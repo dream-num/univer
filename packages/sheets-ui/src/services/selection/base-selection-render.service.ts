@@ -141,7 +141,11 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // we put the properties here for simplicity
     // Used in the formula selection feature, a new selection string is added by drawing a box with the mouse.
     protected _remainLastEnabled: boolean = false;
-    protected _skipLastEnabled: boolean = false;
+
+    /**
+     * _skipLastEnabled = true means start a new ref selection, false means update last ref selection
+     */
+    protected _startNewSelection: boolean = false;
     protected _singleSelectionEnabled: boolean = false;
     // #endregion
 
@@ -233,6 +237,13 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         control.update(rangeWithCoord, rowHeaderWidth, columnHeaderHeight, style, primaryWithCoord);
     }
 
+    /**
+     * Create a new selection control and record in this._selectionControls
+     * @param scene
+     * @param _rangeType
+     * @param skeleton
+     * @returns {SelectionControl} control
+     */
     newSelectionControl(scene: Scene, _rangeType: RANGE_TYPE, skeleton: SpreadsheetSkeleton): SelectionControl {
         const selectionControls = this.getSelectionControls();
         const zIndex = selectionControls.length;
@@ -453,6 +464,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const cursorCellRangeWithRangeType: IRangeWithCoord = { ...cursorCellRange, rangeType };
         this._startRangeWhenPointerDown = { ...cursorCellRange, rangeType };
 
+        // for multi selection, active selection control is the last selection.
         let activeSelectionControl: Nullable<SelectionControl> = this.getActiveSelectionControl();
         const curControls = this.getSelectionControls();
         for (const control of curControls) {
@@ -477,10 +489,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         const currentCell = activeSelectionControl?.model.currentCell;
         const expandByShiftKey = evt.shiftKey && currentCell;
-        const remainLastEnable = this._remainLastEnabled &&
+        const updateLastSelection = this._remainLastEnabled &&
             !evt.ctrlKey &&
             !evt.shiftKey &&
-            !this._skipLastEnabled &&
+            !this._startNewSelection &&
             !this._singleSelectionEnabled;
 
         //#region update selection control
@@ -493,7 +505,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
                 rangeType,
                 activeSelectionControl! // Get updated in this method
             );
-        } else if (remainLastEnable && activeSelectionControl) {
+        } else if (updateLastSelection && activeSelectionControl) {
             // Supports the formula ref text selection feature,
             // under the condition of preserving all previous selections, it modifies the position of the latest selection.
             this._updateSelectionControlByRange(

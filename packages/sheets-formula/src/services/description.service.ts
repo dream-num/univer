@@ -258,9 +258,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         });
 
         const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
-        if (config?.description) {
-            this._descriptions = filterFunctionList.concat(config.description);
-        }
+        this._descriptions = filterFunctionList.concat(config?.description ?? []);
     }
 
     private _registerDescriptions() {
@@ -279,6 +277,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
                 repeat: item.repeat,
             })),
         }));
+
         this._functionService.registerDescriptions(...functionListLocale);
     }
 }

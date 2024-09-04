@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, ThemeService } from '@univerjs/core';
+import type { ThemeService } from '@univerjs/core';
 import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -154,8 +154,8 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>): void {
-        super._updateControlStyleAndLayout(style);
+    protected override _setSizeAndStyleForSelectionControl(style: ISelectionStyle): void {
+        super._setSizeAndStyleForSelectionControl(style);
 
         // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)

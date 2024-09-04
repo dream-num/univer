@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IMutationInfo } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { isLegalLink, serializeUrl } from '../common/util';
-// import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
-// import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -40,104 +38,9 @@ export class SheetHyperLinkSetRangeController extends Disposable {
     }
 
     private _initCommandInterceptor() {
-        // this._initAddHyperLinkCommandInterceptor();
         this._initSetRangeValuesCommandInterceptor();
-        // this._initUpdateHyperLinkCommandInterceptor();
         this._initClearSelectionCommandInterceptor();
-        // this._initRichTextEditorInterceptor();
     }
-
-    private _getCurrentCell(unitId: string, subUnitId: string, row: number, col: number) {
-        return this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId)?.getCell(row, col);
-    }
-
-    // private _initAddHyperLinkCommandInterceptor() {
-    //     this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
-
-    //         getMutations: (command) => {
-    //             if (command.id === AddHyperLinkCommand.id) {
-    //                 const params = command.params as IAddHyperLinkCommandParams;
-    //                 const { unitId, subUnitId, link } = params;
-    //                 const currentCell = this._getCurrentCell(unitId, subUnitId, link.row, link.column);
-    //                 const redoParams: ISetRangeValuesMutationParams = {
-    //                     unitId,
-    //                     subUnitId,
-    //                     cellValue: {
-    //                         [link.row]: {
-    //                             [link.column]: {
-    //                                 v: link.display,
-    //                                 // t: CellValueType.STRING, // Setting a link to a number is still a number
-    //                                 p: null,
-    //                                 t: currentCell?.t ?? undefined, // Keep force string type
-    //                             },
-    //                         },
-    //                     },
-    //                 };
-
-    //                 return {
-    //                     redos: [{
-    //                         id: SetRangeValuesMutation.id,
-    //                         params: redoParams,
-    //                     }],
-    //                     undos: [{
-    //                         id: SetRangeValuesMutation.id,
-    //                         params: SetRangeValuesUndoMutationFactory(this._injector, redoParams),
-
-    //                     }],
-    //                 };
-    //             }
-
-    //             return {
-    //                 redos: [],
-    //                 undos: [],
-    //             };
-    //         },
-    //     }));
-    // }
-
-    // private _initUpdateHyperLinkCommandInterceptor() {
-    //     this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
-    //         getMutations: (command) => {
-    //             if (command.id === UpdateHyperLinkCommand.id) {
-    //                 const params = command.params as IUpdateHyperLinkCommandParams;
-    //                 const { unitId, subUnitId, id, payload } = params;
-    //                 const current = this._hyperLinkModel.getHyperLink(unitId, subUnitId, id);
-    //                 if (current && current.display !== payload.display) {
-    //                     const redoParams: ISetRangeValuesMutationParams = {
-    //                         unitId,
-    //                         subUnitId,
-    //                         cellValue: {
-    //                             [current.row]: {
-    //                                 [current.column]: {
-    //                                     v: payload.display,
-    //                                     t: CellValueType.STRING,
-    //                                     p: null,
-    //                                 },
-    //                             },
-    //                         },
-    //                     };
-
-    //                     return {
-    //                         redos: [{
-    //                             id: SetRangeValuesMutation.id,
-    //                             params: redoParams,
-    //                         }],
-    //                         undos: [{
-    //                             id: SetRangeValuesMutation.id,
-    //                             params: SetRangeValuesUndoMutationFactory(this._injector, redoParams),
-
-    //                         }],
-    //                     };
-    //                 }
-    //             }
-
-    //             return {
-    //                 redos: [],
-    //                 undos: [],
-    //             };
-    //         },
-    //     }));
-    // }
 
     private _initSetRangeValuesCommandInterceptor() {
         this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
@@ -270,35 +173,4 @@ export class SheetHyperLinkSetRangeController extends Disposable {
             },
         }));
     }
-
-    // private _initRichTextEditorInterceptor() {
-    //     this.disposeWithMe(
-    //         this._editorBridgeService.interceptor.intercept(
-    //             this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
-    //             {
-    //                 handler: (data, context, next) => {
-    //                     if (data?.p) {
-    //                         // 这个逻辑需要内联到
-    //                         const dataStream = data.p.body?.dataStream;
-    //                         const range = data.p.body?.customRanges?.find((i) => i.rangeType === CustomRangeType.HYPERLINK);
-
-    //                         if (range && dataStream && dataStream.length - 3 === range.endIndex && range.startIndex === 0) {
-    //                             return next({
-    //                                 ...data,
-    //                                 p: null,
-    //                                 v: getPlainTextFormDocument(data.p),
-    //                                 t: CellValueType.STRING,
-    //                                 custom: {
-    //                                     __link_url: range.properties?.url,
-    //                                 },
-    //                             });
-    //                         }
-    //                     }
-
-    //                     return next(data);
-    //                 },
-    //             }
-    //         )
-    //     );
-    // }
 }

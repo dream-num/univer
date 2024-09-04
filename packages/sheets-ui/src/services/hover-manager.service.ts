@@ -28,20 +28,18 @@ import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 export interface IHoverCellPosition {
     position: IPosition;
     location: ISheetLocation;
-    unitId: string;
-    subUnitId: string;
     /**
      * active custom range in cell, if cell is rich-text
      */
-    customRange: Nullable<ICustomRange>;
+    customRange?: Nullable<ICustomRange>;
     /**
      * active bullet in cell, if cell is rich-text
      */
-    bullet: Nullable<IParagraph>;
+    bullet?: Nullable<IParagraph>;
     /**
      * rect of custom-range or bullet
      */
-    rect: Nullable<IBoundRectNoAngle>;
+    rect?: Nullable<IBoundRectNoAngle>;
 }
 
 function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {

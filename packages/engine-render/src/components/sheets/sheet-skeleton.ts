@@ -18,9 +18,9 @@
 
 import {
     BooleanNumber,
+    BuildTextUtils,
     CellValueType,
     CustomRangeType,
-    DataStreamTreeTokenType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
     DocumentDataModel,
@@ -36,8 +36,8 @@ import {
     LocaleService,
     ObjectMatrix,
     searchArray,
+    TextX,
     Tools,
-    updateAttributeByInsert,
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
@@ -95,36 +95,25 @@ function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: strin
         return;
     }
 
-    updateAttributeByInsert(
+    const textX = BuildTextUtils.customRange.add({
+        range: {
+            startOffset: 0,
+            endOffset: body.dataStream.length - 1,
+            collapsed: false,
+        },
+        rangeId: linkId,
+        rangeType: CustomRangeType.HYPERLINK,
         body,
-        {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        properties: {
+            url: linkUrl,
+            refId: linkId,
         },
-        1,
-        0
-    );
+    });
+    if (!textX) {
+        return;
+    }
 
-    updateAttributeByInsert(
-        body,
-        {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
-        },
-        1,
-        documentModel.getBody()!.dataStream.length - 2
-    );
-
-    body.customRanges = [
-        ...body.customRanges ?? [],
-        {
-            startIndex: 0,
-            endIndex: body.dataStream.length - 3,
-            rangeType: CustomRangeType.HYPERLINK,
-            rangeId: linkId,
-            properties: {
-                url: linkUrl,
-            },
-        },
-    ];
+    TextX.apply(body, textX.serialize());
 }
 
 /**

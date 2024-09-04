@@ -18,7 +18,6 @@ export enum SheetHyperLinkType {
     SHEET = 'sheet',
     RANGE = 'range',
     DEFINE_NAME = 'defineName',
-    OUTER = 'outer',
     INVALID = 'invalid',
     URL = 'url',
 }

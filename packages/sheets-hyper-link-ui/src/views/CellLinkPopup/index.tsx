@@ -21,6 +21,7 @@ import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
@@ -30,13 +31,13 @@ import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
 const iconsMap = {
-    outer: <LinkSingle />,
-    link: <LinkSingle />,
-    sheet: <Xlsx />,
-    range: <AllBorderSingle />,
-    defineName: <AllBorderSingle />,
-    'range-error': <AllBorderSingle />,
-    'sheet-error': <Xlsx />,
+    [SheetHyperLinkType.URL]: <LinkSingle />,
+    // link: <LinkSingle />,
+    [SheetHyperLinkType.SHEET]: <Xlsx />,
+    [SheetHyperLinkType.RANGE]: <AllBorderSingle />,
+    [SheetHyperLinkType.DEFINE_NAME]: <AllBorderSingle />,
+    [SheetHyperLinkType.INVALID]: <AllBorderSingle />,
+    // 'sheet-error': <Xlsx />,
 };
 
 export const CellLinkPopup = () => {
@@ -87,7 +88,7 @@ export const CellLinkPopup = () => {
                             if (isError) {
                                 return;
                             }
-                            if (linkObj.type !== 'outer') {
+                            if (linkObj.type !== SheetHyperLinkType.URL) {
                                 const url = new URL(window.location.href);
                                 url.hash = linkObj.url.slice(1);
                                 navigator.clipboard.writeText(url.href);

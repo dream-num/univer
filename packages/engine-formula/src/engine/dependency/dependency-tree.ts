@@ -26,6 +26,7 @@ import type {
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
+import { getBlockTokensByRange, setRangeBlockToken } from './range-block-util';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -268,7 +269,7 @@ interface IFormulaDependencyTreeCacheItem {
 
 export class FormulaDependencyTreeCache extends Disposable {
     private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
-    private _map = new Map<string, string[]>();
+    private _map = new Map<string, Map<string, string[]>>();
 
     override dispose(): void {
         this.clear();
@@ -298,71 +299,7 @@ export class FormulaDependencyTreeCache extends Disposable {
         const { gridRange } = unitRangeWithToken;
         const { unitId, sheetId, range } = gridRange;
         const baseKey = `${unitId}-${sheetId}`;
-        this._splitRangeIntoBlocks(range, baseKey, token);
-    }
-
-    private _splitRangeIntoBlocks(range: IRange, baseKey: string, token: string) {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        const blockSize = 10;
-
-        for (let row = 0; row <= endRow; row += blockSize) {
-            for (let col = 0; col <= endColumn; col += blockSize) {
-                const blockEndRow = row + blockSize - 1;
-                const blockEndColumn = col + blockSize - 1;
-
-                // 计算交集
-                const intersectStartRow = Math.max(startRow, row);
-                const intersectStartColumn = Math.max(startColumn, col);
-                const intersectEndRow = Math.min(endRow, blockEndRow);
-                const intersectEndColumn = Math.min(endColumn, blockEndColumn);
-
-                // 检查是否有交集
-                if (intersectStartRow <= intersectEndRow && intersectStartColumn <= intersectEndColumn) {
-                    // 计算 row 和 column 方向的索引
-                    const rowIndex = Math.floor(row / blockSize);
-                    const colIndex = Math.floor(col / blockSize);
-                    const key = `${baseKey}${rowIndex}_${colIndex}`;
-                    if (!this._map.has(key)) {
-                        this._map.set(key, [token]);
-                    } else {
-                        this._map.get(key)!.push(token);
-                    }
-                }
-            }
-        }
-    }
-
-    private _getBlocksContainsToken(range: IRange, baseKey: string) {
-        const { startRow, startColumn, endRow, endColumn } = range;
-        const blockSize = 10;
-        const tokens = new Set<string>();
-
-        for (let row = 0; row <= endRow; row += blockSize) {
-            for (let col = 0; col <= endColumn; col += blockSize) {
-                const blockEndRow = row + blockSize - 1;
-                const blockEndColumn = col + blockSize - 1;
-
-                // 计算交集
-                const intersectStartRow = Math.max(startRow, row);
-                const intersectStartColumn = Math.max(startColumn, col);
-                const intersectEndRow = Math.min(endRow, blockEndRow);
-                const intersectEndColumn = Math.min(endColumn, blockEndColumn);
-
-                // 检查是否有交集
-                if (intersectStartRow <= intersectEndRow && intersectStartColumn <= intersectEndColumn) {
-                    // 计算 row 和 column 方向的索引
-                    const rowIndex = Math.floor(row / blockSize);
-                    const colIndex = Math.floor(col / blockSize);
-                    const key = `${baseKey}${rowIndex}_${colIndex}`;
-                    if (this._map.has(key)) {
-                        this._map.get(key)!.forEach((token) => {
-                            tokens.add(token);
-                        });
-                    }
-                }
-            }
-        }
-        return tokens;
+        setRangeBlockToken(range, baseKey, token, this._map);
     }
 
     clear() {
@@ -391,7 +328,7 @@ export class FormulaDependencyTreeCache extends Disposable {
         for (const dependenceRange of dependenceTreeRanges) {
             const { unitId, sheetId, range } = dependenceRange.gridRange;
             const baseKey = `${unitId}-${sheetId}`;
-            const blockTokens = this._getBlocksContainsToken(range, baseKey);
+            const blockTokens = getBlockTokensByRange(range, baseKey, this._map);
             blockTokens.forEach((token) => {
                 const cacheItem = this._cacheItems.get(token)!;
                 const { unitRangeWithToken, treeList } = cacheItem;

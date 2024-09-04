@@ -19,8 +19,7 @@ import { DataStreamTreeTokenType } from '@univerjs/core';
 
 export const getPlainText = (text: string) => {
     return text.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
-        .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '')
-        .replaceAll(DataStreamTreeTokenType.PARAGRAPH, '');
+        .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
 };
 
 /**

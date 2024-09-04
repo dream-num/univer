@@ -113,22 +113,59 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     return dos;
 }
 
-export interface IReplaceSelectionFactoryParams {
-    unitId: string;
-    selection?: ITextRangeParam;
-
-    originBody?: IDocumentBody;
+export interface IReplaceSelectionTextXParams {
+    /**
+     * range to be replaced.
+     */
+    selection: ITextRangeParam;
 
     /** Body to be inserted at the given position. */
     body: IDocumentBody; // Do not contain `\r\n` at the end.
+    /**
+     * origin document data model.
+     */
+    doc: DocumentDataModel;
+}
 
+const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
+    const { selection, body: insertBody, doc } = params;
+    const segmentId = selection.segmentId;
+    const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+    if (!body) return false;
+
+    const textX = new TextX();
+    // delete
+    textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId));
+    // insert
+    textX.push({
+        t: TextXActionType.INSERT,
+        body: insertBody,
+        len: insertBody.dataStream.length,
+        line: 0,
+        segmentId,
+    });
+
+    return textX;
+};
+
+export interface IReplaceSelectionFactoryParams {
+    unitId: string;
+    /**
+     * slelection to be replaced, if not provided, use the current selection.
+     */
+    selection?: ITextRangeParam;
+
+    /** Body to be inserted at the given position. */
+    body: IDocumentBody; // Do not contain `\r\n` at the end.
+    /**
+     * Text ranges to be replaced.
+     */
     textRanges?: ITextRangeWithStyle[];
-
     doc?: DocumentDataModel;
 }
 
 export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSelectionFactoryParams) {
-    const { unitId, originBody, body: insertBody, doc } = params;
+    const { unitId, body: insertBody, doc } = params;
     let docDataModel: Nullable<DocumentDataModel> = doc;
     if (!docDataModel) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -139,12 +176,8 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         return false;
     }
     const segmentId = params.selection?.segmentId;
-    let body: IDocumentBody | undefined;
-    if (!params.originBody) {
-        body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
-    } else {
-        body = originBody;
-    }
+    const body = docDataModel.getSelfOrHeaderFooterModel(segmentId)?.getBody();
+
     if (!body) return false;
 
     const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -152,7 +185,6 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
     if (!selection || !body) {
         return false;
     }
-
     const textRanges = params.textRanges ?? [{
         startOffset: selection.startOffset + insertBody.dataStream.length,
         endOffset: selection.startOffset + insertBody.dataStream.length,
@@ -160,7 +192,15 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         segmentId,
     }];
 
-    const textX = new TextX();
+    const textX = replaceSelectionTextX({
+        selection,
+        body: insertBody,
+        doc: docDataModel,
+    });
+    if (!textX) {
+        return false;
+    }
+
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> & { textX: TextX } = {
         id: RichTextEditingMutation.id,
         params: {
@@ -174,16 +214,6 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
     };
 
     const jsonX = JSONX.getInstance();
-        // delete
-    textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId));
-        // insert
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: insertBody,
-        len: insertBody.dataStream.length,
-        line: 0,
-        segmentId,
-    });
     const path = getRichTextEditPath(docDataModel, segmentId);
     doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;

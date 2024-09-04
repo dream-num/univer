@@ -25,7 +25,7 @@ import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IEditorBridgeService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
+import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
 import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
@@ -271,7 +271,7 @@ export const CellLinkEdit = () => {
             });
         }
 
-        commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
 
     return (
@@ -398,7 +398,7 @@ export const CellLinkEdit = () => {
                                 subUnitId: editing.subUnitId,
                             });
                         }
-                        commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+                        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
                 >
                     {localeService.t('hyperLink.form.cancel')}

@@ -24,7 +24,7 @@ import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/sidebar.operations';
+import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';

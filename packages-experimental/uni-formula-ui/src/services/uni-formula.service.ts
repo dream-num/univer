@@ -104,9 +104,9 @@ export const UpdateSlideUniFormulaCacheCommand: ICommand<IUpdateSlideUniFormulaC
 
             const redoMutation = replaceSelectionFactory(accessor, {
                 unitId,
-                originBody,
                 body,
                 selection: makeSelection(range.startIndex, range.endIndex),
+                doc: documentModel,
             });
 
             if (!redoMutation) return false;

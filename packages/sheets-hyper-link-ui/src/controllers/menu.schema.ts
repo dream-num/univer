@@ -16,7 +16,7 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
-import { InsertHyperLinkToolbarOperation } from '../commands/operations/sidebar.operations';
+import { InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { insertLinkMenuFactory, insertLinkMenuToolbarFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {

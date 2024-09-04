@@ -25,9 +25,9 @@ export { InsertLinkShortcut } from './controllers/menu';
 export {
     OpenHyperLinkEditPanelOperation,
     InsertHyperLinkOperation,
-    CloseHyperLinkSidebarOperation,
+    CloseHyperLinkPopupOperation,
     type IOpenHyperLinkEditPanelOperationParams,
-} from './commands/operations/sidebar.operations';
+} from './commands/operations/popup.operations';
 
 export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
 export { CancelHyperLinkCommand, type ICancelHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';

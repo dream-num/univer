@@ -45,9 +45,9 @@ export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOp
     },
 };
 
-export const CloseHyperLinkSidebarOperation: ICommand = {
+export const CloseHyperLinkPopupOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'sheet.operation.close-hyper-link-sidebar',
+    id: 'sheet.operation.close-hyper-link-popup',
     handler(accessor) {
         const popupService = accessor.get(SheetsHyperLinkPopupService);
 
@@ -96,7 +96,7 @@ export const InsertHyperLinkToolbarOperation: ICommand = {
         const commandService = accessor.get(ICommandService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
         if (popupService.currentEditing) {
-            return commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+            return commandService.executeCommand(CloseHyperLinkPopupOperation.id);
         } else {
             return commandService.executeCommand(InsertHyperLinkOperation.id);
         }

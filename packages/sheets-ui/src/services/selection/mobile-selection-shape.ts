@@ -154,8 +154,8 @@ export class MobileSelectionControl extends SelectionControl {
         super.dispose();
     }
 
-    protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>): void {
-        super._updateControlStyleAndLayout(style);
+    protected override _setSizeAndStyleForSelectionControl(style: Nullable<ISelectionStyle>): void {
+        super._setSizeAndStyleForSelectionControl(style);
 
         // const rangeType = this.rangeType;
         // startX startY shares same coordinate with viewport.(include row & colheader)

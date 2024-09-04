@@ -29,12 +29,10 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
-import type { MenuConfig } from '@univerjs/ui';
-import {
-    ComponentManager,
+import { ComponentManager,
     IDialogService,
     ILayoutService,
-    IMenuService,
+    IMenuManagerService,
     IShortcutService,
 } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
@@ -55,13 +53,7 @@ import {
     OpenFindDialogShortcutItem,
     OpenReplaceDialogShortcutItem,
 } from './find-replace.shortcut';
-import { FindReplaceMenuItemFactory } from './find-replace.menu';
-
-export interface IUniverFindReplaceConfig {
-    menu: MenuConfig;
-}
-
-export const DefaultFindReplaceConfig = {};
+import { menuSchema } from './menu.schema';
 
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
@@ -72,9 +64,8 @@ const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 @OnLifecycle(LifecycleStages.Rendered, FindReplaceController)
 export class FindReplaceController extends RxDisposable {
     constructor(
-        private readonly _config: Partial<IUniverFindReplaceConfig>,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IFindReplaceService private readonly _findReplaceService: IFindReplaceService,
@@ -122,11 +113,10 @@ export class FindReplaceController extends RxDisposable {
     }
 
     private _initUI(): void {
-        const { menu = {} } = this._config;
-
-        this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(FindReplaceMenuItemFactory), menu));
         this.disposeWithMe(this._componentManager.register('FindReplaceDialog', FindReplaceDialog));
         this.disposeWithMe(this._componentManager.register('SearchIcon', SearchSingle16));
+
+        this._menuManagerService.mergeMenu(menuSchema);
 
         // this controller is also responsible for toggling the FindReplaceDialog
         this._findReplaceService.stateUpdates$.pipe(takeUntil(this.dispose$)).subscribe((newState) => {

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, LocaleService, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 
-import type { IUniverUniscriptConfig } from './controllers/uniscript.controller';
-import { DefaultUniscriptConfig, UniscriptController } from './controllers/uniscript.controller';
+import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
+import type { IUniverUniscriptConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'uniscript';
 
@@ -29,20 +30,25 @@ export class UniverUniscriptPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverUniscriptConfig> = {},
+        private readonly _config: Partial<IUniverUniscriptConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultUniscriptConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const injector = this._injector;
         const dependencies: Dependency[] = [
-            [UniscriptController, { useFactory: () => injector.createInstance(UniscriptController, this._config) }],
-            [ScriptEditorService, { useFactory: () => injector.createInstance(ScriptEditorService, this._config) }],
+            [UniscriptController],
+            [ScriptEditorService],
             [ScriptPanelService],
         ];
 

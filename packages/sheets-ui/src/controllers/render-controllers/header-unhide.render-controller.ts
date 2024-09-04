@@ -21,7 +21,7 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';
-import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -100,21 +100,19 @@ export class HeaderUnhideRenderController extends RxDisposable {
             this._update(this._workbook, worksheet);
         });
 
-        // Re-render hidden rows / cols when specific commands are executed.
-        this.disposeWithMe(this._commandService.onCommandExecuted((command) => {
-            if (!RENDER_COMMANDS.includes(command.id) ||
-                !command.params ||
-                !(command.params as ISheetCommandSharedParams).unitId ||
-                (command.params as ISheetCommandSharedParams).subUnitId !== activeSheetId) {
-                return;
-            }
-
-            const workbook = this._workbook;
-            const worksheet = workbook.getSheetBySheetId((command.params as ISheetCommandSharedParams).subUnitId);
-            if (worksheet) {
-                this._update(workbook, worksheet);
-            }
-        }));
+        this.disposeWithMe(
+            this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                if (param) {
+                    const { unitId, sheetId } = param;
+                    if (unitId === this._workbook.getUnitId() && sheetId === activeSheetId) {
+                        const worksheet = this._workbook.getSheetBySheetId(sheetId);
+                        if (worksheet) {
+                            this._update(this._workbook, worksheet);
+                        }
+                    }
+                }
+            })
+        );
     }
 
     private _update(workbook: Workbook, worksheet: Worksheet): void {

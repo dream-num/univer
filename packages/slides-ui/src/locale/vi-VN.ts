@@ -15,7 +15,7 @@
  */
 
 import type zhCN from './zh-CN';
-import enUS from './en-US.ts';
+import enUS from './en-US';
 
 const locale: typeof zhCN = enUS;
 

@@ -17,14 +17,10 @@
 import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
 import { Inject, Injector, LocaleType, Plugin, RediContext, Univer, UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@univerjs/core';
-import { of } from 'rxjs';
-import { IMenuService, MenuService } from '../../../services/menu/menu.service';
 import { IShortcutService, ShortcutService } from '../../../services/shortcut/shortcut.service';
 import { IPlatformService, PlatformService } from '../../../services/platform/platform.service';
-import type { IMenuButtonItem } from '../../../services/menu/menu';
-import { MenuItemType, MenuPosition } from '../../../services/menu/menu';
 import { ComponentManager } from '../../../common';
+import { ContextMenuPosition } from '../../../services/menu/types';
 import { MobileMenu } from './MobileMenu';
 
 const meta: Meta = {
@@ -36,45 +32,6 @@ const meta: Meta = {
 };
 
 export default meta;
-
-function MockMenuItemFactory(_accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: 'mock-menu-item',
-        type: MenuItemType.BUTTON,
-        title: 'Copy',
-        icon: 'Copy',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-        ],
-        disabled$: of(false),
-    };
-}
-
-function MockMenuItemFactory2(_accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: 'mock-menu-item-2',
-        type: MenuItemType.BUTTON,
-        title: 'Paste',
-        icon: 'PasteSpecial',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-        ],
-        disabled$: of(false),
-    };
-}
-
-function MockMenuItemFactory3(_accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: 'mock-menu-item-3',
-        type: MenuItemType.BUTTON,
-        title: 'Paste All',
-        icon: 'PasteSpecial',
-        positions: [
-            MenuPosition.CONTEXT_MENU,
-        ],
-        disabled$: of(false),
-    };
-}
 
 function createMobileMenuStorybookBed() {
     const univer = new Univer({
@@ -100,13 +57,7 @@ function createMobileMenuStorybookBed() {
             const injector = this._injector;
             injector.add([IPlatformService, { useClass: PlatformService }]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
-            injector.add([IMenuService, { useClass: MenuService }]);
             injector.add([ComponentManager]);
-
-            const menuService = injector.get(IMenuService);
-            menuService.addMenuItem(injector.invoke(MockMenuItemFactory), {});
-            menuService.addMenuItem(injector.invoke(MockMenuItemFactory2), {});
-            menuService.addMenuItem(injector.invoke(MockMenuItemFactory3), {});
         }
     }
 
@@ -121,7 +72,7 @@ export const Playground = {
 
         return (
             <RediContext.Provider value={{ injector: bed.injector }}>
-                <MobileMenu menuType={MenuPosition.CONTEXT_MENU} />
+                <MobileMenu menuType={ContextMenuPosition.MAIN_AREA} />
             </RediContext.Provider>
         );
     },

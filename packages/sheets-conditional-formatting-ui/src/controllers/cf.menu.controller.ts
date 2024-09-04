@@ -15,66 +15,20 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService, ISidebarService } from '@univerjs/ui';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { FactoryManageConditionalFormattingRule } from '../menu/manage-rule';
-import { ConditionFormattingPanel } from '../components/panel';
+import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { IMenuManagerService } from '@univerjs/ui';
+import { menuSchema } from './menu.schema';
 
-export interface IUniverSheetsConditionalFormattingUIConfig {
-    menu: MenuConfig;
-}
-
-export const DefaultSheetConditionalFormattingUiConfig = {};
-
-const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
 @OnLifecycle(LifecycleStages.Ready, ConditionalFormattingMenuController)
 export class ConditionalFormattingMenuController extends Disposable {
     private _sidebarDisposable: IDisposable | null = null;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IMenuService) private _menuService: IMenuService,
-        @Inject(ISidebarService) private _sidebarService: ISidebarService,
-        @Inject(LocaleService) private _localeService: LocaleService
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
-        this._initMenu();
-        this._initPanel();
-
-        this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((sheet) => {
-                if (!sheet) this._sidebarDisposable?.dispose();
-            })
-        );
-    }
-
-    openPanel(rule?: IConditionFormattingRule) {
-        const props = {
-            header: { title: this._localeService.t('sheet.cf.title') },
-            children: {
-                label: CF_PANEL_KEY,
-                rule,
-                key: Tools.generateRandomId(4),
-            },
-            onClose: () => this._sidebarDisposable = null,
-        };
-
-        this._sidebarDisposable = this._sidebarService.open(props);
-    }
-
-    private _initMenu() {
-        const { menu = {} } = this._config;
-
-        this._menuService.addMenuItem(FactoryManageConditionalFormattingRule(this._injector), menu);
-    }
-
-    private _initPanel() {
-        this._componentManager.register(CF_PANEL_KEY, ConditionFormattingPanel);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 }

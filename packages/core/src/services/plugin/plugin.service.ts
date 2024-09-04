@@ -123,11 +123,11 @@ export class PluginService implements IDisposable {
         const { type, pluginName } = ctor;
 
         if (type === UniverInstanceType.UNRECOGNIZED) {
-            throw new Error(`[PluginService]: invalid plugin type for ${ctor}. Please assign a "type" to your plugin.`);
+            throw new Error(`[PluginService]: invalid plugin type for ${ctor.name}. Please assign a "type" to your plugin.`);
         }
 
-        if (pluginName === '') {
-            throw new Error(`[PluginService]: no plugin name for ${ctor}. Please assign a "pluginName" to your plugin.`);
+        if (!pluginName) {
+            throw new Error(`[PluginService]: no plugin name for ${ctor.name}. Please assign a "pluginName" to your plugin.`);
         }
 
         if (this._seenPlugins.has(pluginName)) {

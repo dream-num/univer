@@ -708,9 +708,14 @@ export class Tools {
         return Math.max(min, Math.min(max, value));
     }
 
+    static now(): number {
+        if (performance && performance.now) {
+            return performance.now();
+        }
+        return Date.now();
+    }
+
     /**
-     *
-     *
      * @static
      * @param {unknown} object Modify the property while leaving the reference unchanged.
      * @param {unknown} source The source  being merged in object.

@@ -118,8 +118,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '是对要测试的单元格的引用。' },
         },
     },
     ISLOGICAL: {
@@ -237,8 +236,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '要转换的值。' },
         },
     },
     NA: {
@@ -251,8 +249,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SHEET: {

@@ -33,11 +33,13 @@ export class DataBar extends SheetExtension {
 
     override Z_INDEX = EXTENSION_Z_INDEX;
     _radius = 1;
+
+    // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
-        parentScale: IScale,
+        _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        diffRanges: IRange[]
     ) {
         const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
             spreadsheetSkeleton;

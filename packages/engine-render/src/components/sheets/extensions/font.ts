@@ -19,8 +19,9 @@
 import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
-import { inRowViewRanges, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
+import { expandRangeIfIntersects, inRowViewRanges, inViewRanges } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -28,7 +29,6 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -60,15 +60,10 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
-        const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
-        const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
+        const { stylesCache, dataMergeCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
-        if (!spreadsheetSkeleton || !worksheet || !fontList) {
-            return;
-        }
+        if (!worksheet || !fontList) return;
 
-        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
-            spreadsheetSkeleton;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -97,6 +92,7 @@ export class Font extends SheetExtension {
 
             // If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
 
+            const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
             // eslint-disable-next-line complexity
             fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
                 if (!checkOutOfViewBound) {
@@ -129,7 +125,7 @@ export class Font extends SheetExtension {
                 // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
                 // At this moment, we can only exclude the cells that are not within the current row.
                 const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-                const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
+                const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
                 if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
                     return true;
                 }
@@ -151,16 +147,6 @@ export class Font extends SheetExtension {
                         return true;
                     }
                 }
-
-                /**
-                 * Overflow can cause text truncation, so columns are not rendered incrementally.
-                 */
-                // if (
-                //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
-                // ) {
-                //     return true;
-                // }
 
                 // If the cell is overflowing, but the overflowRectangle has not been set,
                 // then overflowRectangle is set to undefined.
@@ -279,6 +265,7 @@ export class Font extends SheetExtension {
                 }
                 ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                 this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
+
                 ctx.closePath();
                 ctx.restore();
             });

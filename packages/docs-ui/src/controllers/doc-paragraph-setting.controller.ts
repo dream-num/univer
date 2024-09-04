@@ -22,6 +22,8 @@ const paragraphSettingIndexKey = 'doc_ui_paragraph-setting-panel';
 
 @OnLifecycle(LifecycleStages.Rendered, DocParagraphSettingController)
 export class DocParagraphSettingController extends Disposable {
+    private _id: 'DocParagraphSetting';
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -39,12 +41,16 @@ export class DocParagraphSettingController extends Disposable {
     public openPanel() {
         const props = {
             header: { title: 'doc.slider.paragraphSetting' },
+            id: this._id,
             children: {
                 label: paragraphSettingIndexKey,
             },
             width: 300,
         };
-
         this._sidebarService.open(props);
+    }
+
+    public closePanel() {
+        this._sidebarService.close(this._id);
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/shared",
-    "version": "0.2.9",
+    "version": "0.2.11",
     "private": true,
     "description": "Some infrastructures for univerjs",
     "author": "DreamNum <developer@univer.ai>",
@@ -23,7 +23,7 @@
         "happy-dom": "15.0.0",
         "javascript-obfuscator": "^4.1.1",
         "vite": "^5.4.2",
-        "vite-plugin-dts": "^4.0.3",
+        "vite-plugin-dts": "^4.1.0",
         "vitest": "^2.0.5"
     }
 }

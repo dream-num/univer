@@ -27,52 +27,57 @@ import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteCondi
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { CF_MENU_OPERATION, OpenConditionalFormattingOperator } from '../commands/operations/open-conditional-formatting-panel';
 
-const commandList = [SetWorksheetActiveOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
+const commandList = [
+    SetWorksheetActiveOperation.id,
+    AddConditionalRuleMutation.id,
+    SetConditionalRuleMutation.id,
+    DeleteConditionalRuleMutation.id,
+    MoveConditionalRuleMutation.id,
+];
 
-// eslint-disable-next-line max-lines-per-function
+const commonSelections = [
+    {
+        label: 'sheet.cf.ruleType.highlightCell',
+        value: CF_MENU_OPERATION.highlightCell,
+    },
+    {
+        label: 'sheet.cf.panel.rankAndAverage',
+        value: CF_MENU_OPERATION.rank,
+    },
+    {
+        label: 'sheet.cf.ruleType.formula',
+        value: CF_MENU_OPERATION.formula,
+    },
+    {
+        label: 'sheet.cf.ruleType.colorScale',
+        value: CF_MENU_OPERATION.colorScale,
+    },
+    {
+        label: 'sheet.cf.ruleType.dataBar',
+        value: CF_MENU_OPERATION.dataBar,
+    }, {
+        label: 'sheet.cf.ruleType.iconSet',
+        value: CF_MENU_OPERATION.icon,
+    },
+    {
+        label: 'sheet.cf.menu.manageConditionalFormatting',
+        value: CF_MENU_OPERATION.viewRule,
+    }, {
+        label: 'sheet.cf.menu.createConditionalFormatting',
+        value: CF_MENU_OPERATION.createRule,
+    },
+    {
+        label: 'sheet.cf.menu.clearRangeRules',
+        value: CF_MENU_OPERATION.clearRangeRules,
+        disabled: false,
+    },
+    {
+        label: 'sheet.cf.menu.clearWorkSheetRules',
+        value: CF_MENU_OPERATION.clearWorkSheetRules,
+    },
+];
+
 export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMenuSelectorItem => {
-    const commonSelections = [
-        {
-            label: 'sheet.cf.ruleType.highlightCell',
-            value: CF_MENU_OPERATION.highlightCell,
-        },
-        {
-            label: 'sheet.cf.panel.rankAndAverage',
-            value: CF_MENU_OPERATION.rank,
-        },
-        {
-            label: 'sheet.cf.ruleType.formula',
-            value: CF_MENU_OPERATION.formula,
-        },
-        {
-            label: 'sheet.cf.ruleType.colorScale',
-            value: CF_MENU_OPERATION.colorScale,
-        },
-        {
-            label: 'sheet.cf.ruleType.dataBar',
-            value: CF_MENU_OPERATION.dataBar,
-        }, {
-            label: 'sheet.cf.ruleType.iconSet',
-            value: CF_MENU_OPERATION.icon,
-        },
-        {
-            label: 'sheet.cf.menu.manageConditionalFormatting',
-            value: CF_MENU_OPERATION.viewRule,
-        }, {
-            label: 'sheet.cf.menu.createConditionalFormatting',
-            value: CF_MENU_OPERATION.createRule,
-        },
-        {
-            label: 'sheet.cf.menu.clearRangeRules',
-            value: CF_MENU_OPERATION.clearRangeRules,
-            disabled: false,
-        },
-        {
-            label: 'sheet.cf.menu.clearWorkSheetRules',
-            value: CF_MENU_OPERATION.clearWorkSheetRules,
-        },
-    ];
-
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);

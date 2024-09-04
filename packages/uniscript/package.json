@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniscript",
-    "version": "0.2.9",
+    "version": "0.2.11",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -79,7 +79,7 @@
         "@univerjs/protocol": "0.1.39-alpha.15"
     },
     "devDependencies": {
-        "@types/react": "^18.3.4",
+        "@types/react": "^18.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/facade": "workspace:*",

@@ -74,6 +74,7 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Data Validation**: Supports restricting the type of data that can be entered into a cell.
 - **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
 - **Comments**: Enables adding comments to cells to provide additional information.
+- **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
 - **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
 - **Import & Export**[^1]: Support for importing and exporting data in XLSX.
@@ -82,9 +83,12 @@ Univer provides a wide range of features for spreadsheets, documents and present
 ### 📝 Univer Doc (Under Development)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
+- **Lists**: Supports ordered lists, unordered lists, and task lists.
+- **Hyperlinks**: Supports inserting links to external websites, email addresses, and other locations within a document.
 - **Floating Images**: Allows inserting images into a document and supporting text and image layout.
 - **Headers & Footers**: Allows adding headers and footers to a document.
 - **Comments**: Enables adding comments to a document to provide additional information.
+- **Import**[^1]: Supports importing data in DOCX format.
 - **Collaborative Editing**[^1]: Supports multiple users editing a document simultaneously.
 
 ### 📽️ Univer Slide (Under Development)

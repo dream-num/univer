@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { IMAGE_UPLOAD_ICON, ImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -39,23 +37,14 @@ import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command'
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
-
-export interface IUniverSheetsDrawingConfig {
-    menu?: MenuConfig;
-    overrides?: DependencyOverride;
-}
-
-export const DefaultSheetsDrawingConfig: IUniverSheetsDrawingConfig = {
-
-};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsDrawingConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
@@ -72,15 +61,7 @@ export class SheetDrawingUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config;
-        // init menus
-        [
-            ImageMenuFactory,
-            UploadFloatImageMenuFactory,
-            // UploadCellImageMenuFactory,
-        ].forEach((menuFactory) => {
-            this._menuService.addMenuItem(menuFactory(this._injector), menu);
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCommands() {

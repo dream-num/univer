@@ -252,14 +252,6 @@ export class SelectionControl extends Disposable {
         return this._themeService;
     }
 
-    // get selectionStyle() {
-    //     return this._selectionStyle;
-    // }
-
-    // set selectionStyle(style: Nullable<ISelectionStyle>) {
-    //     this._selectionStyle = style;
-    // }
-
     get selectionModel(): SelectionRenderModel {
         return this._selectionModel;
     }
@@ -322,18 +314,14 @@ export class SelectionControl extends Disposable {
     }
 
     /**
-     * invoked when update selection style & range change, invoked by updateStyle, updateRange, update
+     * Update Control Style And Position of SelectionControl
+     * @param selectionStyle
      */
     // eslint-disable-next-line max-lines-per-function
-    protected _updateControlStyleAndLayout(selectionStyle: Nullable<ISelectionStyle>): void {
-        // this._selectionStyle = selectionStyle;
-        // this._rowHeaderWidth = (rowHeaderWidth ?? this._rowHeaderWidth) || 0;
-        // this._columnHeaderHeight = (columnHeaderHeight ?? this._columnHeaderHeight) || 0;
-
-        // startX startY shares same coordinate with viewport.(include row & colheader)
-        const { startX, startY, endX, endY } = this._selectionModel;
+    protected _setSizeAndStyleForSelectionControl(selectionStyle: ISelectionStyle): void {
+        this.currentStyle = selectionStyle;
         const defaultStyle = this._defaultStyle;
-        const currentStyle = this.currentStyle = selectionStyle || this._currentStyle;// rediculous! style param value is this._currentStyle, but this._currentStyle may be null.
+        const currentStyle = this.currentStyle;
 
         const {
             stroke = defaultStyle.stroke!,
@@ -349,21 +337,17 @@ export class SelectionControl extends Disposable {
             AutofillSize = defaultStyle.AutofillSize!,
             AutofillStrokeWidth = defaultStyle.AutofillStrokeWidth!,
         } = currentStyle;
-
         const scale = this._getScale();
-
         const leftAdjustWidth = (strokeWidth + SELECTION_CONTROL_BORDER_BUFFER_WIDTH) / 2 / scale;
-
         strokeWidth /= scale;
         AutofillSize /= scale;
         AutofillStrokeWidth /= scale < 1 ? 1 : scale;
-
         // const selectBorderOffsetFix = SELECTION_BORDER_OFFSET_FIX / scale;
-
         const borderBuffer = SELECTION_CONTROL_BORDER_BUFFER_WIDTH / scale;
-
         const fixOnePixelBlurOffset = FIX_ONE_PIXEL_BLUR_OFFSET / scale;
 
+        // startX startY shares same coordinate with viewport.(include row & colheader)
+        const { startX, startY, endX, endY } = this._selectionModel;
         this.leftControl.transformByState({
             height: endY - startY,
             left: -leftAdjustWidth + fixOnePixelBlurOffset,
@@ -463,36 +447,33 @@ export class SelectionControl extends Disposable {
         }
 
         this._updateBackgroundControl(selectionStyle);
-
         this._updateHeaderBackground(selectionStyle);
-
         this._updateWidgets(selectionStyle);
+    }
 
-        this.selectionShape.show();
-        this.selectionShape.translate(startX, startY);
-
-        // this._selectionStyle = selectionStyle;
-
-        // this._rowHeaderWidth = rowHeaderWidth || 0;
-
-        // this._columnHeaderHeight = columnHeaderHeight || 0;
-
-        this.selectionShape.makeDirtyNoDebounce(true);
+    /**
+     * update selection control position by curr selection model
+     */
+    protected _refreshControlPosition(): void {
+        const { startX, startY } = this._selectionModel;
+        this.selectionShapeGroup.show();
+        this.selectionShapeGroup.translate(startX, startY);
+        this.selectionShapeGroup.makeDirtyNoDebounce(true);
     }
 
     updateStyle(style: ISelectionStyle): void {
-        this._updateControlStyleAndLayout(style);
+        this._setSizeAndStyleForSelectionControl(style);
+        this._refreshControlPosition();
     }
 
     updateRange(range: IRangeWithCoord, primaryCell: Nullable<ISelectionCellWithMergeInfo>): void {
         this._selectionModel.setValue(range, primaryCell);
-        // TODO @lumixraku
-        // why update rowHeaderWidth and columnHeaderHeight at the same time? Did they change when update range?
-        this._updateControlStyleAndLayout(this._currentStyle);
+        this._setSizeAndStyleForSelectionControl(this._currentStyle);
+        this._refreshControlPosition();
     }
 
     /**
-     * update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
+     * Update selection model with new range & primary cell(aka: highlight/current), also update row/col selection size & style.
      *
      * @param newSelectionRange
      * @param rowHeaderWidth
@@ -508,11 +489,11 @@ export class SelectionControl extends Disposable {
         primaryCell?: Nullable<ISelectionCellWithMergeInfo>
     ): void {
         this._selectionModel.setValue(newSelectionRange, primaryCell);
-        // this._selectionStyle = selectionStyle;
         this._rowHeaderWidth = rowHeaderWidth;
         this._columnHeaderHeight = columnHeaderHeight;
 
-        this._updateControlStyleAndLayout(style || this._currentStyle);
+        this._setSizeAndStyleForSelectionControl(style || this._currentStyle);
+        this._refreshControlPosition();
     }
 
     /**
@@ -525,7 +506,7 @@ export class SelectionControl extends Disposable {
 
     clearHighlight(): void {
         this._selectionModel.clearCurrentCell();
-        this._updateControlStyleAndLayout(this._currentStyle);
+        this._setSizeAndStyleForSelectionControl(this._currentStyle);
     }
 
     getScene(): Scene {
@@ -627,13 +608,6 @@ export class SelectionControl extends Disposable {
         this._isHelperSelection = false;
     }
 
-    // updateStyleId(id: string) {
-    //     if (this._selectionStyle == null) {
-    //         return;
-    //     }
-    //     this._selectionStyle.id = id;
-    // }
-
     // eslint-disable-next-line max-lines-per-function
     private _initialize(): void {
         this._defaultStyle = getNormalSelectionStyle(this._themeService);
@@ -714,7 +688,8 @@ export class SelectionControl extends Disposable {
                         return;
                     }
 
-                    this._updateControlStyleAndLayout(this._currentStyle);
+                    this._setSizeAndStyleForSelectionControl(this._currentStyle);
+                    this._refreshControlPosition();
                 })
             )
         );

@@ -144,7 +144,7 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([
         IDescriptionService,
         {
-            useFactory: () => injector.createInstance(DescriptionService, undefined),
+            useFactory: () => injector.createInstance(DescriptionService),
         },
     ]);
 

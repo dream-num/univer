@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { type Ctor, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 
@@ -57,13 +57,15 @@ import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
+import type { IUniverEngineFormulaConfig } from './config.schema';
+import { PLUGIN_CONFIG_KEY } from './config.schema';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
     constructor(
-        private _function: Array<[Ctor<BaseFunction>, IFunctionNames]> = [],
         @ICommandService private readonly _commandService: ICommandService,
         @IFunctionService private readonly _functionService: IFunctionService,
+        @IConfigService private readonly _configService: IConfigService,
         @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
@@ -103,6 +105,8 @@ export class FormulaController extends Disposable {
     }
 
     private _registerFunctions() {
+        const config = this._configService.getConfig<IUniverEngineFormulaConfig>(PLUGIN_CONFIG_KEY);
+
         const functions: BaseFunction[] = (
             [
                 ...functionArray,
@@ -123,7 +127,7 @@ export class FormulaController extends Disposable {
                 ...functionWeb,
             ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
         )
-            .concat(this._function)
+            .concat(config?.function ?? [])
             .map((registerObject) => {
                 const Func = registerObject[0] as Ctor<BaseFunction>;
                 const name = registerObject[1] as IFunctionNames;

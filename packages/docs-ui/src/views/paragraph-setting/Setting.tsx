@@ -15,9 +15,9 @@
  */
 
 import * as React from 'react';
-import { HorizontalAlign, LocaleService, useDependency } from '@univerjs/core';
+import { HorizontalAlign, LocaleService, SpacingRule, useDependency } from '@univerjs/core';
 import { useMemo } from 'react';
-import { InputNumber, Tooltip } from '@univerjs/design';
+import { InputNumber, Select, Tooltip } from '@univerjs/design';
 import clsx from 'clsx';
 import { AlignTextBothSingle, HorizontallySingle, LeftJustifyingSingle, RightJustifyingSingle } from '@univerjs/icons';
 import {
@@ -34,12 +34,13 @@ import {
 import styles from './index.module.less';
 
 const AutoFocusInputNumber = (props: {
-    value: number; onChange: (v: number) => Promise<unknown>; className?: string; min?: number; max?: number;
+    value: number; onChange: (v: number) => Promise<unknown>; className?: string; min?: number; max?: number; step?: number;
 }) => {
-    const { value, onChange, className = '', min = 0, max = 100 } = props;
+    const { value, onChange, className = '', min = 0, max = 100, step = 1 } = props;
     const ref = React.useRef<HTMLInputElement>(null);
     return (
         <InputNumber
+            step={step}
             ref={ref}
             min={min}
             max={max}
@@ -51,7 +52,7 @@ const AutoFocusInputNumber = (props: {
                     // To re-focus after the scroll ends, you need to ensure that the re-focusing takes place after the scrolling process.
                     setTimeout(() => {
                         ref.current?.focus();
-                    }, 2);
+                    }, 30);
                 });
             }}
             className={className}
@@ -80,7 +81,14 @@ export function ParagraphSetting() {
 
     const [spaceAbove, spaceAboveSet] = useFirstParagraphIndentSpaceAbove(currentParagraph);
     const [spaceBelow, spaceBelowSet] = useFirstParagraphSpaceBelow(currentParagraph);
-    const [lineSpacing, lineSpacingSet] = useFirstParagraphLineSpacing(currentParagraph);
+    const { lineSpacing: [lineSpacing, lineSpacingSet], spacingRule: [spacingRule, spacingRuleSet] } = useFirstParagraphLineSpacing(currentParagraph);
+
+    const lineSpaceConfig = useMemo(() => {
+        if (spacingRule === SpacingRule.AUTO) {
+            return { min: 1, max: 5, step: lineSpacing < 2 ? 0.5 : 1 };
+        }
+        return { min: 1, max: 100 };
+    }, [spacingRule, lineSpacing]);
 
     return (
         <div className={styles.paragraphSetting}>
@@ -155,9 +163,25 @@ export function ParagraphSetting() {
                     <AutoFocusInputNumber className={styles.paragraphSettingMtBase} value={spaceBelow} onChange={(v) => spaceBelowSet(v ?? 0)}></AutoFocusInputNumber>
                 </div>
                 <div className={styles.paragraphSettingFlexCol}>
-
                     <div className={styles.paragraphSettingLabel}>{localeService.t('doc.paragraphSetting.lineSpace')}</div>
-                    <AutoFocusInputNumber min={1} max={5} className={styles.paragraphSettingMtBase} value={lineSpacing} onChange={(v) => lineSpacingSet(v ?? 0)}></AutoFocusInputNumber>
+                    <div className={`${styles.paragraphSettingMtBase} ${styles.paragraphSettingSpaceLine}`} style={{ width: 162 }}>
+                        <Select
+                            value={`${spacingRule}`}
+                            options={[
+                                { label: localeService.t('doc.paragraphSetting.multiSpace'), value: `${SpacingRule.AUTO}` },
+                                { label: localeService.t('doc.paragraphSetting.fixedValue'), value: `${SpacingRule.AT_LEAST}` },
+                            ]}
+                            onChange={(v) => spacingRuleSet(Number(v))}
+                        >
+                        </Select>
+                        <AutoFocusInputNumber
+                            {...lineSpaceConfig}
+                            value={lineSpacing}
+                            onChange={(v) => lineSpacingSet(v ?? 0)}
+                        >
+                        </AutoFocusInputNumber>
+                    </div>
+
                 </div>
             </div>
         </div>

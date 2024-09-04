@@ -16,37 +16,35 @@
 
 import type { Workbook } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
-import { type IUniverSheetsUIConfig, RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import React from 'react';
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
 import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
 import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
-import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID, SheetBoldMenuItemFactory, SheetItalicMenuItemFactory, SheetStrikeThroughMenuItemFactory, SheetUnderlineMenuItemFactory } from './menu';
+import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID } from './menu';
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class UniSheetsUIController extends SheetUIController {
     constructor(
-        config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) injector: Injector,
         @Inject(ComponentManager) componentManager: ComponentManager,
         @ILayoutService layoutService: ILayoutService,
         @ICommandService commandService: ICommandService,
         @IShortcutService shortcutService: IShortcutService,
-        @IMenuService menuService: IMenuService,
+        @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
         super(
-            config,
             injector,
             componentManager,
             layoutService,
             commandService,
             shortcutService,
-            menuService,
+            menuManagerService,
             uiPartsService
         );
         this._initUniMenus();
@@ -63,6 +61,8 @@ export class UniSheetsUIController extends SheetUIController {
     }
 
     private _initUniMenus(): void {
+        this._menuManagerService.appendRootMenu(menuSchema);
+
         ([
             [BuiltinUniToolbarItemId.FONT_FAMILY, SetRangeFontFamilyCommand.id],
             [BuiltinUniToolbarItemId.FONT_SIZE, SetRangeFontSizeCommand.id],
@@ -71,17 +71,6 @@ export class UniSheetsUIController extends SheetUIController {
             [BuiltinUniToolbarItemId.IMAGE, SheetsImageMenuId],
         ]).forEach(([id, menuId]) => {
             this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_SHEET });
-        });
-
-        (
-            [
-                SheetBoldMenuItemFactory,
-                SheetItalicMenuItemFactory,
-                SheetUnderlineMenuItemFactory,
-                SheetStrikeThroughMenuItemFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
         });
     }
 
@@ -107,4 +96,3 @@ function RenderOutline() {
         <UniSheetBar />
     );
 }
-

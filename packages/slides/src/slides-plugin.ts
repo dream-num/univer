@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
-// import { TextSelectionManagerService } from '@univerjs/docs';
-// import { CanvasView } from './views/render';
-
-export interface IUniverSlidesConfig {}
-
-const DEFAULT_SLIDE_PLUGIN_DATA = {};
+import type { IUniverSlidesConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'slides';
 
@@ -31,20 +27,22 @@ export class UniverSlidesPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SLIDE;
 
-    private _config: IUniverSlidesConfig;
-
     private _canvasEngine: Engine | null = null;
 
     // private _canvasView: CanvasView | null = null;
 
     constructor(
-        config: Partial<IUniverSlidesConfig> = {},
+        private readonly _config: Partial<IUniverSlidesConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initializeDependencies(this._injector);
     }
 

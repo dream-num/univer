@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, LifecycleService, UniverInstanceType } from '@univerjs/core';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
-import { filter, first } from 'rxjs';
+import { ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { drawingPositionToTransform } from '../../basics/transform-position';
 
 export class SheetsDrawingRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
+        @Inject(LifecycleService) private _lifecycleService: LifecycleService,
+        @Inject(ISheetSelectionRenderService) private _sheetSelectionRenderService: ISheetSelectionRenderService,
+        @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -37,11 +40,20 @@ export class SheetsDrawingRenderController extends Disposable implements IRender
     }
 
     private _drawingInitializeListener() {
-        this._lifecycleService.lifecycle$.pipe(filter((e) => e === LifecycleStages.Steady), first()).subscribe(() => {
-            if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
-                this._sheetDrawingService.initializeNotification(this._context.unitId);
-                this._drawingManagerService.initializeNotification(this._context.unitId);
+        // initialize drawing data and add to sheet canvas
+        if (this._context.type === UniverInstanceType.UNIVER_SHEET) {
+            this._sheetDrawingService.initializeNotification(this._context.unitId);
+            const data = this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId);
+            for (const subUnit in data) {
+                const subUnitData = data[subUnit];
+                for (const drawingId in subUnitData.data) {
+                    const drawingData = subUnitData.data[drawingId];
+                    drawingData.transform = drawingPositionToTransform(drawingData.sheetTransform, this._sheetSelectionRenderService, this._sheetSkeletonManagerService);
+                }
             }
-        });
+
+            this._drawingManagerService.registerDrawingData(this._context.unitId, this._sheetDrawingService.getDrawingDataForUnit(this._context.unitId));
+            this._drawingManagerService.initializeNotification(this._context.unitId);
+        }
     }
 }

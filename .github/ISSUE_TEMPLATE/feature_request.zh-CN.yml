@@ -18,14 +18,9 @@ body:
       id: problem
       attributes:
           label: 问题
-          description: 请描述一下你想要解决的问题。
-      validations:
-          required: true
-
-    - type: textarea
-      id: solution
-      attributes:
-          label: 解决方案
-          description: 您期望的解决方案是什么？请描述预期行为。
+          description: |
+              请详细描述您的需求，如果您的描述无法被理解，**那么您的问题可能会被直接关闭**。
+              - 您应当清楚地提供需求的背景、目的、以及您希望的解决方案。
+              - 如果您有任何的设计稿、流程图、或者其他相关的附件，请在这里提供。
       validations:
           required: true

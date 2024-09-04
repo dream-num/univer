@@ -19,7 +19,7 @@ import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverI
 import { UnitAction } from '@univerjs/protocol';
 
 import type { ICellPermission } from '@univerjs/sheets';
-import { RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { IExclusiveRangeService, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { Observable } from 'rxjs';
 import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
 
@@ -43,6 +43,59 @@ export function deriveStateFromActiveSheet$<T>(univerInstanceService: IUniverIns
         if (!active) return of(defaultValue);
         return callback(active);
     }));
+}
+
+/**
+ * @description Get the current exclusive range disable status
+ * @param accessor The accessor
+ * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
+ * @returns {Observable<boolean>} The current exclusive range disable status
+ */
+export function getCurrentExclusiveRangeInterest$(accessor: IAccessor, disableGroupSet?: Set<string>) {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const exclusiveRangeService = accessor.get(IExclusiveRangeService);
+    const selectionManagerService = accessor.get(SheetsSelectionsService);
+    const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    return workbook$.pipe(
+        switchMap((workbook) => {
+            if (!workbook) {
+                return of(false);
+            }
+            return combineLatest([selectionManagerService.selectionMoveEnd$, workbook.activeSheet$]).pipe(
+                switchMap(([selections, worksheet]) => {
+                    if (!worksheet) {
+                        return of(false);
+                    }
+                    if (selections.length === 0) {
+                        return of(false);
+                    }
+
+                    const interestGroupIds = exclusiveRangeService.getInterestGroupId(selections);
+                    // if disableGroupSet is provided, check if the interestGroupIds contains any of the disableGroupSet
+                    if (disableGroupSet) {
+                        const disableGroup = interestGroupIds.filter((groupId) => disableGroupSet.has(groupId));
+                        return of(disableGroup.length > 0);
+                    } else {
+                        return of(interestGroupIds.length > 0);
+                    }
+                })
+            );
+        })
+    );
+}
+
+/**
+ * Get the observable combine with exclusive range
+ * @param accessor The accessor
+ * @param {Observable<boolean>} observable$
+ * @param {Set<string>} [disableGroupSet] The disable group set, if provided, check if the interestGroupIds contains any of the disableGroupSet, otherwise check if the interestGroupIds is not empty
+ * @returns {Observable<boolean>} The observable combine with exclusive range
+ */
+export function getObservableWithExclusiveRange$(accessor: IAccessor, observable$: Observable<boolean>, disableGroupSet?: Set<string>): Observable<boolean> {
+    return combineLatest([observable$, getCurrentExclusiveRangeInterest$(accessor, disableGroupSet)]).pipe(
+        map(([observable, exclusiveRangeDisable]) => observable || exclusiveRangeDisable)
+    );
 }
 
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {

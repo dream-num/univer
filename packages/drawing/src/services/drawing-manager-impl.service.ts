@@ -228,12 +228,21 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     getBatchRemoveOp(removeParams: IDrawingSearch[]): IDrawingJsonUndo1 {
         const ops: JSONOp[] = [];
         const invertOps: JSONOp[] = [];
+
         removeParams.forEach((removeParam) => {
             const { op, invertOp } = this._removeByParam(removeParam);
-            ops.push(op);
+            /**
+             * ot-json compose case
+             * two remove ops to does composition
+             * ops: [[unit, sheetUnit, order, 0, { r: true }], [unit, sheetUnit, order, 1, { r: true }]]
+             * We expected them to composed as [unit, sheetUnit, order, [0, { r: true }], [1, { r: true }]]
+             * But extremely confusing to get [unit, sheetUnit, order, 0, { r: true }, 2, { r: true }]
+             * And We apply this composed op to data, it's not a 2-index item for us to remove.
+             * So use unshift api instead of push here.
+             */
+            ops.unshift(op);
             invertOps.push(invertOp);
         });
-
         const op = ops.reduce(json1.type.compose, null);
         const invertOp = invertOps.reduce(json1.type.compose, null);
 

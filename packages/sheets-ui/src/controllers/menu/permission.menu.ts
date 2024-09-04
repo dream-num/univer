@@ -25,8 +25,7 @@ import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionForm
 import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
 import { SheetMenuPosition } from './menu';
 
-export const tmpIcon = 'data-validation-single';
-const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
+export const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
 
 export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuItem {
     return {

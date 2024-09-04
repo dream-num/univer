@@ -51,9 +51,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
         });
-        univer.registerPlugin(UniverDocsPlugin, {
-            hasScroll: false,
-        });
+        univer.registerPlugin(UniverDocsPlugin);
         univer.registerPlugin(UniverDocsUIPlugin);
 
         // sheets plugin

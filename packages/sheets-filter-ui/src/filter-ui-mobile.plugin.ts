@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 
-import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui-desktop.controller';
-import { DefaultSheetFilterUiConfig } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { SheetsFilterUIMobileController } from './controllers/sheets-filter-ui-mobile.controller';
+import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -31,12 +31,18 @@ export class UniverSheetsFilterMobileUIPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = {},
-        @Inject(Injector) protected readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = defaultPluginConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

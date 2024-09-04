@@ -15,11 +15,10 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, ICommandService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
-import type { IUniverSheetsThreadCommentConfig } from './controllers/sheets-thread-comment.controller';
-import { DefaultSheetsThreadCommentConfig, SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
+import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
@@ -27,32 +26,33 @@ import { SHEETS_THREAD_COMMENT } from './types/const';
 import { SheetsThreadCommentCopyPasteController } from './controllers/sheets-thread-comment-copy-paste.controller';
 import { SheetsThreadCommentHoverController } from './controllers/sheets-thread-comment-hover.controller';
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
+import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverThreadCommentUIPlugin, UniverSheetsThreadCommentBasePlugin)
 export class UniverSheetsThreadCommentPlugin extends Plugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
-    private _pluginConfig: IUniverSheetsThreadCommentConfig;
-
     constructor(
-        config: Partial<IUniverSheetsThreadCommentConfig> = {},
+        private readonly _config: Partial<IUniverSheetsThreadCommentConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @Inject(ICommandService) protected _commandService: ICommandService
+        @Inject(ICommandService) protected _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._pluginConfig = Tools.deepMerge({}, DefaultSheetsThreadCommentConfig, config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
-            [
-                SheetsThreadCommentController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetsThreadCommentController, this._pluginConfig),
-                },
-            ],
+            [SheetsThreadCommentController],
             [SheetsThreadCommentRenderController],
             [SheetsThreadCommentCopyPasteController],
             [SheetsThreadCommentHoverController],

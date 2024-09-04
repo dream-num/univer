@@ -116,7 +116,7 @@ import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../compone
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
-import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './menu-util';
+import { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'ROW_HEADER_CONTEXT_MENU',
@@ -970,7 +970,7 @@ export function PasteSpacialMenuItemFactory(accessor: IAccessor): IMenuSelectorI
             SheetMenuPosition.COL_HEADER_CONTEXT_MENU,
             SheetMenuPosition.ROW_HEADER_CONTEXT_MENU,
         ],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+        hidden$: getObservableWithExclusiveRange$(accessor, getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET)),
     };
 }
 

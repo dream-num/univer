@@ -24,7 +24,7 @@ import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-na
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'doc.menu.image';
-const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
+export const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
 
 // TODO: @Jocs, remove this when cell support drawing.
 const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-mention-ui",
-    "version": "0.2.9",
+    "version": "0.2.11",
     "private": true,
     "description": "Univer normal ui-plugin-docs",
     "author": "DreamNum <developer@univer.ai>",
@@ -73,7 +73,7 @@
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
-        "@types/react": "^18.3.4",
+        "@types/react": "^18.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",

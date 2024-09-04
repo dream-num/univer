@@ -134,6 +134,7 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
         id: linkMenu.commandId,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getLinkDisable$(accessor),
+        // disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] })),
     } as IMenuItem;
 };
 

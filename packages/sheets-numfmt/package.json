@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-numfmt",
-    "version": "0.2.9",
+    "version": "0.2.11",
     "private": false,
     "description": "UniverSheet numfmt plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -79,7 +79,7 @@
         "@univerjs/icons": "^0.1.77"
     },
     "devDependencies": {
-        "@types/react": "^18.3.4",
+        "@types/react": "^18.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",

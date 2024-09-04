@@ -280,7 +280,9 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId(),
         } = this.autoFillLocation || {};
         const direction = this.direction;
-        if (!source || !target || unitId !== triggerUnitId || subUnitId !== triggerSubUnitId) {
+        if (!source || !source.cols.length || !source.rows.length
+            || !target || !target.cols.length || !target.rows.length
+            || unitId !== triggerUnitId || subUnitId !== triggerSubUnitId) {
             return false;
         }
 

@@ -90,6 +90,8 @@ const locale = {
             before: '段落前',
             after: '段落后',
             lineSpace: '行距',
+            multiSpace: '多倍行距',
+            fixedValue: '固定值(px)',
         },
     },
 };

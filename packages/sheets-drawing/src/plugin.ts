@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
+import type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsDrawingPlugin extends Plugin {
     static override pluginName = SHEET_DRAWING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: unknown,
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsDrawingConfig> = defaultPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
+import type { DependencyOverride } from '@univerjs/core';
 
-export interface IUrlHandler {
-    navigateToOtherWebsite?: (url: string) => void;
+export const PLUGIN_CONFIG_KEY = 'drawing.config';
+
+export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+
+export interface IUniverDrawingConfig {
+    override?: DependencyOverride;
 }
 
-export interface IUniverSheetsHyperLinkUIConfig {
-    menu?: MenuConfig;
-    urlHandler?: IUrlHandler;
-}
+export const defaultPluginConfig: IUniverDrawingConfig = {};

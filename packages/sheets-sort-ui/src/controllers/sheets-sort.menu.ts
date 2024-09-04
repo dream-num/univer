@@ -21,8 +21,8 @@ import { getCurrentRangeDisable$, SheetMenuPosition } from '@univerjs/sheets-ui'
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 
-const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
-const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
+export const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
+export const SHEETS_SORT_CTX_MENU_ID = 'sheet.menu.sheets-sort-ctx';
 
 export const SHEETS_SORT_ASC_ICON = 'AscendingSingle';
 export const SHEETS_SORT_ASC_EXT_ICON = 'ExpandAscendingSingle';

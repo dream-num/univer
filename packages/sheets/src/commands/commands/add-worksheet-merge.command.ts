@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, Injector, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
@@ -22,6 +22,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     ObjectMatrix,
+    Rectangle,
     sequenceExecute,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -39,6 +40,7 @@ import {
 } from '../mutations/remove-worksheet-merge.mutation';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IAddMergeCommandParams {
     value?: Dimension.ROWS | Dimension.COLUMNS;
@@ -262,3 +264,25 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
         } as IAddMergeCommandParams);
     },
 };
+
+export async function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[]) {
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
+    if (!target) return;
+    const { worksheet } = target;
+    const mergeData = worksheet.getMergeData();
+    const overlap = mergeData.some((mergeRange) => {
+        return ranges.some((range) => {
+            return Rectangle.intersects(range, mergeRange);
+        });
+    });
+    if (overlap) {
+        throw new Error('The ranges to be merged overlap with the existing merged cells');
+    }
+    const commandService = injector.get(ICommandService);
+    await commandService.executeCommand(AddWorksheetMergeCommand.id, {
+        unitId,
+        subUnitId,
+        selections: ranges,
+    });
+}

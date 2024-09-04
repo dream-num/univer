@@ -45,10 +45,3 @@ export const DefaultDocContainerConfig = {
     infoBar: true,
     toolbar: true,
 };
-
-export const DefaultDocUiConfig = {
-    layout: {
-        docContainerConfig: DefaultDocContainerConfig,
-        toolbarConfig: DefaultToolbarConfig,
-    },
-};

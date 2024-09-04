@@ -16,15 +16,15 @@
 
 import type {
     Dependency } from '@univerjs/core';
-import {
-    ICommandService,
+import { ICommandService,
+
+    IConfigService,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
     mergeOverrideWithDependencies,
-    Plugin,
-    Tools, UniverInstanceType } from '@univerjs/core';
+    Plugin, UniverInstanceType } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -39,8 +39,6 @@ import {
     MoveSelectionUpShortcut,
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
-import type { IUniverDocsUIConfig } from './basics';
-import { DefaultDocUiConfig } from './basics';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AppUIController } from './controllers';
 import { DocUIController } from './controllers/doc-ui.controller';
@@ -67,21 +65,30 @@ import { DocParagraphSettingController } from './controllers/doc-paragraph-setti
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { DocTableController } from './controllers/doc-table.controller';
+import type { IUniverDocsUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        private readonly _config: IUniverDocsUIConfig,
+        private readonly _config: Partial<IUniverDocsUIConfig> = defaultPluginConfig,
         @Inject(Injector) override _injector: Injector,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @ICommandService private _commandService: ICommandService,
-        @ILogService private _logService: ILogService
+        @ILogService private _logService: ILogService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultDocUiConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
@@ -127,14 +134,14 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            [DocUIController, { useFactory: () => this._injector.createInstance(DocUIController, this._config) }],
+            [DocUIController],
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocAutoFormatController],
 
             [DocTableController],
             [DocsRenderService],
-            [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
+            [AppUIController],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocParagraphSettingController],

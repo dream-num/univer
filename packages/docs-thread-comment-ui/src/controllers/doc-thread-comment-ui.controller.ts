@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
 import { ShowCommentPanelOperation, StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DeleteDocCommentComment } from '../commands/commands/delete-doc-comment.command';
-import { AddDocCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
-
-export interface IDocThreadCommentUIConfig {
-    menu: MenuConfig;
-}
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Rendered, DocThreadCommentUIController)
 export class DocThreadCommentUIController extends Disposable {
     constructor(
-        private _config: IDocThreadCommentUIConfig,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private readonly _menuService: IMenuService,
-        @Inject(Injector) private readonly _injector: Injector,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
@@ -56,12 +49,7 @@ export class DocThreadCommentUIController extends Disposable {
     }
 
     private _initMenus() {
-        [
-            AddDocCommentMenuItemFactory,
-            ToolbarDocCommentMenuItemFactory,
-        ].forEach((menuFactory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(menuFactory(this._injector), this._config.menu));
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initComponents() {

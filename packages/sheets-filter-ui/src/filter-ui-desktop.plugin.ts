@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Optional, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    IConfigService,
+    Inject,
+    Injector,
+    Optional,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { IRPCChannelService, toModule } from '@univerjs/rpc';
-import type { IUniverSheetsFilterUIConfig } from './controllers/sheets-filter-ui-desktop.controller';
-import { DefaultSheetFilterUiConfig, SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
+import { SheetsFilterUIDesktopController } from './controllers/sheets-filter-ui-desktop.controller';
 import { SheetsFilterPanelService } from './services/sheets-filter-panel.service';
 import { SheetsFilterPermissionController } from './controllers/sheets-filter-permission.controller';
 import { ISheetsGenerateFilterValuesService, SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME } from './worker/generate-filter-values.service';
+import type { IUniverSheetsFilterUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'SHEET_FILTER_UI_PLUGIN';
 
@@ -35,23 +44,26 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsFilterUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService,
         @Optional(IRPCChannelService) private readonly _rpcChannelService?: IRPCChannelService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetFilterUiConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
             [SheetsFilterPanelService],
             [SheetsFilterPermissionController],
-            [SheetsFilterUIDesktopController, {
-                useFactory: (): SheetsFilterUIDesktopController =>
-                    this._injector.createInstance(SheetsFilterUIDesktopController, this._config),
-            }],
+            [SheetsFilterUIDesktopController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
         if (this._config.useRemoteFilterValuesGenerator && this._rpcChannelService) {

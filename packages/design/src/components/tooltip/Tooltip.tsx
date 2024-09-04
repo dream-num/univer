@@ -39,7 +39,7 @@ export interface ITooltipProps {
     style?: React.CSSProperties;
 }
 
-type NullableTooltipRef = TooltipRef | null;
+export type NullableTooltipRef = TooltipRef | null;
 
 export const Tooltip = forwardRef<NullableTooltipRef, ITooltipProps>((props, ref) => {
     const {

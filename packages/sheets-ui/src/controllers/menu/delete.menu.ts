@@ -26,9 +26,9 @@ import {
     RemoveRowConfirmCommand,
 } from '../../commands/commands/remove-row-col-confirm.command';
 import { SheetMenuPosition } from './menu';
-import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getDeleteMenuHidden$ } from './menu-util';
+import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getDeleteMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
 
-const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
+export const DELETE_RANGE_MENU_ID = 'sheet.menu.delete';
 export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: DELETE_RANGE_MENU_ID,
@@ -37,7 +37,7 @@ export function DeleteRangeMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         title: 'rightClick.delete',
         icon: 'Reduce',
         positions: [MenuPosition.CONTEXT_MENU],
-        hidden$: getBaseRangeMenuHidden$(accessor),
+        hidden$: getObservableWithExclusiveRange$(accessor, getBaseRangeMenuHidden$(accessor)),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission] }),
     };
 }

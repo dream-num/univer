@@ -42,7 +42,7 @@ const univer = new Univer({
 // core plugins
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, { container: 'app' });
-univer.registerPlugin(UniverDocsPlugin, { hasScroll: false });
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);
 // base-render
 univer.registerPlugin(UniverFormulaEnginePlugin);

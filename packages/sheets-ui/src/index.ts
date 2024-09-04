@@ -18,13 +18,13 @@ export { SheetsUIPart } from './consts/ui-name';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
 export { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
-export { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from './controllers/menu/menu-util';
+export { deriveStateFromActiveSheet$, getCurrentRangeDisable$, getObservableWithExclusiveRange$, getCurrentExclusiveRangeInterest$ } from './controllers/menu/menu-util';
 export { SheetsRenderService } from './services/sheets-render.service';
 export { getCustomRangePosition, calculateDocSkeletonRects, getEditingCustomRangePosition } from './services/utils/doc-skeleton-util';
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
-export { SheetUIController, type IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
+export { SheetUIController } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -99,6 +99,8 @@ export { SheetPermissionInitController } from './controllers/permission/sheet-pe
 
 export { IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+
+export { menuSchema } from './controllers/menu.schema';
 
 // #region - all commands
 

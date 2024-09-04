@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
@@ -22,6 +22,8 @@ import { HyperLinkModel } from './models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
 import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
+import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
@@ -29,10 +31,15 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        config: unknown,
-        @Inject(Injector) protected _injector: Injector
+        private readonly _config: Partial<IUniverSheetsHyperLinkConfig> = defaultPluginConfig,
+        @Inject(Injector) protected _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

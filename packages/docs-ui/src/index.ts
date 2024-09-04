@@ -29,6 +29,9 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { DOC_VERTICAL_PADDING } from './types/const/padding';
 // #region - all commands
 
+export { menuSchema } from './controllers/menu.schema';
+
+// #region - all commands
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
 // #endregion

@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/sidebar.operations';
-import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-config';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut, zenEditorInsertLinkMenuFactory, zenEditorInsertLinkMenuToolbarFactory } from './menu';
+import { menuSchema } from './menu.schema';
+import { InsertLinkShortcut } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
-        private _config: Nullable<IUniverSheetsHyperLinkUIConfig>,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ICommandService private _commandService: ICommandService,
-        @Inject(LocaleService) private _localeService: LocaleService,
-        @IMenuService private _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private _injector: Injector,
         @Inject(IShortcutService) private _shortcutService: IShortcutService
     ) {
@@ -75,14 +72,7 @@ export class SheetsHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
-        [
-            zenEditorInsertLinkMenuToolbarFactory,
-            zenEditorInsertLinkMenuFactory,
-            insertLinkMenuFactory,
-            insertLinkMenuToolbarFactory,
-        ].forEach((menuFactory) => {
-            this._menuService.addMenuItem(menuFactory(this._injector), this._config?.menu ?? {});
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortCut() {

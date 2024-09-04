@@ -118,8 +118,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '範囲', detail: '参照とは、テストするセルへの参照のことです。' },
         },
     },
     ISLOGICAL: {
@@ -237,8 +236,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: '変換する値を指定します。' },
         },
     },
     NA: {
@@ -251,8 +249,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SHEET: {

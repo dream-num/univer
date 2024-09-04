@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
@@ -24,7 +24,8 @@ import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.comm
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
 import { DocLinkPopup } from '../views/hyper-link-popup';
-import { AddHyperLinkMenuItemFactory, addLinkShortcut, DOC_LINK_ICON } from './menu';
+import { addLinkShortcut, DOC_LINK_ICON } from './menu';
+import { menuSchema } from './menu.schema';
 
 export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;
@@ -33,10 +34,9 @@ export interface IDocHyperLinkUIConfig {
 @OnLifecycle(LifecycleStages.Starting, DocHyperLinkUIController)
 export class DocHyperLinkUIController extends Disposable {
     constructor(
-        protected _config: IDocHyperLinkUIConfig,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
@@ -78,8 +78,6 @@ export class DocHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
-        [AddHyperLinkMenuItemFactory].forEach((menuFactory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(menuFactory(this._injector), {}));
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 }

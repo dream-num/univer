@@ -61,10 +61,10 @@ export class SheetsDrawingCopyPasteController extends Disposable {
     }
 
     private _collect(unitId: string, subUnitId: string, range: IRange) {
-        const skeletonManagetService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
-        if (!skeletonManagetService) return;
+        const skeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+        if (!skeletonManagerService) return;
 
-        const selectionRect = skeletonManagetService.attachRangeWithCoord(range);
+        const selectionRect = skeletonManagerService.attachRangeWithCoord(range);
         if (!selectionRect) {
             return;
         }
@@ -139,19 +139,19 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         const { row: copyRow, col: copyCol } = mapFunc(vCopyRange.startRow, vCopyRange.startColumn);
         const { row: pasteRow, col: pasteCol } = mapFunc(vPastedRange.startRow, vPastedRange.startColumn);
 
-        const skeletonManagetService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
+        const skeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
 
-        if (!skeletonManagetService) {
+        if (!skeletonManagerService) {
             return { redos: [], undos: [] };
         }
 
-        const copyRect = skeletonManagetService.attachRangeWithCoord({
+        const copyRect = skeletonManagerService.attachRangeWithCoord({
             startRow: copyRow,
             endRow: copyRow,
             startColumn: copyCol,
             endColumn: copyCol,
         });
-        const pasteRect = skeletonManagetService.attachRangeWithCoord({
+        const pasteRect = skeletonManagerService.attachRangeWithCoord({
             startRow: pasteRow,
             endRow: pasteRow,
             startColumn: pasteCol,

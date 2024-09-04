@@ -88,6 +88,8 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         );
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+
+        window.srs = this;
     }
 
     private _init() {

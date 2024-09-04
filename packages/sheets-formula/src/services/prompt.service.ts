@@ -240,6 +240,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
     }
 
     setSequenceNodes(nodes: Array<string | ISequenceNode>) {
+        console.log('service  seq nodes', this._sequenceNodes);
         this._sequenceNodes = nodes;
     }
 
@@ -308,7 +309,9 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         newNode.token = refString;
 
         newNode.endIndex += difference;
+
         this._sequenceNodes[nodeIndex] = newNode;
+        console.log('updateSequenceRef this._sequenceNodes', nodeIndex, newNode, this._sequenceNodes);
 
         for (let i = nodeIndex + 1, len = this._sequenceNodes.length; i < len; i++) {
             const node = this._sequenceNodes[i];
@@ -321,6 +324,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
             newNode.startIndex += difference;
             newNode.endIndex += difference;
             this._sequenceNodes[i] = newNode;
+            console.log('updateSequenceRef this._sequenceNodes', nodeIndex, newNode, this._sequenceNodes);
         }
     }
 
@@ -353,6 +357,8 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
             newNode.startIndex += refStringCount;
             newNode.endIndex += refStringCount;
             this._sequenceNodes[i] = newNode;
+
+            console.log('insertSequenceRef this._sequenceNodes', nodeIndex, newNode, this._sequenceNodes);
         }
     }
 
@@ -365,6 +371,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
         const nodeIndex = this.getCurrentSequenceNodeIndex(index);
         const str = content.split('');
         this._sequenceNodes.splice(nodeIndex, 0, ...str);
+        console.log('insert Sequence string  this._sequenceNodes', str);
 
         const contentCount = str.length;
 
@@ -379,6 +386,7 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
             newNode.startIndex += contentCount;
             newNode.endIndex += contentCount;
             this._sequenceNodes[i] = newNode;
+            console.log('insert Sequence string this._sequenceNodes', nodeIndex, newNode, this._sequenceNodes);
         }
     }
 

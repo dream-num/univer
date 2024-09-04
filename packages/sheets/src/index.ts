@@ -371,6 +371,7 @@ export { SetWorksheetHideMutation, type ISetWorksheetHideMutationParams } from '
 export { SetWorksheetNameMutation, type ISetWorksheetNameMutationParams } from './commands/mutations/set-worksheet-name.mutation';
 export { SetWorksheetOrderMutation, type ISetWorksheetOrderMutationParams } from './commands/mutations/set-worksheet-order.mutation';
 export { SetWorksheetPermissionPointsMutation } from './commands/mutations/set-worksheet-permission-points.mutation';
+export type { ISetWorksheetPermissionPointsMutationParams } from './commands/mutations/set-worksheet-permission-points.mutation';
 export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
 export { SetWorksheetRightToLeftMutation } from './commands/mutations/set-worksheet-right-to-left.mutation';
 export {

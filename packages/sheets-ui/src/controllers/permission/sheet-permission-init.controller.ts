@@ -15,10 +15,10 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IAuthzIoService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 
-import type { IRangeProtectionRule, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
-import { defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, IRangeProtectionRule, ISetWorksheetPermissionPointsMutationParams, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionRenderModel, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
 
 import { UnitAction, UnitObject } from '@univerjs/protocol';
@@ -39,7 +39,8 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
-        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService
+        @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
+        @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
         this._initRangePermissionFromSnapshot();
@@ -51,6 +52,7 @@ export class SheetPermissionInitController extends Disposable {
         this._initUserChange();
         this._initViewModelByRangeInterceptor();
         this._initViewModelBySheetInterceptor();
+        this._refreshPermissionByCollaCreate();
     }
 
     private async _initRangePermissionFromSnapshot() {
@@ -487,5 +489,22 @@ export class SheetPermissionInitController extends Disposable {
                 }
             });
         }
+    }
+
+    private _refreshPermissionByCollaCreate() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command, options) => {
+                if (options?.fromCollab) {
+                    if (
+                        command.id === AddRangeProtectionMutation.id
+                        || command.id === AddWorksheetProtectionMutation.id
+                        || command.id === SetWorksheetPermissionPointsMutation.id
+                    ) {
+                        const params = command.params as IAddRangeProtectionMutationParams | IAddWorksheetProtectionParams | ISetWorksheetPermissionPointsMutationParams;
+                        this._undoRedoService.clearUndoRedo(params.unitId);
+                    }
+                }
+            })
+        );
     }
 }

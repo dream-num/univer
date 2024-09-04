@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-export enum SheetHyperLinkType {
-    SHEET = 'sheet',
-    RANGE = 'range',
-    DEFINE_NAME = 'defineName',
-    OUTER = 'outer',
-    INVALID = 'invalid',
-    URL = 'url',
+import type { Nullable } from '@univerjs/core';
+import type { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import type { ISheetUrlParams } from './i-sheet-url-params';
+
+export interface ISheetHyperLinkInfo {
+    type: SheetHyperLinkType;
+    name: string;
+    url: string;
+    searchObj: Nullable<ISheetUrlParams>;
+    handler: () => void;
 }

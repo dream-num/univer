@@ -14,11 +14,5 @@
  * limitations under the License.
  */
 
-export enum SheetHyperLinkType {
-    SHEET = 'sheet',
-    RANGE = 'range',
-    DEFINE_NAME = 'defineName',
-    OUTER = 'outer',
-    INVALID = 'invalid',
-    URL = 'url',
-}
+export type { ISheetHyperLinkInfo } from './i-sheet-hyper-link-info';
+export type { ISheetUrlParams } from './i-sheet-url-params';

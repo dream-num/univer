@@ -16,9 +16,10 @@
 
 import { Disposable } from '@univerjs/core';
 import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import type React from 'react';
 
-export interface CustomHyperLinkFormProps {
+export interface ICustomHyperLinkFormProps {
     linkId: string;
     payload: string;
     display: string;
@@ -34,23 +35,16 @@ export interface ICustomHyperLinkView {
         label: string;
         value: string;
     };
-    Form: React.FC<CustomHyperLinkFormProps>;
+    Form: React.FC<ICustomHyperLinkFormProps>;
     convert: (link: ICellHyperLink) => { display: string; payload: string; type: string };
     match: (link: ICellHyperLink) => boolean;
-}
-
-export enum LinkType {
-    link = 'link',
-    range = 'range',
-    sheet = 'gid',
-    definedName = 'rangeid',
 }
 
 export class SheetsHyperLinkSidePanelService extends Disposable {
     private _customHyperLinks = new Map<string, ICustomHyperLinkView>();
 
-    isBuiltInLinkType(type: string) {
-        return Boolean((LinkType as any)[type]);
+    isBuiltInLinkType(type: SheetHyperLinkType | string) {
+        return type !== SheetHyperLinkType.URL;
     }
 
     getOptions() {

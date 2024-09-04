@@ -15,7 +15,7 @@
  */
 
 export { HyperLinkModel } from './models/hyper-link.model';
-export { HyperLinkType } from './types/enums/hyper-link-type';
+export { SheetHyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
 export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
 

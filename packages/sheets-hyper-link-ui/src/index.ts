@@ -20,6 +20,7 @@ export { SheetsHyperLinkResolverService } from './services/resolver.service';
 export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 export { InsertLinkShortcut } from './controllers/menu';
+export type { ISheetHyperLinkInfo, ISheetUrlParams } from './types/interfaces';
 
 // #region - all commands
 export {

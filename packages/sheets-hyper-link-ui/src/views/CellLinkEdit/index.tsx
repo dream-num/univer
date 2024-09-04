@@ -20,14 +20,14 @@ import { createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, g
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
 import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IEditorBridgeService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
 import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
-import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
+import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
@@ -37,7 +37,7 @@ export const CellLinkEdit = () => {
     const [id, setId] = useState('');
     const [display, setDisplay] = useState('');
     const [showLabel, setShowLabel] = useState(true);
-    const [type, setType] = useState<LinkType | string>(LinkType.link);
+    const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
@@ -64,15 +64,33 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
             const { label, customRange, row, col } = editing;
-            const link = customRange
-                ? {
+            let link;
+            if (customRange) {
+                link = {
                     id: customRange?.rangeId ?? '',
                     display: label ?? '',
                     payload: customRange?.properties?.url ?? '',
                     row,
                     column: col,
+                };
+            } else {
+                const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
+                const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
+                const cell = worksheet?.getCellRaw(editing.row, editing.col);
+                const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
+                const cellValue = `${getCellValueOrigin(cell)}`;
+                if (cell && (cell.p || cellValue)) {
+                    setShowLabel(false);
                 }
-                : null;
+
+                link = {
+                    id: '',
+                    display: '',
+                    payload: range?.properties?.url ?? '',
+                    row,
+                    column: col,
+                };
+            }
 
             if (link) {
                 setId(link.id);
@@ -84,26 +102,19 @@ export const CellLinkEdit = () => {
                     setDisplay(customLinkInfo.display);
                     return;
                 }
-
                 setDisplay(link.display);
                 const linkInfo = resolverService.parseHyperLink(link.payload);
-                if (linkInfo.type === 'outer') {
-                    setType(LinkType.link);
-                    setPayload(linkInfo.url);
-                    if (linkInfo.url === link.display) {
-                        setByPayload.current = true;
+                setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
+                switch (linkInfo.type) {
+                    case SheetHyperLinkType.URL:{
+                        setPayload(linkInfo.url);
+                        if (linkInfo.url === link.display) {
+                            setByPayload.current = true;
+                        }
+                        break;
                     }
-                    return;
-                } else {
-                    const params = linkInfo.searchObj;
-                    if (params.rangeid) {
-                        setType(LinkType.definedName);
-                        setPayload(params.rangeid);
-
-                        return;
-                    }
-
-                    if (params.range) {
+                    case SheetHyperLinkType.RANGE:{
+                        const params = linkInfo.searchObj!;
                         const sheetName = params.gid ?
                             univerInstanceService
                                 .getUnit<Workbook>(editing.unitId)
@@ -111,41 +122,32 @@ export const CellLinkEdit = () => {
                                 ?.getName()
                             ?? ''
                             : '';
-                        setType(LinkType.range);
-                        if (params.range === ERROR_RANGE) {
-                            setPayload('');
-                        } else {
-                            const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
-                            setPayload(payload);
-                            if (payload === link.display) {
-                                setByPayload.current = true;
-                            }
+                        const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
+                        setPayload(payload);
+                        if (payload === link.display) {
+                            setByPayload.current = true;
                         }
-
-                        return;
+                        break;
                     }
-
-                    if (params.gid) {
-                        setType(LinkType.sheet);
-                        setPayload(params.gid);
-                        return;
+                    case SheetHyperLinkType.SHEET:{
+                        const params = linkInfo.searchObj!;
+                        setPayload(params.gid!);
+                        break;
                     }
+                    case SheetHyperLinkType.DEFINE_NAME:{
+                        const params = linkInfo.searchObj!;
+                        setPayload(params.rangeid!);
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
-            const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
-            const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
-            const cell = worksheet?.getCellRaw(editing.row, editing.col);
-            const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-            const cellValue = getCellValueOrigin(cell);
-            setType(LinkType.link);
-            setPayload(range?.properties?.url ?? '');
-            setShowLabel(!cellValue);
-            setDisplay((cellValue ?? '').toString());
-            setId('');
+
             return;
         }
 
-        setType(LinkType.link);
+        setType(SheetHyperLinkType.URL);
         setPayload('');
         setDisplay('');
         setId('');
@@ -155,23 +157,23 @@ export const CellLinkEdit = () => {
 
     const linkTypeOptions: Array<{
         label: string;
-        value: LinkType | string;
+        value: SheetHyperLinkType | string;
     }> = [
         {
             label: localeService.t('hyperLink.form.link'),
-            value: LinkType.link,
+            value: SheetHyperLinkType.URL,
         },
         {
             label: localeService.t('hyperLink.form.range'),
-            value: LinkType.range,
+            value: SheetHyperLinkType.RANGE,
         },
         {
             label: localeService.t('hyperLink.form.worksheet'),
-            value: LinkType.sheet,
+            value: SheetHyperLinkType.SHEET,
         },
         {
             label: localeService.t('hyperLink.form.definedName'),
-            value: LinkType.definedName,
+            value: SheetHyperLinkType.DEFINE_NAME,
         },
         ...sidePanelOptions,
     ];
@@ -187,12 +189,12 @@ export const CellLinkEdit = () => {
         value: value.id,
     }));
 
-    const formatUrl = (type: LinkType | string, payload: string) => {
-        if (type === LinkType.link) {
+    const formatUrl = (type: SheetHyperLinkType | string, payload: string) => {
+        if (type === SheetHyperLinkType.URL) {
             return serializeUrl(payload);
         }
 
-        if (type === LinkType.range) {
+        if (type === SheetHyperLinkType.RANGE) {
             const info = deserializeRangeWithSheet(payload);
             const worksheet = workbook.getSheetBySheetName(info.sheetName);
             if (worksheet) {
@@ -298,12 +300,12 @@ export const CellLinkEdit = () => {
                     options={linkTypeOptions}
                     value={type}
                     onChange={(newType) => {
-                        setType(newType as LinkType);
+                        setType(newType as SheetHyperLinkType);
                         setPayload('');
                     }}
                 />
             </FormLayout>
-            {type === LinkType.link && (
+            {type === SheetHyperLinkType.URL && (
                 <FormLayout
                     error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
                 >
@@ -320,7 +322,7 @@ export const CellLinkEdit = () => {
                     />
                 </FormLayout>
             )}
-            {type === LinkType.range && (
+            {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
                         openForSheetUnitId={workbook.getUnitId()}
@@ -341,7 +343,7 @@ export const CellLinkEdit = () => {
                     />
                 </FormLayout>
             )}
-            {type === LinkType.sheet && (
+            {type === SheetHyperLinkType.SHEET && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
                         options={sheetsOption}
@@ -358,7 +360,7 @@ export const CellLinkEdit = () => {
                     />
                 </FormLayout>
             )}
-            {type === LinkType.definedName && (
+            {type === SheetHyperLinkType.DEFINE_NAME && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
                         options={definedNames}
@@ -407,7 +409,7 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
-                        if (!display || !payload || (type === LinkType.link && !isLegalLink(payload))) {
+                        if (!display || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
                             setShowError(true);
                             return;
                         }

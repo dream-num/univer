@@ -20,17 +20,13 @@ import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
+import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
 import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
-
-interface ISheetUrlParams {
-    gid?: string;
-    range?: string;
-    rangeid?: string;
-}
+import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
+import type { ISheetHyperLinkInfo } from '../types/interfaces/i-sheet-hyper-link-info';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();
@@ -58,13 +54,6 @@ function getContainRange(range: IRange, worksheet: Worksheet) {
     return Rectangle.realUnion(range, ...relativeCells);
 }
 
-export interface IHyperLinkInfo<T extends string> {
-    type: T;
-    name: string;
-    url: string;
-    handler: () => void;
-}
-
 export class SheetsHyperLinkResolverService {
     constructor(
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
@@ -76,10 +65,17 @@ export class SheetsHyperLinkResolverService {
     ) { }
 
     private _getURLName(params: ISheetUrlParams) {
-        const { gid, range, rangeid } = params;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const { gid, range, rangeid, unitid } = params;
+        const workbook = unitid ?
+            this._univerInstanceService.getUnit<Workbook>(unitid, UniverInstanceType.UNIVER_SHEET)
+            : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const invalidLink = {
+            type: SheetHyperLinkType.INVALID,
+            name: this._localeService.t('hyperLink.message.refError'),
+        };
+
         if (!workbook) {
-            return null;
+            return invalidLink;
         }
 
         const sheet = gid ? workbook.getSheetBySheetId(gid) : workbook.getActiveSheet();
@@ -89,14 +85,11 @@ export class SheetsHyperLinkResolverService {
             const rangeObj = deserializeRangeWithSheet(range).range;
             if (isValidRange(rangeObj) && range !== ERROR_RANGE) {
                 return {
-                    type: 'range',
+                    type: SheetHyperLinkType.RANGE,
                     name: serializeRangeWithSheet(sheetName, rangeObj),
-                } as const;
+                };
             } else {
-                return {
-                    type: 'range-error',
-                    name: this._localeService.t('hyperLink.message.refError'),
-                } as const;
+                return invalidLink;
             }
         }
 
@@ -104,14 +97,11 @@ export class SheetsHyperLinkResolverService {
             const range = this._definedNamesService.getValueById(workbook.getUnitId(), rangeid);
             if (range) {
                 return {
-                    type: 'defineName',
+                    type: SheetHyperLinkType.DEFINE_NAME,
                     name: range.formulaOrRefString,
-                } as const;
+                };
             } else {
-                return {
-                    type: 'range-error',
-                    name: this._localeService.t('hyperLink.message.refError'),
-                } as const;
+                return invalidLink;
             }
         }
 
@@ -119,18 +109,15 @@ export class SheetsHyperLinkResolverService {
             const worksheet = workbook.getSheetBySheetId(gid);
             if (worksheet) {
                 return {
-                    type: 'sheet',
+                    type: SheetHyperLinkType.SHEET,
                     name: worksheet.getName(),
-                } as const;
+                };
             } else {
-                return {
-                    type: 'sheet-error',
-                    name: this._localeService.t('hyperLink.message.refError'),
-                } as const;
+                return invalidLink;
             }
         }
 
-        return null;
+        return invalidLink;
     }
 
     navigateTo(params: ISheetUrlParams) {
@@ -159,34 +146,37 @@ export class SheetsHyperLinkResolverService {
         this.navigateToSheetById(unitId, gid);
     }
 
-    parseHyperLink(urlStr: string) {
-        if (urlStr?.startsWith('#')) {
+    parseHyperLink(urlStr: string): ISheetHyperLinkInfo {
+        if (urlStr.startsWith('#')) {
             const search = new URLSearchParams(urlStr.slice(1));
             // range, gid, rangeid
             const searchObj: ISheetUrlParams = {
                 gid: search.get('gid') ?? '',
                 range: search.get('range') ?? '',
                 rangeid: search.get('rangeid') ?? '',
+                unitid: search.get('unitid') ?? '',
             };
             const urlInfo = this._getURLName(searchObj);
+
             return {
-                type: urlInfo?.type || 'link',
-                name: urlInfo?.name || urlStr,
+                type: urlInfo.type,
+                name: urlInfo.name,
                 url: urlStr,
                 searchObj,
                 handler: () => {
                     this.navigateTo(searchObj);
                 },
-            } as const;
+            };
         } else {
             return {
-                type: 'outer',
+                type: SheetHyperLinkType.URL,
                 name: urlStr,
                 url: urlStr,
                 handler: () => {
                     this.navigateToOtherWebsite(urlStr);
                 },
-            } as const;
+                searchObj: null,
+            };
         }
     }
 

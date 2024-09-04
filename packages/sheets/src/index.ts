@@ -180,6 +180,7 @@ export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeVerticalCommand,
     AddWorksheetMergeHorizontalCommand,
+    addMergeCellsUtil,
 } from './commands/commands/add-worksheet-merge.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';

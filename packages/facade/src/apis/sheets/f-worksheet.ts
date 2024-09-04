@@ -112,10 +112,10 @@ export class FWorksheet {
         return this._worksheet.getMaxRows();
     }
 
-     /**
-      * get all data validation rules in current sheet
-      * @returns all data validation rules
-      */
+    /**
+     * get all data validation rules in current sheet
+     * @returns all data validation rules
+     */
     getDataValidations(): FDataValidation[] {
         const dataValidationModel = this._injector.get(DataValidationModel);
         return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
@@ -820,6 +820,19 @@ export class FWorksheet {
         });
 
         return this;
+    }
+
+    // #endregion
+
+    // #region merge cells
+
+    /**
+     * Get all merged cells in the current sheet
+     * @returns all merged cells
+     */
+    getMergedRanges(): FRange[] {
+        const snapshot = this._worksheet.getSnapshot();
+        return snapshot.mergeData.map((merge) => this._injector.createInstance(FRange, this._workbook, this._worksheet, merge));
     }
 
     // #endregion

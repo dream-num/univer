@@ -16,7 +16,7 @@
 
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
@@ -83,6 +83,12 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetColVisibleMutation);
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
+
+        // merge cells
+        commandService.registerCommand(AddWorksheetMergeCommand);
+        commandService.registerCommand(AddWorksheetMergeMutation);
+        commandService.registerCommand(RemoveWorksheetMergeCommand);
+        commandService.registerCommand(RemoveWorksheetMergeMutation);
 
         getValueByPosition = (
             startRow: number,

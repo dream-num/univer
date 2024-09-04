@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { BuildTextUtils, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
-import { isSegmentIntersects } from '../basics/selection';
 
 @OnLifecycle(LifecycleStages.Ready, DocCustomRangeController)
 export class DocCustomRangeController extends Disposable {
@@ -48,7 +47,7 @@ export class DocCustomRangeController extends Disposable {
             if (collapsed) {
                 return range.startIndex < startOffset && range.endIndex >= endOffset;
             }
-            return isSegmentIntersects(startOffset, endOffset - 1, range.startIndex, range.endIndex);
+            return BuildTextUtils.range.isIntersects(startOffset, endOffset - 1, range.startIndex, range.endIndex);
         });
 
         if (customRanges?.length) {

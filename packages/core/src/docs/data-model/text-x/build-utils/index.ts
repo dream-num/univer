@@ -39,10 +39,12 @@ export class BuildTextUtils {
         getSelectionWithNoSymbolSide,
         getDeleteSelection,
         getInsertSelection,
-        isIntersects: isSegmentIntersects,
-
         getDeleteActions: getRetainAndDeleteFromReplace,
         getDeleteExculdeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
+    };
+
+    static range = {
+        isIntersects: isSegmentIntersects,
     };
 }
 

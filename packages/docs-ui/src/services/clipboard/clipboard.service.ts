@@ -15,10 +15,10 @@
  */
 
 import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { copyCustomRange, CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
+import { CutContentCommand, getCursorWhenDelete, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
 import type { RectRange, TextRange } from '@univerjs/engine-render';
 import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -221,7 +221,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
 
         // copy custom ranges
-        body.customRanges = body.customRanges?.map(copyCustomRange);
+        body.customRanges = body.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
 
         const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
@@ -372,7 +372,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const deleteRange = getDeleteSelection({ startOffset, endOffset, collapsed }, body);
+            const deleteRange = BuildTextUtils.selection.getDeleteSelection({ startOffset, endOffset, collapsed }, body);
 
             const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
             if (docBody == null) {

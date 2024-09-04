@@ -92,8 +92,31 @@ export class FHooks {
      */
     onRedo = FUndoRedoHooks.afterRedo.bind(this);
 
-    beforeCopy = FClipboardHooks.beforeCopy.bind(this);
-    afterCopy = FClipboardHooks.afterCopy.bind(this);
-    beforePaste = FClipboardHooks.beforePaste.bind(this);
-    afterPaste = FClipboardHooks.afterPaste.bind(this);
+    /**
+     * The onBeforeCopy event is fired before a copy operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeCopy = FClipboardHooks.onBeforeCopy.bind(this);
+
+    /**
+     * The onCopy event is fired after a copy operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCopy = FClipboardHooks.onCopy.bind(this);
+
+    /**
+     * The onBeforePaste event is fired before a paste operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforePaste = FClipboardHooks.onBeforePaste.bind(this);
+
+    /**
+     * The onPaste event is fired after a paste operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onPaste = FClipboardHooks.onPaste.bind(this);
 }

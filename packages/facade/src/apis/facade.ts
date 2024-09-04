@@ -226,7 +226,7 @@ export class FUniver {
      * @returns {FDocument | null} The currently focused Univer document.
      */
     getActiveDocument(): FDocument | null {
-        const document = this._univerInstanceService.getCurrentUniverDocInstance();
+        const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (!document) {
             return null;
         }

@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import { type Injector, IUndoRedoService, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, type Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import { FUniver } from '../../facade';
 import type { FWorksheet } from '../../sheets/f-worksheet';
 import type { FWorkbook } from '../../sheets/f-workbook';
@@ -34,23 +29,14 @@ function createUnitTestBed(): {
     univerAPI: FUniver;
     injector: Injector;
 } {
-    const univer = new Univer({
-        theme: {},
-        locales: {},
-    });
+    const univer = new Univer();
     const injector = univer.__getInjector();
-    univer.registerPlugin(UniverDocsPlugin);
-    univer.registerPlugin(UniverDocsUIPlugin);
     univer.registerPlugin(UniverSheetsPlugin);
     univer.registerPlugin(UniverRenderEnginePlugin);
-    univer.registerPlugin(UniverFormulaEnginePlugin);
-    univer.registerPlugin(UniverUIPlugin, {
-        container: document.createElement('div'),
-        footer: false,
-        header: false,
-    });
-    univer.registerPlugin(UniverSheetsUIPlugin);
-    univer.registerPlugin(UniverSheetsFormulaPlugin);
+
+    const commandService = injector.get(ICommandService);
+    commandService.registerCommand(PasteCommand);
+    commandService.registerCommand(CopyCommand);
 
     const sheet = univer.createUnit(UniverInstanceType.UNIVER_SHEET, {});
     const univerInstanceService = injector.get(IUniverInstanceService);
@@ -78,16 +64,25 @@ describe('Test Clipboard Hooks', () => {
     it('clipboard normal case', async () => {
         const workbook = univerAPI.getActiveWorkbook() as FWorkbook;
         const sheet = workbook.getActiveSheet() as FWorksheet;
-        const text = 'Hello World';
         expect(sheet).not.toBeUndefined();
-        const a1 = sheet.getRange(0, 0);
-        await a1.setValue(text);
-        const b1 = sheet.getRange(1, 0);
-        workbook.setActiveSelection(a1);
+
+        const beforeCopyFn = vi.fn();
+        const afterCopyFn = vi.fn();
+        const beforePasteFn = vi.fn();
+        const afterPasteFn = vi.fn();
+
+        univerAPI.getHooks().onBeforeCopy(beforeCopyFn);
+        univerAPI.getHooks().onCopy(afterCopyFn);
+        univerAPI.getHooks().onBeforePaste(beforePasteFn);
+        univerAPI.getHooks().onPaste(afterPasteFn);
+
         await univerAPI.copy();
-        workbook.setActiveSelection(b1);
         await univerAPI.paste();
-        expect(b1.getValue()).toBe(text);
+
+        expect(beforeCopyFn).toHaveBeenCalledTimes(1);
+        expect(afterCopyFn).toHaveBeenCalledTimes(1);
+        expect(beforePasteFn).toHaveBeenCalledTimes(1);
+        expect(afterPasteFn).toHaveBeenCalledTimes(1);
     });
 });
 

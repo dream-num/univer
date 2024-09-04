@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IUndoRedoItem } from '@univerjs/core';
-import { ICommandService, IUndoRedoService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
+import { ICommandService } from '@univerjs/core';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import type { FHooks } from '../f-hooks';
 
 export const FClipboardHooks = {
 
-    beforeCopy(this: FHooks, callback: () => void): IDisposable {
+    onBeforeCopy(this: FHooks, callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.beforeCommandExecuted((command) => {
@@ -30,7 +30,7 @@ export const FClipboardHooks = {
             }
         });
     },
-    afterCopy(this: FHooks, callback: () => void): IDisposable {
+    onCopy(this: FHooks, callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.onCommandExecuted((command) => {
@@ -40,7 +40,7 @@ export const FClipboardHooks = {
         });
     },
 
-    beforePaste(this: FHooks, callback: () => void): IDisposable {
+    onBeforePaste(this: FHooks, callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.beforeCommandExecuted((command) => {
@@ -49,7 +49,7 @@ export const FClipboardHooks = {
             }
         });
     },
-    afterPaste(this: FHooks, callback: () => void): IDisposable {
+    onPaste(this: FHooks, callback: () => void): IDisposable {
         const commandService = this._injector.get(ICommandService);
 
         return commandService.onCommandExecuted((command) => {

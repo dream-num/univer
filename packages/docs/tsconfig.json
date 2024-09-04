@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src"]
+    "include": ["src", "../core/src/docs/data-model/text-x/build-utils/__test__/custom-range.ts"]
 }

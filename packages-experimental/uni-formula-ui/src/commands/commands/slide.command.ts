@@ -15,9 +15,9 @@
  */
 
 import type { ICommand, IDocumentBody } from '@univerjs/core';
-import { CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream } from '@univerjs/core';
+import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream } from '@univerjs/core';
 import { SLIDE_EDITOR_ID } from '@univerjs/slides-ui';
-import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
+import { replaceSelectionFactory } from '@univerjs/docs';
 import { SlideUIFormulaCacheService } from '../../services/slide-ui-formula-cache.service';
 
 export interface IAddSlideUniFormulaCommandParams {
@@ -57,7 +57,7 @@ export const AddSlideUniFormulaCommand: ICommand<IAddSlideUniFormulaCommandParam
         const insertCustomRangeMutation = replaceSelectionFactory(accessor, {
             unitId: SLIDE_EDITOR_ID,
             body,
-            selection: makeSelection(startIndex, startIndex + 1),
+            selection: BuildTextUtils.selection.makeSelection(startIndex, startIndex + 1),
         });
 
         // NOTE: For slides, the process to update a element's content is pretty different from docs.

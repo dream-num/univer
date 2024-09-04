@@ -25,6 +25,7 @@ export { TextSelectionManagerService, serializeDocRange } from './services/text-
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { IMEInputManagerService } from './services/ime-input-manager.service';
 export { replaceSelectionFactory } from './basics/replace';
+export { getSelectionText } from './basics/selection';
 // #region - all commands
 
 export { BreakLineCommand } from './commands/commands/break-line.command';

@@ -15,8 +15,7 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
-import { makeSelection } from '@univerjs/docs';
+import { BuildTextUtils, Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IShortcutItem } from '@univerjs/ui';
@@ -104,7 +103,7 @@ export class UniFormulaPopupService extends Disposable {
             ? this._uniFormulaService.getDocFormula(unitId, position.rangeId)?.f ?? '='
             : '=';
 
-        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(makeSelection(startIndex), {
+        const disposable = this._docCanvasPopupManagerService.attachPopupToRange(BuildTextUtils.selection.makeSelection(startIndex), {
             componentKey: DOC_FORMULA_POPUP_KEY,
             onClickOutside: () => this.closePopup(), // user may update ref range selections
             direction: 'top',

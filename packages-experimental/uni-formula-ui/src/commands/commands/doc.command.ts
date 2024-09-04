@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
-import { CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
-import { makeSelection, replaceSelectionFactory } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
+import { replaceSelectionFactory } from '@univerjs/docs';
 import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from '@univerjs/uni-formula';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '@univerjs/uni-formula';
 
@@ -53,7 +53,7 @@ export const AddDocUniFormulaCommand: ICommand<IAddDocUniFormulaCommandParams> =
         const insertCustomRangeMutation = replaceSelectionFactory(accessor, {
             unitId,
             body,
-            selection: makeSelection(startIndex, startIndex + 1),
+            selection: BuildTextUtils.selection.makeSelection(startIndex, startIndex + 1),
         });
 
         if (insertCustomRangeMutation) {

@@ -171,7 +171,7 @@ function RectPopup(props: IRectPopupProps) {
         <section
             ref={nodeRef}
             style={style}
-            className={styles.popupAbsolute}
+            className={styles.popupFixed}
             onPointerDown={(e) => e.stopPropagation()}
         >
             <RectPopupContext.Provider value={anchorRect}>

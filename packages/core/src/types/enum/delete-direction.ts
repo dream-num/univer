@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from './document-data-model';
-export * from './preset-list-type';
-export * from './types';
-export * from './text-x/build-utils';
+export enum DeleteDirection {
+    LEFT,
+    RIGHT,
+}

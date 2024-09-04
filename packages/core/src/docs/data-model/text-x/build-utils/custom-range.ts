@@ -104,3 +104,4 @@ export function excludePonintsFromRange(range: [number, number], points: number[
 
     return newRanges;
 }
+

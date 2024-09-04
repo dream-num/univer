@@ -15,14 +15,13 @@
  */
 
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getRichTextEditPath } from '../util';
-import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 
 interface IReplaceContentCommandParams {
     unitId: string;
@@ -194,7 +193,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, '', 0, false));
+        textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, body, '', 0, false));
         // insert
         textX.push({
             t: TextXActionType.INSERT,

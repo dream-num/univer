@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
-import { DataStreamTreeTokenType } from '@univerjs/core';
-import { DeleteDirection } from '../types/enums/delete-direction';
-import { isCustomRangeSplitSymbol } from './custom-range';
+import type { IDeleteAction, IDocumentBody, IRetainAction, ITextRange, Nullable } from '@univerjs/core';
+import { DataStreamTreeTokenType, TextXActionType } from '@univerjs/core';
+import { DeleteDirection } from '../../../../types/enum/delete-direction';
+import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -237,6 +237,7 @@ const tags = [
     DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
 
 ];
+
 export function getSelectionText(dataStream: string, start: number, end: number) {
     const text = dataStream.slice(start, end);
     return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
@@ -246,3 +247,78 @@ export function isSegmentIntersects(start: number, end: number, start2: number, 
     return Math.max(start, start2) <= Math.min(end, end2);
 }
 
+export function getRetainAndDeleteFromReplace(
+    range: ITextRange,
+    segmentId: string = '',
+    memoryCursor: number,
+    body: IDocumentBody
+) {
+    const { startOffset, endOffset } = range;
+    const dos: Array<IRetainAction | IDeleteAction> = [];
+    const textStart = startOffset - memoryCursor;
+    const textEnd = endOffset - memoryCursor;
+    const dataStream = body.dataStream;
+    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
+    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
+    const retainPoints = new Set<number>();
+    relativeCustomRanges?.forEach((range) => {
+        if (toDeleteRanges.has(range)) {
+            return;
+        }
+
+        if (range.startIndex - memoryCursor >= textStart &&
+            range.startIndex - memoryCursor <= textEnd &&
+            range.endIndex - memoryCursor > textEnd) {
+            retainPoints.add(range.startIndex);
+        }
+        if (range.endIndex - memoryCursor >= textStart &&
+            range.endIndex - memoryCursor <= textEnd &&
+            range.startIndex < textStart) {
+            retainPoints.add(range.endIndex);
+        }
+    });
+
+    if (textStart > 0) {
+        dos.push({
+            t: TextXActionType.RETAIN,
+            len: textStart,
+            segmentId,
+        });
+    }
+
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
+    let cursor = textStart;
+    sortedRetains.forEach((pos) => {
+        const len = pos - cursor;
+        if (len > 0) {
+            dos.push({
+                t: TextXActionType.DELETE,
+                len,
+                line: 0,
+                segmentId,
+            });
+        }
+        dos.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId,
+        });
+        cursor = pos + 1;
+    });
+
+    if (cursor < textEnd) {
+        dos.push({
+            t: TextXActionType.DELETE,
+            len: textEnd - cursor,
+            line: 0,
+            segmentId,
+        });
+        cursor = textEnd + 1;
+    }
+
+    return {
+        dos,
+        cursor,
+        retain: retainPoints.size,
+    };
+}

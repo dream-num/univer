@@ -25,6 +25,7 @@ import type {
     Nullable,
 } from '@univerjs/core';
 import {
+    BuildTextUtils,
     CommandType,
     ICommandService,
     IUniverInstanceService,
@@ -36,12 +37,10 @@ import {
 } from '@univerjs/core';
 import type { DocumentViewModel, ITextRangeWithStyle, RectRange, TextRange } from '@univerjs/engine-render';
 
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
-import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
 export function getCustomBlockIdsInSelections(body: IDocumentBody, selections: ITextRange[]): string[] {
@@ -189,7 +188,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
+                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor, originBody);
                 textX.push(...dos);
             }
 
@@ -256,7 +255,7 @@ function getCutActionsFromTextRanges(
                 segmentId,
             });
         } else {
-            textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor, false));
+            textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
         }
 
         memoryCursor.reset();

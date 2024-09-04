@@ -23,14 +23,11 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { getInsertSelection } from '../../basics/selection';
 import { getRichTextEditPath } from '../util';
 import { DeleteDirection } from '../../types/enums/delete-direction';
 
@@ -69,7 +66,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (!originBody) {
             return false;
         }
-        const actualRange = getInsertSelection(range, originBody);
+        const actualRange = BuildTextUtils.selection.getInsertSelection(range, originBody);
         const { startOffset, collapsed } = actualRange;
         const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [
@@ -103,7 +100,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
+            const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
             textX.push(...dos);
             doMutation.params.textRanges = [{
                 startOffset: startOffset + cursorMove + retain,
@@ -161,8 +158,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const dataStream = body.dataStream;
         const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
         const end = start + len - 1;
-        const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
-        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(start, len, customRange, dataStream));
+        const relativeCustomRanges = body.customRanges?.filter((customRange) => BuildTextUtils.customRange.isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
+        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => BuildTextUtils.customRange.shouldDeleteCustomRange(start, len, customRange, dataStream));
         const deleteIndexes: number[] = [];
         for (let i = 0; i < len; i++) {
             deleteIndexes.push(start + i);

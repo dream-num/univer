@@ -14,146 +14,15 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
-import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, TextX } from '@univerjs/core';
+import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 import { getRichTextEditPath } from '../commands/util';
-import { getSelectionForAddCustomRange, normalizeSelection } from './selection';
-import { excludePonintsFromRange } from './custom-range';
 
-interface IAddCustomRangeParamPure {
-    range: ITextRange;
-    segmentId?: string;
-    rangeId: string;
-    rangeType: CustomRangeType;
-    properties?: Record<string, any>;
-    wholeEntity?: boolean;
-    body: IDocumentBody;
-}
-
-interface IAddCustomRangeParam extends IAddCustomRangeParamPure {
+interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
     unitId: string;
-}
-
-// eslint-disable-next-line max-lines-per-function
-export function addCustomRangeTextX(param: IAddCustomRangeParamPure) {
-    const { range, rangeId, rangeType, segmentId, wholeEntity, properties, body } = param;
-    const actualRange = getSelectionForAddCustomRange(range, body);
-    if (!actualRange) {
-        return false;
-    }
-
-    if (!body) {
-        return false;
-    }
-
-    const { startOffset, endOffset } = actualRange;
-
-    const customRanges = body.customRanges ?? [];
-    let cursor = 0;
-    const textX = new TextX();
-
-    // eslint-disable-next-line max-lines-per-function
-    const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
-        const relativeCustomRanges = [];
-        for (let i = 0, len = customRanges.length; i < len; i++) {
-            const customRange = customRanges[i];
-            // intersect
-            if (customRange.rangeType === rangeType && Math.max(customRange.startIndex, startIndex) <= Math.min(customRange.endIndex, endIndex)) {
-                relativeCustomRanges.push({ ...customRange });
-            }
-
-            // optimize
-            if (customRange.startIndex > endIndex) {
-                break;
-            }
-        }
-        const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort((pre, aft) => pre - aft);
-
-        const range = deletes.length
-            ? {
-                startOffset: Math.min(deletes[0], startIndex),
-                endOffset: Math.max(deletes[deletes.length - 1] + 1, endIndex + 1),
-            }
-            : {
-                startOffset: startIndex,
-                endOffset: endIndex + 1,
-            };
-
-        if (range.startOffset !== cursor) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: range.startOffset - cursor,
-                segmentId,
-            });
-            cursor = range.startOffset;
-        }
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
-            },
-            len: 1,
-            line: 0,
-            segmentId,
-        });
-
-        deletes.forEach((index) => {
-            if (index !== cursor) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: index - cursor,
-                    segmentId,
-                });
-                cursor = index;
-            }
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId,
-            });
-            cursor++;
-        });
-
-        if (cursor !== range.endOffset) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: range.endOffset - cursor,
-                segmentId,
-            });
-            cursor = range.endOffset;
-        }
-
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
-                customRanges: [
-                    {
-                        rangeId: index ? `${rangeId}-${index}` : rangeId,
-                        rangeType,
-                        startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
-                        endIndex: 0,
-                        wholeEntity,
-                        properties: {
-                            ...properties,
-                        },
-                    },
-                ],
-            },
-            len: 1,
-            line: 0,
-            segmentId,
-        });
-    };
-    const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
-    const newRanges = excludePonintsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
-    newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
-
-    return textX;
 }
 
 export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRangeParam, body: IDocumentBody) {
@@ -173,7 +42,7 @@ export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRang
         },
     };
     const jsonX = JSONX.getInstance();
-    const textX = addCustomRangeTextX({ ...param, body });
+    const textX = BuildTextUtils.customRange.add({ ...param, body });
     if (!textX) {
         return false;
     }
@@ -210,9 +79,9 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     if (!body) {
         return false;
     }
-    const { startOffset, endOffset } = normalizeSelection(selection);
+    const { startOffset, endOffset } = BuildTextUtils.selection.normalizeSelection(selection);
 
-    const textX = addCustomRangeTextX({
+    const textX = BuildTextUtils.customRange.add({
         range: { startOffset, endOffset, collapsed: startOffset === endOffset },
         rangeId,
         rangeType,
@@ -239,58 +108,6 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     return doMutation;
 }
 
-export interface IDeleteCustomRangeParam {
-    rangeId: string;
-    segmentId?: string;
-    documentDataModel: DocumentDataModel;
-}
-
-export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { rangeId, segmentId, documentDataModel } = params;
-
-    const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
-    if (!range) {
-        return false;
-    }
-
-    const { startIndex, endIndex } = range;
-    const textX = new TextX();
-
-    const len = endIndex - startIndex + 1;
-
-    if (startIndex > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: startIndex,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
-        segmentId,
-        line: 0,
-    });
-
-    if (len - 2 > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: len - 2,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
-        segmentId,
-        line: 0,
-    });
-
-    return textX;
-}
-
 export function deleteCustomRangeFactory(accessor: IAccessor, params: {
     rangeId: string;
     segmentId?: string;
@@ -315,7 +132,7 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: {
     };
 
     const jsonX = JSONX.getInstance();
-    const textX = deleteCustomRangeTextX(accessor, {
+    const textX = BuildTextUtils.customRange.delete(accessor, {
         documentDataModel,
         rangeId: params.rangeId,
     });

@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
-import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getCustomRangesInterestsWithRange, TextSelectionManagerService } from '@univerjs/docs';
+import { BuildTextUtils, CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
@@ -50,7 +50,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
+    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
     // can't insert hyperlink in range contains other custom ranges
     return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };

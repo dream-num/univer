@@ -16,6 +16,7 @@
 
 import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
+    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
     generateRandomId,
@@ -37,11 +38,12 @@ import type { ITextActiveRange } from '../../services/text-selection-manager.ser
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getDeleteSelection } from '../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { DeleteDirection } from '../../types/enums/delete-direction';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
+
+const getDeleteSelection = BuildTextUtils.selection.getDeleteSelection;
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;

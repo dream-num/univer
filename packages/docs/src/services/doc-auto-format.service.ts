@@ -15,8 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagraphRange, ITextRange, Nullable } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { getCustomRangesInterestsWithRange } from '../basics/custom-range';
+import { BuildTextUtils, Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { ITextActiveRange } from './text-selection-manager.service';
 import { TextSelectionManagerService } from './text-selection-manager.service';
 
@@ -122,7 +121,7 @@ export class DocAutoFormatService extends Disposable {
                 selection,
                 isBody: !selection.segmentId,
                 paragraphs: getParagraphsInRange(selection, doc.getBody()?.paragraphs ?? []),
-                customRanges: getCustomRangesInterestsWithRange(selection, doc.getBody()?.customRanges ?? []),
+                customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc.getBody()?.customRanges ?? []),
                 commandId: id,
                 commandParams: params,
             };

@@ -15,19 +15,16 @@
  */
 
 export { getParagraphsInRange, getParagraphsInRanges, findNearestSectionBreak } from './commands/commands/list.command';
-export { replaceSelectionFactory } from './basics/replace';
-export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection, isSegmentIntersects } from './basics/selection';
 export { hasParagraphInTable } from './basics/paragraph';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
-
 export { UniverDocsPlugin } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService, serializeDocRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';
 export { IMEInputManagerService } from './services/ime-input-manager.service';
-
+export { replaceSelectionFactory } from './basics/replace';
 // #region - all commands
 
 export { BreakLineCommand } from './commands/commands/break-line.command';
@@ -92,12 +89,10 @@ export {
 
 // #endregion
 
-export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
 export { getRichTextEditPath } from './commands/util';
 export { getPlainTextFormDocument, getPlainTextFormBody, getPlainText } from './basics/plain-text';
-export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory, deleteCustomRangeTextX, addCustomRangeTextX } from './basics/custom-range-factory';
+export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
-export { getCustomRangesInterestsWithRange, copyCustomRange } from './basics/custom-range';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocAutoFormatService } from './services/doc-auto-format.service';

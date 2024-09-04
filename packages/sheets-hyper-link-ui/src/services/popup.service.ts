@@ -18,10 +18,10 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
-import { CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import { getCustomRangesInterestsWithRange, getPlainText, getPlainTextFormBody, getPlainTextFormDocument, TextSelectionManagerService } from '@univerjs/docs';
+import { getPlainText, getPlainTextFormBody, getPlainTextFormDocument, TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -196,7 +196,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                     label: getPlainTextFormBody(body),
                 };
             }
-            const links = getCustomRangesInterestsWithRange(textRange, body.customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK) ?? []);
+            const links = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(textRange, body.customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK) ?? []);
             let start = textRange.startOffset;
             let end = textRange.endOffset;
             links.forEach((link) => {

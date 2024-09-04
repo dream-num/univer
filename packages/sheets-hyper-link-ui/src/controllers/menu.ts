@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { DocumentDataModel, IAccessor, ITextRange, Workbook } from '@univerjs/core';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { map, mergeMap, Observable } from 'rxjs';
-import { getCustomRangesInterestsWithRange, TextSelectionManagerService } from '@univerjs/docs';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 
 const getLinkDisable$ = (accessor: IAccessor) => {
@@ -95,7 +95,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    const insertCustomRanges = getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
+    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
     // can't insert hyperlink in range contains other custom ranges
     return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };

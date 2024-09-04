@@ -15,14 +15,12 @@
  */
 
 import type { ICommand, ICommandInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { IMEInputManagerService } from '../../services/ime-input-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
-import { getInsertSelection } from '../../basics/selection';
 import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
@@ -61,7 +59,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             return false;
         }
 
-        const insertRange = getInsertSelection(previousActiveRange, body);
+        const insertRange = BuildTextUtils.selection.getInsertSelection(previousActiveRange, body);
         Object.assign(previousActiveRange, insertRange);
         const { startOffset } = previousActiveRange;
 
@@ -90,7 +88,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         let memoryCursor = 0;
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const { dos, retain, cursor } = getRetainAndDeleteFromReplace(previousActiveRange, segmentId, 0, body);
+            const { dos, retain, cursor } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0, body);
             textX.push(...dos);
             doMutation.params!.textRanges = [{
                 startOffset: startOffset + len + retain,

@@ -15,10 +15,8 @@
  */
 
 import type { ICommand, IParagraph } from '@univerjs/core';
-import { BooleanNumber, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import { BooleanNumber, BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import { getInsertSelection } from '../../basics/selection';
-import { copyCustomRange } from '../../basics/custom-range';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -95,14 +93,14 @@ export const BreakLineCommand: ICommand = {
         }
 
         const unitId = docDataModel.getUnitId();
-        const { startOffset, endOffset } = getInsertSelection(activeTextRange, body);
+        const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
         // line breaks to 2
         if (prevParagraph && prevParagraph.startIndex > endOffset) {
             const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
-            bodyAfter.customRanges = bodyAfter.customRanges?.map(copyCustomRange);
+            bodyAfter.customRanges = bodyAfter.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
 
             const deleteRange = {
                 startOffset,

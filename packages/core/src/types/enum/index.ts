@@ -31,3 +31,4 @@ export * from './sheet-types';
 export * from './text-style';
 export * from './theme-color-type';
 export * from './prst-geom-type';
+export * from './delete-direction';

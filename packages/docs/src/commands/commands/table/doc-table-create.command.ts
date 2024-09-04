@@ -15,9 +15,9 @@
  */
 
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { generateParagraphs, getCommandSkeleton, getInsertSelection, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import { generateParagraphs, getCommandSkeleton, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { genEmptyTable, genTableSource } from './table';
 
@@ -34,7 +34,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
     id: CreateDocTableCommandId,
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor, params: ICreateDocTableCommandParams) => {
         const { rowCount, colCount } = params;
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -59,7 +59,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         if (skeleton == null) {
             return false;
         }
-        const { startOffset } = getInsertSelection(activeRange, body);
+        const { startOffset } = BuildTextUtils.selection.getInsertSelection(activeRange, body);
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

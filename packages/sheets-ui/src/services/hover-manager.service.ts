@@ -57,7 +57,7 @@ function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
             paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
             break;
         case VerticalAlign.MIDDLE:
-            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startX - height) / 2;
+            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startY - height) / 2;
             break;
         default:
             break;
@@ -209,12 +209,6 @@ export class HoverManagerService extends Disposable {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
         this._currentCell$.next(activeCell);
     }
-
-    // triggerMouseLeave(unitId: string) {
-    //     if (this._currentCell$.getValue()?.unitId === unitId) {
-    //         this._currentCell$.next(null);
-    //     }
-    // }
 
     triggerClick(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);

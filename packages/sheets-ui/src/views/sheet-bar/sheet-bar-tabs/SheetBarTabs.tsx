@@ -32,12 +32,11 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { IConfirmService, Menu, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, Menu, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
-import { SheetMenuPosition } from '../../../controllers/menu/menu';
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { IEditorBridgeService } from '../../../services/editor-bridge.service';
 import { useActiveWorkbook } from '../../../components/hook';
@@ -409,7 +408,7 @@ export function SheetBarTabs() {
             trigger={['contextMenu']}
             overlay={(
                 <Menu
-                    menuType={SheetMenuPosition.SHEET_BAR}
+                    menuType={ContextMenuPosition.FOOTER_TABS}
                     onOptionSelect={(params) => {
                         const { label: id, value, commandId } = params;
                         commandService.executeCommand(commandId ?? id as string, { value, subUnitId: activeKey });

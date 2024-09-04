@@ -22,7 +22,7 @@ export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
 
-export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
+export { UniverDocsPlugin } from './doc-plugin';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { TextSelectionManagerService, serializeDocRange } from './services/text-selection-manager.service';
 export { DocStateChangeManagerService, type IDocStateChangeParams } from './services/doc-state-change-manager.service';

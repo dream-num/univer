@@ -19,7 +19,7 @@ import { AuthzIoLocalService, DisposableCollection, IAuthzIoService, ICommandSer
 import { ExclusiveRangeService, IExclusiveRangeService, RangeProtectionRuleModel, RefRangeService, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { IMenuService, IPlatformService, IShortcutService, MenuService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { IMenu2Service, IPlatformService, IShortcutService, Menu2Service, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../../commands/commands/sheets-filter.command';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
@@ -68,7 +68,7 @@ function createSheetsFilterMenuTestBed() {
             injector.add([RefRangeService]);
             injector.add([SheetsSelectionsService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);
-            injector.add([IMenuService, { useClass: MenuService }]);
+            injector.add([IMenu2Service, { useClass: Menu2Service }]);
             injector.add([WorksheetPermissionService]);
             injector.add([WorksheetProtectionPointModel]);
             injector.add([WorkbookPermissionService]);

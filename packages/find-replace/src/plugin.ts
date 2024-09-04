@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Plugin } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@univerjs/core';
 
-import type { IUniverFindReplaceConfig } from './controllers/find-replace.controller';
-import { DefaultFindReplaceConfig, FindReplaceController } from './controllers/find-replace.controller';
+import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
+import type { IUniverFindReplaceConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'FIND_REPLACE_PLUGIN';
 
@@ -27,23 +28,20 @@ export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private readonly _config: Partial<IUniverFindReplaceConfig> = {},
+        private readonly _config: Partial<IUniverFindReplaceConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultFindReplaceConfig, this._config);
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
-            [
-                FindReplaceController,
-                {
-                    useFactory: () => this._injector.createInstance(FindReplaceController, this._config),
-                },
-            ],
+            [FindReplaceController],
             [IFindReplaceService, { useClass: FindReplaceService }],
         ] as Dependency[]).forEach(
             (d) => {

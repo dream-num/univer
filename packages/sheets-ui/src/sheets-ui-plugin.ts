@@ -15,7 +15,7 @@
  */
 
 import type { Dependency, Workbook } from '@univerjs/core';
-import { DependentOn, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -33,8 +33,7 @@ import { HeaderResizeRenderController } from './controllers/render-controllers/h
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SheetsRenderService } from './services/sheets-render.service';
-import type { IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
-import { DefaultSheetUiConfig, SheetUIController } from './controllers/sheet-ui.controller';
+import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -83,6 +82,8 @@ import { MoveRangeRenderController } from './controllers/move-range.controller';
 import { ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
 import { SheetScrollManagerService } from './services/scroll-manager.service';
 import { SelectAllService } from './services/select-all/select-all.service';
+import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -91,14 +92,21 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     /** @ignore */
     constructor(
-        private readonly _config: Partial<IUniverSheetsUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetUiConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -126,9 +134,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [FormulaEditorController],
             [SheetClipboardController],
             [SheetsRenderService],
-            [SheetUIController, {
-                useFactory: (): SheetUIController => this._injector.createInstance(SheetUIController, this._config),
-            }],
+            [SheetUIController],
             [StatusBarController],
             [AutoFillController],
             [FormatPainterController],

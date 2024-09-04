@@ -21,7 +21,7 @@ import { getColor } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
-import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces.ts';
+import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';

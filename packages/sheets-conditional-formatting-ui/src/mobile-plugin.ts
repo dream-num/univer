@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-import { DependentOn, ICommandService, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import {
+    DependentOn,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    Plugin,
+    UniverInstanceType,
+} from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
@@ -35,11 +43,11 @@ import { AddCfCommand } from './commands/commands/add-cf.command';
 
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
-import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/cf.menu.controller';
-import { DefaultSheetConditionalFormattingUiConfig } from './controllers/cf.menu.controller';
 import { ConditionalFormattingI18nController } from './controllers/cf.i18n.controller';
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingPermissionController } from './controllers/cf.permission.controller';
+import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
@@ -47,12 +55,19 @@ export class UniverSheetsConditionalFormattingMobileUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsConditionalFormattingUIConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(ICommandService) private _commandService: ICommandService
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
-        this._config = Tools.deepMerge({}, DefaultSheetConditionalFormattingUiConfig, this._config);
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         this._initCommand();
 

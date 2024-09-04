@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, Tools } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 
-import type { IUniverDebuggerConfig } from './controllers/debugger.controller';
-import { DebuggerController, DefaultDebuggerConfig } from './controllers/debugger.controller';
+import { DebuggerController } from './controllers/debugger.controller';
 import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
+import type { IUniverDebuggerConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'DEBUGGER_PLUGIN';
@@ -28,12 +29,18 @@ export class UniverDebuggerPlugin extends Plugin {
     private _debuggerController!: DebuggerController;
 
     constructor(
-        private readonly _config: Partial<IUniverDebuggerConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverDebuggerConfig> = defaultPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultDebuggerConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -42,12 +49,7 @@ export class UniverDebuggerPlugin extends Plugin {
             [E2EMemoryController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
-        this._injector.add([
-            DebuggerController,
-            {
-                useFactory: () => this._injector.createInstance(DebuggerController, this._config),
-            },
-        ]);
+        this._injector.add([DebuggerController]);
     }
 
     getDebuggerController() {

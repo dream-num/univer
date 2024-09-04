@@ -15,43 +15,24 @@
  */
 
 import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenu2Service } from '@univerjs/ui';
 
-import { BehaviorSubject } from 'rxjs';
-import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
-import type { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
-
-export interface IUniverSheetsNumfmtConfig {
-    menu: MenuConfig;
-}
-
-export const DefaultSheetNumfmtConfig = {};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtMenuController)
 export class NumfmtMenuController extends Disposable {
-    private _currencySymbol$ = new BehaviorSubject<keyof typeof countryCurrencyMap>('US');
-    public readonly currencySymbol$ = this._currencySymbol$.asObservable();
-
     constructor(
-        private readonly _config: Partial<IUniverSheetsNumfmtConfig>,
         @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @Inject(IMenuService) private _menuService: IMenuService
-
+        @IMenu2Service private readonly _menu2Service: IMenu2Service
     ) {
         super();
         this._initMenu();
     }
 
     private _initMenu() {
-        const { menu = {} } = this._config;
-
-        [PercentMenuItem, AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
-            .forEach((factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(factory(this._injector), menu));
-            });
+        this._menu2Service.mergeMenu(menuSchema);
 
         this.disposeWithMe((this._componentManager.register(MORE_NUMFMT_TYPE_KEY, MoreNumfmtType)));
         this.disposeWithMe((this._componentManager.register(OPTIONS_KEY, Options)));

@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, RANGE_TYPE, Tools } from '@univerjs/core';
 import { type IPointerEvent, type IRenderContext, type IRenderModule, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { type ISelectionWithStyle, SheetsSelectionsService } from '@univerjs/sheets';
-import { IContextMenuService, ILayoutService, MenuPosition } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService, ILayoutService } from '@univerjs/ui';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 
@@ -108,7 +108,7 @@ export class SheetContextMenuMobileRenderController extends Disposable implement
                 clientY,
                 preventDefault: () => {},
                 stopPropagation: () => {},
-            } as unknown as IPointerEvent, MenuPosition.CONTEXT_MENU);
+            } as unknown as IPointerEvent, ContextMenuPosition.MAIN_AREA);
         }));
     }
 }

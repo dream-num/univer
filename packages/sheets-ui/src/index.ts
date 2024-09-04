@@ -24,7 +24,7 @@ export { SheetsRenderService } from './services/sheets-render.service';
 export { SHEET_VIEWPORT_KEY as VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
-export { SheetUIController, type IUniverSheetsUIConfig } from './controllers/sheet-ui.controller';
+export { SheetUIController } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -99,6 +99,8 @@ export { SheetPermissionInitController } from './controllers/permission/sheet-pe
 
 export { IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+
+export { menuSchema } from './controllers/menu.schema';
 
 // #region - all commands
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, switchMap } from 'rxjs';
 import type { MenuConfig, MenuItemConfig } from '../services/menu/menu';
 
 export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig: MenuItemConfig | null): T {
@@ -43,10 +43,16 @@ export function mergeMenuConfigs<T = MenuConfig>(baseConfig: T, additionalConfig
 
 // Helper function to update reactive properties
 function updateReactiveProperty<T, K extends keyof T>(baseConfig: T, key: K, value: any): void {
-    if (value !== undefined && baseConfig[key]) {
-        const subject$ = (baseConfig[key] as any).pipe(
-            switchMap(() => new BehaviorSubject(value))
-        );
-        baseConfig[key] = subject$;
+    if (value !== undefined) {
+        if (baseConfig[key]) {
+            const subject$ = (baseConfig[key] as any).pipe(
+                switchMap(() => new BehaviorSubject(value))
+            );
+            baseConfig[key] = subject$;
+        } else {
+            baseConfig[key] = new Observable((subscriber) => {
+                subscriber.next(value);
+            }) as any;
+        }
     }
 }

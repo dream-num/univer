@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { connectInjector, Disposable, IConfigService, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
+import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
@@ -26,7 +26,10 @@ import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.servi
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
-import { type IUniverUIConfig, type IWorkbenchOptions, UI_CONFIG_KEY } from './ui.controller';
+import type { IUniverUIConfig } from '../config.schema';
+import { IMenu2Service } from '../../services/menu/menu2.service';
+import { menuSchema } from '../menus/menu.schema';
+import type { IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -40,15 +43,19 @@ export class DesktopUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IConfigService private readonly _configService: IConfigService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
 
-        this._configService.setConfig(UI_CONFIG_KEY, this._config);
         this._initBuiltinComponents();
+        this._initMenus();
 
         Promise.resolve().then(() => this._bootstrapWorkbench());
+    }
+
+    private _initMenus(): void {
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _bootstrapWorkbench(): void {

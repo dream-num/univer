@@ -17,15 +17,15 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
-    uiToolbar: {
+    ribbon: {
         start: 'Начало',
         insert: 'Вставка',
         formulas: 'Формулы',
         data: 'Данные',
         view: 'Вид',
         others: 'Другие',
+        more: 'Больше',
     },
-    more: 'Больше',
     fontFamily: {
         TimesNewRoman: 'Times New Roman',
         Arial: 'Arial',

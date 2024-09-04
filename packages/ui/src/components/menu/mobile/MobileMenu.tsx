@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { makeArray, useDependency, useObservable } from '@univerjs/core';
+import React, { useMemo } from 'react';
+import { useDependency, useObservable } from '@univerjs/core';
 import { clsx } from 'clsx';
 import type { IBaseMenuProps } from '../desktop/Menu';
-import { IMenuService } from '../../../services/menu/menu.service';
 import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueType } from '../../../services/menu/menu';
 import { MenuItemType } from '../../../services/menu/menu';
 
 import { CustomLabel } from '../../custom-label';
+import type { IMenu2Schema } from '../../../services/menu/menu2.service';
+import { IMenu2Service } from '../../../services/menu/menu2.service';
 import styles from './index.module.less';
 
 /**
@@ -30,14 +31,29 @@ import styles from './index.module.less';
  */
 export function MobileMenu(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-    const menuService = useDependency(IMenuService);
+    const menu2Service = useDependency(IMenu2Service);
 
     if (!menuType) {
         return null;
     }
 
     // There is no submenu on mobile devices, so if there are sub menu items, we should flat them.
-    const flattedMenuItems = makeArray<string>(menuType).map(menuService.getMenuItems.bind(menuService)).flat();
+    const flattedMenuItems = useMemo(() => {
+        const menuItems = menu2Service.getMenuByPositionKey(menuType);
+        // 递归把所有的子菜单项都展开
+
+        function flatMenuItems(items: IMenu2Schema[]): IMenu2Schema[] {
+            return items.reduce((acc, item) => {
+                if (item.children) {
+                    return [...acc, ...flatMenuItems(item.children)];
+                }
+                return [...acc, item];
+            }, [] as IMenu2Schema[]);
+        }
+
+        return flatMenuItems(menuItems);
+    }, [menuType]);
+
     return (
         <div
             className={styles.mobileMenuContainer}
@@ -45,11 +61,11 @@ export function MobileMenu(props: IBaseMenuProps) {
                 gridTemplateColumns: `repeat(${Math.min(2, flattedMenuItems.length)}, 48px)`,
             }}
         >
-            {flattedMenuItems.map((item) => (
+            {flattedMenuItems.map((item) => item.item && (
                 <MobileMenuItem
-                    key={item.id}
-                    menuItem={item}
-                    onClick={(object: Partial<IValueOption>) => onOptionSelect?.({ value: '', label: item.id, ...object })}
+                    key={item.key}
+                    menuItem={item.item}
+                    onClick={(object: Partial<IValueOption>) => onOptionSelect?.({ value: '', label: item.key, ...object })}
                 />
             ))}
         </div>

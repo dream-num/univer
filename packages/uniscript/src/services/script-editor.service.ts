@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '@univerjs/core';
+import { Disposable, IConfigService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import type { editor } from 'monaco-editor';
-import type { IUniverUniscriptConfig } from '../controllers/uniscript.controller';
+import type { IUniverUniscriptConfig } from '../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 /**
  * This service is for loading monaco editor and its resources. It also holds the
@@ -26,7 +27,7 @@ import type { IUniverUniscriptConfig } from '../controllers/uniscript.controller
 export class ScriptEditorService extends Disposable {
     private _editorInstance: editor.IStandaloneCodeEditor | null = null;
 
-    constructor(private readonly _config: Partial<IUniverUniscriptConfig>) {
+    constructor(@IConfigService private readonly _configService: IConfigService) {
         super();
     }
 
@@ -41,8 +42,10 @@ export class ScriptEditorService extends Disposable {
 
     requireVscodeEditor(): void {
         if (!window.MonacoEnvironment) {
+            const config = this._configService.getConfig<IUniverUniscriptConfig>(PLUGIN_CONFIG_KEY);
+
             window.MonacoEnvironment = {
-                getWorkerUrl: this._config.getWorkerUrl,
+                getWorkerUrl: config?.getWorkerUrl,
             };
         }
     }

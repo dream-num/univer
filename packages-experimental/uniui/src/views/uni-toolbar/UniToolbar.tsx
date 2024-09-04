@@ -15,7 +15,7 @@
  */
 
 import { IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import { MenuPosition, ToolbarItem, useToolbarGroups } from '@univerjs/ui';
+import { IMenu2Service, ToolbarItem } from '@univerjs/ui';
 import type { ComponentType } from 'react';
 import React from 'react';
 import { useWorkbooks } from '@univerjs/sheets-ui';
@@ -23,15 +23,6 @@ import { UNI_MENU_POSITIONS } from '../../controllers/menu';
 import { UniToolbarService } from '../../services/toolbar/uni-toolbar-service';
 import styles from './index.module.less';
 import { UniFormulaBar } from './UniFormulaBar';
-
-const MENU_POSITIONS = [
-    MenuPosition.TOOLBAR_START,
-    MenuPosition.TOOLBAR_INSERT,
-    MenuPosition.TOOLBAR_FORMULAS,
-    MenuPosition.TOOLBAR_DATA,
-    MenuPosition.TOOLBAR_VIEW,
-    UNI_MENU_POSITIONS.TOOLBAR_MAIN,
-];
 
 export interface IToolbarProps {
     headerMenuComponents?: Set<ComponentType>;
@@ -41,35 +32,38 @@ export function UniToolbar() {
     const uniToolbarService = useDependency(UniToolbarService);
     const instanceService = useDependency(IUniverInstanceService);
     const focusedUnit = useObservable(instanceService.focused$);
+    const menu2Service = useDependency(IMenu2Service);
 
     const type = focusedUnit ? (instanceService.getUnit(focusedUnit)?.type ?? UniverInstanceType.UNIVER_UNKNOWN) : UniverInstanceType.UNIVER_UNKNOWN;
 
-    const { visibleItems } = useToolbarGroups(MENU_POSITIONS);
+    const menus = menu2Service.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_MAIN);
 
     const toolbarItems = uniToolbarService.getItems();
 
     const uniVisibleItems = toolbarItems.map((item) => {
         const { impl } = item;
         const typeImpl = impl.find((item) => item.type === type);
-        const visibleItem = visibleItems.find((item) => item.id === typeImpl?.id);
+        const visibleItem = menus.find((item) => item.key === typeImpl?.id)?.item;
         if (visibleItem) {
             return visibleItem;
         }
         const placeHolderImpl = impl.find((item) => item.type === UniverInstanceType.UNIVER_UNKNOWN);
-        const placeHolderItem = visibleItems.find((item) => item.id === placeHolderImpl?.id);
+        const placeHolderItem = menus.find((item) => item.key === placeHolderImpl?.id)?.item;
         if (placeHolderItem) {
             return placeHolderItem;
         }
         return null;
-    }).filter((item) => !!item);
+    }).filter((item) => {
+        return !!item && !item.id.startsWith('FAKE_');
+    });
 
     const hasWorkbooks = useWorkbooks().length > 0;
 
     return (
         <div className={styles.uniToolbar}>
-            { hasWorkbooks && <UniFormulaBar /> }
+            {hasWorkbooks && <UniFormulaBar />}
             <div className={styles.toolbarGroup}>
-                {uniVisibleItems.map((subItem) => <ToolbarItem key={subItem.id} {...subItem} />)}
+                {uniVisibleItems.map((subItem) => subItem && <ToolbarItem key={subItem.id} {...subItem} />)}
             </div>
         </div>
 

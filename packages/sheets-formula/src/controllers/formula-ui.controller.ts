@@ -15,12 +15,10 @@
  */
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-import type { Ctor, Dependency } from '@univerjs/core';
+import { BuiltInUIPart, ComponentManager, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import type { Dependency } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -33,7 +31,6 @@ import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
-import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
 import {
     ChangeRefToAbsoluteShortcut,
     promptSelectionShortcutItem,
@@ -43,22 +40,13 @@ import {
     singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
 import { FormulaEditorShowController } from './formula-editor-show.controller';
-
-export interface IUniverSheetsFormulaConfig {
-    menu: MenuConfig;
-    notExecuteFormula?: boolean;
-    description: IFunctionInfo[];
-    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
-}
-
-export const DefaultSheetFormulaConfig = {};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsFormulaConfig>,
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenu2Service private readonly _menu2Service: IMenu2Service,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
@@ -79,13 +67,7 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerMenus(): void {
-        const { menu = {} } = this._config;
-
-        [InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory].forEach(
-            (factory) => {
-                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-            }
-        );
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _registerCommands(): void {

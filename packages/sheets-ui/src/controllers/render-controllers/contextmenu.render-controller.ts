@@ -22,9 +22,8 @@ import {
 } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import { IContextMenuService, MenuPosition } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 
-import { SheetMenuPosition } from '../menu/menu';
 import { SHEET_VIEW_KEY } from '../../common/keys';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { attachSelectionWithCoord } from '../../services/selection/util';
@@ -80,13 +79,13 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
                     this._contextMenuService.triggerContextMenu(event, position);
                 };
                 if (!isPointerInRange()) {
-                    triggerMenu(MenuPosition.CONTEXT_MENU);
+                    triggerMenu(ContextMenuPosition.MAIN_AREA);
                 } else if (rangeType === RANGE_TYPE.COLUMN) {
-                    triggerMenu(SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+                    triggerMenu(ContextMenuPosition.COL_HEADER);
                 } else if (rangeType === RANGE_TYPE.ROW) {
-                    triggerMenu(SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
+                    triggerMenu(ContextMenuPosition.ROW_HEADER);
                 } else {
-                    triggerMenu(MenuPosition.CONTEXT_MENU);
+                    triggerMenu(ContextMenuPosition.MAIN_AREA);
                 }
             }
         });
@@ -97,7 +96,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
         const rowHeaderSub = spreadsheetRowHeader.onPointerDown$.subscribeEvent((event) => {
             if (event.button === 2) {
-                this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU);
+                this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.ROW_HEADER);
             }
         });
         this.disposeWithMe(rowHeaderSub);
@@ -106,7 +105,7 @@ export class SheetContextMenuRenderController extends Disposable implements IRen
         const colHeaderPointerDownObserver = spreadsheetColumnHeader.onPointerDown$;
         const colHeaderObserver = colHeaderPointerDownObserver.subscribeEvent((event) => {
             if (event.button === 2) {
-                this._contextMenuService.triggerContextMenu(event, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+                this._contextMenuService.triggerContextMenu(event, ContextMenuPosition.COL_HEADER);
             }
         });
         this.disposeWithMe(colHeaderObserver);

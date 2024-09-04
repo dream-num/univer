@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import {
+    connectInjector,
+    Disposable,
+    ICommandService,
+    IConfigService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    LifecycleStages,
+    OnLifecycle,
+    UniverInstanceType,
+} from '@univerjs/core';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';
@@ -28,7 +38,6 @@ import {
     FontFamilyItem,
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
-import type { IUniverDocsUIConfig } from '../basics';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { DocFooter } from '../views/doc-footer';
@@ -48,44 +57,23 @@ import {
 } from '../shortcuts/toolbar.shortcut';
 import { TabShortCut } from '../shortcuts/format.shortcut';
 import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
-import {
-    AlignCenterMenuItemFactory,
-    AlignJustifyMenuItemFactory,
-    AlignLeftMenuItemFactory,
-    AlignRightMenuItemFactory,
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    BulletListMenuItemFactory,
-    CheckListMenuItemFactory,
-    FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
-    HeaderFooterMenuItemFactory,
-    InsertTableMenuFactory,
-    ItalicMenuItemFactory,
-    OrderListMenuItemFactory,
-    ResetBackgroundColorMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    SubscriptMenuItemFactory,
-    SuperscriptMenuItemFactory,
-    TableMenuFactory,
-    TextColorSelectorMenuItemFactory,
-    UnderlineMenuItemFactory,
-} from './menu/menu';
-import { CopyMenuFactory, CutMenuFactory, DeleteColumnsMenuItemFactory, DeleteMenuFactory, DeleteRowsMenuItemFactory, DeleteTableMenuItemFactory, InsertColumnLeftMenuItemFactory, InsertColumnRightMenuItemFactory, InsertRowAfterMenuItemFactory, InsertRowBeforeMenuItemFactory, ParagraphSettingMenuFactory, PasteMenuFactory, TableDeleteMenuItemFactory, TableInsertMenuItemFactory } from './menu/context-menu';
+import { menuSchema } from './menu.schema';
+import type { IUniverDocsUIConfig } from './config.schema';
+import { PLUGIN_CONFIG_KEY } from './config.schema';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
-        protected readonly _config: Partial<IUniverDocsUIConfig>,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ICommandService protected readonly _commandService: ICommandService,
         @ILayoutService protected readonly _layoutService: ILayoutService,
-        @IMenuService protected readonly _menuService: IMenuService,
+        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
-        @IShortcutService protected readonly _shortcutService: IShortcutService
+        @IShortcutService protected readonly _shortcutService: IShortcutService,
+        @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
 
@@ -106,65 +94,14 @@ export class DocUIController extends Disposable {
 
     private _initUiParts() {
         const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
-        if (this._config.layout?.docContainerConfig?.footer && !workbook) {
+        const config = this._configService.getConfig<IUniverDocsUIConfig>(PLUGIN_CONFIG_KEY);
+        if (config?.layout?.docContainerConfig?.footer && !workbook) {
             this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(DocFooter, this._injector)));
         }
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config;
-
-        // init menus
-        (
-            [
-                BoldMenuItemFactory,
-                ItalicMenuItemFactory,
-                UnderlineMenuItemFactory,
-                StrikeThroughMenuItemFactory,
-                SubscriptMenuItemFactory,
-                SuperscriptMenuItemFactory,
-                FontSizeSelectorMenuItemFactory,
-                FontFamilySelectorMenuItemFactory,
-                TextColorSelectorMenuItemFactory,
-                HeaderFooterMenuItemFactory,
-                TableMenuFactory,
-                InsertTableMenuFactory,
-                AlignLeftMenuItemFactory,
-                AlignCenterMenuItemFactory,
-                AlignRightMenuItemFactory,
-                AlignJustifyMenuItemFactory,
-                OrderListMenuItemFactory,
-                BulletListMenuItemFactory,
-                CheckListMenuItemFactory,
-                ResetBackgroundColorMenuItemFactory,
-                BackgroundColorSelectorMenuItemFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
-
-        ([
-            CopyMenuFactory,
-            CutMenuFactory,
-            PasteMenuFactory,
-            DeleteMenuFactory,
-            ParagraphSettingMenuFactory,
-            TableInsertMenuItemFactory,
-            InsertRowBeforeMenuItemFactory,
-            InsertRowAfterMenuItemFactory,
-            InsertColumnLeftMenuItemFactory,
-            InsertColumnRightMenuItemFactory,
-            TableDeleteMenuItemFactory,
-            DeleteRowsMenuItemFactory,
-            DeleteColumnsMenuItemFactory,
-            DeleteTableMenuItemFactory,
-        ] as IMenuItemFactory[]).forEach((factory) => {
-            try {
-                this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-            } catch (error) {
-
-            }
-        });
+        this._menu2Service.mergeMenu(menuSchema);
     }
 
     private _initShortCut() {

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Inject, Injector, Plugin } from '@univerjs/core';
+import { createIdentifier, IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
+import type { IUniverEngineRenderConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 /**
  * The global rendering engine.
@@ -30,10 +32,15 @@ export class UniverRenderEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        _config: undefined,
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverEngineRenderConfig> = defaultPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
 

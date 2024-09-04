@@ -17,6 +17,7 @@
 import type { Dependency, ICommand } from '@univerjs/core';
 import {
     ICommandService,
+    IConfigService,
     Inject,
     Injector,
     Plugin,
@@ -64,10 +65,8 @@ import { CreateDocTableCommand } from './commands/commands/table/doc-table-creat
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
-
-export interface IUniverDocsConfig {
-    hasScroll?: boolean;
-}
+import type { IUniverDocsConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DOCS_PLUGIN';
 
@@ -76,10 +75,16 @@ export class UniverDocsPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        _config: Partial<IUniverDocsConfig> = {},
-        @Inject(Injector) override _injector: Injector
+        private readonly _config: Partial<IUniverDocsConfig> = defaultPluginConfig,
+        @Inject(Injector) override _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initializeDependencies(_injector);
 
         this._initializeCommands();

@@ -229,7 +229,7 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
     };
 }
 
-const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
+export const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 
 export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -274,7 +274,7 @@ export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButto
     };
 }
 
-const FLOAT_DOM_ITEM_MENU_ID = 'debugger.float-dom-menu-item';
+export const FLOAT_DOM_ITEM_MENU_ID = 'debugger.float-dom-menu-item';
 
 export function FloatDomMenuItemFactory(): IMenuSelectorItem {
     return {

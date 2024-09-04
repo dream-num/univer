@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
@@ -27,17 +27,28 @@ import { SetConditionalRuleMutation } from './commands/mutations/set-conditional
 import { MoveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { ConditionalFormattingFormulaService } from './services/conditional-formatting-formula.service';
 import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
+import type { IUniverSheetsConditionalFormattingConfig } from './controllers/config.schema';
+import {
+    defaultPluginConfig,
+    PLUGIN_CONFIG_KEY,
+} from './controllers/config.schema';
 
 export class UniverSheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverSheetsConditionalFormattingConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(ICommandService) private _commandService: ICommandService
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         ([
             [ConditionalFormattingService],
             [ConditionalFormattingFormulaService],

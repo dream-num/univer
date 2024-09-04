@@ -176,15 +176,14 @@ export class HoverManagerService extends Disposable {
             paragraph: IParagraph;
         }> = null;
 
-        const PADDING = 4;
         const cell = skeleton.getCellByIndex(location.row, location.col);
         if (font) {
             const { paddingLeft, paddingTop } = calcPadding(cell, font);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
             const innerX = offsetX - position.startX;
             const innerY = offsetY - position.startY;
-            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top - PADDING) <= innerY && innerY <= (rect.bottom + PADDING)));
-            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top - PADDING) <= innerY && innerY <= (list.rect.bottom + PADDING));
+            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));
+            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top) <= innerY && innerY <= (list.rect.bottom));
         }
 
         const rect = customRange?.rects.pop() ?? bullet?.rect;
@@ -197,8 +196,8 @@ export class HoverManagerService extends Disposable {
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
             rect: rect && {
-                top: rect.top + cell.mergeInfo.startY - PADDING,
-                bottom: rect.bottom + cell.mergeInfo.startY + PADDING,
+                top: rect.top + cell.mergeInfo.startY,
+                bottom: rect.bottom + cell.mergeInfo.startY,
                 left: rect.left + cell.mergeInfo.startX,
                 right: rect.right + cell.mergeInfo.startX,
             },

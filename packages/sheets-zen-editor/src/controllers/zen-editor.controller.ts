@@ -196,6 +196,11 @@ export class ZenEditorController extends RxDisposable {
         const body = param.documentLayoutObject.documentModel?.getBody();
         const dataStream = body?.dataStream;
         const paragraphs = body?.paragraphs;
+        const customBlocks = body?.customBlocks;
+        const drawings = param.documentLayoutObject.documentModel?.getDrawings();
+        const drawingsOrder = param.documentLayoutObject.documentModel?.getDrawingsOrder();
+        const customRanges = body?.customRanges;
+
         let textRuns: ITextRun[] = [];
 
         if (dataStream == null || paragraphs == null) {
@@ -206,7 +211,7 @@ export class ZenEditorController extends RxDisposable {
             textRuns = body?.textRuns;
         }
 
-        this._syncContentAndRender(DOCS_ZEN_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+        this._syncContentAndRender(DOCS_ZEN_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customBlocks, drawings, drawingsOrder, customRanges);
 
         // Also need to resize document and scene after sync content.
         // this._autoScroll();

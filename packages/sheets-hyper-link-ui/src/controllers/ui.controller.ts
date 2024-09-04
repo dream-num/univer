@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -31,7 +31,7 @@ export class SheetsHyperLinkUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ICommandService private _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private _injector: Injector,
         @Inject(IShortcutService) private _shortcutService: IShortcutService
     ) {
@@ -70,7 +70,7 @@ export class SheetsHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortCut() {

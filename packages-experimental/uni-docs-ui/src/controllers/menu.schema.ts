@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID, UNI_MENU_POSITIONS } from '@univerjs/uniui';
 import { menuSchema as docsUIMenuSchema } from '@univerjs/docs-ui';
@@ -29,7 +29,7 @@ import {
     DocUnderlineMenuItemFactory,
 } from './menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (docsUIMenuSchema as any)[RibbonStartGroup.FORMAT],
     [FONT_GROUP_MENU_ID]: {
         [DOC_BOLD_MUTATION_ID]: {

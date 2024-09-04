@@ -22,8 +22,8 @@ import type { IDisplayMenuItem, IMenuItem, IValueOption, MenuItemDefaultValueTyp
 import { MenuItemType } from '../../../services/menu/menu';
 
 import { CustomLabel } from '../../custom-label';
-import type { IMenu2Schema } from '../../../services/menu/menu2.service';
-import { IMenu2Service } from '../../../services/menu/menu2.service';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import styles from './index.module.less';
 
 /**
@@ -31,7 +31,7 @@ import styles from './index.module.less';
  */
 export function MobileMenu(props: IBaseMenuProps) {
     const { menuType, onOptionSelect } = props;
-    const menu2Service = useDependency(IMenu2Service);
+    const menuManagerService = useDependency(IMenuManagerService);
 
     if (!menuType) {
         return null;
@@ -39,16 +39,16 @@ export function MobileMenu(props: IBaseMenuProps) {
 
     // There is no submenu on mobile devices, so if there are sub menu items, we should flat them.
     const flattedMenuItems = useMemo(() => {
-        const menuItems = menu2Service.getMenuByPositionKey(menuType);
+        const menuItems = menuManagerService.getMenuByPositionKey(menuType);
         // 递归把所有的子菜单项都展开
 
-        function flatMenuItems(items: IMenu2Schema[]): IMenu2Schema[] {
+        function flatMenuItems(items: IMenuSchema[]): IMenuSchema[] {
             return items.reduce((acc, item) => {
                 if (item.children) {
                     return [...acc, ...flatMenuItems(item.children)];
                 }
                 return [...acc, item];
-            }, [] as IMenu2Schema[]);
+            }, [] as IMenuSchema[]);
         }
 
         return flatMenuItems(menuItems);

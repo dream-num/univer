@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
+import { createIdentifier, Disposable, ILogService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -23,7 +23,7 @@ import { IShortcutService } from '../shortcut/shortcut.service';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 import type { IDisplayMenuItem, IMenuItem, MenuConfig } from './menu';
 import { MenuPosition } from './menu';
-import { IMenu2Service } from './menu2.service';
+import { IMenuManagerService } from './menu-manager.service';
 import { ContextMenuGroup, RibbonOthersGroup } from './types';
 
 /** @deprecated */
@@ -66,7 +66,8 @@ export class MenuService extends Disposable implements IMenuService {
 
     constructor(
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
+        @ILogService protected readonly _logService: ILogService
     ) {
         super();
     }
@@ -78,6 +79,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     addMenuItem(item: IMenuItem, config: MenuConfig): IDisposable {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         if (this._menuItemMap.has(item.id)) {
             throw new Error(`Menu item with the same id ${item.id} has already been added!`);
         }
@@ -105,7 +107,7 @@ export class MenuService extends Disposable implements IMenuService {
             if (position !== MenuPosition.CONTEXT_MENU) {
                 const menus = this.getMenuItems(position);
                 menus.forEach((menu) => {
-                    this._menu2Service.mergeMenu({
+                    this._menuManagerService.mergeMenu({
                         [position]: {
                             [menu.group ?? RibbonOthersGroup.OTHERS]: {
                                 [menu.id]: {
@@ -118,7 +120,7 @@ export class MenuService extends Disposable implements IMenuService {
             } else {
                 const menus = this.getMenuItems(position);
                 menus.forEach((menu) => {
-                    this._menu2Service.mergeMenu({
+                    this._menuManagerService.mergeMenu({
                         [position]: {
                             [menu.group ?? ContextMenuGroup.OTHERS]: {
                                 [menu.id]: {
@@ -166,6 +168,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     getMenuItems(positions: MenuPosition | string): Array<IDisplayMenuItem<IMenuItem>> {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         // TODO: @wzhudev: compose shortcut to returned menu items.
         if (this._menuByPositions.has(positions)) {
             const menuItems = this._menuByPositions.get(positions);
@@ -180,6 +183,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     setMenuItem(item: IMenuItem): void {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         this._menuItemMap.set(item.id, item);
         if (Array.isArray(item.positions)) {
             item.positions.forEach((menu) => this._updateMenuItems(item, menu));
@@ -192,6 +196,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     getMenuItem(id: string): IMenuItem | null {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         if (this._menuItemMap.has(id)) {
             return this._menuItemMap.get(id)!;
         }
@@ -201,11 +206,13 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     setMenuConfigs(id: string, config: MenuConfig): void {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         this._menuConfigs.set(id, config);
     }
 
     /** @deprecated */
     getMenuConfig(id: string): MenuConfig | null {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         if (this._menuConfigs.has(id)) {
             return this._menuConfigs.get(id)!;
         }
@@ -215,6 +222,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     private _getDisplayMenuItems(menuItem: IMenuItem): IDisplayMenuItem<IMenuItem> {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         const shortcut = this._shortcutService.getShortcutDisplayOfCommand(menuItem.id);
         if (!shortcut) {
             return menuItem;
@@ -228,6 +236,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     private _appendMenuToPosition(menu: IMenuItem, position: MenuPosition | string) {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         if (!this._menuByPositions.has(position)) {
             this._menuByPositions.set(position, []);
         }
@@ -242,6 +251,7 @@ export class MenuService extends Disposable implements IMenuService {
 
     /** @deprecated */
     private _updateMenuItems(menu: IMenuItem, position: MenuPosition | string) {
+        this._logService.warn('[MenuService]: MenuService is deprecated, please use MenuManagerService instead.');
         if (!this._menuByPositions.has(position)) {
             this._menuByPositions.set(position, []);
         }

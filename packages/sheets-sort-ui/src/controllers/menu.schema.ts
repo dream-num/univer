@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, RibbonStartGroup } from '@univerjs/ui';
 import {
     SortRangeAscCommand,
@@ -43,7 +43,7 @@ import {
     sortRangeMenuFactory,
 } from './sheets-sort.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {
         [SHEETS_SORT_MENU_ID]: {
             order: 2,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     StartAddCommentOperation,
@@ -22,7 +22,7 @@ import {
 } from '../commands/operations/show-comment-panel.operation';
 import { AddDocCommentMenuItemFactory, ToolbarDocCommentMenuItemFactory } from './menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
         [ToggleCommentPanelOperation.id]: {
             order: 1,

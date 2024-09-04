@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
@@ -24,13 +24,13 @@ import { menuSchema } from './menu.schema';
 @OnLifecycle(LifecycleStages.Steady, UniscriptController)
 export class UniscriptController extends Disposable {
     constructor(
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService commandService: ICommandService,
         @Inject(ComponentManager) componentManager: ComponentManager
     ) {
         super();
 
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
         this.disposeWithMe(componentManager.register(ScriptPanelComponentName, ScriptEditorPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleScriptPanelOperation));
     }

@@ -54,7 +54,7 @@ import { IRangeSelectorService, RangeSelectorService } from './services/range-se
 import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-import { IMenu2Service, Menu2Service } from './services/menu/menu2.service';
+import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import type { IUniverUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
@@ -99,7 +99,7 @@ export class UniverUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuService, { useClass: MenuService }],
-            [IMenu2Service, { useClass: Menu2Service }],
+            [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],

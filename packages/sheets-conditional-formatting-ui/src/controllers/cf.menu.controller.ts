@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { IMenu2Service } from '@univerjs/ui';
+import { IMenuManagerService } from '@univerjs/ui';
 import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, ConditionalFormattingMenuController)
@@ -25,10 +25,10 @@ export class ConditionalFormattingMenuController extends Disposable {
 
     constructor(
         @Inject(Injector) private _injector: Injector,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
 
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 }

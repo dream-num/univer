@@ -53,7 +53,7 @@ import { IProgressService, ProgressService } from './services/progress/progress.
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { MobileUIController } from './controllers/ui/ui-mobile.controller';
-import { IMenu2Service, Menu2Service } from './services/menu/menu2.service';
+import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 
 export const UNIVER_MOBILE_UI_PLUGIN_NAME = 'UNIVER_MOBILE_UI_PLUGIN';
 
@@ -83,7 +83,7 @@ export class UniverMobileUIPlugin extends Plugin {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [IMenuService, { useClass: MenuService }],
-            [IMenu2Service, { useClass: Menu2Service }],
+            [IMenuManagerService, { useClass: MenuManagerService }],
             [IContextMenuService, { useClass: ContextMenuService }],
             [IClipboardInterfaceService, { useClass: BrowserClipboardService, lazy: true }],
             [INotificationService, { useClass: DesktopNotificationService, lazy: true }],

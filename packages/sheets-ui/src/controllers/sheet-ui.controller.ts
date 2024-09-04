@@ -24,7 +24,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
@@ -164,7 +164,7 @@ export class SheetUIController extends Disposable {
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
-        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService
     ) {
         super();
@@ -276,7 +276,7 @@ export class SheetUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortcuts(): void {

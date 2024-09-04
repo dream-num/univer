@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { CrossHighlightingSingle } from '@univerjs/icons';
 import {
     DisableCrosshairHighlightOperation,
@@ -30,7 +30,7 @@ import { menuSchema } from './menu.schema';
 export class SheetsCrosshairHighlightController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentMgr: ComponentManager,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService
     ) {
         super();
@@ -50,7 +50,7 @@ export class SheetsCrosshairHighlightController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initComponents(): void {

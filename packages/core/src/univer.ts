@@ -114,6 +114,7 @@ export class Univer {
      * @deprecated use `createUnit` instead
      */
     createUniverSheet(data: Partial<IWorkbookData>): Workbook {
+        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverSheet is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
     }
 
@@ -121,6 +122,7 @@ export class Univer {
      * @deprecated use `createUnit` instead
      */
     createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
+        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverDoc is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
     }
 
@@ -128,6 +130,7 @@ export class Univer {
      * @deprecated use `createUnit` instead
      */
     createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
+        this._injector.get(ILogService).warn('[Univer]: Univer.createUniverSlide is deprecated, use createUnit instead');
         return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, data);
     }
 

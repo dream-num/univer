@@ -25,7 +25,7 @@ import { ShortcutPanel } from '../../views/components/shortcut-panel/ShortcutPan
 import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
 import { IShortcutService } from '../../services/shortcut/shortcut.service';
 import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
-import { IMenu2Service } from '../../services/menu/menu2.service';
+import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 
 const ToggleShortcutPanelShortcut: IShortcutItem = {
     id: ToggleShortcutPanelOperation.id,
@@ -43,7 +43,7 @@ export class ShortcutPanelController extends Disposable {
         @Inject(Injector) injector: Injector,
         @Inject(ComponentManager) componentManager: ComponentManager,
         @IShortcutService shortcutService: IShortcutService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService commandService: ICommandService
     ) {
         super();

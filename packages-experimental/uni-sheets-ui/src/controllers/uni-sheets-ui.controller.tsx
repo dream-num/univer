@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenu2Service, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import React from 'react';
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
@@ -34,7 +34,7 @@ export class UniSheetsUIController extends SheetUIController {
         @ILayoutService layoutService: ILayoutService,
         @ICommandService commandService: ICommandService,
         @IShortcutService shortcutService: IShortcutService,
-        @IMenu2Service menu2Service: IMenu2Service,
+        @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
@@ -44,7 +44,7 @@ export class UniSheetsUIController extends SheetUIController {
             layoutService,
             commandService,
             shortcutService,
-            menu2Service,
+            menuManagerService,
             uiPartsService
         );
         this._initUniMenus();
@@ -61,7 +61,7 @@ export class UniSheetsUIController extends SheetUIController {
     }
 
     private _initUniMenus(): void {
-        this._menu2Service.appendRootMenu(menuSchema);
+        this._menuManagerService.appendRootMenu(menuSchema);
 
         ([
             [BuiltinUniToolbarItemId.FONT_FAMILY, SetRangeFontFamilyCommand.id],

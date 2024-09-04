@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { AddDocCommentComment } from '../commands/commands/add-doc-comment.command';
 import { DocThreadCommentPanel } from '../views/doc-thread-comment-panel';
@@ -27,7 +27,7 @@ import { menuSchema } from './menu.schema';
 export class DocThreadCommentUIController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
@@ -49,7 +49,7 @@ export class DocThreadCommentUIController extends Disposable {
     }
 
     private _initMenus() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initComponents() {

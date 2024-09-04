@@ -27,7 +27,7 @@ import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import type { IUniverUIConfig } from '../config.schema';
-import { IMenu2Service } from '../../services/menu/menu2.service';
+import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { menuSchema } from '../menus/menu.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 
@@ -43,7 +43,7 @@ export class DesktopUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
@@ -55,7 +55,7 @@ export class DesktopUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _bootstrapWorkbench(): void {

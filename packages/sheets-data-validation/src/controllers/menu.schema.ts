@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation.command';
@@ -25,7 +25,7 @@ import {
     openDataValidationMenuFactory,
 } from './dv.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {
         [DATA_VALIDATION_MENU_ID]: {
             order: 9,

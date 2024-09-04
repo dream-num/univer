@@ -18,7 +18,7 @@ import React from 'react';
 import type { SlideDataModel } from '@univerjs/core';
 import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IMAGE_MENU_ID, SHAPE_MENU_ID, SlideAddTextCommand, SlideEditorContainer, SlidesUIController } from '@univerjs/slides-ui';
-import { BuiltInUIPart, ComponentManager, IMenu2Service, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import { UniSlideSideBar } from '../views/UniSlideSideBar';
 import { menuSchema } from './menu.schema';
@@ -27,14 +27,14 @@ import { menuSchema } from './menu.schema';
 export class UniSlidesUIController extends SlidesUIController {
     constructor(
         @Inject(Injector) _injector: Injector,
-        @IMenu2Service _menu2Service: IMenu2Service,
+        @IMenuManagerService _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) _componentManager: ComponentManager,
         @IUIPartsService _uiPartsService: IUIPartsService,
         @ICommandService _commandService: ICommandService,
         @IShortcutService _shortcutService: IShortcutService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
-        super(_injector, _menu2Service, _componentManager, _uiPartsService, _commandService, _shortcutService);
+        super(_injector, _menuManagerService, _componentManager, _uiPartsService, _commandService, _shortcutService);
         this._initUniMenus();
     }
 
@@ -47,7 +47,7 @@ export class UniSlidesUIController extends SlidesUIController {
     }
 
     private _initUniMenus(): void {
-        this._menu2Service.appendRootMenu(menuSchema);
+        this._menuManagerService.appendRootMenu(menuSchema);
 
         ([
             [BuiltinUniToolbarItemId.IMAGE, IMAGE_MENU_ID],

@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { IMenu2Service, IShortcutService, IZenZoneService } from '@univerjs/ui';
+import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../commands/commands/zen-editor.command';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -29,7 +29,7 @@ export class ZenEditorUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();
@@ -55,7 +55,7 @@ export class ZenEditorUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortcuts(): void {

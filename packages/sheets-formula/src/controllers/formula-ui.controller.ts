@@ -15,7 +15,7 @@
  */
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { BuiltInUIPart, ComponentManager, IMenu2Service, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import type { Dependency } from '@univerjs/core';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -46,7 +46,7 @@ import { menuSchema } from './menu.schema';
 export class FormulaUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
@@ -67,7 +67,7 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerMenus(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _registerCommands(): void {

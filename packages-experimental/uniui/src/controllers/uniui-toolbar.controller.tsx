@@ -17,7 +17,7 @@
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DeleteSingle, DownloadSingle, LockSingle, PivotTableSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenu2Service } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
 // import {
@@ -49,7 +49,7 @@ export const DefaultUniuiToolbarConfig = {};
 @OnLifecycle(LifecycleStages.Ready, UniuiToolbarController)
 export class UniuiToolbarController extends Disposable {
     constructor(
-        @IMenu2Service protected readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -78,7 +78,7 @@ export class UniuiToolbarController extends Disposable {
     }
 
     private _initMenus(): void {
-        this._menu2Service.appendRootMenu(menuSchema);
+        this._menuManagerService.appendRootMenu(menuSchema);
 
         // register menu factories
         // (

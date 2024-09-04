@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenu2Service, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { LinkSingle } from '@univerjs/icons';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
@@ -36,7 +36,7 @@ export class DocHyperLinkUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
@@ -78,6 +78,6 @@ export class DocHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 }

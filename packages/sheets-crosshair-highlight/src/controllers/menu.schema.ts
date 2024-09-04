@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ContextMenuGroup, ContextMenuPosition, type IMenu2Item } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, type MenuSchemaType } from '@univerjs/ui';
 import { ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
 import { CrosshairHighlightMenuItemFactory } from './crosshair.menu';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [ContextMenuPosition.FOOTER_MENU]: {
         [ContextMenuGroup.OTHERS]: {
             [ToggleCrosshairHighlightOperation.id]: {

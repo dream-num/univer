@@ -16,7 +16,7 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, Inject, Injector, LocaleService } from '@univerjs/core';
-import { ComponentManager, IMenu2Service, IMessageService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IMessageService, IShortcutService } from '@univerjs/ui';
 
 import { distinctUntilChanged } from 'rxjs';
 import { SheetCanvasPopManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
@@ -48,7 +48,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
         @Inject(LocaleService) private _localeService: LocaleService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IMenu2Service private readonly _menu2Service: IMenu2Service,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(SheetsRenderService) sheetsRenderService: SheetsRenderService,
@@ -93,7 +93,7 @@ export class SheetsFilterUIDesktopController extends SheetsFilterUIMobileControl
     }
 
     private _initMenuItems(): void {
-        this._menu2Service.mergeMenu(menuSchema);
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initUI(): void {

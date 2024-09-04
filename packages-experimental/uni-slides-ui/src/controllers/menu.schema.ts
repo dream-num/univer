@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMenu2Item } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { UNI_MENU_POSITIONS } from '@univerjs/uniui';
 import { menuSchema as slidesUIMenuSchema } from '@univerjs/slides-ui';
 
-export const menuSchema: IMenu2Item = {
+export const menuSchema: MenuSchemaType = {
     [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: (slidesUIMenuSchema as any)[RibbonStartGroup.FORMAT],
 };

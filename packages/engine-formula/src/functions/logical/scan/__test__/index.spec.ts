@@ -69,6 +69,11 @@ describe('Test scan', () => {
                 [6],
             ]);
 
+            lexerNode = lexer.treeBuilder('=SCAN(1,1,LAMBDA(x,y,x*y))');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
+
             lexerNode = lexer.treeBuilder('=SCAN(1,{1;2;3},LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
@@ -78,6 +83,14 @@ describe('Test scan', () => {
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.CALC);
+
+            lexerNode = lexer.treeBuilder('=SCAN(1,{1,2,#NAME?;4,5,6},LAMBDA(x,y,x*y))');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+                [1, 2, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME, ErrorType.NAME],
+            ]);
         });
 
         it('value is error', async () => {
@@ -91,7 +104,12 @@ describe('Test scan', () => {
             result = await interpreter.executeAsync(astNode as BaseAstNode);
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
 
-            lexerNode = lexer.treeBuilder('=SCAN(1,1,1)');
+            lexerNode = lexer.treeBuilder('=SCAN(1,1,#NAME?)');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+
+            lexerNode = lexer.treeBuilder('=SCAN({1},1,1)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.VALUE);

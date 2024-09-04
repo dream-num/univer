@@ -69,9 +69,15 @@ export class Scan extends BaseFunction {
             const row: BaseValueObject[] = [];
 
             for (let c = 0; c < columnCount; c++) {
+                if (accumulator.isError()) {
+                    row.push(accumulator);
+                    continue;
+                }
+
                 const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
 
                 if (valueObject.isError()) {
+                    accumulator = valueObject;
                     row.push(valueObject);
                     continue;
                 }

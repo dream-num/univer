@@ -94,6 +94,15 @@ describe('Test reduce', () => {
                 [ErrorType.NAME],
             ]);
 
+            lexerNode = lexer.treeBuilder('=REDUCE({1;2;3},1,#NAME?)');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+                [ErrorType.NAME],
+                [ErrorType.NAME],
+                [ErrorType.NAME],
+            ]);
+
             lexerNode = lexer.treeBuilder('=REDUCE(1,1,1)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);

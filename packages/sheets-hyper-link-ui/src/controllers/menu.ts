@@ -128,6 +128,8 @@ const linkMenu = {
     icon: 'LinkSingle',
 };
 
+export const genZenEditorMenuId = (id: string) => `${id}-zen-editor`;
+
 export const insertLinkMenuFactory = (accessor: IAccessor) => {
     return {
         ...linkMenu,
@@ -141,7 +143,7 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
 export const zenEditorInsertLinkMenuFactory = (accessor: IAccessor) => {
     return {
         ...linkMenu,
-        id: `${linkMenu.commandId}-zen-editor`,
+        id: genZenEditorMenuId(linkMenu.commandId),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
         disabled$: getZenLinkDisable$(accessor),
     } as IMenuItem;
@@ -168,7 +170,7 @@ export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {
 export const zenEditorInsertLinkMenuToolbarFactory = (accessor: IAccessor) => {
     return {
         ...linkToolbarMenu,
-        id: `${linkToolbarMenu.commandId}-zen-editor`,
+        id: genZenEditorMenuId(linkToolbarMenu.commandId),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
         disabled$: getZenLinkDisable$(accessor),
     };

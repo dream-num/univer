@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
+import type { Nullable, ThemeService } from '@univerjs/core';
 import { RANGE_TYPE } from '@univerjs/core';
 import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -49,7 +49,6 @@ export class MobileSelectionControl extends SelectionControl {
         protected _rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL
     ) {
         super(_scene, _zIndex, _themeService, _highlightHeader);
-        // window.sp = this;
         this.initControlPoints();
     }
 
@@ -153,10 +152,6 @@ export class MobileSelectionControl extends SelectionControl {
         this._fillControlBottomRight?.dispose();
         this._fillControlTopLeft?.dispose();
         super.dispose();
-    }
-
-    override updateRange(range: IRangeWithCoord): void {
-        this._selectionModel.setValue(range);
     }
 
     protected override _updateControlStyleAndLayout(style: Nullable<ISelectionStyle>): void {

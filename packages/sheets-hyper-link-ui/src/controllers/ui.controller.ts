@@ -25,7 +25,7 @@ import type { IUniverSheetsHyperLinkUIConfig } from '../types/interfaces/i-confi
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut } from './menu';
+import { insertLinkMenuFactory, insertLinkMenuToolbarFactory, InsertLinkShortcut, zenEditorInsertLinkMenuFactory, zenEditorInsertLinkMenuToolbarFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
@@ -75,8 +75,14 @@ export class SheetsHyperLinkUIController extends Disposable {
     }
 
     private _initMenus() {
-        this._menuService.addMenuItem(insertLinkMenuFactory(this._injector), this._config?.menu ?? {});
-        this._menuService.addMenuItem(insertLinkMenuToolbarFactory(this._injector), this._config?.menu ?? {});
+        [
+            zenEditorInsertLinkMenuToolbarFactory,
+            zenEditorInsertLinkMenuFactory,
+            insertLinkMenuFactory,
+            insertLinkMenuToolbarFactory,
+        ].forEach((menuFactory) => {
+            this._menuService.addMenuItem(menuFactory(this._injector), this._config?.menu ?? {});
+        });
     }
 
     private _initShortCut() {

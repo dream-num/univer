@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
-import { ISidebarService } from '@univerjs/ui';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
@@ -50,10 +49,8 @@ export const CloseHyperLinkSidebarOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'sheet.operation.close-hyper-link-sidebar',
     handler(accessor) {
-        const sidebarService = accessor.get(ISidebarService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
 
-        sidebarService.close();
         popupService.endEditing();
         return true;
     },
@@ -79,12 +76,15 @@ export const InsertHyperLinkOperation: ICommand = {
         const row = selection.primary.startRow;
         const col = selection.primary.startColumn;
         const visible = editorBridgeService.isVisible();
+        const isZenEditor = univerInstanceService.getFocusedUnit()?.getUnitId() === DOCS_ZEN_EDITOR_UNIT_ID_KEY;
         return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,
             col,
-            type: visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
+            type: isZenEditor ?
+                HyperLinkEditSourceType.ZEN_EDITOR
+                : visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
         });
     },
 };

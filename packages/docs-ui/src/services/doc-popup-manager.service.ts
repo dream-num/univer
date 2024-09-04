@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ITextRangeParam } from '@univerjs/core';
+import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
@@ -223,9 +223,8 @@ export class DocCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
-        const unitId = workbook.getUnitId();
-        // const subUnitId =
+        const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
+        const unitId = currentDoc.getUnitId();
 
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
@@ -256,9 +255,9 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
-        const unitId = workbook.getUnitId();
+    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, _unitId?: string): INeedCheckDisposable {
+        const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+        const unitId = _unitId || currentDoc?.getUnitId() || '';
         const { direction = 'top', multipleDirection } = popup;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
@@ -266,6 +265,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 dispose: () => {
                     // empty
                 },
+                canDispose: () => true,
             };
         }
 
@@ -292,6 +292,7 @@ export class DocCanvasPopManagerService extends Disposable {
                 bounds$.complete();
                 disposable.dispose();
             },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
 }

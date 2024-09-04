@@ -16,9 +16,9 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, CustomRangeType, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
-import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -32,8 +32,6 @@ import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/com
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
-
-function resolveSheetLink() {}
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
@@ -51,6 +49,7 @@ export const CellLinkEdit = () => {
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
+    const zenZoneService = useDependency(IZenZoneService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -238,7 +237,7 @@ export const CellLinkEdit = () => {
                     documentId: editorBridgeService.getCurrentEditorId(),
                 });
             } else {
-                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
+                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
                 await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
@@ -249,11 +248,13 @@ export const CellLinkEdit = () => {
                         payload: formatUrl(type, payload),
                         display,
                     },
-                    documentId: editorBridgeService.getCurrentEditorId(),
+                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                        : editorBridgeService.getCurrentEditorId(),
                 });
             }
         }
-        if (editing) {
+        if (editing?.type === HyperLinkEditSourceType.VIEWING) {
             await commandService.executeCommand(SetWorksheetActiveOperation.id, {
                 unitId: editing.unitId,
                 subUnitId: editing.subUnitId,
@@ -292,7 +293,7 @@ export const CellLinkEdit = () => {
                     </FormLayout>
                 )
                 : null}
-            <FormLayout label={localeService.t('hyperLink.form.type')}>
+            <FormLayout label={localeService.t('hyperLink.form.type')} contentStyle={{ marginBottom: 0 }}>
                 <Select
                     options={linkTypeOptions}
                     value={type}
@@ -327,6 +328,16 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
+                        onActive={(active) => {
+                            if (editing?.type !== HyperLinkEditSourceType.ZEN_EDITOR) {
+                                return;
+                            }
+                            if (active) {
+                                zenZoneService.hide();
+                            } else {
+                                zenZoneService.show();
+                            }
+                        }}
                     />
                 </FormLayout>
             )}

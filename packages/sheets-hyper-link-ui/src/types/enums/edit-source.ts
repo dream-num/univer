@@ -17,5 +17,5 @@
 export enum HyperLinkEditSourceType {
     EDITING = 'editing',
     VIEWING = 'viewing',
-    ZEN_MODE = 'zen_mode',
+    ZEN_EDITOR = 'zen_mode',
 }

@@ -830,9 +830,9 @@ export class FWorksheet {
      * Get all merged cells in the current sheet
      * @returns all merged cells
      */
-    getMergeCells(): IRange[] {
+    getMergeCells(): FRange[] {
         const snapshot = this._worksheet.getSnapshot();
-        return snapshot.mergeData;
+        return snapshot.mergeData.map((merge) => this._injector.createInstance(FRange, this._workbook, this._worksheet, merge));
     }
 
     // #endregion

@@ -635,12 +635,12 @@ describe('Test FRange', () => {
             expect(activeSheet.getMergeCells().length).toBe(0);
             range = await range.mergeAcross();
             expect(activeSheet.getMergeCells().length).toBe(3);
-            expect(activeSheet.getMergeCells()[0]).toStrictEqual({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 });
+            expect(activeSheet.getMergeCells()[0].getRange()).toStrictEqual({ startRow: 0, endRow: 0, startColumn: 0, endColumn: 2 });
             range = range.breakApart();
             expect(activeSheet.getMergeCells().length).toBe(0);
             await range.mergeVertically();
             expect(activeSheet.getMergeCells().length).toBe(3);
-            expect(activeSheet.getMergeCells()[0]).toStrictEqual({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 });
+            expect(activeSheet.getMergeCells()[0].getRange()).toStrictEqual({ startRow: 0, endRow: 2, startColumn: 0, endColumn: 0 });
             const range2 = activeSheet.getRange(0, 2, 0, 0);
             expect(range2.isPartOfMerge()).toBeTruthy();
             const range3 = activeSheet.getRange(0, 5, 0, 5);

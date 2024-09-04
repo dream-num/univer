@@ -75,6 +75,8 @@ export interface IAutoFillService {
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
     fillData(triggerUnitId: string, triggerSubUnitId: string): boolean;
+
+    initPrevUndo(): void;
 }
 
 export interface IApplyMenuItem {
@@ -89,6 +91,8 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     private _hooks: ISheetAutoFillHook[] = [];
     private readonly _applyType$: BehaviorSubject<APPLY_TYPE> = new BehaviorSubject<APPLY_TYPE>(APPLY_TYPE.SERIES);
     private _isFillingStyle: boolean = true;
+
+    private _prevUndos: IMutationInfo[] = [];
 
     private readonly _autoFillLocation$: BehaviorSubject<Nullable<IAutoFillLocation>> = new BehaviorSubject<
         Nullable<IAutoFillLocation>
@@ -158,6 +162,11 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             return (currentItem.priority || 0) > (maxItem.priority || 0) ? currentItem : maxItem;
         }, items[0]);
         return [maxPriority];
+    }
+
+    // a cache to undo commands of last apply-type
+    initPrevUndo() {
+        this._prevUndos = [];
     }
 
     addHook(hook: ISheetAutoFillHook) {
@@ -286,6 +295,13 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             return false;
         }
 
+        if (this._prevUndos.length > 0) {
+            this._prevUndos.forEach((undo) => {
+                this._commandService.syncExecuteCommand(undo.id, undo.params);
+            });
+        }
+        this._prevUndos = [];
+
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
         const applyType = this.applyType;
         const activeHooks = this.getActiveHooks();
@@ -318,6 +334,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         });
         const result = redos.every((m) => this._commandService.syncExecuteCommand(m.id, m.params));
         if (result) {
+            this._prevUndos = undos;
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
                 unitID: unitId,

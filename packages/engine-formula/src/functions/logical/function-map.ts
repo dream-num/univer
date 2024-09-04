@@ -16,6 +16,8 @@
 
 import { FUNCTION_NAMES_LOGICAL } from './function-names';
 import { And } from './and';
+import { Bycol } from './bycol';
+import { Byrow } from './byrow';
 import { False } from './false';
 import { If } from './if';
 import { Iferror } from './iferror';
@@ -24,14 +26,19 @@ import { Ifs } from './ifs';
 import { Lambda } from './lambda';
 import { Let } from './let';
 import { Makearray } from './makearray';
+import { Map } from './map';
 import { Not } from './not';
 import { Or } from './or';
+import { Reduce } from './reduce';
+import { Scan } from './scan';
 import { Switch } from './switch';
 import { True } from './true';
 import { Xor } from './xor';
 
 export const functionLogical = [
     [And, FUNCTION_NAMES_LOGICAL.AND],
+    [Bycol, FUNCTION_NAMES_LOGICAL.BYCOL],
+    [Byrow, FUNCTION_NAMES_LOGICAL.BYROW],
     [False, FUNCTION_NAMES_LOGICAL.FALSE],
     [If, FUNCTION_NAMES_LOGICAL.IF],
     [Iferror, FUNCTION_NAMES_LOGICAL.IFERROR],
@@ -40,8 +47,11 @@ export const functionLogical = [
     [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
     [Let, FUNCTION_NAMES_LOGICAL.LET],
     [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
+    [Map, FUNCTION_NAMES_LOGICAL.MAP],
     [Not, FUNCTION_NAMES_LOGICAL.NOT],
     [Or, FUNCTION_NAMES_LOGICAL.OR],
+    [Reduce, FUNCTION_NAMES_LOGICAL.REDUCE],
+    [Scan, FUNCTION_NAMES_LOGICAL.SCAN],
     [Switch, FUNCTION_NAMES_LOGICAL.SWITCH],
     [True, FUNCTION_NAMES_LOGICAL.TRUE],
     [Xor, FUNCTION_NAMES_LOGICAL.XOR],

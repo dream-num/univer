@@ -71,6 +71,7 @@ export class FormulaDependencyTree extends Disposable {
     featureId: Nullable<string>;
 
     isPassive: boolean = true;
+    private _id: string;
 
     getDirtyData: Nullable<
         (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
@@ -78,6 +79,15 @@ export class FormulaDependencyTree extends Disposable {
             dirtyRanges: IFeatureDirtyRangeType;
         }
     >;
+
+    constructor() {
+        super();
+        this._id = `${Math.random().toString(36).slice(5)}-${Math.random().toString(36).slice(5)}`;
+    }
+
+    get id() {
+        return this._id;
+    }
 
     private _state = FDtreeStateType.DEFAULT;
 

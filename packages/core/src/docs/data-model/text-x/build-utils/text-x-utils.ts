@@ -22,7 +22,7 @@ import { DataStreamTreeTokenType } from '../../types';
 import type { IDeleteAction, IRetainAction } from '../action-types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
-import { excludePonintsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
 
 export interface IDeleteCustomRangeParam {
@@ -200,7 +200,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
         });
     };
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
-    const newRanges = excludePonintsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
+    const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
     newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
 
     return textX;

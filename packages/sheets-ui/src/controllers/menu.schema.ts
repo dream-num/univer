@@ -41,7 +41,7 @@ import {
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand, SetWorksheetHideCommand,
-    SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand,
+    SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
 import {
@@ -164,7 +164,7 @@ import {
     HideSheetMenuItemFactory,
     RenameSheetMenuItemFactory,
     ShowMenuItemFactory,
-    UnHideSheetMenuItemFactory,
+    // UnHideSheetMenuItemFactory,
 } from './menu/sheet.menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -672,10 +672,10 @@ export const menuSchema: MenuSchemaType = {
                 order: 4,
                 menuItemFactory: HideSheetMenuItemFactory,
             },
-            [SetWorksheetShowCommand.id]: {
-                order: 5,
-                menuItemFactory: UnHideSheetMenuItemFactory,
-            },
+            // [SetWorksheetShowCommand.id]: {
+            //     order: 5,
+            //     menuItemFactory: UnHideSheetMenuItemFactory,
+            // },
             [ShowMenuListCommand.id]: {
                 order: 6,
                 menuItemFactory: ShowMenuItemFactory,

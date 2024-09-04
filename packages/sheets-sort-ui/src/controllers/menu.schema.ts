@@ -15,7 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, RibbonStartGroup } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     SortRangeAscCommand,
     SortRangeAscExtCommand,
@@ -70,29 +70,31 @@ export const menuSchema: MenuSchemaType = {
             },
         },
     },
-    [ContextMenuGroup.DATA]: {
-        [SHEETS_SORT_CTX_MENU_ID]: {
-            order: 0,
-            menuItemFactory: sortRangeCtxMenuFactory,
-            [SortRangeAscInCtxMenuCommand.id]: {
+    [ContextMenuPosition.MAIN_AREA]: {
+        [ContextMenuGroup.DATA]: {
+            [SHEETS_SORT_CTX_MENU_ID]: {
                 order: 0,
-                menuItemFactory: sortRangeAscCtxMenuFactory,
-            },
-            [SortRangeAscExtInCtxMenuCommand.id]: {
-                order: 1,
-                menuItemFactory: sortRangeAscExtCtxMenuFactory,
-            },
-            [SortRangeDescInCtxMenuCommand.id]: {
-                order: 2,
-                menuItemFactory: sortRangeDescCtxMenuFactory,
-            },
-            [SortRangeDescExtInCtxMenuCommand.id]: {
-                order: 3,
-                menuItemFactory: sortRangeDescExtCtxMenuFactory,
-            },
-            [SortRangeCustomInCtxMenuCommand.id]: {
-                order: 4,
-                menuItemFactory: sortRangeCustomCtxMenuFactory,
+                menuItemFactory: sortRangeCtxMenuFactory,
+                [SortRangeAscInCtxMenuCommand.id]: {
+                    order: 0,
+                    menuItemFactory: sortRangeAscCtxMenuFactory,
+                },
+                [SortRangeAscExtInCtxMenuCommand.id]: {
+                    order: 1,
+                    menuItemFactory: sortRangeAscExtCtxMenuFactory,
+                },
+                [SortRangeDescInCtxMenuCommand.id]: {
+                    order: 2,
+                    menuItemFactory: sortRangeDescCtxMenuFactory,
+                },
+                [SortRangeDescExtInCtxMenuCommand.id]: {
+                    order: 3,
+                    menuItemFactory: sortRangeDescExtCtxMenuFactory,
+                },
+                [SortRangeCustomInCtxMenuCommand.id]: {
+                    order: 4,
+                    menuItemFactory: sortRangeCustomCtxMenuFactory,
+                },
             },
         },
     },

@@ -148,7 +148,8 @@ export class SelectionRenderModel implements IRangeWithCoord {
         this._endX = endX;
         this._endY = endY;
 
-        if (rangeType) {
+        // !! rangeType various from 0 ~ 3
+        if (rangeType !== undefined) {
             this._rangeType = rangeType;
         }
         this.setCurrentCell(currentCell);

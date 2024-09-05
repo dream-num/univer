@@ -112,7 +112,7 @@ export class DataValidationDropdownManagerService extends Disposable {
 
     showDropdown(param: IDropdownParam, closeOnOutSide = true) {
         const { location } = param;
-        const { row, col } = location;
+        const { row, col, unitId, subUnitId } = location;
 
         if (this._currentPopup) {
             this._currentPopup.dispose();
@@ -137,8 +137,9 @@ export class DataValidationDropdownManagerService extends Disposable {
                 },
                 offset: [0, 3],
                 excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
-            }
-
+            },
+            unitId,
+            subUnitId
         );
 
         if (!popupDisposable) {

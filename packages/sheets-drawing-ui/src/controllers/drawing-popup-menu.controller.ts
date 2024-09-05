@@ -21,7 +21,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
-import { IDrawingManagerService } from '@univerjs/drawing';
+import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
@@ -119,7 +119,10 @@ export class DrawingPopupMenuController extends RxDisposable {
                         return;
                     }
 
-                    const { unitId, subUnitId, drawingId } = drawingParam;
+                    const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
+                    if (drawingType === DrawingTypeEnum.DRAWING_DOM) {
+                        return;
+                    }
                     singletonPopupDisposer?.dispose();
                     singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,

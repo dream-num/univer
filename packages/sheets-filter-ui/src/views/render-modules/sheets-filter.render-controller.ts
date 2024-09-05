@@ -59,6 +59,11 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
         this._initRenderer();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._disposeRendering();
+    }
+
     private _initRenderer(): void {
         // Subscribe to skeleton change and filter model change.
         this._sheetSkeletonManagerService.currentSkeleton$.pipe(

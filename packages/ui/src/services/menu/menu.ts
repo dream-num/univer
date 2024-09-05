@@ -89,7 +89,7 @@ interface IMenuItemBase<V> {
 
     /** In what menu should the item display. */
     /** @deprecated positions will be removed in the future. */
-    positions: OneOrMany<MenuPosition | string>;
+    positions?: OneOrMany<MenuPosition | string>;
 
     type: MenuItemType;
 

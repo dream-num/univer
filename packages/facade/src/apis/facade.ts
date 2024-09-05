@@ -36,7 +36,9 @@ import {
     RedoCommand,
     toDisposable,
     UndoCommand,
-    Univer, UniverInstanceType, WrapStrategy,
+    Univer,
+    UniverInstanceType,
+    WrapStrategy,
 } from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import { ISocketService, WebSocketService } from '@univerjs/network';

@@ -16,7 +16,7 @@
 
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { getCurrentRangeDisable$, getObservableWithExclusiveRange$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
@@ -26,7 +26,6 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
     return {
         id: InsertHyperLinkOperation.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
         title: 'hyperLink.menu.add',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         icon: 'LinkSingle',
@@ -37,8 +36,6 @@ export const insertLinkMenuFactory = (accessor: IAccessor) => {
 export const insertLinkMenuToolbarFactory = (accessor: IAccessor) => {
     return {
         tooltip: 'hyperLink.form.addTitle',
-        positions: MenuPosition.TOOLBAR_START,
-        group: MenuGroup.TOOLBAR_OTHERS,
         id: InsertHyperLinkToolbarOperation.id,
         type: MenuItemType.BUTTON,
         icon: 'LinkSingle',

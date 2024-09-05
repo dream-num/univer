@@ -16,9 +16,9 @@
 
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { getCurrentRangeDisable$, PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
+import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import type { IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, IClipboardInterfaceService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
 import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
 
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
@@ -31,9 +31,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: InsertFunctionOperation.id,
         icon: 'FunctionSingle',
         tooltip: 'formula.insert.tooltip',
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
                 label: 'SUM',
@@ -70,7 +68,6 @@ export function MoreFunctionsMenuItemFactory(accessor: IAccessor): IMenuItem {
     return {
         id: MoreFunctionsOperation.id,
         title: 'formula.insert.more',
-        positions: InsertFunctionOperation.id,
         type: MenuItemType.BUTTON,
     };
 }
@@ -97,7 +94,6 @@ export function PasteFormulaMenuItemFactory(accessor: IAccessor): IMenuItem {
         id: SheetOnlyPasteFormulaCommand.id,
         type: MenuItemType.BUTTON,
         title: 'formula.operation.pasteFormula',
-        positions: [PASTE_SPECIAL_MENU_ID],
         disabled$: menuClipboardDisabledObservable(accessor).pipe(
             combineLatestWith(getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], rangeTypes: [RangeProtectionPermissionEditPoint], worksheetTypes: [WorksheetSetCellValuePermission, WorksheetEditPermission] })),
             map(([d1, d2]) => d1 || d2)

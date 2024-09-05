@@ -15,7 +15,7 @@
  */
 
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 
 import { UniverInstanceType } from '@univerjs/core';
@@ -23,7 +23,6 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { permissionLockIconKey, permissionMenuIconKey } from '../../consts/permission';
 import { ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionFormSheetBarCommand } from '../../commands/commands/worksheet-protection.command';
 import { getAddPermissionDisableBase$, getAddPermissionFromSheetBarDisable$, getAddPermissionHidden$, getEditPermissionHidden$, getPermissionDisableBase$, getRemovePermissionDisable$, getRemovePermissionFromSheetBarDisable$, getSetPermissionFromSheetBarDisable$, getViewPermissionDisable$ } from './permission-menu-util';
-import { SheetMenuPosition } from './menu';
 
 export const SHEET_PERMISSION_CONTEXT_MENU_ID = 'sheet.contextMenu.permission';
 
@@ -31,10 +30,6 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
     return {
         id: AddRangeProtectionFromToolbarCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [
-            MenuPosition.TOOLBAR_START,
-        ],
-        group: MenuGroup.TOOLBAR_OTHERS,
         icon: permissionMenuIconKey,
         tooltip: 'permission.toolbarMenu',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -45,11 +40,9 @@ export function sheetPermissionToolbarMenuFactory(accessor: IAccessor): IMenuIte
 export function sheetPermissionContextMenuFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     return {
         id: SHEET_PERMISSION_CONTEXT_MENU_ID,
-        group: MenuGroup.CONTEXT_MENU_LAYOUT,
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.protectRange',
         icon: permissionLockIconKey,
-        positions: [MenuPosition.CONTEXT_MENU, SheetMenuPosition.ROW_HEADER_CONTEXT_MENU, SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -59,7 +52,6 @@ export function sheetPermissionAddProtectContextMenuFactory(accessor: IAccessor)
         id: AddRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.turnOnProtectRange',
-        positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         hidden$: getAddPermissionHidden$(accessor),
         disabled$: getAddPermissionDisableBase$(accessor),
     };
@@ -70,7 +62,6 @@ export function sheetPermissionEditProtectContextMenuFactory(accessor: IAccessor
         id: SetRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.editProtectRange',
-        positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         hidden$: getEditPermissionHidden$(accessor),
         disabled$: getPermissionDisableBase$(accessor),
     };
@@ -81,7 +72,6 @@ export function sheetPermissionRemoveProtectContextMenuFactory(accessor: IAccess
         id: DeleteRangeProtectionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.removeProtectRange',
-        positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         disabled$: getRemovePermissionDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -92,7 +82,6 @@ export function sheetPermissionViewAllProtectRuleContextMenuFactory(accessor: IA
         id: ViewSheetPermissionFromContextMenuCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.viewAllProtectArea',
-        positions: [SHEET_PERMISSION_CONTEXT_MENU_ID],
         disabled$: getViewPermissionDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -102,7 +91,6 @@ export function sheetPermissionProtectSheetInSheetBarMenuFactory(accessor: IAcce
     return {
         id: AddRangeProtectionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.addProtectSheet',
         disabled$: getAddPermissionFromSheetBarDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -113,7 +101,6 @@ export function sheetPermissionRemoveProtectionSheetBarMenuFactory(accessor: IAc
     return {
         id: DeleteWorksheetProtectionFormSheetBarCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.removeProtectSheet',
         disabled$: getRemovePermissionFromSheetBarDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -124,7 +111,6 @@ export function sheetPermissionChangeSheetPermissionSheetBarMenuFactory(accessor
     return {
         id: ChangeSheetProtectionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.changeSheetPermission',
         disabled$: getSetPermissionFromSheetBarDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -135,7 +121,6 @@ export function sheetPermissionViewAllProtectRuleSheetBarMenuFactory(accessor: I
     return {
         id: ViewSheetPermissionFromSheetBarCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.viewAllProtectArea',
         disabled$: getViewPermissionDisable$(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

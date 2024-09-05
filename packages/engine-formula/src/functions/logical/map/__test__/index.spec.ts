@@ -89,6 +89,14 @@ describe('Test map', () => {
                 [1, ErrorType.NA, ErrorType.NA],
                 [ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
+
+            lexerNode = lexer.treeBuilder('=MAP({1,2,3;4,5,6},{1,2},LAMBDA(x,y,x*y))');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+                [1, 4, ErrorType.NA],
+                [ErrorType.NA, ErrorType.NA, ErrorType.NA],
+            ]);
         });
 
         it('value is error', async () => {

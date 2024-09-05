@@ -220,11 +220,11 @@ export const CellLinkEdit = () => {
             if (id) {
                 const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
                 await commandService.executeCommand(commandId, {
+                    id,
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
-                    id,
                     payload: {
-                        display,
+                        display: showLabel ? display : '',
                         payload: formatUrl(type, payload),
                     },
                     row: editing.row,
@@ -243,7 +243,7 @@ export const CellLinkEdit = () => {
                         row: editing.row,
                         column: editing.col,
                         payload: formatUrl(type, payload),
-                        display,
+                        display: showLabel ? display : '',
                     },
                     documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
                         DOCS_ZEN_EDITOR_UNIT_ID_KEY

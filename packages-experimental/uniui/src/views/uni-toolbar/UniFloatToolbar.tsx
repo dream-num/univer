@@ -17,7 +17,7 @@
 import { flip, offset, shift, useFloating } from '@floating-ui/react-dom';
 import React, { useEffect, useImperativeHandle } from 'react';
 import { IUniverInstanceService, type Nullable, useDependency, useObservable } from '@univerjs/core';
-import { ComponentContainer, ToolbarItem, useComponentsOfPart, useToolbarGroups } from '@univerjs/ui';
+import { ComponentContainer, IMenuManagerService, ToolbarItem, useComponentsOfPart } from '@univerjs/ui';
 import type { IUnitRendererProps } from '../workbench/UniWorkbench';
 import { DELETE_MENU_ID, DOWNLOAD_MENU_ID, LOCK_MENU_ID, PRINT_MENU_ID, SHARE_MENU_ID, UNI_MENU_POSITIONS, ZEN_MENU_ID } from '../../controllers/menu';
 import styles from './index.module.less';
@@ -30,10 +30,6 @@ export enum UniFloatToolbarUIPart {
     NAME = 'name',
 }
 
-const MENU_POSITIONS = [
-    UNI_MENU_POSITIONS.TOOLBAR_FLOAT,
-];
-
 const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
     DOWNLOAD_MENU_ID,
     SHARE_MENU_ID,
@@ -44,13 +40,15 @@ const UNI_FLOATING_TOOLBAR_SCHEMA: string[] = [
 ];
 
 export const UniFloatingToolbar = React.forwardRef<IFloatingToolbarRef, { node: Nullable<IUnitRendererProps> }>(({ node }, ref) => {
+    const menuManagerService = useDependency(IMenuManagerService);
+
     const { x, y, refs, strategy, update } = useFloating({
         placement: 'top',
         middleware: [offset(10), flip(), shift({ padding: 5 })],
     });
 
-    const { visibleItems } = useToolbarGroups(MENU_POSITIONS, UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
-    const uniVisibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => visibleItems.find((item) => item.id === id)).filter((item) => !!item);
+    const menus = menuManagerService.getMenuByPositionKey(UNI_MENU_POSITIONS.TOOLBAR_FLOAT);
+    const uniVisibleItems = UNI_FLOATING_TOOLBAR_SCHEMA.map((id) => menus.find((item) => item.key === id)?.item).filter((item) => !!item);
 
     const { setReference, setFloating } = refs;
 
@@ -106,4 +104,3 @@ export function UnitName({ unitId }: { unitId: string }) {
         </div>
     );
 };
-

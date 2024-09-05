@@ -36,7 +36,7 @@ const STEADY_TIMEOUT = 3000;
 @OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
     private _steadyTimeout: NodeJS.Timeout;
-    disposed: boolean;
+    private _renderTimeout: NodeJS.Timeout;
     constructor(
         private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -60,8 +60,8 @@ export class DesktopUIController extends Disposable {
     }
 
     private _bootstrapWorkbench(): void {
-        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((unit: UnitModel) => {
-            console.log('desktop unitDisposed$!!!!!!!!!!!', unit.getUnitId());
+        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
+            clearTimeout(this._renderTimeout);
             clearTimeout(this._steadyTimeout);
         }));
 
@@ -83,9 +83,7 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                this._steadyTimeout = setTimeout(() => {
-                    console.log('this.disposed@11q11111111@', this.disposed);
-                    // if (this.disposed) return;
+                this._renderTimeout = setTimeout(() => {
                     const allRenders = this._renderManagerService.getRenderAll();
 
                     for (const [key, render] of allRenders) {
@@ -93,11 +91,8 @@ export class DesktopUIController extends Disposable {
                         render.engine.setContainer(contentElement);
                     }
 
-                    console.log('into  LifecycleStages.Rendered;');
                     this._lifecycleService.stage = LifecycleStages.Rendered;
                     this._steadyTimeout = setTimeout(() => {
-                        console.log('this.disposed@!!!22222222@@@@@@', this.disposed);
-                        // if (this.disposed) return;
                         this._lifecycleService.stage = LifecycleStages.Steady;
                     }, STEADY_TIMEOUT);
                 }, 300);

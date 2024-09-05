@@ -280,7 +280,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     disposeUnit(unitId: string): boolean {
-        console.log('disposeUnit!!!!!!!!!', unitId);
         const result = this._getUnitById(unitId);
         if (!result) return false;
 

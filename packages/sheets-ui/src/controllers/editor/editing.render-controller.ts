@@ -178,17 +178,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._listenEditorFocus(d);
         this._commandExecutedListener(d);
 
-        const unit = this._instanceSrv.getFocusedUnit();
-        console.log('editor render controller 11111', unit?.getUnitId());
-        this._instanceSrv.unitDisposed$.subscribe((unit: UnitModel) => {
-            console.log('editor render controller clearTimeout unitDisposed$!!!!!!!!!!!', unit.getUnitId());
+        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
             clearTimeout(this._cursorTimeout);
-        });
+        }));
 
         // FIXME: this problem is the same with slide. Should be fixed when refactoring editor.
         this._cursorTimeout = setTimeout(() => {
-            const unit = this._instanceSrv.getFocusedUnit();
-            console.log('editor render controller  22222', unit?.getUnitId());
             this._cursorStateListener(d);
         }, 1000);
 
@@ -1000,7 +995,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _cursorStateListener(d: DisposableCollection) {
         const editorObject = this._getEditorObject()!;
-        if (!editorObject.document) { console.trace(); }
+        if (!editorObject.document) return;
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {

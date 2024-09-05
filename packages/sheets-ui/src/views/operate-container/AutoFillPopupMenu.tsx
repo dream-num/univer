@@ -173,6 +173,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
 
     const handleClick = (item: IAutoFillPopupMenuItem) => {
         commandService.executeCommand(RefillCommand.id, { type: item.value });
+        setVisible(false);
     };
 
     const showMore = visible || isHovered;

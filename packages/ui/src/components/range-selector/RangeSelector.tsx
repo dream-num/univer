@@ -44,10 +44,17 @@ export interface IRangeSelectorProps {
     className?: string;
     textEditorClassName?: string;
     onSelectorVisibleChange?: (visible: boolean) => void;
+    disableInput?: boolean;
 }
 
+const disableInputStyle: React.CSSProperties = {
+    pointerEvents: 'none',
+    cursor: 'not-allowed',
+    opacity: 0.5,
+};
+
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange } = props;
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange, disableInput } = props;
     const onSelectorVisibleChange = useEvent(_onSelectorVisibleChange);
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -302,7 +309,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div className={sClassName} ref={selectorRef} style={{ width, height }}>
-                <TextEditor placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor style={disableInput ? disableInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />

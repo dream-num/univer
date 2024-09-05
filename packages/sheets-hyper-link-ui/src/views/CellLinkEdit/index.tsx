@@ -271,6 +271,10 @@ export const CellLinkEdit = () => {
         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
 
+    if (!editing) {
+        return null;
+    }
+
     return (
         <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
             {showLabel
@@ -325,16 +329,21 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
+                        disableInput={editing.type === HyperLinkEditSourceType.ZEN_EDITOR}
                         onSelectorVisibleChange={(visible) => {
                             if (visible) {
-                                zenZoneService.hide();
+                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+                                    zenZoneService.hide();
+                                }
                                 setHide(true);
                             } else {
                                 commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
                                     unitId: editing!.unitId,
                                     subUnitId: editing!.subUnitId,
                                 });
-                                zenZoneService.show();
+                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+                                    zenZoneService.show();
+                                }
                                 setHide(false);
                             }
                         }}

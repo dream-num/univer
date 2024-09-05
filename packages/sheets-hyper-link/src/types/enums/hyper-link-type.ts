@@ -15,7 +15,7 @@
  */
 
 export enum SheetHyperLinkType {
-    SHEET = 'sheet',
+    SHEET = 'gid',
     RANGE = 'range',
     DEFINE_NAME = 'rangeid',
     INVALID = 'invalid',

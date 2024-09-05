@@ -19,7 +19,7 @@ import type { IRange } from '@univerjs/core';
 // the size of the block
 const BLOCKSIZE = 10;
 
-export function setRangeBlockToken(range: IRange, baseKey: string, token: string, map: Map<string, Map<string, string[]>>): void {
+export function setRangeBlockToken(range: IRange, baseKey: string, token: string, map: Map<string, Map<string, Set<string>>>): void {
     const { startRow, startColumn, endRow, endColumn } = range;
     // the horizontal and vertical start index of the block
     const startH = Math.floor(startRow / BLOCKSIZE);
@@ -32,14 +32,14 @@ export function setRangeBlockToken(range: IRange, baseKey: string, token: string
                 map.set(baseKey, new Map());
             }
             if (!map.get(baseKey)!.has(key)) {
-                map.get(baseKey)!.set(key, []);
+                map.get(baseKey)!.set(key, new Set<string>());
             }
-            map.get(baseKey)!.get(key)!.push(token);
+            map.get(baseKey)!.get(key)!.add(token);
         }
     }
 }
 
-export function getBlockTokensByRange(range: IRange, baseKey: string, map: Map<string, Map<string, string[]>>): Set<string> {
+export function getBlockTokensByRange(range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
     const { startRow, startColumn, endRow, endColumn } = range;
     const startH = Math.floor(startRow / BLOCKSIZE);
     const startV = Math.floor(startColumn / BLOCKSIZE);
@@ -56,3 +56,4 @@ export function getBlockTokensByRange(range: IRange, baseKey: string, map: Map<s
     }
     return tokensSet;
 }
+

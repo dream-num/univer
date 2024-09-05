@@ -52,6 +52,10 @@ export class WorksheetProtectionRuleModel {
         this._worksheetRuleInitStateChange.next(state);
     }
 
+    getSheetRuleInitState() {
+        return this._worksheetRuleInitStateChange.value;
+    }
+
     addRule(unitId: string, rule: IWorksheetProtectionRule) {
         const subUnitMap = this._ensureSubUnitMap(unitId);
         subUnitMap.set(rule.subUnitId, rule);

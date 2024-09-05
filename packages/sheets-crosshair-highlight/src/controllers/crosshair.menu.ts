@@ -16,7 +16,6 @@
 
 import { type IAccessor, UniverInstanceType } from '@univerjs/core';
 import { getMenuHiddenObservable, type IMenuSelectorItem, MenuItemType } from '@univerjs/ui';
-import { SheetMenuPosition } from '@univerjs/sheets-ui';
 import { SheetsCrosshairHighlightService } from '../services/crosshair.service';
 import { SetCrosshairHighlightColorOperation, ToggleCrosshairHighlightOperation } from '../commands/operations/operation';
 
@@ -41,6 +40,5 @@ export function CrosshairHighlightMenuItemFactory(accessor: IAccessor): IMenuSel
         selectionsCommandId: SetCrosshairHighlightColorOperation.id,
         activated$: crosshairHighlightService.enabled$,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
-        positions: [SheetMenuPosition.SHEET_FOOTER],
     };
 }

@@ -17,6 +17,10 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
 import {
+    DELETE_MENU_ID,
+    DeleteMenuItemFactory,
+    DOWNLOAD_MENU_ID,
+    DownloadMenuItemFactory,
     FAKE_BG_COLOR_MENU_ID,
     FAKE_FONT_COLOR_MENU_ID,
     FAKE_FONT_FAMILY_MENU_ID,
@@ -36,7 +40,15 @@ import {
     FakeTextColorSelectorMenuItemFactory,
     FakeUnorderListMenuItemFactory,
     FontGroupMenuItemFactory,
+    // LOCK_MENU_ID,
+    // LockMenuItemFactory,
+    PRINT_MENU_ID,
+    PrintMenuItemFactory,
+    SHARE_MENU_ID,
+    ShareMenuItemFactory,
     UNI_MENU_POSITIONS,
+    ZEN_MENU_ID,
+    ZenMenuItemFactory,
 } from './menu';
 
 export const menuSchema: MenuSchemaType = {
@@ -70,6 +82,26 @@ export const menuSchema: MenuSchemaType = {
         },
         [FAKE_TABLE_MENU_ID]: {
             menuItemFactory: FakePivotTableMenuItemFactory,
+        },
+    },
+    [UNI_MENU_POSITIONS.TOOLBAR_FLOAT]: {
+        [DOWNLOAD_MENU_ID]: {
+            menuItemFactory: DownloadMenuItemFactory,
+        },
+        [SHARE_MENU_ID]: {
+            menuItemFactory: ShareMenuItemFactory,
+        },
+        // [LOCK_MENU_ID]: {
+        //     menuItemFactory: LockMenuItemFactory,
+        // },
+        [PRINT_MENU_ID]: {
+            menuItemFactory: PrintMenuItemFactory,
+        },
+        [ZEN_MENU_ID]: {
+            menuItemFactory: ZenMenuItemFactory,
+        },
+        [DELETE_MENU_ID]: {
+            menuItemFactory: DeleteMenuItemFactory,
         },
     },
 };

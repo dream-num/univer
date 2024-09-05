@@ -41,7 +41,7 @@ type ICheckPermissionCommandParams = IEditorBridgeServiceVisibleParam | IMoveRow
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorBaseController)
+@OnLifecycle(LifecycleStages.Ready, SheetPermissionInterceptorBaseController)
 export class SheetPermissionInterceptorBaseController extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -170,11 +170,21 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 errorMsg = this._localeService.t('permission.dialog.setStyleErr');
                 break;
             case SheetCopyCommand.id:
-            case SheetCutCommand.id:
                 permission = this.permissionCheckWithRanges({
                     workbookTypes: [WorkbookCopyPermission],
                     rangeTypes: [RangeProtectionPermissionViewPoint],
                     worksheetTypes: [WorksheetCopyPermission],
+                });
+                errorMsg = this._localeService.t('permission.dialog.copyErr');
+                if (!this._permissionService.getPermissionPoint(new WorkbookCopyPermission(this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()).id)?.value) {
+                    errorMsg = this._localeService.t('permission.dialog.workbookCopyErr');
+                }
+                break;
+            case SheetCutCommand.id:
+                permission = this.permissionCheckWithRanges({
+                    workbookTypes: [WorkbookCopyPermission, WorkbookEditablePermission],
+                    rangeTypes: [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint],
+                    worksheetTypes: [WorksheetCopyPermission, WorksheetEditPermission],
                 });
                 errorMsg = this._localeService.t('permission.dialog.copyErr');
                 if (!this._permissionService.getPermissionPoint(new WorkbookCopyPermission(this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()).id)?.value) {

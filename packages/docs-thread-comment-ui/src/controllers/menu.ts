@@ -17,7 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { debounceTime, Observable } from 'rxjs';
@@ -45,12 +45,10 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
 export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: StartAddCommentOperation.id,
-        group: MenuGroup.CONTEXT_MENU_DATA,
         type: MenuItemType.BUTTON,
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
-        positions: [MenuPosition.CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(TextSelectionManagerService);
@@ -68,12 +66,10 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 export function ToolbarDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ToggleCommentPanelOperation.id,
-        group: MenuGroup.CONTEXT_MENU_DATA,
         type: MenuItemType.BUTTON,
         icon: 'CommentSingle',
         title: 'threadCommentUI.panel.addComment',
         tooltip: 'threadCommentUI.panel.addComment',
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

@@ -24,6 +24,9 @@ import type { IUniverSheetsCrosshairHighlightConfig } from './controllers/config
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsCrosshairHighlightPlugin extends Plugin {
+    static override pluginName: string = 'UNIVER_SHEETS_CROSSHAIR_HIGHLIGHT';
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
     constructor(
         private readonly _config: Partial<IUniverSheetsCrosshairHighlightConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,

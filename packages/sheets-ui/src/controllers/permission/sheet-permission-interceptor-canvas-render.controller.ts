@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 
@@ -238,7 +238,12 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     }
                     const { worksheet, unitId, subUnitId } = target;
 
-                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
+                    const worksheetEditPermission = this._permissionService.composePermission([
+                        new WorkbookEditablePermission(unitId).id,
+                        new WorksheetEditPermission(unitId, subUnitId).id,
+                        new WorksheetSetCellValuePermission(unitId, subUnitId).id,
+                        new WorksheetSetCellStylePermission(unitId, subUnitId).id,
+                    ]).every((permission) => permission.value);
                     if (!worksheetEditPermission) {
                         return false;
                     }

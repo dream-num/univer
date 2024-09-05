@@ -90,7 +90,7 @@ export class MenuService extends Disposable implements IMenuService {
 
         if (Array.isArray(item.positions)) {
             item.positions.forEach((menu) => this._appendMenuToPosition(item, menu));
-        } else {
+        } else if (item.positions) {
             this._appendMenuToPosition(item, item.positions);
         }
 
@@ -150,7 +150,7 @@ export class MenuService extends Disposable implements IMenuService {
                         menus.splice(index, 1);
                     }
                 });
-            } else {
+            } else if (item.positions) {
                 const menus = this._menuByPositions.get(item.positions);
                 if (!menus) {
                     return;
@@ -187,7 +187,7 @@ export class MenuService extends Disposable implements IMenuService {
         this._menuItemMap.set(item.id, item);
         if (Array.isArray(item.positions)) {
             item.positions.forEach((menu) => this._updateMenuItems(item, menu));
-        } else {
+        } else if (item.positions) {
             this._updateMenuItems(item, item.positions);
         }
 

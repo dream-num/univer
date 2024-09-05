@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, IStyleData, Workbook } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
 import {
     Disposable,
     getCellInfoInMergeData,
     ICommandService,
     Inject,
     Injector,
-    isICellData,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -145,7 +144,7 @@ export class FormatPainterController extends Disposable {
         };
     }
 
-    private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, range: IRange, format: ISelectionFormatInfo) {
+    private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, originRange: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;
 
@@ -155,6 +154,14 @@ export class FormatPainterController extends Disposable {
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
         const styleRowsNum = endRow - startRow + 1;
         const styleColsNum = endColumn - startColumn + 1;
+        const range = (originRange.startRow === originRange.endRow && originRange.startColumn === originRange.endColumn)
+            ? {
+                startRow: originRange.startRow,
+                startColumn: originRange.startColumn,
+                endRow: originRange.startRow + styleRowsNum - 1,
+                endColumn: originRange.startColumn + styleColsNum - 1,
+            }
+            : originRange;
         const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
             Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
         );
@@ -167,7 +174,7 @@ export class FormatPainterController extends Disposable {
                 const style = stylesMatrix.getValue(mappedRowIndex, mappedColIndex);
 
                 if (style) {
-                    styleValues[rowIndex][colIndex].s = style;
+                    styleValues[rowIndex][colIndex].s = Object.keys(style).length > 0 ? style : null;
                 }
             });
         });
@@ -194,37 +201,34 @@ export class FormatPainterController extends Disposable {
             }
         });
         const currentSelections = [range];
+        const clearCellValue = new ObjectMatrix<ICellData>();
         const cellValue = new ObjectMatrix<ICellData>();
-        let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
 
         if (Tools.isArray(styleValues)) {
             for (let i = 0; i < currentSelections.length; i++) {
                 const { startRow, startColumn, endRow, endColumn } = currentSelections[i];
-
                 for (let r = 0; r <= endRow - startRow; r++) {
                     for (let c = 0; c <= endColumn - startColumn; c++) {
+                        clearCellValue.setValue(r + startRow, c + startColumn, { s: null });
                         cellValue.setValue(r + startRow, c + startColumn, styleValues[r][c]);
                     }
                 }
             }
-        } else if (isICellData(styleValues)) {
-            for (let i = 0; i < currentSelections.length; i++) {
-                const { startRow, startColumn } = currentSelections[i];
-
-                cellValue.setValue(startRow, startColumn, styleValues);
-            }
-        } else {
-            realCellValue = styleValues as IObjectMatrixPrimitiveType<ICellData>;
         }
 
+        const clearStyleMutationParams: ISetRangeValuesMutationParams = {
+            subUnitId,
+            unitId,
+            cellValue: clearCellValue.getMatrix(),
+        };
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: realCellValue ?? cellValue.getMatrix(),
+            cellValue: cellValue.getMatrix(),
         };
         const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = this._injector.invoke(
             SetRangeValuesUndoMutationFactory,
-            setRangeValuesMutationParams
+            clearStyleMutationParams
         );
 
         const { undos: interceptorUndos, redos: interceptorRedos } = sheetInterceptorService.onCommandExecute({
@@ -277,11 +281,13 @@ export class FormatPainterController extends Disposable {
 
         return {
             undos: [
+                { id: SetRangeValuesMutation.id, params: clearStyleMutationParams },
                 { id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams },
                 ...interceptorUndos,
                 ...mergeUndos,
             ],
             redos: [
+                { id: SetRangeValuesMutation.id, params: clearStyleMutationParams },
                 { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
                 ...interceptorRedos,
                 ...mergeRedos,

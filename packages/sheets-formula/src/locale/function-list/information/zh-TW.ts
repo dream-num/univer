@@ -109,8 +109,8 @@ export default {
         },
     },
     ISFORMULA: {
-        description: '如果有包含公式的單元格的引用，則傳回 TRUE',
-        abstract: '如果有包含公式的單元格的引用，則傳回 TRUE',
+        description: '檢查是否有參照包含公式的儲存格，並傳回 TRUE 或 FALSE。',
+        abstract: '檢查是否有參照包含公式的儲存格，並傳回 TRUE 或 FALSE。',
         links: [
             {
                 title: '教導',
@@ -118,8 +118,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '參照', detail: '是您要測試之儲存格的參照。' },
         },
     },
     ISLOGICAL: {
@@ -236,8 +235,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '這是要轉換的值。' },
         },
     },
     NA: {
@@ -250,8 +248,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     SHEET: {

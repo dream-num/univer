@@ -21,6 +21,7 @@ import { Isblank } from './isblank';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
 import { Iseven } from './iseven/iseven';
+import { Isformula } from './isformula';
 import { Islogical } from './islogical';
 import { Isna } from './isna';
 import { Isnontext } from './isnontext';
@@ -28,6 +29,8 @@ import { Isnumber } from './isnumber';
 import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
+import { N } from './n';
+import { Na } from './na';
 import { Type } from './type';
 
 export const functionInformation = [
@@ -37,6 +40,7 @@ export const functionInformation = [
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
     [Iserror, FUNCTION_NAMES_INFORMATION.ISERROR],
     [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],
+    [Isformula, FUNCTION_NAMES_INFORMATION.ISFORMULA],
     [Islogical, FUNCTION_NAMES_INFORMATION.ISLOGICAL],
     [Isna, FUNCTION_NAMES_INFORMATION.ISNA],
     [Isnontext, FUNCTION_NAMES_INFORMATION.ISNONTEXT],
@@ -44,5 +48,7 @@ export const functionInformation = [
     [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
     [Isref, FUNCTION_NAMES_INFORMATION.ISREF],
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
+    [N, FUNCTION_NAMES_INFORMATION.N],
+    [Na, FUNCTION_NAMES_INFORMATION.NA],
     [Type, FUNCTION_NAMES_INFORMATION.TYPE],
 ];

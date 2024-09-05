@@ -35,6 +35,8 @@ import type { RenderManagerService } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
+
 @OnLifecycle(LifecycleStages.Ready, AutoHeightController)
 export class AutoHeightController extends Disposable {
     constructor(
@@ -135,7 +137,6 @@ export class AutoHeightController extends Disposable {
 
                 // TODO: @jocs, All styles that affect the size of the cell,
                 // I don't know if the enumeration is complete, to be added in the future.
-                const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
                 if (!AFFECT_LAYOUT_STYLES.includes(command.params?.style.type)) {
                     return {

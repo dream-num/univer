@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
+import type { IDisposable, UnitModel } from '@univerjs/core';
 import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -36,6 +36,7 @@ const STEADY_TIMEOUT = 3000;
 @OnLifecycle(LifecycleStages.Ready, DesktopUIController)
 export class DesktopUIController extends Disposable {
     private _steadyTimeout: NodeJS.Timeout;
+    private _renderTimeout: NodeJS.Timeout;
     constructor(
         private readonly _config: IUniverUIConfig,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -59,7 +60,8 @@ export class DesktopUIController extends Disposable {
     }
 
     private _bootstrapWorkbench(): void {
-        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe(() => {
+        this.disposeWithMe(this._instanceSrv.unitDisposed$.subscribe((_unit: UnitModel) => {
+            clearTimeout(this._renderTimeout);
             clearTimeout(this._steadyTimeout);
         }));
 
@@ -81,17 +83,18 @@ export class DesktopUIController extends Disposable {
                     }
                 });
 
-                setTimeout(() => {
+                this._renderTimeout = setTimeout(() => {
                     const allRenders = this._renderManagerService.getRenderAll();
 
                     for (const [key, render] of allRenders) {
                         if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
-
                         render.engine.setContainer(contentElement);
                     }
 
                     this._lifecycleService.stage = LifecycleStages.Rendered;
-                    this._steadyTimeout = setTimeout(() => this._lifecycleService.stage = LifecycleStages.Steady, STEADY_TIMEOUT);
+                    this._steadyTimeout = setTimeout(() => {
+                        this._lifecycleService.stage = LifecycleStages.Steady;
+                    }, STEADY_TIMEOUT);
                 }, 300);
             })
         );

@@ -19,8 +19,7 @@ import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniver
 import { DocSkeletonManagerService, SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
-import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
+import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 
 export const DOC_ITALIC_MUTATION_ID = 'doc.command.uni-italic';
@@ -38,7 +37,6 @@ export function DocBoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'BoldSingle',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
-        positions: [FONT_GROUP_MENU_ID],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -69,12 +67,10 @@ export function DocItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: DOC_ITALIC_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
-        positions: [FONT_GROUP_MENU_ID],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -105,12 +101,10 @@ export function DocUnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
     return {
         id: DOC_UNDERLINE_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
-        positions: [FONT_GROUP_MENU_ID],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -141,12 +135,10 @@ export function DocStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButto
 
     return {
         id: DOC_STRIKE_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
-        positions: [FONT_GROUP_MENU_ID],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -176,8 +168,6 @@ export function DocTableMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DOC_TABLE_MUTATION_ID,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_LAYOUT,
         icon: 'GridSingle',
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),

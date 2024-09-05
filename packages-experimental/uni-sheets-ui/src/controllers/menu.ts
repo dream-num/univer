@@ -17,10 +17,18 @@
 import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_SHEET, FontItalic, FontWeight, ICommandService, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
-import { RangeProtectionPermissionEditPoint, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import {
+    RangeProtectionPermissionEditPoint,
+    SetRangeValuesMutation,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SheetsSelectionsService,
+    WorkbookEditablePermission,
+    WorksheetEditPermission,
+    WorksheetSetCellStylePermission,
+} from '@univerjs/sheets';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { getMenuHiddenObservable, type IMenuButtonItem, MenuGroup, MenuItemType } from '@univerjs/ui';
-import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
+import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
 
 export const SHEET_BOLD_MUTATION_ID = 'sheet.command.uni-bold';
@@ -36,12 +44,10 @@ export function SheetBoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SHEET_BOLD_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
-        positions: [FONT_GROUP_MENU_ID],
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -100,12 +106,10 @@ export function SheetItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
     return {
         id: SHEET_ITALIC_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
-        positions: [FONT_GROUP_MENU_ID],
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -156,12 +160,10 @@ export function SheetUnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonI
 
     return {
         id: SHEET_UNDERLINE_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
-        positions: [FONT_GROUP_MENU_ID],
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -212,12 +214,10 @@ export function SheetStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuBut
 
     return {
         id: SHEET_STRIKE_MUTATION_ID,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
-        positions: [FONT_GROUP_MENU_ID],
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {

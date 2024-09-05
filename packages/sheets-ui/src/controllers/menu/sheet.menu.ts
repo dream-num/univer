@@ -39,7 +39,6 @@ import { RemoveSheetConfirmCommand } from '../../commands/commands/remove-sheet-
 import { ShowMenuListCommand } from '../../commands/commands/unhide.command';
 import { RenameSheetOperation } from '../../commands/operations/rename-sheet.operation';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
-import { SheetMenuPosition } from './menu';
 import { getWorkbookPermissionDisable$ } from './menu-util';
 
 export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -67,7 +66,6 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: RemoveSheetConfirmCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.delete',
         disabled$: combineLatest([defaultDisable$, permissionDisable$]).pipe(
             map(([defaultDisabled, permissionDisabled]) => {
@@ -82,7 +80,6 @@ export function CopySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: CopySheetCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.copy',
         disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookCreateSheetPermission]),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -93,7 +90,6 @@ export function RenameSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
     return {
         id: RenameSheetOperation.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.rename',
         disabled$: getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookRenameSheetPermission]),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -104,7 +100,6 @@ export function ChangeColorSheetMenuItemFactory(accessor: IAccessor): IMenuSelec
     return {
         id: SetTabColorCommand.id,
         title: 'sheetConfig.changeColor',
-        positions: [SheetMenuPosition.SHEET_BAR],
         type: MenuItemType.SELECTOR,
         selections: [
             {
@@ -125,7 +120,6 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: SetWorksheetHideCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.hide',
         disabled$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -176,7 +170,6 @@ export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
     return {
         id: SetWorksheetShowCommand.id,
         type: MenuItemType.SELECTOR,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
         disabled$: defaultDisable$.pipe(
             combineLatestWith(getWorkbookPermissionDisable$(accessor, [WorkbookEditablePermission, WorkbookHideSheetPermission])),
@@ -207,7 +200,6 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ShowMenuListCommand.id,
         type: MenuItemType.BUTTON,
-        positions: [SheetMenuPosition.SHEET_BAR],
         title: 'sheetConfig.unhide',
         disabled$: new Observable<boolean>((subscriber) => {
             function disableFunction() {

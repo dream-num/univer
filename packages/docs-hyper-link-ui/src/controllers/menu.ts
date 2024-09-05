@@ -17,7 +17,7 @@
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { whenDocAndEditorFocused } from '@univerjs/docs-ui';
@@ -28,12 +28,10 @@ export const DOC_LINK_ICON = 'doc-hyper-link-icon';
 export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: ShowDocHyperLinkEditPopupOperation.id,
-        group: MenuGroup.CONTEXT_MENU_DATA,
         type: MenuItemType.BUTTON,
         icon: DOC_LINK_ICON,
         title: 'docLink.menu.tooltip',
         tooltip: 'docLink.menu.tooltip',
-        positions: [MenuPosition.TOOLBAR_START, MenuPosition.CONTEXT_MENU],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {
             const textSelectionService = accessor.get(TextSelectionManagerService);

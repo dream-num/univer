@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
@@ -29,8 +29,6 @@ export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: DataValidationIcon,
         tooltip: 'dataValidation.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -43,7 +41,6 @@ export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
         id: OpenValidationPanelOperation.id,
         title: 'dataValidation.panel.title',
         type: MenuItemType.BUTTON,
-        positions: [DATA_VALIDATION_MENU_ID],
     };
 }
 
@@ -52,6 +49,5 @@ export function addDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
         id: AddSheetDataValidationAndOpenCommand.id,
         title: 'dataValidation.panel.add',
         type: MenuItemType.BUTTON,
-        positions: [DATA_VALIDATION_MENU_ID],
     };
 }

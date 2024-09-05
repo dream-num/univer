@@ -55,9 +55,7 @@ import {
     FONT_SIZE_LIST,
     getHeaderFooterMenuHiddenObservable,
     getMenuHiddenObservable,
-    MenuGroup,
     MenuItemType,
-    MenuPosition,
 } from '@univerjs/ui';
 import type { IAccessor, PresetListType } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
@@ -209,12 +207,10 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetInlineFormatBoldCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'BoldSingle',
         title: 'Set bold',
         tooltip: 'toolbar.bold',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -247,12 +243,10 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetInlineFormatItalicCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'ItalicSingle',
         title: 'Set italic',
         tooltip: 'toolbar.italic',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -285,12 +279,10 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetInlineFormatUnderlineCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'UnderlineSingle',
         title: 'Set underline',
         tooltip: 'toolbar.underline',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -323,12 +315,10 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
     return {
         id: SetInlineFormatStrikethroughCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'StrikethroughSingle',
         title: 'Set strike through',
         tooltip: 'toolbar.strikethrough',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -361,11 +351,9 @@ export function SubscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: SetInlineFormatSubscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'SubscriptSingle',
         tooltip: 'toolbar.subscript',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -398,11 +386,9 @@ export function SuperscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
     return {
         id: SetInlineFormatSuperscriptCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON,
         icon: 'SuperscriptSingle',
         tooltip: 'toolbar.superscript',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -436,10 +422,8 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     return {
         id: SetInlineFormatFontFamilyCommand.id,
         tooltip: 'toolbar.font',
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
         label: FONT_FAMILY_COMPONENT,
-        positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_FAMILY_LIST.map((item) => ({
             label: {
                 name: FONT_FAMILY_ITEM_COMPONENT,
@@ -481,7 +465,6 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
     return {
         id: SetInlineFormatFontSizeCommand.id,
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.SELECTOR,
         tooltip: 'toolbar.fontSize',
         label: {
@@ -492,7 +475,6 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                 // disabled$,
             },
         },
-        positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_LIST,
         // disabled$,
         value$: new Observable((subscriber) => {
@@ -532,9 +514,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         icon: 'FontColor',
         tooltip: 'toolbar.textColor.main',
 
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON_SELECTOR,
-        positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
                 label: {
@@ -564,11 +544,9 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenHeaderFooterPanelCommand.id,
-        group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         icon: 'FreezeRowSingle',
         tooltip: 'toolbar.headerFooter',
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -582,8 +560,6 @@ export function TableMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: TABLE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_LAYOUT,
         icon: TableIcon,
         tooltip: 'toolbar.table.main',
         disabled$: getTableDisabledObservable(accessor),
@@ -599,7 +575,6 @@ export function InsertTableMenuFactory(_accessor: IAccessor): IMenuButtonItem {
         id: DocCreateTableOperation.id,
         title: 'toolbar.table.insert',
         type: MenuItemType.BUTTON,
-        positions: [TABLE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }
@@ -609,11 +584,9 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
     return {
         id: AlignLeftCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'LeftJustifyingSingle',
         tooltip: 'toolbar.alignLeft',
-        positions: [MenuPosition.TOOLBAR_START],
         disabled$: disableMenuWhenNoDocRange(accessor),
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
@@ -645,11 +618,9 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
     return {
         id: AlignCenterCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'HorizontallySingle',
         tooltip: 'toolbar.alignCenter',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -681,11 +652,9 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
     return {
         id: AlignRightCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'RightJustifyingSingle',
         tooltip: 'toolbar.alignRight',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -717,11 +686,9 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
     return {
         id: AlignJustifyCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'AlignTextBothSingle',
         tooltip: 'toolbar.alignJustify',
-        positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
@@ -795,7 +762,6 @@ const listValueFactory$ = (accessor: IAccessor) => {
 export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
     return {
         id: OrderListCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
             {
@@ -808,7 +774,6 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         ],
         icon: 'OrderSingle',
         tooltip: 'toolbar.order',
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: disableMenuWhenNoDocRange(accessor),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('ORDER_LIST') === 0)),
@@ -818,7 +783,6 @@ export function OrderListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
 export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<PresetListType, PresetListType> {
     return {
         id: BulletListCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
             {
@@ -831,7 +795,6 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         ],
         icon: 'UnorderSingle',
         tooltip: 'toolbar.unorder',
-        positions: [MenuPosition.TOOLBAR_START],
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('BULLET_LIST') === 0)),
@@ -841,11 +804,9 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: CheckListCommand.id,
-        group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'TodoList',
         tooltip: 'toolbar.checklist',
-        positions: [MenuPosition.TOOLBAR_START],
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
@@ -858,7 +819,6 @@ export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuB
         type: MenuItemType.BUTTON,
         title: 'toolbar.resetColor',
         icon: 'NoColor',
-        positions: SetInlineFormatTextBackgroundColorCommand.id,
     };
 }
 
@@ -869,9 +829,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
     return {
         id: SetInlineFormatTextBackgroundColorCommand.id,
         tooltip: 'toolbar.fillColor.main',
-        group: MenuGroup.TOOLBAR_FORMAT,
         type: MenuItemType.BUTTON_SELECTOR,
-        positions: [MenuPosition.TOOLBAR_START],
         icon: 'PaintBucket',
         selections: [
             {

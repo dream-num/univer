@@ -30,7 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ITelemetryService, TelemetryEventNames } from '@univerjs/telemetry';
+import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
@@ -199,7 +199,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const sheetId = this._context.unit.getActiveSheet().getSheetId();
         const unitId = this._context.unit.getUnitId();
         const telemetryData = { sheetId, unitId, elapsedTimeToStart, ...summaryFrameStats };
-        this._telemetryService!.capture(TelemetryEventNames.sheet_render_cost, telemetryData);
+        this._telemetryService!.capture('sheet_render_cost', telemetryData);
     }
 
     private _addComponent(workbook: Workbook) {

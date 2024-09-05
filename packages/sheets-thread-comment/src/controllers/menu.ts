@@ -15,7 +15,7 @@
  */
 
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { UniverInstanceType } from '@univerjs/core';
@@ -28,7 +28,6 @@ export const threadCommentMenuFactory = (accessor: IAccessor) => {
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.CONTEXT_MENU],
         icon: COMMENT_SINGLE_ICON,
         title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -46,8 +45,6 @@ export const threadPanelMenuFactory = (accessor: IAccessor) => {
         type: MenuItemType.BUTTON,
         icon: COMMENT_SINGLE_ICON,
         tooltip: 'sheetThreadComment.menu.commentManagement',
-        positions: MenuPosition.TOOLBAR_START,
-        group: MenuGroup.TOOLBAR_OTHERS,
         disabled$: getCurrentRangeDisable$(accessor, {
             workbookTypes: [WorkbookCommentPermission],
             worksheetTypes: [WorksheetViewPermission],

@@ -191,9 +191,9 @@ export class SheetsFilterController extends Disposable {
         const filterColumn = filterModel.getAllFilterColumns();
         const effected = filterColumn.filter((column) => column[0] >= anchor);
         if (effected.length !== 0) {
-            const { undos: moveUndos, redos: moveRedos } = this.moveCriteria(unitId, subUnitId, effected, count);
-            redos.push(...moveRedos);
-            undos.push(...moveUndos);
+            const { newRange, oldRange } = this.moveCriteria(unitId, subUnitId, effected, count);
+            redos.push(...newRange.redos, ...oldRange.redos);
+            undos.push(...newRange.undos, ...oldRange.undos);
         }
 
         return { redos: mergeSetFilterCriteria(redos), undos: mergeSetFilterCriteria(undos) };
@@ -247,7 +247,6 @@ export class SheetsFilterController extends Disposable {
         if (removeStartColumn > endColumn) {
             return this._handleNull();
         }
-
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
 
@@ -271,10 +270,13 @@ export class SheetsFilterController extends Disposable {
             const [col, _] = column;
             return col > removeEndColumn;
         });
+
+        let newRangeCriteria: { undos: IMutationInfo[]; redos: IMutationInfo[] } = { undos: [], redos: [] };
         if (shifted.length > 0) {
-            const { undos: moveUndos, redos: moveRedos } = this.moveCriteria(unitId, subUnitId, shifted, -removeCount);
-            redos.push(...moveRedos);
-            undos.push(...moveUndos);
+            const { oldRange, newRange } = this.moveCriteria(unitId, subUnitId, shifted, -removeCount);
+            newRangeCriteria = newRange;
+            redos.push(...oldRange.redos);
+            undos.unshift(...oldRange.undos);
         }
 
         if (rangeRemoveCount === endColumn - startColumn + 1) {
@@ -283,36 +285,27 @@ export class SheetsFilterController extends Disposable {
                 subUnitId,
             };
             redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
+            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
         } else {
-            if (startColumn <= removeStartColumn) {
-                const finalEndColumn = endColumn - rangeRemoveCount;
-                const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
-                    unitId,
-                    subUnitId,
-                    range: {
-                        ...filterRange,
-                        endColumn: finalEndColumn,
-                    },
-                };
-                redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            } else {
-                const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
-                    unitId,
-                    subUnitId,
-                    range: {
-                        ...filterRange,
-                        startColumn: removeStartColumn,
-                        endColumn: endColumn - (removeEndColumn - removeStartColumn + 1),
-                    },
-                };
-                redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
-            }
+            const newStartColumn = startColumn <= removeStartColumn
+                ? startColumn :
+                (rangeRemoveCount === 0 ? startColumn - removeCount : removeStartColumn);
+            const newEndColumn = startColumn <= removeStartColumn ? endColumn - rangeRemoveCount : endColumn - removeCount;
+            const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
+                unitId,
+                subUnitId,
+                range: { ...filterRange, startColumn: newStartColumn, endColumn: newEndColumn },
+            };
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
+            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+
+            redos.push(...newRangeCriteria.redos);
+            undos.unshift(...newRangeCriteria.undos);
         }
 
-        undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
         return {
-            undos: mergeSetFilterCriteria(undos),
-            redos: mergeSetFilterCriteria(redos),
+            undos,
+            redos,
         };
     }
 
@@ -327,6 +320,18 @@ export class SheetsFilterController extends Disposable {
         const { startRow: removeStartRow, endRow: removeEndRow } = config.range;
         if (removeStartRow > endRow) {
             return this._handleNull();
+        }
+        if (removeEndRow < startRow) {
+            return {
+                undos: [{ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } }],
+                redos: [{ id: SetSheetsFilterRangeMutation.id, params: {
+                    range: {
+                        ...filterRange,
+                        startRow: startRow - (removeEndRow - removeStartRow + 1),
+                        endRow: endRow - (removeEndRow - removeStartRow + 1),
+                    },
+                    unitId, subUnitId } }],
+            };
         }
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
@@ -648,19 +653,21 @@ export class SheetsFilterController extends Disposable {
             criteria: null,
             col: -1,
         };
-        const undos: IMutationInfo[] = [];
-        const redos: IMutationInfo[] = [];
+        const oldUndos: IMutationInfo[] = [];
+        const oldRedos: IMutationInfo[] = [];
+        const newUndos: IMutationInfo[] = [];
+        const newRedos: IMutationInfo[] = [];
 
         target.forEach((column) => {
             const [offset, filter] = column;
-            redos.push({
+            oldRedos.push({
                 id: SetSheetsFilterCriteriaMutation.id,
                 params: {
                     ...defaultSetCriteriaMutationParams,
                     col: offset,
                 },
             });
-            undos.push({
+            oldUndos.push({
                 id: SetSheetsFilterCriteriaMutation.id,
                 params: {
                     ...defaultSetCriteriaMutationParams,
@@ -672,7 +679,7 @@ export class SheetsFilterController extends Disposable {
 
         target.forEach((column) => {
             const [offset, filter] = column;
-            redos.push({
+            newRedos.push({
                 id: SetSheetsFilterCriteriaMutation.id,
                 params: {
                     ...defaultSetCriteriaMutationParams,
@@ -680,7 +687,7 @@ export class SheetsFilterController extends Disposable {
                     criteria: { ...filter.serialize(), colId: offset + step },
                 },
             });
-            undos.push({
+            newUndos.push({
                 id: SetSheetsFilterCriteriaMutation.id,
                 params: {
                     ...defaultSetCriteriaMutationParams,
@@ -691,8 +698,14 @@ export class SheetsFilterController extends Disposable {
         });
 
         return {
-            redos,
-            undos,
+            newRange: {
+                redos: newRedos,
+                undos: newUndos,
+            },
+            oldRange: {
+                redos: oldRedos,
+                undos: oldUndos,
+            },
         };
     }
 

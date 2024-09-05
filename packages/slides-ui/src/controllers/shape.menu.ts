@@ -15,7 +15,7 @@
  */
 
 import type { IMenuButtonItem, IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
@@ -27,8 +27,6 @@ export function SlideShapeMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: SHAPE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: GRAPH_SINGLE_ICON,
         tooltip: 'slide.shape.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
@@ -41,7 +39,6 @@ export function UploadSlideFloatShapeMenuFactory(_accessor: IAccessor): IMenuBut
         id: InsertSlideShapeRectangleCommand.id,
         title: 'slide.shape.insert.rectangle',
         type: MenuItemType.BUTTON,
-        positions: [SHAPE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }

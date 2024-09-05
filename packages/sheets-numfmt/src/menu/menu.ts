@@ -25,7 +25,7 @@ import {
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { merge, Observable } from 'rxjs';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
@@ -65,8 +65,6 @@ export const CurrencyMenuItem = (accessor: IAccessor) => {
         title: 'sheet.numfmt.currency',
         tooltip: 'sheet.numfmt.currency',
         type: MenuItemType.BUTTON,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
 
@@ -80,8 +78,6 @@ export const AddDecimalMenuItem = (accessor: IAccessor) => {
         title: 'sheet.numfmt.addDecimal',
         tooltip: 'sheet.numfmt.addDecimal',
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -94,8 +90,6 @@ export const SubtractDecimalMenuItem = (accessor: IAccessor) => {
         title: 'sheet.numfmt.subtractDecimal',
         tooltip: 'sheet.numfmt.subtractDecimal',
         type: MenuItemType.BUTTON,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
@@ -108,8 +102,6 @@ export const PercentMenuItem = (accessor: IAccessor) => {
         title: 'sheet.numfmt.percent',
         tooltip: 'sheet.numfmt.percent',
         type: MenuItemType.BUTTON,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
 
@@ -167,8 +159,6 @@ export const FactoryOtherMenuItem = (accessor: IAccessor): IMenuSelectorItem => 
         id: OpenNumfmtPanelOperator.id,
         tooltip: 'sheet.numfmt.title',
         type: MenuItemType.SELECTOR,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
         selections: [
             {
                 label: {

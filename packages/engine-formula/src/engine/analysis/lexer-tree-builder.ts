@@ -1221,6 +1221,7 @@ export class LexerTreeBuilder extends Disposable {
                 } else {
                     this._pushNodeToChildren(currentString);
                     this._openBracket(bracketType.NORMAL);
+                    this._resetSegment();
                 }
             } else if (
                 currentString === matchToken.CLOSE_BRACKET &&

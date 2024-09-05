@@ -149,7 +149,7 @@ describe('lexer nodeMaker test', () => {
 
         it('minus test complex', () => {
             const node = lexerTreeBuilder.treeBuilder('= ( 2019-09-09 ) ') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["  2019","09","-","09 ","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" 2019","09","-","09 ","-"]}');
         });
 
         it('sheet range', () => {
@@ -474,6 +474,47 @@ describe('lexer nodeMaker test', () => {
                 startIndex: 0,
                 token: '{"2007/1/1", "2008/1/1"}',
             }]);
+        });
+
+        it('Array bracket double for sequence', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=-(A31:A38="AAA")-  (A31:A38="AAA")')).toStrictEqual(
+                [
+                    '-',
+                    '(',
+                    {
+                        endIndex: 8,
+                        nodeType: 4,
+                        startIndex: 2,
+                        token: 'A31:A38',
+                    },
+                    '=',
+                    {
+                        endIndex: 14,
+                        nodeType: 2,
+                        startIndex: 10,
+                        token: '"AAA"',
+                    },
+                    ')',
+                    '-',
+                    ' ',
+                    ' ',
+                    '(',
+                    {
+                        endIndex: 26,
+                        nodeType: 4,
+                        startIndex: 20,
+                        token: 'A31:A38',
+                    },
+                    '=',
+                    {
+                        endIndex: 32,
+                        nodeType: 2,
+                        startIndex: 28,
+                        token: '"AAA"',
+                    },
+                    ')',
+                ]
+            );
         });
     });
 

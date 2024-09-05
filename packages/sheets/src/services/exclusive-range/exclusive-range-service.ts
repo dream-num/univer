@@ -117,28 +117,25 @@ export class ExclusiveRangeService extends Disposable implements IExclusiveRange
 
     public getInterestGroupId(selections: ISelectionWithStyle[]): string[] {
         const interestGroupId: string[] = [];
-        for (const unitId of this._exclusiveRanges.keys()) {
-            for (const sheetId of this._exclusiveRanges.get(unitId)!.keys()) {
-                for (const feature of this._exclusiveRanges.get(unitId)!.get(sheetId)!.keys()) {
-                    const featureMapRanges = this.getExclusiveRanges(unitId, sheetId, feature);
-                    if (featureMapRanges) {
-                        for (const featureMapRange of featureMapRanges) {
-                            let isIntersect = false;
-                            for (const selection of selections) {
-                                if (Rectangle.intersects(selection.range, featureMapRange.range)) {
-                                    interestGroupId.push(feature);
-                                    isIntersect = true;
-                                    break;
-                                }
-                            }
-                            if (isIntersect) {
-                                break;
-                            }
+        selections.forEach((selection) => {
+            const range = selection.range;
+            const { unitId, sheetId } = range;
+            if (!unitId || !sheetId) return;
+            const featureMap = this._exclusiveRanges.get(unitId)?.get(sheetId);
+            if (!featureMap) return;
+            for (const feature of featureMap.keys()) {
+                const featureMapRanges = featureMap.get(feature);
+                if (featureMapRanges) {
+                    for (const featureMapRange of featureMapRanges) {
+                        if (Rectangle.intersects(range, featureMapRange.range)) {
+                            interestGroupId.push(feature);
+                            break;
                         }
                     }
                 }
             }
-        }
+        });
+
         return interestGroupId;
     }
 }

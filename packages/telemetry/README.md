@@ -5,7 +5,7 @@
 
 ## Introduction
 
-> TODO: Introduction
+This plugin provides interface `ITelemetry` to track telemetry data. The first-party plugins of Univer would dependent on this interface. If you want to track telemetry data, you can implement this interface and register it to `Univer`'s injector.
 
 ## Usage
 

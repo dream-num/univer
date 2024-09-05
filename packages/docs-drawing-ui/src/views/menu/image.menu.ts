@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
 
@@ -65,8 +65,6 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_LAYOUT,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
@@ -82,7 +80,6 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         label: {
             name: COMPONENT_DOC_UPLOAD_FILE_MENU,
         },
-        positions: [IMAGE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

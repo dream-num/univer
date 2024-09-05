@@ -174,7 +174,7 @@ function RectPopup(props: IRectPopupProps) {
             onPointerLeave={onPointerLeave}
             ref={nodeRef}
             style={style}
-            className={styles.popupAbsolute}
+            className={styles.popupFixed}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={onClick}
         >

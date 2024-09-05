@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
@@ -29,8 +29,6 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'sheetImage.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
@@ -49,7 +47,6 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
                 type: UploadFileType.floatImage,
             },
         },
-        positions: [IMAGE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
@@ -65,7 +62,6 @@ export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
                 type: UploadFileType.cellImage,
             },
         },
-        positions: [IMAGE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

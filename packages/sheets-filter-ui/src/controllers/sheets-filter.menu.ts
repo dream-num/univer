@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -30,11 +30,9 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
 
     return {
         id: SmartToggleSheetsFilterCommand.id,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         type: MenuItemType.BUTTON_SELECTOR,
         icon: 'FilterSingle',
         tooltip: 'sheets-filter.toolbar.smart-toggle-filter-tooltip',
-        positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),
         disabled$: getObservableWithExclusiveRange$(accessor, getCurrentRangeDisable$(accessor, { worksheetTypes: [WorksheetFilterPermission, WorksheetViewPermission], rangeTypes: [RangeProtectionPermissionViewPoint] })),
@@ -46,10 +44,8 @@ export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuBu
 
     return {
         id: ClearSheetsFilterCriteriaCommand.id,
-        group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         title: 'sheets-filter.toolbar.clear-filter-criteria',
-        positions: [SmartToggleSheetsFilterCommand.id],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };
@@ -60,10 +56,8 @@ export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
     return {
         id: ReCalcSheetsFilterCommand.id,
-        group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         title: 'sheets-filter.toolbar.re-calc-filter-conditions',
-        positions: [SmartToggleSheetsFilterCommand.id],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };

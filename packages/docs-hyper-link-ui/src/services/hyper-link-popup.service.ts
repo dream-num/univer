@@ -64,7 +64,7 @@ export class DocHyperLinkPopupService extends Disposable {
         return this._showingLink$.value;
     }
 
-    showEditPopup(linkInfo: Nullable<ILinkInfo>): Nullable<IDisposable> {
+    showEditPopup(unitId: string, linkInfo: Nullable<ILinkInfo>): Nullable<IDisposable> {
         if (this._editPopup) {
             this._editPopup.dispose();
         }
@@ -89,13 +89,15 @@ export class DocHyperLinkPopupService extends Disposable {
                 }]);
             }
         }
+
         if (activeRange) {
             this._editPopup = this._docCanvasPopupManagerService.attachPopupToRange(
                 activeRange,
                 {
                     componentKey: DocHyperLinkEdit.componentKey,
                     direction: 'bottom',
-                }
+                },
+                unitId
             );
             return this._editPopup;
         }
@@ -147,7 +149,8 @@ export class DocHyperLinkPopupService extends Disposable {
                 onClickOutside: () => {
                     this.hideInfoPopup();
                 },
-            }
+            },
+            info.unitId
         );
         return this._infoPopup;
     }

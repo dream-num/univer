@@ -69,11 +69,17 @@ export const ShowDocHyperLinkEditPopupOperation: ICommand<IShowDocHyperLinkEditP
     id: 'doc.operation.show-hyper-link-edit-popup',
     handler(accessor, params) {
         const linkInfo = params?.link;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         if (shouldDisableAddLink(accessor) && !linkInfo) {
             return false;
         }
         const hyperLinkService = accessor.get(DocHyperLinkPopupService);
-        hyperLinkService.showEditPopup(linkInfo);
+        const unitId = linkInfo?.unitId || univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+
+        if (!unitId) {
+            return false;
+        }
+        hyperLinkService.showEditPopup(unitId, linkInfo);
         return true;
     },
 };

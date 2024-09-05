@@ -17,7 +17,7 @@
 import { merge, Observable } from 'rxjs';
 import type { IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor, Workbook } from '@univerjs/core';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { checkRangesEditablePermission, RangeProtectionPermissionEditPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
@@ -157,8 +157,6 @@ export const FactoryManageConditionalFormattingRule = (accessor: IAccessor): IMe
     return {
         id: OpenConditionalFormattingOperator.id,
         type: MenuItemType.SELECTOR,
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        positions: [MenuPosition.TOOLBAR_START],
         icon: 'Conditions',
         tooltip: 'sheet.cf.title',
         selections: selections$,

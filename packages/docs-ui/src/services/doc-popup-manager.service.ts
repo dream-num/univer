@@ -15,7 +15,7 @@
  */
 
 import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
@@ -128,8 +128,6 @@ export class DocCanvasPopManagerService extends Disposable {
         super();
     }
 
-    // #region attach to object
-
     private _createObjectPositionObserver(
         targetObject: BaseObject,
         currentRender: IRender
@@ -216,27 +214,20 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    // #region attach to object
     /**
      * attach a popup to canvas object
      * @param targetObject target canvas object
      * @param popup popup item
      * @returns disposable
      */
-    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup): IDisposable {
-        const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)!;
-        const unitId = currentDoc.getUnitId();
-
+    attachPopupToObject(targetObject: BaseObject, popup: IDocCanvasPopup, unitId: string): IDisposable {
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
-            return {
-                dispose: () => {
-                    // empty
-                },
-            };
+            throw new Error(`Current render not found, unitId: ${unitId}`);
         }
 
         const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender);
-
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -255,18 +246,24 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
-    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, _unitId?: string): INeedCheckDisposable {
-        const currentDoc = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
-        const unitId = _unitId || currentDoc?.getUnitId() || '';
+    // #endregion
+    // #region attach to range
+    /**
+     * attach a popup to doc range
+     * @param range doc range
+     * @param popup popup item
+     * @param unitId unit id
+     * @returns disposable
+     */
+    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
+        const doc = this._univerInstanceService.getUnit(unitId);
+        if (!doc) {
+            throw new Error(`Document not found, unitId: ${unitId}`);
+        }
         const { direction = 'top', multipleDirection } = popup;
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
-            return {
-                dispose: () => {
-                    // empty
-                },
-                canDispose: () => true,
-            };
+            throw new Error(`Current render not found, unitId: ${unitId}`);
         }
 
         const { positions: bounds, positions$: bounds$, disposable } = this._createRangePositionObserver(range, currentRender);
@@ -295,4 +292,5 @@ export class DocCanvasPopManagerService extends Disposable {
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
+    // #endregion
 }

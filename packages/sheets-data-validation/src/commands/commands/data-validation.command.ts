@@ -349,7 +349,8 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
             return false;
         }
 
-        if (!validator.validatorFormula({ ...rule, ...setting }, unitId, subUnitId).success) {
+        const newRule = { ...rule, ...setting };
+        if (!validator.validatorFormula(newRule, unitId, subUnitId).success) {
             return false;
         }
 
@@ -359,7 +360,10 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
             ruleId,
             payload: {
                 type: UpdateRuleType.SETTING,
-                payload: setting,
+                payload: {
+                    ...setting,
+                    ...validator.normlizeFormula(newRule, unitId, subUnitId),
+                },
             },
         };
 

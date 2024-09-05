@@ -24,8 +24,14 @@ import type { IRange } from '../../sheets/typedef';
 // TODO@weird94: should be moved outside of the or package
 
 export interface IDataValidationRuleBase {
+    /**
+     * data validation type
+     */
     type: DataValidationType;
     allowBlank?: boolean;
+    /**
+     * data validation creteria
+     */
     formula1?: string;
     formula2?: string;
     operator?: DataValidationOperator;
@@ -34,14 +40,20 @@ export interface IDataValidationRuleBase {
 export interface IDataValidationRuleOptions {
     imeMode?: DataValidationImeMode;
     /**
-     * for dropdown
+     * for list&listMultiple, show dropdown or not
      */
     showDropDown?: boolean;
     /**
      * validator error
      */
     showErrorMessage?: boolean;
+    /**
+     * custom error tips
+     */
     error?: string;
+    /**
+     * reaction when validator error
+     */
     errorStyle?: DataValidationErrorStyle;
     errorTitle?: string;
     /**
@@ -51,13 +63,16 @@ export interface IDataValidationRuleOptions {
     prompt?: string;
     promptTitle?: string;
     /**
-     * cell render mode of data validation
+     * cell render mode of data validation, support TEXT, ARROW, CUSTOM
      */
     renderMode?: DataValidationRenderMode;
     /**
      * custom biz info
      */
     bizInfo?: {
+        /**
+         * show time in date picker
+         */
         showTime?: boolean;
     };
 }

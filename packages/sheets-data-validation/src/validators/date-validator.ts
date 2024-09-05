@@ -40,8 +40,13 @@ const transformDate2SerialNumber = (value: Nullable<CellValue>) => {
     }
 
     // transform date string to serial number
-    const dateStr = `${dayjs(value).format('YYYY-MM-DD HH:mm:ss')}`;
-    return numfmt.parseDate(dateStr)?.v as number | undefined;
+    const v = numfmt.parseDate(value)?.v as number | undefined;
+    if (Tools.isDefine(v)) {
+        return v;
+    }
+
+    // support like 2020年11月11日 locale date
+    return numfmt.parseDate(dayjs(value).format('YYYY-MM-DD HH:mm:ss'))?.v as number | undefined;
 };
 
 export class DateValidator extends BaseDataValidator<number> {
@@ -99,7 +104,7 @@ export class DateValidator extends BaseDataValidator<number> {
     }
 
     private _validatorSingleFormula(formula: string | undefined) {
-        return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula!) || (Boolean(formula) && dayjs(formula).isValid()));
+        return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula!) || Boolean(formula && numfmt.parseDate(formula)));
     }
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
@@ -125,6 +130,26 @@ export class DateValidator extends BaseDataValidator<number> {
         return {
             success: formula1Success,
             formula1: formula1Success ? undefined : errorMsg,
+        };
+    }
+
+    override normlizeFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
+        const { formula1, formula2, bizInfo } = rule;
+        const normlizeSingleFormula = (formula: string | undefined) => {
+            if (!formula) {
+                return formula;
+            }
+            const res = numfmt.parseDate(formula)?.v as number;
+            if (res === undefined || res === null) {
+                return '';
+            }
+            const date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
+            return dayjs(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
+        };
+
+        return {
+            formula1: isFormulaString(formula1) ? formula1 : normlizeSingleFormula(`${formula1}`),
+            formula2: isFormulaString(formula2) ? formula2 : normlizeSingleFormula(`${formula2}`),
         };
     }
 

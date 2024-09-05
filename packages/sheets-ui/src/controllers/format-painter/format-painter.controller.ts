@@ -145,7 +145,7 @@ export class FormatPainterController extends Disposable {
         };
     }
 
-    private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, range: IRange, format: ISelectionFormatInfo) {
+    private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, originRange: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;
 
@@ -155,6 +155,14 @@ export class FormatPainterController extends Disposable {
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
         const styleRowsNum = endRow - startRow + 1;
         const styleColsNum = endColumn - startColumn + 1;
+        const range = (originRange.startRow === originRange.endRow && originRange.startColumn === originRange.endColumn)
+            ? {
+                startRow: originRange.startRow,
+                startColumn: originRange.startColumn,
+                endRow: originRange.startRow + styleRowsNum - 1,
+                endColumn: originRange.startColumn + styleColsNum - 1,
+            }
+            : originRange;
         const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
             Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
         );

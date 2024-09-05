@@ -32,12 +32,10 @@ import styles from './index.module.less';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkSingle />,
-    // link: <LinkSingle />,
     [SheetHyperLinkType.SHEET]: <Xlsx />,
     [SheetHyperLinkType.RANGE]: <AllBorderSingle />,
     [SheetHyperLinkType.DEFINE_NAME]: <AllBorderSingle />,
     [SheetHyperLinkType.INVALID]: <AllBorderSingle />,
-    // 'sheet-error': <Xlsx />,
 };
 
 export const CellLinkPopup = () => {

@@ -84,6 +84,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
     private _updateEditorPosition(params: Nullable<ISelectionWithStyle[]>) {
         if (this._editorBridgeService.isVisible().visible) return;
+        if (this._rangeSelectorService.selectorModalVisible) return;
 
         const primary = params?.[params.length - 1]?.primary;
         if (primary) {

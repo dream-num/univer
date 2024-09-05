@@ -93,66 +93,57 @@ export const CellLinkEdit = () => {
                 };
             }
 
-            if (link) {
-                setId(link.id);
-                const customLink = sidePanelService.findCustomHyperLink(link);
-                if (customLink) {
-                    const customLinkInfo = customLink.convert(link);
-                    setType(customLinkInfo.type);
-                    setPayload(customLinkInfo.payload);
-                    setDisplay(customLinkInfo.display);
-                    return;
-                }
-                setDisplay(link.display);
-                const linkInfo = resolverService.parseHyperLink(link.payload);
-                setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
-                switch (linkInfo.type) {
-                    case SheetHyperLinkType.URL:{
-                        setPayload(linkInfo.url);
-                        if (linkInfo.url === link.display) {
-                            setByPayload.current = true;
-                        }
-                        break;
-                    }
-                    case SheetHyperLinkType.RANGE:{
-                        const params = linkInfo.searchObj!;
-                        const sheetName = params.gid ?
-                            univerInstanceService
-                                .getUnit<Workbook>(editing.unitId)
-                                ?.getSheetBySheetId(params.gid)
-                                ?.getName()
-                            ?? ''
-                            : '';
-                        const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
-                        setPayload(payload);
-                        if (payload === link.display) {
-                            setByPayload.current = true;
-                        }
-                        break;
-                    }
-                    case SheetHyperLinkType.SHEET:{
-                        const params = linkInfo.searchObj!;
-                        setPayload(params.gid!);
-                        break;
-                    }
-                    case SheetHyperLinkType.DEFINE_NAME:{
-                        const params = linkInfo.searchObj!;
-                        setPayload(params.rangeid!);
-                        break;
-                    }
-                    default:
-                        setPayload('');
-                        break;
-                }
+            setId(link.id);
+            const customLink = sidePanelService.findCustomHyperLink(link);
+            if (customLink) {
+                const customLinkInfo = customLink.convert(link);
+                setType(customLinkInfo.type);
+                setPayload(customLinkInfo.payload);
+                setDisplay(customLinkInfo.display);
+                return;
             }
-
-            return;
+            setDisplay(link.display);
+            const linkInfo = resolverService.parseHyperLink(link.payload);
+            setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
+            switch (linkInfo.type) {
+                case SheetHyperLinkType.URL:{
+                    setPayload(linkInfo.url);
+                    if (linkInfo.url === link.display) {
+                        setByPayload.current = true;
+                    }
+                    break;
+                }
+                case SheetHyperLinkType.RANGE:{
+                    const params = linkInfo.searchObj!;
+                    const sheetName = params.gid ?
+                        univerInstanceService
+                            .getUnit<Workbook>(editing.unitId)
+                            ?.getSheetBySheetId(params.gid)
+                            ?.getName()
+                            ?? ''
+                        : '';
+                    const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
+                    setPayload(payload);
+                    if (payload === link.display) {
+                        setByPayload.current = true;
+                    }
+                    break;
+                }
+                case SheetHyperLinkType.SHEET:{
+                    const params = linkInfo.searchObj!;
+                    setPayload(params.gid!);
+                    break;
+                }
+                case SheetHyperLinkType.DEFINE_NAME:{
+                    const params = linkInfo.searchObj!;
+                    setPayload(params.rangeid!);
+                    break;
+                }
+                default:
+                    setPayload('');
+                    break;
+            }
         }
-
-        setType(SheetHyperLinkType.URL);
-        setPayload('');
-        setDisplay('');
-        setId('');
     }, [editing, resolverService, sidePanelService, univerInstanceService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
@@ -335,13 +326,14 @@ export const CellLinkEdit = () => {
                         value={payloadInitial}
                         onChange={handleRangeChange}
                         onSelectorVisibleChange={(visible) => {
-                            if (editing?.type !== HyperLinkEditSourceType.ZEN_EDITOR) {
-                                return;
-                            }
                             if (visible) {
                                 zenZoneService.hide();
                                 setHide(true);
                             } else {
+                                commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                                    unitId: editing!.unitId,
+                                    subUnitId: editing!.subUnitId,
+                                });
                                 zenZoneService.show();
                                 setHide(false);
                             }

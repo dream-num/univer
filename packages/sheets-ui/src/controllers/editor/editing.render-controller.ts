@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -109,6 +109,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     private _workbookSelections: WorkbookSelections;
 
     private _d: Nullable<IDisposable>;
+    _cursorTimeout: NodeJS.Timeout;
 
     constructor(
         private readonly _context: IRenderContext<Workbook>,
@@ -177,8 +178,17 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._listenEditorFocus(d);
         this._commandExecutedListener(d);
 
+        const unit = this._instanceSrv.getFocusedUnit();
+        console.log('editor render controller 11111', unit?.getUnitId());
+        this._instanceSrv.unitDisposed$.subscribe((unit: UnitModel) => {
+            console.log('editor render controller clearTimeout unitDisposed$!!!!!!!!!!!', unit.getUnitId());
+            clearTimeout(this._cursorTimeout);
+        });
+
         // FIXME: this problem is the same with slide. Should be fixed when refactoring editor.
-        setTimeout(() => {
+        this._cursorTimeout = setTimeout(() => {
+            const unit = this._instanceSrv.getFocusedUnit();
+            console.log('editor render controller  22222', unit?.getUnitId());
             this._cursorStateListener(d);
         }, 1000);
 
@@ -990,6 +1000,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
      */
     private _cursorStateListener(d: DisposableCollection) {
         const editorObject = this._getEditorObject()!;
+        if (!editorObject.document) { console.trace(); }
         const { document: documentComponent } = editorObject;
 
         d.add(toDisposable(documentComponent.onPointerDown$.subscribeEvent(() => {
@@ -1164,4 +1175,3 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
     }
     return null;
 }
-

@@ -45,15 +45,15 @@ test('no error on constructing and disposing sheet unit', async ({ page }) => {
     });
 
     await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-    // controllers/format-painter/format-painter.controller.ts:67
+    // await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.disposeDefaultSheetUnit());
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.evaluate(() => window.E2EControllerAPI.disposeDefaultSheetUnit());
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.evaluate(() => window.E2EControllerAPI.disposeUniver());
-    // await page.waitForTimeout(2000 * 1000);
+
+    await page.waitForTimeout(2000 * 1000);
     expect(errored).toBeFalsy();
 });
 

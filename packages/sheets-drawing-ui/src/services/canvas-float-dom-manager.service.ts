@@ -255,8 +255,13 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const { unitId, subUnitId, drawingId } = param;
                     const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
                     const floatDomParam = this._drawingManagerService.getDrawingByParam(param) as IFloatDomData;
+
+                    if (floatDomParam == null || target == null) {
+                        return;
+                    }
+
                     const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
-                    if (floatDomParam == null || target == null || skeleton == null) {
+                    if (skeleton == null) {
                         return;
                     }
 

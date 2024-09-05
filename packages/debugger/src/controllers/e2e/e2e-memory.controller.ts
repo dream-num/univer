@@ -27,6 +27,7 @@ export interface IE2EControllerAPI {
     loadDefaultSheet(): Promise<void>;
     loadDefaultDoc(): Promise<void>;
     disposeUniver(): Promise<void>;
+    disposeDefaultSheetUnit(): Promise<void>;
 }
 
 declare global {
@@ -59,6 +60,7 @@ export class E2EMemoryController extends Disposable {
         window.E2EControllerAPI = {
             loadAndRelease: (id) => this._releaseAndLoad(id),
             loadDefaultSheet: () => this._loadDefaultSheet(),
+            disposeDefaultSheetUnit: (unitId?: string) => this._diposeDefaultSheetUnit(unitId),
             loadDefaultDoc: () => this._loadDefaultDoc(),
             disposeUniver: () => this._disposeUniver(),
         };
@@ -88,6 +90,13 @@ export class E2EMemoryController extends Disposable {
 
     private async _disposeUniver(): Promise<void> {
         await this._commandService.executeCommand(DisposeUniverCommand.id);
+    }
+
+    private async _diposeDefaultSheetUnit(unitIdP?: string): Promise<void> {
+        const unit = this._univerInstanceService.getCurrentUnitForType(2);//UniverType.UNIVER_SHEET;
+        const unitId = unit?.getUnitId();
+        await this._univerInstanceService.disposeUnit(unitIdP || unitId || '');
+        await timer(AWAIT_DISPOSING_TIMEOUT);
     }
 }
 

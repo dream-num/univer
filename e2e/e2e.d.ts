@@ -5,6 +5,7 @@ export interface IE2EControllerAPI {
     loadDefaultSheet(): Promise<void>;
     loadDefaultDoc(): Promise<void>;
     disposeUniver(): Promise<void>;
+    disposeDefaultSheetUnit(unitId?: string): Promise<void>;
 }
 
 declare global {

@@ -227,7 +227,7 @@ export const CellLinkEdit = () => {
     const handleSubmit = async () => {
         if (editing) {
             if (id) {
-                const commandId = editing.type === HyperLinkEditSourceType.EDITING ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
+                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
                 await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
@@ -238,7 +238,9 @@ export const CellLinkEdit = () => {
                     },
                     row: editing.row,
                     column: editing.col,
-                    documentId: editorBridgeService.getCurrentEditorId(),
+                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                        : editorBridgeService.getCurrentEditorId(),
                 });
             } else {
                 const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;

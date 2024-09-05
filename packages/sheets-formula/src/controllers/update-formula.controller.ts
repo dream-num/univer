@@ -109,7 +109,7 @@ import {
 import { filter, map, merge } from 'rxjs';
 import { IEditorService } from '@univerjs/ui';
 import { removeFormulaData } from './utils/offset-formula-data';
-import { getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
+import { formulaDataToCellData, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -255,6 +255,20 @@ export class UpdateFormulaController extends Disposable {
             },
         };
 
+        // update core snapshot
+        this._commandService.executeCommand(
+            SetRangeValuesMutation.id,
+            {
+                unitId,
+                subUnitId: sheetId,
+                cellValue: formulaDataToCellData(newSheetFormulaData),
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+
+        // update formula model
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 

@@ -123,8 +123,8 @@ export default {
         },
     },
     DROP: {
-        description: '配列の先頭または末尾から指定した数の行または列を除外します',
-        abstract: '配列の先頭または末尾から指定した数の行または列を除外します',
+        description: '配列の先頭または末尾から指定した数の行または列を削除します',
+        abstract: '配列の先頭または末尾から指定した数の行または列を削除します',
         links: [
             {
                 title: '指導',
@@ -132,8 +132,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行または列を削除する配列。' },
+            rows: { name: '行の数', detail: '削除する行の数。 負の値は配列の末尾から削除されます。' },
+            columns: { name: '列の数', detail: '削除する列の数。 負の値は配列の末尾から削除されます。' },
         },
     },
     EXPAND: {
@@ -146,8 +147,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '展開する配列。' },
+            rows: { name: '行の数', detail: '展開された配列内の行数。 存在しない場合、行は展開されません。' },
+            columns: { name: '列の数', detail: '展開された配列内の列の数。 存在しない場合、列は展開されません。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     FILTER: {

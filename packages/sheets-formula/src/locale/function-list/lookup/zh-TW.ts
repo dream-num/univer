@@ -133,8 +133,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排除列或欄的陣列。' },
+            rows: { name: '列數', detail: '要排除的列數。負值會從陣列結尾排除。' },
+            columns: { name: '欄數', detail: '要排除的欄數。負值會從陣列結尾排除。' },
         },
     },
     EXPAND: {
@@ -147,8 +148,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要展開的陣列。' },
+            rows: { name: '列數', detail: '展開陣列中的列數。 如果遺失，將不會展開列。' },
+            columns: { name: '欄數', detail: '展開陣列中的欄數。 如果遺失，欄將不會展開。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     FILTER: {

@@ -143,8 +143,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array from which to drop rows or columns.' },
+            rows: { name: 'rows', detail: 'The number of rows to drop. A negative value drops from the end of the array.' },
+            columns: { name: 'columns', detail: 'The number of columns to exclude. A negative value drops from the end of the array.' },
         },
     },
     EXPAND: {
@@ -157,8 +158,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array to expand.' },
+            rows: { name: 'rows', detail: 'The number of rows in the expanded array. If missing, rows will not be expanded.' },
+            columns: { name: 'columns', detail: 'The number of columns in the expanded array. If missing, columns will not be expanded.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     FILTER: {

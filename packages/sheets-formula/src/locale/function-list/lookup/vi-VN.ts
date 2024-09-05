@@ -138,8 +138,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng mà từ đó thả hàng hoặc cột.' },
+            rows: { name: 'số hàng', detail: 'Số hàng cần thả. Giá trị âm giảm từ cuối mảng.' },
+            columns: { name: 'số cột', detail: 'Số cột cần loại trừ. Giá trị âm giảm từ cuối mảng.' },
         },
     },
     EXPAND: {
@@ -152,8 +153,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng cần bung rộng.' },
+            rows: { name: 'số hàng', detail: 'Số hàng trong mảng đã bung rộng. Nếu thiếu, hàng sẽ không được bung rộng.' },
+            columns: { name: 'số cột', detail: 'Số cột trong mảng đã bung rộng. Nếu thiếu, cột sẽ không được bung rộng.' },
+            padWith: { name: 'giá trị cần đệm', detail: 'Giá trị cần đệm. Mặc định là #N/A.' },
         },
     },
     FILTER: {

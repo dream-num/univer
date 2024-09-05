@@ -124,8 +124,8 @@ export default {
         },
     },
     DROP: {
-        description: '从数组的开头或末尾排除指定数量的行或列',
-        abstract: '从数组的开头或末尾排除指定数量的行或列',
+        description: '从数组的开头或末尾删除指定数量的行或列',
+        abstract: '从数组的开头或末尾删除指定数量的行或列',
         links: [
             {
                 title: '教学',
@@ -133,8 +133,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要从中删除行或列的数组。' },
+            rows: { name: '行数', detail: '要删除的行数。负数表示从数组末尾开始删除。' },
+            columns: { name: '列数', detail: '要删除的列数。负数表示从数组末尾开始删除。' },
         },
     },
     EXPAND: {
@@ -147,8 +148,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要展开的数组。' },
+            rows: { name: '行数', detail: '扩展数组中的行数。 如果缺少，行将不会展开。' },
+            columns: { name: '列数', detail: '展开数组中的列数。 如果缺少，列将不会展开。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     FILTER: {

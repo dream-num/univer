@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, DataValidationType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import type { DocumentDataModel, IAccessor, ITextRange, Workbook } from '@univerjs/core';
@@ -52,8 +52,17 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             const { selections, sheet } = sheetWithSelection;
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
-            const cell = sheet.getCellRaw(row, col);
+            const cell = sheet.getCell(row, col);
             if (cell?.f || cell?.si) {
+                return true;
+            }
+            const disables = [
+                DataValidationType.CHECKBOX,
+                DataValidationType.LIST,
+                DataValidationType.LIST_MULTIPLE,
+            ];
+
+            if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
                 return true;
             }
 

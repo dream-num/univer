@@ -155,13 +155,6 @@ export interface IDropdownInfo {
 }
 
 export class DropdownWidget implements IBaseDataValidationWidget {
-    // static padding: IPaddingData = {
-    //     l: MARGIN_H + PADDING_H,
-    //     r: ICON_PLACE + MARGIN_H,
-    //     t: MARGIN_V,
-    //     b: MARGIN_V,
-    // };
-
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
 
     constructor(

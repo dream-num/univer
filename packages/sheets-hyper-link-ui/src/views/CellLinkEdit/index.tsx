@@ -16,13 +16,13 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
+import { createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { IEditorBridgeService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -51,6 +51,7 @@ export const CellLinkEdit = () => {
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
     const zenZoneService = useDependency(IZenZoneService);
+    const markSelectionService = useDependency(IMarkSelectionService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -145,6 +146,37 @@ export const CellLinkEdit = () => {
             }
         }
     }, [editing, resolverService, sidePanelService, univerInstanceService]);
+
+    useEffect(() => {
+        let id: Nullable<string> = null;
+        if (editing && editing.type === HyperLinkEditSourceType.EDITING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
+            id = markSelectionService.addShape(
+                {
+                    range: {
+                        startColumn: editing.col,
+                        endColumn: editing.col,
+                        startRow: editing.row,
+                        endRow: editing.row,
+                    },
+                    style: {
+                        hasAutoFill: false,
+                        fill: 'rgb(255, 189, 55, 0.35)',
+                        strokeWidth: 1,
+                        stroke: '#FFBD37',
+                        widgets: {},
+                    },
+                    primary: null,
+                },
+                [],
+                -1
+            );
+        }
+        return () => {
+            if (id) {
+                markSelectionService.removeShape(id);
+            }
+        };
+    }, [editing, markSelectionService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
 

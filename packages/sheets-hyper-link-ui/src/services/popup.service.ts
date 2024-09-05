@@ -307,6 +307,12 @@ export class SheetsHyperLinkPopupService extends Disposable {
             if (!customRange || !label) {
                 return;
             }
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: customRange.startIndex,
+                    endOffset: customRange.endIndex + 1,
+                },
+            ]);
             this._currentEditingPopup = this._docCanvasPopManagerService.attachPopupToRange(
                 {
                     startOffset: customRange.startIndex,
@@ -323,6 +329,12 @@ export class SheetsHyperLinkPopupService extends Disposable {
             }
             customRange = customRangeInfo.customRange;
             label = customRangeInfo.label;
+            this._textSelectionManagerService.replaceTextRanges([
+                {
+                    startOffset: customRange.startIndex,
+                    endOffset: customRange.endIndex + 1,
+                },
+            ]);
             this._currentEditingPopup = this._sheetCanvasPopManagerService.attachPopupToAbsolutePosition(
                 customRangeInfo.rects.pop()!,
                 this._editPopup,

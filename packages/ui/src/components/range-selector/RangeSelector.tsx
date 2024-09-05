@@ -180,7 +180,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         rangeSelectorService.triggerModalVisibleChange(selectorVisible);
-        onSelectorVisibleChange(selectorVisible);
     }, [onSelectorVisibleChange, rangeSelectorService, selectorVisible]);
 
     useEffect(() => {
@@ -202,6 +201,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     function handleCloseModal() {
         setSelectorVisible(false);
+        onSelectorVisibleChange(false);
         rangeSelectorService.setCurrentSelectorId(null);
     }
 
@@ -215,6 +215,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         rangeSelectorService.setCurrentSelectorId(id);
 
         setSelectorVisible(true);
+        onSelectorVisibleChange(true);
 
         if (rangeValue.length > 0) {
             if (valid) {

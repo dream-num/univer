@@ -177,6 +177,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [onSelectorVisibleChange, rangeSelectorService, selectorVisible]);
 
     useEffect(() => {
+        return () => {
+            rangeSelectorService.triggerModalVisibleChange(false);
+        };
+    }, [rangeSelectorService]);
+
+    useEffect(() => {
         openForSheetUnitIdRef.current = openForSheetUnitId;
         openForSheetSubUnitIdRef.current = openForSheetSubUnitId;
         isSingleChoiceRef.current = isSingleChoice;

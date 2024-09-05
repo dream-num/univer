@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
-import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
@@ -75,10 +75,10 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                     collapsed: true,
                 },
                 body: {
-                    dataStream: display,
+                    dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
                     customRanges: [{
                         startIndex: 0,
-                        endIndex: display.length - 1,
+                        endIndex: display.length + 1,
                         rangeType: CustomRangeType.HYPERLINK,
                         rangeId: id,
                         properties: {

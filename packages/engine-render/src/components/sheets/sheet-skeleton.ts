@@ -1612,6 +1612,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         for (let r = startRow; r <= endRow; r++) {
+            if (this.worksheet.getRowVisible(r) === false) {
+                continue;
+            }
             for (let c = startColumn; c <= endColumn; c++) {
                 this._setCellStylesCache(r, c);
             }

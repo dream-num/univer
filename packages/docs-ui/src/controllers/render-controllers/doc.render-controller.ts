@@ -108,11 +108,12 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         });
 
         // TODO@wzhudev: this shouldn't be a config, because we may render different units at the same time.
-        const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
-        if (hasScroll !== false) {
-            // eslint-disable-next-line no-new
-            new ScrollBar(viewMain);
-        }
+        // @jikkai: hasScroll has never been set before, so I commented it out.
+        // const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
+        // if (hasScroll !== false) {
+        // eslint-disable-next-line no-new
+        new ScrollBar(viewMain);
+        // }
 
         scene.addLayer(
             new Layer(scene, [], DOCS_COMPONENT_MAIN_LAYER_INDEX),

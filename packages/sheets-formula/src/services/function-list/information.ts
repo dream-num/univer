@@ -143,16 +143,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISFORMULA.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISFORMULA.functionParameter.number1.name',
-                detail: 'formula.functionList.ISFORMULA.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISFORMULA.functionParameter.number2.name',
-                detail: 'formula.functionList.ISFORMULA.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISFORMULA.functionParameter.reference.name',
+                detail: 'formula.functionList.ISFORMULA.functionParameter.reference.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -292,16 +285,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.N.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.N.functionParameter.number1.name',
-                detail: 'formula.functionList.N.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.N.functionParameter.number2.name',
-                detail: 'formula.functionList.N.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.N.functionParameter.value.name',
+                detail: 'formula.functionList.N.functionParameter.value.detail',
+                example: '7',
                 require: 1,
                 repeat: 0,
             },
@@ -313,20 +299,6 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         description: 'formula.functionList.NA.description',
         abstract: 'formula.functionList.NA.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.NA.functionParameter.number1.name',
-                detail: 'formula.functionList.NA.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.NA.functionParameter.number2.name',
-                detail: 'formula.functionList.NA.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {

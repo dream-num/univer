@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService } from '@univerjs/uniui';
-import type { IUniverDocsUIConfig } from '@univerjs/docs-ui';
 import { DocCreateTableOperation, DocUIController } from '@univerjs/docs-ui';
 import { BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
 import { IMAGE_MENU_ID as DocsImageMenuId } from '@univerjs/docs-drawing-ui';
-import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_TABLE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID, DocBoldMenuItemFactory, DocItalicMenuItemFactory, DocStrikeThroughMenuItemFactory, DocTableMenuFactory, DocUnderlineMenuItemFactory } from './menu';
+import { DOC_BOLD_MUTATION_ID, DOC_ITALIC_MUTATION_ID, DOC_STRIKE_MUTATION_ID, DOC_TABLE_MUTATION_ID, DOC_UNDERLINE_MUTATION_ID } from './menu';
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, UniDocsUIController)
 export class UniDocsUIController extends DocUIController {
     constructor(
-        config: Partial<IUniverDocsUIConfig>,
         @Inject(Injector) injector: Injector,
         @Inject(ComponentManager) componentManager: ComponentManager,
         @ICommandService commandService: ICommandService,
         @ILayoutService layoutService: ILayoutService,
-        @IMenuService menuService: IMenuService,
+        @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
         @IUniverInstanceService univerInstanceService: IUniverInstanceService,
         @IShortcutService shortcutService: IShortcutService,
+        @IConfigService configService: IConfigService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
-
     ) {
         super(
-            config,
             injector,
             componentManager,
             commandService,
             layoutService,
-            menuService,
+            menuManagerService,
             uiPartsService,
             univerInstanceService,
-            shortcutService
+            shortcutService,
+            configService
         );
         this._initUniMenus();
         this._initMutations();
     }
 
     private _initUniMenus(): void {
+        this._menuManagerService.appendRootMenu(menuSchema);
+
         ([
             [BuiltinUniToolbarItemId.FONT_FAMILY, SetInlineFormatFontFamilyCommand.id],
             [BuiltinUniToolbarItemId.FONT_SIZE, SetInlineFormatFontSizeCommand.id],
@@ -66,18 +66,6 @@ export class UniDocsUIController extends DocUIController {
             [BuiltinUniToolbarItemId.UNORDER_LIST, BulletListCommand.id],
         ]).forEach(([id, menuId]) => {
             this.disposeWithMe(this._toolbarService.implementItem(id, { id: menuId, type: UniverInstanceType.UNIVER_DOC }));
-        });
-
-        (
-            [
-                DocBoldMenuItemFactory,
-                DocItalicMenuItemFactory,
-                DocUnderlineMenuItemFactory,
-                DocStrikeThroughMenuItemFactory,
-                DocTableMenuFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
         });
     }
 

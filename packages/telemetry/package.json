@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/telemetry",
-    "version": "0.2.1",
+    "version": "0.2.11",
     "private": true,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -56,18 +56,16 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
-        "rxjs": ">=7.0.0"
+        "@univerjs/core": "workspace:*"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.3",
-        "vite": "^5.3.4",
-        "vitest": "^2.0.3"
+        "typescript": "^5.5.4",
+        "vite": "^5.4.2",
+        "vitest": "^2.0.5"
     },
     "univerSpace": {
         ".": {

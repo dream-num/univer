@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
 import {
@@ -25,8 +24,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
@@ -107,76 +105,6 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
 import { ScrollToRangeOperation } from '../commands/operations/scroll-to-range.operation';
 import {
-    ClearSelectionAllMenuItemFactory,
-    ClearSelectionContentMenuItemFactory,
-    ClearSelectionFormatMenuItemFactory,
-    ClearSelectionMenuItemFactory,
-} from './menu/clear.menu';
-import {
-    DeleteRangeMenuItemFactory,
-    DeleteRangeMoveLeftMenuItemFactory,
-    DeleteRangeMoveUpMenuItemFactory,
-    RemoveColMenuItemFactory,
-    RemoveRowMenuItemFactory,
-} from './menu/delete.menu';
-import {
-    CellInsertMenuItemFactory,
-    ColInsertMenuItemFactory,
-    InsertColAfterMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
-    InsertRangeMoveDownMenuItemFactory,
-    InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
-    RowInsertMenuItemFactory,
-} from './menu/insert.menu';
-import {
-    BackgroundColorSelectorMenuItemFactory,
-    BoldMenuItemFactory,
-    CancelFrozenMenuItemFactory,
-    CopyMenuItemFactory,
-    FitContentMenuItemFactory,
-    FontFamilySelectorMenuItemFactory,
-    FontSizeSelectorMenuItemFactory,
-    FormatPainterMenuItemFactory,
-    FrozenColMenuItemFactory,
-    FrozenMenuItemFactory,
-    FrozenRowMenuItemFactory,
-    HideColMenuItemFactory,
-    HideRowMenuItemFactory,
-    HorizontalAlignMenuItemFactory,
-    ItalicMenuItemFactory,
-    PasteBesidesBorderMenuItemFactory,
-    PasteColWidthMenuItemFactory,
-    PasteFormatMenuItemFactory,
-    PasteMenuItemFactory,
-    PasteSpacialMenuItemFactory,
-    PasteValueMenuItemFactory,
-    ResetBackgroundColorMenuItemFactory,
-    ResetTextColorMenuItemFactory,
-    SetColWidthMenuItemFactory,
-    SetRowHeightMenuItemFactory,
-    SheetFrozenHeaderMenuItemFactory,
-    SheetFrozenMenuItemFactory,
-    ShowColMenuItemFactory,
-    ShowRowMenuItemFactory,
-    StrikeThroughMenuItemFactory,
-    TextColorSelectorMenuItemFactory,
-    TextRotateMenuItemFactory,
-    UnderlineMenuItemFactory,
-    VerticalAlignMenuItemFactory,
-    WrapTextMenuItemFactory,
-} from './menu/menu';
-
-import {
-    ChangeColorSheetMenuItemFactory,
-    CopySheetMenuItemFactory,
-    DeleteSheetMenuItemFactory,
-    HideSheetMenuItemFactory,
-    RenameSheetMenuItemFactory,
-    ShowMenuItemFactory,
-} from './menu/sheet.menu';
-import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,
     EditorCursorEscShortcut,
@@ -226,28 +154,17 @@ import {
     ZoomInShortcutItem,
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
-import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
-import { sheetPermissionAddProtectContextMenuFactory, sheetPermissionChangeSheetPermissionSheetBarMenuFactory, sheetPermissionContextMenuFactory, sheetPermissionEditProtectContextMenuFactory, sheetPermissionProtectSheetInSheetBarMenuFactory, sheetPermissionRemoveProtectContextMenuFactory, sheetPermissionRemoveProtectionSheetBarMenuFactory, sheetPermissionToolbarMenuFactory, sheetPermissionViewAllProtectRuleContextMenuFactory, sheetPermissionViewAllProtectRuleSheetBarMenuFactory } from './menu/permission.menu';
-
-export interface IUniverSheetsUIConfig {
-    menu: MenuConfig;
-    disableAutoFocus?: true;
-    override?: DependencyOverride;
-}
-
-export const DefaultSheetUiConfig = {};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
-        protected readonly _config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ILayoutService protected readonly _layoutService: ILayoutService,
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
-        @IMenuService protected readonly _menuService: IMenuService,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService
     ) {
         super();
@@ -358,98 +275,8 @@ export class SheetUIController extends Disposable {
         });
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initMenus(): void {
-        const { menu = {} } = this._config;
-
-        (
-            [
-                // context menu
-                CopyMenuItemFactory,
-                PasteMenuItemFactory,
-                PasteSpacialMenuItemFactory,
-                PasteValueMenuItemFactory,
-                PasteFormatMenuItemFactory,
-                PasteColWidthMenuItemFactory,
-                PasteBesidesBorderMenuItemFactory,
-                ClearSelectionContentMenuItemFactory,
-                ClearSelectionFormatMenuItemFactory,
-                ClearSelectionAllMenuItemFactory,
-                ClearSelectionMenuItemFactory,
-                ColInsertMenuItemFactory,
-                RowInsertMenuItemFactory,
-                CellInsertMenuItemFactory,
-                InsertRowBeforeMenuItemFactory,
-                InsertRowAfterMenuItemFactory,
-                InsertColBeforeMenuItemFactory,
-                InsertColAfterMenuItemFactory,
-                RemoveRowMenuItemFactory,
-                HideRowMenuItemFactory,
-                ShowRowMenuItemFactory,
-                HideColMenuItemFactory,
-                ShowColMenuItemFactory,
-                RemoveColMenuItemFactory,
-                SetRowHeightMenuItemFactory,
-                FitContentMenuItemFactory,
-                SetColWidthMenuItemFactory,
-                DeleteRangeMenuItemFactory,
-                DeleteRangeMoveLeftMenuItemFactory,
-                DeleteRangeMoveUpMenuItemFactory,
-                InsertRangeMoveRightMenuItemFactory,
-                InsertRangeMoveDownMenuItemFactory,
-                FrozenMenuItemFactory,
-                FrozenRowMenuItemFactory,
-                FrozenColMenuItemFactory,
-                CancelFrozenMenuItemFactory,
-                SheetFrozenMenuItemFactory,
-                SheetFrozenHeaderMenuItemFactory,
-
-                // toolbar
-                FormatPainterMenuItemFactory,
-                BoldMenuItemFactory,
-                ItalicMenuItemFactory,
-                UnderlineMenuItemFactory,
-                StrikeThroughMenuItemFactory,
-                FontFamilySelectorMenuItemFactory,
-                FontSizeSelectorMenuItemFactory,
-                ResetTextColorMenuItemFactory,
-                TextColorSelectorMenuItemFactory,
-                ResetBackgroundColorMenuItemFactory,
-                BackgroundColorSelectorMenuItemFactory,
-                CellBorderSelectorMenuItemFactory,
-                CellMergeMenuItemFactory,
-                CellMergeAllMenuItemFactory,
-                CellMergeVerticalMenuItemFactory,
-                CellMergeHorizontalMenuItemFactory,
-                CellMergeCancelMenuItemFactory,
-                HorizontalAlignMenuItemFactory,
-                VerticalAlignMenuItemFactory,
-                WrapTextMenuItemFactory,
-                TextRotateMenuItemFactory,
-
-                // sheetbar
-                DeleteSheetMenuItemFactory,
-                CopySheetMenuItemFactory,
-                RenameSheetMenuItemFactory,
-                ChangeColorSheetMenuItemFactory,
-                HideSheetMenuItemFactory,
-                ShowMenuItemFactory,
-
-                // sheet protection
-                sheetPermissionContextMenuFactory,
-                sheetPermissionAddProtectContextMenuFactory,
-                sheetPermissionEditProtectContextMenuFactory,
-                sheetPermissionRemoveProtectContextMenuFactory,
-                sheetPermissionViewAllProtectRuleContextMenuFactory,
-                sheetPermissionProtectSheetInSheetBarMenuFactory,
-                sheetPermissionRemoveProtectionSheetBarMenuFactory,
-                sheetPermissionChangeSheetPermissionSheetBarMenuFactory,
-                sheetPermissionViewAllProtectRuleSheetBarMenuFactory,
-                sheetPermissionToolbarMenuFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortcuts(): void {

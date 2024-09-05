@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Dependency, Nullable } from '@univerjs/core';
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
@@ -31,7 +31,8 @@ import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.con
 import { SheetHyperLinkUrlController } from './controllers/url.controller';
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
-import type { IUniverSheetsHyperLinkUIConfig } from './types/interfaces/i-config';
+import type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsHyperLinkPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
@@ -39,21 +40,24 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private _config: Nullable<IUniverSheetsHyperLinkUIConfig>,
+        private readonly _config: Partial<IUniverSheetsHyperLinkUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected override _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         const dependencies: Dependency[] = [
-            [
-                SheetsHyperLinkResolverService,
-                {
-                    useFactory: () => this._injector.createInstance(SheetsHyperLinkResolverService, this._config?.urlHandler),
-                },
-            ],
+            [SheetsHyperLinkResolverService],
             [SheetsHyperLinkPopupService],
             [SheetsHyperLinkSidePanelService],
 
@@ -61,12 +65,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkRenderManagerController],
             [SheetHyperLinkSetRangeController],
             [SheetsHyperLinkPopupController],
-            [
-                SheetsHyperLinkUIController,
-                {
-                    useFactory: () => this._injector.createInstance(SheetsHyperLinkUIController, this._config),
-                },
-            ],
+            [SheetsHyperLinkUIController],
             [SheetsHyperLinkAutoFillController],
             [SheetsHyperLinkCopyPasteController],
             [SheetsHyperLinkPermissionController],

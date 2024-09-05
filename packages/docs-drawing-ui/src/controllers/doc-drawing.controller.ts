@@ -15,13 +15,12 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 
 import { AddImageSingle } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
-import { ImageMenuFactory, ImageUploadIcon, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
+import { ImageUploadIcon } from '../views/menu/image.menu';
 import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
 import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
@@ -38,13 +37,14 @@ import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.c
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
 export class DocDrawingUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
@@ -61,15 +61,7 @@ export class DocDrawingUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        // init menus
-        (
-            [
-                ImageMenuFactory,
-                UploadFloatImageMenuFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCommands() {

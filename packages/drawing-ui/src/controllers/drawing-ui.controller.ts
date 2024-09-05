@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ComponentManager } from '@univerjs/ui';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
@@ -27,11 +27,8 @@ import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.o
 @OnLifecycle(LifecycleStages.Rendered, DrawingUIController)
 export class DrawingUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @IMenuService private readonly _menuService: IMenuService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -42,17 +39,6 @@ export class DrawingUIController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_POPUP_MENU, ImagePopupMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_IMAGE_VIEWER, ImageViewer));
-    }
-
-    private _initMenus(): void {
-        // init menus
-        // (
-        //     [
-
-        //     ] as IMenuItemFactory[]
-        // ).forEach((factory) => {
-        //     this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
-        // });
     }
 
     private _initCommands() {
@@ -68,6 +54,5 @@ export class DrawingUIController extends Disposable {
     private _init(): void {
         this._initCommands();
         this._initCustomComponents();
-        this._initMenus();
     }
 }

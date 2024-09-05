@@ -94,6 +94,19 @@ export default {
             value: { name: 'Giá trị', detail: 'Giá trị cần kiểm tra. Nếu số không phải là số nguyên thì nó bị cắt cụt.' },
         },
     },
+    ISFORMULA: {
+        description: 'Kiểm tra xem liệu có tham chiếu đến ô chứa công thức hay không và trả về kết quả TRUE hoặc FALSE.',
+        abstract: 'Kiểm tra xem liệu có tham chiếu đến ô chứa công thức hay không và trả về kết quả TRUE hoặc FALSE.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/isformula-%E5%87%BD%E6%95%B0-e4d1355f-7121-4ef2-801e-3839bfd6b1e5',
+            },
+        ],
+        functionParameter: {
+            reference: { name: 'tham chiếu', detail: 'Tham chiếu là tham chiếu đến ô mà bạn muốn kiểm tra.' },
+        },
+    },
     ISLOGICAL: {
         description: 'Trả về TRUE nếu giá trị là giá trị logic',
         abstract: 'Trả về TRUE nếu giá trị là giá trị logic',
@@ -183,6 +196,31 @@ export default {
         ],
         functionParameter: {
             value: { name: 'Giá trị', detail: 'Giá trị mà bạn muốn kiểm tra. Đối số giá trị có thể là trống (ô trống), lỗi, giá trị lô-gic, văn bản, số, giá trị tham chiếu hoặc tên tham chiếu tới bất kỳ giá trị nào trong những giá trị này.' },
+        },
+    },
+    N: {
+        description: 'Trả về một giá trị được chuyển đổi thành số.',
+        abstract: 'Trả về một giá trị được chuyển đổi thành số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/n-%E5%87%BD%E6%95%B0-a624cad1-3635-4208-b54a-29733d1278c9',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị mà bạn muốn chuyển đổi.' },
+        },
+    },
+    NA: {
+        description: 'Trả về giá trị lỗi #N/A.',
+        abstract: 'Trả về giá trị lỗi #N/A.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/na-%E5%87%BD%E6%95%B0-5469c2d1-a90c-4fb5-9bbc-64bd9bb6b47c',
+            },
+        ],
+        functionParameter: {
         },
     },
     TYPE: {

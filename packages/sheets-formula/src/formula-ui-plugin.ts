@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -27,8 +27,7 @@ import { ArrayFormulaDisplayController } from './controllers/array-formula-displ
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
-import type { IUniverSheetsFormulaConfig } from './controllers/formula-ui.controller';
-import { DefaultSheetFormulaConfig, FormulaUIController } from './controllers/formula-ui.controller';
+import { FormulaUIController } from './controllers/formula-ui.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
@@ -42,6 +41,19 @@ import { FormulaRenderManagerController } from './controllers/formula-render.con
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 import { PromptController } from './controllers/prompt.controller';
 import { IRemoteRegisterFunctionService, RemoteRegisterFunctionService, RemoteRegisterFunctionServiceName } from './services/remote/remote-register-function.service';
+import type {
+    IUniverSheetsFormulaBaseConfig,
+    IUniverSheetsFormulaMobileConfig,
+    IUniverSheetsFormulaRemoteConfig,
+} from './controllers/config.schema';
+import {
+    defaultPluginBaseConfig,
+    defaultPluginMobileConfig,
+    defaultPluginRemoteConfig,
+    PLUGIN_CONFIG_KEY_BASE,
+    PLUGIN_CONFIG_KEY_MOBILE,
+    PLUGIN_CONFIG_KEY_REMOTE,
+} from './controllers/config.schema';
 
 @DependentOn(UniverFormulaEnginePlugin)
 export class UniverRemoteSheetsFormulaPlugin extends Plugin {
@@ -49,10 +61,15 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config = {},
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsFormulaRemoteConfig> = defaultPluginRemoteConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_REMOTE, rest);
     }
 
     override onStarting(): void {
@@ -73,13 +90,19 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
+        private readonly _config: Partial<IUniverSheetsFormulaBaseConfig> = defaultPluginBaseConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_BASE, rest);
     }
 
     override onStarting(): void {
@@ -87,11 +110,11 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
             [IRefSelectionsService, { useClass: RefSelectionsService }],
-            [IDescriptionService, { useFactory: () => j.createInstance(DescriptionService, this._config?.description) }],
+            [IDescriptionService, { useClass: DescriptionService }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],
-            [FormulaUIController, { useFactory: () => j.createInstance(FormulaUIController, this._config) }],
+            [FormulaUIController],
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],
@@ -131,12 +154,18 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsFormulaConfig> = {},
-        @Inject(Injector) override readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsFormulaMobileConfig> = defaultPluginMobileConfig,
+        @Inject(Injector) override readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
-        this._config = Tools.deepMerge({}, DefaultSheetFormulaConfig, this._config);
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY_MOBILE, rest);
     }
 
     override onStarting(): void {
@@ -147,12 +176,7 @@ export class UniverSheetsFormulaMobilePlugin extends Plugin {
         const dependencies: Dependency[] = [
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [
-                IDescriptionService,
-                {
-                    useFactory: () => this._injector.createInstance(DescriptionService, this._config?.description),
-                },
-            ],
+            [IDescriptionService, { useClass: DescriptionService }],
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],

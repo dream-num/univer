@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
 import { DataValidationModel } from './models/data-validation-model';
@@ -22,6 +22,8 @@ import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataVal
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
+import type { IUniverDataValidationConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_DATA_VALIDATION_PLUGIN';
 
@@ -30,11 +32,16 @@ export class UniverDataValidationPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config: unknown,
+        private readonly _config: Partial<IUniverDataValidationConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private _commandService: ICommandService
+        @ICommandService private _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

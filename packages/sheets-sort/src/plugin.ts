@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 
 import { SheetsSortController } from './controllers/sheets-sort.controller';
 import { SheetsSortService } from './services/sheets-sort.service';
+import type { IUniverSheetsSortConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
 
@@ -27,10 +29,15 @@ export class UniverSheetsSortPlugin extends Plugin {
     static override pluginName = NAME;
 
     constructor(
-        _config: unknown,
-        @Inject(Injector) protected readonly _injector: Injector
+        private readonly _config: Partial<IUniverSheetsSortConfig> = defaultPluginConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

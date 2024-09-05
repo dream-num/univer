@@ -43,6 +43,7 @@ export class DocMentionTriggerController extends Disposable {
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
                         this._commandService.executeCommand(ShowMentionEditPopupOperation.id, {
                             startIndex: activeRange.startOffset - 1,
+                            unitId: params.unitId,
                         });
                     }
                 }

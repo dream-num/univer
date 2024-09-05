@@ -16,11 +16,29 @@
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DeleteSingle, DownloadSingle, LockSingle, PivotTableSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
+import type { MenuConfig } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
-import { DeleteMenuItemFactory, DownloadMenuItemFactory, FakeBackgroundColorSelectorMenuItemFactory, FakeFontFamilySelectorMenuItemFactory, FakeFontGroupMenuItemFactory, FakeFontSizeSelectorMenuItemFactory, FakeImageMenuFactory, FakeOrderListMenuItemFactory, FakePivotTableMenuItemFactory, FakeTextColorSelectorMenuItemFactory, FakeUnorderListMenuItemFactory, FontGroupMenuItemFactory, LockMenuItemFactory, PrintMenuItemFactory, ShareMenuItemFactory, ZenMenuItemFactory } from './menu';
+// import {
+//     DeleteMenuItemFactory,
+//     DownloadMenuItemFactory,
+//     FakeBackgroundColorSelectorMenuItemFactory,
+//     FakeFontFamilySelectorMenuItemFactory,
+//     FakeFontGroupMenuItemFactory,
+//     FakeFontSizeSelectorMenuItemFactory,
+//     FakeImageMenuFactory,
+//     FakeOrderListMenuItemFactory,
+//     FakePivotTableMenuItemFactory,
+//     FakeTextColorSelectorMenuItemFactory,
+//     FakeUnorderListMenuItemFactory,
+//     FontGroupMenuItemFactory,
+//     LockMenuItemFactory,
+//     PrintMenuItemFactory,
+//     ShareMenuItemFactory,
+//     ZenMenuItemFactory,
+// } from './menu';
+import { menuSchema } from './menu.schema';
 
 export interface IUniuiToolbarConfig {
     menu: MenuConfig;
@@ -31,7 +49,7 @@ export const DefaultUniuiToolbarConfig = {};
 @OnLifecycle(LifecycleStages.Ready, UniuiToolbarController)
 export class UniuiToolbarController extends Disposable {
     constructor(
-        @IMenuService protected readonly _menuService: IMenuService,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -60,29 +78,31 @@ export class UniuiToolbarController extends Disposable {
     }
 
     private _initMenus(): void {
+        this._menuManagerService.appendRootMenu(menuSchema);
+
         // register menu factories
-        (
-            [
-                DownloadMenuItemFactory,
-                ShareMenuItemFactory,
-                LockMenuItemFactory,
-                PrintMenuItemFactory,
-                ZenMenuItemFactory,
-                DeleteMenuItemFactory,
-                FontGroupMenuItemFactory,
-                FakeFontFamilySelectorMenuItemFactory,
-                FakeTextColorSelectorMenuItemFactory,
-                FakeFontSizeSelectorMenuItemFactory,
-                FakeBackgroundColorSelectorMenuItemFactory,
-                FakeImageMenuFactory,
-                FakeFontGroupMenuItemFactory,
-                FakePivotTableMenuItemFactory,
-                FakeOrderListMenuItemFactory,
-                FakeUnorderListMenuItemFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
-        });
+        // (
+        //     [
+        //         DownloadMenuItemFactory,
+        //         ShareMenuItemFactory,
+        //         LockMenuItemFactory,
+        //         PrintMenuItemFactory,
+        //         ZenMenuItemFactory,
+        //         DeleteMenuItemFactory,
+        //         FontGroupMenuItemFactory,
+        //         FakeFontFamilySelectorMenuItemFactory,
+        //         FakeTextColorSelectorMenuItemFactory,
+        //         FakeFontSizeSelectorMenuItemFactory,
+        //         FakeBackgroundColorSelectorMenuItemFactory,
+        //         FakeImageMenuFactory,
+        //         FakeFontGroupMenuItemFactory,
+        //         FakePivotTableMenuItemFactory,
+        //         FakeOrderListMenuItemFactory,
+        //         FakeUnorderListMenuItemFactory,
+        //     ] as IMenuItemFactory[]
+        // ).forEach((factory) => {
+        //     this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), {}));
+        // });
     }
 
     private _initCommands(): void {

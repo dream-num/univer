@@ -25,7 +25,10 @@ import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.servi
 import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
 import { FloatDom } from '../../views/components/dom/FloatDom';
 import { MobileApp } from '../../views/MobileApp';
-import type { IUIController, IUniverUIConfig, IWorkbenchOptions } from './ui.controller';
+import type { IUniverUIConfig } from '../config.schema';
+import { IMenuManagerService } from '../../services/menu/menu-manager.service';
+import { menuSchema } from '../menus/menu.schema';
+import type { IUIController, IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
 
@@ -37,6 +40,7 @@ export class MobileUIController extends Disposable implements IUIController {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
@@ -44,6 +48,10 @@ export class MobileUIController extends Disposable implements IUIController {
         this._initBuiltinComponents();
 
         Promise.resolve().then(() => this._bootstrapWorkbench());
+    }
+
+    private _initMenus(): void {
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _bootstrapWorkbench(): void {

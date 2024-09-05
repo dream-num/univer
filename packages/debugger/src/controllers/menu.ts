@@ -17,7 +17,7 @@
 import { LocaleType } from '@univerjs/core';
 import { defaultTheme, greenTheme } from '@univerjs/design';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import { MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
@@ -40,7 +40,6 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         icon: 'VueI18nIcon',
         tooltip: 'i18n',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'English',
@@ -72,7 +71,6 @@ export function ThemeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Theme',
         tooltip: 'Theme',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'green',
@@ -92,7 +90,6 @@ export function NotificationMenuItemFactory(accessor: IAccessor): IMenuSelectorI
         title: 'Notification',
         tooltip: 'Notification',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Notification Success',
@@ -120,7 +117,6 @@ export function DialogMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Dialog',
         tooltip: 'Dialog',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Open Dialog',
@@ -140,7 +136,6 @@ export function ConfirmMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Confirm',
         tooltip: 'Confirm',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Open confirm',
@@ -156,7 +151,6 @@ export function MessageMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Message',
         tooltip: 'Message',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Open message',
@@ -172,7 +166,6 @@ export function SidebarMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Sidebar',
         tooltip: 'Sidebar',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Open sidebar',
@@ -192,7 +185,6 @@ export function SetEditableMenuItemFactory(accessor: IAccessor): IMenuSelectorIt
         title: 'Editable',
         tooltip: 'Editable',
         type: MenuItemType.SELECTOR,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'changeUniverEditable',
@@ -211,7 +203,6 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
         id: SaveSnapshotOptions.id,
         type: MenuItemType.SELECTOR,
         title: 'Snapshot',
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'saveWorkbook',
@@ -229,7 +220,7 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
     };
 }
 
-const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
+export const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 
 export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
@@ -237,7 +228,6 @@ export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
         title: 'Dispose',
         tooltip: 'Lifecycle Related Commands',
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
     };
 }
 
@@ -248,7 +238,6 @@ export function DisposeUniverItemFactory(_accessor: IAccessor): IMenuButtonItem 
         tooltip: 'Dispose the Univer instance',
         icon: 'DS',
         type: MenuItemType.BUTTON,
-        positions: [UNIT_ITEM_MENU_ID],
     };
 }
 
@@ -259,7 +248,6 @@ export function DisposeCurrentUnitMenuItemFactory(accessor: IAccessor): IMenuBut
         tooltip: 'Dispose Current Unit',
         icon: 'DS',
         type: MenuItemType.BUTTON,
-        positions: [UNIT_ITEM_MENU_ID],
     };
 }
 
@@ -270,11 +258,10 @@ export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButto
         tooltip: 'Create Another Sheet',
         icon: 'CR',
         type: MenuItemType.BUTTON,
-        positions: [UNIT_ITEM_MENU_ID],
     };
 }
 
-const FLOAT_DOM_ITEM_MENU_ID = 'debugger.float-dom-menu-item';
+export const FLOAT_DOM_ITEM_MENU_ID = 'debugger.float-dom-menu-item';
 
 export function FloatDomMenuItemFactory(): IMenuSelectorItem {
     return {
@@ -282,7 +269,6 @@ export function FloatDomMenuItemFactory(): IMenuSelectorItem {
         title: 'FloatDom',
         tooltip: 'Float Dom Commands',
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_OTHERS],
     };
 }
 
@@ -293,7 +279,6 @@ export function CreateFloatDOMMenuItemFactory(): IMenuButtonItem {
         tooltip: 'Create Float Dom',
         icon: 'DS',
         type: MenuItemType.BUTTON,
-        positions: [FLOAT_DOM_ITEM_MENU_ID],
     };
 }
 
@@ -302,7 +287,6 @@ export function ShowCellContentMenuItemFactory(accessor: IAccessor): IMenuButton
         id: ShowCellContentOperation.id,
         type: MenuItemType.BUTTON,
         title: 'Cell',
-        positions: [FLOAT_DOM_ITEM_MENU_ID],
         icon: 'DS',
     };
 }
@@ -312,7 +296,6 @@ export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
         id: ChangeUserCommand.id,
         type: MenuItemType.SELECTOR,
         title: 'Change User',
-        positions: [MenuPosition.TOOLBAR_OTHERS],
         selections: [
             {
                 label: 'Owner',
@@ -330,4 +313,3 @@ export function ChangeUserMenuItemFactory(): IMenuSelectorItem {
         ],
     };
 }
-

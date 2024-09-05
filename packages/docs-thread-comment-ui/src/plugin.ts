@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { PLUGIN_NAME } from './common/const';
-import type { IDocThreadCommentUIConfig } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentUIController } from './controllers/doc-thread-comment-ui.controller';
 import { DocThreadCommentService } from './services/doc-thread-comment.service';
 import { DocThreadCommentSelectionController } from './controllers/doc-thread-comment-selection.controller';
 import { DocThreadCommentRenderController } from './controllers/render-controllers/render.controller';
+import type { IUniverDocsThreadCommentUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverThreadCommentUIPlugin)
 export class UniverDocsThreadCommentUIPlugin extends Plugin {
@@ -31,21 +32,24 @@ export class UniverDocsThreadCommentUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
-        private _config: IDocThreadCommentUIConfig = { menu: {} },
+        private readonly _config: Partial<IUniverDocsThreadCommentUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
         ([
-            [
-                DocThreadCommentUIController,
-                {
-                    useFactory: () => this._injector.createInstance(DocThreadCommentUIController, this._config),
-                },
-            ],
+            [DocThreadCommentUIController],
             [DocThreadCommentSelectionController],
 
             [DocThreadCommentService],

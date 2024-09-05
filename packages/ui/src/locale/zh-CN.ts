@@ -15,15 +15,15 @@
  */
 
 const locale = {
-    uiToolbar: {
+    ribbon: {
         start: '开始',
         insert: '插入',
         formulas: '公式',
         data: '数据',
         view: '视图',
         others: '其他',
+        more: '更多',
     },
-    more: '更多',
     fontFamily: {
         TimesNewRoman: 'Times New Roman',
         Arial: 'Arial',

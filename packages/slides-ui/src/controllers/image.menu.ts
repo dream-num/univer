@@ -15,7 +15,7 @@
  */
 
 import type { IMenuItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../components/upload-component/component-name';
@@ -28,8 +28,6 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'slide.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
@@ -48,7 +46,6 @@ export function UploadSlideFloatImageMenuFactory(_accessor: IAccessor): IMenuIte
                 type: UploadFileType.floatImage,
             },
         },
-        positions: [IMAGE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }

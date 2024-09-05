@@ -16,7 +16,7 @@
 
 import React, { Component, createRef } from 'react';
 
-import type { IUniverDocsUIConfig } from '../../basics';
+import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
 import style from './index.module.less';
 
 interface IBaseDocContainerProps {
@@ -43,6 +43,7 @@ export class DocContainer extends Component<IBaseDocContainerProps> {
 
     constructor(props: IBaseDocContainerProps) {
         super(props);
+
         this.changeSkin(props.config.container as string, 'default');
     }
 

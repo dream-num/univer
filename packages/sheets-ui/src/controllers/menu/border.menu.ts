@@ -18,7 +18,7 @@ import { ICommandService, UniverInstanceType } from '@univerjs/core';
 import type { IBorderInfo } from '@univerjs/sheets';
 import { BorderStyleManagerService, RangeProtectionPermissionEditPoint, SetBorderBasicCommand, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import type { IMenuSelectorItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { Observable } from 'rxjs';
 
@@ -57,9 +57,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
             return disposable.dispose;
         }),
-        group: MenuGroup.TOOLBAR_FORMAT,
         tooltip: 'toolbar.border.main',
-        positions: [MenuPosition.TOOLBAR_START],
         type: MenuItemType.BUTTON_SELECTOR,
         selections: [
             {

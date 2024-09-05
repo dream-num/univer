@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { type IMenuButtonItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -24,11 +24,10 @@ import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operat
 export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenZenEditorOperation.id,
-        group: MenuGroup.CONTEXT_MENU_OTHERS,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
         icon: 'AmplifySingle',
-        positions: [MenuPosition.CONTEXT_MENU],
+        hidden$: getCurrentExclusiveRangeInterest$(accessor),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetSetCellStylePermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }

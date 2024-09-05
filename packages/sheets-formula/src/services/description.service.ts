@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Inject, LocaleService, toDisposable } from '@univerjs/core';
+import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionArray,
@@ -39,6 +39,8 @@ import {
 } from '@univerjs/engine-formula';
 import type { IDisposable } from '@univerjs/core';
 
+import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
 
@@ -119,9 +121,9 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     private _descriptions: IFunctionInfo[] = [];
 
     constructor(
-        private _description: IFunctionInfo[] = [],
         @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         this._initialize();
     }
@@ -255,7 +257,8 @@ export class DescriptionService implements IDescriptionService, IDisposable {
             return functions.includes(item.functionName as IFunctionNames);
         });
 
-        this._descriptions = filterFunctionList.concat(this._description);
+        const config = this._configService.getConfig<IUniverSheetsFormulaBaseConfig>(PLUGIN_CONFIG_KEY_BASE);
+        this._descriptions = filterFunctionList.concat(config?.description ?? []);
     }
 
     private _registerDescriptions() {
@@ -274,6 +277,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
                 repeat: item.repeat,
             })),
         }));
+
         this._functionService.registerDescriptions(...functionListLocale);
     }
 }

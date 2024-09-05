@@ -25,13 +25,12 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Spreads
 import { CURSOR_TYPE, Rect } from '@univerjs/engine-render';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
-import { IContextMenuService } from '@univerjs/ui';
+import { ContextMenuPosition, IContextMenuService } from '@univerjs/ui';
 
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { HEADER_MENU_SHAPE_TYPE, HeaderMenuShape } from '../../views/header-menu-shape';
-import { SheetMenuPosition } from '../menu/menu';
 import { getCoordByOffset } from '../utils/component-tools';
 
 const HEADER_MENU_CONTROLLER_SHAPE = '__SpreadsheetHeaderMenuSHAPEControllerShape__';
@@ -260,7 +259,7 @@ export class HeaderMenuRenderController extends Disposable implements IRenderMod
 
             evt.stopPropagation();
             evt.preventDefault();
-            this._contextMenuService.triggerContextMenu(evt, SheetMenuPosition.COL_HEADER_CONTEXT_MENU);
+            this._contextMenuService.triggerContextMenu(evt, ContextMenuPosition.COL_HEADER);
         });
     }
 

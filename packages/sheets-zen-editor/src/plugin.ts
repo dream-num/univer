@@ -14,37 +14,39 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, LocaleService, Plugin, Tools, UniverInstanceType } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 
 import { ZenEditorController } from './controllers/zen-editor.controller';
-import type { IUniverSheetsZenEditorUIConfig } from './controllers/zen-editor-ui.controller';
-import { DefaultSheetZenEditorUiConfig, ZenEditorUIController } from './controllers/zen-editor-ui.controller';
+import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
+import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsZenEditorUIConfig> = {},
+        private readonly _config: Partial<IUniverSheetsZenEditorConfig> = defaultPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
 
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initializeDependencies(this._injector);
-        this._config = Tools.deepMerge({}, DefaultSheetZenEditorUiConfig, this._config);
     }
 
     private _initializeDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            [
-                ZenEditorUIController,
-                {
-                    useFactory: () => this._injector.createInstance(ZenEditorUIController, this._config),
-                },
-            ],
+            [ZenEditorUIController],
             [ZenEditorController],
             [IZenEditorManagerService, { useClass: ZenEditorManagerService }],
         ];

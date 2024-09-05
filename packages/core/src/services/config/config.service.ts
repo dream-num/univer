@@ -15,6 +15,7 @@
  */
 
 import { createIdentifier } from '../../common/di';
+import { Tools } from '../../shared';
 
 import type { Nullable } from '../../shared/types';
 
@@ -25,25 +26,49 @@ import type { Nullable } from '../../shared/types';
  */
 export const IConfigService = createIdentifier<IConfigService>('univer.config-service');
 
+interface IConfigOptions {
+    /**
+     * Whether the configuration is read-only.
+     * Not implemented yet.
+     * @ignore
+     */
+    readonly?: boolean;
+
+    /**
+     * Whether to merge the configuration with the existing one.
+     * @default false
+     */
+    merge?: boolean;
+}
+
 export interface IConfigService {
-    getConfig<T>(id: string, defaultValue: T): T;
     getConfig<T>(id: string): Nullable<T>;
-    setConfig(id: string, value: unknown): void;
-    deleteConfig(id: string): void;
+    setConfig(id: string | symbol, value: unknown, options?: IConfigOptions): void;
+    deleteConfig(id: string): boolean;
 }
 
 export class ConfigService implements IConfigService {
-    private readonly _config: Map<string, any> = new Map();
+    private readonly _config: Map<string | symbol, any> = new Map();
 
-    getConfig<T>(id: string): Nullable<T> {
+    getConfig<T>(id: string | symbol): Nullable<T> {
         return this._config.get(id) as T;
     }
 
-    setConfig(id: string, value: unknown) {
+    setConfig(id: string, value: unknown, options?: IConfigOptions): void {
+        const { merge = false } = options || {};
+
+        const existingValue = this._config.get(id) ?? {};
+
+        if (merge) {
+            this._config.set(id, Tools.deepMerge(existingValue, value));
+
+            return;
+        }
+
         this._config.set(id, value);
     }
 
-    deleteConfig(id: string): void {
-        this._config.delete(id);
+    deleteConfig(id: string | symbol): boolean {
+        return this._config.delete(id);
     }
 }

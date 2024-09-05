@@ -16,21 +16,31 @@
 
 import type { IAccessor } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { ContextMenuPosition, RibbonPosition } from './types';
 
 export type OneOrMany<T> = T | T[];
 
+/** @deprecated */
 export enum MenuPosition {
     VOID = 'void',
-    TOOLBAR_START = 'uiToolbar.start',
-    TOOLBAR_INSERT = 'uiToolbar.insert',
-    TOOLBAR_FORMULAS = 'uiToolbar.formulas',
-    TOOLBAR_DATA = 'uiToolbar.data',
-    TOOLBAR_VIEW = 'uiToolbar.view',
-    TOOLBAR_OTHERS = 'uiToolbar.others',
-    CONTEXT_MENU = 'contextMenu',
+    // TOOLBAR_START = 'uiToolbar.start',
+    // TOOLBAR_INSERT = 'uiToolbar.insert',
+    // TOOLBAR_FORMULAS = 'uiToolbar.formulas',
+    // TOOLBAR_DATA = 'uiToolbar.data',
+    // TOOLBAR_VIEW = 'uiToolbar.view',
+    // TOOLBAR_OTHERS = 'uiToolbar.others',
+    // CONTEXT_MENU = 'contextMenu',
+    TOOLBAR_START = RibbonPosition.START,
+    TOOLBAR_INSERT = RibbonPosition.INSERT,
+    TOOLBAR_FORMULAS = RibbonPosition.FORMULAS,
+    TOOLBAR_DATA = RibbonPosition.DATA,
+    TOOLBAR_VIEW = RibbonPosition.VIEW,
+    TOOLBAR_OTHERS = RibbonPosition.OTHERS,
+    CONTEXT_MENU = ContextMenuPosition.MAIN_AREA,
     FOOTER = 'footer',
 }
 
+/** @deprecated */
 export enum MenuGroup {
     TOOLBAR_HISTORY,
     TOOLBAR_FORMAT,
@@ -79,7 +89,7 @@ interface IMenuItemBase<V> {
 
     /** In what menu should the item display. */
     /** @deprecated positions will be removed in the future. */
-    positions: OneOrMany<MenuPosition | string>;
+    positions?: OneOrMany<MenuPosition | string>;
 
     type: MenuItemType;
 
@@ -156,7 +166,7 @@ export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuI
 
 export type MenuItemDefaultValueType = string | number | undefined;
 
-export type IMenuItem = IMenuButtonItem<MenuItemDefaultValueType> | IMenuSelectorItem<MenuItemDefaultValueType>;
+export type IMenuItem = IMenuButtonItem<MenuItemDefaultValueType> | IMenuSelectorItem<MenuItemDefaultValueType, any>;
 
 export type IDisplayMenuItem<T extends IMenuItem> = T & {
     shortcut?: string;

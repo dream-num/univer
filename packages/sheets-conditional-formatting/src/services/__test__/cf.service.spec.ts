@@ -15,6 +15,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+import { Range } from '@univerjs/core';
 import type { IAverageHighlightCell, IColorScale, IConditionFormattingRule, IDataBar, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../models/type';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType } from '../../base/const';
 import { EMPTY_STYLE } from '../calculate-unit/type';
@@ -28,6 +29,14 @@ describe('Test conditional formatting service', () => {
         testBed = createTestBed();
         (testBed.getConditionalFormattingService() as any)._calculateUnit$.subscribe((config: any) => {
             (testBed.getConditionalFormattingService() as any)._handleCalculateUnit(config.unitId, config.subUnitId, config.rule);
+        });
+        (testBed.getConditionalFormattingRuleModel() as any)._ruleChange$.subscribe((config: any) => {
+            config.rule.ranges.forEach((range: any) => {
+                const viewModel = testBed.getConditionalFormattingViewModel();
+                Range.foreach(range, (row, col) => {
+                    viewModel.pushCellCf(config.unitId, config.subUnitId, row, col, config.rule.cfId);
+                });
+            });
         });
     });
 

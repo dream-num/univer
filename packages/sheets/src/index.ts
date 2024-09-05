@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { type IUniverSheetsConfig, UniverSheetsPlugin } from './sheets-plugin';
+export { UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services
 export { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE } from './basics/const/command-listener-const';
@@ -104,6 +104,8 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 export type { FormatType } from './services/numfmt/type';
 export { expandToContinuousRange } from './basics/expand-range';
 
+export { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+
 // permission
 export { defaultWorksheetPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './services/permission';
 export type { IWorksheetProtectionRule } from './services/permission/type';
@@ -178,6 +180,7 @@ export {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeVerticalCommand,
     AddWorksheetMergeHorizontalCommand,
+    addMergeCellsUtil,
 } from './commands/commands/add-worksheet-merge.command';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';

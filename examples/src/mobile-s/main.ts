@@ -48,9 +48,7 @@ const univer = new Univer({
 univer.registerPlugin(UniverFormulaEnginePlugin);
 
 // core plugins
-univer.registerPlugin(UniverDocsPlugin, {
-    hasScroll: false,
-});
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverMobileUIPlugin, { container: 'app', contextMenu: true });
 univer.registerPlugin(UniverRPCMainThreadPlugin, {

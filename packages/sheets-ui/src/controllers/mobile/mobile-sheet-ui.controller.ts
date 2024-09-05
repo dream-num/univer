@@ -23,8 +23,7 @@ import {
     SetStrikeThroughCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
-import type { IMenuItemFactory, MenuConfig } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import {
     AddWorksheetMergeAllCommand,
@@ -103,10 +102,6 @@ import { AddRangeProtectionFromContextMenuCommand, AddRangeProtectionFromSheetBa
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../../commands/commands/worksheet-protection.command';
 
 import {
-    CopyMenuItemFactory,
-} from '../menu/menu';
-
-import {
     EditorBreakLineShortcut,
     EditorCursorEnterShortcut,
     EditorCursorEscShortcut,
@@ -157,23 +152,17 @@ import {
     ZoomOutShortcutItem,
 } from '../shortcuts/view.shortcut';
 import { MobileSheetBar } from '../../views/mobile/sheet-bar/MobileSheetBar';
-
-export interface IUniverSheetsUIConfig {
-    menu: MenuConfig;
-}
-
-export const DefaultSheetUiConfig = {};
+import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, SheetUIMobileController)
 export class SheetUIMobileController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSheetsUIConfig>,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @IUIPartsService private readonly _uiPartsService: IUIPartsService
     ) {
         super();
@@ -283,84 +272,7 @@ export class SheetUIMobileController extends Disposable {
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config;
-
-        (
-            [
-                // context menu
-                CopyMenuItemFactory,
-                // PasteMenuItemFactory,
-                // PasteSpacialMenuItemFactory,
-                // PasteValueMenuItemFactory,
-                // PasteFormatMenuItemFactory,
-                // PasteColWidthMenuItemFactory,
-                // PasteBesidesBorderMenuItemFactory,
-                // ClearSelectionContentMenuItemFactory,
-                // ClearSelectionFormatMenuItemFactory,
-                // ClearSelectionAllMenuItemFactory,
-                // ClearSelectionMenuItemFactory,
-                // ColInsertMenuItemFactory,
-                // RowInsertMenuItemFactory,
-                // CellInsertMenuItemFactory,
-                // InsertRowBeforeMenuItemFactory,
-                // InsertRowAfterMenuItemFactory,
-                // InsertColBeforeMenuItemFactory,
-                // InsertColAfterMenuItemFactory,
-                // RemoveRowMenuItemFactory,
-                // HideRowMenuItemFactory,
-                // ShowRowMenuItemFactory,
-                // HideColMenuItemFactory,
-                // ShowColMenuItemFactory,
-                // RemoveColMenuItemFactory,
-                // SetRowHeightMenuItemFactory,
-                // FitContentMenuItemFactory,
-                // SetColWidthMenuItemFactory,
-                // DeleteRangeMenuItemFactory,
-                // DeleteRangeMoveLeftMenuItemFactory,
-                // DeleteRangeMoveUpMenuItemFactory,
-                // InsertRangeMoveRightMenuItemFactory,
-                // InsertRangeMoveDownMenuItemFactory,
-                // FrozenMenuItemFactory,
-                // FrozenRowMenuItemFactory,
-                // FrozenColMenuItemFactory,
-                // CancelFrozenMenuItemFactory,
-                // SheetFrozenMenuItemFactory,
-                // SheetFrozenHeaderMenuItemFactory,
-
-                // toolbar
-                // FormatPainterMenuItemFactory,
-                // BoldMenuItemFactory,
-                // ItalicMenuItemFactory,
-                // UnderlineMenuItemFactory,
-                // StrikeThroughMenuItemFactory,
-                // FontFamilySelectorMenuItemFactory,
-                // FontSizeSelectorMenuItemFactory,
-                // ResetTextColorMenuItemFactory,
-                // TextColorSelectorMenuItemFactory,
-                // ResetBackgroundColorMenuItemFactory,
-                // BackgroundColorSelectorMenuItemFactory,
-                // CellBorderSelectorMenuItemFactory,
-                // CellMergeMenuItemFactory,
-                // CellMergeAllMenuItemFactory,
-                // CellMergeVerticalMenuItemFactory,
-                // CellMergeHorizontalMenuItemFactory,
-                // CellMergeCancelMenuItemFactory,
-                // HorizontalAlignMenuItemFactory,
-                // VerticalAlignMenuItemFactory,
-                // WrapTextMenuItemFactory,
-                // TextRotateMenuItemFactory,
-
-                // sheetbar
-                // DeleteSheetMenuItemFactory,
-                // CopySheetMenuItemFactory,
-                // RenameSheetMenuItemFactory,
-                // ChangeColorSheetMenuItemFactory,
-                // HideSheetMenuItemFactory,
-                // ShowMenuItemFactory,
-            ] as IMenuItemFactory[]
-        ).forEach((factory) => {
-            this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory), menu));
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initShortcuts(): void {

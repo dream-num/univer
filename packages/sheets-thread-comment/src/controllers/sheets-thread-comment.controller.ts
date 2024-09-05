@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride, Nullable, Workbook } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { CommentSingle } from '@univerjs/icons';
 import { SetActiveCommentOperation, THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -32,16 +31,8 @@ import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
-import { AddCommentShortcut, threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
-
-export interface IUniverSheetsThreadCommentConfig {
-    menu?: MenuConfig;
-    overrides?: DependencyOverride;
-}
-
-export const DefaultSheetsThreadCommentConfig: IUniverSheetsThreadCommentConfig = {
-
-};
+import { AddCommentShortcut } from './menu';
+import { menuSchema } from './menu.schema';
 
 interface ISelectionShapeInfo {
     shapeId: string;
@@ -56,8 +47,7 @@ export class SheetsThreadCommentController extends Disposable {
     private _selectionShapeInfo: Nullable<ISelectionShapeInfo> = null;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsThreadCommentConfig>,
-        @IMenuService private readonly _menuService: IMenuService,
+        @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
@@ -148,14 +138,7 @@ export class SheetsThreadCommentController extends Disposable {
     }
 
     private _initMenu() {
-        const { menu = {} } = this._config;
-
-        [
-            threadCommentMenuFactory,
-            threadPanelMenuFactory,
-        ].forEach((menuFactory) => {
-            this._menuService.addMenuItem(menuFactory(this._injector), menu);
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initComponent() {

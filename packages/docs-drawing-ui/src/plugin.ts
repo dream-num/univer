@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DependentOn, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -27,6 +27,8 @@ import { DocDrawingTransformUpdateController } from './controllers/render-contro
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
+import type { IUniverDocsDrawingUIConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
 
@@ -36,11 +38,16 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        _config: undefined,
+        private readonly _config: Partial<IUniverDocsDrawingUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

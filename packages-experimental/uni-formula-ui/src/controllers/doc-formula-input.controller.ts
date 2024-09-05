@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IInsertCommandParams } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/ui';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 
+import { filter, map, mergeMap } from 'rxjs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
 import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
@@ -35,9 +38,9 @@ export class DocUniFormulaInputController extends Disposable {
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService,
         @ILogService private readonly _logService: ILogService,
-        @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
         @Inject(UniFormulaPopupService) private readonly _formulaPopupSrv: UniFormulaPopupService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -91,11 +94,16 @@ export class DocUniFormulaInputController extends Disposable {
     }
 
     private _initHoverListener(): void {
-        this.disposeWithMe(this._docEventManagerService.hoverCustomRanges$.subscribe((customRanges) => {
-            const focusedUnit = this._instanceSrv.getFocusedUnit();
+        const rangesWithDoc$ = this._instanceSrv.focused$.pipe(
+            map((focused) => focused ? this._instanceSrv.getUnit<DocumentDataModel>(focused, UniverInstanceType.UNIVER_DOC) : null),
+            map((doc) => doc && { doc, docEventManagerService: this._renderManagerService.getRenderById(doc!.getUnitId())?.with(DocEventManagerService) }),
+            filter((info) => !!info),
+            mergeMap((info) => info.docEventManagerService!.hoverCustomRanges$.pipe(map((ranges) => ({ doc: info.doc, ranges }))))
+        );
 
+        this.disposeWithMe(rangesWithDoc$.subscribe(({ doc, ranges: customRanges }) => {
             if (
-                !focusedUnit ||
+                !doc ||
                 this._formulaPopupSrv.popupInfo?.type === 'new' ||
                 this._formulaPopupSrv.popupLocked
             ) {
@@ -108,7 +116,32 @@ export class DocUniFormulaInputController extends Disposable {
                 this._logService.debug('[DocUniFormulaController]: activeCustomRanges', customRanges);
                 this._showPopup({
                     startIndex,
-                    unitId: focusedUnit.getUnitId(),
+                    unitId: doc.getUnitId(),
+                    position: { rangeId },
+                    type: 'existing',
+                });
+            } else {
+                if (!this._hovered) {
+                    this._closePopup(500);
+                }
+            }
+        }));
+        this.disposeWithMe(rangesWithDoc$.subscribe(({ doc, ranges: customRanges }) => {
+            if (
+                !doc ||
+                this._formulaPopupSrv.popupInfo?.type === 'new' ||
+                this._formulaPopupSrv.popupLocked
+            ) {
+                return;
+            }
+
+            const formulaCustomRange = customRanges.find((range) => range.range.rangeType === CustomRangeType.UNI_FORMULA)?.range;
+            if (formulaCustomRange) {
+                const { startIndex, rangeId } = formulaCustomRange;
+                this._logService.debug('[DocUniFormulaController]: activeCustomRanges', customRanges);
+                this._showPopup({
+                    startIndex,
+                    unitId: doc.getUnitId(),
                     position: { rangeId },
                     type: 'existing',
                 });

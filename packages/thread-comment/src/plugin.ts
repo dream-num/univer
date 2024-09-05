@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyOverride } from '@univerjs/core';
-import { ICommandService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { TC_PLUGIN_NAME } from './types/const';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation, UpdateCommentRefMutation } from './commands/mutations/comment.mutation';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
-
-export interface IUniverThreadCommentConfig {
-    overrides?: DependencyOverride;
-}
+import type { IUniverThreadCommentConfig } from './controllers/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_UNKNOWN;
-    private _config: IUniverThreadCommentConfig;
 
     constructor(
-        config: IUniverThreadCommentConfig,
+        private readonly _config: Partial<IUniverThreadCommentConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService protected _commandService: ICommandService
+        @ICommandService protected _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
-        this._config = config;
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
-import type { MenuConfig } from '@univerjs/ui';
-import { BuiltInUIPart, ComponentManager, IMenuService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
@@ -35,18 +33,11 @@ import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
 import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
-import { IMAGE_UPLOAD_ICON, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
-import { GRAPH_SINGLE_ICON, SlideShapeMenuFactory, UploadSlideFloatShapeMenuFactory } from './shape.menu';
+import { IMAGE_UPLOAD_ICON } from './image.menu';
+import { GRAPH_SINGLE_ICON } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
-import { SlideAddTextMenuItemFactory, TEXT_ICON_ID } from './text.menu';
-
-export interface IUniverSlidesDrawingConfig {
-    menu?: MenuConfig;
-    override?: DependencyOverride;
-}
-
-export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
-};
+import { TEXT_ICON_ID } from './text.menu';
+import { menuSchema } from './menu.schema';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
@@ -54,9 +45,8 @@ export const DefaultSlidesDrawingConfig: IUniverSlidesDrawingConfig = {
 @OnLifecycle(LifecycleStages.Ready, SlidesUIController)
 export class SlidesUIController extends Disposable {
     constructor(
-        private readonly _config: Partial<IUniverSlidesDrawingConfig>,
         @Inject(Injector) protected readonly _injector: Injector,
-        @IMenuService protected readonly _menuService: IMenuService,
+        @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
         @Inject(ComponentManager) protected readonly _componentManager: ComponentManager,
         @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
         @ICommandService protected readonly _commandService: ICommandService,
@@ -72,17 +62,7 @@ export class SlidesUIController extends Disposable {
     }
 
     private _initMenus(): void {
-        const { menu = {} } = this._config || {};
-
-        [
-            SlideAddTextMenuItemFactory,
-            SlideImageMenuFactory,
-            UploadSlideFloatImageMenuFactory,
-            SlideShapeMenuFactory,
-            UploadSlideFloatShapeMenuFactory,
-        ].forEach((menuFactory) => {
-            this._menuService.addMenuItem(menuFactory(this._injector), menu);
-        });
+        this._menuManagerService.mergeMenu(menuSchema);
     }
 
     private _initCustomComponents(): void {

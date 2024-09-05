@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -23,7 +23,8 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import type { IUrlHandler } from '../types/interfaces/i-config';
+import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
+import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
 
 interface ISheetUrlParams {
     gid?: string;
@@ -66,12 +67,12 @@ export interface IHyperLinkInfo<T extends string> {
 
 export class SheetsHyperLinkResolverService {
     constructor(
-        private _urlHandler: Nullable<IUrlHandler>,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
         @IDefinedNamesService private _definedNamesService: IDefinedNamesService,
         @IMessageService private _messageService: IMessageService,
-        @Inject(LocaleService) private _localeService: LocaleService
+        @Inject(LocaleService) private _localeService: LocaleService,
+        @IConfigService private _configService: IConfigService
     ) { }
 
     private _getURLName(params: ISheetUrlParams) {
@@ -285,8 +286,10 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToOtherWebsite(url: string) {
-        if (this._urlHandler?.navigateToOtherWebsite) {
-            return this._urlHandler.navigateToOtherWebsite(url);
+        const config = this._configService.getConfig<IUniverSheetsHyperLinkUIConfig>(PLUGIN_CONFIG_KEY);
+
+        if (config?.urlHandler?.navigateToOtherWebsite) {
+            return config.urlHandler.navigateToOtherWebsite(url);
         }
 
         window.open(url, '_blank', 'noopener noreferrer');

@@ -23,7 +23,6 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 import type { Image, Scene } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
@@ -58,42 +57,11 @@ export class ImageUpdateController extends Disposable {
     }
 
     private _initialize() {
-        this._recoveryImages();
-
         this._drawingAddListener();
 
         this._commandExecutedListener();
 
         this._imageUpdateListener();
-    }
-
-    private _recoveryImages() {
-        const drawingList = this._drawingManagerService.drawingManagerData;
-        const info = getCurrentUnitInfo(this._currentUniverService);
-        if (info == null) {
-            return;
-        }
-
-        const { unitId: currentUnitId, subUnitId: currentSubUnitId, current } = info;
-
-        if (current.type === UniverInstanceType.UNIVER_DOC) {
-            return;
-        }
-
-        Object.keys(drawingList).forEach((unitId) => {
-            Object.keys(drawingList[unitId]).forEach((subUnitId) => {
-                const drawingMap = drawingList[unitId][subUnitId].data;
-                if (drawingMap == null || unitId !== currentUnitId || subUnitId !== currentSubUnitId) {
-                    return;
-                }
-                Object.keys(drawingMap).forEach((drawingId) => {
-                    const drawing = drawingMap[drawingId];
-                    if (drawing) {
-                        this._insertImages([{ unitId, subUnitId, drawingId }]);
-                    }
-                });
-            });
-        });
     }
 
     private _commandExecutedListener() {

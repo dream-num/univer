@@ -143,7 +143,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([
                 IDescriptionService,
                 {
-                    useFactory: () => this._injector.createInstance(DescriptionService, undefined),
+                    useFactory: () => this._injector.createInstance(DescriptionService),
                 },
             ]);
 

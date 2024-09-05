@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin } from '@univerjs/core';
-import type { Ctor, Dependency } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import type { Dependency } from '@univerjs/core';
 
-import type { IFunctionNames } from './basics/function';
 import { CalculateController } from './controller/calculate.controller';
 import { FormulaController } from './controller/formula.controller';
 import { SetDefinedNameController } from './controller/set-defined-name.controller';
@@ -39,7 +38,6 @@ import { UnionNodeFactory } from './engine/ast-node/union-node';
 import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
-import type { BaseFunction } from './functions/base-function';
 import { FormulaDataModel } from './models/formula-data.model';
 import { CalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
@@ -55,22 +53,24 @@ import { ISuperTableService, SuperTableService } from './services/super-table.se
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import { SetDependencyController } from './controller/set-dependency.controller';
+import type { IUniverEngineFormulaConfig } from './controller/config.schema';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 
 const PLUGIN_NAME = 'base-formula-engine';
-
-interface IUniverFormulaEngine {
-    notExecuteFormula?: boolean;
-    function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
-}
 
 export class UniverFormulaEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        private _config: IUniverFormulaEngine,
-        @Inject(Injector) protected override _injector: Injector
+        private readonly _config: Partial<IUniverEngineFormulaConfig> = defaultPluginConfig,
+        @Inject(Injector) protected override _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting(): void {
@@ -93,12 +93,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [LexerTreeBuilder],
 
             //Controllers
-            [
-                FormulaController,
-                {
-                    useFactory: () => this._injector.createInstance(FormulaController, this._config?.function),
-                },
-            ],
+            [FormulaController],
             [SetDefinedNameController],
             [SetSuperTableController],
         ];

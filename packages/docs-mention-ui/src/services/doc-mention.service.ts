@@ -19,7 +19,7 @@ import { Disposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 export class DocMentionService extends Disposable {
-    private readonly _editing$ = new BehaviorSubject<Nullable<number>>(undefined);
+    private readonly _editing$ = new BehaviorSubject<Nullable<{ unitId: string; index: number }>>(undefined);
     readonly editing$ = this._editing$.asObservable();
 
     get editing() {
@@ -34,8 +34,8 @@ export class DocMentionService extends Disposable {
         });
     }
 
-    startEditing(index: number) {
-        this._editing$.next(index);
+    startEditing(item: { unitId: string; index: number }) {
+        this._editing$.next(item);
     }
 
     endEditing() {

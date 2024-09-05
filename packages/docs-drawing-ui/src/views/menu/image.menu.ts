@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
 
@@ -24,7 +24,7 @@ import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-na
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'doc.menu.image';
-const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
+export const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
 
 // TODO: @Jocs, remove this when cell support drawing.
 const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
@@ -65,8 +65,6 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_ID,
         type: MenuItemType.SUBITEMS,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_LAYOUT,
         icon: ImageUploadIcon,
         tooltip: 'docImage.title',
         disabled$: getDisableWhenSelectionInTableObservable(accessor),
@@ -82,7 +80,6 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
         label: {
             name: COMPONENT_DOC_UPLOAD_FILE_MENU,
         },
-        positions: [IMAGE_MENU_ID],
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

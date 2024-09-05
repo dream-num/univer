@@ -130,9 +130,7 @@ window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
 
 function registerBasicPlugins(univer: Univer) {
-    univer.registerPlugin(UniverDocsPlugin, {
-        hasScroll: false,
-    });
+    univer.registerPlugin(UniverDocsPlugin);
     univer.registerPlugin(UniverFormulaEnginePlugin, {
         notExecuteFormula: true,
     });

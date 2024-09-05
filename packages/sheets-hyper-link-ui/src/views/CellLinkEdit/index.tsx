@@ -416,7 +416,7 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
-                        if (!display || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
+                        if ((showLabel && !display) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
                             setShowError(true);
                             return;
                         }

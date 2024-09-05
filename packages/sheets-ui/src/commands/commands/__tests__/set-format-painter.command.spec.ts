@@ -342,5 +342,76 @@ describe('Test format painter rules in controller', () => {
                 expect(mergeData?.[4].startRow).toBe(13);
             });
         });
+        describe('format painter to single cell', () => {
+            it ('will copy whole original styles', async () => {
+                expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
+
+                    selections: [
+                        {
+                            range: {
+                                startRow: 0,
+                                endRow: 0,
+                                startColumn: 0,
+                                endColumn: 3,
+                            },
+                        },
+                    ],
+                })).toBeTruthy();
+
+                expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                    range: {
+                        startRow: 5,
+                        endRow: 5,
+                        startColumn: 0,
+                        endColumn: 0,
+                    },
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
+                })).toBeTruthy();
+
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                if (!workbook) throw new Error('This is an error');
+                expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 0)?.s).toBe('yifA1t');
+                expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 1)?.s).toBe('M5JbP2');
+            });
+            describe('format painter from non-style cell to styled cell', () => {
+                it ('will clear styles', async () => {
+                    expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+
+                        selections: [
+                            {
+                                range: {
+                                    startRow: 6,
+                                    endRow: 6,
+                                    startColumn: 0,
+                                    endColumn: 0,
+                                },
+                            },
+                        ],
+                    })).toBeTruthy();
+
+                    expect(await commandService.executeCommand(SetOnceFormatPainterCommand.id)).toBeTruthy();
+                    expect(await commandService.executeCommand(ApplyFormatPainterCommand.id, {
+                        range: {
+                            startRow: 0,
+                            endRow: 0,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                        unitId: 'workbook-01',
+                        subUnitId: 'sheet-0011',
+                    })).toBeTruthy();
+
+                    const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    if (!workbook) throw new Error('This is an error');
+                    expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 0)?.s).toBe(undefined);
+                });
+            });
+        });
     });
 });

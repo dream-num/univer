@@ -342,6 +342,7 @@ describe('Test format painter rules in controller', () => {
                 expect(mergeData?.[4].startRow).toBe(13);
             });
         });
+
         describe('format painter to single cell', () => {
             it ('will copy whole original styles', async () => {
                 expect(await commandService.executeCommand(SetSelectionsOperation.id, {
@@ -377,6 +378,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 0)?.s).toBe('yifA1t');
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(5, 1)?.s).toBe('M5JbP2');
             });
+
             describe('format painter from non-style cell to styled cell', () => {
                 it ('will clear styles', async () => {
                     expect(await commandService.executeCommand(SetSelectionsOperation.id, {

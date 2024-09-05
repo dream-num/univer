@@ -302,7 +302,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         if (link.type === HyperLinkEditSourceType.ZEN_EDITOR) {
             const document: Nullable<DocumentDataModel> = this._univerInstanceService.getUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
             customRange = document?.getBody()?.customRanges?.find((range) => range.rangeId === link.customRangeId);
-            label = customRange ? document?.getBody()?.dataStream.slice(customRange.startIndex + 1, customRange?.endIndex - 1) : '';
+            label = customRange ? document?.getBody()?.dataStream.slice(customRange.startIndex + 1, customRange.endIndex) : '';
             if (!customRange || !label) {
                 return;
             }

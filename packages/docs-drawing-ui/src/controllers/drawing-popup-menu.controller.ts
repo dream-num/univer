@@ -128,9 +128,7 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                         },
                         unitId
                     );
-                    if (!popup) {
-                        return;
-                    }
+
                     disposePopups.push(this.disposeWithMe(popup));
 
                     const focusDrawings = this._drawingManagerService.getFocusDrawings();

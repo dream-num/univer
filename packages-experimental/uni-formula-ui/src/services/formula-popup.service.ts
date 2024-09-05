@@ -113,9 +113,6 @@ export class UniFormulaPopupService extends Disposable {
             },
             unitId
         );
-        if (!disposable) {
-            return false;
-        }
         this._popupInfo$.next({ unitId, disposable, type, f, startIndex, position });
         return true;
     }

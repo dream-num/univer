@@ -67,9 +67,6 @@ export class DocMentionPopupService extends Disposable {
             },
             unitId
         );
-        if (!dispose) {
-            return;
-        }
         this._editPopup$.next({ popup: dispose, anchor: index });
     }
 

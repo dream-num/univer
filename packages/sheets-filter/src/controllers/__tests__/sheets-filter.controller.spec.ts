@@ -18,9 +18,10 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ICommandService, Inject, Injector, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { InsertColMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RefRangeService, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, SetRangeValuesMutation, SetSelectionsOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
 import { SheetsFilterController } from '../sheets-filter.controller';
+import { SetSheetsFilterCriteriaMutation } from '../../commands/mutations/sheets-filter.mutation';
 
 function testWorkbookDataWithFilterFactory(): IWorkbookData {
     return {
@@ -145,6 +146,11 @@ function createFilterControllerTestBed(workbookData?: IWorkbookData) {
         MoveRowsMutation,
         MoveColsCommand,
         MoveColsMutation,
+        InsertColMutation,
+        RemoveRowCommand,
+        RemoveRowMutation,
+        RemoveColCommand,
+        RemoveColMutation,
         SetSelectionsOperation,
         SetRangeValuesMutation,
     ]
@@ -278,6 +284,78 @@ describe('test controller of sheets filter', () => {
             } as ISetRangeValuesMutationParams)).toBeTruthy();
             expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
                 .toEqual({ startRow: 3, startColumn: 0, endRow: 6, endColumn: 5 });
+        });
+    });
+
+    describe('test interceptor of remove-rows-command', () => {
+        it('filter range should move up if remove rows before filter header', async () => {
+            expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                selections: [
+                    {
+                        range: {
+                            rangeType: RANGE_TYPE.ROW,
+                            startRow: 0,
+                            endRow: 0,
+                        },
+                    },
+                ],
+            })).toBeTruthy();
+            expect(await commandService.executeCommand(RemoveRowCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 5 },
+            })).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 2, startColumn: 0, endRow: 4, endColumn: 5 });
+        });
+    });
+
+    describe('test interceptor of remove-cols-command', () => {
+        it('filter range should move left if remove cols before filter header', async () => {
+            expect(await commandService.executeCommand(SetSheetsFilterCriteriaMutation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                col: 1,
+                criteria: {
+                    colId: 1,
+                    filters: {
+                        filters: ['test'],
+                    },
+                },
+            })).toBeTruthy();
+            expect(await commandService.executeCommand(SetSelectionsOperation.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                selections: [
+                    {
+                        range: {
+                            rangeType: RANGE_TYPE.COLUMN,
+                            startRow: 0,
+                            endRow: 10,
+                            startColumn: 0,
+                            endColumn: 0,
+                        },
+                    },
+                ],
+            })).toBeTruthy();
+            expect(await commandService.executeCommand(RemoveColCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: { startRow: 0, startColumn: 0, endRow: 10, endColumn: 0 },
+            })).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 4 });
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(0);
+
+            expect(await commandService.executeCommand(UndoCommand.id, {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+            })).toBeTruthy();
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getRange())
+                .toEqual({ startRow: 3, startColumn: 0, endRow: 5, endColumn: 5 });
+            expect((sheetsFilterService as SheetsFilterService).getFilterModel('test', 'sheet1')!.getAllFilterColumns()?.[0][0]).toBe(1);
         });
     });
 });

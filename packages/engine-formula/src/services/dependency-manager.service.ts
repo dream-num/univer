@@ -335,10 +335,6 @@ export class DependencyManagerService extends Disposable implements IDependencyM
     hasFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
         return this._formulaData[unitId]?.[sheetId]?.getValue(row, column) != null;
     }
-
-    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
-        return this._formulaData[unitId]?.[sheetId]?.getValue(row, column);
-    }
 }
 
 export const IDependencyManagerService = createIdentifier<DependencyManagerService>(

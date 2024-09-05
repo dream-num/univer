@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRange, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IRangeSelectorRange extends IUnitRange {
     sheetName: string;
@@ -32,6 +32,10 @@ export interface IRangeSelectorService {
 
     openSelector$: Observable<unknown>;
     openSelector(): void;
+
+    selectorModalVisible$: Observable<boolean>;
+    get selectorModalVisible(): boolean;
+    triggerModalVisibleChange(visible: boolean): void;
 }
 
 export class RangeSelectorService extends Disposable implements IRangeSelectorService, IDisposable {
@@ -42,6 +46,13 @@ export class RangeSelectorService extends Disposable implements IRangeSelectorSe
 
     private readonly _openSelector$ = new Subject();
     readonly openSelector$ = this._openSelector$.asObservable();
+
+    private readonly _selectorModalVisible$ = new BehaviorSubject(false);
+    readonly selectorModalVisible$ = this._selectorModalVisible$.asObservable();
+
+    get selectorModalVisible() {
+        return this._selectorModalVisible$.getValue();
+    }
 
     setCurrentSelectorId(id: Nullable<string>) {
         this._currentSelectorId = id;
@@ -60,6 +71,10 @@ export class RangeSelectorService extends Disposable implements IRangeSelectorSe
 
     openSelector() {
         this._openSelector$.next(null);
+    }
+
+    triggerModalVisibleChange(visible: boolean) {
+        this._selectorModalVisible$.next(visible);
     }
 }
 

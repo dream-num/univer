@@ -140,6 +140,7 @@ export const CellLinkEdit = () => {
                         break;
                     }
                     default:
+                        setPayload('');
                         break;
                 }
             }

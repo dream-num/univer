@@ -170,6 +170,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, []);
 
     useEffect(() => {
+        rangeSelectorService.triggerModalVisibleChange(selectorVisible);
+    }, [rangeSelectorService, selectorVisible]);
+
+    useEffect(() => {
         openForSheetUnitIdRef.current = openForSheetUnitId;
         openForSheetSubUnitIdRef.current = openForSheetSubUnitId;
         isSingleChoiceRef.current = isSingleChoice;
@@ -310,7 +314,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     </footer>
                 )}
                 onClose={handleCloseModal}
-
             >
                 <div className={clsx(styles.rangeSelectorModal, className)}>
                     {rangeDataList.map((item, index) => (

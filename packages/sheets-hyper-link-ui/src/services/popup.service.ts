@@ -18,11 +18,12 @@ import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
-import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { getPlainText, getPlainTextFormBody, getPlainTextFormDocument, TextSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { IEditorService, IRangeSelectorService } from '@univerjs/ui';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
@@ -90,7 +91,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService
+        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
+        @IEditorService private readonly _editorService: IEditorService,
+        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();
 
@@ -218,6 +221,16 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const popup: ICanvasPopup = {
             componentKey: CellLinkEdit.componentKey,
             direction: 'bottom',
+            onClickOutside: () => {
+                const hyperLinkRangeSelectorId = createInternalEditorID('hyper-link-edit');
+                if (this._editorService.getFocusId() === hyperLinkRangeSelectorId) {
+                    return;
+                }
+                if (this._rangeSelectorService.getCurrentSelectorId() === hyperLinkRangeSelectorId && this._rangeSelectorService.selectorModalVisible) {
+                    return;
+                }
+                this.endEditing();
+            },
         };
         return popup;
     }

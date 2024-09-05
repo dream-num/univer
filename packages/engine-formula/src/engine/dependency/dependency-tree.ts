@@ -269,7 +269,7 @@ interface IFormulaDependencyTreeCacheItem {
 
 export class FormulaDependencyTreeCache extends Disposable {
     private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
-    private _map = new Map<string, Map<string, string[]>>();
+    private _map = new Map<string, Map<string, Set<string>>>();
 
     override dispose(): void {
         this.clear();

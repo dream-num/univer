@@ -52,7 +52,8 @@ export function getDataValidationDiffMutations(
     subUnitId: string,
     diffs: RangeMutation[],
     accessor: IAccessor,
-    source: DataValidationChangeSource = 'command'
+    source: DataValidationChangeSource = 'command',
+    fillDefaultValue = true
 ) {
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
@@ -70,6 +71,9 @@ export function getDataValidationDiffMutations(
     const redoMatrix = new ObjectMatrix<ICellData>();
 
     function setRangesDefaultValue(ranges: IRange[], defaultValue: CellValue) {
+        if (!fillDefaultValue) {
+            return;
+        }
         ranges.forEach((range) => {
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);

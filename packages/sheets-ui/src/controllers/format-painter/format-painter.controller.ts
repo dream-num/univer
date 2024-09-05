@@ -175,7 +175,7 @@ export class FormatPainterController extends Disposable {
                 const style = stylesMatrix.getValue(mappedRowIndex, mappedColIndex);
 
                 if (style) {
-                    styleValues[rowIndex][colIndex].s = style;
+                    styleValues[rowIndex][colIndex].s = Object.keys(style).length > 0 ? style : null;
                 }
             });
         });

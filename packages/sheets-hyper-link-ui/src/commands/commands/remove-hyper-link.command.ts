@@ -83,7 +83,6 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         }
 
         const newBody = TextX.apply(snapshot.body!, textX.serialize());
-        Object.freeze(newBody);
         const redos: IMutationInfo[] = [];
         const undos: IMutationInfo[] = [];
         const setRangeParams = {

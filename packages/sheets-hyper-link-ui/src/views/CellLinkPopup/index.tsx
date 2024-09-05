@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import cs from 'clsx';
@@ -127,14 +127,16 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                const commandId = currentPopup.type === HyperLinkEditSourceType.EDITING ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                                const commandId = (currentPopup.type === HyperLinkEditSourceType.EDITING || currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
                                 if (commandService.syncExecuteCommand(commandId, {
                                     unitId,
                                     subUnitId,
                                     id: customRange.rangeId,
                                     row,
                                     column: col,
-                                    documentId: editorBridgeService.getCurrentEditorId(),
+                                    documentId: currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                                        : editorBridgeService.getCurrentEditorId(),
                                 })) {
                                     popupService.hideCurrentPopup(undefined, true);
                                 }

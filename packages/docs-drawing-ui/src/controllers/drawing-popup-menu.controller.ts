@@ -116,15 +116,22 @@ export class DocDrawingPopupMenuController extends RxDisposable {
                     }
 
                     const { unitId, subUnitId, drawingId } = drawingParam;
-
-                    disposePopups.push(this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
-                        componentKey: COMPONENT_IMAGE_POPUP_MENU,
-                        direction: 'horizontal',
-                        offset: [2, 0],
-                        extraProps: {
-                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
+                    const popup = this._canvasPopManagerService.attachPopupToObject(
+                        object,
+                        {
+                            componentKey: COMPONENT_IMAGE_POPUP_MENU,
+                            direction: 'horizontal',
+                            offset: [2, 0],
+                            extraProps: {
+                                menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
+                            },
                         },
-                    })));
+                        unitId
+                    );
+                    if (!popup) {
+                        return;
+                    }
+                    disposePopups.push(this.disposeWithMe(popup));
 
                     const focusDrawings = this._drawingManagerService.getFocusDrawings();
 

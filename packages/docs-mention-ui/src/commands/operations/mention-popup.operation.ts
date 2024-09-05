@@ -41,6 +41,7 @@ export const CloseMentionInfoPopupOperation: ICommand = {
 
 export interface IShowMentionEditPopupOperationParams {
     startIndex: number;
+    unitId: string;
 }
 
 export const ShowMentionEditPopupOperation: ICommand<IShowMentionEditPopupOperationParams> = {
@@ -51,7 +52,7 @@ export const ShowMentionEditPopupOperation: ICommand<IShowMentionEditPopupOperat
             return false;
         }
         const docMentionService = accessor.get(DocMentionService);
-        docMentionService.startEditing(params.startIndex);
+        docMentionService.startEditing({ unitId: params.unitId, index: params.startIndex });
         return true;
     },
 };

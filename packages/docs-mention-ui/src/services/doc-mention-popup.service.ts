@@ -43,7 +43,7 @@ export class DocMentionPopupService extends Disposable {
 
         this.disposeWithMe(this._docMentionService.editing$.subscribe((editing) => {
             if (editing !== undefined && editing !== null) {
-                this.showEditPopup(editing);
+                this.showEditPopup(editing.unitId, editing.index);
             } else {
                 this.closeEditPopup();
             }
@@ -54,7 +54,7 @@ export class DocMentionPopupService extends Disposable {
 
     closeInfoPopup() {}
 
-    showEditPopup(index: number) {
+    showEditPopup(unitId: string, index: number) {
         this.closeEditPopup();
         const dispose = this._docCanvasPopupManagerService.attachPopupToRange(
             { startOffset: index, endOffset: index, collapsed: true },
@@ -64,8 +64,12 @@ export class DocMentionPopupService extends Disposable {
                     this.closeEditPopup();
                 },
                 direction: 'bottom',
-            }
+            },
+            unitId
         );
+        if (!dispose) {
+            return;
+        }
         this._editPopup$.next({ popup: dispose, anchor: index });
     }
 

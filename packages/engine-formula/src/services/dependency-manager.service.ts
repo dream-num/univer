@@ -138,27 +138,38 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[] | FormulaDependencyTreeCache, dependencyTrees?: FormulaDependencyTree[]): FormulaDependencyTree[] {
         const allTrees = this.getAllTree();
-        if (shouldBeBuildTrees.length === 0) {
-            this._buildReverseDependency(allTrees, dependencyTrees);
-            return allTrees;
-        }
+        // if (shouldBeBuildTrees.length === 0) {
+        //     this._buildReverseDependency(allTrees, dependencyTrees);
+        //     return allTrees;
+        // }
         if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
             this._buildDependencyTreeWithCache(allTrees, shouldBeBuildTrees, dependencyTrees || []);
         } else {
             this._buildDependencyTree(allTrees, shouldBeBuildTrees, shouldBeBuildTrees);
         }
-
         return allTrees;
     }
 
     private _buildDependencyTreeWithCache(allTrees: FormulaDependencyTree[], formulaDependencyTreeCache: FormulaDependencyTreeCache, dependencyTrees: FormulaDependencyTree[]) {
+        const cache = new FormulaDependencyTreeCache();
+        for (const tree of allTrees.concat(dependencyTrees)) {
+            const rangeList = tree.rangeList;
+            for (const range of rangeList) {
+                cache.add(range, tree);
+                cache.addDependencyMap(tree);
+            }
+        }
+        for (const tree of allTrees.concat(dependencyTrees)) {
+            cache.updateParent(tree);
+        }
+
         for (let i = 0; i < allTrees.length; i++) {
             const tree = allTrees[i];
-            formulaDependencyTreeCache.dependencyWithBlock(tree);
+            cache.dependency1(tree);
         }
         // this._buildReverseDependency(allTrees, dependencyTrees);
         for (const dependencyTree of dependencyTrees) {
-            formulaDependencyTreeCache.dependencyWithBlock(dependencyTree);
+            cache.dependency1(dependencyTree);
         }
     }
 
@@ -173,14 +184,18 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             const rangeList = tree.rangeList;
             for (const range of rangeList) {
                 cache.add(range, tree);
+                cache.addDependencyMap(tree);
             }
+        }
+        for (const tree of allTrees.concat(dependencyTrees)) {
+            cache.updateParent(tree);
         }
         for (let i = 0; i < allTrees.length; i++) {
             const tree = allTrees[i];
-            cache.dependencyWithBlock(tree);
+            cache.dependency1(tree);
         }
         for (const dependencyTree of dependencyTrees) {
-            cache.dependencyWithBlock(dependencyTree);
+            cache.dependency1(dependencyTree);
         }
         // this._buildReverseDependency(allTrees, dependencyTrees);
     }

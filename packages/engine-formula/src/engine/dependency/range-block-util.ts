@@ -39,11 +39,11 @@ export function setRangeBlockToken(range: IRange, baseKey: string, token: string
     }
 }
 
-export function getBlockTokensByRange(range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
+export function getBlockTokensByRange(tokensSet: Set<string>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
     const { startRow, startColumn, endRow, endColumn } = range;
     const startH = Math.floor(startRow / BLOCKSIZE);
     const startV = Math.floor(startColumn / BLOCKSIZE);
-    const tokensSet = new Set<string>();
+    // const tokensSet = new Set<string>();
     for (let x = startH; x <= Math.ceil(endRow / BLOCKSIZE); x += BLOCKSIZE) {
         for (let y = startV; y <= Math.ceil(endColumn / BLOCKSIZE); y += BLOCKSIZE) {
             const key = `${baseKey}_${x}_${y}`;

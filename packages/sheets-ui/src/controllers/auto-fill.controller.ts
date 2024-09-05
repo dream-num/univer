@@ -148,13 +148,9 @@ export class AutoFillController extends Disposable {
             SetWorksheetRowHeightMutation.id,
         ];
 
-        quitCommands.forEach((commandId) => {
-            this._autoFillService.addExitCommandId(commandId);
-        });
-
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             const fromCollab = options?.fromCollab;
-            if (this._autoFillService.isExitCommandId(command.id) && !fromCollab && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id) {
+            if (quitCommands.includes(command.id) && !fromCollab && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id) {
                 this._quit();
             }
 

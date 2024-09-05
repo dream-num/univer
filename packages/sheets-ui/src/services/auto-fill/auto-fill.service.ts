@@ -75,9 +75,6 @@ export interface IAutoFillService {
     getActiveHooks(): ISheetAutoFillHook[];
     addHook(hook: ISheetAutoFillHook): IDisposable;
     fillData(triggerUnitId: string, triggerSubUnitId: string): boolean;
-
-    addExitCommandId(commandId: string): void;
-    isExitCommandId(commandId: string): boolean;
 }
 
 export interface IApplyMenuItem {
@@ -104,8 +101,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
 
     private _direction: Direction = Direction.DOWN;
     readonly applyType$ = this._applyType$.asObservable();
-
-    private _exitCommandIds: string[] = [];
 
     private readonly _menu$: BehaviorSubject<IApplyMenuItem[]> = new BehaviorSubject<IApplyMenuItem[]>([
         {
@@ -163,14 +158,6 @@ export class AutoFillService extends Disposable implements IAutoFillService {
             return (currentItem.priority || 0) > (maxItem.priority || 0) ? currentItem : maxItem;
         }, items[0]);
         return [maxPriority];
-    }
-
-    addExitCommandId(commandId: string) {
-        this._exitCommandIds.push(commandId);
-    }
-
-    isExitCommandId(commandId: string) {
-        return this._exitCommandIds.includes(commandId);
     }
 
     addHook(hook: ISheetAutoFillHook) {

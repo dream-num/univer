@@ -15,6 +15,7 @@
  */
 
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { UniverType } from '@univerjs/protocol';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultWorkbookData } from './data/default-sheet';
 import { getDefaultDocData } from './data/default-doc';
@@ -23,10 +24,11 @@ const AWAIT_LOADING_TIMEOUT = 5000;
 const AWAIT_DISPOSING_TIMEOUT = 5000;
 
 export interface IE2EControllerAPI {
-    loadAndRelease(id: number): Promise<void>;
-    loadDefaultSheet(): Promise<void>;
-    loadDefaultDoc(): Promise<void>;
+    loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
+    loadDefaultSheet(loadTimeout?: number): Promise<void>;
+    loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     disposeUniver(): Promise<void>;
+    disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
 }
 
 declare global {
@@ -57,37 +59,45 @@ export class E2EMemoryController extends Disposable {
 
     private _initPlugin(): void {
         window.E2EControllerAPI = {
-            loadAndRelease: (id) => this._releaseAndLoad(id),
-            loadDefaultSheet: () => this._loadDefaultSheet(),
-            loadDefaultDoc: () => this._loadDefaultDoc(),
+            loadAndRelease: (id, loadTimeout, disposeTimeout) => this._loadAndRelease(id, loadTimeout, disposeTimeout),
+            loadDefaultSheet: (loadTimeout) => this._loadDefaultSheet(loadTimeout),
+            disposeCurrSheetUnit: (disposeTimeout?: number) => this._diposeDefaultSheetUnit(disposeTimeout),
+            loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
         };
     }
 
-    private async _releaseAndLoad(releaseId: number): Promise<void> {
+    private async _loadAndRelease(releaseId: number, loadingTimeout: number = AWAIT_LOADING_TIMEOUT, disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
         const unitId = `e2e${releaseId}`;
         const snapshot = getDefaultWorkbookData();
         snapshot.id = unitId;
 
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, snapshot);
-        await timer(AWAIT_LOADING_TIMEOUT);
+        await timer(loadingTimeout);
 
         this._univerInstanceService.disposeUnit(unitId);
-        await timer(AWAIT_DISPOSING_TIMEOUT);
+        await timer(disposingTimeout);
     }
 
-    private async _loadDefaultSheet(): Promise<void> {
+    private async _loadDefaultSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, getDefaultWorkbookData());
-        await timer(AWAIT_LOADING_TIMEOUT);
+        await timer(loadingTimeout);
     }
 
-    private async _loadDefaultDoc(): Promise<void> {
+    private async _loadDefaultDoc(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, getDefaultDocData());
-        await timer(AWAIT_LOADING_TIMEOUT);
+        await timer(loadingTimeout);
     }
 
     private async _disposeUniver(): Promise<void> {
         await this._commandService.executeCommand(DisposeUniverCommand.id);
+    }
+
+    private async _diposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
+        const unit = this._univerInstanceService.getCurrentUnitForType(UniverType.UNIVER_SHEET);
+        const unitId = unit?.getUnitId();
+        await this._univerInstanceService.disposeUnit(unitId || '');
+        await timer(disposingTimeout);
     }
 }
 

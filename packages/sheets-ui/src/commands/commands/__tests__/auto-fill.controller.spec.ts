@@ -792,14 +792,14 @@ describe('Test auto fill rules in controller', () => {
 
             // undo redo
             await commandService.executeCommand(UndoCommand.id);
-            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(6);
+            expect(workbook.getSheetBySheetId('sheet1')?.getCell(14, 4)?.v).toBe(8);
             const styles_undo = getStyles(14, 4, 14, 4);
             expect(styles_undo && styles_undo[0][0]).toStrictEqual({
                 bg: {
-                    rgb: '#ccc',
+                    rgb: '#eee',
                 },
-                ht: 2,
-                vt: 2,
+                ht: null,
+                vt: null,
             });
 
             // redo

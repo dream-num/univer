@@ -64,6 +64,10 @@ export class RangeProtectionRuleModel {
     private _rangeRuleInitStateChange = new BehaviorSubject<boolean>(false);
     rangeRuleInitStateChange$ = this._rangeRuleInitStateChange.asObservable();
 
+    getRangeRuleInitState() {
+        return this._rangeRuleInitStateChange.value;
+    }
+
     changeRuleInitState(state: boolean) {
         this._rangeRuleInitStateChange.next(state);
     }

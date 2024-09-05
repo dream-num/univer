@@ -53,18 +53,21 @@ export class SheetCanvasPopManagerService extends Disposable {
         worksheet: Worksheet
     ) {
         const calc = () => {
-            const { scene, engine } = currentRender;
-
-            const canvas = engine.getCanvasElement();
-            const canvasBound = canvas.getBoundingClientRect();
+            const { scene } = currentRender;
 
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
+            const canvasElement = currentRender.engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
 
+            // We should take the scale into account when canvas is scaled by CSS.
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+            // const { top, left, width } = canvasClientRect; // real width affected by scale
+            const scaleAdjust = canvasClientRect.width / widthOfCanvas;
             const position = {
-                left: offsetBound.left + canvasBound.left,
-                right: offsetBound.right + canvasBound.left,
-                top: offsetBound.top + canvasBound.top,
-                bottom: offsetBound.bottom + canvasBound.top,
+                left: (offsetBound.left * scaleAdjust) + canvasClientRect.left,
+                right: (offsetBound.right * scaleAdjust) + canvasClientRect.left,
+                top: (offsetBound.top * scaleAdjust) + canvasClientRect.top,
+                bottom: (offsetBound.bottom * scaleAdjust) + canvasClientRect.top,
             };
 
             return position;
@@ -149,7 +152,9 @@ export class SheetCanvasPopManagerService extends Disposable {
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
+    // #endregion
 
+    // #region attach to position
     attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string): Nullable<INeedCheckDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
@@ -191,7 +196,9 @@ export class SheetCanvasPopManagerService extends Disposable {
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
+    // #endregion
 
+    // #region attach to absolute position
     attachPopupToAbsolutePosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
@@ -232,7 +239,6 @@ export class SheetCanvasPopManagerService extends Disposable {
             canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
-
     // #endregion
 
     // #region attach to cell

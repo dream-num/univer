@@ -147,10 +147,18 @@ export class AutoFillController extends Disposable {
             SetWorksheetColWidthMutation.id,
             SetWorksheetRowHeightMutation.id,
         ];
+
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             const fromCollab = options?.fromCollab;
             if (quitCommands.includes(command.id) && !fromCollab && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id) {
                 this._quit();
+            }
+
+            // any edit operation will quit auto fill, except auto fill command
+            if (command.id === SetRangeValuesMutation.id) {
+                if ((command.params as ISetRangeValuesMutationParams).trigger !== AutoFillCommand.id) {
+                    this._quit();
+                }
             }
             if (command.id === RemoveSheetMutation.id) {
                 if ((command.params as IRemoveSheetMutationParams).unitId === this._currentLocation?.unitId &&
@@ -365,6 +373,7 @@ export class AutoFillController extends Disposable {
             }
         });
 
+        this._autoFillService.initPrevUndo();
         // set apply type will trigger fillData
         for (let i = 0; i < preferTypes.length; i++) {
             const menuItem = this._autoFillService.menu.find((m) => m.value === preferTypes[i]);

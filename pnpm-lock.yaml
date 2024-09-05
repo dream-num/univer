@@ -810,6 +810,9 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/protocol':
+        specifier: 0.1.39-alpha.15
+        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       react:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.3.1

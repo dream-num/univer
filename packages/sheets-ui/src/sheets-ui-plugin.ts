@@ -70,12 +70,11 @@ import { DragManagerService } from './services/drag-manager.service';
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorBaseController } from './controllers/permission/sheet-permission-interceptor-base.controller';
 import { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
-import { SheetPermissionRenderController, SheetPermissionRenderManagerController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
 import { SheetPermissionInterceptorCanvasRenderController } from './controllers/permission/sheet-permission-interceptor-canvas-render.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionPanelModel } from './services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from './services/permission/sheet-permission-user-list.service';
-import { WorksheetProtectionRenderService } from './services/permission/worksheet-permission-render.service';
 import { SheetPrintInterceptorService } from './services/print-interceptor.service';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { MoveRangeRenderController } from './controllers/move-range.controller';
@@ -143,7 +142,6 @@ export class UniverSheetsUIPlugin extends Plugin {
             // permission
             [SheetPermissionPanelModel],
             [SheetPermissionUserManagerService],
-            [WorksheetProtectionRenderService],
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
@@ -208,6 +206,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorCanvasRenderController],
             [SheetPermissionInterceptorFormulaRenderController],
             [SheetPermissionRenderController],
+            [WorksheetProtectionRenderController],
         ] as Dependency[]).forEach((m) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, m));
         });

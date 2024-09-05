@@ -34,7 +34,7 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
     const excludeRects$ = useMemo(() => popup.excludeRects$?.pipe(throttleTime(0, animationFrameScheduler)), [popup.excludeRects$]);
     const anchorRect = useObservable(anchorRect$, popup.anchorRect);
     const excludeRects = useObservable(excludeRects$, popup.excludeRects);
-    const { offset, canvasElement, hideOnInvisible = true } = popup;
+    const { offset, canvasElement, hideOnInvisible = true, hiddenType = 'destroy' } = popup;
 
     // We add an offset to the anchor rect to make the popup offset with the anchor.
     const rectWithOffset = useMemo(() => {
@@ -65,12 +65,13 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
         }
     }, [rectWithOffset, canvasElement, hideOnInvisible]);
 
-    if (hidden || !rectWithOffset) {
+    if ((hidden && hiddenType === 'destroy') || !rectWithOffset) {
         return null;
     }
 
     return (
         <RectPopup
+            hidden={hidden}
             anchorRect={rectWithOffset}
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}

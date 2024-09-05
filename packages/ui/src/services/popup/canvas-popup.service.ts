@@ -34,6 +34,7 @@ export interface IPopup extends Pick<IRectPopupProps, 'direction' | 'excludeOuts
     offset?: [number, number];
     canvasElement: HTMLCanvasElement;
     hideOnInvisible?: boolean;
+    hiddenType?: 'hide' | 'destroy';
     onPointerEnter?: () => void;
     onPointerLeave?: () => void;
     onClick?: () => void;

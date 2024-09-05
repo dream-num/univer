@@ -231,6 +231,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 }
                 this.endEditing();
             },
+            hiddenType: 'hide',
         };
         return popup;
     }

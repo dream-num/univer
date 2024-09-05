@@ -316,8 +316,11 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     if (!body) return false;
 
     const textX = new TextX();
+    const deleteActions = getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId);
     // delete
-    textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId));
+    if (deleteActions.length) {
+        textX.push(...deleteActions);
+    }
     // insert
     textX.push({
         t: TextXActionType.INSERT,

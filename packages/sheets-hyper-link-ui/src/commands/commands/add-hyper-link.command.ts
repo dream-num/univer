@@ -66,16 +66,37 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             return false;
         }
 
-        const textX = BuildTextUtils.customRange.add({
-            body,
-            range: { startOffset: 0, endOffset: body.dataStream.length - 2, collapsed: false },
-            rangeId: id,
-            rangeType: CustomRangeType.HYPERLINK,
-            properties: {
-                url: payload,
-                refId: id,
-            },
-        });
+        let textX: TextX | false;
+        if (display) {
+            textX = BuildTextUtils.selection.replace({
+                selection: { startOffset: 0, endOffset: 0, collapsed: true },
+                body: {
+                    dataStream: display,
+                    customRanges: [{
+                        startIndex: 0,
+                        endIndex: display.length - 1,
+                        rangeType: CustomRangeType.HYPERLINK,
+                        rangeId: id,
+                        properties: {
+                            url: payload,
+                            // refId: id,
+                        },
+                    }],
+                },
+                doc: doc.documentModel!,
+            });
+        } else {
+            textX = BuildTextUtils.customRange.add({
+                body,
+                range: { startOffset: 0, endOffset: body.dataStream.length - 2, collapsed: false },
+                rangeId: id,
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: {
+                    url: payload,
+                    refId: id,
+                },
+            });
+        }
 
         if (!textX) {
             return false;

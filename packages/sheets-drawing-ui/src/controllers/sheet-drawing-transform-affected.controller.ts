@@ -1121,6 +1121,9 @@ export class SheetDrawingTransformAffectedController extends Disposable implemen
 
                         Object.keys(drawingMap).forEach((unitId) => {
                             const subUnitMap = drawingMap[unitId];
+                            if (subUnitMap == null) {
+                                return;
+                            }
                             Object.keys(subUnitMap).forEach((subUnitId) => {
                                 const drawingData = subUnitMap[subUnitId].data;
                                 if (drawingData == null) {

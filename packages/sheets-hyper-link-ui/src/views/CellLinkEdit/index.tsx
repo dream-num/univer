@@ -35,6 +35,7 @@ import styles from './index.module.less';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
+    const [hide, setHide] = useState(false);
     const [display, setDisplay] = useState('');
     const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
@@ -278,7 +279,7 @@ export const CellLinkEdit = () => {
     };
 
     return (
-        <div className={styles.cellLinkEdit}>
+        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
             {showLabel
                 ? (
                     <FormLayout
@@ -331,14 +332,16 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
-                        onActive={(active) => {
+                        onSelectorVisibleChange={(visible) => {
                             if (editing?.type !== HyperLinkEditSourceType.ZEN_EDITOR) {
                                 return;
                             }
-                            if (active) {
+                            if (visible) {
                                 zenZoneService.hide();
+                                setHide(true);
                             } else {
                                 zenZoneService.show();
+                                setHide(false);
                             }
                         }}
                     />

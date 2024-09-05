@@ -25,6 +25,7 @@ import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
+import { useEvent } from '../hooks/event';
 import styles from './index.module.less';
 
 export interface IRangeSelectorProps {
@@ -42,11 +43,12 @@ export interface IRangeSelectorProps {
     placeholder?: string; // Placeholder text.
     className?: string;
     textEditorClassName?: string;
+    onSelectorVisibleChange?: (visible: boolean) => void;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName } = props;
-
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange } = props;
+    const onSelectorVisibleChange = useEvent(_onSelectorVisibleChange);
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
     const addNewItem = (newValue: string) => {
@@ -171,7 +173,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         rangeSelectorService.triggerModalVisibleChange(selectorVisible);
-    }, [rangeSelectorService, selectorVisible]);
+        onSelectorVisibleChange(selectorVisible);
+    }, [onSelectorVisibleChange, rangeSelectorService, selectorVisible]);
 
     useEffect(() => {
         openForSheetUnitIdRef.current = openForSheetUnitId;

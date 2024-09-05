@@ -69,7 +69,11 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         let textX: TextX | false;
         if (display) {
             textX = BuildTextUtils.selection.replace({
-                selection: { startOffset: 0, endOffset: 0, collapsed: true },
+                selection: {
+                    startOffset: 0,
+                    endOffset: body.dataStream.length - 2,
+                    collapsed: true,
+                },
                 body: {
                     dataStream: display,
                     customRanges: [{

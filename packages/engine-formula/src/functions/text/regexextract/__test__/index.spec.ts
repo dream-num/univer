@@ -88,5 +88,47 @@ describe('Test regexextract function', () => {
             const result = testFunction.calculate(text, regularExpression);
             expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
         });
+
+        it('Result length > 1', () => {
+            let text = StringValueObject.create('我的生日20220104');
+            let regularExpression = StringValueObject.create('生日(2022\\d+)');
+            let result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual('20220104');
+
+            regularExpression = StringValueObject.create('生日(?:2022)(\\d+)');
+            result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual('0104');
+
+            text = StringValueObject.create('111aaa111');
+            regularExpression = StringValueObject.create('(\\d+)([a-z]+)(\\d+)');
+            result = testFunction.calculate(text, regularExpression);
+            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+                ['111', 'aaa', '111'],
+            ]);
+
+            text = StringValueObject.create('abcd');
+            regularExpression = StringValueObject.create('((((a)b)c)d)');
+            result = testFunction.calculate(text, regularExpression);
+            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+                ['abcd', 'abc', 'ab', 'a'],
+            ]);
+
+            text = StringValueObject.create('Visit our website at https://www.example.com');
+            regularExpression = StringValueObject.create('https?://[^\s]+');
+            result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual('https://www.example.com');
+        });
+
+        it('Is not valid or safe RegExp', () => {
+            let text = StringValueObject.create('');
+            let regularExpression = StringValueObject.create('[a-Z]+');
+            let result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+
+            text = StringValueObject.create('abcd');
+            regularExpression = StringValueObject.create('((((a');
+            result = testFunction.calculate(text, regularExpression);
+            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+        });
     });
 });

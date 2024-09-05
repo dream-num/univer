@@ -373,6 +373,7 @@ export class AutoFillController extends Disposable {
             }
         });
 
+        this._autoFillService.initPrevUndo();
         // set apply type will trigger fillData
         for (let i = 0; i < preferTypes.length; i++) {
             const menuItem = this._autoFillService.menu.find((m) => m.value === preferTypes[i]);

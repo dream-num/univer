@@ -42,6 +42,8 @@ import { Transpose } from './transpose';
 import { Unique } from './unique';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
+import { Wrapcols } from './wrapcols';
+import { Wraprows } from './wraprows';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
 import { Index } from './index';
@@ -75,6 +77,8 @@ export const functionLookup = [
     [Unique, FUNCTION_NAMES_LOOKUP.UNIQUE],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],
+    [Wrapcols, FUNCTION_NAMES_LOOKUP.WRAPCOLS],
+    [Wraprows, FUNCTION_NAMES_LOOKUP.WRAPROWS],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],
     [Xmatch, FUNCTION_NAMES_LOOKUP.XMATCH],
 ];

@@ -561,8 +561,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'vector', detail: 'The vector or reference to wrap.' },
+            wrapCount: { name: 'wrap_count', detail: 'The maximum number of values for each column.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     WRAPROWS: {
@@ -575,8 +576,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'vector', detail: 'The vector or reference to wrap.' },
+            wrapCount: { name: 'wrap_count', detail: 'The maximum number of values for each row.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     XLOOKUP: {

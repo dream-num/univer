@@ -541,8 +541,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '指定した数の要素の後に、指定した行または列の値を列でラップします',
-        abstract: '指定した数の要素の後に、指定した行または列の値を列でラップします',
+        description: '指定した数の要素の後に、指定された値の行または列を列ごとにラップして、新しい配列を形成します。',
+        abstract: '指定した数の要素の後に、指定された値の行または列を列ごとにラップして、新しい配列を形成します。',
         links: [
             {
                 title: '指導',
@@ -550,13 +550,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'ベクター', detail: 'ラップするベクターまたは参照。' },
+            wrapCount: { name: '改行の数', detail: '各列の値の最大数。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     WRAPROWS: {
-        description: '指定した数の要素の後に、指定された行または値の列を行ごとにラップします',
-        abstract: '指定した数の要素の後に、指定された行または値の列を行ごとにラップします',
+        description: '指定した数の要素の後に、指定された行または値の列を行ごとにラップして、新しい配列を形成します。',
+        abstract: '指定した数の要素の後に、指定された行または値の列を行ごとにラップして、新しい配列を形成します。',
         links: [
             {
                 title: '指導',
@@ -564,8 +565,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'ベクター', detail: 'ラップするベクターまたは参照。' },
+            wrapCount: { name: '改行の数', detail: '各行の値の最大数。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     XLOOKUP: {

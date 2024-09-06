@@ -540,8 +540,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '在指定数量的元素之后按列包装提供的行或值列',
-        abstract: '在指定数量的元素之后按列包装提供的行或值列',
+        description: '将提供的行或列的值按列换行到指定数量的元素之后以形成新数组。',
+        abstract: '将提供的行或列的值按列换行到指定数量的元素之后以形成新数组。',
         links: [
             {
                 title: '教学',
@@ -549,13 +549,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '矢量', detail: '要换行的矢量或引用。' },
+            wrapCount: { name: '换行数量', detail: '每列的值的最大数量。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     WRAPROWS: {
-        description: '在指定数量的元素之后按行包装提供的行或值列',
-        abstract: '在指定数量的元素之后按行包装提供的行或值列',
+        description: '将提供的行或列的值按行换行到指定数量的元素之后以形成新数组。',
+        abstract: '将提供的行或列的值按行换行到指定数量的元素之后以形成新数组。',
         links: [
             {
                 title: '教学',
@@ -563,8 +564,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '矢量', detail: '要换行的矢量或引用。' },
+            wrapCount: { name: '换行数量', detail: '每行的值的最大数量。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     XLOOKUP: {

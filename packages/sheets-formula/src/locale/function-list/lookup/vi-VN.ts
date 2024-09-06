@@ -473,6 +473,36 @@ export default {
             array2: { name: 'mảng', detail: 'Mảng để nối thêm.' },
         },
     },
+    WRAPCOLS: {
+        description: 'Ngắt dòng hoặc cột giá trị được cung cấp theo cột sau một số lượng các thành phần được chỉ định để tạo thành một mảng mới.',
+        abstract: 'Ngắt dòng hoặc cột giá trị được cung cấp theo cột sau một số lượng các thành phần được chỉ định để tạo thành một mảng mới.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/wrapcols-%E5%87%BD%E6%95%B0-d038b05a-57b7-4ee0-be94-ded0792511e2',
+            },
+        ],
+        functionParameter: {
+            vector: { name: 'véc-tơ', detail: 'Véc-tơ hoặc tham chiếu để ngắt dòng.' },
+            wrapCount: { name: 'số lần ngắt dòng', detail: 'Số lượng giá trị tối đa cho mỗi cột.' },
+            padWith: { name: 'giá trị cần đệm', detail: 'Giá trị cần đệm. Mặc định là #N/A.' },
+        },
+    },
+    WRAPROWS: {
+        description: 'Ngắt dòng hoặc cột giá trị được cung cấp theo hàng sau một số lượng các thành phần được chỉ định để tạo thành một mảng mới.',
+        abstract: 'Ngắt dòng hoặc cột giá trị được cung cấp theo hàng sau một số lượng các thành phần được chỉ định để tạo thành một mảng mới.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/wraprows-%E5%87%BD%E6%95%B0-796825f3-975a-4cee-9c84-1bbddf60ade0',
+            },
+        ],
+        functionParameter: {
+            vector: { name: 'véc-tơ', detail: 'Véc-tơ hoặc tham chiếu để ngắt dòng.' },
+            wrapCount: { name: 'số lần ngắt dòng', detail: 'Số lượng giá trị tối đa cho mỗi hàng.' },
+            padWith: { name: 'giá trị cần đệm', detail: 'Giá trị cần đệm. Mặc định là #N/A.' },
+        },
+    },
     XLOOKUP: {
         description: 'Hàm tìm kiếm một phạm vi hoặc mảng và trả về mục tương ứng với kết quả khớp đầu tiên mà nó tìm thấy. Nếu không có kết quả khớp nào tồn tại, XLOOKUP có thể trả về kết quả khớp (gần đúng) gần nhất',
         abstract: 'Tìm kiếm một phạm vi hoặc mảng và trả về mục tương ứng với kết quả khớp đầu tiên được tìm thấy.',

@@ -540,8 +540,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '在指定數量的元素之後按列包裝提供的行或值列',
-        abstract: '在指定數量的元素之後按列包裝提供的行或值列',
+        description: '在指定的元素數之後，將提供的列或欄的值以欄換行，以形成新陣列。',
+        abstract: '在指定的元素數之後，將提供的列或欄的值以欄換行，以形成新陣列。',
         links: [
             {
                 title: '教導',
@@ -549,13 +549,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '向量', detail: '要換行的向量或參照。' },
+            wrapCount: { name: '換行數目', detail: '每一欄的最大值數目。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     WRAPROWS: {
-        description: '在指定數量的元素之後按行包裝提供的行或值列',
-        abstract: '在指定數量的元素之後按行包裝提供的行或值列',
+        description: '在指定的元素數之後，將提供的列或欄的值以列換行，以形成新陣列。',
+        abstract: '在指定的元素數之後，將提供的列或欄的值以列換行，以形成新陣列。',
         links: [
             {
                 title: '教導',
@@ -563,8 +564,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '向量', detail: '要換行的向量或參照。' },
+            wrapCount: { name: '換行數目', detail: '每一列的最大值數目。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     XLOOKUP: {

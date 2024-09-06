@@ -149,7 +149,7 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         let id: Nullable<string> = null;
-        if (editing && editing.type === HyperLinkEditSourceType.EDITING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
+        if (editing && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
             id = markSelectionService.addShape(
                 {
                     range: {

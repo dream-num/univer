@@ -363,7 +363,6 @@ export class SheetsHyperLinkPopupService extends Disposable {
     }
 
     endEditing(type?: HyperLinkEditSourceType) {
-        // console.trace('===endEdit', type);
         const current = this._currentEditing$.getValue();
         if (current && (!type || type === current.type)) {
             this._currentEditingPopup?.dispose();

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { DEFAULT_WORKSHEET_ROW_HEIGHT, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -619,7 +619,14 @@ function parseTableRows(html: string): {
     }
 
     const rowMatchesAsArray = Array.from(rowMatches);
-    const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1]));
+    const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1])).map((properties) => {
+        if (!properties.height) {
+            const style = properties.style;
+            const match = style && style.match(/height\s*:\s*(\d+)px/);
+            properties.height = `${match ? Number.parseInt(match[1], 10) : DEFAULT_WORKSHEET_ROW_HEIGHT}`;
+        }
+        return properties;
+    });
 
     return {
         rowProperties,

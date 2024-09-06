@@ -23,7 +23,6 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { getCursorWhenDelete } from '../../commands/commands/delete.command';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getDeleteSelection } from '../../basics/selection';
-import { DocCustomRangeService } from '../doc-custom-range.service';
 import { copyCustomRange } from '../../basics/custom-range';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
@@ -97,8 +96,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
-        @Inject(DocCustomRangeService) private readonly _docCustomRangeService: DocCustomRangeService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
     }

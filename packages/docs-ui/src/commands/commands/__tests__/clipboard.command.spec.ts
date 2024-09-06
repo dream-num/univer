@@ -23,19 +23,6 @@ import type { IInnerCutCommandParams, IInnerPasteCommandParams } from '../clipbo
 import { CutContentCommand, InnerPasteCommand } from '../clipboard.inner.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-// vi.mock('@univerjs/engine-render', async () => {
-//     const actual = await vi.importActual('@univerjs/engine-render');
-//     const { ITextSelectionRenderManager, TextSelectionRenderManager } = await import(
-//         './mock-text-selection-render-manager'
-//     );
-
-//     return {
-//         ...actual,
-//         ITextSelectionRenderManager,
-//         TextSelectionRenderManager,
-//     };
-// });
-
 function getDocumentData() {
     const TEST_DOCUMENT_DATA_EN: IDocumentData = {
         id: 'test-doc',

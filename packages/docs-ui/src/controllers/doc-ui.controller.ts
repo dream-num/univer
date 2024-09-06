@@ -26,7 +26,7 @@ import {
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';

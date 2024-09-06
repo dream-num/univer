@@ -22,8 +22,7 @@ import { ICommandService,
     Injector,
     IUniverInstanceService,
     mergeOverrideWithDependencies,
-    Plugin,
-    Tools, UniverInstanceType,
+    Plugin, UniverInstanceType,
 } from '@univerjs/core';
 import { IEditorService, IShortcutService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -89,7 +88,6 @@ import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipbo
 import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { SelectAllOperation } from './commands/operations/select-all.operation';
-import { DocCustomRangeService } from './services/doc-custom-range.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
@@ -223,11 +221,11 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocClipboardController],
             [DocEditorBridgeController],
             // Controller
-            [DocUIController, { useFactory: () => this._injector.createInstance(DocUIController, this._config) }],
+            [DocUIController],
             [DocAutoFormatController],
             [DocTableController],
             [DocMoveCursorController],
-            [AppUIController, { useFactory: () => this._injector.createInstance(AppUIController, this._config) }],
+            [AppUIController],
             [DocParagraphSettingController],
 
             // Services
@@ -235,7 +233,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocCanvasPopManagerService],
             [DocsRenderService],
             [DocStateChangeManagerService],
-            [DocCustomRangeService],
             [DocAutoFormatService],
         ];
 

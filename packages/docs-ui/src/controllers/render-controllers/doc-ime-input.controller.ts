@@ -26,8 +26,8 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
-import { DocSkeletonManagerService } from '../../../../docs/src/services/doc-skeleton-manager.service';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

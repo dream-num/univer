@@ -16,7 +16,7 @@
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { DocumentDataModel, IAccessor } from '@univerjs/core';
-import { DocSkeletonManagerService } from '../../../docs/src/services/doc-skeleton-manager.service';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 
 /**
  * Get the skeleton of the command's target.

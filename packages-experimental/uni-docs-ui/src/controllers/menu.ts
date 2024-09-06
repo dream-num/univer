@@ -214,15 +214,15 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
             }
 
             const textRange = textRanges[0];
-            const { collapsed, anchorNodePosition } = textRange;
+            const { collapsed, startNodePosition } = textRange;
 
             if (!collapsed) {
                 subscriber.next(true);
                 return;
             }
 
-            if (anchorNodePosition != null) {
-                const { path } = anchorNodePosition;
+            if (startNodePosition != null) {
+                const { path } = startNodePosition;
 
                 // TODO: Not support insert table in table cell now.
                 if (path.indexOf('cells') !== -1) {

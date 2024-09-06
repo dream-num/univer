@@ -53,7 +53,6 @@ export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } f
 
 export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
-export { DocCustomRangeService, type ICustomRangeHook } from './services/doc-custom-range.service';
 export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
 
 export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';

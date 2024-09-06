@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
+import { Inject, Injector, RxDisposable } from '@univerjs/core';
 
-import type { IUniverDocsUIConfig } from '../basics';
 import { DocContainerUIController } from './doc-container-ui-controller';
 
 export class AppUIController extends RxDisposable {
     private _docContainerController: DocContainerUIController;
 
     constructor(
-        _config: IUniverDocsUIConfig,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
-        this._docContainerController = this._injector.createInstance(DocContainerUIController, _config);
+        this._docContainerController = this._injector.createInstance(DocContainerUIController);
     }
 }

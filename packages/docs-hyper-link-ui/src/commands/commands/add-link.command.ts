@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService, sequenceExecute } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 
 export interface IAddDocHyperLinkCommandParams {
@@ -30,7 +30,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             return false;
         }
 
-        const { payload, unitId } = params;
+        const { payload } = params;
         const commandService = accessor.get(ICommandService);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(

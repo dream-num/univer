@@ -16,38 +16,35 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
-import {
-    AlignCenterCommand,
-    AlignJustifyCommand,
-    AlignLeftCommand,
-    AlignRightCommand,
-    BulletListCommand,
-    CheckListCommand,
-    DeleteLeftCommand,
-    DocTableDeleteColumnsCommand,
-    DocTableDeleteRowsCommand,
-    DocTableDeleteTableCommand,
-    DocTableInsertColumnLeftCommand,
-    DocTableInsertColumnRightCommand,
-    DocTableInsertRowAboveCommand,
-    DocTableInsertRowBellowCommand,
-    OrderListCommand,
-    ResetInlineFormatTextBackgroundColorCommand,
-    SetInlineFormatBoldCommand,
-    SetInlineFormatFontFamilyCommand,
-    SetInlineFormatFontSizeCommand,
-    SetInlineFormatItalicCommand,
-    SetInlineFormatStrikethroughCommand,
-    SetInlineFormatSubscriptCommand,
-    SetInlineFormatSuperscriptCommand,
-    SetInlineFormatTextBackgroundColorCommand,
-    SetInlineFormatTextColorCommand,
-    SetInlineFormatUnderlineCommand,
-} from '@univerjs/docs';
 import { DocCreateTableOperation } from '../commands/operations/doc-create-table.operation';
 import { OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../commands/operations/doc-paragraph-setting-panel.operation';
+import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
+
+import { BulletListCommand, CheckListCommand, OrderListCommand } from '../commands/commands/list.command';
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
+import { DeleteLeftCommand } from '../commands/commands/delete.command';
+import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../commands/commands/table/doc-table-insert.command';
+import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../commands/commands/table/doc-table-delete.command';
+import {
+    CopyMenuFactory,
+    CutMenuFactory,
+    DeleteColumnsMenuItemFactory,
+    DeleteMenuFactory,
+    DeleteRowsMenuItemFactory,
+    DeleteTableMenuItemFactory,
+    InsertColumnLeftMenuItemFactory,
+    InsertColumnRightMenuItemFactory,
+    InsertRowAfterMenuItemFactory,
+    InsertRowBeforeMenuItemFactory,
+    ParagraphSettingMenuFactory,
+    PasteMenuFactory,
+    TABLE_DELETE_MENU_ID,
+    TABLE_INSERT_MENU_ID,
+    TableDeleteMenuItemFactory,
+    TableInsertMenuItemFactory,
+} from './menu/context-menu';
 import {
     AlignCenterMenuItemFactory,
     AlignJustifyMenuItemFactory,
@@ -72,24 +69,6 @@ import {
     TextColorSelectorMenuItemFactory,
     UnderlineMenuItemFactory,
 } from './menu/menu';
-import {
-    CopyMenuFactory,
-    CutMenuFactory,
-    DeleteColumnsMenuItemFactory,
-    DeleteMenuFactory,
-    DeleteRowsMenuItemFactory,
-    DeleteTableMenuItemFactory,
-    InsertColumnLeftMenuItemFactory,
-    InsertColumnRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
-    ParagraphSettingMenuFactory,
-    PasteMenuFactory,
-    TABLE_DELETE_MENU_ID,
-    TABLE_INSERT_MENU_ID,
-    TableDeleteMenuItemFactory,
-    TableInsertMenuItemFactory,
-} from './menu/context-menu';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMAT]: {

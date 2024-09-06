@@ -31,19 +31,6 @@ import {
 } from '../inline-format.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
-// vi.mock('@univerjs/engine-render', async () => {
-//     const actual = await vi.importActual('@univerjs/engine-render');
-//     const { ITextSelectionRenderManager, TextSelectionRenderManager } = await import(
-//         './mock-text-selection-render-manager'
-//     );
-
-//     return {
-//         ...actual,
-//         ITextSelectionRenderManager,
-//         TextSelectionRenderManager,
-//     };
-// });
-
 describe('Test inline format commands', () => {
     let univer: Univer;
     let get: Injector['get'];

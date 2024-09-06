@@ -4,5 +4,6 @@
         "rootDir": "src",
         "outDir": "lib/types"
     },
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "references": [{ "path": "./tsconfig.node.json" }],
+    "include": ["src"]
 }

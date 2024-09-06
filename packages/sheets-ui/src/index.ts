@@ -33,7 +33,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
-export { checkInHeaderRanges } from './controllers/utils/selections-tools';
+export { isThisRowColSelected as checkInHeaderRanges } from './controllers/utils/selections-tools';
 export { useActiveWorkbook, useActiveWorksheet, useWorkbooks } from './components/hook';
 export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
 export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';

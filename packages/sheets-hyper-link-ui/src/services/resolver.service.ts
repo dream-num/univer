@@ -82,14 +82,13 @@ export class SheetsHyperLinkResolverService {
         const sheetName = sheet?.getName() ?? '';
 
         if (range) {
+            if (!sheet) return invalidLink;
             const rangeObj = deserializeRangeWithSheet(range).range;
-            if (isValidRange(rangeObj) && range !== ERROR_RANGE) {
+            if (isValidRange(rangeObj, sheet) && range !== ERROR_RANGE) {
                 return {
                     type: SheetHyperLinkType.RANGE,
                     name: serializeRangeWithSheet(sheetName, rangeObj),
                 };
-            } else {
-                return invalidLink;
             }
         }
 
@@ -100,8 +99,6 @@ export class SheetsHyperLinkResolverService {
                     type: SheetHyperLinkType.DEFINE_NAME,
                     name: range.formulaOrRefString,
                 };
-            } else {
-                return invalidLink;
             }
         }
 
@@ -112,8 +109,6 @@ export class SheetsHyperLinkResolverService {
                     type: SheetHyperLinkType.SHEET,
                     name: worksheet.getName(),
                 };
-            } else {
-                return invalidLink;
             }
         }
 

@@ -16,6 +16,7 @@
 
 import type { ICellData, ICellDataForSheetInterceptor, IRange, IRangeWithCoord, ISelectionCell, ISelectionCellWithMergeInfo } from '../sheets/typedef';
 import { RANGE_TYPE } from '../sheets/typedef';
+import type { Worksheet } from '../sheets/worksheet';
 import {
     BaselineOffset,
     BorderStyleTypes,
@@ -487,7 +488,7 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
     return body;
 }
 
-export function isValidRange(range: IRange): boolean {
+export function isValidRange(range: IRange, worksheet?: Worksheet): boolean {
     const { startRow, endRow, startColumn, endColumn, rangeType } = range;
     if (
         startRow < 0
@@ -516,6 +517,14 @@ export function isValidRange(range: IRange): boolean {
         )
     ) {
         return false;
+    }
+
+    if (worksheet) {
+        const rowCount = worksheet.getRowCount();
+        const colCount = worksheet.getColumnCount();
+        if (endRow >= rowCount || endColumn >= colCount) {
+            return false;
+        }
     }
 
     return true;

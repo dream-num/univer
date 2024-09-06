@@ -66,7 +66,7 @@ export const CellLinkPopup = () => {
         return null;
     }
     const linkObj = resolverService.parseHyperLink(customRange.properties.url ?? '');
-    const isError = linkObj.type.indexOf('error') > -1;
+    const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
         <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>

@@ -373,17 +373,14 @@ export const CellLinkEdit = () => {
                         value={payloadInitial}
                         onChange={handleRangeChange}
                         disableInput={editing.type === HyperLinkEditSourceType.ZEN_EDITOR}
-                        onSelectorVisibleChange={(visible) => {
+                        onSelectorVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     zenZoneService.hide();
                                 }
                                 setHide(true);
                             } else {
-                                commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
-                                    unitId: editing!.unitId,
-                                    subUnitId: editing!.subUnitId,
-                                });
+                                await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     zenZoneService.show();
                                 }

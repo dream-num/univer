@@ -217,6 +217,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
     const { scene } = currentRender;
 
@@ -230,6 +231,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     }
 
     let { actualCol, actualRow } = cellIndex;
+
     skeleton.overflowCache.forValue((r, c, range) => {
         if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
             actualCol = c;
@@ -238,6 +240,16 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     });
 
     const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+    const originCell = skeleton.getCellByIndex(cellIndex.row, cellIndex.col);
+    const originLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: originCell.actualRow,
+        col: originCell.actualColumn,
+    };
+
     const location: ISheetLocation = {
         unitId,
         subUnitId: sheetId,
@@ -248,7 +260,6 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     };
 
     let anchorCell: IRange;
-
     if (actualCell.mergeInfo) {
         anchorCell = actualCell.mergeInfo;
     } else {
@@ -284,6 +295,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
 
     return {
         position,
-        location,
+        location: originLocation,
+        overflowLocation: location,
     };
 }

@@ -17,7 +17,7 @@
 import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { BehaviorSubject, distinctUntilChanged, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
 import type { IBoundRectNoAngle, IFontCacheItem } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
@@ -27,7 +27,14 @@ import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
 export interface IHoverCellPosition {
     position: IPosition;
+    /**
+     * location of cell
+     */
     location: ISheetLocation;
+    /**
+     * location of hovering cell, if cell is overflowed, location is the orginal cell
+     */
+    overflowLocation: ISheetLocation;
     /**
      * active custom range in cell, if cell is rich-text
      */
@@ -100,14 +107,23 @@ export class HoverManagerService extends Disposable {
         distinctUntilChanged(
             // eslint-disable-next-line complexity
             (pre, aft) => (
-                pre?.location?.unitId === aft?.location?.unitId
-                && pre?.location?.subUnitId === aft?.location?.subUnitId
-                && pre?.location?.row === aft?.location?.row
-                && pre?.location?.col === aft?.location?.col
+                pre?.overflowLocation?.unitId === aft?.overflowLocation?.unitId
+                && pre?.overflowLocation?.subUnitId === aft?.overflowLocation?.subUnitId
+                && pre?.overflowLocation?.row === aft?.overflowLocation?.row
+                && pre?.overflowLocation?.col === aft?.overflowLocation?.col
                 && pre?.customRange?.rangeId === aft?.customRange?.rangeId
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
             )
-        )
+        ),
+        map((cell) => cell && {
+            unitId: cell.overflowLocation.unitId,
+            subUnitId: cell.overflowLocation.subUnitId,
+            row: cell.overflowLocation.row,
+            col: cell.overflowLocation.col,
+            customRange: cell.customRange,
+            bullet: cell.bullet,
+            rect: cell.rect,
+        })
     );
 
     // Notify when mouse position changes
@@ -161,10 +177,9 @@ export class HoverManagerService extends Disposable {
             return null;
         }
 
-        const { location, position } = hoverPosition;
+        const { position, overflowLocation, location } = hoverPosition;
 
-        const font = skeleton.getFont(location.row, location.col);
-
+        const font = skeleton.getFont(overflowLocation.row, overflowLocation.col);
         let customRange: Nullable<{
             rects: IBoundRectNoAngle[];
             range: ICustomRange<Record<string, any>>;
@@ -174,7 +189,7 @@ export class HoverManagerService extends Disposable {
             paragraph: IParagraph;
         }> = null;
 
-        const cell = skeleton.getCellByIndex(location.row, location.col);
+        const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
         if (font) {
             const { paddingLeft, paddingTop } = calcPadding(cell, font);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
@@ -189,6 +204,7 @@ export class HoverManagerService extends Disposable {
         return {
             location,
             position,
+            overflowLocation,
             unitId,
             subUnitId: worksheet.getSheetId(),
             customRange: customRange?.range,

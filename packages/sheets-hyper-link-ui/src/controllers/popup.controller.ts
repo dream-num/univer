@@ -96,7 +96,8 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     return;
                 }
 
-                const renderer = this._renderManagerService.getRenderById(currentCell.location.unitId);
+                const { unitId, subUnitId, row, col } = currentCell;
+                const renderer = this._renderManagerService.getRenderById(unitId);
                 if (!renderer) {
                     return;
                 }
@@ -107,11 +108,11 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 const skeleton = renderer?.with(SheetSkeletonManagerService)
-                    .getWorksheetSkeleton(currentCell.location.subUnitId)
+                    .getWorksheetSkeleton(subUnitId)
                     ?.skeleton;
 
-                const currentCol = currentCell.location.col;
-                const currentRow = currentCell.location.row;
+                const currentCol = col;
+                const currentRow = row;
                 let targetRow = currentRow;
                 let targetCol = currentCol;
 
@@ -124,7 +125,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     });
                 }
 
-                const { viewPermission, editPermission, copyPermission } = this._getLinkPermission(currentCell.location);
+                const { viewPermission, editPermission, copyPermission } = this._getLinkPermission(currentCell);
 
                 if (!viewPermission || !currentCell.customRange) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
@@ -132,7 +133,6 @@ export class SheetsHyperLinkPopupController extends Disposable {
                 }
 
                 this._sheetsHyperLinkPopupService.showPopup({
-                    ...currentCell.location,
                     row: targetRow,
                     col: targetCol,
                     editPermission,
@@ -140,6 +140,8 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     customRange: currentCell.customRange,
                     customRangeRect: currentCell.rect,
                     type: HyperLinkEditSourceType.VIEWING,
+                    unitId,
+                    subUnitId,
                 });
             })
         );

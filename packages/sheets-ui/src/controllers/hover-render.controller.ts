@@ -15,8 +15,9 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
+import { Disposable, DisposableCollection, fromEventSubject, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { throttleTime } from 'rxjs';
 import { HoverManagerService } from '../services/hover-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -59,7 +60,7 @@ export class HoverRenderController extends Disposable implements IRenderModule {
                 this._active = true;
             }));
 
-            disposeSet.add(mainComponent.onPointerMove$.subscribeEvent((evt) => {
+            disposeSet.add(fromEventSubject(mainComponent.onPointerMove$).pipe(throttleTime(30)).subscribe((evt) => {
                 this._active = true;
                 this._hoverManagerService.triggerMouseMove(unitId, evt.offsetX, evt.offsetY);
             }));

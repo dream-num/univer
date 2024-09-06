@@ -16,13 +16,14 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { TextSelectionManagerService } from '@univerjs/docs';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -52,6 +53,7 @@ export const CellLinkEdit = () => {
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
     const zenZoneService = useDependency(IZenZoneService);
     const markSelectionService = useDependency(IMarkSelectionService);
+    const textSelectionService = useDependency(TextSelectionManagerService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -85,7 +87,6 @@ export const CellLinkEdit = () => {
                     if (cell && (cell.p || cellValue)) {
                         setShowLabel(false);
                     }
-
                     link = {
                         id: '',
                         display: '',
@@ -94,11 +95,15 @@ export const CellLinkEdit = () => {
                         column: col,
                     };
                 } else {
+                    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                    const selection = textSelectionService.getActiveTextRangeWithStyle();
+                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc?.getBody()?.customRanges ?? [])?.[0];
+
                     setShowLabel(false);
                     link = {
                         id: '',
                         display: label ?? '',
-                        payload: '',
+                        payload: customRange?.properties?.url ?? '',
                         row,
                         column: col,
                     };
@@ -156,7 +161,7 @@ export const CellLinkEdit = () => {
                     break;
             }
         }
-    }, [editing, resolverService, sidePanelService, univerInstanceService]);
+    }, [editing, resolverService, sidePanelService, textSelectionService, univerInstanceService]);
 
     useEffect(() => {
         let id: Nullable<string> = null;

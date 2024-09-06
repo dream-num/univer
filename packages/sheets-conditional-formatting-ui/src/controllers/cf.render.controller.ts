@@ -41,6 +41,7 @@ export class SheetsCfRenderController extends Disposable {
         super();
 
         this._initViewModelInterceptor();
+        this._initViewModel();
         this._initSkeleton();
         this._initVmEffectByRule();
         this.disposeWithMe(() => {
@@ -48,13 +49,13 @@ export class SheetsCfRenderController extends Disposable {
         });
     }
 
-    private _initSkeleton() {
-        const markDirtySkeleton = () => {
-            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
-            this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
-            this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
-        };
+    public markDirtySkeleton() {
+        const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).reCalculate();
+        this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
+    }
 
+    private _initSkeleton() {
         // After the conditional formatting is marked dirty to drive a rendering, to trigger the window within the conditional formatting recalculation
         this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
             const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -64,7 +65,7 @@ export class SheetsCfRenderController extends Disposable {
             if (!worksheet) return false;
 
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(markDirtySkeleton));
+        })).subscribe(() => this.markDirtySkeleton()));
 
         // Sort and delete does not mark dirty.
         this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.pipe(bufferTime(16), filter((v) => {
@@ -75,7 +76,7 @@ export class SheetsCfRenderController extends Disposable {
             if (!worksheet) return false;
 
             return v.filter((item) => ['sort', 'delete'].includes(item.type) && item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(markDirtySkeleton));
+        })).subscribe(() => this.markDirtySkeleton()));
 
         // Once the calculation is complete, a view update is triggered
         // This rendering does not trigger conditional formatting recalculation,because the rule is not mark dirty
@@ -87,29 +88,16 @@ export class SheetsCfRenderController extends Disposable {
             if (!worksheet) return false;
 
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
-        })).subscribe(markDirtySkeleton));
+        })).subscribe(() => this.markDirtySkeleton()));
     }
 
     private _initVmEffectByRule() {
         this.disposeWithMe(
-
             this._conditionalFormattingRuleModel.$ruleChange.subscribe((config) => {
                 const { rule, unitId, subUnitId } = config;
                 switch (config.type) {
                     case 'add': {
-                        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
-
-                        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-                            map.set(cur, index);
-                            return map;
-                        }, new Map<string, number>());
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                            });
-                        });
-                        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
+                        this._handleRuleAdd(unitId, subUnitId, rule);
                         return;
                     }
                     case 'delete': {
@@ -139,6 +127,43 @@ export class SheetsCfRenderController extends Disposable {
                     }
                 }
             }));
+    }
+
+    private _initViewModel() {
+        let isNeedMark = false;
+        const workbookList = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        workbookList.forEach((workbook) => {
+            const unitId = workbook.getUnitId();
+            const subRuleMap = this._conditionalFormattingRuleModel.getUnitRules(unitId);
+            if (subRuleMap) {
+                [...subRuleMap.keys()].forEach((subUnitId) => {
+                    const ruleList = subRuleMap.get(subUnitId)!;
+                    ruleList.forEach((rule) => {
+                        this._handleRuleAdd(unitId, subUnitId, rule);
+                        isNeedMark = true;
+                    });
+                });
+            }
+        });
+        isNeedMark && this.markDirtySkeleton();
+    }
+
+    private _handleRuleAdd(
+        unitId: string,
+        subUnitId: string,
+        rule: IConditionFormattingRule) {
+        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
+        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
+            map.set(cur, index);
+            return map;
+        }, new Map<string, number>());
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
+                this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
+            });
+        });
+        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
     }
 
     private _handleRuleChange(

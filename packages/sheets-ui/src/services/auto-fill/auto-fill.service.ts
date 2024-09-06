@@ -378,38 +378,17 @@ export class AutoFillService extends Disposable implements IAutoFillService {
     }
 
     private _getAutoHeightUndoRedos(unitId: string, subUnitId: string, ranges: IRange[]) {
-        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
+        const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
         const skeleton = sheetSkeletonService?.getCurrent()?.skeleton;
-        if (!skeleton) {
-            return {
-                redos: [],
-                undos: [],
-            };
-        }
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
+        if (!skeleton) return { redos: [], undos: [] };
 
-        const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
-            subUnitId,
-            unitId,
-            rowsAutoHeightInfo,
-        };
-        const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
-            this._injector,
-            redoParams
-        );
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
+        const redoParams: ISetWorksheetRowAutoHeightMutationParams = { subUnitId, unitId, rowsAutoHeightInfo };
+        const worksheet = skeleton.worksheet;
+        const undoParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);
         return {
-            undos: [
-                {
-                    id: SetWorksheetRowAutoHeightMutation.id,
-                    params: undoParams,
-                },
-            ],
-            redos: [
-                {
-                    id: SetWorksheetRowAutoHeightMutation.id,
-                    params: redoParams,
-                },
-            ],
+            undos: [{ id: SetWorksheetRowAutoHeightMutation.id, params: undoParams }],
+            redos: [{ id: SetWorksheetRowAutoHeightMutation.id, params: redoParams }],
         };
     }
 }

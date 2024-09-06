@@ -52,7 +52,8 @@ export function getDataValidationDiffMutations(
     subUnitId: string,
     diffs: RangeMutation[],
     accessor: IAccessor,
-    source: DataValidationChangeSource = 'command'
+    source: DataValidationChangeSource = 'command',
+    fillDefaultValue = true
 ) {
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
@@ -70,6 +71,9 @@ export function getDataValidationDiffMutations(
     const redoMatrix = new ObjectMatrix<ICellData>();
 
     function setRangesDefaultValue(ranges: IRange[], defaultValue: CellValue) {
+        if (!fillDefaultValue) {
+            return;
+        }
         ranges.forEach((range) => {
             Range.foreach(range, (row, column) => {
                 const cellData = worksheet.getCellRaw(row, column);
@@ -349,7 +353,8 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
             return false;
         }
 
-        if (!validator.validatorFormula({ ...rule, ...setting }, unitId, subUnitId).success) {
+        const newRule = { ...rule, ...setting };
+        if (!validator.validatorFormula(newRule, unitId, subUnitId).success) {
             return false;
         }
 
@@ -359,7 +364,10 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
             ruleId,
             payload: {
                 type: UpdateRuleType.SETTING,
-                payload: setting,
+                payload: {
+                    ...setting,
+                    ...validator.normlizeFormula(newRule, unitId, subUnitId),
+                },
             },
         };
 

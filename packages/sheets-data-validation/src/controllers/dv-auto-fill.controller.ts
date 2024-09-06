@@ -37,7 +37,7 @@ export class DataValidationAutoFillController extends Disposable {
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 
-        const generalApplyFunc = (location: IAutoFillLocation) => {
+        const generalApplyFunc = (location: IAutoFillLocation, applyType: APPLY_TYPE) => {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
             const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
             const ruleMatrixCopy = manager.getRuleObjectMatrix().clone();
@@ -95,7 +95,7 @@ export class DataValidationAutoFillController extends Disposable {
             });
 
             const diffs = ruleMatrixCopy.diff(manager.getDataValidations());
-            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched');
+            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched', applyType === APPLY_TYPE.ONLY_FORMAT);
             return {
                 undos: undoMutations,
                 redos: redoMutations,
@@ -125,7 +125,7 @@ export class DataValidationAutoFillController extends Disposable {
                     applyType === APPLY_TYPE.ONLY_FORMAT ||
                     applyType === APPLY_TYPE.SERIES
                 ) {
-                    return generalApplyFunc(location);
+                    return generalApplyFunc(location, applyType);
                 }
 
                 return noopReturnFunc();

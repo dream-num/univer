@@ -35,8 +35,9 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { DocCanvasPopManagerService, DocEventManagerService } from '@univerjs/docs-ui';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import { TextSelectionManagerService } from '@univerjs/docs';
+import { IZenZoneService } from '@univerjs/ui';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -52,7 +53,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
 
@@ -217,6 +218,17 @@ export class SheetsHyperLinkPopupController extends Disposable {
     }
 
     private _initZenEditor() {
+        this.disposeWithMe(
+            this._zenZoneService.visible$.subscribe((visible) => {
+                if (visible) {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.VIEWING);
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.EDITING);
+                    this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.VIEWING);
+                }
+            })
+        );
+
         this.disposeWithMe(
             this._univerInstanceService.focused$.pipe(
                 mergeMap((id) => {

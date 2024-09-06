@@ -249,7 +249,6 @@ export class ZenEditorController extends RxDisposable {
         docBody.paragraphs = paragraphs;
         docBody.customBlocks = customBlocks;
         docBody.customRanges = customRanges;
-
         snapshot.drawings = drawings;
         snapshot.drawingsOrder = drawingsOrder;
 

@@ -76,22 +76,33 @@ export const CellLinkEdit = () => {
                     column: col,
                 };
             } else {
-                const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
-                const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
-                const cell = worksheet?.getCellRaw(editing.row, editing.col);
-                const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-                const cellValue = `${getCellValueOrigin(cell)}`;
-                if (cell && (cell.p || cellValue)) {
-                    setShowLabel(false);
-                }
+                if (editing.type === HyperLinkEditSourceType.VIEWING) {
+                    const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
+                    const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
+                    const cell = worksheet?.getCellRaw(editing.row, editing.col);
+                    const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
+                    const cellValue = `${getCellValueOrigin(cell)}`;
+                    if (cell && (cell.p || cellValue)) {
+                        setShowLabel(false);
+                    }
 
-                link = {
-                    id: '',
-                    display: '',
-                    payload: range?.properties?.url ?? '',
-                    row,
-                    column: col,
-                };
+                    link = {
+                        id: '',
+                        display: '',
+                        payload: range?.properties?.url ?? '',
+                        row,
+                        column: col,
+                    };
+                } else {
+                    setShowLabel(false);
+                    link = {
+                        id: '',
+                        display: label,
+                        payload: '',
+                        row,
+                        column: col,
+                    };
+                }
             }
 
             setId(link.id);

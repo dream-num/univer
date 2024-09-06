@@ -114,7 +114,7 @@ export abstract class ThinScene extends Disposable {
         return this._sceneKey;
     }
 
-    get evented() {
+    get objectsEvented() {
         return this._evented;
     }
 
@@ -138,11 +138,16 @@ export abstract class ThinScene extends Disposable {
         this._scaleY = scaleY;
     }
 
-    enableEvent() {
+    enableObjectsEvent() {
         this._evented = true;
     }
 
-    disableEvent() {
+    /**
+     * If scene.event is disabled, scene.pick(curosrPos) return null.
+     * Then only scene itself can response to pointer event, all objects under the scene would not.
+     * see sceneInputManager@_onPointerMove
+     */
+    disableObjectsEvent() {
         this._evented = false;
     }
 

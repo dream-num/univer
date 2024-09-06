@@ -543,7 +543,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             this._removeAllRanges();
         }
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
 
         const scrollTimer = ScrollTimer.create(scene);
         this._scrollTimers.push(scrollTimer);
@@ -575,7 +575,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             [...this._scenePointerMoveSubs, ...this._scenePointerUpSubs].forEach((e) => {
                 e.unsubscribe();
             });
-            scene.enableEvent();
+            scene.enableObjectsEvent();
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {

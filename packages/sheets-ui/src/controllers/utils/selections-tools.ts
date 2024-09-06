@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController, RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
@@ -76,8 +76,8 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
 export function isThisRowSelected(
     selections: Readonly<ISelectionWithStyle[]>,
     rowIndex: number
-) {
-    return isThisRowColSelected(selections, rowIndex, RANGE_TYPE.ROW);
+): boolean {
+    return !!matchedSelectionByRowColIndex(selections, rowIndex, RANGE_TYPE.ROW);
 }
 
 /**
@@ -89,8 +89,8 @@ export function isThisRowSelected(
 export function isThisColSelected(
     selections: Readonly<ISelectionWithStyle[]>,
     colIndex: number
-) {
-    return isThisRowColSelected(selections, colIndex, RANGE_TYPE.COLUMN);
+): boolean {
+    return !!matchedSelectionByRowColIndex(selections, colIndex, RANGE_TYPE.COLUMN);
 }
 
 /**
@@ -100,11 +100,11 @@ export function isThisColSelected(
  * @param rowOrCol
  * @returns boolean
  */
-export function isThisRowColSelected(
+export function matchedSelectionByRowColIndex(
     selections: Readonly<ISelectionWithStyle[]>,
     indexOfRowCol: number,
     rowOrCol: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
-): boolean {
+): Nullable<ISelectionWithStyle> {
     const matchSelectionData = selections.find((sel) => {
         const range = sel.range;
         const { startRow: startRowOfCurrSel, endRow: endRowOfCurrSel, startColumn: startColumnOfCurrSel, endColumn: endColumnOfCurrSel, rangeType: rangeTypeOfCurrSelection } = range;
@@ -122,5 +122,5 @@ export function isThisRowColSelected(
         return false;
     });
 
-    return !!matchSelectionData;
+    return matchSelectionData;
 }

@@ -808,24 +808,28 @@ export class Scene extends ThinScene {
         super.dispose();
     }
 
-    // Determine the only object selected
-    override pick(vec: Vector2): Nullable<BaseObject | Scene | ThinScene> {
-        let pickedViewport = this.getActiveViewportByCoord(vec);
+    /**
+     * Get the object under the pointer, if scene.event is disabled, the object is null.
+     * @param {Vector2} coord
+     * @return {Nullable<BaseObject | Scene | ThinScene>} object under the pointer
+     */
+    override pick(coord: Vector2): Nullable<BaseObject | Scene | ThinScene> {
+        let pickedViewport = this.getActiveViewportByCoord(coord);
 
         if (!pickedViewport) {
             pickedViewport = this._viewports[0];
         }
 
-        if (!this.evented || !pickedViewport) {
-            return;
+        if (!this.objectsEvented || !pickedViewport) {
+            return null;
         }
 
-        const scrollBarRect = pickedViewport.pickScrollBar(vec);
+        const scrollBarRect = pickedViewport.pickScrollBar(coord);
         if (scrollBarRect) {
             return scrollBarRect;
         }
 
-        const vecFromSheetContent = pickedViewport.transformVector2SceneCoord(vec);
+        const vecFromSheetContent = pickedViewport.transformVector2SceneCoord(coord);
 
         let isPickedObject: Nullable<BaseObject | Scene | ThinScene> = null;
 

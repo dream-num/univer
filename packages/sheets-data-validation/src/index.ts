@@ -56,4 +56,6 @@ export {
     HideDataValidationDropdown,
 } from './commands/operations/data-validation.operation';
 
+export { LIST_DROPDOWN_KEY, DATE_DROPDOWN_KEY } from './views';
+
 // #endregion

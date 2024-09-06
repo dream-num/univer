@@ -32,13 +32,13 @@ export class MobileSelectionControl extends SelectionControl {
      * bottomRight controlPointer, it is not visible, just transparent, for handling event.
      */
     private _fillControlBottomRight: Rect | null;
-    /**
-     * a very small visible point, placed in control pointer
-     */
+    // /**
+    //  * a very small visible point, placed in control pointer
+    //  */
     private _fillControlTopLeftInner: Rect | null;
-    /**
-     * a very small visible point, placed in control pointer
-     */
+    // /**
+    //  * a very small visible point, placed in control pointer
+    //  */
     private _fillControlBottomRightInner: Rect | null;
 
     constructor(
@@ -60,53 +60,56 @@ export class MobileSelectionControl extends SelectionControl {
         const stroke = defaultStyle.stroke!;
         const AutofillStroke = defaultStyle.AutofillStroke!;
         const zIndex = this.zIndex;
-        const RectCtor = Rect;
         // if (this._rangeType === RANGE_TYPE.ROW || this._rangeType === RANGE_TYPE.COLUMN) {
-        //     RectCtor = FloatRect;
+        //     Rect = FloatRect;
         // }
         // @transformControlPoint takes care of left & top
-        this._fillControlTopLeft = new RectCtor(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
+        this._fillControlTopLeft = new Rect(SELECTION_MANAGER_KEY.fillTopLeft + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
+            visualWidth: expandCornerInnerSize,
+            visualHeight: expandCornerInnerSize,
             strokeWidth: AutofillStrokeWidth,
         });
-        this._fillControlTopLeftInner = new RectCtor(SELECTION_MANAGER_KEY.fillTopLeftInner + zIndex, {
-            zIndex: zIndex + 1,
-            width: expandCornerInnerSize,
-            height: expandCornerInnerSize,
-            radius: expandCornerInnerSize / 2,
-            strokeWidth: AutofillStrokeWidth,
-        });
-        this._fillControlBottomRight = new RectCtor(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
+        // this._fillControlTopLeftInner = new Rect(SELECTION_MANAGER_KEY.fillTopLeftInner + zIndex, {
+        //     zIndex: zIndex + 1,
+        //     width: expandCornerInnerSize,
+        //     height: expandCornerInnerSize,
+        //     radius: expandCornerInnerSize / 2,
+        //     strokeWidth: AutofillStrokeWidth,
+        // });
+        this._fillControlBottomRight = new Rect(SELECTION_MANAGER_KEY.fillBottomRight + zIndex, {
             zIndex: zIndex + 2,
             width: expandCornerSize,
             height: expandCornerSize,
             radius: expandCornerSize / 2,
+            visualHeight: expandCornerInnerSize,
+            visualWidth: expandCornerInnerSize,
             strokeWidth: AutofillStrokeWidth,
         });
-        this._fillControlBottomRightInner = new RectCtor(SELECTION_MANAGER_KEY.fillBottomRightInner + zIndex, {
-            zIndex: zIndex + 1,
-            width: expandCornerInnerSize,
-            height: expandCornerInnerSize,
-            radius: expandCornerInnerSize / 2,
-            strokeWidth: AutofillStrokeWidth,
-        });
+        // this._fillControlBottomRightInner = new Rect(SELECTION_MANAGER_KEY.fillBottomRightInner + zIndex, {
+        //     zIndex: zIndex + 1,
+        //     width: expandCornerInnerSize,
+        //     height: expandCornerInnerSize,
+        //     radius: expandCornerInnerSize / 2,
+        //     strokeWidth: AutofillStrokeWidth,
+        // });
 
         const fillProps: IRectProps = {
             fill: stroke,
             stroke: AutofillStroke,
             strokeScaleEnabled: false,
         };
-        this._fillControlTopLeftInner!.setProps({ ...fillProps });
-        this._fillControlBottomRightInner!.setProps({ ...fillProps });
-        // for test
-        // this.fillControlTopLeft!.setProps({ ...fillProps, ...{ fill: 'red' } });
-        // this.fillControlBottomRight!.setProps({ ...fillProps, ...{ fill: 'black' } });
+        this._fillControlTopLeft!.setProps({ ...fillProps });
+        this._fillControlBottomRight!.setProps({ ...fillProps });
 
         // put into scene
-        const objs = [this._fillControlTopLeft, this._fillControlBottomRight, this._fillControlTopLeftInner, this._fillControlBottomRightInner] as BaseObject[];
+        const objs = [
+            this._fillControlTopLeft, this._fillControlBottomRight,
+            // this._fillControlTopLeftInner, this._fillControlBottomRightInner
+        ] as BaseObject[];
 
         // do not use this.model.rangeType, model has not been initialized yet
         switch (this._rangeType) {
@@ -179,13 +182,13 @@ export class MobileSelectionControl extends SelectionControl {
 
             this.fillControlTopLeft!.show();
             this.fillControlBottomRight!.show();
-            this._fillControlTopLeftInner!.show();
-            this._fillControlBottomRightInner!.show();
+            // this._fillControlTopLeftInner!.show();
+            // this._fillControlBottomRightInner!.show();
         } else {
             this.fillControlTopLeft?.hide();
             this.fillControlBottomRight?.hide();
-            this._fillControlTopLeftInner?.hide();
-            this._fillControlBottomRightInner?.hide();
+            // this._fillControlTopLeftInner?.hide();
+            // this._fillControlBottomRightInner?.hide();
         }
     }
 
@@ -229,14 +232,14 @@ export class MobileSelectionControl extends SelectionControl {
                     left: endX - startX - expandCornerSize / 2,
                     top: endY - startY - expandCornerSize / 2,
                 });
-                this._fillControlTopLeftInner!.transformByState({
-                    left: -expandCornerSizeInner / 2,
-                    top: -expandCornerSizeInner / 2,
-                });
-                this._fillControlBottomRightInner!.transformByState({
-                    left: endX - startX - expandCornerSizeInner / 2,
-                    top: endY - startY - expandCornerSizeInner / 2,
-                });
+                // this._fillControlTopLeftInner!.transformByState({
+                //     left: -expandCornerSizeInner / 2,
+                //     top: -expandCornerSizeInner / 2,
+                // });
+                // this._fillControlBottomRightInner!.transformByState({
+                //     left: endX - startX - expandCornerSizeInner / 2,
+                //     top: endY - startY - expandCornerSizeInner / 2,
+                // });
                 break;
 
             case RANGE_TYPE.ROW: {
@@ -251,14 +254,14 @@ export class MobileSelectionControl extends SelectionControl {
                     left: controlLeft,
                     top: -expandCornerSize / 2 + endY - startY,
                 });
-                this._fillControlTopLeftInner!.transformByState({
-                    left: innerLeft,
-                    top: -expandCornerSizeInner / 2,
-                });
-                this._fillControlBottomRightInner!.transformByState({
-                    left: innerLeft,
-                    top: -expandCornerSizeInner / 2 + endY - startY,
-                });
+                // this._fillControlTopLeftInner!.transformByState({
+                //     left: innerLeft,
+                //     top: -expandCornerSizeInner / 2,
+                // });
+                // this._fillControlBottomRightInner!.transformByState({
+                //     left: innerLeft,
+                //     top: -expandCornerSizeInner / 2 + endY - startY,
+                // });
             }
                 break;
             case RANGE_TYPE.COLUMN:
@@ -275,14 +278,14 @@ export class MobileSelectionControl extends SelectionControl {
                         left: -expandCornerSize / 2 + endX - startX,
                         top: controlTop,
                     });
-                    this._fillControlTopLeftInner!.transformByState({
-                        left: -expandCornerSizeInner / 2,
-                        top: innerTop,
-                    });
-                    this._fillControlBottomRightInner!.transformByState({
-                        left: -expandCornerSizeInner / 2 + endX - startX,
-                        top: innerTop,
-                    });
+                    // this._fillControlTopLeftInner!.transformByState({
+                    //     left: -expandCornerSizeInner / 2,
+                    //     top: innerTop,
+                    // });
+                    // this._fillControlBottomRightInner!.transformByState({
+                    //     left: -expandCornerSizeInner / 2 + endX - startX,
+                    //     top: innerTop,
+                    // });
                 }
                 break;
             default:

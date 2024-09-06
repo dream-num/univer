@@ -44,8 +44,8 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         return this._radius;
     }
 
-    static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
-        let { radius, left, top, width, height } = props;
+    static override drawWith(ctx: UniverRenderingContext, props: IRectProps) {
+        let { radius, left, top, width, height, visualWidth, visualHeight } = props;
 
         radius = radius ?? 0;
         width = width ?? 0;
@@ -53,6 +53,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         left = left ?? 0;
         top = top ?? 0;
 
+        ctx.save();
         ctx.beginPath();
 
         if (props.strokeDashArray) {
@@ -63,9 +64,20 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
             left = 0;
         }
 
+        if (props.visualHeight) {
+            ctx.translate(0, (height - (props.visualHeight || 0)) / 2);
+            height = props.visualHeight;
+        }
+        if (props.visualWidth) {
+            ctx.translate((width - (props.visualWidth || 0)) / 2, 0);
+            width = props.visualWidth;
+        }
+
         if (!radius) {
             // simple rect - don't bother doing all that complicated maths stuff.
             ctx.rect(left, top, width, height);
+            // ctx.fillStyle = 'red';
+            // ctx.fill();
         } else {
             let topLeft = 0;
             let topRight = 0;
@@ -86,6 +98,8 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
 
         ctx.closePath();
         this._renderPaintInOrder(ctx, props);
+
+        ctx.restore();
     }
 
     override toJson() {
@@ -105,7 +119,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
     protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
         const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
         if (!strokeDashArray) {
-            Rect.drawWith(ctx, this);
+            Rect.drawWith(ctx, this as IRectProps);
         } else {
             const parentTrans = this.getParent().transform;
             // group.transform contains startXY

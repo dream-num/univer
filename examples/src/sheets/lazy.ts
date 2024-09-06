@@ -18,23 +18,27 @@ import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
-// import { UniverUniscriptPlugin } from '@univerjs/uniscript';
+import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
-        // [
-        //     UniverUniscriptPlugin,
-        //     {
-        //         getWorkerUrl(moduleID: string, label: string) {
-        //             if (label === 'typescript' || label === 'javascript') {
-        //                 return './vs/language/typescript/ts.worker.js';
-        //             }
-
-        //             return './vs/editor/editor.worker.js';
-        //         },
-        //     },
-
-        // ],
+        [UniverUniscriptPlugin, {
+            getWorkerUrl(_: string, label: string) {
+                if (label === 'json') {
+                    return '/vs/language/json/json.worker.js';
+                }
+                if (label === 'css' || label === 'scss' || label === 'less') {
+                    return '/vs/language/css/css.worker.js';
+                }
+                if (label === 'html' || label === 'handlebars' || label === 'razor') {
+                    return '/vs/language/html/html.worker.js';
+                }
+                if (label === 'typescript' || label === 'javascript') {
+                    return '/vs/language/typescript/ts.worker.js';
+                }
+                return '/vs/editor/editor.worker.js';
+            },
+        }],
         [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: false }],
         [UniverSheetsFindReplacePlugin],

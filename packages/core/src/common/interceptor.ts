@@ -74,13 +74,13 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
         this._interceptorPoints = interceptorPoints;
     }
 
-    fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>) {
+    public fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>) {
         const key = name as unknown as string;
         const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
         return composeInterceptors(interceptors || []);
     }
 
-    intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {
+    public intercept<T extends IInterceptor<any, any>>(name: T, interceptor: T) {
         const key = name as unknown as string;
         if (!this._interceptorsByName.has(key)) {
             this._interceptorsByName.set(key, []);
@@ -95,7 +95,11 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
         return () => remove(this._interceptorsByName.get(key)!, interceptor);
     }
 
-    getInterceptPoints() {
+    public getInterceptPoints() {
         return this._interceptorPoints;
+    }
+
+    public dispose() {
+        this._interceptorsByName.clear();
     }
 }

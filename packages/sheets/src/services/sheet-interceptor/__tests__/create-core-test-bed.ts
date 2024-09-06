@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData } from '@univerjs/core';
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
 
@@ -66,7 +66,7 @@ export function createSheetTestBed(workbookData?: IWorkbookData, dependencies?: 
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData || TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

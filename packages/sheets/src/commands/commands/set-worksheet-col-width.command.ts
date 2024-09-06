@@ -46,7 +46,6 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
     handler: async (accessor: IAccessor, params: IDeltaColumnWidthCommandParams) => {
         const selectionManagerService = accessor.get(SheetsSelectionsService);
         const selections = selectionManagerService.getCurrentSelections();
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (!selections?.length) {
             return false;
@@ -120,8 +119,8 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
         });
 
         const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(
-            accessor,
-            redoMutationParams
+            redoMutationParams,
+            worksheet
         );
 
         const setColWidthResult = commandService.syncExecuteCommand(
@@ -168,21 +167,16 @@ export const SetColWidthCommand: ICommand = {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
 
-        const { subUnitId, unitId } = target;
+        const { subUnitId, unitId, worksheet } = target;
         const redoMutationParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,
             ranges: selections,
             colWidth: params.value,
         };
-        const undoMutationParams: ISetWorksheetColWidthMutationParams = SetWorksheetColWidthMutationFactory(
-            accessor,
-            redoMutationParams
-        );
-        const setColWidthResult = commandService.syncExecuteCommand(
-            SetWorksheetColWidthMutation.id,
-            redoMutationParams
-        );
+
+        const undoMutationParams = SetWorksheetColWidthMutationFactory(redoMutationParams, worksheet);
+        const setColWidthResult = commandService.syncExecuteCommand(SetWorksheetColWidthMutation.id, redoMutationParams);
 
         const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
             id: SetColWidthCommand.id,

@@ -51,14 +51,12 @@ export class AutoHeightController extends Disposable {
     }
 
     getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
-        const {
-            _univerInstanceService: univerInstanceService,
-            _injector: injector,
-        } = this;
+        const { _univerInstanceService: univerInstanceService } = this;
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet()?.getSheetId();
+        const subUnitId = worksheet.getSheetId();
 
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
         if (!subUnitId || !sheetSkeletonService.getCurrent()) {
@@ -75,10 +73,7 @@ export class AutoHeightController extends Disposable {
             unitId,
             rowsAutoHeightInfo,
         };
-        const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(
-            injector,
-            redoParams
-        );
+        const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);
         return {
             undos: [
                 {

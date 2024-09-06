@@ -16,7 +16,13 @@ const args = minimist(process.argv.slice(2));
 const isE2E = !!args.e2e;
 
 // User should also config their bunlder to build monaco editor's resources for web worker.
-const monacoEditorEntryPoints = ['vs/language/typescript/ts.worker.js', 'vs/editor/editor.worker.js'];
+const monacoEditorEntryPoints = [
+    'vs/language/json/json.worker.js',
+    'vs/language/css/css.worker.js',
+    'vs/language/html/html.worker.js',
+    'vs/language/typescript/ts.worker.js',
+    'vs/editor/editor.worker.js',
+];
 
 // Get git commit hash and ref name
 const gitCommitHash = execSync('git rev-parse --short HEAD').toString().trim();

@@ -15,6 +15,7 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { RibbonStartGroup, menuSchema as UIMenuSchema } from '@univerjs/ui';
 import { FONT_GROUP_MENU_ID } from '@univerjs/uniui';
 import {
     DELETE_MENU_ID,
@@ -53,6 +54,7 @@ import {
 
 export const menuSchema: MenuSchemaType = {
     [UNI_MENU_POSITIONS.TOOLBAR_MAIN]: {
+        ...(UIMenuSchema as any)[RibbonStartGroup.HISTORY],
         [FAKE_FONT_FAMILY_MENU_ID]: {
             menuItemFactory: FakeFontFamilySelectorMenuItemFactory,
         },

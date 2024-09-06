@@ -91,6 +91,10 @@ export class ConditionalFormattingService extends Disposable {
                 this._handleCalculateUnit(config.unitId, config.subUnitId, config.rule);
             });
         });
+
+        this.disposeWithMe(() => {
+            this.interceptorManager.dispose();
+        });
     }
 
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {

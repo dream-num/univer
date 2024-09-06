@@ -15,8 +15,9 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import {
-    ICommandService,
+import { ICommandService,
+    Inject,
+    Injector,
     IResourceManagerService,
     IUniverInstanceService,
     RedoCommand,
@@ -24,12 +25,14 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { InsertCommand } from '@univerjs/docs';
+import { DOC_RANGE_TYPE, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
 export class FDocument {
     readonly id: string;
 
     constructor(
         private readonly _documentDataModel: DocumentDataModel,
+        @Inject(Injector) protected readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService
@@ -94,5 +97,31 @@ export class FDocument {
             range: activeRange,
             segmentId,
         });
+    }
+
+    /**
+     * Sets the selection to a specified text range in the document.
+     *
+     * @param startOffset - The starting offset of the selection in the document.
+     * @param endOffset - The ending offset of the selection in the document.
+     *
+     * @example
+     * ```typescript
+     * document.setSelection(10, 20);
+     * ```
+     */
+    setSelection(startOffset: number, endOffset: number): void {
+        const textSelectionRenderManager = this._injector.get(ITextSelectionRenderManager);
+        textSelectionRenderManager.removeAllRanges();
+        textSelectionRenderManager.addDocRanges(
+            [
+                {
+                    startOffset,
+                    endOffset,
+                    rangeType: DOC_RANGE_TYPE.TEXT,
+                },
+            ]
+            , true
+        );
     }
 }

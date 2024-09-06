@@ -17,6 +17,7 @@
 import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
+import { FClipboardHooks } from './hooks/f-clipboard-hooks';
 import { FUndoRedoHooks } from './hooks/f-undoredo-hooks';
 
 export class FHooks {
@@ -90,4 +91,32 @@ export class FHooks {
      * @returns A disposable object that can be used to unsubscribe from the event
      */
     onRedo = FUndoRedoHooks.afterRedo.bind(this);
+
+    /**
+     * The onBeforeCopy event is fired before a copy operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforeCopy = FClipboardHooks.onBeforeCopy.bind(this);
+
+    /**
+     * The onCopy event is fired after a copy operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onCopy = FClipboardHooks.onCopy.bind(this);
+
+    /**
+     * The onBeforePaste event is fired before a paste operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onBeforePaste = FClipboardHooks.onBeforePaste.bind(this);
+
+    /**
+     * The onPaste event is fired after a paste operation is performed.
+     * @param callback Callback function that will be called when the event is fired
+     * @returns A disposable object that can be used to unsubscribe from the event
+     */
+    onPaste = FClipboardHooks.onPaste.bind(this);
 }

@@ -30,11 +30,12 @@ import { FSelection } from './f-selection';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
 import { FThreadComment } from './f-thread-comment';
-import type { IFICanvasFloatDom } from './f-workbook';
+import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { covertToColRange, covertToRowRange, transformComponentKey } from './utils';
 
 export class FWorksheet {
     constructor(
+        private readonly _fWorkbook: FWorkbook,
         private readonly _workbook: Workbook,
         private readonly _worksheet: Worksheet,
         @Inject(Injector) private readonly _injector: Injector,
@@ -91,6 +92,8 @@ export class FWorksheet {
             endRow: row + (height ?? 1) - 1,
             startColumn: col,
             endColumn: col + (width ?? 1) - 1,
+            unitId: this._workbook.getUnitId(),
+            sheetId: this._worksheet.getSheetId(),
         };
 
         return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
@@ -836,4 +839,32 @@ export class FWorksheet {
     }
 
     // #endregion
+
+    /**
+     * Returns the selected range in the active sheet, or null if there is no active range.
+     * @returns the active range
+     */
+    getActiveRange(): FRange | null {
+        return this._fWorkbook.getActiveRange();
+    }
+
+    /**
+     * Sets the active selection region for this sheet.
+     * @param range The range to set as the active selection.
+     */
+    setActiveRange(range: FRange): void {
+        const { unitId, sheetId } = range.getRange();
+
+        if (unitId !== this._workbook.getUnitId() || sheetId !== this._worksheet.getSheetId()) {
+            throw new Error('Specified range must be part of the sheet.');
+        }
+
+        this._fWorkbook.setActiveRange(range);
+    }
+
+    /**
+     * Sets the active selection region for this sheet.
+     * @param range The range to set as the active selection.
+     */
+    setActiveSelection = this.setActiveRange;
 }

@@ -36,6 +36,7 @@ import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.
 import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { IMoveRangeMutationParams } from '../../commands/mutations/move-range.mutation';
 import { MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
+import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
 import { adjustRangeOnMutation, getEffectedRangesOnMutation } from './util';
@@ -84,9 +85,12 @@ class WatchRange extends Disposable {
         }
 
         if (this._skipIntersects) {
+            if (mutation.id === RemoveSheetMutation.id) {
+                return;
+            }
             const effectRanges = getEffectedRangesOnMutation(mutation);
             if (effectRanges?.some((effectRange) => Rectangle.intersects(effectRange, this._range!))) {
-                return false;
+                return;
             }
         }
 

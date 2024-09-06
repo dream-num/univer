@@ -23,6 +23,8 @@ import { getDefaultDocData } from './data/default-doc';
 const AWAIT_LOADING_TIMEOUT = 5000;
 const AWAIT_DISPOSING_TIMEOUT = 5000;
 
+// NOTE: this interface is copied to `e2e/e2e.d.ts`. When you modify this interface, make sure
+// the duplication is updated as well.
 export interface IE2EControllerAPI {
     loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
     loadDefaultSheet(loadTimeout?: number): Promise<void>;

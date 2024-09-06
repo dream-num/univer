@@ -15,7 +15,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Dependency, ICommand, IRange, IWorkbookData, Nullable } from '@univerjs/core';
+import type { Dependency, ICommand, IRange, IWorkbookData, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 
 import { RefRangeService } from '../ref-range.service';
@@ -83,7 +83,7 @@ export function createRefRangeTestBed() {
     ] as ICommand[]).forEach((command) => commandService.registerCommand(command));
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA);
+    const sheet = univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

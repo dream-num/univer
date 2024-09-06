@@ -117,10 +117,7 @@ export const DeltaRowHeightCommand: ICommand = {
             };
         }
 
-        const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
-            accessor,
-            redoMutationParams
-        );
+        const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(redoMutationParams, worksheet);
 
         const redoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams = {
             unitId,
@@ -130,7 +127,7 @@ export const DeltaRowHeightCommand: ICommand = {
         };
 
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
-            SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoSetIsAutoHeightParams);
+            SetWorksheetRowIsAutoHeightMutationFactory(redoSetIsAutoHeightParams, worksheet);
 
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -215,7 +212,7 @@ export const SetRowHeightCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { unitId, subUnitId } = target;
+        const { unitId, subUnitId, worksheet } = target;
 
         const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             subUnitId,
@@ -224,10 +221,7 @@ export const SetRowHeightCommand: ICommand = {
             rowHeight: params.value,
         };
 
-        const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(
-            accessor,
-            redoMutationParams
-        );
+        const undoMutationParams: ISetWorksheetRowHeightMutationParams = SetWorksheetRowHeightMutationFactory(redoMutationParams, worksheet);
 
         const redoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams = {
             unitId,
@@ -237,7 +231,7 @@ export const SetRowHeightCommand: ICommand = {
         };
 
         const undoSetIsAutoHeightParams: ISetWorksheetRowIsAutoHeightMutationParams =
-            SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoSetIsAutoHeightParams);
+            SetWorksheetRowIsAutoHeightMutationFactory(redoSetIsAutoHeightParams, worksheet);
 
         const result = sequenceExecute([
             {
@@ -310,7 +304,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { unitId, subUnitId } = target;
+        const { unitId, subUnitId, worksheet } = target;
         const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
         if (!ranges?.length) {
@@ -325,7 +319,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         };
 
         const undoMutationParams: ISetWorksheetRowIsAutoHeightMutationParams =
-            SetWorksheetRowIsAutoHeightMutationFactory(accessor, redoMutationParams);
+            SetWorksheetRowIsAutoHeightMutationFactory(redoMutationParams, worksheet);
 
         const setIsAutoHeightResult = commandService.syncExecuteCommand(
             SetWorksheetRowIsAutoHeightMutation.id,

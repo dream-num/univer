@@ -27,11 +27,48 @@ import { createCommandTestBed } from './create-command-test-bed';
 describe('Test set col width commands', () => {
     let univer: Univer;
     let get: Injector['get'];
+
     let commandService: ICommandService;
+    let selectionsService: SheetsSelectionsService;
 
     function getColumnWidth(col: number): number {
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return worksheet.getColumnWidth(col);
+    }
+
+    function setSelection(start: number, end: number): void {
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const maxRow = worksheet.getMaxRows() - 1;
+
+        selectionsService.setSelections([
+            {
+                range: { startRow: 0, startColumn: start, endColumn: end, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
+                primary: {
+                    startRow: 0,
+                    startColumn: start,
+                    endColumn: start,
+                    endRow: 0,
+                    actualColumn: start,
+                    actualRow: 1,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            },
+        ]);
+    }
+
+    function addSelection(start: number, end: number): void {
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        const maxRow = worksheet.getMaxRows() - 1;
+
+        selectionsService.addSelections([
+            {
+                range: { startRow: 0, startColumn: start, endColumn: end, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
+                primary: null,
+                style: null,
+            },
+        ]);
     }
 
     beforeEach(() => {
@@ -46,30 +83,11 @@ describe('Test set col width commands', () => {
 
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         const maxRow = worksheet.getMaxRows() - 1;
-        const selectionManagerService = get(SheetsSelectionsService);
-        selectionManagerService.addSelections([
-            {
-                range: { startRow: 0, startColumn: 1, endColumn: 2, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
-                primary: {
-                    startRow: 0,
-                    startColumn: 1,
-                    endColumn: 1,
-                    endRow: 0,
-                    actualColumn: 1,
-                    actualRow: 1,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
-        selectionManagerService.addSelections([
-            {
-                range: { startRow: 0, startColumn: 5, endColumn: 5, endRow: maxRow, rangeType: RANGE_TYPE.COLUMN },
-                primary: null,
-                style: null,
-            },
-        ]);
+        selectionsService = get(SheetsSelectionsService);
+
+        // Select col 1 and 5
+        setSelection(1, 2);
+        addSelection(5, 5);
     });
 
     afterEach(() => univer.dispose());
@@ -95,6 +113,29 @@ describe('Test set col width commands', () => {
             expect(getColumnWidth(1)).toBe(65);
             expect(getColumnWidth(2)).toBe(65);
             expect(getColumnWidth(5)).toBe(65);
+        });
+
+        // Fix https://github.com/dream-num/univer-pro/issues/2302.
+        it('Should undo to original col widths', async () => {
+            expect(getColumnWidth(1)).toBe(88);
+
+            setSelection(1, 1);
+            await commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, { deltaX: -23, anchorCol: 1 });
+            expect(getColumnWidth(1)).toBe(65);
+            expect(getColumnWidth(2)).toBe(88);
+            setSelection(2, 2);
+            await commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, { deltaX: 22, anchorCol: 2 });
+            expect(getColumnWidth(1)).toBe(65);
+            expect(getColumnWidth(2)).toBe(110);
+
+            setSelection(1, 2);
+            await commandService.executeCommand<IDeltaColumnWidthCommandParams>(DeltaColumnWidthCommand.id, { deltaX: 50, anchorCol: 2 });
+            expect(getColumnWidth(1)).toBe(160);
+            expect(getColumnWidth(2)).toBe(160);
+
+            await commandService.executeCommand(UndoCommand.id);
+            expect(getColumnWidth(1)).toBe(65);
+            expect(getColumnWidth(2)).toBe(110);
         });
 
         it('Should expand only the anchor col in other situations', () => {

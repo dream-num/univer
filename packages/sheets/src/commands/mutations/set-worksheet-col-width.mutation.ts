@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation, IObjectArrayPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
+
+import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetColWidthMutationParams {
     unitId: string;
@@ -24,24 +26,20 @@ export interface ISetWorksheetColWidthMutationParams {
     colWidth: number | IObjectArrayPrimitiveType<Nullable<number>>;
 }
 
+/**
+ * This factory is for generating undo mutations for command {@link DeltaColumnWidthCommand}.
+ *
+ * Note that this mutation may return multi mutations params if the column width is different
+ * for each column in the range.
+ */
 export const SetWorksheetColWidthMutationFactory = (
-    accessor: IAccessor,
-    params: ISetWorksheetColWidthMutationParams
+    params: ISetWorksheetColWidthMutationParams,
+    worksheet: Worksheet
 ): ISetWorksheetColWidthMutationParams => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
-
-    if (universheet == null) {
-        throw new Error('universheet is null error!');
-    }
-
-    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-    if (worksheet == null) {
-        throw new Error('universheet is null error!');
-    }
+    const { unitId, subUnitId, ranges } = params;
     const colWidth: IObjectArrayPrimitiveType<Nullable<number>> = {};
     const manager = worksheet.getColumnManager();
-    const ranges = params.ranges;
+
     for (let i = 0; i < ranges.length; i++) {
         const range = ranges[i];
         for (let j = range.startColumn; j < range.endColumn + 1; j++) {
@@ -51,9 +49,9 @@ export const SetWorksheetColWidthMutationFactory = (
     }
 
     return {
-        unitId: params.unitId,
-        subUnitId: params.subUnitId,
-        ranges: params.ranges,
+        unitId,
+        subUnitId,
+        ranges,
         colWidth,
     };
 };
@@ -63,17 +61,10 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const universheet = univerInstanceService.getUniverSheetInstance(params.unitId);
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
 
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
-        }
-
-        const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-        if (!worksheet) {
-            return false;
-        }
-
+        const { worksheet } = target;
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();
         const ranges = params.ranges;
@@ -85,7 +76,7 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
                 if (typeof params.colWidth === 'number') {
                     column.w = params.colWidth;
                 } else {
-                    column.w = params.colWidth[j - range.startColumn] ?? defaultColumnWidth;
+                    column.w = params.colWidth[j] ?? defaultColumnWidth;
                 }
             }
         }

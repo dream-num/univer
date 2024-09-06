@@ -81,7 +81,7 @@ export const CellLinkEdit = () => {
                     const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
                     const cell = worksheet?.getCellRaw(editing.row, editing.col);
                     const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-                    const cellValue = `${getCellValueOrigin(cell)}`;
+                    const cellValue = `${getCellValueOrigin(cell) ?? ''}`;
                     if (cell && (cell.p || cellValue)) {
                         setShowLabel(false);
                     }

@@ -180,7 +180,7 @@ export class MobileSelectionControl extends SelectionControl {
      * @param sheetContentWidth
      * @param sheetContentHeight max sheet content height, for very short sheet, control pointer shoud not out of sheet
      */
-    // eslint-disable-next-line max-lines-per-function
+
     transformControlPoint(viewportScrollX: number = 0, viewportScrollY: number = 0, sheetContentWidth: number = 0, sheetContentHeight: number = 0): void {
         const style = this.currentStyle!;
         const rangeType = this.selectionModel.rangeType;

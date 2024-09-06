@@ -433,8 +433,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要从中获取行或列的数组。' },
+            rows: { name: '行数', detail: '要获取的行数。负数表示从数组末尾开始获取。' },
+            columns: { name: '列数', detail: '要获取的列数。负数表示从数组末尾开始获取。' },
         },
     },
     TOCOL: {
@@ -447,8 +448,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要作为列返回的数组或引用。' },
+            ignore: { name: '忽略值', detail: '是否忽略某些类型的值。默认情况下，不会忽略任何值。 指定下列操作之一：\n0 保留所有值（默认）\n1 忽略空白\n2 忽略错误\n3 忽略空白和错误' },
+            scanByColumn: { name: '按列扫描数组', detail: '按列扫描数组。 默认情况下，按行扫描数组。 扫描确定值是按行排序还是按列排序。' },
         },
     },
     TOROW: {
@@ -461,8 +463,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要作为行返回的数组或引用。' },
+            ignore: { name: '忽略值', detail: '是否忽略某些类型的值。默认情况下，不会忽略任何值。 指定下列操作之一：\n0 保留所有值（默认）\n1 忽略空白\n2 忽略错误\n3 忽略空白和错误' },
+            scanByColumn: { name: '按列扫描数组', detail: '按列扫描数组。 默认情况下，按行扫描数组。 扫描确定值是按行排序还是按列排序。' },
         },
     },
     TRANSPOSE: {

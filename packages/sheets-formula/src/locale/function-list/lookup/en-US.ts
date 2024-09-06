@@ -446,8 +446,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array from which to take rows or columns.' },
+            rows: { name: 'rows', detail: 'The number of rows to take. A negative value takes from the end of the array.' },
+            columns: { name: 'columns', detail: 'The number of columns to take. A negative value takes from the end of the array.' },
         },
     },
     TOCOL: {
@@ -460,8 +461,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or reference to return as a column.' },
+            ignore: { name: 'ignore', detail: 'Whether to ignore certain types of values. By default, no values are ignored. Specify one of the following:\n0 Keep all values (default)\n1 Ignore blanks\n2 Ignore errors\n3 Ignore blanks and errors' },
+            scanByColumn: { name: 'scan_by_column', detail: 'Scan the array by column. By default, the array is scanned by row. Scanning determines whether the values are ordered by row or by column.' },
         },
     },
     TOROW: {
@@ -474,8 +476,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or reference to return as a row.' },
+            ignore: { name: 'ignore', detail: 'Whether to ignore certain types of values. By default, no values are ignored. Specify one of the following:\n0 Keep all values (default)\n1 Ignore blanks\n2 Ignore errors\n3 Ignore blanks and errors' },
+            scanByColumn: { name: 'scan_by_column', detail: 'Scan the array by column. By default, the array is scanned by row. Scanning determines whether the values are ordered by row or by column.' },
         },
     },
     TRANSPOSE: {

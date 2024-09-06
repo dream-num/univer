@@ -358,6 +358,51 @@ export default {
             sortOrder2: { name: 'thứ tự sắp xếp 2', detail: 'Thứ tự dùng để sắp xếp. 1 cho tăng dần, -1 cho giảm dần. Mặc định là tăng dần.' },
         },
     },
+    TAKE: {
+        description: 'Trả về một số hàng hoặc cột liền kề đã xác định từ điểm bắt đầu hoặc kết thúc của một mảng.',
+        abstract: 'Trả về một số hàng hoặc cột liền kề đã xác định từ điểm bắt đầu hoặc kết thúc của một mảng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/take-%E5%87%BD%E6%95%B0-25382ff1-5da1-4f78-ab43-f33bd2e4e003',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng lấy hàng hoặc cột từ đó.' },
+            rows: { name: 'số hàng', detail: 'Số hàng cần thực hiện. Giá trị âm lấy từ cuối mảng.' },
+            columns: { name: 'số cột', detail: 'Số cột cần thực hiện. Giá trị âm lấy từ cuối mảng.' },
+        },
+    },
+    TOCOL: {
+        description: 'Trả về mảng trong một cột đơn.',
+        abstract: 'Trả về mảng trong một cột đơn.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/tocol-%E5%87%BD%E6%95%B0-22839d9b-0b55-4fc1-b4e6-2761f8f122ed',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc tham chiếu muốn trả về dưới dạng cột.' },
+            ignore: { name: 'bỏ qua giá trị', detail: 'Có bỏ qua một số kiểu giá trị nhất định hay không. Theo mặc định, không có giá trị nào bị bỏ qua. Xác định một trong những hành động sau:\n0 Giữ tất cả các giá trị (mặc định)\n1 Bỏ qua giá trị trống\n2 Bỏ qua lỗi\n3 Bỏ qua giá trị trống và lỗi' },
+            scanByColumn: { name: 'quét mảng theo cột', detail: 'Quét mảng theo cột. Theo mặc định, mảng được quét theo hàng. Quét xác định xem các giá trị được sắp xếp theo hàng hay theo cột.' },
+        },
+    },
+    TOROW: {
+        description: 'Trả về mảng trong một hàng đơn.',
+        abstract: 'Trả về mảng trong một hàng đơn.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/torow-%E5%87%BD%E6%95%B0-b90d0964-a7d9-44b7-816b-ffa5c2fe2289',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc tham chiếu muốn trả về dưới dạng một hàng.' },
+            ignore: { name: 'bỏ qua giá trị', detail: 'Có bỏ qua một số kiểu giá trị nhất định hay không. Theo mặc định, không có giá trị nào bị bỏ qua. Xác định một trong những hành động sau:\n0 Giữ tất cả các giá trị (mặc định)\n1 Bỏ qua giá trị trống\n2 Bỏ qua lỗi\n3 Bỏ qua giá trị trống và lỗi' },
+            scanByColumn: { name: 'quét mảng theo cột', detail: 'Quét mảng theo cột. Theo mặc định, mảng được quét theo hàng. Quét xác định xem các giá trị được sắp xếp theo hàng hay theo cột.' },
+        },
+    },
     TRANSPOSE: {
         description: 'Trả về chuyển vị của một mảng',
         abstract: 'Trả về chuyển vị của một mảng',

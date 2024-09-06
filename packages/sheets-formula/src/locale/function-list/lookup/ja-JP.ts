@@ -435,8 +435,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行または列を取得する配列。' },
+            rows: { name: '行の数', detail: '取得する行の数。 負の値は配列の最後から取得します。' },
+            columns: { name: '列の数', detail: '取得する列の数。 負の値は配列の最後から取得します。' },
         },
     },
     TOCOL: {
@@ -449,8 +450,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '列として返す配列または参照。' },
+            ignore: { name: '無視値', detail: '特定の種類の値を無視するかどうか。 既定では、値は無視されません。 次のいずれかを指定します。\n0 すべての値を保持する (既定)\n1 空白を無視する\n2 エラーを無視する\n3 空白とエラーを無視する' },
+            scanByColumn: { name: '配列を列でスキャンします', detail: '配列を列でスキャンします。 既定では、配列は行ごとにスキャンされます。 スキャンにより、値が行順か列順かが決まります。' },
         },
     },
     TOROW: {
@@ -463,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行として返す配列または参照。' },
+            ignore: { name: '無視値', detail: '特定の種類の値を無視するかどうか。 既定では、値は無視されません。 次のいずれかを指定します。\n0 すべての値を保持する (既定)\n1 空白を無視する\n2 エラーを無視する\n3 空白とエラーを無視する' },
+            scanByColumn: { name: '配列を列でスキャンします', detail: '配列を列でスキャンします。 既定では、配列は行ごとにスキャンされます。 スキャンにより、値が行順か列順かが決まります。' },
         },
     },
     TRANSPOSE: {

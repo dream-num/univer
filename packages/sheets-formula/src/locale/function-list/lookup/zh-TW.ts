@@ -433,13 +433,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要取用列或欄的陣列。' },
+            rows: { name: '列數', detail: '要取用的列數。負值會從陣列結尾取用。' },
+            columns: { name: '欄數', detail: '要取用的欄數。負值會從陣列結尾取用。' },
         },
     },
     TOCOL: {
-        description: '傳回單一列中的陣列',
-        abstract: '傳回單一列中的陣列',
+        description: '傳回單一欄中的陣列。',
+        abstract: '傳回單一欄中的陣列。',
         links: [
             {
                 title: '教導',
@@ -447,13 +448,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要以欄返回的陣列或參照。' },
+            ignore: { name: '忽略值', detail: '是否要忽略特定類型的值。 根據預設，不會忽略任何值。 指定下列其中一項動作：\n0 保留所有值 (預設)\n1 略過空白\n2 略過錯誤\n3 略過空白和錯誤' },
+            scanByColumn: { name: '依欄掃描陣列', detail: '依欄掃描陣列。 根據預設，陣列會以列掃描。 掃描會決定值是依列或欄排序。' },
         },
     },
     TOROW: {
-        description: '傳回單一行中的陣列',
-        abstract: '傳回單一行中的陣列',
+        description: '傳回單一列中的陣列。',
+        abstract: '傳回單一列中的陣列。',
         links: [
             {
                 title: '教導',
@@ -461,8 +463,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要以列返回的陣列或參照。' },
+            ignore: { name: '忽略值', detail: '是否要忽略特定類型的值。 根據預設，不會忽略任何值。 指定下列其中一項動作：\n0 保留所有值 (預設)\n1 略過空白\n2 略過錯誤\n3 略過空白和錯誤' },
+            scanByColumn: { name: '依欄掃描陣列', detail: '依欄掃描陣列。 根據預設，陣列會以列掃描。 掃描會決定值是依列或欄排序。' },
         },
     },
     TRANSPOSE: {

@@ -18,7 +18,7 @@
 
 import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
@@ -58,6 +58,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(AddSheetDataValidationCommand);
+        commandService.registerCommand(AddWorksheetMergeCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -208,6 +209,60 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(2, 4, 2, 4)?.bg?.rgb).toBe('green');
         expect(getStyleByPosition(3, 3, 3, 3)?.bg?.rgb).toBe('orange');
         expect(getStyleByPosition(3, 4, 3, 4)?.bg?.rgb).toBe('red');
+    });
+
+    it('Range getValues', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // 设置不同类型的值
+        activeSheet?.getRange(0, 0, 4, 4)?.setValues([
+            [1, 'text', true, ''],
+            [2.5, '', false, ''],
+            ['', '=SUM(A1:A2)', '', 0],
+            ['', '', '', ''],
+        ]);
+
+        // 测试获取整个范围的值
+        const range1 = activeSheet?.getRange(0, 0, 4, 4);
+        const values1 = range1?.getValues();
+        expect(values1).toEqual([
+            [1, 'text', 1, ''],
+            [2.5, '', 0, ''],
+            ['', null, '', 0],
+            ['', '', '', ''],
+        ]);
+
+        // 测试获取部分范围的值
+        const range2 = activeSheet?.getRange(1, 1, 2, 2);
+        const values2 = range2?.getValues();
+        expect(values2).toEqual([
+            ['', 0],
+            [null, ''],
+        ]);
+
+        // 测试获取单个单元格的值
+        const range3 = activeSheet?.getRange(0, 0, 1, 1);
+        const values3 = range3?.getValues();
+        expect(values3).toEqual([[1]]);
+
+        // 测试获取空白区域的值
+        const range4 = activeSheet?.getRange(5, 5, 2, 2);
+        const values4 = range4?.getValues();
+        expect(values4).toEqual([
+            [null, null],
+            [null, null],
+        ]);
+
+        // 测试获取包含合并单元格的范围的值
+        activeSheet?.getRange(6, 0, 2, 2)?.merge();
+        activeSheet?.getRange(6, 0)?.setValue('Merged');
+        const range5 = activeSheet?.getRange(6, 0, 3, 3);
+        const values5 = range5?.getValues();
+        expect(values5).toEqual([
+            ['Merged', null, null],
+            [null, null, null],
+            [null, null, null],
+        ]);
     });
 
     it('Range getCellData', () => {

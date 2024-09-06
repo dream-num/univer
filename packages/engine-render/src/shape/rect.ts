@@ -87,6 +87,15 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
             width = props.visualWidth;
         }
 
+        if (props.visualHeight) {
+            ctx.translate(0, (height - (props.visualHeight || 0)) / 2);
+            height = props.visualHeight;
+        }
+        if (props.visualWidth) {
+            ctx.translate((width - (props.visualWidth || 0)) / 2, 0);
+            width = props.visualWidth;
+        }
+
         if (!radius) {
             // transform of this rect has been handled in shape@render
             ctx.rect(0, 0, width, height);

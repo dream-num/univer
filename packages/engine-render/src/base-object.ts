@@ -95,20 +95,11 @@ export abstract class BaseObject extends Disposable {
     private _left: number = 0;
     private _leftOrigin: number | string = 0;
 
-    /**
-     * object size, for hit test, rendering if _visual size is undefined.
-     */
     private _width: number = 0;
     private _widthOrigin: number | string = 0;
 
     private _height: number = 0;
     private _heightOrigin: number | string = 0;
-
-    /**
-     * for rendering, in many case object size is bigger than visual size for better
-     */
-    private _visualHeight: Nullable<number>;
-    private _visualWidth: Nullable<number>;
 
     private _angle: number = 0;
 
@@ -212,14 +203,6 @@ export abstract class BaseObject extends Disposable {
 
     get height(): number {
         return this._height;
-    }
-
-    get visualHeight(): Nullable<number> {
-        return this._visualHeight;
-    }
-
-    get visualWidth(): Nullable<number> {
-        return this._visualWidth;
     }
 
     get strokeWidth() {

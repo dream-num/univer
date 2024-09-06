@@ -55,9 +55,6 @@ export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     strokeMiterLimit?: number;
     strokeWidth?: number;
 
-    visualHeight?: number;
-    visualWidth?: number;
-
     parent?: IScale;
 }
 

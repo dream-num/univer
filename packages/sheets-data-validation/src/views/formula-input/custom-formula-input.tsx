@@ -33,7 +33,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                 onChange={(newValue) => {
                     onChange?.({
                         ...value,
-                        formula1: newValue ?? '',
+                        formula1: (newValue ?? '').trim(),
                     });
                 }}
                 onlyInputFormula

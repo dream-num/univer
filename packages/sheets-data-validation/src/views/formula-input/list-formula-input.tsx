@@ -342,7 +342,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 openForSheetSubUnitId={subUnitId}
                                 onlyInputFormula
                                 onChange={async (newString) => {
-                                    const str = newString ?? '';
+                                    const str = (newString ?? '').trim();
                                     setFormulaStrCopy(str);
                                     updateFormula(str);
                                 }}

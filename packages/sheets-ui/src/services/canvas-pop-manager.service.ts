@@ -54,7 +54,6 @@ export class SheetCanvasPopManagerService extends Disposable {
     ) {
         const calc = () => {
             const { scene } = currentRender;
-
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
             const canvasElement = currentRender.engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();

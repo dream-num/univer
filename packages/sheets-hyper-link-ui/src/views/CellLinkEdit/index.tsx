@@ -97,7 +97,7 @@ export const CellLinkEdit = () => {
                     setShowLabel(false);
                     link = {
                         id: '',
-                        display: label,
+                        display: label ?? '',
                         payload: '',
                         row,
                         column: col,

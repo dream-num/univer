@@ -15,12 +15,11 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Tools } from '@univerjs/core';
+import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { isLegalLink, serializeUrl } from '../common/util';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
@@ -53,38 +52,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     if (params.cellValue) {
                         new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
                             const cellValueRaw = cell?.v;
-                            const cellValue = (cellValueRaw ?? '').toString();
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
-                            if (!link) {
-                                if (isLegalLink(cellValue) || cell?.custom?.__link_url) {
-                                    const url = cell?.custom?.__link_url ?? cellValue;
-                                    const id = Tools.generateRandomId();
-                                    undos.push({
-                                        id: RemoveHyperLinkMutation.id,
-                                        params: {
-                                            unitId,
-                                            subUnitId,
-                                            id,
-                                        },
-                                    });
-                                    redos.push({
-                                        id: AddHyperLinkMutation.id,
-                                        params: {
-                                            unitId,
-                                            subUnitId,
-                                            link: {
-                                                id,
-                                                row,
-                                                column: col,
-                                                display: cellValue,
-                                                payload: serializeUrl(url),
-                                            },
-                                        },
-                                    });
-                                }
-                                return;
-                            }
-
                             if (link) {
                                 // rich-text can store link in custom-range, don't save to link model
                                 if (cellValueRaw === '' || cell?.custom?.__link_url === '' || cell?.p) {

@@ -568,6 +568,8 @@ describe('Test FRange', () => {
 
         expect(range.getDataValidation()).toBeTruthy();
         expect(range.getDataValidation()?.rule.ranges).toEqual([{
+            unitId: univerAPI.getActiveWorkbook()?.getId(),
+            sheetId: activeSheet.getSheetId(),
             startRow: 0,
             endRow: 9,
             startColumn: 0,
@@ -601,7 +603,14 @@ describe('Test FRange', () => {
             expect(filter).not.toBeNull();
             expect(activeSheet.getFilter()).not.toBeNull();
             expect(activeSheet.getRange(0, 0, 1, 1).getFilter()).not.toBeNull();
-            expect(filter.getRange().getRange()).toStrictEqual({ startColumn: 0, startRow: 0, endColumn: 9, endRow: 9 } as IRange);
+            expect(filter.getRange().getRange()).toStrictEqual({
+                unitId: univerAPI.getActiveWorkbook()?.getId(),
+                sheetId: activeSheet.getSheetId(),
+                startColumn: 0,
+                startRow: 0,
+                endColumn: 9,
+                endRow: 9,
+            } as IRange);
 
             expect(await filter.setColumnFilterCriteria(1, { colId: 1, filters: { blank: true } })).toBeTruthy();
             expect(filter.getColumnFilterCriteria(1)).toEqual({ colId: 1, filters: { blank: true } });

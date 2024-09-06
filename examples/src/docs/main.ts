@@ -27,6 +27,7 @@ import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
+import { FUniver } from '@univerjs/facade';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
@@ -101,3 +102,4 @@ const mockUser = {
     canBindAnonymous: false,
 };
 userManagerService.setCurrentUser(mockUser);
+window.univerAPI = FUniver.newAPI(univer);

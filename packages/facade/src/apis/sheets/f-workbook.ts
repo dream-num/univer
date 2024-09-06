@@ -30,9 +30,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import type {
+    ISetSelectionsOperationParams,
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, RemoveSheetCommand, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
 import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
@@ -43,6 +44,7 @@ import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, Thre
 import { filter } from 'rxjs';
 import type { IFComponentKey } from './utils';
 import { FWorksheet } from './f-worksheet';
+import { FRange } from './f-range';
 
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {
 
@@ -105,7 +107,7 @@ export class FWorkbook {
      */
     getActiveSheet(): FWorksheet {
         const activeSheet = this._workbook.getActiveSheet();
-        return this._injector.createInstance(FWorksheet, this._workbook, activeSheet);
+        return this._injector.createInstance(FWorksheet, this, this._workbook, activeSheet);
     }
 
     /**
@@ -114,7 +116,7 @@ export class FWorkbook {
      */
     getSheets(): FWorksheet[] {
         return this._workbook.getSheets().map((sheet) => {
-            return this._injector.createInstance(FWorksheet, this._workbook, sheet);
+            return this._injector.createInstance(FWorksheet, this, this._workbook, sheet);
         });
     }
 
@@ -146,7 +148,7 @@ export class FWorkbook {
             throw new Error('No active sheet found');
         }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+        return this._injector.createInstance(FWorksheet, this, this._workbook, worksheet);
     }
 
     /**
@@ -160,7 +162,7 @@ export class FWorkbook {
             return null;
         }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+        return this._injector.createInstance(FWorksheet, this, this._workbook, worksheet);
     }
 
     /**
@@ -174,7 +176,7 @@ export class FWorkbook {
             return null;
         }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+        return this._injector.createInstance(FWorksheet, this, this._workbook, worksheet);
     }
 
     /**
@@ -211,7 +213,7 @@ export class FWorkbook {
             throw new Error('No active sheet found');
         }
 
-        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+        return this._injector.createInstance(FWorksheet, this, this._workbook, worksheet);
     }
 
     /**
@@ -314,6 +316,50 @@ export class FWorkbook {
         return validatorService.validatorWorkbook(
             this._workbook.getUnitId()
         );
+    }
+
+    /**
+     * Sets the active selection region for this sheet.
+     * @param range The range to set as the active selection.
+     */
+    setActiveRange(range: FRange): void {
+        // In theory, FRange should belong to a specific context, rather than getting the currently active sheet
+        const sheet = this.getActiveSheet();
+        const sheetId = range.getRange().sheetId || sheet.getSheetId();
+
+        const worksheet = sheetId ? this._workbook.getSheetBySheetId(sheetId) : this._workbook.getActiveSheet(true);
+        if (!worksheet) {
+            throw new Error('No active sheet found');
+        }
+
+        // if the range is not in the current sheet, set the active sheet to the range's sheet
+        if (worksheet.getSheetId() !== sheet.getSheetId()) {
+            this.setActiveSheet(this._injector.createInstance(FWorksheet, this, this._workbook, worksheet));
+        }
+
+        const setSelectionOperationParams: ISetSelectionsOperationParams = {
+            unitId: this.getId(),
+            subUnitId: sheetId,
+
+            selections: [range].map((r) => ({ range: r.getRange(), primary: getPrimaryForRange(r.getRange(), worksheet), style: null })),
+        };
+
+        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, setSelectionOperationParams);
+    }
+
+    /**
+     * Returns the selected range in the active sheet, or null if there is no active range.
+     * @returns the active range
+     */
+    getActiveRange(): FRange | null {
+        const activeSheet = this._workbook.getActiveSheet();
+        const selections = this._selectionManagerService.getCurrentSelections();
+        const active = selections.find((selection) => !!selection.primary);
+        if (!active) {
+            return null;
+        }
+
+        return this._injector.createInstance(FRange, this._workbook, activeSheet, active.range);
     }
 
     // region DataValidationHooks

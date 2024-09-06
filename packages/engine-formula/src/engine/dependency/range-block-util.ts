@@ -14,46 +14,78 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+// import type { IRange } from '@univerjs/core';
 
-// the size of the block
-const BLOCKSIZE = 10;
+// // the size of the block
+// const BLOCKSIZE = 10;
 
-export function setRangeBlockToken(range: IRange, baseKey: string, token: string, map: Map<string, Map<string, Set<string>>>): void {
-    const { startRow, startColumn, endRow, endColumn } = range;
-    // the horizontal and vertical start index of the block
-    const startH = Math.floor(startRow / BLOCKSIZE);
-    const startV = Math.floor(startColumn / BLOCKSIZE);
+// export function setRangeBlockToken(range: IRange, baseKey: string, token: string, map: Map<string, Map<string, Set<string>>>): void {
+//     const { startRow, startColumn, endRow, endColumn } = range;
 
-    for (let x = startH; x <= Math.ceil(endRow / BLOCKSIZE); x += BLOCKSIZE) {
-        for (let y = startV; y <= Math.ceil(endColumn / BLOCKSIZE); y += BLOCKSIZE) {
-            const key = `${baseKey}_${x}_${y}`;
-            if (!map.has(baseKey)) {
-                map.set(baseKey, new Map());
-            }
-            if (!map.get(baseKey)!.has(key)) {
-                map.get(baseKey)!.set(key, new Set<string>());
-            }
-            map.get(baseKey)!.get(key)!.add(token);
-        }
-    }
-}
+//     // 计算块的起始和结束索引
+//     const startH = Math.floor(startRow / BLOCKSIZE);
+//     const endH = Math.ceil(endRow / BLOCKSIZE);
+//     const startV = Math.floor(startColumn / BLOCKSIZE);
+//     const endV = Math.ceil(endColumn / BLOCKSIZE);
 
-export function getBlockTokensByRange(tokensSet: Set<string>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
-    const { startRow, startColumn, endRow, endColumn } = range;
-    const startH = Math.floor(startRow / BLOCKSIZE);
-    const startV = Math.floor(startColumn / BLOCKSIZE);
-    // const tokensSet = new Set<string>();
-    for (let x = startH; x <= Math.ceil(endRow / BLOCKSIZE); x += BLOCKSIZE) {
-        for (let y = startV; y <= Math.ceil(endColumn / BLOCKSIZE); y += BLOCKSIZE) {
-            const key = `${baseKey}_${x}_${y}`;
-            if (map.has(baseKey) && map.get(baseKey)!.has(key)) {
-                map.get(baseKey)!.get(key)!.forEach((token) => {
-                    tokensSet.add(token);
-                });
-            }
-        }
-    }
-    return tokensSet;
-}
+//     // 遍历所有与range有交集的块
+//     for (let x = startH; x <= endH; x++) {
+//         for (let y = startV; y <= endV; y++) {
+//             const key = `${baseKey}_${x}_${y}`;
+//             if (!map.has(baseKey)) {
+//                 map.set(baseKey, new Map());
+//             }
+//             if (!map.get(baseKey)!.has(key)) {
+//                 map.get(baseKey)!.set(key, new Set<string>());
+//             }
+//             map.get(baseKey)!.get(key)!.add(token);
+//         }
+//     }
+// }
 
+// export function getBlockTokensByRange(tokensSet: Set<string>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>): Set<string> {
+//     const { startRow, startColumn, endRow, endColumn } = range;
+
+//     // 计算块的起始和结束索引
+//     const startH = Math.floor(startRow / BLOCKSIZE);
+//     const endH = Math.floor(endRow / BLOCKSIZE);
+//     const startV = Math.floor(startColumn / BLOCKSIZE);
+//     const endV = Math.floor(endColumn / BLOCKSIZE);
+
+//     // 遍历所有与range有交集的块
+//     for (let x = startH; x <= endH; x++) {
+//         for (let y = startV; y <= endV; y++) {
+//             const key = `${baseKey}_${x}_${y}`;
+//             if (map.has(baseKey) && map.get(baseKey)!.has(key)) {
+//                 const blockTokens = map.get(baseKey)!.get(key)!;
+//                 blockTokens.forEach((token) => tokensSet.add(token));
+//             }
+//         }
+//     }
+
+//     return tokensSet;
+// }
+
+// export function updateBlockKey(tokensSet: Map<string, Set<string>>, range: IRange, baseKey: string, map: Map<string, Map<string, Set<string>>>) {
+//     const { startRow, startColumn, endRow, endColumn } = range;
+
+//     // 计算块的起始和结束索引
+//     const startH = Math.floor(startRow / BLOCKSIZE);
+//     const endH = Math.floor(endRow / BLOCKSIZE);
+//     const startV = Math.floor(startColumn / BLOCKSIZE);
+//     const endV = Math.floor(endColumn / BLOCKSIZE);
+
+//     let hasCreate = tokensSet.has(baseKey);
+
+//     // 遍历所有与range有交集的块
+//     for (let x = startH; x <= endH; x++) {
+//         for (let y = startV; y <= endV; y++) {
+//             if (!hasCreate) {
+//                 tokensSet.set(baseKey, new Set<string>());
+//                 hasCreate = true;
+//             }
+
+//             tokensSet.get(baseKey)?.add(`${baseKey}_${x}_${y}`);
+//         }
+//     }
+// }

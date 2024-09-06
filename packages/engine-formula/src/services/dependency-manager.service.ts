@@ -159,18 +159,15 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 cache.addDependencyMap(tree);
             }
         }
-        for (const tree of allTrees.concat(dependencyTrees)) {
+
+        const treeMap = cache.getDependencyMap();
+        for (const tree of treeMap.values()) {
             cache.updateParent(tree);
         }
-
-        for (let i = 0; i < allTrees.length; i++) {
-            const tree = allTrees[i];
-            cache.dependency1(tree);
+        for (const tree of treeMap.values()) {
+            cache.dependencyUseParentId(tree);
         }
-        // this._buildReverseDependency(allTrees, dependencyTrees);
-        for (const dependencyTree of dependencyTrees) {
-            cache.dependency1(dependencyTree);
-        }
+        cache.dispose();
     }
 
     /**
@@ -187,51 +184,16 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 cache.addDependencyMap(tree);
             }
         }
-        for (const tree of allTrees.concat(dependencyTrees)) {
+       // do not use allTrees.concat(shouldBeBuildTrees, dependencyTrees) to avoid duplicate trees
+        const treeMap = cache.getDependencyMap();
+
+        for (const tree of treeMap.values()) {
             cache.updateParent(tree);
         }
-        for (let i = 0; i < allTrees.length; i++) {
-            const tree = allTrees[i];
-            cache.dependency1(tree);
+        for (const tree of treeMap.values()) {
+            cache.dependencyUseParentId(tree);
         }
-        for (const dependencyTree of dependencyTrees) {
-            cache.dependency1(dependencyTree);
-        }
-        // this._buildReverseDependency(allTrees, dependencyTrees);
-    }
-
-    /**
-     * Build the reverse dependency relationship between the trees.
-     * @param allTrees
-     * @param dependencyTrees
-     */
-    private _buildReverseDependency(allTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]) {
-        allTrees.forEach((tree) => {
-            dependencyTrees?.forEach((dependencyTree) => {
-                if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
-                    return true;
-                }
-
-                if (tree.dependency(dependencyTree)) {
-                    tree.pushChildren(dependencyTree);
-                }
-            });
-        });
-        // let allTreesCache = new FormulaDependencyTreeCache();
-        // for (const tree of allTrees) {
-        //     const rangeList = tree.rangeList;
-        //     for (const range of rangeList) {
-        //         allTreesCache.add(range, tree);
-        //     }
-        // }
-        // if (dependencyTrees) {
-        //     for (const dependencyTree of dependencyTrees) {
-        //         allTreesCache.dependencyWithBlock(dependencyTree);
-        //     }
-        // }
-        // allTreesCache.dispose();
-        // // @ts-ignore
-        // allTreesCache = null;
+        cache.dispose();
     }
 
     /**

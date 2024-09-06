@@ -26,6 +26,9 @@ export interface ISetSelectionsOperationParams {
     subUnitId: string;
     selections: ISelectionWithStyle[];
     type?: SelectionMoveType;
+
+    /** If should scroll to the selected range. */
+    reveal?: boolean;
 }
 
 export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> = {
@@ -36,11 +39,11 @@ export const SetSelectionsOperation: IOperation<ISetSelectionsOperationParams> =
 
         const { selections, type, unitId, subUnitId } = params;
         const selectionManagerService = getSelectionsService(accessor);
-        // must be a new selectionData
-        // this._ensureWorkbookSelection(unitIdOrSelections).setSelections would clear selection Data on selecitonManagerInstance.
-        // see issues#2199
-        selectionManagerService.setSelections(unitId, subUnitId, [...selections], type);
 
+        // Must be a new selectionData
+        // this._ensureWorkbookSelection(unitIdOrSelections).setSelections would clear selection Data on SheetSelectionsService.
+        // kee issues#2199
+        selectionManagerService.setSelections(unitId, subUnitId, [...selections], type);
         return true;
     },
 };

@@ -24,10 +24,10 @@ import {
     Injector,
     RANGE_TYPE, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, PointerInput, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
+import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { SheetsSelectionsService } from '@univerjs/sheets';
+import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
@@ -91,6 +91,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
             } else if (command.id === ExpandSelectionCommand.id) {
                 const param = command.params as IExpandSelectionCommandParams;
                 this._scrollToSelectionForExpand(param);
+            } else if (command.id === SetSelectionsOperation.id && (command.params as ISetSelectionsOperationParams).reveal) {
+                this._scrollToSelection();
             }
         }));
     }
@@ -444,14 +446,11 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
         const selection = this._getSelectionsService().getCurrentLastSelection();
-        if (selection == null) {
-            return;
-        }
+        if (!selection) return;
 
         const { startRow, startColumn, actualRow, actualColumn } = selection.primary;
         const selectionStartRow = targetIsActualRowAndColumn ? actualRow : startRow;
         const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn : startColumn;
-
         this._scrollToCell(selectionStartRow, selectionStartColumn);
     }
 

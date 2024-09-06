@@ -180,6 +180,7 @@ export const SetColHiddenCommand: ICommand = {
         const undoMutationParams = SetColHiddenUndoMutationFactory(accessor, redoMutationParams);
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
             unitId, subUnitId,
+            reveal: true,
             selections: ranges.map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),

@@ -22,10 +22,15 @@ import { bufferTime, filter } from 'rxjs/operators';
 import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
-import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting';
+import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsCfRenderController)
 export class SheetsCfRenderController extends Disposable {
+    /**
+     * When a set operation is triggered multiple times over a short period of time, it may result in some callbacks not being disposed,and caused a render cache exception.
+     * The solution here is to store all the asynchronous tasks and focus on processing after the last callback
+     */
+    private _ruleChangeCacheMap: Map<string, Array<{ oldRule: IConditionFormattingRule; rule: IConditionFormattingRule; dispose: () => boolean }>> = new Map();
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -38,6 +43,9 @@ export class SheetsCfRenderController extends Disposable {
         this._initViewModelInterceptor();
         this._initSkeleton();
         this._initVmEffectByRule();
+        this.disposeWithMe(() => {
+            this._ruleChangeCacheMap.clear();
+        });
     }
 
     private _initSkeleton() {
@@ -84,6 +92,7 @@ export class SheetsCfRenderController extends Disposable {
 
     private _initVmEffectByRule() {
         this.disposeWithMe(
+
             this._conditionalFormattingRuleModel.$ruleChange.subscribe((config) => {
                 const { rule, unitId, subUnitId } = config;
                 switch (config.type) {
@@ -113,44 +122,7 @@ export class SheetsCfRenderController extends Disposable {
                         return;
                     }
                     case 'set': {
-                        const oldRule = config.oldRule!;
-                        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
-                        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
-                            map.set(cur, index);
-                            return map;
-                        }, new Map<string, number>());
-
-                        // After each setting, the cache needs to be cleared,
-                        // and this cleanup is deferred until the end of the calculation.
-                        // Otherwise the render will flash once
-                        const dispose = this._conditionalFormattingService.interceptorManager.intercept(this._conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
-                            handler: (config, _, next) => {
-                                if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
-                                    oldRule.ranges.forEach((range) => {
-                                        Range.foreach(range, (row, col) => {
-                                            this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                                        });
-                                    });
-                                    rule.ranges.forEach((range) => {
-                                        Range.foreach(range, (row, col) => {
-                                            this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                                            this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
-                                        });
-                                    });
-                                    dispose();
-                                    return;
-                                }
-                                next(config);
-                            },
-                        });
-
-                        rule.ranges.forEach((range) => {
-                            Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                            });
-                        });
-
-                        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
+                        this._handleRuleChange(unitId, subUnitId, rule, config.oldRule!);
                         return;
                     }
                     case 'sort': {
@@ -167,6 +139,67 @@ export class SheetsCfRenderController extends Disposable {
                     }
                 }
             }));
+    }
+
+    private _handleRuleChange(
+        unitId: string,
+        subUnitId: string,
+        rule: IConditionFormattingRule,
+        oldRule: IConditionFormattingRule
+    ) {
+        const list = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId)!;
+        const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
+            map.set(cur, index);
+            return map;
+        }, new Map<string, number>());
+
+        // After each setting, the cache needs to be cleared,
+        // and this cleanup is deferred until the end of the calculation.
+        // Otherwise the render will flash once
+        const handleChange = (oldRule: IConditionFormattingRule, newRule: IConditionFormattingRule) => {
+            oldRule.ranges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
+                    this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
+                });
+            });
+            newRule.ranges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
+                    this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
+                    this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
+                });
+            });
+        };
+        const dispose = this._conditionalFormattingService.interceptorManager.intercept(this._conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
+            handler: (config, _, next) => {
+                if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
+                    const list = this._ruleChangeCacheMap.get(config.cfId) || [];
+                    list.forEach((config) => {
+                        handleChange(config.oldRule, config.rule);
+                        config.dispose();
+                    });
+                    this._ruleChangeCacheMap.delete(config.cfId);
+                    return;
+                }
+                next(config);
+            },
+        });
+
+        if (oldRule.cfId === rule.cfId) {
+            let list = this._ruleChangeCacheMap.get(oldRule.cfId);
+            if (!list) {
+                list = [];
+                this._ruleChangeCacheMap.set(oldRule.cfId, list);
+            }
+            list.push({ oldRule, rule, dispose });
+        }
+
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
+            });
+        });
+
+        this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
     }
 
     private _initViewModelInterceptor() {

@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_SHEET, FontItalic, FontWeight, ICommandService, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import {
     RangeProtectionPermissionEditPoint,
     SetRangeValuesMutation,
@@ -27,6 +27,7 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
+import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
@@ -266,7 +267,7 @@ export function SheetStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuBut
 
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const textSelectionService = accessor.get(DocSelectionManagerService);
 
     const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const activeTextRange = textSelectionService.getActiveRectRange();

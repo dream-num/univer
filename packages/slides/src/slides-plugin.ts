@@ -18,8 +18,13 @@ import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@u
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSlidesConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+// import { DocSelectionManagerService } from '@univerjs/docs';
+// import { CanvasView } from './views/render';
+
+export interface IUniverSlidesConfig {}
+
+const DEFAULT_SLIDE_PLUGIN_DATA = {};
 
 const PLUGIN_NAME = 'slides';
 
@@ -73,7 +78,7 @@ export class UniverSlidesPlugin extends Plugin {
     private _initializeDependencies(slideInjector: Injector) {
         const dependencies: Dependency[] = [
             // [CanvasView],
-            // [TextSelectionManagerService],
+            // [DocSelectionManagerService],
         ];
 
         dependencies.forEach((d) => {

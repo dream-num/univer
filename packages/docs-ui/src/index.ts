@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+export { getCustomRangesInterestsWithRange } from './basics/custom-range';
+export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection } from './basics/selection';
+export { hasParagraphInTable } from './basics/paragraph';
+export { replaceSelectionFactory } from './basics/replace';
+export type { IDocObjectParam } from './basics/component-tools';
+export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/component-tools';
+export { getRichTextEditPath, getCommandSkeleton } from './commands/util';
+export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
+export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
+export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
+export { getPlainTextFormDocument, getPlainTextFormBody } from './basics/plain-text';
+export * from './basics/docs-view-key';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
@@ -30,6 +42,90 @@ export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema } from './controllers/menu.schema';
 
 // #region - all commands
+export { RectRange, convertPositionsToRectRanges } from './services/selection/rect-range';
+export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
+export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';
+export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange, getLineBounding } from './services/selection/text-range';
+export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
+export { getOneTextSelectionRange } from './services/selection/convert-text-range';
+export type { IDocRange } from './services/selection/range-interface';
+export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
+
+export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
+export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
+export { DocCustomRangeService, type ICustomRangeHook } from './services/doc-custom-range.service';
+export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+
+export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
+export { BreakLineCommand } from './commands/commands/break-line.command';
+export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
+export {
+    InsertCommand,
+    DeleteCommand,
+    UpdateCommand,
+    EditorInsertTextCommandId,
+    type ICoverCommandParams,
+    type IDeleteCommandParams,
+    type IInsertCommandParams,
+    type IUpdateCommandParams,
+} from './commands/commands/core-editing.command';
+export { DeleteLeftCommand, DeleteRightCommand, DeleteCustomBlockCommand, MergeTwoParagraphCommand, type IDeleteCustomBlockParams } from './commands/commands/delete.command';
+export {
+    SetInlineFormatBoldCommand,
+    SetInlineFormatItalicCommand,
+    SetInlineFormatUnderlineCommand,
+    SetInlineFormatStrikethroughCommand,
+    SetInlineFormatSubscriptCommand,
+    SetInlineFormatSuperscriptCommand,
+    SetInlineFormatFontSizeCommand,
+    SetInlineFormatFontFamilyCommand,
+    SetInlineFormatTextColorCommand,
+    SetInlineFormatTextBackgroundColorCommand,
+    ResetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatCommand,
+} from './commands/commands/inline-format.command';
+export {
+    ListOperationCommand,
+    BulletListCommand,
+    OrderListCommand,
+    ChangeListNestingLevelCommand,
+    ChangeListTypeCommand,
+    CheckListCommand,
+    ToggleCheckListCommand,
+    QuickListCommand,
+} from './commands/commands/list.command';
+export {
+    AlignOperationCommand,
+    AlignLeftCommand,
+    AlignCenterCommand,
+    AlignRightCommand,
+    AlignJustifyCommand,
+} from './commands/commands/paragraph-align.command';
+export { IMEInputCommand } from './commands/commands/ime-input.command';
+export { ReplaceContentCommand, CoverContentCommand } from './commands/commands/replace-content.command';
+export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+export { AfterSpaceCommand, TabCommand, EnterCommand, type ITabCommandParams } from './commands/commands/auto-format.command';
+export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
+export { MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
+
+// #endregion
+export { DocAutoFormatService } from '../../docs-ui/src/services/doc-auto-format.service';
+export { ChangeListNestingLevelType } from './commands/commands/list.command';
+export { generateParagraphs } from './commands/commands/break-line.command';
+export type { IInnerCutCommandParams } from './commands/commands/clipboard.inner.command';
+export { getCutActionsFromDocRanges, getCustomBlockIdsInSelections } from './commands/commands/clipboard.inner.command';
+export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
+export { DocTableDeleteRowsCommand, DocTableDeleteColumnsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
+export type { IDocTableDeleteRowsCommandParams, IDocTableDeleteColumnsCommandParams, IDocTableDeleteTableCommandParams } from './commands/commands/table/doc-table-delete.command';
+export type { IDocTableInsertColumnCommandParams, IDocTableInsertRowCommandParams, IDocTableInsertColumnRightCommandParams, IDocTableInsertRowAboveCommandParams, IDocTableInsertRowBellowCommandParams, IDocTableInsertColumnLeftCommandParams } from './commands/commands/table/doc-table-insert.command';
+export { DocTableInsertColumnCommand, DocTableInsertRowCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertColumnLeftCommand } from './commands/commands/table/doc-table-insert.command';
+export type { IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
+export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
+
+export { genTableSource, getEmptyTableRow, getEmptyTableCell, getTableColumn } from './commands/commands/table/table';
+export { getCursorWhenDelete } from './commands/commands/delete.command';
 export { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
+export { SelectAllOperation } from './commands/operations/select-all.operation';
+export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 // #endregion

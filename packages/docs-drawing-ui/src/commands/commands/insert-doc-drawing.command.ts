@@ -24,7 +24,8 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getCustomBlockIdsInSelections, getRetainAndDeleteFromReplace, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getCustomBlockIdsInSelections, getRetainAndDeleteFromReplace, getRichTextEditPath } from '@univerjs/docs-ui';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**
@@ -42,10 +43,10 @@ export const InsertDocDrawingCommand: ICommand = {
         }
 
         const commandService = accessor.get(ICommandService);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const activeTextRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeTextRange = docSelectionManagerService.getActiveTextRange();
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (activeTextRange == null || documentDataModel == null) {
             return false;

@@ -34,7 +34,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IRefSelectionsService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
@@ -42,6 +42,7 @@ import type { KeyCode } from '@univerjs/ui';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
+import { getCanvasOffsetByEngine } from '@univerjs/docs-ui';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';

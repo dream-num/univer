@@ -16,7 +16,8 @@
 
 import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
 import React, { useEffect } from 'react';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionList } from '../mention-list';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
@@ -27,7 +28,6 @@ export const MentionEditPopup = () => {
     const popupService = useDependency(DocMentionPopupService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const textSelectionRenderService = useDependency(ITextSelectionRenderManager);
     const editPopup = useObservable(popupService.editPopup$);
     const userService = useDependency(UserManagerService);
 
@@ -40,12 +40,16 @@ export const MentionEditPopup = () => {
         },
     }));
 
+    const renderManagerService = useDependency(IRenderManagerService);
+
+    const docSelectionRenderService = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
     useEffect(() => {
-        textSelectionRenderService.blur();
+        docSelectionRenderService?.blur();
         return () => {
-            textSelectionRenderService.focus();
+            docSelectionRenderService?.focus();
         };
-    }, [textSelectionRenderService]);
+    }, [docSelectionRenderService]);
 
     if (!editPopup) {
         return null;

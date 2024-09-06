@@ -17,11 +17,11 @@
 import { ICommandService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IMouseEvent } from '@univerjs/engine-render';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { Menu } from '../../../components/menu/desktop/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';
+import { ILayoutService } from '../../../services/layout/layout.service';
 
 export function DesktopContextMenu() {
     const contentRef = useRef<HTMLDivElement>(null);
@@ -79,9 +79,14 @@ export function DesktopContextMenu() {
                         menuType={menuType}
                         onOptionSelect={(params) => {
                             const { label: id, commandId, value } = params;
-                            commandService && commandService.executeCommand(commandId ?? id as string, { value });
-                            const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-                            textSelectionRenderManager.focus();
+
+                            if (commandService) {
+                                commandService.executeCommand(commandId ?? id as string, { value });
+                            }
+
+                            const layoutService = injector.get(ILayoutService);
+                            layoutService.focus();
+
                             setVisible(false);
                         }}
                     />

@@ -33,30 +33,20 @@ export * from './shape';
 export * from './viewport';
 
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
-export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange, getLineBounding } from './components/docs/text-selection/text-range';
-export { RectRange, convertPositionsToRectRanges } from './components/docs/text-selection/rect-range';
-export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-text-range';
 export { Liquid } from './components/docs/liquid';
-export { getCanvasOffsetByEngine } from './components/docs/text-selection/selection-utils';
-export {
-    ITextSelectionRenderManager,
-    TextSelectionRenderManager,
-} from './components/docs/text-selection/text-selection-render-manager';
-export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } from './components/docs/text-selection/text-selection-render-manager';
 export { Documents } from './components/docs/document';
 export { DocBackground } from './components/docs/doc-background';
 export type { IPageRenderConfig } from './components/docs/document';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
 export { ThinEngine } from './thin-engine';
-export { getCharSpaceApply, getNumberUnitValue } from './components/docs/layout/tools';
 export { type IChangeObserverConfig } from './scene.transformer';
 export { DEFAULT_PADDING_DATA } from './components/sheets/sheet-skeleton';
 export { DocumentEditArea } from './components/docs/view-model/document-view-model';
-export { lineIterator, glyphIterator } from './components/docs/layout/tools';
-export { getOneTextSelectionRange } from './components/docs/text-selection/convert-text-range';
-export { getLastLine } from './components/docs/layout/tools';
+export { lineIterator, glyphIterator, getPageFromPath, getLastLine, getNumberUnitValue, getCharSpaceApply } from './components/docs/layout/tools';
 export { DataStreamTreeNode } from './components/docs/view-model/data-stream-tree-node';
-export type { IDocRange } from './components/docs/text-selection/range-interface';
-export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './components/docs/text-selection/convert-rect-range';
 export { parseDataStreamToTree } from './components/docs/view-model/document-view-model';
-export { DOC_RANGE_TYPE } from './components/docs/text-selection/range-interface';
+export type { IDocumentOffsetConfig } from './components/docs/document';
+export { getTableIdAndSliceIndex } from './components/docs/layout/block/table';
+export { ThinScene } from './thin-scene';
+export { getOffsetRectForDom } from './basics/position';
+export type { IFindNodeRestrictions } from './components/docs/layout/doc-skeleton';

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DOCS_VIEW_KEY } from '@univerjs/docs';
+import { DOCS_VIEW_KEY } from '@univerjs/docs-ui';
 import type { DocBackground, Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
 
 export interface IDocObjectParam {

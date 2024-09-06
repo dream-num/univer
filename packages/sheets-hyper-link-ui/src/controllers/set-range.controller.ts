@@ -20,7 +20,7 @@ import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { getPlainTextFormDocument } from '@univerjs/docs';
+import { getPlainTextFormDocument } from '@univerjs/docs-ui';
 import { isLegalLink, serializeUrl } from '../common/util';
 import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
 import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';

@@ -32,6 +32,7 @@ export const DocsRenameMutation: ICommand = {
             return false;
         }
         doc.setName(params.name);
+
         return true;
     },
 };

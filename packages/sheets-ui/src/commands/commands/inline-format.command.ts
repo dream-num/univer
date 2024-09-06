@@ -16,17 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService } from '@univerjs/core';
-import {
-    SetInlineFormatBoldCommand,
-    SetInlineFormatFontFamilyCommand,
-    SetInlineFormatFontSizeCommand,
-    SetInlineFormatItalicCommand,
-    SetInlineFormatStrikethroughCommand,
-    SetInlineFormatSubscriptCommand,
-    SetInlineFormatSuperscriptCommand,
-    SetInlineFormatTextColorCommand,
-    SetInlineFormatUnderlineCommand,
-} from '@univerjs/docs';
+import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,

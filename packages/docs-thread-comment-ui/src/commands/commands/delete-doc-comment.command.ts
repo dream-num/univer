@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, sequenceExecute } from '@univerjs/core';
-import { deleteCustomDecorationFactory } from '@univerjs/docs';
+import { deleteCustomDecorationFactory } from '@univerjs/docs-ui';
 
 export interface IDeleteDocCommentComment {
     unitId: string;

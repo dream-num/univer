@@ -17,15 +17,17 @@
 import type { DocumentDataModel } from '@univerjs/core';
 import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
-import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 
 import { ComponentManager, IEditorService } from '@univerjs/ui';
-import { DocSkeletonManagerService, neoGetDocObject } from '@univerjs/docs';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { Nullable } from 'vitest';
 import { TextBubbleShape } from '../views/header-footer/text-bubble';
 import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
+import { neoGetDocObject } from '../basics/component-tools';
 
 const HEADER_FOOTER_STROKE_COLOR = 'rgba(58, 96, 247, 1)';
 const HEADER_FOOTER_FILL_COLOR = 'rgba(58, 96, 247, 0.08)';
@@ -129,7 +131,7 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
@@ -214,15 +216,15 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
             const { createType, headerFooterId } = checkCreateHeaderFooterType(viewModel, editArea, pageNumber);
 
             if (editArea === DocumentEditArea.BODY) {
-                this._textSelectionRenderManager.setSegment('');
-                this._textSelectionRenderManager.setSegmentPage(-1);
-                this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
+                this._docSelectionRenderService.setSegment('');
+                this._docSelectionRenderService.setSegmentPage(-1);
+                this._docSelectionRenderService.setCursorManually(offsetX, offsetY);
             } else {
                 if (createType != null) {
                     const SEGMENT_ID_LEN = 6;
                     const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
-                    this._textSelectionRenderManager.setSegment(segmentId);
-                    this._textSelectionRenderManager.setSegmentPage(pageNumber);
+                    this._docSelectionRenderService.setSegment(segmentId);
+                    this._docSelectionRenderService.setSegmentPage(pageNumber);
 
                     await this._commandService.executeCommand(CoreHeaderFooterCommand.id, {
                         unitId,
@@ -230,9 +232,9 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
                         segmentId,
                     });
                 } else if (headerFooterId != null) {
-                    this._textSelectionRenderManager.setSegment(headerFooterId);
-                    this._textSelectionRenderManager.setSegmentPage(pageNumber);
-                    this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
+                    this._docSelectionRenderService.setSegment(headerFooterId);
+                    this._docSelectionRenderService.setSegmentPage(pageNumber);
+                    this._docSelectionRenderService.setCursorManually(offsetX, offsetY);
                 }
             }
         }));

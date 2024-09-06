@@ -16,8 +16,7 @@
 
 import type { IDisposable, Nullable } from '@univerjs/core';
 import { Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
-import { makeSelection } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService, makeSelection } from '@univerjs/docs-ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IShortcutItem } from '@univerjs/ui';
 import { IShortcutService, KeyCode } from '@univerjs/ui';

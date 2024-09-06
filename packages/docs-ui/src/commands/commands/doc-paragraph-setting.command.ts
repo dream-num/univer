@@ -17,7 +17,9 @@
 import type { DocumentDataModel, IAccessor, ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, MemoryCursor, TextX, TextXActionType, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getParagraphsInRanges, getRichTextEditPath, RichTextEditingMutation, serializeDocRange, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getRichTextEditPath } from '../util';
+import { getParagraphsInRanges } from './list.command';
 
 export interface IDocParagraphSettingCommandParams {
     paragraph: Partial<Pick<IParagraphStyle, 'hanging' | 'horizontalAlign' | 'spaceBelow' | 'spaceAbove' | 'indentEnd' | 'indentStart' | 'lineSpacing' | 'indentFirstLine' | 'snapToGrid' | 'spacingRule'>>;
@@ -27,13 +29,13 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
     id: 'doc-paragraph-setting.command',
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, config) => {
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const docRanges = textSelectionManagerService.getDocRanges();
+        const docRanges = docSelectionManagerService.getDocRanges();
 
         if (!docDataModel || docRanges.length === 0 || !config) {
             return false;
@@ -46,14 +48,12 @@ export const DocParagraphSettingCommand: ICommand<IDocParagraphSettingCommandPar
         const allParagraphs = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.paragraphs ?? [];
         const paragraphs = getParagraphsInRanges(docRanges, allParagraphs) ?? [];
 
-        const serializedSelections = docRanges.map(serializeDocRange);
-
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
-                textRanges: serializedSelections,
+                textRanges: docRanges,
             },
         };
 

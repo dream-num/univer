@@ -19,8 +19,9 @@ import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceTyp
 import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { getSelectionText, TextSelectionManagerService } from '@univerjs/docs';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionRenderService, getSelectionText } from '@univerjs/docs-ui';
 import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
@@ -85,16 +86,18 @@ export const StartAddCommentOperation: ICommand = {
         const panelService = accessor.get(ThreadCommentPanelService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const textSelectionRenderService = accessor.get(ITextSelectionRenderManager);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const renderManagerService = accessor.get(IRenderManagerService);
         const userManagerService = accessor.get(UserManagerService);
         const docCommentService = accessor.get(DocThreadCommentService);
         const commandService = accessor.get(ICommandService);
         const sidebarService = accessor.get(ISidebarService);
-        const textRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const textRange = docSelectionManagerService.getActiveTextRange();
         if (!doc || !textRange) {
             return false;
         }
+
+        const docSelectionRenderManager = renderManagerService.getRenderById(doc.getUnitId())?.with(DocSelectionRenderService);
 
         if (textRange.collapsed) {
             if (panelService.panelVisible) {
@@ -127,7 +130,7 @@ export const StartAddCommentOperation: ICommand = {
             threadId: commentId,
         };
 
-        textSelectionRenderService.blurEditor();
+        docSelectionRenderManager?.blurEditor();
         docCommentService.startAdd(comment);
         panelService.setActiveComment({
             unitId,

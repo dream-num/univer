@@ -14,32 +14,20 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Optional, RxDisposable } from '@univerjs/core';
-import { ILayoutService } from '@univerjs/ui';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { Inject, Injector, LocaleService, RxDisposable } from '@univerjs/core';
 
+import type { IUniverDocsUIConfig } from '../basics';
 import { DocContainerUIController } from './doc-container-ui-controller';
 
 export class AppUIController extends RxDisposable {
     private _docContainerController: DocContainerUIController;
 
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
+        _config: IUniverDocsUIConfig,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
-
-        this._docContainerController = this._injector.createInstance(DocContainerUIController);
-        this._registerContainer();
-    }
-
-    private _registerContainer() {
-        if (this._layoutService) {
-            this.disposeWithMe(
-                // the content editable div should be regarded as part of the applications container
-                this._layoutService.registerContainerElement(this._textSelectionRenderManager.__getEditorContainer())
-            );
-        }
+        this._docContainerController = this._injector.createInstance(DocContainerUIController, _config);
     }
 }

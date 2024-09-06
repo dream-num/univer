@@ -16,18 +16,22 @@
 
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
 import { Inject, IUniverInstanceService, RxDisposable } from '@univerjs/core';
-import { DocSkeletonManagerService, getDocObject, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { getAnchorBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
+import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
+import { getAnchorBounding } from '../../services/selection/text-range';
+import { VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { getDocObject } from '../../basics/component-tools';
 
 const ANCHOR_WIDTH = 1.5;
 
 export class DocBackScrollRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
@@ -123,7 +127,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
     // Let the selection show on the current screen.
     private _scrollToSelection(unitId: string) {
-        const activeTextRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         if (activeTextRange == null) {
             return;
         }

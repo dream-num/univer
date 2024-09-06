@@ -45,6 +45,14 @@ describe('Test drop function', () => {
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
             expect(getObjectValue(result)).toStrictEqual(2);
+
+            const rows2 = NumberValueObject.create(0);
+            const columns2 = NumberValueObject.create(0);
+            const result2 = testFunction.calculate(array, rows2, columns2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [2, 2],
+                [2, 2],
+            ]);
         });
 
         it('Array value test', async () => {
@@ -67,6 +75,13 @@ describe('Test drop function', () => {
                 [ErrorType.CALC, ErrorType.CALC],
                 [ErrorType.CALC, 1],
                 [ErrorType.CALC, 1],
+            ]);
+
+            const result4 = testFunction.calculate(array, rows3, columns3);
+            expect(getObjectValue(result4)).toStrictEqual([
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
             ]);
         });
 

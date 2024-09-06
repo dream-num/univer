@@ -64,6 +64,20 @@ describe('Test torow function', () => {
             const array3 = StringValueObject.create('test');
             const result3 = testFunction.calculate(array3, ignore, scanByColumn);
             expect(getObjectValue(result3)).toStrictEqual('test');
+
+            const array4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [ErrorType.NAME, null],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(array4, ignore, scanByColumn);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.CALC);
         });
 
         it('Ignore value test', async () => {
@@ -136,6 +150,12 @@ describe('Test torow function', () => {
             const scanByColumn3 = StringValueObject.create('test');
             const result3 = testFunction.calculate(array, ignore, scanByColumn3);
             expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+
+            const scanByColumn4 = ArrayValueObject.create('{1,0,-1}');
+            const result4 = testFunction.calculate(array, ignore, scanByColumn4);
+            expect(getObjectValue(result4)).toStrictEqual([
+                ['Ben', 'Ben', 'Ben'],
+            ]);
         });
     });
 });

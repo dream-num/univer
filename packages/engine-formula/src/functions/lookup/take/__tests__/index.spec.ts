@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Take } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -45,6 +45,14 @@ describe('Test take function', () => {
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
             expect(getObjectValue(result)).toStrictEqual(2);
+
+            const rows2 = NumberValueObject.create(4);
+            const columns2 = NumberValueObject.create(4);
+            const result2 = testFunction.calculate(array, rows2, columns2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [2, 2],
+                [2, 2],
+            ]);
         });
 
         it('Array value test', async () => {
@@ -68,6 +76,13 @@ describe('Test take function', () => {
                 [ErrorType.CALC, ErrorType.CALC],
                 [ErrorType.CALC, ErrorType.CALC],
             ]);
+
+            const result4 = testFunction.calculate(array, rows3, columns3);
+            expect(getObjectValue(result4)).toStrictEqual([
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
+            ]);
         });
 
         it('Rows value test', async () => {
@@ -83,7 +98,7 @@ describe('Test take function', () => {
                 row: 0,
                 column: 0,
             });
-            const rows = NumberValueObject.create(2);
+            const rows = NullValueObject.create();
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
             expect(getObjectValue(result)).toStrictEqual([
@@ -203,7 +218,7 @@ describe('Test take function', () => {
                 column: 0,
             });
             const rows = NumberValueObject.create(1);
-            const columns = NumberValueObject.create(2);
+            const columns = NullValueObject.create();
             const result = testFunction.calculate(array, rows, columns);
             expect(getObjectValue(result)).toStrictEqual([
                 [2, 2],

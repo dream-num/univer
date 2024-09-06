@@ -72,6 +72,13 @@ describe('Test expand function', () => {
                 [ErrorType.VALUE, ErrorType.VALUE],
                 [ErrorType.VALUE, ErrorType.VALUE],
             ]);
+
+            const result4 = testFunction.calculate(array, rows3, columns3);
+            expect(getObjectValue(result4)).toStrictEqual([
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
+                [ErrorType.NAME, ErrorType.NAME],
+            ]);
         });
 
         it('Rows value test', async () => {
@@ -301,6 +308,34 @@ describe('Test expand function', () => {
             const result = testFunction.calculate(array, rows, columns);
             expect(getObjectValue(result)).toStrictEqual([
                 [2, 2],
+            ]);
+        });
+
+        it('PadWith value test6', async () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [2, 2],
+                    [2, 2],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const rows = NumberValueObject.create(3);
+            const columns = NumberValueObject.create(3);
+            const padWith = ArrayValueObject.create('{"a","b"}');
+            const result = testFunction.calculate(array, rows, columns, padWith);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            const padWith2 = ArrayValueObject.create('{"a"}');
+            const result2 = testFunction.calculate(array, rows, columns, padWith2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [2, 2, 'a'],
+                [2, 2, 'a'],
+                ['a', 'a', 'a'],
             ]);
         });
     });

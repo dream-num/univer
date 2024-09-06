@@ -85,7 +85,7 @@ export class Torow extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.CALC);
             }
 
-            if (maxRowLength > 1 || maxColumnLength > 1) {
+            if (maxRowLength > 1 || maxColumnLength > 1 || result.length === 1) {
                 return result[0];
             }
 

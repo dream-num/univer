@@ -124,6 +124,12 @@ describe('Test wraprows function', () => {
                 ['Ben', 1, 'Mary'],
                 [-2, 'test', 'test'],
             ]);
+
+            const padWith4 = ArrayValueObject.create('{"a", "b"}');
+            const result4 = testFunction.calculate(vector, wrapCount, padWith4);
+            expect(getObjectValue(result4)).toStrictEqual([
+                ['Ben', 'Ben'],
+            ]);
         });
     });
 });

@@ -63,14 +63,20 @@ export class SheetCanvasPopManagerService extends Disposable {
                 top,
                 bottom: top + height,
             };
-
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
 
+            const canvasElement = currentRender.engine.getCanvasElement();
+            const canvasClientRect = canvasElement.getBoundingClientRect();
+
+            // We should take the scale into account when canvas is scaled by CSS.
+            const widthOfCanvas = pxToNum(canvasElement.style.width); // declared width
+            // const { top, left, width } = canvasClientRect; // real width affected by scale
+            const scaleAdjust = canvasClientRect.width / widthOfCanvas;
             const position = {
-                left: offsetBound.left,
-                right: offsetBound.right,
-                top: offsetBound.top,
-                bottom: offsetBound.bottom,
+                left: (offsetBound.left * scaleAdjust) + canvasClientRect.left,
+                right: (offsetBound.right * scaleAdjust) + canvasClientRect.left,
+                top: (offsetBound.top * scaleAdjust) + canvasClientRect.top,
+                bottom: (offsetBound.bottom * scaleAdjust) + canvasClientRect.top,
             };
             return position;
         };

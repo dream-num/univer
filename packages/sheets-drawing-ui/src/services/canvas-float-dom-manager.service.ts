@@ -35,7 +35,7 @@ export interface ICanvasFloatDom {
     /**
      * whether allow transform float-dom
      */
-    allowTransform: boolean;
+    allowTransform?: boolean;
     /**
      * initial position of float-dom
      */
@@ -303,7 +303,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     const rect = new Rect(rectShapeKey, imageConfig);
 
-                    scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(rect);
+                    scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
+                    if (floatDomParam.allowTransform !== false) {
+                        scene.attachTransformerTo(rect);
+                    }
                     const map = this._ensureMap(unitId, subUnitId);
                     const disposableCollection = new DisposableCollection();
                     const initPosition = calcPosition(rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
@@ -474,7 +477,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         const { unitId, subUnitId } = target;
-        const { initPosition, componentKey, data } = layer;
+        const { initPosition, componentKey, data, allowTransform = true } = layer;
         const id = propId ?? generateRandomId();
 
         const sheetTransform = this._getPosition(initPosition, unitId);
@@ -498,6 +501,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 height: initPosition.endY - initPosition.startY,
             },
             data,
+            allowTransform,
         };
 
         this._commandService.executeCommand(InsertSheetDrawingCommand.id, {

@@ -214,7 +214,7 @@ describe('Test FRange', () => {
     it('Range getValues', () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
-        // 设置不同类型的值
+        // Set different types of values
         activeSheet?.getRange(0, 0, 4, 4)?.setValues([
             [1, 'text', true, ''],
             [2.5, '', false, ''],
@@ -222,7 +222,7 @@ describe('Test FRange', () => {
             ['', '', '', ''],
         ]);
 
-        // 测试获取整个范围的值
+        // Test getting values for the entire range
         const range1 = activeSheet?.getRange(0, 0, 4, 4);
         const values1 = range1?.getValues();
         expect(values1).toEqual([
@@ -232,7 +232,7 @@ describe('Test FRange', () => {
             ['', '', '', ''],
         ]);
 
-        // 测试获取部分范围的值
+        // Test getting values for a partial range
         const range2 = activeSheet?.getRange(1, 1, 2, 2);
         const values2 = range2?.getValues();
         expect(values2).toEqual([
@@ -240,12 +240,12 @@ describe('Test FRange', () => {
             [null, ''],
         ]);
 
-        // 测试获取单个单元格的值
+        // Test getting value for a single cell
         const range3 = activeSheet?.getRange(0, 0, 1, 1);
         const values3 = range3?.getValues();
         expect(values3).toEqual([[1]]);
 
-        // 测试获取空白区域的值
+        // Test getting values for an empty area
         const range4 = activeSheet?.getRange(5, 5, 2, 2);
         const values4 = range4?.getValues();
         expect(values4).toEqual([
@@ -253,7 +253,7 @@ describe('Test FRange', () => {
             [null, null],
         ]);
 
-        // 测试获取包含合并单元格的范围的值
+        // Test getting values for a range containing merged cells
         activeSheet?.getRange(6, 0, 2, 2)?.merge();
         activeSheet?.getRange(6, 0)?.setValue('Merged');
         const range5 = activeSheet?.getRange(6, 0, 3, 3);

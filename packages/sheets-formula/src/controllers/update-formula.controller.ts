@@ -50,6 +50,7 @@ import { deserializeRangeWithSheet,
     sequenceNodeType,
     serializeRangeToRefString,
     SetArrayFormulaDataMutation,
+    SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
 
@@ -378,6 +379,18 @@ export class UpdateFormulaController extends Disposable {
             SetFormulaDataMutation.id,
             {
                 formulaData: newFormulaData,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+
+        // start calculation
+        this._commandService.executeCommand(
+            SetFormulaCalculationStartMutation.id,
+            {
+                commands: [],
+                forceCalculation: true,
             },
             {
                 onlyLocal: true,

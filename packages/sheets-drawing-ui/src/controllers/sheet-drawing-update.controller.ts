@@ -17,7 +17,7 @@
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
-import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { WorkbookSelections } from '@univerjs/sheets';
@@ -62,15 +62,17 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
     }
 
     async insertFloatImage(): Promise<boolean> {
-        const files = await this._fileOpenerService.openFile();
-        const fileLength = files.length;
+        const files = await this._fileOpenerService.openFile({
+            multiple: true,
+            accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
+        });
 
+        const fileLength = files.length;
         if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
             this._messageService.show({
                 type: MessageType.Error,
                 content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
             });
-
             return false;
         } else if (fileLength === 0) {
             return false;

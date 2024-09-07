@@ -90,7 +90,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
     private _initHoverListener() {
         this.disposeWithMe(
             // hover over not editing cell
-            this._hoverManagerService.currentCellWithDoc$.pipe(debounceTime(200)).subscribe((currentCell) => {
+            this._hoverManagerService.currentRichText$.pipe(debounceTime(200)).subscribe((currentCell) => {
                 if (!currentCell) {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup();
                     return;

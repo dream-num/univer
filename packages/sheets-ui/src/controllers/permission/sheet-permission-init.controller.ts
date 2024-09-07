@@ -23,7 +23,6 @@ import { IDialogService } from '@univerjs/ui';
 
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 
-import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import type { IRangeProtectionRenderCellData } from '../../views/permission/extensions/range-protection.render';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
@@ -388,7 +387,7 @@ export class SheetPermissionInitController extends Disposable {
                         [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
                     }];
                     const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
-                    const _cellData: IWorksheetProtectionRenderCellData & ISheetFontRenderExtension = { ...cell, hasWorksheetRule: true, selectionProtection };
+                    const _cellData: IWorksheetProtectionRenderCellData = { ...cell, hasWorksheetRule: true, selectionProtection };
                     if (isSkipRender) {
                         delete _cellData.s;
                         delete _cellData.v;

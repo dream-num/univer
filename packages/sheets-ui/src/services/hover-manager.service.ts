@@ -31,10 +31,9 @@ export interface IHoverCellPosition {
      * location of cell
      */
     location: ISheetLocation;
-    /**
-     * location of hovering cell, if cell is overflowed, location is the orginal cell
-     */
-    overflowLocation: ISheetLocation;
+}
+
+export interface IHoverRichTextPosition extends IHoverCellPosition {
     /**
      * active custom range in cell, if cell is rich-text
      */
@@ -88,6 +87,7 @@ function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
 
 export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
+    private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextPosition>>(null);
     private _currentClickedCell$ = new Subject<IHoverCellPosition>();
 
     // Notify when hovering over different cells
@@ -103,23 +103,23 @@ export class HoverManagerService extends Disposable {
     );
 
     // Notify when hovering over different cells and different custom range or bullet
-    currentCellWithDoc$ = this._currentCell$.pipe(
+    currentRichText$ = this._currentRichText$.pipe(
         distinctUntilChanged(
             // eslint-disable-next-line complexity
             (pre, aft) => (
-                pre?.overflowLocation?.unitId === aft?.overflowLocation?.unitId
-                && pre?.overflowLocation?.subUnitId === aft?.overflowLocation?.subUnitId
-                && pre?.overflowLocation?.row === aft?.overflowLocation?.row
-                && pre?.overflowLocation?.col === aft?.overflowLocation?.col
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
                 && pre?.customRange?.rangeId === aft?.customRange?.rangeId
                 && pre?.bullet?.startIndex === aft?.bullet?.startIndex
             )
         ),
         map((cell) => cell && {
-            unitId: cell.overflowLocation.unitId,
-            subUnitId: cell.overflowLocation.subUnitId,
-            row: cell.overflowLocation.row,
-            col: cell.overflowLocation.col,
+            unitId: cell.location.unitId,
+            subUnitId: cell.location.subUnitId,
+            row: cell.location.row,
+            col: cell.location.col,
             customRange: cell.customRange,
             bullet: cell.bullet,
             rect: cell.rect,
@@ -208,8 +208,6 @@ export class HoverManagerService extends Disposable {
             location,
             position,
             overflowLocation,
-            unitId,
-            subUnitId: worksheet.getSheetId(),
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
             rect: rect && {
@@ -223,7 +221,15 @@ export class HoverManagerService extends Disposable {
 
     triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {
         const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
-        this._currentCell$.next(activeCell);
+        this._currentCell$.next(activeCell && {
+            location: activeCell.location,
+            position: activeCell.position,
+        });
+
+        this._currentRichText$.next(activeCell && {
+            ...activeCell,
+            location: activeCell.overflowLocation,
+        });
     }
 
     triggerClick(unitId: string, offsetX: number, offsetY: number) {

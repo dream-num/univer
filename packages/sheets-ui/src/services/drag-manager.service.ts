@@ -24,7 +24,7 @@ import { SheetScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import type { IHoverCellPosition } from './hover-manager.service';
 
-export interface IDragCellPosition extends Omit<IHoverCellPosition, 'overflowLocation'> {
+export interface IDragCellPosition extends IHoverCellPosition {
     dataTransfer: DataTransfer;
 }
 

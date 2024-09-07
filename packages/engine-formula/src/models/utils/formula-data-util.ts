@@ -36,6 +36,7 @@ export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatri
     const f = currentFormulaInfo?.f || '';
     const si = currentFormulaInfo?.si || '';
 
+    // Any data update may destroy the original correspondence between f and si, and the relationship between f and si needs to be re-bound.
     function clearFormulaData() {
         // The id that needs to be offset
         // When the cell containing the formulas f and si is deleted, f and si lose their association, and f needs to be moved to the next cell containing the same si.

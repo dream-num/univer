@@ -23,7 +23,7 @@ import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serial
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -53,7 +53,7 @@ export const CellLinkEdit = () => {
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
     const zenZoneService = useDependency(IZenZoneService);
     const markSelectionService = useDependency(IMarkSelectionService);
-    const textSelectionService = useDependency(TextSelectionManagerService);
+    const textSelectionService = useDependency(DocSelectionManagerService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -96,7 +96,7 @@ export const CellLinkEdit = () => {
                     };
                 } else {
                     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-                    const selection = textSelectionService.getActiveTextRangeWithStyle();
+                    const selection = textSelectionService.getActiveTextRange();
                     const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc?.getBody()?.customRanges ?? [])?.[0];
 
                     setShowLabel(false);

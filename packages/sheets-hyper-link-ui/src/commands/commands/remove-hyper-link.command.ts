@@ -16,7 +16,7 @@
 
 import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { deleteCustomRangeFactory } from '@univerjs/docs';
+import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';

@@ -36,8 +36,8 @@ import {
     WorksheetViewPermission,
 } from '@univerjs/sheets';
 import { DocEventManagerService } from '@univerjs/docs-ui';
-import { TextSelectionManagerService } from '@univerjs/docs';
 import { IZenZoneService } from '@univerjs/ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -51,7 +51,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {

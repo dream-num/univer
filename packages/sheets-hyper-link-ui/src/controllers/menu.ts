@@ -21,7 +21,7 @@ import type { DocumentDataModel, IAccessor, ITextRange, Workbook } from '@univer
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { map, mergeMap, Observable } from 'rxjs';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 
 const getLinkDisable$ = (accessor: IAccessor) => {
@@ -74,7 +74,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {
-    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const textSelectionService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textRanges = textSelectionService.getDocRanges();
     if (!textRanges.length || textRanges.length > 1) {
@@ -116,7 +116,7 @@ const getZenLinkDisable$ = (accessor: IAccessor) => {
             if (!focused || focused !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
                 return new Observable<null>((sub) => sub.next(null));
             }
-            const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+            const textSelectionManagerService = accessor.get(DocSelectionManagerService);
             return textSelectionManagerService.textSelection$;
         }),
         map((selection) => {

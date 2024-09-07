@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { makeSelection, getSelectionText, getDeleteSelection, getInsertSelection } from './basics/selection';
 export { hasParagraphInTable } from './basics/paragraph';
 export { replaceSelectionFactory } from './basics/replace';
 export type { IDocObjectParam } from './basics/component-tools';
@@ -22,8 +21,7 @@ export { getDocObject, neoGetDocObject, getDocObjectById } from './basics/compon
 export { getRichTextEditPath, getCommandSkeleton } from './commands/util';
 export { addCustomRangeFactory, addCustomRangeBySelectionFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
-export { getRetainAndDeleteFromReplace } from './basics/retain-delete-params';
-export { getPlainTextFormDocument, getPlainTextFormBody } from './basics/plain-text';
+export { getSelectionText, getPlainTextFormDocument, getPlainTextFormBody, getPlainText } from './basics/plain-text';
 export * from './basics/docs-view-key';
 export { whenDocAndEditorFocused } from './shortcuts/utils';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';

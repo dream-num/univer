@@ -21,9 +21,9 @@ import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable
 import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import { getPlainText, getPlainTextFormBody, getPlainTextFormDocument, TextSelectionManagerService } from '@univerjs/docs';
-import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { DocCanvasPopManagerService, getPlainText, getPlainTextFormBody, getPlainTextFormDocument } from '@univerjs/docs-ui';
 import { IEditorService, IRangeSelectorService } from '@univerjs/ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
@@ -90,7 +90,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
@@ -186,7 +186,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
         const visible = this._editorBridgeService.isVisible().visible;
         const state = this._editorBridgeService.getEditCellState();
         if (visible && state) {
-            const textRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+            const textRange = this._textSelectionManagerService.getActiveTextRange();
             const body = state.documentLayoutObject.documentModel?.getBody();
             if (!body) {
                 return null;
@@ -243,7 +243,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
             if (!document) {
                 return;
             }
-            const range = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+            const range = this._textSelectionManagerService.getActiveTextRange();
             if (!range) {
                 return;
             }

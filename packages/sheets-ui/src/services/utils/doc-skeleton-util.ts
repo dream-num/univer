@@ -17,9 +17,9 @@
 import type { ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
 import { CustomRangeType, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
 import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { DOC_VERTICAL_PADDING } from '@univerjs/docs-ui';
+import { DOC_VERTICAL_PADDING, getLineBounding, NodePositionConvertToCursor } from '@univerjs/docs-ui';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { IEditorBridgeService } from '../editor-bridge.service';
 

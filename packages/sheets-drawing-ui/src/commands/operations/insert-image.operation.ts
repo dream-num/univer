@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-import type { IOperation, Nullable } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { ICommand, Nullable } from '@univerjs/core';
+import { CommandType, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetDrawingUpdateController } from '../../controllers/sheet-drawing-update.controller';
 
-export interface IInsertImageOperationParams {
+export interface IInsertImageCommandParams {
     files: Nullable<File[]>;
 };
 
-export const InsertFloatImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'sheet.operation.insert-float-image',
-    type: CommandType.OPERATION,
-    handler: (accessor, params) => {
-        return true;
-    },
-};
-
-export const InsertCellImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'sheet.operation.insert-cell-image',
-    type: CommandType.OPERATION,
-    handler: (accessor, params) => {
-        return true;
+export const InsertFloatImageCommand: ICommand<IInsertImageCommandParams> = {
+    id: 'sheet.command.insert-float-image',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET)
+            ?.with(SheetDrawingUpdateController).insertFloatImage() ?? false;
     },
 };

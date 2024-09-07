@@ -58,3 +58,11 @@ export const CreateEmptySheetCommand: ICommand = {
         return true;
     },
 };
+
+export const LoadFromSnapshotCommand: ICommand = {
+    id: 'debugger.command.create-from-snapshot',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+
+    },
+};

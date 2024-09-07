@@ -30,7 +30,7 @@ export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-dr
 
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
-export { InsertFloatImageOperation, InsertCellImageOperation } from './commands/operations/insert-image.operation';
+export { InsertFloatImageCommand as InsertFloatImageOperation, InsertCellImageOperation } from './commands/operations/insert-image.operation';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
 export { IMAGE_MENU_ID } from './views/menu/image.menu';

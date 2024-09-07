@@ -14,7 +14,3 @@
  * limitations under the License.
  */
 
-export enum UploadFileType {
-    cellImage,
-    floatImage,
-}

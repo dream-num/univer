@@ -19,8 +19,7 @@ import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../upload-component/component-name';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
+import { InsertFloatImageCommand } from '../../commands/operations/insert-image.operation';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'sheet.menu.image';
@@ -38,30 +37,9 @@ export function ImageMenuFactory(accessor: IAccessor): IMenuItem {
 
 export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
-        id: InsertFloatImageOperation.id,
+        id: InsertFloatImageCommand.id,
         title: 'sheetImage.upload.float',
-        type: MenuItemType.SELECTOR,
-        label: {
-            name: COMPONENT_UPLOAD_FILE_MENU,
-            props: {
-                type: UploadFileType.floatImage,
-            },
-        },
-        hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
-    };
-}
-
-export function UploadCellImageMenuFactory(_accessor: IAccessor): IMenuItem {
-    return {
-        id: InsertCellImageOperation.id,
-        title: 'sheetImage.upload.cell',
-        type: MenuItemType.SELECTOR,
-        label: {
-            name: COMPONENT_UPLOAD_FILE_MENU,
-            props: {
-                type: UploadFileType.cellImage,
-            },
-        },
+        type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }

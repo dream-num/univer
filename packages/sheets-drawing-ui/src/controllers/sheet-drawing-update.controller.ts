@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -23,11 +23,9 @@ import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IMessageService } from '@univerjs/ui';
+import { IFileOpenerService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
-import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
@@ -45,6 +43,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @ICommandService private readonly _commandService: ICommandService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
+        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -56,52 +55,29 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
 
-        this._initCommandListeners();
         this._updateImageListener();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
     }
 
-    /**
-     * Upload image to cell or float image
-     */
-    private _initCommandListeners() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                if (command.id === InsertCellImageOperation.id || command.id === InsertFloatImageOperation.id) {
-                    const params = command.params as IInsertImageOperationParams;
-                    if (params.files == null) {
-                        return;
-                    }
+    async insertFloatImage(): Promise<boolean> {
+        const files = await this._fileOpenerService.openFile();
+        const fileLength = files.length;
 
-                    const fileLength = params.files.length;
+        if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+            });
 
-                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
-                        this._messageService.show({
-                            type: MessageType.Error,
-                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
-                        });
-                        return;
-                    }
+            return false;
+        } else if (fileLength === 0) {
+            return false;
+        }
 
-                    this._imageIoService.setWaitCount(fileLength);
-                    if (command.id === InsertCellImageOperation.id) {
-                        params.files.forEach(async (file) => {
-                            await this._insertCellImage(file);
-                        });
-                    } else {
-                        params.files.forEach(async (file) => {
-                            await this._insertFloatImage(file);
-                        });
-                    }
-                }
-            })
-        );
-    }
-
-    private async _insertCellImage(file: File) {
-        // TODO: empty
+        files.forEach(async (file) => await this._insertFloatImage(file));
+        return true;
     }
 
     private async _insertFloatImage(file: File) {

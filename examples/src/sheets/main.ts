@@ -42,7 +42,14 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+
+// 用户的
+// import { data } from './test-data/test-data-01';
+
+// import { data } from './test-data/test1';
+// import { data } from './test-data/lx7';
+// import { data } from './test-data/mini';
+import { data } from './test-data/mcc11';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -135,7 +142,7 @@ userManagerService.setCurrentUser(mockUser);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, data);
 }
 
 setTimeout(() => {

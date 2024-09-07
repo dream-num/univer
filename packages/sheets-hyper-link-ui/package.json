@@ -69,7 +69,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/docs-ui/basics/plain-text.js": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",

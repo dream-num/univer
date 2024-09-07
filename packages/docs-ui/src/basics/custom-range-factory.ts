@@ -107,11 +107,13 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     return doMutation;
 }
 
-export function deleteCustomRangeFactory(accessor: IAccessor, params: {
+export interface IDeleteCustomRangeFactoryParams {
     rangeId: string;
     segmentId?: string;
     unitId: string;
-}) {
+}
+
+export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeFactoryParams) {
     const { unitId, segmentId } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 

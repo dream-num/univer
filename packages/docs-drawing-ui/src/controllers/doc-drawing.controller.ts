@@ -18,8 +18,6 @@ import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifec
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 
 import { AddImageSingle } from '@univerjs/icons';
-import { UploadFileMenu } from '../views/upload-component/UploadFile';
-import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageUploadIcon } from '../views/menu/image.menu';
 import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
@@ -56,7 +54,6 @@ export class DocDrawingUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_DRAWING_PANEL, DocDrawingPanel));
     }
 

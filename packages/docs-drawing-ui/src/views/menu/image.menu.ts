@@ -20,11 +20,11 @@ import type { IAccessor } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { Observable } from 'rxjs';
-import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../upload-component/component-name';
+import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'doc.menu.image';
-export const IMAGE_MENU_UPLOAD_FLOAT_ID = 'doc.menu.image.upload.float';
+export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageOperation.id;
 
 // TODO: @Jocs, remove this when cell support drawing.
 const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
@@ -76,10 +76,7 @@ export function UploadFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: IMAGE_MENU_UPLOAD_FLOAT_ID,
         title: 'docImage.upload.float',
-        type: MenuItemType.SELECTOR,
-        label: {
-            name: COMPONENT_DOC_UPLOAD_FILE_MENU,
-        },
+        type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_DOC),
     };
 }

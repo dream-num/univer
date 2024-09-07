@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-import type { IOperation, Nullable } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { ICommand, Nullable } from '@univerjs/core';
+import { CommandType, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocDrawingUpdateRenderController } from '../../controllers/render-controllers/doc-drawing-update.render-controller';
 
-export interface IInsertImageOperationParams {
+export interface IInsertDocImageCommandParams {
     files: Nullable<File[]>;
 };
 
-/**
- * @deprecated Do not use command as event!
- */
-export const InsertDocImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'doc.operation.insert-float-image',
-    type: CommandType.OPERATION,
-    handler: () => true,
+export const InsertDocImageOperation: ICommand<IInsertDocImageCommandParams> = {
+    id: 'doc.command.insert-float-image',
+    type: CommandType.COMMAND,
+    handler: (accessor) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+        return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)
+            ?.with(DocDrawingUpdateRenderController).insertDocImage() ?? false;
+    },
 };

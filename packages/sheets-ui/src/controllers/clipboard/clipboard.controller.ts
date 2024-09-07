@@ -44,7 +44,7 @@ import {
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    Optional, RxDisposable, UniverInstanceType,
+    Optional, RxDisposable, Tools, UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type {
@@ -541,7 +541,7 @@ export class SheetClipboardController extends RxDisposable {
     private _onPastePlainText(pasteTo: ISheetDiscreteRangeLocation, text: string, payload: ICopyPastePayload) {
         const { range, unitId, subUnitId } = pasteTo;
         let cellValue: IObjectMatrixPrimitiveType<ICellData>;
-        if (/\r|\n/.test(text)) {
+        if (/\r|\n/.test(text) || Tools.isLegalUrl(text)) {
             const body = generateBody(text);
             const p = this._generateDocumentDataModelSnapshot({ body });
             cellValue = {

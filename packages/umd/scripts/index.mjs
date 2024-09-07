@@ -193,6 +193,7 @@ function buildJS() {
     const libs = [
         '@univerjs/protocol',
         '@univerjs/core',
+        '@univerjs/telemetry',
         '@univerjs/rpc',
         '@univerjs/design',
         '@univerjs/engine-render',
@@ -229,6 +230,7 @@ function buildJS() {
         '@univerjs/sheets-drawing-ui',
         '@univerjs/docs-drawing',
         '@univerjs/docs-drawing-ui',
+        '@univerjs/docs-hyper-link',
         '@univerjs/docs-hyper-link-ui',
         '@univerjs/slides',
         '@univerjs/slides-ui',

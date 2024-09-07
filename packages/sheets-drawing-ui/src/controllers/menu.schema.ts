@@ -17,7 +17,7 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { IMAGE_MENU_ID, ImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
-import { InsertFloatImageCommand } from '../commands/operations/insert-image.operation';
+import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.FORMULAS_INSERT]: {

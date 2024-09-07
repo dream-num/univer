@@ -23,7 +23,7 @@ export interface IInsertDocImageCommandParams {
     files: Nullable<File[]>;
 };
 
-export const InsertDocImageOperation: ICommand<IInsertDocImageCommandParams> = {
+export const InsertDocImageCommand: ICommand<IInsertDocImageCommandParams> = {
     id: 'doc.command.insert-float-image',
     type: CommandType.COMMAND,
     handler: (accessor) => {

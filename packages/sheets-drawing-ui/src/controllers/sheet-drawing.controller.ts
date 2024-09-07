@@ -19,7 +19,7 @@ import { ComponentManager, IMenuManagerService, IShortcutService } from '@univer
 
 import { AddImageSingle } from '@univerjs/icons';
 import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
-import { InsertFloatImageCommand } from '../commands/operations/insert-image.operation';
+import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';

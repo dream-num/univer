@@ -28,7 +28,7 @@ export { UngroupDocDrawingCommand } from './commands/commands/ungroup-doc-drawin
 
 export { ClearDocDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.operation';
-export { InsertDocImageOperation } from './commands/operations/insert-image.operation';
+export { InsertDocImageCommand } from './commands/commands/insert-image.command';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
 export { IMAGE_MENU_ID } from './views/menu/image.menu';

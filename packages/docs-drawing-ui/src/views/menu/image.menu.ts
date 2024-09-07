@@ -17,14 +17,13 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
-
 import { TextSelectionManagerService } from '@univerjs/docs';
 import { Observable } from 'rxjs';
-import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
+import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'doc.menu.image';
-export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageOperation.id;
+export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageCommand.id;
 
 // TODO: @Jocs, remove this when cell support drawing.
 const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {

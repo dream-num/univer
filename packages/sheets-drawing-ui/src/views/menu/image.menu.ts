@@ -19,7 +19,7 @@ import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
-import { InsertFloatImageCommand } from '../../commands/operations/insert-image.operation';
+import { InsertFloatImageCommand } from '../../commands/commands/insert-image.command';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'sheet.menu.image';

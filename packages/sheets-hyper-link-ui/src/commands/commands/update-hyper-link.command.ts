@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, Workbook } from '@univerjs/core';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { ICellLinkContent } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation, HyperLinkModel, type ICellLinkContent, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IUpdateHyperLinkCommandParams {
@@ -43,7 +43,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-
+        const hyperLinkModel = accessor.get(HyperLinkModel);
         const { unitId, subUnitId, payload: link, row, column, id } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const currentRender = renderManagerService.getRenderById(unitId);
@@ -122,12 +122,33 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             id: SetRangeValuesMutation.id,
             params: undoParams,
         };
+        const redos: IMutationInfo[] = [redo];
+        const undos: IMutationInfo[] = [undo];
+        const modelLink = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
+        if (modelLink) {
+            redos.push({
+                id: RemoveHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    id: modelLink.id,
+                },
+            });
+            undos.push({
+                id: AddHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    link: modelLink,
+                },
+            });
+        }
 
-        const res = commandService.syncExecuteCommand(redo.id, redo.params);
+        const res = await sequenceExecuteAsync(redos, commandService);
         if (res) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
+                redoMutations: redos,
+                undoMutations: undos,
                 unitID: unitId,
             });
             return true;

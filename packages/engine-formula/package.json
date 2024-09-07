@@ -20,6 +20,9 @@
     "keywords": [
         "univer"
     ],
+    "sideEffects": [
+        "./src/facade.ts"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"

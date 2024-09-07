@@ -23,7 +23,6 @@ export { FHooks } from './apis/f-hooks';
 // #region - Univer Sheet
 
 export { FFilter } from './apis/sheets/f-filter';
-export { FFormula } from './apis/sheets/f-formula';
 export { FPermission } from './apis/sheets/f-permission';
 export { FRange } from './apis/sheets/f-range';
 export { FSelection } from './apis/sheets/f-selection';

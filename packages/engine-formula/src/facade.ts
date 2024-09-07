@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable } from '@univerjs/core';
+import type { ICommandInfo, ICommandService, IDisposable, Injector } from '@univerjs/core';
+import { FBase, FUniver } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
  */
-export class FFormula {
+export class FFormula extends FBase {
+    static override name = 'FFormula';
+
+    protected readonly _injector: Injector;
+    protected readonly _commandService: ICommandService;
+
     /**
      * Start the calculation of the formula.
      */
@@ -91,3 +97,13 @@ export class FFormula {
         });
     }
 }
+
+class FacadeFormula {
+    protected readonly _injector: Injector;
+
+    getFormula(): FFormula {
+        return this._injector.createInstance(FFormula);
+    }
+}
+
+FUniver.extend(FacadeFormula);

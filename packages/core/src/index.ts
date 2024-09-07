@@ -31,6 +31,7 @@ export {
 export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { CustomCommandExecutionError } from './common/error';
+export { FBase, FUniver } from './common/facade';
 export { throttle } from './common/function';
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
@@ -93,6 +94,9 @@ export { IUniverInstanceService } from './services/instance/instance.service';
 export { UniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
+
+// #region sheet
+
 export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
@@ -103,12 +107,12 @@ export {
     PermissionStatus,
 } from './services/permission/type';
 export type { IPermissionParam } from './services/permission/type';
-
-// #region sheet
-
 export type { IPermissionPoint } from './services/permission/type';
 export type { IPermissionTypes, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from './services/permission/type';
 export { Plugin } from './services/plugin/plugin';
+
+// #region sheet
+
 export type { PluginCtor } from './services/plugin/plugin';
 export { DependentOn, PluginService } from './services/plugin/plugin.service';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
@@ -155,20 +159,26 @@ export {
     DEFAULT_WORKSHEET_ROW_TITLE_WIDTH_KEY,
     mergeWorksheetSnapshotWithDefault,
 } from './sheets/sheet-snapshot-utils';
+
 export { Styles } from './sheets/styles';
+
+// #region sheet
+
 export * from './sheets/typedef';
 export { isRangesEqual, isUnitRangesEqual } from './sheets/util';
 export { SheetViewModel } from './sheets/view-model';
+export { getWorksheetUID, Workbook } from './sheets/workbook';
+export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
+export { SlideDataModel } from './slides/slide-model';
 
 // #endregion
 
-export { getWorksheetUID, Workbook } from './sheets/workbook';
-export { extractPureTextFromCell, getOriginCellValue, Worksheet } from './sheets/worksheet';
-
-export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
+export * from './types/const';
+
 export * from './types/const';
 export { skipParseTagNames } from './types/const/clipboard';
+export * from './types/enum';
 export * from './types/enum';
 export * from './types/enum';
 export { DataValidationErrorStyle } from './types/enum/data-validation-error-style';
@@ -177,6 +187,7 @@ export { DataValidationOperator } from './types/enum/data-validation-operator';
 export { DataValidationRenderMode } from './types/enum/data-validation-render-mode';
 export { DataValidationStatus } from './types/enum/data-validation-status';
 export { DataValidationType } from './types/enum/data-validation-type';
+export * from './types/interfaces';
 export * from './types/interfaces';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';

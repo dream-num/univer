@@ -16,11 +16,7 @@
 
 import {
     BorderStyleTypes,
-    debounce,
-    ICommandService,
-    Inject,
-    Injector,
-    IUniverInstanceService,
+    FUniver,
     Quantity,
     RedoCommand,
     toDisposable,
@@ -29,25 +25,26 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
-import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import type {
     CommandListener,
     Dependency,
+
     DocumentDataModel,
+    ICommandService,
     IDisposable,
     IDocumentData,
     IExecutionOptions,
+    Injector,
+    IUniverInstanceService,
     IWorkbookData,
     Nullable,
-    Workbook,
-} from '@univerjs/core';
+    Workbook } from '@univerjs/core';
 import type {
     IColumnsHeaderCfgParam,
     IRowsHeaderCfgParam,
@@ -58,47 +55,21 @@ import type {
 } from '@univerjs/engine-render';
 import type { ISocket } from '@univerjs/network';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
-import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
-import { FFormula } from './sheets/f-formula';
 import { FPermission } from './sheets/f-permission';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FWorkbook } from './sheets/f-workbook';
 
-export class FUniver {
+export class FacadeUniver {
+    protected readonly _injector: Injector;
+    protected readonly _univerInstanceService: IUniverInstanceService;
+    protected readonly _commandService: ICommandService;
+
     static BorderStyle = BorderStyleTypes;
 
     static WrapStrategy = WrapStrategy;
-
-    constructor(
-        @Inject(Injector) protected readonly _injector: Injector,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
-    ) {
-        this._initialize();
-    }
-
-    /**
-     * Initialize the FUniver instance.
-     *
-     * @private
-     */
-    private _initialize(): void {
-        this._debouncedFormulaCalculation = debounce(() => {
-            this._commandService.executeCommand(
-                SetFormulaCalculationStartMutation.id,
-                {
-                    commands: [],
-                    forceCalculation: true,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }, 10);
-    }
 
     /**
      * Get dependencies for FUniver, you can override newAPI to add more dependencies.
@@ -130,7 +101,7 @@ export class FUniver {
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        const dependencies = FUniver.getDependencies(injector);
+        const dependencies = FacadeUniver.getDependencies(injector);
         dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
     }
@@ -138,11 +109,6 @@ export class FUniver {
     static newDataValidation(): FDataValidationBuilder {
         return new FDataValidationBuilder();
     }
-
-    /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
-     */
-    private _debouncedFormulaCalculation: () => void;
 
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
@@ -235,30 +201,6 @@ export class FUniver {
     }
 
     /**
-     * Register a function to the spreadsheet.
-     *
-     * @param {IRegisterFunctionParams} config The configuration of the function.
-     * @returns {IDisposable} The disposable instance.
-     */
-    registerFunction(config: IRegisterFunctionParams): IDisposable {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
-
-        const functionsDisposable = registerFunctionService.registerFunctions(config);
-
-        // When the initialization workbook data already contains custom formulas, and then register the formula, you need to trigger a forced calculation to refresh the calculation results
-        this._debouncedFormulaCalculation();
-
-        return toDisposable(() => {
-            functionsDisposable.dispose();
-        });
-    }
-
-    /**
      * Register sheet row header render extensions.
      *
      * @param {string} unitId The unit id of the spreadsheet.
@@ -307,10 +249,6 @@ export class FUniver {
             registerDisposable.dispose();
             sheetComponent.makeDirty(true);
         });
-    }
-
-    getFormula(): FFormula {
-        return this._injector.createInstance(FFormula);
     }
 
     // #region
@@ -525,3 +463,7 @@ export class FUniver {
         return this._injector.createInstance(FPermission);
     }
 }
+
+FUniver.extend(FacadeUniver);
+
+export { FUniver };

@@ -50,6 +50,9 @@ const getLinkDisable$ = (accessor: IAccessor) => {
                 return true;
             }
             const { selections, sheet } = sheetWithSelection;
+            if (!selections.length) {
+                return true;
+            }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
             const cell = sheet.getCell(row, col);

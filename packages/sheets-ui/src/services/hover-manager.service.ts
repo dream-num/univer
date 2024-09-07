@@ -152,6 +152,7 @@ export class HoverManagerService extends Disposable {
         }));
     }
 
+    // eslint-disable-next-line complexity
     private _calcActiveCell(unitId: string, offsetX: number, offsetY: number) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
@@ -190,6 +191,8 @@ export class HoverManagerService extends Disposable {
         }> = null;
 
         const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
+        const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
+
         if (font) {
             const { paddingLeft, paddingTop } = calcPadding(cell, font);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
@@ -200,7 +203,7 @@ export class HoverManagerService extends Disposable {
         }
 
         const rect = customRange?.rects.pop() ?? bullet?.rect;
-
+        const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
         return {
             location,
             position,
@@ -210,10 +213,10 @@ export class HoverManagerService extends Disposable {
             customRange: customRange?.range,
             bullet: bullet?.paragraph,
             rect: rect && {
-                top: rect.top + cell.mergeInfo.startY,
-                bottom: rect.bottom + cell.mergeInfo.startY,
-                left: rect.left + cell.mergeInfo.startX,
-                right: rect.right + cell.mergeInfo.startX,
+                top: rect.top + cell.mergeInfo.startY + topOffset,
+                bottom: rect.bottom + cell.mergeInfo.startY + topOffset,
+                left: rect.left + cell.mergeInfo.startX + leftOffset,
+                right: rect.right + cell.mergeInfo.startX + leftOffset,
             },
         };
     }

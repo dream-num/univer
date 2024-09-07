@@ -15,25 +15,27 @@
  */
 
 import type { IMutationInfo } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, TextX, Tools } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
         this._initCommandInterceptor();
+        this._initAfterEditor();
     }
 
     private _initCommandInterceptor() {
@@ -50,30 +52,27 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     const redos: IMutationInfo[] = [];
                     const undos: IMutationInfo[] = [];
                     if (params.cellValue) {
-                        new ObjectMatrix(params.cellValue).forValue((row, col, cell) => {
-                            const cellValueRaw = cell?.v;
+                        new ObjectMatrix(params.cellValue).forValue((row, col) => {
                             const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
                             if (link) {
                                 // rich-text can store link in custom-range, don't save to link model
-                                if (cellValueRaw === '' || cell?.custom?.__link_url === '' || cell?.p) {
-                                    redos.push({
-                                        id: RemoveHyperLinkMutation.id,
-                                        params: {
-                                            unitId,
-                                            subUnitId,
-                                            id: link.id,
-                                        },
-                                    });
+                                redos.push({
+                                    id: RemoveHyperLinkMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId,
+                                        id: link.id,
+                                    },
+                                });
 
-                                    undos.push({
-                                        id: AddHyperLinkMutation.id,
-                                        params: {
-                                            unitId,
-                                            subUnitId,
-                                            link,
-                                        },
-                                    });
-                                }
+                                undos.push({
+                                    id: AddHyperLinkMutation.id,
+                                    params: {
+                                        unitId,
+                                        subUnitId,
+                                        link,
+                                    },
+                                });
                             }
                         });
                     }
@@ -138,6 +137,68 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     redos: [],
                     undos: [],
                 };
+            },
+        }));
+    }
+
+    private _initAfterEditor() {
+        this.disposeWithMe(this._editorBridgeService.interceptor.intercept(this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
+            handler: (cell, context, next) => {
+                if (!cell || cell.p) {
+                    return next(cell);
+                }
+
+                if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v)) {
+                    const { unitId, subUnitId } = context;
+                    const renderer = this._renderManagerService.getRenderById(unitId);
+                    const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+                    if (!skeleton) {
+                        return next(cell);
+                    }
+                    const doc = skeleton.skeleton.getBlankCellDocumentModel(cell);
+                    if (!doc.documentModel) {
+                        return next(cell);
+                    }
+                    const textX = BuildTextUtils.selection.replace({
+                        selection: {
+                            startOffset: 0,
+                            endOffset: cell.v.length,
+                            collapsed: false,
+                        },
+                        body: {
+                            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${cell.v}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                            customRanges: [{
+                                startIndex: 0,
+                                endIndex: cell.v.length,
+                                rangeId: generateRandomId(),
+                                rangeType: CustomRangeType.HYPERLINK,
+                                properties: {
+                                    url: cell.v,
+                                },
+                            }],
+                        },
+                        doc: doc.documentModel,
+                    });
+                    if (!textX) {
+                        return next(cell);
+                    }
+                    const body = doc.documentModel.getBody()!;
+                    TextX.apply(body, textX.serialize());
+                    return next({
+                        ...cell,
+                        p: {
+                            id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                            body,
+                            documentStyle: {
+                                pageSize: {
+                                    width: Infinity,
+                                    height: Infinity,
+                                },
+                            },
+                        },
+                    });
+                }
+                return next(cell);
             },
         }));
     }

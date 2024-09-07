@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType } from '../../lib/types';
+import { DataStreamTreeTokenType } from '../docs';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';

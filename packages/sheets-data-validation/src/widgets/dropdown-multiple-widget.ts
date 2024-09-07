@@ -79,8 +79,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
-        // @ts-ignore
-        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const fontRenderExtension = data.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
         const validation = data.dataValidation;
@@ -171,8 +170,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { primaryWithCoord, style, data } = info;
-        // @ts-ignore
-        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const fontRenderExtension = data.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const cellBounding = {

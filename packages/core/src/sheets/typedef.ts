@@ -245,6 +245,13 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     coverable?: boolean;
     linkUrl?: string;
     linkId?: string;
+    fontRenderExtension?: {
+        leftOffset?: number;
+        rightOffset?: number;
+        topOffset?: number;
+        downOffset?: number;
+        isSkip?: boolean;
+    };
 }
 
 export function isICellData(value: any): value is ICellData {

@@ -344,6 +344,18 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.subUnitId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
+                    const range = {
+                        range: {
+                            startRow: row,
+                            startColumn: column,
+                            endRow: row,
+                            endColumn: column,
+                        },
+                        unitId,
+                        sheetId,
+
+                    };
+                    FDtree.anchorToken = serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(unitId, sheetId) });
 
                     FDtree.rowCount = sheetItem.rowCount;
                     FDtree.columnCount = sheetItem.columnCount;

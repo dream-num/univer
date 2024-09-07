@@ -59,7 +59,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             return false;
         }
         const { payload, display, row, column, id } = link;
-        const cellData = worksheet.getCellRaw(row, column);
+        const cellData = worksheet.getCell(row, column);
         const doc = skeleton.getBlankCellDocumentModel(cellData);
         const snapshot = doc.documentModel!.getSnapshot();
         const body = snapshot.body;

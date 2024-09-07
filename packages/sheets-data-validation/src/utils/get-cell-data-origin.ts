@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, type ICellData, type Nullable } from '@univerjs/core';
+import { DataStreamTreeTokenType, DEFAULT_EMPTY_DOCUMENT_VALUE, type ICellData, type Nullable } from '@univerjs/core';
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {
     if (cell === null) {
@@ -32,7 +32,7 @@ export function getCellValueOrigin(cell: Nullable<ICellData>) {
         const lastString = data.substring(data.length - 2, data.length);
         const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
 
-        return newDataStream;
+        return newDataStream.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
     }
 
     return cell?.v;

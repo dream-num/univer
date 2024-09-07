@@ -73,7 +73,6 @@ export const SetSpecificRowsVisibleCommand: ICommand<ISetSpecificRowsVisibleComm
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
             unitId,
             subUnitId,
-
             selections: getSelectionsAfterHiding(ranges).map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),
@@ -180,7 +179,9 @@ export const SetRowHiddenCommand: ICommand<ISetRowHiddenCommandParams> = {
 
         const undoMutationParams = SetRowHiddenUndoMutationFactory(accessor, redoMutationParams);
         const undoSetSelectionsOperationParams: ISetSelectionsOperationParams = {
-            unitId, subUnitId,
+            unitId,
+            subUnitId,
+            reveal: true,
             selections: ranges.map((range) => ({
                 range,
                 primary: getPrimaryForRange(range, worksheet),

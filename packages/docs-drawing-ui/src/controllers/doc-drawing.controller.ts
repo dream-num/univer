@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 
 import { AddImageSingle } from '@univerjs/icons';
-import { UploadFileMenu } from '../views/upload-component/UploadFile';
-import { COMPONENT_DOC_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageUploadIcon } from '../views/menu/image.menu';
-import { InsertDocImageOperation } from '../commands/operations/insert-image.operation';
 import { COMPONENT_DOC_DRAWING_PANEL } from '../views/doc-image-panel/component-name';
 import { DocDrawingPanel } from '../views/doc-image-panel/DocDrawingPanel';
 
@@ -36,13 +33,13 @@ import { UngroupDocDrawingCommand } from '../commands/commands/ungroup-doc-drawi
 import { GroupDocDrawingCommand } from '../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../commands/commands/insert-doc-drawing.command';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDocDrawingDistanceCommand, UpdateDocDrawingWrappingStyleCommand, UpdateDocDrawingWrapTextCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
+import { InsertDocImageCommand } from '../commands/commands/insert-image.command';
 import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, DocDrawingUIController)
 export class DocDrawingUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -56,7 +53,6 @@ export class DocDrawingUIController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(ImageUploadIcon, AddImageSingle));
-        this.disposeWithMe(componentManager.register(COMPONENT_DOC_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_DOC_DRAWING_PANEL, DocDrawingPanel));
     }
 
@@ -66,7 +62,7 @@ export class DocDrawingUIController extends Disposable {
 
     private _initCommands() {
         [
-            InsertDocImageOperation,
+            InsertDocImageCommand,
             InsertDocDrawingCommand,
             UpdateDocDrawingWrappingStyleCommand,
             UpdateDocDrawingDistanceCommand,

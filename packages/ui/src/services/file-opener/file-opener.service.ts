@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import type { IOperation, Nullable } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { createIdentifier } from '@univerjs/core';
 
-export interface IInsertImageOperationParams {
-    files: Nullable<File[]>;
-};
+export interface IOpenFileOptions {
+    accept?: string;
+    multiple?: boolean;
+}
+
+export interface IFileOpenerService {
+    openFile(options?: IOpenFileOptions): Promise<File[]>;
+}
 
 /**
- * @deprecated Do not use command as event!
+ * This service is used to upload files.
  */
-export const InsertDocImageOperation: IOperation<IInsertImageOperationParams> = {
-    id: 'doc.operation.insert-float-image',
-    type: CommandType.OPERATION,
-    handler: () => true,
-};
+export const IFileOpenerService = createIdentifier<IFileOpenerService>('univer.ui.file-opener.service');
+

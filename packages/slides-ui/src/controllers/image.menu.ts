@@ -18,8 +18,7 @@ import type { IMenuItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
-import { COMPONENT_UPLOAD_FILE_MENU, UploadFileType } from '../components/upload-component/component-name';
-import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 
 export const IMAGE_UPLOAD_ICON = 'addition-and-subtraction-single';
 export const IMAGE_MENU_ID = 'slide.menu.image';
@@ -31,21 +30,14 @@ export function SlideImageMenuFactory(accessor: IAccessor): IMenuItem {
         icon: IMAGE_UPLOAD_ICON,
         tooltip: 'slide.image.insert.title',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SLIDE),
-        // disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
     };
 }
 
 export function UploadSlideFloatImageMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
-        id: InsertSlideFloatImageOperation.id,
+        id: InsertSlideFloatImageCommand.id,
         title: 'slide.image.insert.float',
-        type: MenuItemType.SELECTOR,
-        label: {
-            name: COMPONENT_UPLOAD_FILE_MENU,
-            props: {
-                type: UploadFileType.floatImage,
-            },
-        },
+        type: MenuItemType.BUTTON,
         hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SLIDE),
     };
 }

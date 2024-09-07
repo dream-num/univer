@@ -17,8 +17,8 @@
 import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
-import { DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { IMessageService } from '@univerjs/ui';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
+import { IFileOpenerService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
@@ -27,8 +27,6 @@ import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 
-import type { IInsertImageOperationParams } from '../../commands/operations/insert-image.operation';
-import { InsertDocImageOperation } from '../../commands/operations/insert-image.operation';
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
@@ -40,6 +38,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
+        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
@@ -54,7 +53,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     ) {
         super();
 
-        this._initCommandListeners();
         this._updateDrawingListener();
         this._updateOrderListener();
         this._groupDrawingListener();
@@ -63,34 +61,25 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         this._editAreaChangeListener();
     }
 
-    /**
-     * Upload image to cell or float image
-     */
-    private _initCommandListeners() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                if (command.id === InsertDocImageOperation.id) {
-                    const params = command.params as IInsertImageOperationParams;
-                    if (params.files == null) {
-                        return;
-                    }
+    async insertDocImage(): Promise<boolean> {
+        const files = await this._fileOpenerService.openFile({
+            multiple: true,
+            accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),
+        });
 
-                    const fileLength = params.files.length;
+        const fileLength = files.length;
+        if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
+            });
+            return false;
+        } else if (fileLength === 0) {
+            return false;
+        }
 
-                    if (fileLength > DRAWING_IMAGE_COUNT_LIMIT) {
-                        this._messageService.show({
-                            type: MessageType.Error,
-                            content: this._localeService.t('update-status.exceedMaxCount', String(DRAWING_IMAGE_COUNT_LIMIT)),
-                        });
-                        return;
-                    }
-
-                    this._imageIoService.setWaitCount(fileLength);
-
-                    await this._insertFloatImages(params.files);
-                }
-            })
-        );
+        await this._insertFloatImages(files);
+        return true;
     }
 
     // eslint-disable-next-line max-lines-per-function

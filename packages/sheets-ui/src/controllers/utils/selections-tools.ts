@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { MERGE_CELL_INTERCEPTOR_CHECK, MergeCellController, RangeProtectionRuleModel, SheetsSelectionsService } from '@univerjs/sheets';
@@ -67,23 +67,60 @@ export function getSheetSelectionsDisabled$(accessor: IAccessor) {
     );
 }
 
-export function checkInHeaderRanges(
+/**
+ * Detect if this row is selected
+ * @param selections
+ * @param rowIndex
+ * @returns boolean
+ */
+export function isThisRowSelected(
     selections: Readonly<ISelectionWithStyle[]>,
-    num: number,
-    rType: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
-): false | ISelectionWithStyle {
+    rowIndex: number
+): boolean {
+    return !!matchedSelectionByRowColIndex(selections, rowIndex, RANGE_TYPE.ROW);
+}
+
+/**
+ * Detect if this col is selected
+ * @param selections
+ * @param colIndex
+ * @returns boolean
+ */
+export function isThisColSelected(
+    selections: Readonly<ISelectionWithStyle[]>,
+    colIndex: number
+): boolean {
+    return !!matchedSelectionByRowColIndex(selections, colIndex, RANGE_TYPE.COLUMN);
+}
+
+/**
+ * Detect this row/col is in selections.
+ * @param selections
+ * @param indexOfRowCol
+ * @param rowOrCol
+ * @returns boolean
+ */
+export function matchedSelectionByRowColIndex(
+    selections: Readonly<ISelectionWithStyle[]>,
+    indexOfRowCol: number,
+    rowOrCol: RANGE_TYPE.ROW | RANGE_TYPE.COLUMN
+): Nullable<ISelectionWithStyle> {
     const matchSelectionData = selections.find((sel) => {
         const range = sel.range;
-        const { startRow, endRow, startColumn, endColumn, rangeType } = range;
+        const { startRow: startRowOfCurrSel, endRow: endRowOfCurrSel, startColumn: startColumnOfCurrSel, endColumn: endColumnOfCurrSel, rangeType: rangeTypeOfCurrSelection } = range;
 
-        if (rangeType === RANGE_TYPE.ALL || rangeType === RANGE_TYPE.NORMAL) return false;
+        if (rangeTypeOfCurrSelection === RANGE_TYPE.ALL || rangeTypeOfCurrSelection === RANGE_TYPE.NORMAL) return false;
 
-        if (rType === RANGE_TYPE.COLUMN && RANGE_TYPE.COLUMN === rangeType) {
-            return num >= startColumn && num <= endColumn;
+        if (rangeTypeOfCurrSelection === rowOrCol) {
+            if (rowOrCol === RANGE_TYPE.COLUMN && startColumnOfCurrSel <= indexOfRowCol && indexOfRowCol <= endColumnOfCurrSel) {
+                return true;
+            }
+            if (rowOrCol === RANGE_TYPE.ROW && startRowOfCurrSel <= indexOfRowCol && indexOfRowCol <= endRowOfCurrSel) {
+                return true;
+            }
         }
-
-        return rangeType === RANGE_TYPE.ROW && num >= startRow && num <= endRow;
+        return false;
     });
 
-    return matchSelectionData ?? false;
+    return matchSelectionData;
 }

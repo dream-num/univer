@@ -370,7 +370,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
 
                     scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
 
-                    scene.disableEvent();
+                    scene.disableObjectsEvent();
 
                     // TODO: do it in another way
                     // this._editorBridgeService.changeVisible({
@@ -460,7 +460,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         this._resizeHelperShape?.dispose();
                         this._resizeHelperShape = null;
 
-                        scene.enableEvent();
+                        scene.enableObjectsEvent();
 
                         if (isStartMove) {
                             scene.resetCursor();

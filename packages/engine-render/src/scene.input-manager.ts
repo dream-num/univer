@@ -41,6 +41,8 @@ export class InputManager extends Disposable {
     /** If you need to check double click without raising a single click at first click, enable this flag */
     static ExclusiveDoubleClickMode = false;
 
+    private _scene!: ThinScene;
+
     /** This is a defensive check to not allow control attachment prior to an already active one. If already attached, previous control is unattached before attaching the new one. */
     private _alreadyAttached = false;
 
@@ -51,49 +53,30 @@ export class InputManager extends Disposable {
 
     // Pointers
     private _onPointerMove!: (evt: IMouseEvent) => void;
-
     private _onPointerDown!: (evt: IPointerEvent) => void;
-
     private _onPointerUp!: (evt: IPointerEvent) => void;
-
     private _onPointerOut!: (evt: IPointerEvent) => void;
-
     private _onPointerCancel!: (evt: IPointerEvent) => void;
-
     private _onPointerEnter!: (evt: IPointerEvent) => void;
-
     private _onPointerLeave!: (evt: IPointerEvent) => void;
-
     private _onMouseWheel!: (evt: IWheelEvent) => void;
 
     // Keyboard
     private _onKeyDown!: (evt: IKeyboardEvent) => void;
-
     private _onKeyUp!: (evt: IKeyboardEvent) => void;
 
     // Drag
     private _onDragEnter!: (evt: IDragEvent) => void;
-
     private _onDragLeave!: (evt: IDragEvent) => void;
-
     private _onDragOver!: (evt: IDragEvent) => void;
-
     private _onDrop!: (evt: IDragEvent) => void;
 
-    private _scene!: ThinScene;
-
     private _currentMouseEnterPicked: Nullable<BaseObject | ThinScene>;
-
     private _startingPosition = new Vector2(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
-
     private _delayedTimeout: NodeJS.Timeout | number = -1;
-
     private _delayedTripeTimeout: NodeJS.Timeout | number = -1;
-
     private _doubleClickOccurred = 0;
-
     private _tripleClickState = false;
-
     private _currentObject: Nullable<BaseObject | ThinScene>;
 
     constructor(scene: ThinScene) {
@@ -178,7 +161,7 @@ export class InputManager extends Disposable {
                 evt.pointerId = 0;
             }
 
-            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const _isStop = this._currentObject?.triggerPointerMove(evt);
 
             this.mouseLeaveEnterHandler(evt);
@@ -215,7 +198,7 @@ export class InputManager extends Disposable {
             if ((evt as IPointerEvent).pointerId === undefined) {
                 (evt as unknown as PointerEvent).pointerId = 0;
             }
-            const currentObject = this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const currentObject = this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             // Math.random() < 0.01 && console.log('!!!scene _onPointerMove', currentObject?.oKey);
 
             const isStop = currentObject?.triggerPointerMove(evt);
@@ -233,8 +216,7 @@ export class InputManager extends Disposable {
                 (evt as unknown as PointerEvent).pointerId = 0;
             }
 
-            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
-
+            const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerPointerDown(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -248,7 +230,7 @@ export class InputManager extends Disposable {
                 evt.pointerId = 0;
             }
 
-            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerPointerUp(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -267,7 +249,7 @@ export class InputManager extends Disposable {
         };
 
         this._onMouseWheel = (evt: IWheelEvent) => {
-            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerMouseWheel(evt);
 
             this._scene.getViewports().forEach((vp: Viewport) => {
@@ -292,7 +274,7 @@ export class InputManager extends Disposable {
         };
 
         this._onDragEnter = (evt: IDragEvent) => {
-            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             this._currentObject?.triggerDragOver(evt);
 
             this.dragLeaveEnterHandler(evt);
@@ -305,7 +287,7 @@ export class InputManager extends Disposable {
         };
 
         this._onDragOver = (evt: IDragEvent) => {
-            this._currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            this._currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const isStop = this._currentObject?.triggerDragOver(evt);
 
             this.dragLeaveEnterHandler(evt);
@@ -317,7 +299,7 @@ export class InputManager extends Disposable {
         };
 
         this._onDrop = (evt: IDragEvent) => {
-            const currentObject = this._getCurrentObject(evt.offsetX, evt.offsetY);
+            const currentObject = this._getObjectAtPos(evt.offsetX, evt.offsetY);
             const isStop = currentObject?.triggerDrop(evt);
 
             if (this._checkDirectSceneEventTrigger(!isStop, currentObject)) {
@@ -436,7 +418,13 @@ export class InputManager extends Disposable {
         this._alreadyAttached = false;
     }
 
-    private _getCurrentObject(offsetX: number, offsetY: number) {
+    /**
+     * Just call this._scene?.pick, nothing special.
+     * @param offsetX
+     * @param offsetY
+     * @returns
+     */
+    private _getObjectAtPos(offsetX: number, offsetY: number) {
         return this._scene?.pick(Vector2.FromArray([offsetX, offsetY]));
     }
 
@@ -454,7 +442,7 @@ export class InputManager extends Disposable {
                 isNotInSceneViewer = parent.classType !== RENDER_CLASS_TYPE.SCENE_VIEWER;
             }
         }
-        return (!this._scene.evented && isTrigger && isNotInSceneViewer) || notObject;
+        return (!this._scene.objectsEvented && isTrigger && isNotInSceneViewer) || notObject;
     }
 
     /**

@@ -17,7 +17,7 @@
 import type { ICommand, IDocumentBody } from '@univerjs/core';
 import { BuildTextUtils, CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream } from '@univerjs/core';
 import { SLIDE_EDITOR_ID } from '@univerjs/slides-ui';
-import { replaceSelectionFactory } from '@univerjs/docs';
+import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { SlideUIFormulaCacheService } from '../../services/slide-ui-formula-cache.service';
 
 export interface IAddSlideUniFormulaCommandParams {

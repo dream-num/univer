@@ -18,8 +18,9 @@ import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univer
 import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
 import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
-import { DocSkeletonManagerService, TextSelectionManagerService, ToggleCheckListCommand } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '../../services/doc-event-manager.service';
+import { ToggleCheckListCommand } from '../../commands/commands/list.command';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -27,7 +28,7 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocEventManagerService) private readonly _docEventManagerService: DocEventManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

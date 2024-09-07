@@ -22,10 +22,10 @@ import { IFileOpenerService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import { DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
-import { docDrawingPositionToTransform } from '@univerjs/docs-ui';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
 import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
@@ -38,8 +38,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,
@@ -47,13 +46,14 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IContextService private readonly _contextService: IContextService,
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManager: TextSelectionManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
+        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService
     ) {
         super();
 
-        this._updateDrawingListener();
+        // this._updateDrawingListener();
+        // this._initCommandListeners();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();
@@ -191,7 +191,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     private _getImagePosition(
         imageWidth: number, imageHeight: number
     ): Nullable<IDocDrawingPosition> {
-        const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
+        const activeTextRange = this._docSelectionRenderService.getActiveTextRange();
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
             top: 0,
@@ -224,13 +224,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 drawingIds,
                 arrangeType,
             } as ISetDrawingArrangeCommandParams);
-        });
-    }
-
-    private _updateDrawingListener() {
-        this._drawingManagerService.featurePluginUpdate$.subscribe((params) => {
-            // REFACTOR: @JOCS  需要修改，移除 transformer 修改，不需要跟新了，单独处理了。
-            // 确认下还需要监听这个吗？
         });
     }
 
@@ -276,18 +269,17 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                     this._contextService.setContextValue(FOCUSING_COMMON_DRAWINGS, true);
                     this._docDrawingService.focusDrawing(params);
                     // Need to remove text selections when focus drawings.
-                    const activeTextRange = this._textSelectionManager.getActiveTextRange();
+                    const activeTextRange = this._docSelectionManagerService.getActiveTextRange();
                     if (activeTextRange) {
-                        this._textSelectionManager.replaceTextRanges([]);
+                        this._docSelectionManagerService.replaceTextRanges([]);
                     }
-                    // this._textSelectionRenderManager.blur();
 
-                    const prevSegmentId = this._textSelectionRenderManager.getSegment();
+                    const prevSegmentId = this._docSelectionRenderService.getSegment();
                     const segmentId = this._findSegmentIdByDrawingId(params[0].drawingId);
 
                     // Change segmentId when click drawing in different segment.
                     if (prevSegmentId !== segmentId) {
-                        this._textSelectionRenderManager.setSegment(segmentId);
+                        this._docSelectionRenderService.setSegment(segmentId);
                     }
 
                     if (transformer) {

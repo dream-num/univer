@@ -959,10 +959,6 @@ importers:
         version: 2.0.5(@types/node@22.5.2)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs:
-    dependencies:
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: 'link:'
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1873,6 +1869,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2144,6 +2143,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -2681,6 +2683,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../drawing
@@ -2723,6 +2728,15 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -2785,6 +2799,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

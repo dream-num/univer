@@ -23,50 +23,17 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
-import { BreakLineCommand } from './commands/commands/break-line.command';
-import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
-import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
-import { IMEInputCommand } from './commands/commands/ime-input.command';
-import {
-    ResetInlineFormatTextBackgroundColorCommand,
-    SetInlineFormatBoldCommand,
-    SetInlineFormatCommand,
-    SetInlineFormatFontFamilyCommand,
-    SetInlineFormatFontSizeCommand,
-    SetInlineFormatItalicCommand,
-    SetInlineFormatStrikethroughCommand,
-    SetInlineFormatSubscriptCommand,
-    SetInlineFormatSuperscriptCommand,
-    SetInlineFormatTextBackgroundColorCommand,
-    SetInlineFormatTextColorCommand,
-    SetInlineFormatUnderlineCommand,
-} from './commands/commands/inline-format.command';
-import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
-import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
-import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
-import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/cursor.operation';
-import { SelectAllOperation } from './commands/operations/select-all.operation';
-import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { IMEInputController } from './controllers/ime-input.controller';
-import { MoveCursorController } from './controllers/move-cursor.controller';
-import { NormalInputController } from './controllers/normal-input.controller';
-import { IMEInputManagerService } from './services/ime-input-manager.service';
-import { TextSelectionManagerService } from './services/text-selection-manager.service';
-import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
-import { DocAutoFormatService } from './services/doc-auto-format.service';
-import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
-import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
-import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
-import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
-import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
-import type { IUniverDocsConfig } from './controllers/config.schema';
+import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
+import { DocSelectionManagerService } from './services/doc-selection-manager.service';
+import { DocCustomRangeController } from './controllers/custom-range.controller';
+import { DocStateEmitService } from './services/doc-state-emit.service';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+
+export interface IUniverDocsConfig {
+    hasScroll?: boolean;
+}
 
 const PLUGIN_NAME = 'DOCS_PLUGIN';
 
@@ -93,64 +60,9 @@ export class UniverDocsPlugin extends Plugin {
     private _initializeCommands(): void {
         (
             [
-                MoveCursorOperation,
-                MoveSelectionOperation,
-                DeleteLeftCommand,
-                DeleteRightCommand,
-                SetInlineFormatBoldCommand,
-                SetInlineFormatItalicCommand,
-                SetInlineFormatUnderlineCommand,
-                SetInlineFormatStrikethroughCommand,
-                SetInlineFormatSubscriptCommand,
-                SetInlineFormatSuperscriptCommand,
-                SetInlineFormatFontSizeCommand,
-                SetInlineFormatFontFamilyCommand,
-                SetInlineFormatTextColorCommand,
-                ResetInlineFormatTextBackgroundColorCommand,
-                SetInlineFormatTextBackgroundColorCommand,
-                SetInlineFormatCommand,
-                BreakLineCommand,
-                InsertCommand,
-                DeleteCommand,
-                DeleteCustomBlockCommand,
-                UpdateCommand,
-                IMEInputCommand,
-                MergeTwoParagraphCommand,
                 RichTextEditingMutation,
-                ReplaceContentCommand,
-                CoverContentCommand,
-                SetDocZoomRatioCommand,
-                SetDocZoomRatioOperation,
-                SetTextSelectionsOperation,
-                SelectAllOperation,
-                OrderListCommand,
-                BulletListCommand,
-                ListOperationCommand,
-                AlignLeftCommand,
-                AlignCenterCommand,
-                AlignRightCommand,
-                AlignOperationCommand,
-                AlignJustifyCommand,
-                CreateDocTableCommand,
-                DocTableInsertRowCommand,
-                DocTableInsertRowAboveCommand,
-                DocTableInsertRowBellowCommand,
-                DocTableInsertColumnCommand,
-                DocTableInsertColumnLeftCommand,
-                DocTableInsertColumnRightCommand,
-                DocTableDeleteRowsCommand,
-                DocTableDeleteColumnsCommand,
-                DocTableDeleteTableCommand,
-                DocTableTabCommand,
                 DocsRenameMutation,
-                TabCommand,
-                AfterSpaceCommand,
-                EnterCommand,
-                ChangeListNestingLevelCommand,
-                ChangeListTypeCommand,
-                CheckListCommand,
-                ToggleCheckListCommand,
-                QuickListCommand,
+                SetTextSelectionsOperation,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -161,21 +73,9 @@ export class UniverDocsPlugin extends Plugin {
         (
             [
                 // services
-                [DocStateChangeManagerService],
-                [IMEInputManagerService],
-                [
-                    ITextSelectionRenderManager,
-                    {
-                        useClass: TextSelectionRenderManager,
-                    },
-                ],
-                [TextSelectionManagerService],
-                [DocAutoFormatService],
-
+                [DocSelectionManagerService],
+                [DocStateEmitService],
                 // controllers
-                [NormalInputController],
-                [IMEInputController],
-                [MoveCursorController],
                 [DocCustomRangeController],
 
             ] as Dependency[]

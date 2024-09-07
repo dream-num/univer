@@ -44,22 +44,17 @@ import {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
-    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
+    DocSelectionManagerService,
     DocSkeletonManagerService,
-    MoveCursorOperation,
-    MoveSelectionOperation,
     RichTextEditingMutation,
-    TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
 import {
     convertTextRotation,
     DeviceInputEventType,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
     IRenderManagerService,
-    ITextSelectionRenderManager,
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
@@ -69,6 +64,8 @@ import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutat
 import { distinctUntilChanged, filter } from 'rxjs';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 
+import type { IEditorInputConfig } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
@@ -121,10 +118,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
@@ -238,7 +234,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            this._textSelectionRenderManager.sync();
+            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
+            if (docSelectionRenderManager) {
+                docSelectionRenderManager.sync();
+            }
         }));
     }
 
@@ -278,7 +278,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 endOffset: 0,
             }]);
 
-            this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
+            if (docSelectionRenderManager) {
+                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            }
         }));
     }
 
@@ -695,19 +699,23 @@ export class EditingRenderController extends Disposable implements IRenderModule
      * @param d DisposableCollection
      */
     private _initialKeyboardListener(d: DisposableCollection) {
-        d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            if (!this._isCurrentSheetFocused()) {
-                return;
-            }
+        const docSelectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
-            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-            // TODO@Jocs: should get editor instead of current doc
-            const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
-            if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
-                this._showEditorByKeyboard(config);
-            }
-        }));
+        if (docSelectionRenderService) {
+            d.add(docSelectionRenderService.onInputBefore$.subscribe((config) => {
+                if (!this._isCurrentSheetFocused()) {
+                    return;
+                }
+
+                const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+                const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+                // TODO@Jocs: should get editor instead of current doc
+                const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
+                if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                    this._showEditorByKeyboard(config);
+                }
+            }));
+        }
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
@@ -1028,7 +1036,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     // WTF: this is should not exist at all. It is because all editor instances reuse the singleton
-    // "TextSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
+    // "DocSelectionManagerService" and other modules. Which will be refactored soon in August, 2024.
     private _isCurrentSheetFocused(): boolean {
         return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }

@@ -18,7 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
@@ -33,7 +33,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocHyperLinkPopupService) private readonly _hyperLinkPopupService: DocHyperLinkPopupService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 
@@ -53,7 +53,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
-                const activeRanges = this._textSelectionManagerService.getCurrentTextRanges();
+                const activeRanges = this._docSelectionManagerService.getCurrentTextRanges();
                 const currentSegmentId = activeRanges?.[0].segmentId;
                 if ((link?.segmentId ?? '') !== currentSegmentId) {
                     this._hideInfoPopup();

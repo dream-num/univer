@@ -37,7 +37,6 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { replaceSelectionFactory } from '@univerjs/docs';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { IDocFormulaCache, ISlideFormulaCache } from '@univerjs/uni-formula';
@@ -45,6 +44,7 @@ import { DumbUniFormulaService, IUniFormulaService } from '@univerjs/uni-formula
 import { take } from 'rxjs';
 import { RichText } from '@univerjs/engine-render';
 import { CanvasView } from '@univerjs/slides-ui';
+import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { type IDocPopupPosition, type ISlidePopupPosition, isSlidePosition } from '../commands/operations/operation';
 
 const PSEUDO_SUBUNIT = 'PSEUDO_SUBUNIT';

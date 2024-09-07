@@ -15,10 +15,14 @@
  */
 
 import { Disposable, Inject, LifecycleStages, OnLifecycle, QuickListTypeMap } from '@univerjs/core';
-import type { ITabCommandParams } from '@univerjs/docs';
-import { AfterSpaceCommand, BreakLineCommand, ChangeListNestingLevelCommand, ChangeListNestingLevelType, DocAutoFormatService, DocTableTabCommand, EnterCommand, ListOperationCommand, QuickListCommand, TabCommand } from '@univerjs/docs';
-import { isInSameTableCell } from '@univerjs/engine-render';
 import type { Nullable } from 'vitest';
+import { DocAutoFormatService } from '../services/doc-auto-format.service';
+import type { ITabCommandParams } from '../commands/commands/auto-format.command';
+import { AfterSpaceCommand, EnterCommand, TabCommand } from '../commands/commands/auto-format.command';
+import { ChangeListNestingLevelCommand, ChangeListNestingLevelType, ListOperationCommand, QuickListCommand } from '../commands/commands/list.command';
+import { DocTableTabCommand } from '../commands/commands/table/doc-table-tab.command';
+import { isInSameTableCell } from '../services/selection/convert-rect-range';
+import { BreakLineCommand } from '../commands/commands/break-line.command';
 
 @OnLifecycle(LifecycleStages.Rendered, DocAutoFormatController)
 export class DocAutoFormatController extends Disposable {

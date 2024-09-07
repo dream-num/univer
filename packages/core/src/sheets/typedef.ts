@@ -574,8 +574,8 @@ export interface ISelection {
 }
 
 /**
- * Selection range Info, contains selectionrange & primaryrange
- * primaryrange is the range of the highlighted cell.
+ * Selection range Info, contains selection range & primary range
+ * primary range is the range of the highlighted cell.
  */
 export interface ISelectionWithCoord {
     rangeWithCoord: IRangeWithCoord;
@@ -586,15 +586,28 @@ export interface ITextRangeStart {
     startOffset: number;
 }
 
+export enum RANGE_DIRECTION {
+    NONE = 'none',
+    BACKWARD = 'backward',
+    FORWARD = 'forward',
+}
+
 export interface ITextRange extends ITextRangeStart {
     endOffset: number;
     collapsed: boolean;
+    direction?: RANGE_DIRECTION;
+}
+
+export enum DOC_RANGE_TYPE {
+    RECT = 'RECT',
+    TEXT = 'TEXT',
 }
 
 export interface ITextRangeParam extends ITextRange {
     segmentId?: string; //The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
     segmentPage?: number; //The page number of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.
     isActive?: boolean; // Whether the text range is active or current range.
+    rangeType?: DOC_RANGE_TYPE;
 }
 
 /**

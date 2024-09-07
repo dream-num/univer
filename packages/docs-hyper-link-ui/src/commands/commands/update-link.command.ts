@@ -16,7 +16,8 @@
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { replaceSelectionFactory, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { replaceSelectionFactory } from '@univerjs/docs-ui';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -36,13 +37,13 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         const { unitId, payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selectionService = accessor.get(TextSelectionManagerService);
-        const currentSelection = selectionService.getActiveTextRange();
-
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const currentSelection = docSelectionManagerService.getActiveTextRange();
         const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
         if (!currentSelection || !doc) {
             return false;
         }
+
         const newId = generateRandomId();
         const oldBody = getBodySlice(doc.getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
         const textRun = oldBody.textRuns?.[0];

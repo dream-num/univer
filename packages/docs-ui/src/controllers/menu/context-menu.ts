@@ -19,26 +19,19 @@ import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
-import {
-    DeleteLeftCommand,
-    DocTableDeleteColumnsCommand,
-    DocTableDeleteRowsCommand,
-    DocTableDeleteTableCommand,
-    DocTableInsertColumnLeftCommand,
-    DocTableInsertColumnRightCommand,
-    DocTableInsertRowAboveCommand,
-    DocTableInsertRowBellowCommand,
-    TextSelectionManagerService,
-} from '@univerjs/docs';
-import type { RectRange } from '@univerjs/engine-render';
+import type { IRectRangeWithStyle } from '@univerjs/engine-render';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DocParagraphSettingPanelOperation } from '../../commands/operations/doc-paragraph-setting-panel.operation';
+import { DeleteLeftCommand } from '../../commands/commands/delete.command';
+import { DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand } from '../../commands/commands/table/doc-table-insert.command';
+import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
 
 const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     return new Observable<boolean>((subscriber) => {
-        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
-            const range = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const observable = docSelectionManagerService.textSelection$.subscribe(() => {
+            const range = docSelectionManagerService.getActiveTextRange();
             if (range && !range.collapsed) {
                 subscriber.next(false);
             } else {
@@ -50,7 +43,7 @@ const getDisableOnCollapsedObservable = (accessor: IAccessor) => {
     });
 };
 
-function inSameTable(rectRanges: Readonly<RectRange[]>) {
+function inSameTable(rectRanges: Readonly<IRectRangeWithStyle[]>) {
     if (rectRanges.length < 2) {
         return true;
     }
@@ -60,13 +53,13 @@ function inSameTable(rectRanges: Readonly<RectRange[]>) {
 }
 
 const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable<boolean>((subscriber) => {
-        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
-            const rectRanges = textSelectionManagerService.getCurrentRectRanges();
-            const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const observable = docSelectionManagerService.textSelection$.subscribe(() => {
+            const rectRanges = docSelectionManagerService.getCurrentRectRanges();
+            const activeRange = docSelectionManagerService.getActiveTextRange();
             if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
                 subscriber.next(false);
                 return;

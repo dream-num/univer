@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
-import { ICommandService,
+import { DOC_RANGE_TYPE, ICommandService,
     Inject,
     Injector,
     IResourceManagerService,
@@ -24,8 +24,8 @@ import { ICommandService,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { InsertCommand } from '@univerjs/docs';
-import { DOC_RANGE_TYPE, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 export class FDocument {
     readonly id: string;
@@ -35,7 +35,8 @@ export class FDocument {
         @Inject(Injector) protected readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService
+        @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         this.id = this._documentDataModel.getUnitId();
     }
@@ -111,9 +112,10 @@ export class FDocument {
      * ```
      */
     setSelection(startOffset: number, endOffset: number): void {
-        const textSelectionRenderManager = this._injector.get(ITextSelectionRenderManager);
-        textSelectionRenderManager.removeAllRanges();
-        textSelectionRenderManager.addDocRanges(
+        // TODO: @jocs...
+        const docSelectionRenderService = this._renderManagerService.getRenderById(this.getId())?.with(DocSelectionRenderService);
+        docSelectionRenderService?.removeAllRanges();
+        docSelectionRenderService?.addDocRanges(
             [
                 {
                     startOffset,

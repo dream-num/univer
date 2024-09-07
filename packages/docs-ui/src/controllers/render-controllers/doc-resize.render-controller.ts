@@ -18,14 +18,14 @@ import { Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, fromEventSubject, Inject, isIn
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { animationFrameScheduler, filter, throttleTime } from 'rxjs';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

@@ -114,19 +114,6 @@ export class SlideCanvasPopMangerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposable = new DisposableCollection();
 
-        // disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-        //     if (commandInfo.id === SetDocZoomRatioOperation.id) {
-        //         position$.next(calc());
-        //     }
-        // }));
-
-        // const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        // if (viewMain) {
-        //     disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-        //         position$.next(calc());
-        //     }));
-        // }
-
         return {
             position,
             position$,

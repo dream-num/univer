@@ -16,7 +16,8 @@
 
 import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 
 import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, MenuItemType } from '@univerjs/ui';
@@ -180,7 +181,7 @@ export function DocTableMenuFactory(accessor: IAccessor): IMenuItem {
 
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const textSelectionService = accessor.get(DocSelectionManagerService);
 
     const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const activeTextRange = textSelectionService.getActiveTextRange();
@@ -196,10 +197,10 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 }
 
 function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
     return new Observable((subscriber) => {
-        const subscription = textSelectionManagerService.textSelection$.subscribe((selection) => {
+        const subscription = docSelectionManagerService.textSelection$.subscribe((selection) => {
             if (selection == null) {
                 subscriber.next(true);
                 return;
@@ -213,15 +214,15 @@ function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
             }
 
             const textRange = textRanges[0];
-            const { collapsed, anchorNodePosition } = textRange;
+            const { collapsed, startNodePosition } = textRange;
 
             if (!collapsed) {
                 subscriber.next(true);
                 return;
             }
 
-            if (anchorNodePosition != null) {
-                const { path } = anchorNodePosition;
+            if (startNodePosition != null) {
+                const { path } = startNodePosition;
 
                 // TODO: Not support insert table in table cell now.
                 if (path.indexOf('cells') !== -1) {

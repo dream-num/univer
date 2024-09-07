@@ -18,7 +18,8 @@ import { ICommandService } from '@univerjs/core';
 import type { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { InsertCommand, RichTextEditingMutation } from '@univerjs/docs';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import { InsertCommand } from '@univerjs/docs-ui';
 import type { FUniver } from '../../facade';
 import { createTestBed } from './create-test-bed';
 

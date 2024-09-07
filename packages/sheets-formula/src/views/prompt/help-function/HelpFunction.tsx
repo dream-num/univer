@@ -20,8 +20,7 @@ import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
 import React, { useEffect, useState } from 'react';
 
-import { IEditorService, ISidebarService } from '@univerjs/ui';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { IEditorService, ILayoutService, ISidebarService } from '@univerjs/ui';
 import { throttleTime } from 'rxjs';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import { IFormulaPromptService } from '../../../services/prompt.service';
@@ -123,8 +122,9 @@ export function HelpFunction() {
         setHelpVisible(!helpVisible);
 
         // focus editor
-        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-        textSelectionRenderManager.focus();
+        // FIXME: @Jocs, still need re focus?
+        const layoutService = injector.get(ILayoutService);
+        layoutService.focus();
     }
 
     return (

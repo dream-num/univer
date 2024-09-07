@@ -24,7 +24,7 @@ import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, Sheets
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
-import { IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
@@ -58,7 +58,8 @@ export class SheetsThreadCommentController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
-        @Inject(SheetsSelectionsService) private readonly _sheetSelectionService: SheetsSelectionsService
+        @Inject(SheetsSelectionsService) private readonly _sheetSelectionService: SheetsSelectionsService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._initMenu();
@@ -68,6 +69,7 @@ export class SheetsThreadCommentController extends Disposable {
         this._initPanelListener();
         this._initMarkSelection();
         this._initSelectionUpdateListener();
+        this._initEditorBridge();
     }
 
     private _initShortcut() {
@@ -117,6 +119,16 @@ export class SheetsThreadCommentController extends Disposable {
                     return;
                 }
                 this._handleSelectionChange(selections, current.unitId, current.sheetId);
+            })
+        );
+    }
+
+    private _initEditorBridge() {
+        this.disposeWithMe(
+            this._editorBridgeService.visible$.subscribe((visible) => {
+                if (visible.visible) {
+                    this._sheetsThreadCommentPopupService.hidePopup();
+                }
             })
         );
     }
@@ -200,6 +212,9 @@ export class SheetsThreadCommentController extends Disposable {
                         endColumn: location.column + GAP,
                     },
                 });
+                if (this._editorBridgeService.isVisible().visible) {
+                    return;
+                }
 
                 this._sheetsThreadCommentPopupService.showPopup({
                     unitId,

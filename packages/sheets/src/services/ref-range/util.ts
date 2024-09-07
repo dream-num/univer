@@ -1082,7 +1082,7 @@ export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (rang
  * @param mutation
  * @returns the adjusted range
  */
-// eslint-disable-next-line max-lines-per-function
+
 export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutationInfo<MutationsAffectRange>): Nullable<IRange> {
     // we map mutation params to corresponding
     const { id, params } = mutation;
@@ -1140,14 +1140,9 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
             baseRangeOperator.type = OperatorType.HorizontalMove;
             break;
         case MoveRangeMutation.id:
-            // baseRangeOperator = handleBaseMoveRange(
-            //     new ObjectMatrix((params as IMoveRangeMutationParams).from).getRange(),
-            //     new ObjectMatrix((params as IMoveRangeMutationParams).to).getRange(),
-            //     range
-            // );
             {
-                const fromRange = (params as IMoveRangeMutationParams).fromRange;
-                const toRange = (params as IMoveRangeMutationParams).toRange;
+                const fromRange = (params as IMoveRangeMutationParams).fromRange || new ObjectMatrix((params as IMoveRangeMutationParams).from).getRange();
+                const toRange = (params as IMoveRangeMutationParams).toRange || new ObjectMatrix((params as IMoveRangeMutationParams).to).getRange();
                 baseRangeOperator = handleBaseMoveRange(
                     fromRange,
                     toRange,

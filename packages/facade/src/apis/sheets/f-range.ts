@@ -214,8 +214,33 @@ export class FRange {
         return null;
     }
 
+    /**
+     * Returns the value of the cell at the start of this range.
+     * @returns The value of the cell.
+     */
     getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
+    }
+
+    /**
+     * Returns the rectangular grid of values for this range.
+     * Returns a two-dimensional array of values, indexed by row, then by column.
+     * @returns A two-dimensional array of values.
+     */
+    getValues(): Nullable<CellValue>[][] {
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const range: Array<Array<Nullable<CellValue>>> = [];
+
+        for (let r = startRow; r <= endRow; r++) {
+            const row: Array<Nullable<CellValue>> = [];
+
+            for (let c = startColumn; c <= endColumn; c++) {
+                row.push(this._worksheet.getCell(r, c)?.v ?? null);
+            }
+
+            range.push(row);
+        }
+        return range;
     }
 
     /**

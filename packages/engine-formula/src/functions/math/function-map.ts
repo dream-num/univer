@@ -29,6 +29,8 @@ import { Base } from './base';
 import { Ceiling } from './ceiling';
 import { CeilingMath } from './ceiling-math';
 import { CeilingPrecise } from './ceiling-precise';
+import { Combin } from './combin';
+import { Combina } from './combina';
 import { Cos } from './cos';
 import { Cosh } from './cosh';
 import { Cot } from './cot';
@@ -39,12 +41,19 @@ import { Decimal } from './decimal';
 import { Degrees } from './degrees';
 import { Even } from './even';
 import { Exp } from './exp';
+import { Fact } from './fact';
+import { Factdouble } from './factdouble';
 import { Floor } from './floor';
 import { FloorMath } from './floor-math';
 import { FloorPrecise } from './floor-precise';
+import { Gcd } from './gcd';
+import { Int } from './int';
+import { Lcm } from './lcm';
 import { Ln } from './ln';
 import { Log } from './log';
 import { Log10 } from './log10';
+import { Mdeterm } from './mdeterm';
+import { Minverse } from './minverse';
 import { Mod } from './mod';
 import { Mround } from './mround';
 import { Odd } from './odd';
@@ -92,6 +101,8 @@ export const functionMath = [
     [Ceiling, FUNCTION_NAMES_MATH.CEILING],
     [CeilingMath, FUNCTION_NAMES_MATH.CEILING_MATH],
     [CeilingPrecise, FUNCTION_NAMES_MATH.CEILING_PRECISE],
+    [Combin, FUNCTION_NAMES_MATH.COMBIN],
+    [Combina, FUNCTION_NAMES_MATH.COMBINA],
     [Cos, FUNCTION_NAMES_MATH.COS],
     [Cosh, FUNCTION_NAMES_MATH.COSH],
     [Cot, FUNCTION_NAMES_MATH.COT],
@@ -102,12 +113,19 @@ export const functionMath = [
     [Degrees, FUNCTION_NAMES_MATH.DEGREES],
     [Even, FUNCTION_NAMES_MATH.EVEN],
     [Exp, FUNCTION_NAMES_MATH.EXP],
+    [Fact, FUNCTION_NAMES_MATH.FACT],
+    [Factdouble, FUNCTION_NAMES_MATH.FACTDOUBLE],
     [Floor, FUNCTION_NAMES_MATH.FLOOR],
     [FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH],
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
+    [Gcd, FUNCTION_NAMES_MATH.GCD],
+    [Int, FUNCTION_NAMES_MATH.INT],
+    [Lcm, FUNCTION_NAMES_MATH.LCM],
     [Ln, FUNCTION_NAMES_MATH.LN],
     [Log, FUNCTION_NAMES_MATH.LOG],
     [Log10, FUNCTION_NAMES_MATH.LOG10],
+    [Mdeterm, FUNCTION_NAMES_MATH.MDETERM],
+    [Minverse, FUNCTION_NAMES_MATH.MINVERSE],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
     [Odd, FUNCTION_NAMES_MATH.ODD],

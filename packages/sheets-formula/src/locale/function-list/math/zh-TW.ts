@@ -244,8 +244,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個組合中的項目數。' },
         },
     },
     COMBINA: {
@@ -258,8 +258,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個組合中的項目數。' },
         },
     },
     COS: {
@@ -403,8 +403,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是您要階乘的非負數數字。 如果數字不是整數，則只會取整數。' },
         },
     },
     FACTDOUBLE: {
@@ -417,8 +416,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是您要雙倍階乘的非負數數字。 如果數字不是整數，則只會取整數。' },
         },
     },
     FLOOR: {
@@ -474,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '這是要求出最大公約數的第1個數字。您也可以使用單一陣列或陣列參照來取代以逗點分隔的引數。' },
+            number2: { name: '數值2', detail: '這是要求出最大公約數的第2個數字。可以按照這種方式指定最多 255 個數字。' },
         },
     },
     INT: {
@@ -488,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要將數字向下捨去到最接近的整數的實數。' },
         },
     },
     ISO_CEILING: {
@@ -516,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '這是要求出最小公倍數的第1個數字。您也可以使用單一陣列或陣列參照來取代以逗點分隔的引數。' },
+            number2: { name: '數值2', detail: '這是要求出最小公倍數的第2個數字。可以按照這種方式指定最多 255 個數字。' },
         },
     },
     LET: {
@@ -584,8 +581,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是具有相同列數與欄數的數值陣列。' },
         },
     },
     MINVERSE: {
@@ -598,8 +594,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是具有相同列數與欄數的數值陣列。' },
         },
     },
     MMULT: {

@@ -244,8 +244,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一组合中项目的数量。' },
         },
     },
     COMBINA: {
@@ -258,8 +258,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一组合中项目的数量。' },
         },
     },
     COS: {
@@ -403,8 +403,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算其阶乘的非负数。 如果 number 不是整数，将被截尾取整。' },
         },
     },
     FACTDOUBLE: {
@@ -417,8 +416,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算其双倍阶乘的非负数。 如果 number 不是整数，将被截尾取整。' },
         },
     },
     FLOOR: {
@@ -474,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '要对其求最大公约数的第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            number2: { name: '数值2', detail: '要对其求最大公约数的第2个数字。可以按照这种方式最多指定255个数字。' },
         },
     },
     INT: {
@@ -488,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要进行向下舍入取整的实数。' },
         },
     },
     ISO_CEILING: {
@@ -516,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '要对其求最小公倍数的第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            number2: { name: '数值2', detail: '要对其求最小公倍数的第2个数字。可以按照这种方式最多指定255个数字。' },
         },
     },
     LET: {
@@ -584,8 +581,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '行数和列数相等的数值数组。' },
         },
     },
     MINVERSE: {
@@ -598,8 +594,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '行数和列数相等的数值数组。' },
         },
     },
     MMULT: {

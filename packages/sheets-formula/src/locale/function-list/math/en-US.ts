@@ -245,8 +245,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each combination.' },
         },
     },
     COMBINA: {
@@ -259,8 +259,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each combination.' },
         },
     },
     COS: {
@@ -404,8 +404,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The nonnegative number for which you want the factorial. If number is not an integer, it is truncated.' },
         },
     },
     FACTDOUBLE: {
@@ -418,8 +417,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The nonnegative number for which you want the double factorial. If number is not an integer, it is truncated.' },
         },
     },
     FLOOR: {
@@ -475,8 +473,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To find the first number of the greatest common divisor, you can also use a single array or a reference to an array instead of the comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number whose greatest common divisor is to be found. Up to 255 numbers can be specified in this way.' },
         },
     },
     INT: {
@@ -489,8 +487,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The real number you want to round down to an integer.' },
         },
     },
     ISO_CEILING: {
@@ -517,8 +514,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To find the first number of the least common multiple, you can also use a single array or a reference to an array instead of the comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number whose least common multiple is to be found. Up to 255 numbers can be specified in this way.' },
         },
     },
     LET: {
@@ -585,8 +582,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A numeric array with an equal number of rows and columns.' },
         },
     },
     MINVERSE: {
@@ -599,8 +595,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A numeric array with an equal number of rows and columns.' },
         },
     },
     MMULT: {

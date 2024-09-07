@@ -245,8 +245,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る組み合わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     COMBINA: {
@@ -259,8 +259,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る組み合わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     COS: {
@@ -404,8 +404,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '階乗を求める正の数値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     FACTDOUBLE: {
@@ -418,8 +417,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '二重階乗を求める正の数値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     FLOOR: {
@@ -475,8 +473,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '最大公約数が必要な最初の数値は、コンマ区切りの引数の代わりに、単一の配列または配列への参照として使用することもできます。' },
+            number2: { name: '数値2', detail: '最大公約数を求める 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
         },
     },
     INT: {
@@ -489,8 +487,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '切り捨てて整数にする実数を指定します。' },
         },
     },
     ISO_CEILING: {
@@ -517,8 +514,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '最小公倍数が必要な最初の数値は、コンマ区切りの引数の代わりに、単一の配列または配列への参照として使用することもできます。' },
+            number2: { name: '数値2', detail: '最小公倍数を求める 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
         },
     },
     LET: {
@@ -585,8 +582,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数と列数が等しい数値配列 (正方行列) を指定します。' },
         },
     },
     MINVERSE: {
@@ -599,8 +595,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数と列数が等しい数値配列 (正方行列) を指定します。' },
         },
     },
     MMULT: {

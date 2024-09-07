@@ -36,6 +36,7 @@ export interface IInsertCommandParams {
     range: ITextRange;
     segmentId?: string;
     cursorOffset?: number;
+    extendLastRange?: boolean;
 }
 
 export const EditorInsertTextCommandId = 'doc.command.insert-text';
@@ -47,10 +48,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, cursorOffset } = params;
+        const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -65,7 +67,9 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (!originBody) {
             return false;
         }
-        const actualRange = BuildTextUtils.selection.getInsertSelection(range, originBody);
+        const actualRange = extendLastRange
+            ? BuildTextUtils.selection.getDeleteSelection(range, originBody)
+            : BuildTextUtils.selection.getInsertSelection(range, originBody);
         const { startOffset, collapsed } = actualRange;
         const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [

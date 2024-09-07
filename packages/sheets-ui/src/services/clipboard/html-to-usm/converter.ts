@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-import { DEFAULT_WORKSHEET_ROW_HEIGHT, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
+import { CustomRangeType, DataStreamTreeTokenType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
 
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -143,8 +143,7 @@ export class HtmlToUSMService {
         const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
         this.process(null, this._dom.childNodes!, newDocBody, tables);
-        const { paragraphs, dataStream, textRuns, payloads } = newDocBody;
-
+        const { paragraphs, dataStream, textRuns, payloads, customRanges } = newDocBody;
         // use paragraph to split rows
         if (paragraphs) {
             const starts = paragraphs.map((p) => p.startIndex + 1);
@@ -169,12 +168,23 @@ export class HtmlToUSMService {
                         });
                     }
                 });
+                const cellCustomRanges: ICustomRange[] = [];
+                customRanges?.forEach((c) => {
+                    if (c.startIndex >= starts[i] && c.endIndex <= starts[i + 1]) {
+                        cellCustomRanges.push({
+                            ...c,
+                            startIndex: c.startIndex - starts[i],
+                            endIndex: c.endIndex - starts[i],
+                        });
+                    }
+                });
                 // set rich format
                 const p = this._generateDocumentDataModelSnapshot({
                     body: {
                         dataStream: cellDataStream,
                         textRuns: cellTextRuns,
                         paragraphs: generateParagraphs(cellDataStream),
+                        customRanges: cellCustomRanges,
                     },
                 });
                 const isEmptyMatrix = Object.keys(valueMatrix.getMatrix()).length === 0;
@@ -192,6 +202,7 @@ export class HtmlToUSMService {
                     textRuns,
                     paragraphs: generateParagraphs(singleDataStream),
                     payloads,
+                    customRanges,
                 };
 
                 const dataStreamLength = dataStream.length;
@@ -570,6 +581,8 @@ export class HtmlToUSMService {
                 if (node.nodeName === 'STYLE') {
                     continue;
                 }
+                const element = node as HTMLElement;
+                const linkStart = this._processBeforeLink(element, { body: doc });
                 const parentStyles = parent ? this._styleCache.get(parent) : {};
                 const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
@@ -589,7 +602,36 @@ export class HtmlToUSMService {
                 if (afterProcessRule) {
                     afterProcessRule.handler(doc, node as HTMLElement);
                 }
+                this._processAfterLink(element, { body: doc }, linkStart);
             }
+        }
+    }
+
+    private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
+        const body = doc.body!;
+        const element = node as HTMLElement;
+        const start = body.dataStream.length;
+        if (element.tagName.toUpperCase() === 'A') {
+            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
+        }
+
+        return start;
+    }
+
+    private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
+        const body = doc.body!;
+        const element = node as HTMLElement;
+
+        if (element.tagName.toUpperCase() === 'A') {
+            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
+            body.customRanges = body.customRanges ?? [];
+            body.customRanges.push({
+                startIndex: start,
+                endIndex: body.dataStream.length - 1,
+                rangeId: element.dataset.rangeid ?? generateRandomId(),
+                rangeType: CustomRangeType.HYPERLINK,
+                properties: { url: (element as HTMLAnchorElement).href },
+            });
         }
     }
 

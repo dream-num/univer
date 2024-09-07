@@ -365,7 +365,7 @@ export class ScrollBar extends BaseScrollBar {
             srcElement?.setProps({
                 fill: this.thumbActiveBackgroundColor!,
             });
-            mainScene.disableEvent();
+            mainScene.disableObjectsEvent();
             this.makeViewDirty(true);
             state.stopPropagation();
         }));
@@ -388,7 +388,7 @@ export class ScrollBar extends BaseScrollBar {
             const srcElement = this.verticalThumbRect;
             this._isVerticalMove = false;
             // srcElement.fill = this._thumbBackgroundColor!;
-            mainScene.enableEvent();
+            mainScene.enableObjectsEvent();
             srcElement?.setProps({
                 fill: this.thumbBackgroundColor!,
             });
@@ -455,7 +455,7 @@ export class ScrollBar extends BaseScrollBar {
                 fill: this.thumbActiveBackgroundColor!,
             });
             this.makeViewDirty(true);
-            mainScene.disableEvent();
+            mainScene.disableObjectsEvent();
             state.stopPropagation();
         }));
 
@@ -473,7 +473,7 @@ export class ScrollBar extends BaseScrollBar {
         this._horizonPointerUpSub = mainScene.onPointerUp$.subscribeEvent((evt: unknown, state: EventState) => {
             const srcElement = this.horizonThumbRect;
             this._isHorizonMove = false;
-            mainScene.enableEvent();
+            mainScene.enableObjectsEvent();
             // srcElement.fill = this._thumbBackgroundColor!;
             srcElement?.setProps({
                 fill: this.thumbBackgroundColor!,

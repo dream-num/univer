@@ -1,5 +1,64 @@
 
 
+## [0.2.12](https://github.com/dream-num/univer/compare/v0.2.11...v0.2.12) (2024-09-07)
+
+
+### Bug Fixes
+
+* **auto-fill:** change apply type will undo last commands ([#3311](https://github.com/dream-num/univer/issues/3311)) ([391c523](https://github.com/dream-num/univer/commit/391c52389e39c7dd533ec863b7818855356fee81))
+* **clipboard:** copy will not use filtered-out rows content ([#3292](https://github.com/dream-num/univer/issues/3292)) ([ec601c3](https://github.com/dream-num/univer/commit/ec601c33545efb82c9a506e05db21fd53b736281))
+* **conditional-formatting:** init view model ([#3349](https://github.com/dream-num/univer/issues/3349)) ([ad145f2](https://github.com/dream-num/univer/commit/ad145f21da5acdd94a6677b90bfe9771b4ab8c34))
+* **conditional-formatting:** render cache error ([#3345](https://github.com/dream-num/univer/issues/3345)) ([e812441](https://github.com/dream-num/univer/commit/e812441c616ee2f25940372a6a3a740e10c9ca60))
+* **conditional-formatting:** the maximum and minimum values are corre… ([#3270](https://github.com/dream-num/univer/issues/3270)) ([5d41a9b](https://github.com/dream-num/univer/commit/5d41a9bba15cce4d2fec746d7a20711683e4c617))
+* **crosshair:** fix no plugin name for the plugin ([19564c7](https://github.com/dream-num/univer/commit/19564c7630f780d81a94abfea5b891ee41262069))
+* **design:** popup style ([#3325](https://github.com/dream-num/univer/issues/3325)) ([675933c](https://github.com/dream-num/univer/commit/675933c2c715d9e832b08cabc9abf794efa159a0))
+* detect row/col index in selection ([#3348](https://github.com/dream-num/univer/issues/3348)) ([c9fef1b](https://github.com/dream-num/univer/commit/c9fef1be0b0d244ca2783ab6dccdb3ff4e754360))
+* **docs:** link break in link ([#3254](https://github.com/dream-num/univer/issues/3254)) ([ff17894](https://github.com/dream-num/univer/commit/ff178948759e2cb57557ce51c9e81ac11ff22999))
+* drawing issues ([#3245](https://github.com/dream-num/univer/issues/3245)) ([d848d33](https://github.com/dream-num/univer/commit/d848d33a692a405f16802a941617a214e1fcec30))
+* **filter:** filter range change error when remove rows/cols ([#3324](https://github.com/dream-num/univer/issues/3324)) ([a70ef37](https://github.com/dream-num/univer/commit/a70ef37bbd46d3fdc3120728d7020f448f445f60))
+* **filter:** filter render controller should dispose its vars when unit disposed ([#3340](https://github.com/dream-num/univer/issues/3340)) ([be7da80](https://github.com/dream-num/univer/commit/be7da806b958f5baaf201b7752954e4630b7b70d))
+* fix dependencies of telemetry ([#3280](https://github.com/dream-num/univer/issues/3280)) ([965064e](https://github.com/dream-num/univer/commit/965064ec39f94ec833dc14b4ac9b39434d24e49c))
+* fix the sorting menu item display position ([#3314](https://github.com/dream-num/univer/issues/3314)) ([3f18a4f](https://github.com/dream-num/univer/commit/3f18a4f61c021e839a2036e7881ea713bb916618))
+* fix threshold error handling ([#3261](https://github.com/dream-num/univer/issues/3261)) ([1e1dde5](https://github.com/dream-num/univer/commit/1e1dde55437bb7bf9bb02d83c2edf1d3f84c44ad))
+* fix uni menu ([#3338](https://github.com/dream-num/univer/issues/3338)) ([af63f7d](https://github.com/dream-num/univer/commit/af63f7dda4e26dbc9cac0eeecf0127764119ac35))
+* font rendering diffrange condition fix ([#3264](https://github.com/dream-num/univer/issues/3264)) ([c920d53](https://github.com/dream-num/univer/commit/c920d53137b3891464a050ca0b72f22e175b5704))
+* **formula:** bracket has more blank ([#3331](https://github.com/dream-num/univer/issues/3331)) ([4900a3c](https://github.com/dream-num/univer/commit/4900a3c0330c1899b364faa73ce923b68d67ce62))
+* **formula:** fix formula paste ([#3257](https://github.com/dream-num/univer/issues/3257)) ([771f191](https://github.com/dream-num/univer/commit/771f191678af8ab1a1e1f893b6f2cdec093fb6c7))
+* **formular:** fix dependency performance issue ([#3359](https://github.com/dream-num/univer/issues/3359)) ([f2f7f5b](https://github.com/dream-num/univer/commit/f2f7f5bb50357824e7094852580286c216f06700))
+* mobile selection did not drawing ([#3312](https://github.com/dream-num/univer/issues/3312)) ([d1773ed](https://github.com/dream-num/univer/commit/d1773ede7979ba6e6ad5ee4da80ed55c10e20912))
+* **permission:** fix permission render bugs ([#3300](https://github.com/dream-num/univer/issues/3300)) ([9751c0a](https://github.com/dream-num/univer/commit/9751c0a815299f8bea3864eff6dfac3153111d05))
+* selection type did not update when set type to normal(0) ([#3317](https://github.com/dream-num/univer/issues/3317)) ([2909cf8](https://github.com/dream-num/univer/commit/2909cf80a7e686dc629a24feea020e96817d6397))
+* **sheet-data-validation:** auto-format data validation  non-standard date string & data-validation auto-fill ([#3336](https://github.com/dream-num/univer/issues/3336)) ([fc3dc44](https://github.com/dream-num/univer/commit/fc3dc4486b7f3c864f1e2a7ccdbe4c6d4705511c))
+* **sheets-drawing-ui:** sheet-drawing error receive data from doc ([#3337](https://github.com/dream-num/univer/issues/3337)) ([b8e6e42](https://github.com/dream-num/univer/commit/b8e6e42c161769f203d2a7d6e57b8ade6311e821))
+* **sheets-drawing-ui:** sheet-drawing-import ([#3277](https://github.com/dream-num/univer/issues/3277)) ([183b3e0](https://github.com/dream-num/univer/commit/183b3e0526c63064cba2ee9ac1ae6c648719ff01))
+* **sheets-formula:** fix the issue of missing formula description list ([#3323](https://github.com/dream-num/univer/issues/3323)) ([9d314ce](https://github.com/dream-num/univer/commit/9d314ce88f4c73f4563ae90ee66410c14ffdb879))
+* **sheets-ui:** auto-fill will copy auto-height strategy from origin region ([#3287](https://github.com/dream-num/univer/issues/3287)) ([04f156e](https://github.com/dream-num/univer/commit/04f156e8975401c7d38b5703fbfbac8968e0d740))
+* **sheets:** skip remove-sheet on watch range if skipIntersects was set ([#3356](https://github.com/dream-num/univer/issues/3356)) ([2ee440a](https://github.com/dream-num/univer/commit/2ee440aa6ef90937d0c796f3368f54f35a46fbae))
+* **sheets:** undo set col width should set to the original value ([#3353](https://github.com/dream-num/univer/issues/3353)) ([c5ebb79](https://github.com/dream-num/univer/commit/c5ebb79c9dddc3bd6fb228a082364636b0f50f06))
+* **sheet:** unhide row button will update when skeleton change & auto-fill will check empty ([4598c91](https://github.com/dream-num/univer/commit/4598c91f249730d335e9f24d90f17e0bce7107ad))
+* skip invisible row in filtered state for performance ([#3319](https://github.com/dream-num/univer/issues/3319)) ([5ada754](https://github.com/dream-num/univer/commit/5ada754e2d37d2a20e95bc0e0950c755e2f9cdeb))
+* **slide:** 2024 width ([#3156](https://github.com/dream-num/univer/issues/3156)) ([1bddcb8](https://github.com/dream-num/univer/commit/1bddcb8935ca54d81e886bba4c21b944ccffadee))
+* sync mutation will not quit auto-fill mode ([#3351](https://github.com/dream-num/univer/issues/3351)) ([8a7545a](https://github.com/dream-num/univer/commit/8a7545a7fa691d1834f3126657ba736edff5652a))
+* unexpected cross viewport selection because it counts rowheader ([#3296](https://github.com/dream-num/univer/issues/3296)) ([ebde3da](https://github.com/dream-num/univer/commit/ebde3da36225147596e34e5af4899176edd41277))
+* **uni-formula-ui:** uni formula deps error ([#3302](https://github.com/dream-num/univer/issues/3302)) ([5ab492f](https://github.com/dream-num/univer/commit/5ab492fd78f5e09188ff4f03456c4ce5d8ed15d1))
+* **uni:** fix missing undo & redo menu item ([#3343](https://github.com/dream-num/univer/issues/3343)) ([15f18c8](https://github.com/dream-num/univer/commit/15f18c80c2aed0d75b6ebf7b3fba8a27dd8e77f8))
+
+
+### Features
+
+* **auto-fill:** edit operation will quit auto-fill mode ([#3333](https://github.com/dream-num/univer/issues/3333)) ([9478a90](https://github.com/dream-num/univer/commit/9478a901300bd44d3f5d5c1c150f302f5e7991b3))
+* **docs-hyper-link:** hyper link refactor ([#3148](https://github.com/dream-num/univer/issues/3148)) ([f21ce50](https://github.com/dream-num/univer/commit/f21ce5066295fc719e52278d227d3d127341cc48))
+* **docs:** support change space rule type ([#3176](https://github.com/dream-num/univer/issues/3176)) ([4936567](https://github.com/dream-num/univer/commit/4936567b3311a515b3b6ead9a3e2938be8a714a5))
+* **facade:** add clipboard hooks and selection api ([#3216](https://github.com/dream-num/univer/issues/3216)) ([e2fbf0e](https://github.com/dream-num/univer/commit/e2fbf0e4bd01b9279a1692f830a90c1ee6812b17))
+* **facade:** add FRange.getValues api ([#3344](https://github.com/dream-num/univer/issues/3344)) ([1021e30](https://github.com/dream-num/univer/commit/1021e300b6b74a216c0e4d7625db411377fa3bfb))
+* **facade:** add merge facade api ([#3289](https://github.com/dream-num/univer/issues/3289)) ([acd03e4](https://github.com/dream-num/univer/commit/acd03e447d1eaecb37c3820ada25431a1c882637))
+* **format-painter:** format pianter to single-cell will copy whole range formats ([#3326](https://github.com/dream-num/univer/issues/3326)) ([923b5dc](https://github.com/dream-num/univer/commit/923b5dc4ed309b48c57eb6bec2a42566f94d5844))
+* **formula:**  isformula/n/na ([#3304](https://github.com/dream-num/univer/issues/3304)) ([ccc4276](https://github.com/dream-num/univer/commit/ccc427654e96b90fac3a954b7311dc4b743527f3))
+* **sheet:** exclusive range serivce ([#3278](https://github.com/dream-num/univer/issues/3278)) ([093ee31](https://github.com/dream-num/univer/commit/093ee318884df61cfe0838b74ece6b0ff244f449))
+* **sheets-drawing-ui:** support disable transform on float dom ([#3342](https://github.com/dream-num/univer/issues/3342)) ([9fe9468](https://github.com/dream-num/univer/commit/9fe9468990f360d124096eea5ffa7f32f3a2dd25))
+* telemetry interface for track function cost time ([#3288](https://github.com/dream-num/univer/issues/3288)) ([01e35e2](https://github.com/dream-num/univer/commit/01e35e2422e3b868226ae62ad0c7c3ca11e40969))
+* telemetry.merge ([#3251](https://github.com/dream-num/univer/issues/3251)) ([8f01cf3](https://github.com/dream-num/univer/commit/8f01cf3a96d70169299f2e483b1e6bf95898cad1))
+
 ## [0.2.11](https://github.com/dream-num/univer/compare/v0.2.10...v0.2.11) (2024-08-31)
 
 

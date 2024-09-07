@@ -138,17 +138,36 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[] | FormulaDependencyTreeCache, dependencyTrees?: FormulaDependencyTree[]): FormulaDependencyTree[] {
         const allTrees = this.getAllTree();
-        if (shouldBeBuildTrees.length === 0) {
-            this._buildReverseDependency(allTrees, dependencyTrees);
-            return allTrees;
-        }
+        // if (shouldBeBuildTrees.length === 0) {
+        //     this._buildReverseDependency(allTrees, dependencyTrees);
+        //     return allTrees;
+        // }
         if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
-            this._buildDependencyTree(allTrees, shouldBeBuildTrees, dependencyTrees || []);
+            this._buildDependencyTreeWithCache(allTrees, shouldBeBuildTrees, dependencyTrees || []);
         } else {
             this._buildDependencyTree(allTrees, shouldBeBuildTrees, shouldBeBuildTrees);
         }
-
         return allTrees;
+    }
+
+    private _buildDependencyTreeWithCache(allTrees: FormulaDependencyTree[], formulaDependencyTreeCache: FormulaDependencyTreeCache, dependencyTrees: FormulaDependencyTree[]) {
+        const cache = new FormulaDependencyTreeCache();
+        for (const tree of allTrees.concat(dependencyTrees)) {
+            const rangeList = tree.rangeList;
+            for (const range of rangeList) {
+                cache.add(range, tree);
+                cache.addDependencyMap(tree);
+            }
+        }
+
+        const treeMap = cache.getDependencyMap();
+        for (const tree of treeMap.values()) {
+            cache.updateParent(tree);
+        }
+        for (const tree of treeMap.values()) {
+            cache.dependencyUseParentId(tree);
+        }
+        cache.dispose();
     }
 
     /**
@@ -156,42 +175,25 @@ export class DependencyManagerService extends Disposable implements IDependencyM
      * @param allTrees  all FormulaDependencyTree
      * @param shouldBeBuildTrees  FormulaDependencyTree[] | FormulaDependencyTreeCache
      */
-    private _buildDependencyTree(allTrees: FormulaDependencyTree[], shouldBeBuildTrees: FormulaDependencyTree[] | FormulaDependencyTreeCache, dependencyTrees: FormulaDependencyTree[]) {
-        allTrees.forEach((tree) => {
-            if (shouldBeBuildTrees instanceof FormulaDependencyTreeCache) {
-                shouldBeBuildTrees.dependency(tree);
-            } else {
-                shouldBeBuildTrees.forEach((shouldBeBuildTree) => {
-                    if (tree === shouldBeBuildTree || shouldBeBuildTree.children.includes(tree)) {
-                        return true;
-                    }
-
-                    if (shouldBeBuildTree.dependency(tree)) {
-                        shouldBeBuildTree.pushChildren(tree);
-                    }
-                });
+    private _buildDependencyTree(allTrees: FormulaDependencyTree[], shouldBeBuildTrees: FormulaDependencyTree[], dependencyTrees: FormulaDependencyTree[]) {
+        const cache = new FormulaDependencyTreeCache();
+        for (const tree of allTrees.concat(shouldBeBuildTrees, dependencyTrees)) {
+            const rangeList = tree.rangeList;
+            for (const range of rangeList) {
+                cache.add(range, tree);
+                cache.addDependencyMap(tree);
             }
-        });
-        this._buildReverseDependency(allTrees, dependencyTrees);
-    }
+        }
+       // do not use allTrees.concat(shouldBeBuildTrees, dependencyTrees) to avoid duplicate trees
+        const treeMap = cache.getDependencyMap();
 
-    /**
-     * Build the reverse dependency relationship between the trees.
-     * @param allTrees
-     * @param dependencyTrees
-     */
-    private _buildReverseDependency(allTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]) {
-        allTrees.forEach((tree) => {
-            dependencyTrees?.forEach((dependencyTree) => {
-                if (tree === dependencyTree || tree.children.includes(dependencyTree)) {
-                    return true;
-                }
-
-                if (tree.dependency(dependencyTree)) {
-                    tree.pushChildren(dependencyTree);
-                }
-            });
-        });
+        for (const tree of treeMap.values()) {
+            cache.updateParent(tree);
+        }
+        for (const tree of treeMap.values()) {
+            cache.dependencyUseParentId(tree);
+        }
+        cache.dispose();
     }
 
     /**

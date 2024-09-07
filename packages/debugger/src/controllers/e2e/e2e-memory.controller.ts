@@ -15,7 +15,6 @@
  */
 
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { UniverType } from '@univerjs/protocol';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultWorkbookData } from './data/default-sheet';
 import { getDefaultDocData } from './data/default-doc';
@@ -96,7 +95,7 @@ export class E2EMemoryController extends Disposable {
     }
 
     private async _diposeDefaultSheetUnit(disposingTimeout: number = AWAIT_DISPOSING_TIMEOUT): Promise<void> {
-        const unit = this._univerInstanceService.getCurrentUnitForType(UniverType.UNIVER_SHEET);
+        const unit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
         const unitId = unit?.getUnitId();
         await this._univerInstanceService.disposeUnit(unitId || '');
         await timer(disposingTimeout);

@@ -332,7 +332,7 @@ export class SelectionShapeExtension {
         this._scrollTimer = scrollTimer;
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY, viewMain);
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -361,7 +361,7 @@ export class SelectionShapeExtension {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
-            scene.enableEvent();
+            scene.enableObjectsEvent();
             this._scrollTimer?.dispose();
             this._control.selectionMoved$.next(this._targetSelection);
 
@@ -471,7 +471,7 @@ export class SelectionShapeExtension {
         scrollTimer.startScroll(newEvtOffsetX, newEvtOffsetY);
         this._scrollTimer = scrollTimer;
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
 
         this._scenePointerMoveSub = scene.onPointerMove$.subscribeEvent((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
@@ -493,7 +493,7 @@ export class SelectionShapeExtension {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
-            scene.enableEvent();
+            scene.enableObjectsEvent();
             this._scrollTimer?.dispose();
             this._control.selectionScaled$.next(this._targetSelection);
 
@@ -830,7 +830,7 @@ export class SelectionShapeExtension {
 
         this._scrollTimer = scrollTimer;
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
 
         this._controlHandler((o) => {
             this._fillControlColors.push(o.fill as string);
@@ -904,7 +904,7 @@ export class SelectionShapeExtension {
             const scene = this._scene;
             scene.resetCursor();
             this._clearObserverEvent();
-            scene.enableEvent();
+            scene.enableObjectsEvent();
             this._scrollTimer?.dispose();
             this._control.refreshSelectionFilled(this._targetSelection);
             this._isInMergeState = false;

@@ -29,7 +29,7 @@ import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operat
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ChangeUserCommand, UnitRole } from '../commands/operations/change-user.operation';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
@@ -222,7 +222,7 @@ export function SaveSnapshotSetEditableMenuItemFactory(accessor: IAccessor): IMe
 
 export const UNIT_ITEM_MENU_ID = 'debugger.unit-menu-item';
 
-export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
+export function UnitMenuItemFactory(): IMenuSelectorItem {
     return {
         id: UNIT_ITEM_MENU_ID,
         title: 'Dispose',
@@ -231,7 +231,7 @@ export function UnitMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     };
 }
 
-export function DisposeUniverItemFactory(_accessor: IAccessor): IMenuButtonItem {
+export function DisposeUniverItemFactory(): IMenuButtonItem {
     return {
         id: DisposeUniverCommand.id,
         title: 'Dispose Univer',
@@ -241,7 +241,7 @@ export function DisposeUniverItemFactory(_accessor: IAccessor): IMenuButtonItem 
     };
 }
 
-export function DisposeCurrentUnitMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function DisposeCurrentUnitMenuItemFactory(): IMenuButtonItem {
     return {
         id: DisposeCurrentUnitCommand.id,
         title: 'Dispose Current Unit',
@@ -251,11 +251,21 @@ export function DisposeCurrentUnitMenuItemFactory(accessor: IAccessor): IMenuBut
     };
 }
 
-export function CreateEmptySheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+export function CreateEmptySheetMenuItemFactory(): IMenuButtonItem {
     return {
         id: CreateEmptySheetCommand.id,
         title: 'Create Another Sheet',
         tooltip: 'Create Another Sheet',
+        icon: 'CR',
+        type: MenuItemType.BUTTON,
+    };
+}
+
+export function LoadSheetSnapshotMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: LoadSheetSnapshotCommand.id,
+        title: 'Load Snapshot',
+        tooltip: 'Load Snapshot',
         icon: 'CR',
         type: MenuItemType.BUTTON,
     };

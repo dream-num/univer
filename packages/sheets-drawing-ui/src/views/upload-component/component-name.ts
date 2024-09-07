@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export const COMPONENT_UPLOAD_FILE_MENU = 'COMPONENT_UPLOAD_FILE_MENU';
-
 export enum UploadFileType {
     cellImage,
     floatImage,

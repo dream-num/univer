@@ -351,7 +351,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             this._addCancelObserver(scene);
 
-            scene.disableEvent();
+            scene.disableObjectsEvent();
 
             const scrollTimer = ScrollTimer.create(scene);
             scrollTimer.startScroll(evtOffsetX, evtOffsetY);
@@ -393,7 +393,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             const scenePointerUpSub = scene.onPointerUp$.subscribeEvent((event) => {
                 scenePointerMoveSub?.unsubscribe();
                 scenePointerUpSub?.unsubscribe();
-                scene.enableEvent();
+                scene.enableObjectsEvent();
                 !isCropper && this.refreshControls();
                 scrollTimer.dispose();
 
@@ -913,7 +913,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     if (topScene == null) {
                         return;
                     }
-                    topScene.disableEvent();
+                    topScene.disableObjectsEvent();
                     const scrollTimer = ScrollTimer.create(topScene);
                     scrollTimer.startScroll(evtOffsetX, evtOffsetY);
                     const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
@@ -959,7 +959,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         // topScene.onPointerUp$.remove(this._topScenePointerUpSub);
                         this._topScenePointerMoveSub?.unsubscribe();
                         this._topScenePointerUpSub?.unsubscribe();
-                        topScene.enableEvent();
+                        topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         scrollTimer.dispose();
                         this._startStateMap.clear();
@@ -1030,7 +1030,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         return;
                     }
 
-                    topScene.disableEvent();
+                    topScene.disableObjectsEvent();
 
                     const viewportActualXY = topScene.getVpScrollXYInfoByPosToVp(Vector2.create(evtOffsetX, evtOffsetY));
 
@@ -1062,7 +1062,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         // topScenePointerUpSub?.dispose();
                         topScenePointerMoveSub?.unsubscribe();
                         topScenePointerUpSub?.unsubscribe();
-                        topScene.enableEvent();
+                        topScene.enableObjectsEvent();
                         topScene.resetCursor();
                         this.refreshControls();
 

@@ -25,7 +25,7 @@ import { distinctUntilChanged, startWith } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
-import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
+import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { attachSelectionWithCoord } from './util';
 
 import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
@@ -89,7 +89,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-                const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), row, RANGE_TYPE.ROW);
+                const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
 
                 this._onPointerDown(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.ROW, this._getActiveViewport(evt), ScrollTimerType.Y);
@@ -104,7 +104,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
             const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
             const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-            const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), column, RANGE_TYPE.COLUMN);
+            const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
             if (matchSelectionData) return;
 
             this._onPointerDown(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.COLUMN, this._getActiveViewport(evt), ScrollTimerType.X);

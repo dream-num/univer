@@ -43,7 +43,7 @@ import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
-import { checkInHeaderRanges } from '../../controllers/utils/selections-tools';
+import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
@@ -148,7 +148,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
                 const { row } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-                const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), row, RANGE_TYPE.ROW);
+                const matchSelectionData = isThisRowSelected(this._workbookSelections.getCurrentSelections(), row);
                 if (matchSelectionData) return;
 
                 this.createNewSelection(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.ROW, this._getActiveViewport(evt));
@@ -162,7 +162,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
 
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()!.skeleton;
                 const { column } = getCoordByOffset(evt.offsetX, evt.offsetY, scene, skeleton);
-                const matchSelectionData = checkInHeaderRanges(this._workbookSelections.getCurrentSelections(), column, RANGE_TYPE.COLUMN);
+                const matchSelectionData = isThisColSelected(this._workbookSelections.getCurrentSelections(), column);
                 if (matchSelectionData) return;
                 this.createNewSelection(evt, (spreadsheet.zIndex || 1) + 1, RANGE_TYPE.COLUMN, this._getActiveViewport(evt));
                 this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());

@@ -488,7 +488,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
 
         scene.setCursor(CURSOR_TYPE.GRABBING);
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
 
         const last = this._getCurrentLastVisible();
         const lastRowY = last === undefined ? Number.POSITIVE_INFINITY : skeleton.rowHeightAccumulation[last.lastRow];
@@ -566,7 +566,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         // eslint-disable-next-line max-lines-per-function, complexity
         this._scenePointerUpSub = scene.onPointerUp$.subscribeEvent(() => {
             scene.resetCursor();
-            scene.enableEvent();
+            scene.enableObjectsEvent();
             this._clearObserverEvent();
 
             const { rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;

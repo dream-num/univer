@@ -71,6 +71,11 @@ export class FormulaDependencyTree extends Disposable {
 
     isPassive: boolean = true;
 
+    _childIds: Set<string> = new Set();
+
+    // the left top cell , which means the position of the FormulaDependencyTree
+    anchorToken: string = '';
+
     getDirtyData: Nullable<
         (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
             runtimeCellData: IRuntimeUnitDataType;
@@ -79,6 +84,16 @@ export class FormulaDependencyTree extends Disposable {
     >;
 
     private _state = FDtreeStateType.DEFAULT;
+
+    private _id: string;
+    constructor() {
+        super();
+        this._id = `${Math.random().toString(36).slice(3)}-${Math.random().toString(36).slice(3)}`;
+    }
+
+    get id() {
+        return this._id;
+    }
 
     override dispose(): void {
         super.dispose();
@@ -219,6 +234,11 @@ export class FormulaDependencyTree extends Disposable {
     pushChildren(tree: FormulaDependencyTree) {
         this.children.push(tree);
         tree._pushParent(this);
+        this._childIds.add(tree.id);
+    }
+
+    hasChild(tree: FormulaDependencyTree) {
+        return this._childIds.has(tree.id);
     }
 
     /**
@@ -264,10 +284,16 @@ export class FormulaDependencyTree extends Disposable {
 interface IFormulaDependencyTreeCacheItem {
     unitRangeWithToken: IUnitRangeWithToken;
     treeList: FormulaDependencyTree[];
+    ids: Set<string>;
 }
 
 export class FormulaDependencyTreeCache extends Disposable {
     private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
+    private _map = new Map<string, Map<string, Set<string>>>();
+    private _dependencyMap = new Map<string, FormulaDependencyTree>();
+    private _parentIdMap = new Map<string, string[]>();
+    // use for mark the first cell of the range
+    private _rangeTokens = new Set<string>();
 
     override dispose(): void {
         this.clear();
@@ -275,6 +301,14 @@ export class FormulaDependencyTreeCache extends Disposable {
 
     size() {
         return this._cacheItems.size;
+    }
+
+    getDependencyMap() {
+        return this._dependencyMap;
+    }
+
+    getDependencyTree(id: string) {
+        return this._dependencyMap.get(id);
     }
 
     get length() {
@@ -287,16 +321,56 @@ export class FormulaDependencyTreeCache extends Disposable {
             this._cacheItems.set(token, {
                 unitRangeWithToken,
                 treeList: [tree],
+                ids: new Set<string>([tree.id]),
             });
             return;
         }
 
         const cacheItem = this._cacheItems.get(token)!;
         cacheItem.treeList.push(tree);
+        cacheItem.ids.add(tree.id);
+
+        const { gridRange } = unitRangeWithToken;
+
+        const { range } = gridRange;
+        if (!(range.startRow === range.endRow && range.startColumn === range.endColumn)) {
+            this._rangeTokens.add(token);
+        }
+    }
+
+    addDependencyMap(tree: FormulaDependencyTree) {
+        this._dependencyMap.set(tree.id, tree);
+    }
+
+    updateParent(tree: FormulaDependencyTree) {
+        const ids = new Set<string>();
+        const unitId = tree.unitId;
+        const sheetId = tree.subUnitId;
+        const testCacheItems = this._cacheItems.get(tree.anchorToken);
+
+        if (testCacheItems) {
+            this._parentIdMap.set(tree.id, [...testCacheItems.ids]);
+            return;
+        }
+        for (const token of this._rangeTokens) {
+            const cacheItem = this._cacheItems.get(token);
+            if (cacheItem) {
+                const { unitRangeWithToken, treeList } = cacheItem;
+                const { gridRange } = unitRangeWithToken;
+                if (gridRange.unitId === unitId && gridRange.sheetId === sheetId && tree.inRangeData(gridRange.range)) {
+                    for (const tree of treeList) {
+                        ids.add(tree.id);
+                    }
+                }
+            }
+        }
+        this._parentIdMap.set(tree.id, [...ids]);
     }
 
     clear() {
         this._cacheItems.clear();
+        this._map.clear();
+        this._dependencyMap.clear();
     }
 
     remove(token: string, tree: FormulaDependencyTree) {
@@ -313,6 +387,52 @@ export class FormulaDependencyTreeCache extends Disposable {
 
     delete(token: string) {
         this._cacheItems.delete(token);
+    }
+
+    getDependencyId(dependenceTree: FormulaDependencyTree, ids: Set<string>) {
+        const parentIdList = this._parentIdMap.get(dependenceTree.id);
+        if (parentIdList) {
+            for (const parentId of parentIdList) {
+                ids.add(parentId);
+                const tree = this._dependencyMap.get(parentId);
+                if (tree) {
+                    this.getDependencyId(tree, ids);
+                }
+            }
+        }
+    }
+
+    /**
+     * Determine whether range is dependent on other trees.
+     * @param dependenceTree
+     */
+
+    dependencyUseParentId(dependenceTree: FormulaDependencyTree) {
+        let ids = new Set<string>();
+
+        this.getDependencyId(dependenceTree, ids);
+        for (const parentId of ids) {
+            const tree = this._dependencyMap.get(parentId);
+            if (tree) {
+                const notExist = tree.hasChild(dependenceTree);
+                if (notExist && tree.rangeList) {
+                    for (const rangeItem of tree.rangeList) {
+                        if (rangeItem.gridRange.unitId === dependenceTree.unitId && rangeItem.gridRange.sheetId === dependenceTree.subUnitId) {
+                            tree.pushChildren(dependenceTree);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (tree && !tree.hasChild(dependenceTree)) {
+                tree.pushChildren(dependenceTree);
+            }
+        }
+        ids.clear();
+
+        // @ts-ignore
+        ids = null;
     }
 
     /**

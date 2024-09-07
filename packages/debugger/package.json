@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/debugger",
-    "version": "0.2.11",
+    "version": "0.2.12",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,7 +58,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

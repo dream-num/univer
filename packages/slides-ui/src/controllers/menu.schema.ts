@@ -17,7 +17,7 @@
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
 import { SlideAddTextCommand } from '../commands/operations/insert-text.operation';
-import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleCommand } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextMenuItemFactory } from './text.menu';
 import { IMAGE_MENU_ID, SlideImageMenuFactory, UploadSlideFloatImageMenuFactory } from './image.menu';
@@ -32,7 +32,7 @@ export const menuSchema: MenuSchemaType = {
         [IMAGE_MENU_ID]: {
             order: 0,
             menuItemFactory: SlideImageMenuFactory,
-            [InsertSlideFloatImageOperation.id]: {
+            [InsertSlideFloatImageCommand.id]: {
                 order: 0,
                 menuItemFactory: UploadSlideFloatImageMenuFactory,
             },

@@ -29,7 +29,7 @@ export { menuSchema } from './controllers/menu.schema';
 // #region - all commands
 export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
 export { DeleteSlideElementOperation } from './commands/operations/delete-element.operation';
-export { InsertSlideFloatImageOperation } from './commands/operations/insert-image.operation';
+export { InsertSlideFloatImageCommand } from './commands/operations/insert-image.operation';
 export { InsertSlideShapeRectangleOperation, InsertSlideShapeRectangleCommand } from './commands/operations/insert-shape.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
 export { AppendSlideOperation } from './commands/operations/append-slide.operation';

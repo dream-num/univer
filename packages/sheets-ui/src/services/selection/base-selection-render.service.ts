@@ -514,7 +514,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
 
-        scene.disableEvent();
+        scene.disableObjectsEvent();
         this._clearUpdatingListeners();
         this._addEndingListeners();
 
@@ -856,7 +856,7 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     protected _clearUpdatingListeners(): void {
         const scene = this._scene;
-        scene.enableEvent();
+        scene.enableObjectsEvent();
 
         this._scenePointerMoveSub?.unsubscribe();
         this._scenePointerMoveSub = null;

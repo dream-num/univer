@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -34,7 +34,7 @@ export interface IUpdateHyperLinkCommandParams {
 export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.update-hyper-link',
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -73,6 +73,12 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         }
 
         const newId = generateRandomId();
+        const oldBody = getBodySlice(doc.documentModel.getBody()!, range.startIndex, range.endIndex + 1);
+        const textRun = oldBody.textRuns?.[0];
+        if (textRun) {
+            textRun.ed = display.length + 1;
+        }
+
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
@@ -86,10 +92,11 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
                         url: payload,
                     },
                 }],
+                textRuns: textRun ? [textRun] : undefined,
             },
             selection: {
                 startOffset: range.startIndex,
-                endOffset: range.endIndex,
+                endOffset: range.endIndex + 1,
                 collapsed: false,
             },
             doc: doc.documentModel,
@@ -184,6 +191,12 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
 
         const display = params.payload.display ?? '';
         const newId = generateRandomId();
+        const oldBody = getBodySlice(doc.getBody()!, range.startIndex, range.endIndex + 1);
+        const textRun = oldBody.textRuns?.[0];
+        if (textRun) {
+            textRun.ed = display.length + 1;
+        }
+
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
@@ -197,10 +210,11 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
                         url: payload.payload,
                     },
                 }],
+                textRuns: textRun ? [textRun] : undefined,
             },
             selection: {
                 startOffset: range.startIndex,
-                endOffset: range.endIndex,
+                endOffset: range.endIndex + 1,
                 collapsed: false,
             },
             doc,

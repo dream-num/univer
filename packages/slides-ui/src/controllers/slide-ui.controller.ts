@@ -19,15 +19,13 @@ import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
-import { InsertSlideFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
 import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
-import { UploadFileMenu } from '../components/upload-component/UploadFile';
-import { COMPONENT_UPLOAD_FILE_MENU } from '../components/upload-component/component-name';
 import { SlideEditorContainer } from '../views/editor-container';
 import { SlideSideBar } from '../components/slide-bar/SlideBar';
 import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
@@ -70,7 +68,6 @@ export class SlidesUIController extends Disposable {
         this.disposeWithMe(componentManager.register(IMAGE_UPLOAD_ICON, AddImageSingle));
         this.disposeWithMe(componentManager.register(TEXT_ICON_ID, TextSingle));
         this.disposeWithMe(componentManager.register(GRAPH_SINGLE_ICON, GraphSingle));
-        this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_IMAGE_POPUP_MENU, SlideImagePopupMenu));
         this.disposeWithMe(componentManager.register(COMPONENT_SLIDE_SIDEBAR, Sidebar));
     }
@@ -80,7 +77,7 @@ export class SlidesUIController extends Disposable {
             AppendSlideOperation,
             ActivateSlidePageOperation,
             SetSlidePageThumbOperation,
-            InsertSlideFloatImageOperation,
+            InsertSlideFloatImageCommand,
             SlideAddTextOperation,
             SlideAddTextCommand,
             InsertSlideShapeRectangleOperation,

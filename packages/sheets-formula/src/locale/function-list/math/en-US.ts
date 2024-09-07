@@ -608,8 +608,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The arrays you want to multiply.' },
+            array2: { name: 'array2', detail: 'The arrays you want to multiply.' },
         },
     },
     MOD: {
@@ -650,8 +650,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first value or range to use in the calculation.' },
+            number2: { name: 'number2', detail: 'Additional values ​​or ranges to use in calculations.' },
         },
     },
     MUNIT: {
@@ -664,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: 'dimension', detail: 'Dimension is an integer specifying the dimension of the unit matrix that you want to return. It returns an array. The dimension has to be greater than zero.' },
         },
     },
     ODD: {

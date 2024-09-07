@@ -54,8 +54,11 @@ import { Log } from './log';
 import { Log10 } from './log10';
 import { Mdeterm } from './mdeterm';
 import { Minverse } from './minverse';
+import { Mmult } from './mmult';
 import { Mod } from './mod';
 import { Mround } from './mround';
+import { Multinomial } from './multinomial';
+import { Munit } from './munit';
 import { Odd } from './odd';
 import { Pi } from './pi';
 import { Power } from './power';
@@ -126,8 +129,11 @@ export const functionMath = [
     [Log10, FUNCTION_NAMES_MATH.LOG10],
     [Mdeterm, FUNCTION_NAMES_MATH.MDETERM],
     [Minverse, FUNCTION_NAMES_MATH.MINVERSE],
+    [Mmult, FUNCTION_NAMES_MATH.MMULT],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
+    [Multinomial, FUNCTION_NAMES_MATH.MULTINOMIAL],
+    [Munit, FUNCTION_NAMES_MATH.MUNIT],
     [Odd, FUNCTION_NAMES_MATH.ODD],
     [Pi, FUNCTION_NAMES_MATH.PI],
     [Power, FUNCTION_NAMES_MATH.POWER],

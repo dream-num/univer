@@ -442,8 +442,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số 1', detail: 'Số đầu tiên yêu cầu ước số chung lớn nhất cũng có thể được sử dụng dưới dạng một mảng hoặc tham chiếu đến một mảng thay vì các đối số được phân tách bằng dấu phẩy.' },
-            number2: { name: 'số 2', detail: 'Số thứ hai cần tìm được ước chung lớn nhất. Có thể chỉ định tối đa 255 số theo cách này.' },
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
         },
     },
     INT: {
@@ -469,8 +469,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số 1', detail: 'Là số đầu tiên tìm bội số chung nhỏ nhất của, bạn cũng có thể sử dụng một mảng đơn hoặc tham chiếu đến một mảng thay vì các đối số được phân tách bằng dấu phẩy.' },
-            number2: { name: 'số 2', detail: 'Tìm số thứ hai là bội số chung nhỏ nhất của nó. Có thể chỉ định tối đa 255 số theo cách này.' },
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
         },
     },
     LN: {
@@ -539,6 +539,20 @@ export default {
             array: { name: 'mảng', detail: 'Một mảng số với số hàng và số cột bằng nhau.' },
         },
     },
+    MMULT: {
+        description: 'Trả về tích ma trận của hai mảng',
+        abstract: 'Trả về tích ma trận của hai mảng',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mmult-%E5%87%BD%E6%95%B0-40593ed7-a3cd-4b6b-b9a3-e4ad3c7245eb',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng1', detail: 'Những mảng mà bạn muốn nhân.' },
+            array2: { name: 'mảng2', detail: 'Những mảng mà bạn muốn nhân.' },
+        },
+    },
     MOD: {
         description: 'Trả về số dư sau khi chia một số cho ước số. Kết quả có cùng dấu với ước số.',
         abstract: 'Trả về số dư sau khi chia một số cho ước số.',
@@ -565,6 +579,33 @@ export default {
         functionParameter: {
             number: { name: 'số', detail: 'Giá trị cần làm tròn.' },
             multiple: { name: 'bội số', detail: 'Số mà bạn muốn làm tròn số tới bội số của nó.' },
+        },
+    },
+    MULTINOMIAL: {
+        description: 'Trả về đa thức của một tập hợp số',
+        abstract: 'Trả về đa thức của một tập hợp số',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/multinomial-%E5%87%BD%E6%95%B0-6fa6373c-6533-41a2-a45e-a56db1db1bf6',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
+        },
+    },
+    MUNIT: {
+        description: 'Trả về ma trận đơn vị cho chiều đã xác định.',
+        abstract: 'Trả về ma trận đơn vị cho chiều đã xác định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/munit-%E5%87%BD%E6%95%B0-c9fe916a-dc26-4105-997d-ba22799853a3',
+            },
+        ],
+        functionParameter: {
+            dimension: { name: 'kích thước', detail: 'Chiều là một số nguyên định rõ chiều của ma trận đơn vị mà bạn muốn trả về. Hàm trả về một mảng. Chiều phải lớn hơn 0.' },
         },
     },
     ODD: {

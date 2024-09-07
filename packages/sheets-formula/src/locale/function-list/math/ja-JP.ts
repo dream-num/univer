@@ -473,8 +473,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '数値1', detail: '最大公約数が必要な最初の数値は、コンマ区切りの引数の代わりに、単一の配列または配列への参照として使用することもできます。' },
-            number2: { name: '数値2', detail: '最大公約数を求める 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     INT: {
@@ -514,8 +514,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '数値1', detail: '最小公倍数が必要な最初の数値は、コンマ区切りの引数の代わりに、単一の配列または配列への参照として使用することもできます。' },
-            number2: { name: '数値2', detail: '最小公倍数を求める 2 番目の数値。この方法では、最大 255 個の番号を指定できます。' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     LET: {
@@ -608,8 +608,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: '行列積を求める 2 つの配列を指定します。' },
+            array2: { name: '配列2', detail: '行列積を求める 2 つの配列を指定します。' },
         },
     },
     MOD: {
@@ -650,8 +650,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     MUNIT: {
@@ -664,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: 'ディメンション', detail: 'ディメンションは、返す必要がある単位行列の次元を指定する整数です。 配列を返します。 ディメンションを 0 より大きい値にする必要があります。' },
         },
     },
     ODD: {

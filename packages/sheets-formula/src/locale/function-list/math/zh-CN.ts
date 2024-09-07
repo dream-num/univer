@@ -472,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '数值1', detail: '要对其求最大公约数的第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
-            number2: { name: '数值2', detail: '要对其求最大公约数的第2个数字。可以按照这种方式最多指定255个数字。' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     INT: {
@@ -513,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '数值1', detail: '要对其求最小公倍数的第1个数字，也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
-            number2: { name: '数值2', detail: '要对其求最小公倍数的第2个数字。可以按照这种方式最多指定255个数字。' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     LET: {
@@ -607,8 +607,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '要进行矩阵乘法运算的两个数组。' },
+            array2: { name: '数组2', detail: '要进行矩阵乘法运算的两个数组。' },
         },
     },
     MOD: {
@@ -649,8 +649,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     MUNIT: {
@@ -663,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: '维度', detail: '是一个整数，用于指定要返回的单位矩阵的维度。 它返回一个数组。 维度必须大于零。' },
         },
     },
     ODD: {

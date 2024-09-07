@@ -472,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '數值1', detail: '這是要求出最大公約數的第1個數字。您也可以使用單一陣列或陣列參照來取代以逗點分隔的引數。' },
-            number2: { name: '數值2', detail: '這是要求出最大公約數的第2個數字。可以按照這種方式指定最多 255 個數字。' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     INT: {
@@ -513,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '數值1', detail: '這是要求出最小公倍數的第1個數字。您也可以使用單一陣列或陣列參照來取代以逗點分隔的引數。' },
-            number2: { name: '數值2', detail: '這是要求出最小公倍數的第2個數字。可以按照這種方式指定最多 255 個數字。' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     LET: {
@@ -607,8 +607,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '這是您要相乘的陣列。' },
+            array2: { name: '陣列2', detail: '這是您要相乘的陣列。' },
         },
     },
     MOD: {
@@ -649,8 +649,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     MUNIT: {
@@ -663,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: '维度', detail: '是指定要傳回之單位矩陣維度的整數。 它會傳回陣列。 維度必須大於零。' },
         },
     },
     ODD: {

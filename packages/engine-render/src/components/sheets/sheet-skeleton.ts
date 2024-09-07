@@ -1714,7 +1714,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         // style supports inline styles
         // const style = styles && styles.get(cell.s);
         // const style = getStyle(styles, cell);
-        const style = this._styles.getStyleByCell(cell);
+        const cellStyle = this._styles.getStyleByCell(cell);
+
+        const columnStyle = this.worksheet.getColumnStyle(c);
+
+        // merge style , the priority is cell > column > default
+        const style = { ...columnStyle, ...cellStyle };
 
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };

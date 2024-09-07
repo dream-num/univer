@@ -242,6 +242,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         'sheet-0010',
     ],
     styles: {
+        mcc: {
+            bg: {
+                rgb: 'rgb(255,0,0)',
+            },
+        },
         1: {
             fs: 30,
             vt: 2,

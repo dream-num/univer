@@ -154,6 +154,10 @@ export interface IRowData {
      * hidden
      */
     hd?: BooleanNumber;
+    /**
+     * row style id or style data
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 export interface IRowAutoHeightInfo {
@@ -174,6 +178,10 @@ export interface IColumnData {
      * hidden
      */
     hd?: BooleanNumber;
+    /**
+     * column style id or style data
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 /**

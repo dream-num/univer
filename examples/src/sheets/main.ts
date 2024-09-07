@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
@@ -147,6 +147,10 @@ setTimeout(() => {
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);
+
+const wb: Workbook = (window.univerAPI.getActiveWorkbook() as any)._workbook;
+const sheet = wb.getActiveSheet();
+sheet.setColumnStyle(0, 'mcc');
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

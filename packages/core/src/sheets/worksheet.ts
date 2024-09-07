@@ -18,6 +18,7 @@ import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
+import type { IStyleData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
@@ -68,9 +69,22 @@ export class Worksheet {
         return this._snapshot;
     }
 
+    getColumnStyle(column: number): Nullable<IStyleData> {
+        return this._styles.get(this._snapshot.columnData[column]?.s);
+    }
+
+    setColumnStyle(column: number, styleId: string): void {
+        const columnData = this._snapshot.columnData[column];
+        if (!columnData) {
+            this._snapshot.columnData[column] = { s: styleId };
+        } else {
+            columnData.s = styleId;
+        }
+    }
+
     /**
      * Returns WorkSheet Cell Data Matrix
-     * @returns
+     * @returns {ObjectMatrix<Nullable<ICellData>>} Cell Data Matrix
      */
     getCellMatrix(): ObjectMatrix<Nullable<ICellData>> {
         return this._cellData;

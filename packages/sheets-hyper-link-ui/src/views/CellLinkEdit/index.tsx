@@ -447,10 +447,7 @@ export const CellLinkEdit = () => {
                 <Button
                     onClick={() => {
                         if (editing) {
-                            commandService.executeCommand(SetWorksheetActiveOperation.id, {
-                                unitId: editing.unitId,
-                                subUnitId: editing.subUnitId,
-                            });
+                            resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
                         }
                         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}

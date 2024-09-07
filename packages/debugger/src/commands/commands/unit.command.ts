@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, IUniverInstanceService, type Univer, UniverInstanceType } from '@univerjs/core';
+import type { ICommand, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { FUniver } from '@univerjs/facade';
+import { IFileOpenerService } from '@univerjs/ui';
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
@@ -55,6 +57,21 @@ export const CreateEmptySheetCommand: ICommand = {
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, {});
+        return true;
+    },
+};
+
+export const LoadSheetSnapshotCommand: ICommand = {
+    id: 'debugger.command.load-sheet-snapshot',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const fileOpenerService = accessor.get(IFileOpenerService);
+        const snapshotFile = await fileOpenerService.openFile({ multiple: false, accept: '.json' });
+        if (snapshotFile.length === 1) return false;
+
+        const text = await snapshotFile[0].text();
+        const instanceService = accessor.get(IUniverInstanceService);
+        instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, JSON.parse(text));
         return true;
     },
 };

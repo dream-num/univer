@@ -26,6 +26,7 @@ import {
     DisposeUniverItemFactory,
     FLOAT_DOM_ITEM_MENU_ID,
     FloatDomMenuItemFactory,
+    LoadSheetSnapshotMenuItemFactory,
     LocaleMenuItemFactory,
     MessageMenuItemFactory,
     NotificationMenuItemFactory,
@@ -45,7 +46,7 @@ import { MessageOperation } from '../commands/operations/message.operation';
 import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operations';
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
@@ -102,6 +103,10 @@ export const menuSchema: MenuSchemaType = {
             [CreateEmptySheetCommand.id]: {
                 order: 2,
                 menuItemFactory: CreateEmptySheetMenuItemFactory,
+            },
+            [LoadSheetSnapshotCommand.id]: {
+                order: 3,
+                menuItemFactory: LoadSheetSnapshotMenuItemFactory,
             },
         },
         [FLOAT_DOM_ITEM_MENU_ID]: {

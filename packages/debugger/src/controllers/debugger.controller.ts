@@ -32,7 +32,7 @@ import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-
 // @ts-ignore
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 
-import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand } from '../commands/commands/unit.command';
+import { CreateEmptySheetCommand, DisposeCurrentUnitCommand, DisposeUniverCommand, LoadSheetSnapshotCommand } from '../commands/commands/unit.command';
 import { CreateFloatDomCommand } from '../commands/commands/float-dom.command';
 import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
@@ -67,6 +67,7 @@ export class DebuggerController extends Disposable {
             DisposeUniverCommand,
             DisposeCurrentUnitCommand,
             CreateEmptySheetCommand,
+            LoadSheetSnapshotCommand,
             CreateFloatDomCommand,
             ChangeUserCommand,
             ShowCellContentOperation,

@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/telemetry",
     "version": "0.2.11",
-    "private": true,
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "funding": {
@@ -77,17 +77,6 @@
             "import": "./lib/es/*",
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
-        },
-        "./lib/*": "./lib/*"
-    },
-    "univer": {
-        ".": {
-            "import": "./lib/es/index.js",
-            "types": "./src/index.ts"
-        },
-        "./*": {
-            "import": "./lib/es/*",
-            "types": "./src/index.ts"
         },
         "./lib/*": "./lib/*"
     }

@@ -68,7 +68,7 @@ import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.comm
 import type { IUniverDocsConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'DOCS_PLUGIN';
+const PLUGIN_NAME = 'DOC_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

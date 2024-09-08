@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const SHEETS_THREAD_COMMENT_BASE = 'SHEETS_THREAD_COMMENT_BASE_PLUGIN';
+export const SHEET_THREAD_COMMENT_BASE = 'SHEET_THREAD_COMMENT_BASE_PLUGIN';

@@ -19,11 +19,11 @@ import { DependentOn, ICommandService, Inject, Injector, Plugin, UniverInstanceT
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
-import { SHEETS_THREAD_COMMENT_BASE } from './types/const';
+import { SHEET_THREAD_COMMENT_BASE } from './types/const';
 
 @DependentOn(UniverThreadCommentPlugin)
 export class UniverSheetsThreadCommentBasePlugin extends Plugin {
-    static override pluginName = SHEETS_THREAD_COMMENT_BASE;
+    static override pluginName = SHEET_THREAD_COMMENT_BASE;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

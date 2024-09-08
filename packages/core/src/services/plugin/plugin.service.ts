@@ -268,6 +268,8 @@ export class PluginHolder extends Disposable {
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
 
+        this._logService.debug('[PluginService]', `Plugin "${pluginInstance.getPluginName()}" registered.`);
+
         return pluginInstance;
     }
 

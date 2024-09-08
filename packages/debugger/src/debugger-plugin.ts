@@ -24,7 +24,7 @@ import type { IUniverDebuggerConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverDebuggerPlugin extends Plugin {
-    static override pluginName = 'DEBUGGER_PLUGIN';
+    static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';
 
     private _debuggerController!: DebuggerController;
 

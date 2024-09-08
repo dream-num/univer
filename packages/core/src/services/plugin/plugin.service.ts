@@ -249,7 +249,7 @@ export class PluginHolder extends Disposable {
                 if (NotRegistered) {
                     this._logService.debug(
                         '[PluginService]',
-                        `plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
+                        `Plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
                     );
 
                     this._registerPlugin(NotRegistered, undefined);

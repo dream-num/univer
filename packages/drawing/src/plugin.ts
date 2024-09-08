@@ -24,7 +24,7 @@ import { IDrawingManagerService } from './services/drawing-manager.service';
 import type { IUniverDrawingConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'DRAWING_PLUGIN';
+const PLUGIN_NAME = 'UNIVER_DRAWING_PLUGIN';
 
 export class UniverDrawingPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

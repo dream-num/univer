@@ -24,7 +24,7 @@ import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
-    static override pluginName = 'zen-editor';
+    static override pluginName = 'SHEET_ZEN_EDITOR_PLUGIN';
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(

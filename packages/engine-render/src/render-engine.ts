@@ -26,7 +26,7 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
  */
 export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine');
 
-const PLUGIN_NAME = 'RENDER_ENGINE_PLUGIN';
+const PLUGIN_NAME = 'UNIVER_RENDER_ENGINE_PLUGIN';
 
 export class UniverRenderEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

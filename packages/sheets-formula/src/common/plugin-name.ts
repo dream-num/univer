@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const FORMULA_UI_PLUGIN_NAME = 'formula-ui';
+export const FORMULA_UI_PLUGIN_NAME = 'SHEET_FORMULA_UI_PLUGIN';

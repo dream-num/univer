@@ -63,7 +63,7 @@ const richTextDemo: IDocumentData = {
             wrapStrategy: 0,
         },
         marginTop: 0,
-        marginBottom: 0,
+        marginBottom: 1,
         marginRight: 2,
         marginLeft: 2,
     },

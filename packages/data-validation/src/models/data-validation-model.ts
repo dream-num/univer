@@ -221,7 +221,7 @@ export class DataValidationModel extends Disposable {
 
     getRules(unitId: string, subUnitId: string) {
         const manager = this._ensureMap(unitId, subUnitId);
-        return manager.list;
+        return [...manager.list];
     }
 
     getUnitRules(unitId: string) {

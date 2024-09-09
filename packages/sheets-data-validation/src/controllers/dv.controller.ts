@@ -43,7 +43,7 @@ export class DataValidationController extends RxDisposable {
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
         @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
     ) {
         super();
         this._init();
@@ -92,12 +92,12 @@ export class DataValidationController extends RxDisposable {
                     const subUnitId = worksheet.getSheetId();
                     const selections = this._selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
-                    const ruleMatrix = this._dataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
+                    const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
 
                     if (selections) {
                         ruleMatrix.removeRange(selections);
                     }
-                    const diffs = ruleMatrix.diff(this._dataValidationModel.getRules(unitId, subUnitId));
+                    const diffs = ruleMatrix.diff(this._sheetDataValidationModel.getRules(unitId, subUnitId));
                     const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched');
 
                     return {

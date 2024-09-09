@@ -243,7 +243,7 @@ export class SheetDataValidationModel extends Disposable {
     }
 
     getRules(unitId: string, subUnitId: string): ISheetDataValidationRule[] {
-        return this._dataValidationModel.getRules(unitId, subUnitId);
+        return [...this._dataValidationModel.getRules(unitId, subUnitId)];
     }
 
     getUnitRules(unitId: string): [string, ISheetDataValidationRule[]][] {

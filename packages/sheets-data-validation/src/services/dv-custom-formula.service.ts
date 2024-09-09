@@ -18,7 +18,7 @@ import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
@@ -66,7 +66,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
-        @Inject(SheetDataValidationModel) private readonly _sheetSheetDataValidationModel: SheetDataValidationModel,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @ILogService private readonly _logService: ILogService
     ) {
@@ -89,7 +89,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                     results.forEach((result) => {
                         const ruleInfo = ruleFormulaMap.get(result.extra?.ruleId);
                         const cellInfo = formulaCellMap.get(result.formulaId);
-                        const rule = this._sheetSheetDataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
+                        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
 
                         if (rule && ruleInfo && !ruleInfo.isTransformable) {
                             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
@@ -145,7 +145,7 @@ export class DataValidationCustomFormulaService extends Disposable {
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {
         const { formulaMap, formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
-        const rule = this._sheetSheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
+        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
         const formulaIdList = new Set<string>();
         const formulaInfo = ruleFormulaMap.get(ruleId);
 

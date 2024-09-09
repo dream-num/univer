@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { DataValidationCacheService } from './dv-cache.service';
 
 type RuleId = string;
@@ -32,7 +32,7 @@ export class DataValidationFormulaService extends Disposable {
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
         this._initFormulaResultHandler();
@@ -51,7 +51,7 @@ export class DataValidationFormulaService extends Disposable {
                     const formulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
                     results.forEach((result) => {
                         if (formulaMap.get(result.extra?.ruleId)) {
-                            const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
+                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
                             if (rule) {
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }

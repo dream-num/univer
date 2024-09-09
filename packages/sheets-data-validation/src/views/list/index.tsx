@@ -17,13 +17,13 @@
 import React, { useEffect, useState } from 'react';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { createDefaultNewRule, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
+import { createDefaultNewRule } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
-import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
+import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import styles from './index.module.less';
@@ -85,7 +85,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     };
 
     const handleRemoveAll = () => {
-        commandService.executeCommand(RemoveAllDataValidationCommand.id, {
+        commandService.executeCommand(RemoveSheetAllDataValidationCommand.id, {
             unitId,
             subUnitId,
         });

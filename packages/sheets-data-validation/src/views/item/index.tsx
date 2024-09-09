@@ -15,12 +15,13 @@
  */
 
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univerjs/data-validation';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
+import { RemoveSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
 import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
@@ -40,7 +41,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const ids = useRef<(string | null)[]>();
     const [isHover, setIsHover] = useState(false);
     const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        commandService.executeCommand(RemoveDataValidationCommand.id, {
+        commandService.executeCommand(RemoveSheetDataValidationCommand.id, {
             ruleId: rule.uid,
             unitId,
             subUnitId,

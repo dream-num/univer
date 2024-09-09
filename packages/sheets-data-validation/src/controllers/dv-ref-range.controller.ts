@@ -19,10 +19,11 @@ import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, Lifecy
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Starting, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {

@@ -25,10 +25,6 @@ export { SheetsDataValidationValidatorService } from './services/dv-validator-se
 export { DataValidationModel } from '@univerjs/data-validation';
 // #region - all commands
 export {
-    RemoveDataValidationCommand as RemoveSheetDataValidationCommand,
-    type IRemoveDataValidationCommandParams as IRemoveSheetDataValidationCommandParams,
-} from '@univerjs/data-validation';
-export {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationOptionsCommand,
     UpdateSheetDataValidationSettingCommand,
@@ -36,6 +32,8 @@ export {
     AddSheetDataValidationAndOpenCommand,
     ClearRangeDataValidationCommand,
     RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    type IRemoveSheetDataValidationCommandParams,
     type IAddSheetDataValidationCommandParams,
     type IUpdateSheetDataValidationRangeCommandParams,
     type IUpdateSheetDataValidationOptionsCommandParams,

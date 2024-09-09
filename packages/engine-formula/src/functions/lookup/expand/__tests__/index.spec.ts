@@ -90,6 +90,9 @@ describe('Test expand function', () => {
                 [ErrorType.VALUE, ErrorType.VALUE],
                 [ErrorType.VALUE, ErrorType.VALUE],
             ]);
+
+            const result7 = testFunction.calculate(array2, rows, columns);
+            expect(getObjectValue(result7)).toStrictEqual(1);
         });
 
         it('Rows value test', async () => {

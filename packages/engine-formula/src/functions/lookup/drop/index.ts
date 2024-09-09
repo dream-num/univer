@@ -132,10 +132,6 @@ export class Drop extends BaseFunction {
     }
 
     private _getResultArray(array: BaseValueObject, rows: number, columns: number, arrayRowCount: number, arrayColumnCount: number): BaseValueObject {
-        if (!array.isArray()) {
-            return array;
-        }
-
         const rowParam = rows >= 0 ? [rows, arrayRowCount] : [0, arrayRowCount + rows];
         const columnParam = columns >= 0 ? [columns, arrayColumnCount] : [0, arrayColumnCount + columns];
 

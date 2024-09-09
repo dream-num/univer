@@ -16,15 +16,16 @@
 
 import { CommandType } from '@univerjs/core';
 import type { ICommand, IDataValidationRule } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
 import type { DataValidationChangeSource } from '../../models/data-validation-model';
 import { DataValidationModel } from '../../models/data-validation-model';
 
-export interface IAddDataValidationMutationParams extends ISheetCommandSharedParams {
+export interface IAddDataValidationMutationParams {
     rule: IDataValidationRule | IDataValidationRule[];
     index?: number;
     source?: DataValidationChangeSource;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParams> = {
@@ -42,9 +43,11 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
     },
 };
 
-export interface IRemoveDataValidationMutationParams extends ISheetCommandSharedParams {
+export interface IRemoveDataValidationMutationParams {
     ruleId: string | string[];
     source?: DataValidationChangeSource;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutationParams> = {
@@ -69,10 +72,12 @@ export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutatio
     },
 };
 
-export interface IUpdateDataValidationMutationParams extends ISheetCommandSharedParams {
+export interface IUpdateDataValidationMutationParams {
     payload: IUpdateRulePayload;
     ruleId: string;
     source?: DataValidationChangeSource;
+    unitId: string;
+    subUnitId: string;
 }
 
 export const UpdateDataValidationMutation: ICommand<IUpdateDataValidationMutationParams> = {

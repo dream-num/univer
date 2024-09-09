@@ -638,6 +638,8 @@ export class SheetsFilterController extends Disposable {
 
     private _initRowFilteredInterceptor(): void {
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+
+            // sheet-interceptor.service.ts
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;
                 return this._sheetsFilterService.getFilterModel(
@@ -835,4 +837,3 @@ export class SheetsFilterController extends Disposable {
         return true;
     }
 }
-

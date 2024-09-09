@@ -67,7 +67,7 @@ export class Border extends SheetExtension {
                 return true;
             }
 
-            const cellInfo = this.getCellIndex(
+            const cellInfo = this.getCellByIndex(
                 rowIndex,
                 columnIndex,
                 rowHeightAccumulation,

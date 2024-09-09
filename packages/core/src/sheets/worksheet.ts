@@ -54,6 +54,8 @@ export class Worksheet {
         this._viewModel = new SheetViewModel((row, col) => this.getCellRaw(row, col));
         this._rowManager = new RowManager(this._snapshot, this._viewModel, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
+
+        window.ws = this; // for debug
     }
 
     /**
@@ -238,6 +240,7 @@ export class Worksheet {
         return null;
     }
 
+    _cellDataCacheMap: Map<number, Map<number, Nullable<ICellDataForSheetInterceptor>>> = new Map();
     /**
      * Get cellData, includes cellData, customRender, markers, dataValidate, etc.
      *
@@ -252,8 +255,17 @@ export class Worksheet {
         if (row < 0 || col < 0) {
             return null;
         }
-
-        return this._viewModel.getCell(row, col);
+        if (this._cellDataCacheMap.get(row)) {
+            if (!this._cellDataCacheMap.get(row)?.get(col)) {
+                this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
+                // return this._cellDataCacheMap.get(row)?.get(col);
+            }
+        } else {
+            this._cellDataCacheMap.set(row, new Map());
+            this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
+            // return this._cellDataCacheMap.get(row)?.get(col);
+        }
+        return this._cellDataCacheMap.get(row)?.get(col);
     }
 
     getCellRaw(row: number, col: number): Nullable<ICellData> {
@@ -462,20 +474,28 @@ export class Worksheet {
         return this.getRowManager().getRowHeight(row);
     }
 
+    _filteredRowCacheMap: Map<number, boolean> = new Map();
     /**
-     * Get if the row in visible. It may be affected by features like filter and view.
+     * Get if the row is visible. It may be affected by features like filter and view.
      * @param row the row index
      * @returns if the row in visible to the user
      */
     getRowVisible(row: number): boolean {
-        const filtered = this._viewModel.getRowFiltered(row);
+        return row <= 2732 && row >= 2727;
+        if (!this._filteredRowCacheMap.has(row)) {
+            this._filteredRowCacheMap.set(row, this._viewModel.getRowFiltered(row));
+        }
+        const filtered = this._filteredRowCacheMap.get(row);
         if (filtered) return false;
-
         return this.getRowRawVisible(row);
     }
 
+    clearFilteredRowCacheMap() {
+        this._filteredRowCacheMap.clear();
+    }
+
     /**
-     * Get if the row does not have `hidden` property.
+     * Get if the row does not have `hidden` property. This value won't affected by features like filter and view.
      * @param row the row index
      * @returns if the row does not have `hidden` property
      */
@@ -504,7 +524,7 @@ export class Worksheet {
     }
 
     /**
-     * Get all visible rows in the sheet.
+     * Get all visible rows in the sheet.(not include filter & view, like getRawVisibleRows)
      * @returns Visible rows range list
      */
     getVisibleRows(): IRange[] {
@@ -513,7 +533,7 @@ export class Worksheet {
     }
 
     /**
-     * Get all visible columns in the sheet.
+     * Get all visible columns in the sheet.(not include filter & view)
      * @returns Visible columns range list
      */
     getVisibleCols(): IRange[] {

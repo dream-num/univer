@@ -16,13 +16,17 @@
 
 import { CommandType, ICommandService, ILogService, IUndoRedoService } from '@univerjs/core';
 import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule } from '@univerjs/core';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
 import { DataValidatorRegistryService } from '../../services/data-validator-registry.service';
 import { DataValidationModel } from '../../models/data-validation-model';
 import { getRuleOptions, getRuleSetting } from '../../common/util';
 import { UpdateRuleType } from '../../types/enum/update-rule-type';
+
+interface ISheetCommandSharedParams {
+    unitId: string;
+    subUnitId: string;
+}
 
 export interface IAddDataValidationCommandParams extends ISheetCommandSharedParams {
     rule: Omit<IDataValidationRule, 'ranges'> & {

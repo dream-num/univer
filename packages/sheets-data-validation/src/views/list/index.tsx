@@ -17,7 +17,6 @@
 import React, { useEffect, useState } from 'react';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { createDefaultNewRule } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
@@ -26,6 +25,7 @@ import type { IAddSheetDataValidationCommandParams } from '../../commands/comman
 import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
+import { createDefaultNewRule } from '../../utils/create';
 import styles from './index.module.less';
 
 export function DataValidationList() {

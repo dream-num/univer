@@ -19,7 +19,6 @@ export { DataValidatorRegistryService, DataValidatorRegistryScope } from './serv
 export { DataValidationModel, type DataValidationChangeSource, type IRuleChange, type IValidStatusChange } from './models/data-validation-model';
 
 export {
-    createDefaultNewRule,
     getRuleOptions,
     getRuleSetting,
 } from './common/util';

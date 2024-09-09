@@ -185,7 +185,7 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
 
 /**
  * This service provides methods for docs and slides to register a formula into Univer's formula system.
- * And it also manages formula resources fields of docs and slides. `SHEETS_FORMULA_REMOTE_PLUGIN`
+ * And it also manages formula resources fields of docs and slides. `SHEET_FORMULA_REMOTE_PLUGIN`
  * is not required but optional here.
  */
 export class UniFormulaService extends DumbUniFormulaService implements IUniFormulaService {

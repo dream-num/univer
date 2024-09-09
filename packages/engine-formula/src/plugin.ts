@@ -56,7 +56,7 @@ import { SetDependencyController } from './controller/set-dependency.controller'
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 
-const PLUGIN_NAME = 'base-formula-engine';
+const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
 
 export class UniverFormulaEnginePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

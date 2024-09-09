@@ -67,7 +67,7 @@ export const LoadSheetSnapshotCommand: ICommand = {
     handler: async (accessor) => {
         const fileOpenerService = accessor.get(IFileOpenerService);
         const snapshotFile = await fileOpenerService.openFile({ multiple: false, accept: '.json' });
-        if (snapshotFile.length === 1) return false;
+        if (snapshotFile.length !== 1) return false;
 
         const text = await snapshotFile[0].text();
         const instanceService = accessor.get(IUniverInstanceService);

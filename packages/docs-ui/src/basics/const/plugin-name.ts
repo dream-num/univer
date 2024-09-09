@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const DOC_UI_PLUGIN_NAME = 'DocUI';
+export const DOC_UI_PLUGIN_NAME = 'DOC_UI_PLUGIN';

@@ -30,7 +30,8 @@ import { SheetsSortUIController } from './controllers/sheets-sort-ui.controller'
 import type { IUniverSheetsSortUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const NAME = 'UNIVER_SHEETS_SORT_UI_PLUGIN';
+const NAME = 'SHEET_SORT_UI_PLUGIN';
+
 @DependentOn(UniverSheetsSortPlugin)
 export class UniverSheetsSortUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

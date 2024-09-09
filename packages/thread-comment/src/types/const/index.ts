@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const TC_PLUGIN_NAME = 'THREAD_COMMENT_PLUGIN';
+export const TC_PLUGIN_NAME = 'UNIVER_THREAD_COMMENT_PLUGIN';

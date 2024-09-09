@@ -24,7 +24,7 @@ import { DrawingRenderService } from './services/drawing-render.service';
 import type { IUniverDrawingUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'DRAWING_UI_PLUGIN';
+const PLUGIN_NAME = 'UNIVER_DRAWING_UI_PLUGIN';
 
 export class UniverDrawingUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

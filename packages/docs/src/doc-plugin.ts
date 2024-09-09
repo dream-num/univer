@@ -29,13 +29,10 @@ import { SetTextSelectionsOperation } from './commands/operations/text-selection
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocStateEmitService } from './services/doc-state-emit.service';
+import type { IUniverDocsConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-export interface IUniverDocsConfig {
-    hasScroll?: boolean;
-}
-
-const PLUGIN_NAME = 'DOCS_PLUGIN';
+const PLUGIN_NAME = 'DOC_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

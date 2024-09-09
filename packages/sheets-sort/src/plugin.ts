@@ -22,7 +22,7 @@ import { SheetsSortService } from './services/sheets-sort.service';
 import type { IUniverSheetsSortConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const NAME = 'UNIVER_SHEETS_SORT_PLUGIN';
+const NAME = 'SHEET_SORT_PLUGIN';
 
 export class UniverSheetsSortPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;

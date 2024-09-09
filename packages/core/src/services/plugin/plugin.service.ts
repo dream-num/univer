@@ -249,7 +249,7 @@ export class PluginHolder extends Disposable {
                 if (NotRegistered) {
                     this._logService.debug(
                         '[PluginService]',
-                        `plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
+                        `Plugin "${plugin.pluginName}" depends on "${NotRegistered.pluginName}" which is not registered. Univer will automatically register it with default configuration.`
                     );
 
                     this._registerPlugin(NotRegistered, undefined);
@@ -267,6 +267,8 @@ export class PluginHolder extends Disposable {
         // eslint-disable-next-line ts/no-explicit-any
         const pluginInstance: Plugin = this._injector.createInstance(plugin as unknown as Ctor<any>, options);
         this._pluginStore.addPlugin(pluginInstance);
+
+        this._logService.debug('[PluginService]', `Plugin "${pluginInstance.getPluginName()}" registered.`);
 
         return pluginInstance;
     }

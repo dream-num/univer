@@ -24,7 +24,7 @@ import { ScriptPanelService } from './services/script-panel.service';
 import type { IUniverUniscriptConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'uniscript';
+const PLUGIN_NAME = 'UNIVER_UNISCRIPT_PLUGIN';
 
 export class UniverUniscriptPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

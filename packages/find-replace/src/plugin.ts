@@ -22,7 +22,7 @@ import { FindReplaceService, IFindReplaceService } from './services/find-replace
 import type { IUniverFindReplaceConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'FIND_REPLACE_PLUGIN';
+const PLUGIN_NAME = 'UNIVER_FIND_REPLACE_PLUGIN';
 
 export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

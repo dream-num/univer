@@ -30,7 +30,7 @@ import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.servi
 import type { IUniverDocsDrawingUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'DOCS_DRAWING_UI_PLUGIN';
+const PLUGIN_NAME = 'DOC_DRAWING_UI_PLUGIN';
 
 @DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin)
 export class UniverDocsDrawingUIPlugin extends Plugin {

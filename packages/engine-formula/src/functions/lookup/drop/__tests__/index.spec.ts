@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Drop } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
@@ -60,7 +60,7 @@ describe('Test drop function', () => {
             const rows = NumberValueObject.create(1);
             const columns = NumberValueObject.create(1);
             const result = testFunction.calculate(array, rows, columns);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.CALC);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             const rows2 = NumberValueObject.create(0);
             const columns2 = NumberValueObject.create(0);
@@ -82,6 +82,17 @@ describe('Test drop function', () => {
                 [ErrorType.NAME, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME],
+            ]);
+
+            const array3 = NullValueObject.create();
+            const result5 = testFunction.calculate(array3, rows, columns);
+            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
+
+            const result6 = testFunction.calculate(array3, rows3, columns3);
+            expect(getObjectValue(result6)).toStrictEqual([
+                [ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, ErrorType.VALUE],
             ]);
         });
 

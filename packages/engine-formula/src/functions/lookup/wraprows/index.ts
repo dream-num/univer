@@ -19,6 +19,7 @@ import { ArrayValueObject } from '../../../engine/value-object/array-value-objec
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 
 export class Wraprows extends BaseFunction {
     override minParams = 2;
@@ -55,6 +56,10 @@ export class Wraprows extends BaseFunction {
                 return vector;
             }
 
+            if (vector.isNull()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
             if (wrapCountObject.isError()) {
                 return wrapCountObject;
             }
@@ -62,7 +67,6 @@ export class Wraprows extends BaseFunction {
             const wrapCountValue = Math.trunc(+wrapCountObject.getValue());
 
             if (
-                vector.isNull() ||
                 (vectorRowCount > 1 && vectorColumnCount > 1) ||
                 Number.isNaN(wrapCountValue)
             ) {
@@ -113,7 +117,7 @@ export class Wraprows extends BaseFunction {
                 const index = r * _wrapCount + c;
 
                 if (index < vectorArray.length) {
-                    row.push(vectorArray[index]);
+                    row.push(vectorArray[index].isNull() ? NumberValueObject.create(0) : vectorArray[index]);
                 } else {
                     row.push(padWith);
                 }

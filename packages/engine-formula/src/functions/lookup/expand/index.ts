@@ -64,6 +64,10 @@ export class Expand extends BaseFunction {
                     return array;
                 }
 
+                if (array.isNull()) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+
                 const { isError, errorObject } = this._checkRowsColumnsPadWith(rowsObject, columnsObject, _padWith, arrayRowCount, arrayColumnCount);
 
                 if (isError) {
@@ -76,6 +80,14 @@ export class Expand extends BaseFunction {
 
                 return array;
             });
+        }
+
+        if (array.isError()) {
+            return array;
+        }
+
+        if (array.isNull()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowsObject = _rows.isArray() ? (_rows as ArrayValueObject).get(0, 0) as BaseValueObject : _rows;
@@ -160,7 +172,13 @@ export class Expand extends BaseFunction {
         arrayRowCount: number,
         arrayColumnCount: number
     ): BaseValueObject {
-        const resultArray: BaseValueObject[][] = array.isArray() ? (array as ArrayValueObject).getArrayValue() as BaseValueObject[][] : [[array]];
+        let resultArray: BaseValueObject[][] = [];
+
+        if (array.isArray()) {
+            resultArray = (array as ArrayValueObject).map((valueObject) => valueObject.isNull() ? NumberValueObject.create(0) : valueObject).getArrayValue() as BaseValueObject[][];
+        } else {
+            resultArray = [[array]];
+        }
 
         const addRows = Math.max(0, rows - arrayRowCount);
         const addColumns = Math.max(0, columns - arrayColumnCount);

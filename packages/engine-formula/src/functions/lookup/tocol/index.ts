@@ -50,6 +50,10 @@ export class Tocol extends BaseFunction {
                 return array;
             }
 
+            if (array.isNull()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
             if (ignoreObject.isError()) {
                 return ignoreObject;
             }
@@ -62,10 +66,6 @@ export class Tocol extends BaseFunction {
             const scanByColumnValue = +scanByColumnObject.getValue();
 
             if (Number.isNaN(ignoreValue) || ignoreValue < 0 || ignoreValue > 3 || Number.isNaN(scanByColumnValue)) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            if (array.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -119,7 +119,7 @@ export class Tocol extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject);
+                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
                 }
             }
         }
@@ -139,7 +139,7 @@ export class Tocol extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject);
+                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
                 }
             }
         }

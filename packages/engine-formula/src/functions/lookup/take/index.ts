@@ -63,6 +63,10 @@ export class Take extends BaseFunction {
                     return array;
                 }
 
+                if (array.isNull()) {
+                    return ErrorValueObject.create(ErrorType.VALUE);
+                }
+
                 const { isError, errorObject } = this._checkRowsColumns(rowsObject, columnsObject, arrayRowCount, arrayColumnCount);
 
                 if (isError) {
@@ -75,6 +79,14 @@ export class Take extends BaseFunction {
 
                 return array;
             });
+        }
+
+        if (array.isError()) {
+            return array;
+        }
+
+        if (array.isNull()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowsObject = _rows.isArray() ? (_rows as ArrayValueObject).get(0, 0) as BaseValueObject : _rows;
@@ -155,6 +167,8 @@ export class Take extends BaseFunction {
         } else {
             resultArray = (array as ArrayValueObject).slice(rowParam, columnParam) as ArrayValueObject;
         }
+
+        resultArray = resultArray.map((valueObject) => valueObject.isNull() ? NumberValueObject.create(0) : valueObject) as ArrayValueObject;
 
         if (rows === 1 && columns === 1) {
             return resultArray.get(0, 0) as BaseValueObject;

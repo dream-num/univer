@@ -61,7 +61,7 @@ describe('Test expand function', () => {
             const rows2 = NumberValueObject.create(0);
             const columns2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(array, rows2, columns2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
 
             const array2 = NumberValueObject.create(1);
             const rows3 = ArrayValueObject.create('{1;0;0}');
@@ -78,6 +78,17 @@ describe('Test expand function', () => {
                 [ErrorType.NAME, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME],
+            ]);
+
+            const array3 = NullValueObject.create();
+            const result5 = testFunction.calculate(array3, rows, columns);
+            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
+
+            const result6 = testFunction.calculate(array3, rows3, columns3);
+            expect(getObjectValue(result6)).toStrictEqual([
+                [ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, ErrorType.VALUE],
+                [ErrorType.VALUE, ErrorType.VALUE],
             ]);
         });
 

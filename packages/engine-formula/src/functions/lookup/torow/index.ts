@@ -119,7 +119,7 @@ export class Torow extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject);
+                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
                 }
             }
         }
@@ -139,7 +139,7 @@ export class Torow extends BaseFunction {
                 const valueObject = _array.get(r, c) as BaseValueObject;
 
                 if (!this._isIgnore(valueObject, ignore)) {
-                    result.push(valueObject);
+                    result.push(valueObject.isNull() ? NumberValueObject.create(0) : valueObject);
                 }
             }
         }

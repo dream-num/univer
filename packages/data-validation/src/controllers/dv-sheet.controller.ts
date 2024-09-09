@@ -50,12 +50,7 @@ export class DataValidationSheetController extends Disposable {
                             return { redos: [], undos: [] };
                         }
 
-                        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
-                        if (!manager) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const rules = manager.getDataValidations();
+                        const rules = this._dataValidationModel.getRules(unitId, subUnitId);
                         const ids = rules.map((i) => i.uid);
                         const redoParams: IRemoveDataValidationMutationParams = {
                             unitId,

@@ -27,7 +27,6 @@ export {
     RemoveAllDataValidationCommand as RemoveSheetAllDataValidationCommand,
     type IRemoveAllDataValidationCommandParams as IRemoveSheetAllDataValidationCommandParams,
 } from '@univerjs/data-validation';
-export { SheetDataValidationManager } from './models/sheet-data-validation-manager';
 
 // #region - all commands
 export {

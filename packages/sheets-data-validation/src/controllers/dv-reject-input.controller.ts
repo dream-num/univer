@@ -15,19 +15,19 @@
  */
 
 import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle, UNIVER_INTERNAL } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 import { Button } from '@univerjs/design';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationRejectInputController)
 export class DataValidationRejectInputController extends Disposable {
     constructor(
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IDialogService private readonly _dialogService: IDialogService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
@@ -43,9 +43,8 @@ export class DataValidationRejectInputController extends Disposable {
                 handler: async (cellPromise, context, next) => {
                     const cell = await cellPromise;
                     const { worksheet, row, col, unitId, subUnitId, workbook } = context;
-                    const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-                    const ruleId = manager.getRuleIdByLocation(row, col);
-                    const rule = ruleId ? manager.getRuleById(ruleId) : undefined;
+                    const ruleId = this._dataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
+                    const rule = ruleId ? this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
                     if (!rule || rule.errorStyle !== DataValidationErrorStyle.STOP) {
                         return next(Promise.resolve(cell));
                     }

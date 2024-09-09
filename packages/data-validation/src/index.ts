@@ -32,7 +32,6 @@ export type { IDataValidationDropdownProps } from './types/interfaces/i-data-val
 export { BaseDataValidator } from './validators/base-data-validator';
 export type { IFormulaResult, IValidatorCellInfo } from './validators/base-data-validator';
 export type { IBaseDataValidationWidget } from './validators/base-widget';
-export { DataValidationManager } from './models/data-validation-manager';
 export type { IFormulaValidResult } from './validators/base-data-validator';
 export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';

@@ -36,7 +36,6 @@ import { DataValidationRefRangeController } from './controllers/dv-ref-range.con
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-import { DataValidationModelController } from './controllers/dv-model.controller';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
@@ -78,7 +77,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [SheetsDataValidationValidatorService],
 
             // controller
-            [DataValidationModelController],
             [DataValidationController],
             [SheetsDataValidationRenderController],
             [DataValidationAlertController],

@@ -25,8 +25,8 @@ import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorServic
 import { bufferTime, debounceTime, filter } from 'rxjs';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { ListValidator } from '../validators';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { menuSchema } from './menu.schema';
 
 const INVALID_MARK = {
@@ -45,6 +45,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
         @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -83,8 +84,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 if (!workbook) {
                     return;
                 }
-                const manager = this._dataValidationModel.ensureManager(unitId, sheetId) as SheetDataValidationManager;
-                const rule = manager.getRuleByLocation(row, column);
+                const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, sheetId, row, column);
 
                 if (!rule) {
                     return;
@@ -153,7 +153,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         };
 
         this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -167,10 +167,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
-                        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-                        if (!manager) {
-                            return next(cell);
-                        }
 
                         const skeleton = this._renderManagerService.getRenderById(unitId)
                             ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
@@ -181,16 +177,16 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                         const styleMap = pos.workbook.getStyles();
                         const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
-                        const ruleId = manager.getRuleIdByLocation(row, col);
+                        const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
                         }
-                        const rule = manager.getRuleById(ruleId);
+                        const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
 
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._dataValidationModel.validator(rule, pos, cell);
+                        const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 
@@ -327,7 +323,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
     ) {
         super();
 
@@ -359,7 +356,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         };
 
         this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._dataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -372,10 +369,6 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
-                        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-                        if (!manager) {
-                            return next(cell);
-                        }
 
                         const skeleton = this._renderManagerService.getRenderById(unitId)
                             ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
@@ -386,16 +379,16 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                         const styleMap = pos.workbook.getStyles();
                         const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
-                        const ruleId = manager.getRuleIdByLocation(row, col);
+                        const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
                         }
-                        const rule = manager.getRuleById(ruleId);
+                        const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
 
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._dataValidationModel.validator(rule, pos, cell);
+                        const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 

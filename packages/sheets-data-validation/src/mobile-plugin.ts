@@ -35,7 +35,6 @@ import { DataValidationCustomFormulaService } from './services/dv-custom-formula
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-import { DataValidationModelController } from './controllers/dv-model.controller';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
@@ -79,7 +78,6 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             [SheetsDataValidationValidatorService],
 
             // controller
-            [DataValidationModelController],
             [DataValidationController],
             [SheetsDataValidationMobileRenderController],
             [DataValidationAlertController],

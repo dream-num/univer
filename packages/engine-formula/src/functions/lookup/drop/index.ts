@@ -43,8 +43,8 @@ export class Drop extends BaseFunction {
             _columns.isArray() ? (_columns as ArrayValueObject).getColumnCount() : 1
         );
 
-        const rowsArray = expandArrayValueObject(maxRowLength, maxColumnLength, rows);
-        const columnsArray = expandArrayValueObject(maxRowLength, maxColumnLength, _columns);
+        const rowsArray = expandArrayValueObject(maxRowLength, maxColumnLength, rows, ErrorValueObject.create(ErrorType.NA));
+        const columnsArray = expandArrayValueObject(maxRowLength, maxColumnLength, _columns, ErrorValueObject.create(ErrorType.NA));
 
         if (maxRowLength > 1 || maxColumnLength > 1) {
             return rowsArray.mapValue((rowsObject, rowIndex, columnIndex) => {

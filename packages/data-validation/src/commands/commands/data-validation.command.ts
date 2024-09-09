@@ -32,7 +32,7 @@ export interface IAddDataValidationCommandParams extends ISheetCommandSharedPara
 }
 
 /**
- * @deprecated
+ * @deprecated `AddDataValidationCommand` is deprecated, please use `AddSheetDataValidationCommand` in `@univerjs/sheets-data-validation` instead!
  */
 export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams> = {
     type: CommandType.COMMAND,
@@ -112,6 +112,9 @@ export const removeDataValidationUndoFactory = (accessor: Injector, redoParams: 
     return undoMutations;
 };
 
+/**
+ * @deprecated `RemoveDataValidationCommand` is deprecated, please use `RemoveSheetDataValidationCommand` in `@univerjs/sheets-data-validation` instead!
+ */
 export const RemoveDataValidationCommand: ICommand<IRemoveDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.removeRule',
@@ -160,7 +163,7 @@ export interface IUpdateDataValidationOptionsCommandParams extends ISheetCommand
 }
 
 /**
- * @deprecated
+ * @deprecated `UpdateDataValidationOptionsCommand` is deprecated, please use `UpdateSheetDataValidationOptionsCommand` in `@univerjs/sheets-data-validation` instead!
  */
 export const UpdateDataValidationOptionsCommand: ICommand<IUpdateDataValidationOptionsCommandParams> = {
     type: CommandType.COMMAND,
@@ -227,7 +230,7 @@ export interface IUpdateDataValidationSettingCommandParams extends ISheetCommand
 }
 
 /**
- * @deprecated
+ * @deprecated `UpdateDataValidationSettingCommand` is deprecated, please use `UpdateSheetDataValidationSettingCommand` in `@univerjs/sheets-data-validation` instead!
  */
 export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationSettingCommandParams> = {
     type: CommandType.COMMAND,
@@ -305,6 +308,9 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
 export interface IRemoveAllDataValidationCommandParams extends ISheetCommandSharedParams {
 }
 
+/**
+ * @deprecated `RemoveAllDataValidationCommand` is deprecated, please use `RemoveSheetAllDataValidationCommand` in `@univerjs/sheets-data-validation` instead!
+ */
 export const RemoveAllDataValidationCommand: ICommand<IRemoveAllDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.removeAll',

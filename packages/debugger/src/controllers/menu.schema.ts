@@ -88,6 +88,10 @@ export const menuSchema: MenuSchemaType = {
         [SaveSnapshotOptions.id]: {
             order: 8,
             menuItemFactory: SaveSnapshotSetEditableMenuItemFactory,
+            [LoadSheetSnapshotCommand.id]: {
+                order: 3,
+                menuItemFactory: LoadSheetSnapshotMenuItemFactory,
+            },
         },
         [UNIT_ITEM_MENU_ID]: {
             order: 9,
@@ -103,10 +107,6 @@ export const menuSchema: MenuSchemaType = {
             [CreateEmptySheetCommand.id]: {
                 order: 2,
                 menuItemFactory: CreateEmptySheetMenuItemFactory,
-            },
-            [LoadSheetSnapshotCommand.id]: {
-                order: 3,
-                menuItemFactory: LoadSheetSnapshotMenuItemFactory,
             },
         },
         [FLOAT_DOM_ITEM_MENU_ID]: {

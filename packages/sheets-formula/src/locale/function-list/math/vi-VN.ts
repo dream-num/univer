@@ -661,6 +661,20 @@ export default {
             number2: { name: 'số 2', detail: 'Các số hoặc phạm vi bổ sung mà bạn muốn nhân, tối đa 255 đối số.' },
         },
     },
+    QUOTIENT: {
+        description: 'Trả về phần nguyên của một phép chia.',
+        abstract: 'Trả về phần nguyên của một phép chia.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/quotient-%E5%87%BD%E6%95%B0-9f7bf099-2a18-4282-8fa4-65290cc99dee',
+            },
+        ],
+        functionParameter: {
+            numerator: { name: 'tử số', detail: 'Số bị chia.' },
+            denominator: { name: 'mẫu số', detail: 'Số chia.' },
+        },
+    },
     RADIANS: {
         description: 'Chuyển đổi độ thành radian.',
         abstract: 'Chuyển đổi độ thành radian.',
@@ -783,6 +797,51 @@ export default {
         ],
         functionParameter: {
             number: { name: 'số', detail: 'Đối số number là góc tính bằng radian mà bạn muốn tìm sec hyperbolic cho nó.' },
+        },
+    },
+    SERIESSUM: {
+        description: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
+        abstract: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/seriessum-%E5%87%BD%E6%95%B0-a3ab25b5-1093-4f5b-b084-96c49087f637',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị đầu vào cho chuỗi lũy thừa.' },
+            n: { name: 'n', detail: 'Lũy thừa ban đầu bạn muốn tăng x lên.' },
+            m: { name: 'm', detail: 'Số bước lũy thừa sẽ tăng cho mỗi toán hạng trong chuỗi.' },
+            coefficients: { name: 'hệ số', detail: 'Bộ hệ số mà mỗi lũy thừa liên tiếp của x được nhân với nó.' },
+        },
+    },
+    SEQUENCE: {
+        description: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
+        abstract: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sequence-%E5%87%BD%E6%95%B0-57467a98-57e0-4817-9f14-2eb78519ca90',
+            },
+        ],
+        functionParameter: {
+            rows: { name: 'hàng', detail: 'Số hàng cần trả về.' },
+            columns: { name: 'cột', detail: 'Số cột cần trả về.' },
+            start: { name: 'bắt đầu', detail: 'Số đầu tiên trong trình tự.' },
+            step: { name: 'khoảng cách', detail: 'Số lượng cần tăng cho mỗi giá trị tiếp theo trong mảng.' },
+        },
+    },
+    SIGN: {
+        description: 'Xác định dấu của một số.',
+        abstract: 'Xác định dấu của một số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sign-%E5%87%BD%E6%95%B0-109c932d-fcdc-4023-91f1-2dd0e916a1d8',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Bất kỳ số thực nào.' },
         },
     },
     SIN: {

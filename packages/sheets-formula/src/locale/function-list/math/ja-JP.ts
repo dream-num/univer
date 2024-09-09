@@ -730,8 +730,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '被除数 (割られる数) を指定します。' },
+            denominator: { name: '分母', detail: '除数 (割る数) を指定します。' },
         },
     },
     RADIANS: {
@@ -882,8 +882,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'べき級数に代入する値を指定します。' },
+            n: { name: 'n', detail: 'x のべき乗の初期値を指定します。' },
+            m: { name: 'm', detail: '級数の各項に対する n の増分を指定します。' },
+            coefficients: { name: '係数', detail: 'x の (n+m) 乗の乗数を指定します。' },
         },
     },
     SEQUENCE: {
@@ -896,8 +898,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行の数', detail: '返す行の数。' },
+            columns: { name: '列の数', detail: '返す列の数。' },
+            start: { name: '最初の数値', detail: '数列の最初の数値。' },
+            step: { name: '値の増', detail: '配列内の後続の各値の増分量。' },
         },
     },
     SIGN: {
@@ -910,8 +914,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     SIN: {

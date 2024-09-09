@@ -63,6 +63,7 @@ import { Odd } from './odd';
 import { Pi } from './pi';
 import { Power } from './power';
 import { Product } from './product';
+import { Quotient } from './quotient';
 import { Radians } from './radians';
 import { Rand } from './rand';
 import { Randarray } from './randarray';
@@ -72,6 +73,9 @@ import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
 import { Sec } from './sec';
 import { Sech } from './sech';
+import { Seriessum } from './seriessum';
+import { Sequence } from './sequence';
+import { Sign } from './sign';
 import { Sin } from './sin';
 import { Sinh } from './sinh';
 import { Sqrt } from './sqrt';
@@ -138,6 +142,7 @@ export const functionMath = [
     [Pi, FUNCTION_NAMES_MATH.PI],
     [Power, FUNCTION_NAMES_MATH.POWER],
     [Product, FUNCTION_NAMES_MATH.PRODUCT],
+    [Quotient, FUNCTION_NAMES_MATH.QUOTIENT],
     [Radians, FUNCTION_NAMES_MATH.RADIANS],
     [Rand, FUNCTION_NAMES_MATH.RAND],
     [Randarray, FUNCTION_NAMES_MATH.RANDARRAY],
@@ -147,6 +152,9 @@ export const functionMath = [
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
     [Sec, FUNCTION_NAMES_MATH.SEC],
     [Sech, FUNCTION_NAMES_MATH.SECH],
+    [Seriessum, FUNCTION_NAMES_MATH.SERIESSUM],
+    [Sequence, FUNCTION_NAMES_MATH.SEQUENCE],
+    [Sign, FUNCTION_NAMES_MATH.SIGN],
     [Sin, FUNCTION_NAMES_MATH.SIN],
     [Sinh, FUNCTION_NAMES_MATH.SINH],
     [Sqrt, FUNCTION_NAMES_MATH.SQRT],

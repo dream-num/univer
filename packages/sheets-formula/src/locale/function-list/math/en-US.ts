@@ -730,8 +730,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: 'numerator', detail: 'The dividend.' },
+            denominator: { name: 'denominator', detail: 'The divisor.' },
         },
     },
     RADIANS: {
@@ -882,8 +882,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The input value to the power series.' },
+            n: { name: 'n', detail: 'The initial power to which you want to raise x.' },
+            m: { name: 'm', detail: 'The step by which to increase n for each term in the series.' },
+            coefficients: { name: 'coefficients', detail: 'A set of coefficients by which each successive power of x is multiplied.' },
         },
     },
     SEQUENCE: {
@@ -896,8 +898,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: 'rows', detail: 'The number of rows to return.' },
+            columns: { name: 'columns', detail: 'The number of columns to return.' },
+            start: { name: 'start', detail: 'The first number in the sequence.' },
+            step: { name: 'step', detail: 'The amount to increment each subsequent value in the array.' },
         },
     },
     SIGN: {
@@ -910,8 +914,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     SIN: {

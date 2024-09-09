@@ -729,8 +729,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '被除数。' },
+            denominator: { name: '分母', detail: '除数。' },
         },
     },
     RADIANS: {
@@ -881,8 +881,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '幂级数的输入值。' },
+            n: { name: 'n', detail: 'x 的首项乘幂。' },
+            m: { name: 'm', detail: '级数中每一项的乘幂 n 的步长增加值。' },
+            coefficients: { name: '系数', detail: '与 x 的每个连续乘幂相乘的一组系数。' },
         },
     },
     SEQUENCE: {
@@ -895,8 +897,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行数', detail: '要返回的行数。' },
+            columns: { name: '列数', detail: '要返回的列数。' },
+            start: { name: '起始数字', detail: '序列中第一个数字。' },
+            step: { name: '递增值', detail: '数组中每个连续值递增的值。' },
         },
     },
     SIGN: {
@@ -909,8 +913,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     SIN: {

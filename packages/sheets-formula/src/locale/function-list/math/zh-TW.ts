@@ -729,8 +729,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '這是被除數。' },
+            denominator: { name: '分母', detail: '這是除數。' },
         },
     },
     RADIANS: {
@@ -880,8 +880,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是冪級數的輸入值。' },
+            n: { name: 'n', detail: '這是要增加 x 的初始乘冪。' },
+            m: { name: 'm', detail: '這是要將級數中的每一項增加 n 所用的間距。' },
+            coefficients: { name: '係數集', detail: '這是一組由 x 的每一個連續乘冪相乘的係數集。' },
         },
     },
     SEQUENCE: {
@@ -894,8 +896,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '列數', detail: '要傳回的列數。' },
+            columns: { name: '欄數', detail: '要傳回的欄數。' },
+            start: { name: '起始數字', detail: '連續值的第一個數字。' },
+            step: { name: '遞增量', detail: '陣列中每個連續值遞增的量。' },
         },
     },
     SIGN: {
@@ -908,8 +912,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任意實數。' },
         },
     },
     SIN: {

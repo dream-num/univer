@@ -57,7 +57,7 @@ import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRend
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
@@ -184,6 +184,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [SheetsDataValidationValidatorService],
+                [SheetDataValidationModel],
 
                 // sheets filter
                 // comment

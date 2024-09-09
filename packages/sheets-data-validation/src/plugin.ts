@@ -46,6 +46,7 @@ import { SheetsDataValidationValidatorService } from './services/dv-validator-se
 import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetDataValidationModel } from './models/sheet-data-validation-model';
+import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
@@ -87,6 +88,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationCopyPasteController],
             [DataValidationFormulaController],
             [DataValidationRejectInputController],
+            [SheetDataValidationSheetController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });

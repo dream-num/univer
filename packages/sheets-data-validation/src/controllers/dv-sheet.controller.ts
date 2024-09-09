@@ -16,14 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
+import { AddDataValidationMutation, DataValidationModel, RemoveDataValidationMutation } from '@univerjs/data-validation';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '../commands/mutations/data-validation.mutation';
-import { AddDataValidationMutation, RemoveDataValidationMutation } from '../commands/mutations/data-validation.mutation';
-import { DataValidationModel } from '../models/data-validation-model';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationSheetController)
-export class DataValidationSheetController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, SheetDataValidationSheetController)
+export class SheetDataValidationSheetController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,

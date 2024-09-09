@@ -64,7 +64,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -73,7 +72,6 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.5.4",
         "vite": "^5.4.2",

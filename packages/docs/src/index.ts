@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
+export { UniverDocsPlugin } from './doc-plugin';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';
 export type { IDocStateChangeParams, IDocStateChangeInfo } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
+export type { IUniverDocsConfig } from './controllers/config.schema';
 
 // #region - all commands
 export {

@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IMenuManagerService } from '@univerjs/ui';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
@@ -46,7 +46,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
         @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Optional(IEditorBridgeService) private readonly _editorBridgeService?: IEditorBridgeService
@@ -152,7 +151,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
         this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
@@ -290,7 +289,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$
+        this._sheetDataValidationModel.ruleChange$
             .pipe(
                 // patched data-validation change don't need to re-calc row height
                 // re-calc of row height will be triggered precisely by the origin command
@@ -321,7 +320,6 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
@@ -355,7 +353,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             }
         };
 
-        this.disposeWithMe(this._dataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
+        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
         this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
@@ -491,7 +489,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     }
 
     private _initAutoHeight() {
-        this._dataValidationModel.ruleChange$
+        this._sheetDataValidationModel.ruleChange$
             .pipe(
                 filter((change) => change.source === 'command'),
                 bufferTime(16)

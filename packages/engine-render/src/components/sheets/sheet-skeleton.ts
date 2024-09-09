@@ -1171,6 +1171,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,
+                paddingData,
                 {
                     horizontalAlign,
                     verticalAlign,
@@ -1866,6 +1867,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _updateConfigAndGetDocumentModel(
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
+        paddingData: IPaddingData,
         renderConfig?: IDocumentRenderConfig
     ): Nullable<DocumentDataModel> {
         if (!renderConfig) {
@@ -1879,6 +1881,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!documentData.documentStyle) {
             documentData.documentStyle = {};
         }
+
+        documentData.documentStyle.marginTop = paddingData.t ?? 0;
+        documentData.documentStyle.marginBottom = paddingData.b ?? 2;
+        documentData.documentStyle.marginLeft = paddingData.l ?? 2;
+        documentData.documentStyle.marginRight = paddingData.r ?? 2;
 
         // Fix https://github.com/dream-num/univer/issues/1586
         documentData.documentStyle.pageSize = {

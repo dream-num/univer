@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, ISheetDataValidationRule, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
@@ -36,7 +36,7 @@ import type {
 import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetDataValidationModel, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
 import type { IUpdateCommandParams } from '@univerjs/docs';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
@@ -67,8 +67,8 @@ export class FWorkbook {
         this.id = this._workbook.getUnitId();
     }
 
-    private get _dataValidationModel(): DataValidationModel {
-        return this._injector.get(DataValidationModel);
+    private get _dataValidationModel(): SheetDataValidationModel {
+        return this._injector.get(SheetDataValidationModel);
     }
 
     private get _threadCommentModel(): ThreadCommentModel {
@@ -368,7 +368,7 @@ export class FWorkbook {
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
-    onDataValidationChange(callback: (ruleChange: IRuleChange<ISheetDataValidationRule>) => void): IDisposable {
+    onDataValidationChange(callback: (ruleChange: IRuleChange) => void): IDisposable {
         return toDisposable(this._dataValidationModel.ruleChange$.pipe(filter((change) => change.unitId === this._workbook.getUnitId())).subscribe(callback));
     }
 

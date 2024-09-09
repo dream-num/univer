@@ -22,6 +22,7 @@ export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+export { SheetDataValidationModel } from './models/sheet-data-validation-model';
 export { DataValidationModel } from '@univerjs/data-validation';
 // #region - all commands
 export {

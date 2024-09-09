@@ -44,6 +44,7 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
+    //eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
@@ -70,8 +71,11 @@ export class Background extends SheetExtension {
             const backgroundCache = background[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
 
+            // console.group('backgroundext');
             const backgroundPaths = new Path2D();
+            // let count = 0;
             backgroundCache.forValue((rowIndex, columnIndex) => {
+                // checkOutOfViewBound = false;
                 if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
                     return true;
                 }
@@ -100,6 +104,9 @@ export class Background extends SheetExtension {
                     if (!visibleRow || !visibleCol) return true;
                 }
 
+                // console.log('background', rowIndex, columnIndex);
+                // count++;
+
                 // For merged cells, and the current cell is the top-left cell in the merged region.
                 if (isMergedMainCell) {
                     startY = mergeInfo.startY;
@@ -115,6 +122,8 @@ export class Background extends SheetExtension {
                 backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
             });
             ctx.fill(backgroundPaths);
+            // if (count > 500) debugger;
+            // console.groupEnd('backgroundext');
         };
 
         Object.keys(background).forEach(renderBGByCell);

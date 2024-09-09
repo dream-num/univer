@@ -560,7 +560,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
                 let offsetX = 0;
                 let offsetY = 0;
-
+                console.log('mouse wheel event');
                 const isLimitedStore = viewMain.limitedScroll();
                 if (evt.inputIndex === PointerInput.MouseWheelX) {
                     const deltaFactor = Math.abs(evt.deltaX);

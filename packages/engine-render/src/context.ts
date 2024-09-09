@@ -25,6 +25,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
+    private _systemType: string;
+    private _browserType: string;
 
     constructor(context: CanvasRenderingContext2D) {
         this._context = context;
@@ -287,13 +289,17 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     private _getScale() {
         const m = this.getTransform();
-        const transformer = Transform.create([m.a, m.b, m.c, m.d, m.e, m.f]);
-        const { scaleX, scaleY } = transformer.decompose();
-
         return {
-            scaleX,
-            scaleY,
+            scaleX: m.a,
+            scaleY: m.d,
         };
+        // const transformer = Transform.create([m.a, m.b, m.c, m.d, m.e, m.f]);
+        // const { scaleX, scaleY } = transformer.decompose();
+
+        // return {
+        //     scaleX,// why not m.a & m.d
+        //     scaleY,
+        // };
     }
 
     getScale() {
@@ -486,31 +492,27 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.closePath();
     }
 
-    getSystem() {
-        if (this._system) {
-            return this._system;
-        } else {
-            this._system = Tools.getSystemType();
+    getSystemType() {
+        if (!this._systemType) {
+            this._systemType = Tools.getSystemType();
         }
-        return this._system;
+        return this._systemType;
     }
 
-    getBrowser() {
-        if (this._browser) {
-            return this._browser;
-        } else {
-            this._browser = Tools.getBrowserType();
+    getBrowserType() {
+        if (!this._browserType) {
+            this._browserType = Tools.getBrowserType();
         }
-        return this._browser;
+        return this._browserType;
     }
 
     /**
      * Chrome hardware acceleration causes canvas stroke to fail to draw lines on Mac.
      */
     closePathByEnv() {
-        const system = this.getSystem();
+        const system = this.getSystemType();
         const isMac = system === 'Mac';
-        const browser = this.getBrowser();
+        const browser = this.getBrowserType();
         const isChrome = browser === 'Chrome';
 
         if (isMac && isChrome) {

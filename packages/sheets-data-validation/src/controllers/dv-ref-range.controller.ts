@@ -211,13 +211,17 @@ export class DataValidationRefRangeController extends Disposable {
                     }
                     case 'remove': {
                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        if (disposeSet) {
+                            disposeSet.forEach((dispose) => dispose());
+                        }
                         break;
                     }
                     case 'update': {
                         const rule = option.rule!;
                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        if (disposeSet) {
+                            disposeSet.forEach((dispose) => dispose());
+                        }
                         this.registerRule(option.unitId, option.subUnitId, rule);
                         break;
                     }

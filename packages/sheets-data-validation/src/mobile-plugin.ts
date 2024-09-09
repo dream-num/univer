@@ -46,6 +46,7 @@ import {
     type IUniverSheetsDataValidationConfig,
     PLUGIN_CONFIG_KEY,
 } from './controllers/config.schema';
+import { SheetDataValidationModel } from './models/sheet-data-validation-model';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationMobilePlugin extends Plugin {
@@ -76,7 +77,7 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             [DataValidationCustomFormulaService],
             [DataValidationDropdownManagerService],
             [SheetsDataValidationValidatorService],
-
+            [SheetDataValidationModel],
             // controller
             [DataValidationController],
             [SheetsDataValidationMobileRenderController],

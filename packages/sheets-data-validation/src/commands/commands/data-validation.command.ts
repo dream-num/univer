@@ -16,7 +16,7 @@
 
 import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
 import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { DataValidationChangeSource, IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -541,5 +541,51 @@ export const ClearRangeDataValidationCommand: ICommand<IClearRangeDataValidation
         });
 
         return sequenceExecute(redoMutations, commandService).result;
+    },
+};
+
+export interface IRemoveSheetAllDataValidationCommandParams extends ISheetCommandSharedParams {
+}
+
+export const RemoveSheetAllDataValidationCommand: ICommand<IRemoveSheetAllDataValidationCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.remove-all-data-validation',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, subUnitId } = params;
+        const commandService = accessor.get(ICommandService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const currentRules = [...dataValidationModel.getRules(unitId, subUnitId)];
+
+        const redoParams: IRemoveDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            ruleId: currentRules.map((rule) => rule.uid),
+        };
+        const redoMutations: IMutationInfo[] = [{
+            id: RemoveDataValidationMutation.id,
+            params: redoParams,
+        }];
+
+        const undoMutations: IMutationInfo[] = [{
+            id: AddDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                rule: currentRules,
+            },
+        }];
+
+        undoRedoService.pushUndoRedo({
+            redoMutations,
+            undoMutations,
+            unitID: unitId,
+        });
+
+        commandService.executeCommand(RemoveDataValidationMutation.id, redoParams);
+        return true;
     },
 };

@@ -39,19 +39,6 @@ export { DataValidationSheetController } from './controllers/dv-sheet.controller
 export { TextLengthErrorTitleMap } from './types/const/operator-text-map';
 
 // #region - all commands
-
-export {
-    AddDataValidationCommand,
-    RemoveDataValidationCommand,
-    UpdateDataValidationOptionsCommand,
-    UpdateDataValidationSettingCommand,
-    RemoveAllDataValidationCommand,
-    removeDataValidationUndoFactory,
-    type IRemoveDataValidationCommandParams,
-    type IAddDataValidationCommandParams,
-    type IRemoveAllDataValidationCommandParams,
-} from './commands/commands/data-validation.command';
-
 export {
     AddDataValidationMutation,
     RemoveDataValidationMutation,

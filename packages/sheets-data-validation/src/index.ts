@@ -22,12 +22,7 @@ export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-export {
-    DataValidationModel,
-    RemoveAllDataValidationCommand as RemoveSheetAllDataValidationCommand,
-    type IRemoveAllDataValidationCommandParams as IRemoveSheetAllDataValidationCommandParams,
-} from '@univerjs/data-validation';
-
+export { DataValidationModel } from '@univerjs/data-validation';
 // #region - all commands
 export {
     RemoveDataValidationCommand as RemoveSheetDataValidationCommand,
@@ -40,11 +35,13 @@ export {
     AddSheetDataValidationCommand,
     AddSheetDataValidationAndOpenCommand,
     ClearRangeDataValidationCommand,
+    RemoveSheetAllDataValidationCommand,
     type IAddSheetDataValidationCommandParams,
     type IUpdateSheetDataValidationRangeCommandParams,
     type IUpdateSheetDataValidationOptionsCommandParams,
     type IUpdateSheetDataValidationSettingCommandParams,
     type IClearRangeDataValidationCommandParams,
+    type IRemoveSheetAllDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

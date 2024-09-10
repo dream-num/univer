@@ -210,10 +210,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 </RadioGroup>
             </div>
             <div style={{ display: typeValue === 'range' ? 'block' : 'none' }}>
-                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
+                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={(value) => typeValue === 'range' && setValidFormulaOrRange(value)} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
             </div>
             <div style={{ display: typeValue === 'range' ? 'none' : 'block' }}>
-                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
+                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={(value) => typeValue !== 'range' && setValidFormulaOrRange(value)} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
             </div>
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />

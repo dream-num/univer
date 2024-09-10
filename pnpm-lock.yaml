@@ -1011,11 +1011,7 @@ importers:
         version: 2.0.5(@types/node@22.5.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs:
-<<<<<<< HEAD
     dependencies:
-=======
-    devDependencies:
->>>>>>> 9ab13e9b2 (fix: rebase dev)
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core

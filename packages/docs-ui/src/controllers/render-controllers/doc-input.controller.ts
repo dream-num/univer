@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { DocSkeletonManagerService } from '@univerjs/docs';
@@ -28,7 +28,6 @@ export class DocInputController extends Disposable implements IRenderModule {
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -54,12 +53,7 @@ export class DocInputController extends Disposable implements IRenderModule {
                 return;
             }
 
-            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-            if (!documentModel) {
-                return;
-            }
-
-            const unitId = documentModel.getUnitId();
+            const unitId = this._context.unitId;
 
             const { event, content = '', activeRange } = config;
 

@@ -159,6 +159,10 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialSetValue() {
         this.disposeWithMe(
             this._editorService.setValue$.subscribe((param) => {
+                if (param.editorUnitId !== this._context.unitId) {
+                    return;
+                }
+
                 this._commandService.executeCommand(CoverContentCommand.id, {
                     unitId: param.editorUnitId,
                     body: param.body,
@@ -197,6 +201,10 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialFocus() {
         this.disposeWithMe(
             this._editorService.focus$.subscribe((textRange) => {
+                if (this._editorService.getFocusEditor()?.editorUnitId !== this._context.unitId) {
+                    return;
+                }
+
                 this._docSelectionRenderService.removeAllRanges();
                 this._docSelectionRenderService.addDocRanges([textRange]);
             })

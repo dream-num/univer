@@ -34,6 +34,7 @@ import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-pe
 import { SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 import type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
 
 @DependentOn(UniverSheetsHyperLinkPlugin, UniverDocsUIPlugin)
 export class UniverSheetsHyperLinkUIPlugin extends Plugin {
@@ -71,6 +72,7 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetsHyperLinkCopyPasteController],
             [SheetsHyperLinkPermissionController],
             [SheetHyperLinkUrlController],
+            [SheetsHyperLinkRichTextRefRangeController],
         ];
 
         dependencies.forEach((dep) => this._injector.add(dep));

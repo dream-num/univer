@@ -90,6 +90,7 @@ export class SheetsHyperLinkResolverService {
                     name: serializeRangeWithSheet(sheetName, rangeObj),
                 };
             }
+            return invalidLink;
         }
 
         if (rangeid) {
@@ -100,6 +101,7 @@ export class SheetsHyperLinkResolverService {
                     name: range.formulaOrRefString,
                 };
             }
+            return invalidLink;
         }
 
         if (gid) {
@@ -110,6 +112,7 @@ export class SheetsHyperLinkResolverService {
                     name: worksheet.getName(),
                 };
             }
+            return invalidLink;
         }
 
         return invalidLink;

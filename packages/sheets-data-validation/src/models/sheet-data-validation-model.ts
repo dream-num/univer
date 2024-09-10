@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
+import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { isReferenceString } from '@univerjs/engine-formula';
 import type { ISheetLocation } from '@univerjs/sheets';
@@ -31,12 +31,11 @@ import { RuleMatrix } from './rule-matrix';
 export class SheetDataValidationModel extends Disposable {
     private readonly _ruleMatrixMap = new Map<string, Map<string, RuleMatrix>>();
     private readonly _validStatusChange$ = new Subject<IValidStatusChange>();
+    private readonly _ruleChange$ = new Subject<IRuleChange>();
 
-    get ruleChange$() {
-        return this._dataValidationModel.ruleChange$;
-    }
+    readonly ruleChange$ = this._ruleChange$.asObservable();
+    readonly validStatusChange$ = this._validStatusChange$.asObservable();
 
-    validStatusChange$ = this._validStatusChange$.asObservable();
     constructor(
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -47,11 +46,33 @@ export class SheetDataValidationModel extends Disposable {
     ) {
         super();
         this._initRuleUpdateListener();
+
+        this.disposeWithMe(() => {
+            this._ruleChange$.complete();
+            this._validStatusChange$.complete();
+        });
     }
 
     private _initRuleUpdateListener() {
+        const allRules = this._dataValidationModel.getAll();
+        for (const [unitId, subUnitMap] of allRules) {
+            for (const [subUnitId, rules] of subUnitMap) {
+                for (const rule of rules) {
+                    this._ruleChange$.next({
+                        type: 'add',
+                        unitId,
+                        subUnitId,
+                        rule,
+                        source: 'command',
+                    });
+                    this._addRule(unitId, subUnitId, rule);
+                }
+            }
+        }
+
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((ruleChange) => {
+                this._ruleChange$.next(ruleChange);
                 switch (ruleChange.type) {
                     case 'add':
                         this._addRule(ruleChange.unitId, ruleChange.subUnitId, ruleChange.rule);
@@ -256,5 +277,9 @@ export class SheetDataValidationModel extends Disposable {
 
     getSubUnitIds(unitId: string) {
         return this._dataValidationModel.getSubUnitIds(unitId);
+    }
+
+    getAll() {
+        return this._dataValidationModel.getAll();
     }
 }

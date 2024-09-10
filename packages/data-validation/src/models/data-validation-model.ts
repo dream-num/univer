@@ -245,4 +245,8 @@ export class DataValidationModel extends Disposable {
     getSubUnitIds(unitId: string) {
         return Array.from(this._model.get(unitId)?.keys() ?? []);
     }
+
+    getAll() {
+        return Array.from(this._model.keys()).map((unitId) => [unitId, this.getUnitRules(unitId)] as const);
+    }
 }

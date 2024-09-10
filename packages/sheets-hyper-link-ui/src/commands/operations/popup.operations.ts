@@ -73,8 +73,8 @@ export const InsertHyperLinkOperation: ICommand = {
             return false;
         }
 
-        const row = selection.primary.startRow;
-        const col = selection.primary.startColumn;
+        const row = selection.range.startRow;
+        const col = selection.range.startColumn;
         const visible = editorBridgeService.isVisible();
         const isZenEditor = univerInstanceService.getFocusedUnit()?.getUnitId() === DOCS_ZEN_EDITOR_UNIT_ID_KEY;
         return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {

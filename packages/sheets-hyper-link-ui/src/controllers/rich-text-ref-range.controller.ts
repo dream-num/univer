@@ -156,25 +156,32 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
     }
 
     private _initWorkbookLoad() {
+        const handleWorkbook = (workbook: Workbook) => {
+            const unitId = workbook.getUnitId();
+            workbook.getSheets().forEach((sheet) => {
+                const subUnitId = sheet.getSheetId();
+                const map = this._enusreMap(unitId, subUnitId);
+                sheet.getCellMatrix().forValue((row, col, cell) => {
+                    const dispose = map.getValue(row, col);
+                    if (dispose) {
+                        dispose.dispose();
+                    }
+
+                    if (cell && cell.p) {
+                        this._registerRange(unitId, subUnitId, row, col, cell.p);
+                    }
+                });
+            });
+        };
+
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
+            handleWorkbook(workbook);
+        });
         this.disposeWithMe(
             this._univerInstanceService.unitAdded$.subscribe((unit) => {
                 if (unit.type === UniverInstanceType.UNIVER_SHEET) {
                     const workbook = unit as Workbook;
-                    const unitId = workbook.getUnitId();
-                    workbook.getSheets().forEach((sheet) => {
-                        const subUnitId = sheet.getSheetId();
-                        const map = this._enusreMap(unitId, subUnitId);
-                        sheet.getCellMatrix().forValue((row, col, cell) => {
-                            const dispose = map.getValue(row, col);
-                            if (dispose) {
-                                dispose.dispose();
-                            }
-
-                            if (cell && cell.p) {
-                                this._registerRange(unitId, subUnitId, row, col, cell.p);
-                            }
-                        });
-                    });
+                    handleWorkbook(workbook);
                 }
             })
         );

@@ -28,7 +28,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
+import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
@@ -99,6 +99,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             UpdateSheetDataValidationRangeCommand,
             UpdateSheetDataValidationSettingCommand,
             UpdateSheetDataValidationOptionsCommand,
+            RemoveSheetDataValidationCommand,
+            RemoveSheetAllDataValidationCommand,
 
              // operation
             ShowDataValidationDropdown,

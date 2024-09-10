@@ -283,7 +283,7 @@ export class FormulaEditorController extends RxDisposable {
         let textRuns = body?.textRuns;
         const customRanges = body?.customRanges;
 
-        if (dataStream == null || paragraphs == null) {
+        if (dataStream == null || (!paragraphs && !customRanges)) {
             return;
         }
 
@@ -300,7 +300,7 @@ export class FormulaEditorController extends RxDisposable {
             textRuns = [];
         }
 
-        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns, customRanges);
+        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs ?? [], textRuns, customRanges);
 
         // Also need to resize document and scene after sync content.
         this._autoScroll();

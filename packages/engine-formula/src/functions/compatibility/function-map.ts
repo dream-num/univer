@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
+import { BetaInv } from '../statistical/beta-inv';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
 import { VarS } from '../statistical/var-s';
+import { Betadist } from './betadist';
 import { Rank } from './rank';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
 
 export const functionCompatibility = [
+    [Betadist, FUNCTION_NAMES_COMPATIBILITY.BETADIST],
+    [BetaInv, FUNCTION_NAMES_COMPATIBILITY.BETAINV],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

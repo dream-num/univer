@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value between A and B at which to evaluate the function.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the beta distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BINOMDIST: {

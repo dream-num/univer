@@ -111,8 +111,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value between A and B at which to evaluate the function.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, BETA.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BETA_INV: {
@@ -125,8 +129,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the beta distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BINOM_DIST: {
@@ -172,8 +179,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: 'Returns the cumulative beta probability density function',
-        abstract: 'Returns the cumulative beta probability density function',
+        description: 'Returns the chi-squared distribution.',
+        abstract: 'Returns the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -181,8 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, CHISQ.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     CHISQ_DIST_RT: {

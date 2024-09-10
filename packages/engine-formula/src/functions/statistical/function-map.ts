@@ -20,6 +20,9 @@ import { Average } from './average';
 import { Averagea } from './averagea';
 import { Averageif } from './averageif';
 import { Averageifs } from './averageifs';
+import { BetaDist } from './beta-dist';
+import { BetaInv } from './beta-inv';
+import { ChisqDist } from './chisq-dist';
 import { Count } from './count';
 import { Counta } from './counta';
 import { Countblank } from './countblank';
@@ -48,6 +51,9 @@ export const functionStatistical = [
     [Averagea, FUNCTION_NAMES_STATISTICAL.AVERAGEA],
     [Averageif, FUNCTION_NAMES_STATISTICAL.AVERAGEIF],
     [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
+    [BetaDist, FUNCTION_NAMES_STATISTICAL.BETA_DIST],
+    [BetaInv, FUNCTION_NAMES_STATISTICAL.BETA_INV],
+    [ChisqDist, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
     [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],

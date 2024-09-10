@@ -111,8 +111,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用來計算其函數的值，介於下限值和上限值之間。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 BETA.DIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BETA_INV: {
@@ -125,8 +129,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是 beta 分佈的相關機率。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BINOM_DIST: {
@@ -172,8 +179,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: '傳回累積 beta 機率密度函數',
-        abstract: '返回累積 beta 機率密度函數',
+        description: '返回 χ2 分佈。',
+        abstract: '返回 χ2 分佈。',
         links: [
             {
                 title: '教導',
@@ -181,8 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，CHISQ.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     CHISQ_DIST_RT: {

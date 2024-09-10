@@ -99,8 +99,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: 'その関数を計算するために使用される、下限値と上限値の間の値。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BETA_INV: {
@@ -113,8 +117,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'β分布における確率を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BINOM_DIST: {
@@ -160,8 +167,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: '累積β確率密度関数の値を返します。',
-        abstract: '累積β確率密度関数の値を返します。',
+        description: 'カイ 2 乗分布を返します。',
+        abstract: 'カイ 2 乗分布を返します。',
         links: [
             {
                 title: '指導',
@@ -169,8 +176,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '分布の評価に使用する値を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     CHISQ_DIST_RT: {

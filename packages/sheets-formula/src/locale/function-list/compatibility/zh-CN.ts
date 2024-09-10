@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算其函数的值，介于下限值和上限值之间。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 beta 分布相关的概率。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BINOMDIST: {

@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giá trị được sử dụng để tính toán hàm của nó, giữa giá trị giới hạn dưới và giá trị giới hạn trên.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố beta.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BINOMDIST: {

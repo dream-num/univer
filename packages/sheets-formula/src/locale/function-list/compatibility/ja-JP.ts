@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: 'その関数を計算するために使用される、下限値と上限値の間の値。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'β分布における確率を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BINOMDIST: {

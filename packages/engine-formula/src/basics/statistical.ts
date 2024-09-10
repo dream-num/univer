@@ -1,0 +1,338 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+export function betaCDF(x: number, alpha: number, beta: number): number {
+    if (x <= 0) {
+        return 0;
+    }
+
+    if (x >= 1) {
+        return 1;
+    }
+
+    return incompleteBetaFunction(x, alpha, beta);
+}
+
+export function betaPDF(x: number, alpha: number, beta: number): number {
+    if (x <= 0 || x >= 1) {
+        return 0;
+    }
+
+    if (alpha === 1 && beta === 1) {
+        return 1;
+    }
+
+    if (alpha < 512 && beta < 512) {
+        return ((x ** (alpha - 1)) * ((1 - x) ** (beta - 1))) / betaFunction(alpha, beta);
+    }
+
+    return Math.exp((alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x) - betaFunctionNaturalLogarithm(alpha, beta));
+}
+
+export function betaINV(probability: number, alpha: number, beta: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return 1;
+    }
+
+    const EPSILON = 1e-8;
+    let x;
+
+    if (alpha >= 1 && beta >= 1) {
+        const p = (probability < 0.5) ? probability : 1 - probability;
+        const temp = Math.sqrt(-2 * Math.log(p));
+
+        x = (2.30753 + temp * 0.27061) / (1 + temp * (0.99229 + temp * 0.04481)) - temp;
+
+        if (probability < 0.5) {
+            x = -x;
+        }
+
+        const temp1 = (x * x - 3) / 6;
+        const temp2 = 2 / (1 / (2 * alpha - 1) + 1 / (2 * beta - 1));
+        const temp3 = (x * Math.sqrt(temp1 + temp2) / temp2) - (1 / (2 * beta - 1) - 1 / (2 * alpha - 1)) * (temp1 + 5 / 6 - 2 / (3 * temp2));
+
+        x = alpha / (alpha + beta * Math.exp(2 * temp3));
+    } else {
+        const temp1 = Math.exp(alpha * Math.log(alpha / (alpha + beta))) / alpha;
+        const temp2 = Math.exp(beta * Math.log(beta / (alpha + beta))) / beta;
+        const temp3 = temp1 + temp2;
+
+        if (probability < temp1 / temp3) {
+            x = (alpha * temp3 * probability) ** (1 / alpha);
+        } else {
+            x = 1 - (beta * temp3 * (1 - probability)) ** (1 / beta);
+        }
+    }
+
+    const betalnNeg = -betaFunctionNaturalLogarithm(alpha, beta);
+    let ibeta, t, u;
+
+    for (let j = 0; j < 10; j++) {
+        if (x === 0 || x === 1) {
+            return x;
+        }
+
+        ibeta = incompleteBetaFunction(x, alpha, beta) - probability;
+
+        t = Math.exp((alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x) + betalnNeg);
+        u = ibeta / t;
+        x -= (t = u / (1 - 0.5 * Math.min(1, u * ((alpha - 1) / x - (beta - 1) / (1 - x)))));
+
+        if (x <= 0) {
+            x = 0.5 * (x + t);
+        }
+
+        if (x >= 1) {
+            x = 0.5 * (x + t + 1);
+        }
+
+        if (Math.abs(t) < EPSILON * x && j > 0) {
+            break;
+        }
+    }
+
+    return x;
+}
+
+function incompleteBetaFunction(x: number, alpha: number, beta: number): number {
+    const bt = (x === 0 || x === 1)
+        ? 0
+        : Math.exp(logGamma(alpha + beta) - logGamma(alpha) - logGamma(beta) + alpha * Math.log(x) + beta * Math.log(1 - x));
+
+    if (x < (alpha + 1) / (alpha + beta + 2)) {
+        return bt * betaContinuedFraction(x, alpha, beta) / alpha;
+    }
+
+    return 1 - bt * betaContinuedFraction(1 - x, beta, alpha) / beta;
+}
+
+function betaContinuedFraction(x: number, alpha: number, beta: number): number {
+    const MAX_ITER = 100;
+    const EPSILON = 1e-8;
+
+    let d = 1 - (alpha + beta) * x / (alpha + 1);
+
+    if (Math.abs(d) < EPSILON) {
+        d = EPSILON;
+    }
+
+    d = 1 / d;
+
+    let c = 1;
+    let h = d;
+
+    for (let m = 1; m <= MAX_ITER; m++) {
+        let temp = m * (beta - m) * x / ((alpha - 1 + m * 2) * (alpha + m * 2));
+
+        d = 1 + temp * d;
+
+        if (Math.abs(d) < EPSILON) {
+            d = EPSILON;
+        }
+
+        c = 1 + temp / c;
+
+        if (Math.abs(c) < EPSILON) {
+            c = EPSILON;
+        }
+
+        d = 1 / d;
+        h *= d * c;
+
+        temp = -(alpha + m) * (alpha + beta + m) * x / ((alpha + m * 2) * (alpha + 1 + m * 2));
+
+        d = 1 + temp * d;
+
+        if (Math.abs(d) < EPSILON) {
+            d = EPSILON;
+        }
+
+        c = 1 + temp / c;
+
+        if (Math.abs(c) < EPSILON) {
+            c = EPSILON;
+        }
+
+        d = 1 / d;
+        h *= d * c;
+
+        if (Math.abs(d * c - 1) < EPSILON) {
+            break;
+        }
+    }
+
+    return h;
+}
+
+function betaFunction(alpha: number, beta: number): number {
+    if (alpha + beta > 170) {
+        return Math.exp(betaFunctionNaturalLogarithm(alpha, beta));
+    }
+
+    return gammaFunction(alpha) * gammaFunction(beta) / gammaFunction(alpha + beta);
+}
+
+function betaFunctionNaturalLogarithm(alpha: number, beta: number): number {
+    return logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta);
+}
+
+function logGamma(x: number): number {
+    const coefficients = [
+        76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
+        -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
+    ];
+
+    let y = x;
+    let tmp = x + 5.5;
+    tmp -= (x + 0.5) * Math.log(tmp);
+    let ser = 1.000000000190015;
+
+    for (let j = 0; j < 6; j++) {
+        y += 1;
+        ser += coefficients[j] / y;
+    }
+
+    return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
+}
+
+function gammaFunction(x: number): number {
+    const p = [
+        -1.716185138865495, 24.76565080557592, -379.80425647094563,
+        629.3311553128184, 866.9662027904133, -31451.272968848367,
+        -36144.413418691176, 66456.14382024054,
+    ];
+    const q = [
+        -30.8402300119739, 315.35062697960416, -1015.1563674902192,
+        -3107.771671572311, 22538.118420980151, 4755.8462775278811, // eslint-disable-line
+        -134659.9598649693, -115132.2596755535,
+    ];
+
+    let fact = 0;
+    let y = x;
+
+    if (x > 171.6243769536076) {
+        return Infinity;
+    }
+
+    if (y <= 0) {
+        const resMod = y % 1 + 3.6e-16;
+
+        if (resMod) {
+            fact = (!(y & 1) ? 1 : -1) * Math.PI / Math.sin(Math.PI * resMod);
+            y = 1 - y;
+        } else {
+            return Infinity;
+        }
+    }
+
+    const yi = y;
+    let n = 0;
+    let z;
+
+    if (y < 1) {
+        z = y++;
+    } else {
+        z = (y -= n = (y | 0) - 1) - 1;
+    }
+
+    let xnum = 0;
+    let xden = 0;
+
+    for (let i = 0; i < 8; ++i) {
+        xnum = (xnum + p[i]) * z;
+        xden = xden * z + q[i];
+    }
+
+    let res = xnum / xden + 1;
+
+    if (yi < y) {
+        res /= yi;
+    } else if (yi > y) {
+        for (let i = 0; i < n; ++i) {
+            res *= y;
+            y++;
+        }
+    }
+
+    if (fact) {
+        res = fact / res;
+    }
+
+    return res;
+}
+
+export function chisquareCDF(x: number, degFreedom: number): number {
+    if (x <= 0) {
+        return 0;
+    }
+
+    return lowRegGamma(degFreedom / 2, x / 2);
+}
+
+export function chisquarePDF(x: number, degFreedom: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x === 0 && degFreedom === 2) {
+        return 0.5;
+    }
+
+    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
+}
+
+function lowRegGamma(a: number, x: number): number {
+    if (x < 0 || a <= 0) {
+        return Number.NaN;
+    }
+
+    // calculate maximum number of itterations required for a
+    const MAX_ITER = -~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17);
+    const aln = logGamma(a);
+
+    let _a = a;
+    let sum = 1 / a;
+    let del = sum;
+
+    if (x < a + 1) {
+        for (let i = 1; i <= MAX_ITER; i++) {
+            sum += del *= x / ++_a;
+        }
+
+        return (sum * Math.exp(-x + a * Math.log(x) - aln));
+    }
+
+    let b = x + 1 - a;
+    let c = 1 / 1.0e-30;
+    let d = 1 / b;
+    let h = d;
+
+    for (let i = 1; i <= MAX_ITER; i++) {
+        const temp = -i * (i - a);
+
+        b += 2;
+        d = temp * d + b;
+        c = b + temp / c;
+        d = 1 / d;
+        h *= d * c;
+    }
+
+    return (1 - h * Math.exp(-x + a * Math.log(x) - aln));
+};

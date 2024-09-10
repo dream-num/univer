@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用來計算其函數的值，介於下限值和上限值之間。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是 beta 分佈的相關機率。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BINOMDIST: {

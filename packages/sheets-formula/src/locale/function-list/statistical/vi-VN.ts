@@ -99,8 +99,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giá trị được sử dụng để tính toán hàm của nó, giữa giá trị giới hạn dưới và giá trị giới hạn trên.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BETA.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BETA_INV: {
@@ -113,8 +117,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố beta.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BINOM_DIST: {
@@ -160,8 +167,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: 'Trả về hàm mật độ xác suất tích lũy beta',
-        abstract: 'Trả về hàm mật độ xác suất tích lũy beta',
+        description: 'Trả về phân bố khi bình phương.',
+        abstract: 'Trả về phân bố khi bình phương.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -169,8 +176,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     CHISQ_DIST_RT: {

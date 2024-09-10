@@ -22,7 +22,7 @@ import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DO
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { DocCanvasPopManagerService, getPlainText, getPlainTextFormBody, getPlainTextFormDocument } from '@univerjs/docs-ui';
-import { IEditorService, IRangeSelectorService } from '@univerjs/ui';
+import { IEditorService, IRangeSelectorService, IZenZoneService } from '@univerjs/ui';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
@@ -93,7 +93,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocCanvasPopManagerService) private readonly _docCanvasPopManagerService: DocCanvasPopManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
+        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
 
@@ -112,6 +113,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
         }
 
         this.hideCurrentPopup(undefined, true);
+        if (location.type !== HyperLinkEditSourceType.ZEN_EDITOR && this._zenZoneService.visible) {
+            return;
+        }
         const currentEditing = this._currentEditing$.getValue();
         if (currentEditing && isEqualLink(location, currentEditing)) {
             return;

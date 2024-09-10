@@ -15,7 +15,6 @@
  */
 
 import { Tools } from '@univerjs/core';
-import { Transform } from './basics';
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
@@ -293,13 +292,6 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
             scaleX: m.a,
             scaleY: m.d,
         };
-        // const transformer = Transform.create([m.a, m.b, m.c, m.d, m.e, m.f]);
-        // const { scaleX, scaleY } = transformer.decompose();
-
-        // return {
-        //     scaleX,// why not m.a & m.d
-        //     scaleY,
-        // };
     }
 
     getScale() {

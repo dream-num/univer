@@ -245,7 +245,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
 
-        window.sc = scene;
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,
@@ -560,7 +559,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
                 let offsetX = 0;
                 let offsetY = 0;
-                console.log('mouse wheel event');
+
                 const isLimitedStore = viewMain.limitedScroll();
                 if (evt.inputIndex === PointerInput.MouseWheelX) {
                     const deltaFactor = Math.abs(evt.deltaX);

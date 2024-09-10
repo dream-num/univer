@@ -312,9 +312,6 @@ export class Font extends SheetExtension {
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, column);
 
-        if (row === 150 && column === 55) {
-            debugger;
-        }
         const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0);
         if (isOverflow) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);

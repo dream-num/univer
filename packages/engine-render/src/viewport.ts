@@ -734,13 +734,11 @@ export class Viewport {
         if (viewportScrollX !== undefined) {
             this._preViewportScrollX = this.viewportScrollX;
             this.viewportScrollX = viewportScrollX;
-            // this._deltaViewportScrollX = viewportScrollX - this._preViewportScrollX;
         }
 
         if (viewportScrollY !== undefined) {
             this._preViewportScrollY = this.viewportScrollY;
             this.viewportScrollY = viewportScrollY;
-            // this._deltaViewportScrollY = viewportScrollY - this._preViewportScrollY;
         }
         return this;
     }
@@ -1349,7 +1347,6 @@ export class Viewport {
 
     private _emitScrollEnd$(scrollSubParam: IScrollObserverParam) {
         clearTimeout(this._scrollStopNum);
-        console.log('emitScrollEnd$');
         this._scrollStopNum = setTimeout(() => {
             this.onScrollEnd$.emitEvent({
                 rawScrollX: scrollSubParam.rawScrollX,
@@ -1363,7 +1360,7 @@ export class Viewport {
                 limitY: this._scrollBar?.limitY,
                 isTrigger: false,
             });
-        }, 16);
+        }, 2);
     }
 
     /**
@@ -1446,8 +1443,6 @@ export class Viewport {
         this.scrollY = scrollY;
         this.viewportScrollX = viewportScrollX;
         this.viewportScrollY = viewportScrollY;
-
-        console.log('viewportScrollY', viewportScrollY, 'delta', this._deltaViewportScrollY);
 
         const scrollSubParam: IScrollObserverParam = {
             isTrigger,

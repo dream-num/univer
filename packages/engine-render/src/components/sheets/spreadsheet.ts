@@ -328,7 +328,7 @@ export class Spreadsheet extends SheetComponent {
                 cacheCtx.save();
                 cacheCtx.beginPath();
                 cacheCtx.rectByPrecision(x, y, w, h);
-                cacheCtx.closePathByEnv();
+                cacheCtx.closePath();
                 // The reason for clipping here is to avoid duplicate drawing (otherwise the text would be jagged, especially on Windows)
                 cacheCtx.clip();
                 this.draw(cacheCtx, {
@@ -665,7 +665,7 @@ export class Spreadsheet extends SheetComponent {
             ctx.lineToByPrecision(startX, endY);
             ctx.lineToByPrecision(startX, startY);
             ctx.stroke();
-            ctx.closePathByEnv();
+            ctx.closePath();
         }
     }
 
@@ -724,7 +724,7 @@ export class Spreadsheet extends SheetComponent {
             cacheCtx.moveTo(i - rowHeaderWidth, top - columnHeaderHeight);
             cacheCtx.lineTo(i - rowHeaderWidth, bottom - columnHeaderHeight);
             cacheCtx.stroke();
-            cacheCtx.closePathByEnv();
+            cacheCtx.closePath();
         }
         for (let j = startY; j <= endY; j += 50) {
             cacheCtx.beginPath();
@@ -732,7 +732,7 @@ export class Spreadsheet extends SheetComponent {
             cacheCtx.moveTo(left - rowHeaderWidth, j - columnHeaderHeight);
             cacheCtx.lineTo(right - rowHeaderWidth, j - columnHeaderHeight);
             cacheCtx.stroke();
-            cacheCtx.closePathByEnv();
+            cacheCtx.closePath();
         }
         cacheCtx.fillStyle = '#666';
         for (let i = startX; i <= endX; i += 100) {
@@ -746,7 +746,7 @@ export class Spreadsheet extends SheetComponent {
         //     cacheCtx.clearRect(left - rowHeaderWidth, j - columnHeaderHeight - 15, 30, 30);
         //     cacheCtx.fillText(`${left}`, left - rowHeaderWidth, j - columnHeaderHeight);
         // }
-        cacheCtx.closePathByEnv();
+        cacheCtx.closePath();
         cacheCtx.restore();
     }
 

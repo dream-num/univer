@@ -51,8 +51,8 @@ import type {
     IRange,
     IRowAutoHeightInfo,
     IRowData,
-    ISelectionCell,
     IRowRange,
+    ISelectionCell,
     ISelectionCellWithMergeInfo,
     ISize,
     IStyleBase,
@@ -265,7 +265,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._updateLayout();
         this._initContextListener();
-        window.sk = this;
         // this.updateDataMerge();
     }
 
@@ -1626,16 +1625,15 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-            for (let c = Math.max(startColumn - 20, 0); c < startColumn; c++) {
-            // for (let c = 0; c < startColumn; c++) {
+            // for (let c = Math.max(startColumn - 20, 0); c < startColumn; c++) {
+            for (let c = 0; c < startColumn; c++) {
                 this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
-                // if (r === 150 && c === 55) debugsger;
             }
             if (endColumn === 0) continue;
 
             // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-            for (let c = endColumn + 1; c < Math.min(endColumn + 20, columnWidthAccumulation.length); c++) {
-            // for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
+            // for (let c = endColumn + 1; c < Math.min(endColumn + 20, columnWidthAccumulation.length); c++) {
+            for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
                 this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
             }
         }
@@ -1705,17 +1703,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
         if (hidden) {
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(
-                r,
-                c,
+                row,
+                col,
                 this._dataMergeCache
             );
 
             if (isMerged && !isMergedMainCell) {
                 // If the cell is merged and is not the main cell, the cell is not rendered.
-                return true;
+                return;
             } else if (!isMergedMainCell) {
                 // If the cell no merged, the cell is not rendered.
-                return true;
+                return;
             }
         }
 

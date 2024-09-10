@@ -81,6 +81,10 @@ export class Marker extends SheetExtension {
                 cellData = worksheet.getCell(mainCell.row, mainCell.col);
             }
 
+            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                return true;
+            }
+
             if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
                 const rangeStr = stringifyRange(mergeInfo);
                 if (mergeCellRendered.has(rangeStr)) {

@@ -188,7 +188,7 @@ export class PromptController extends Disposable {
         @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IEditorService private readonly _editorService: IEditorService,
         @ILayoutService private readonly _layoutService: ILayoutService
@@ -254,7 +254,7 @@ export class PromptController extends Disposable {
 
     private _initialCursorSync() {
         this.disposeWithMe(
-            this._textSelectionManagerService.textSelection$.subscribe((params) => {
+            this._docSelectionManagerService.textSelection$.subscribe((params) => {
                 if (params?.unitId == null) {
                     return;
                 }
@@ -519,7 +519,7 @@ export class PromptController extends Disposable {
     private _initAcceptFormula() {
         this.disposeWithMe(
             this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
-                const activeRange = this._textSelectionManagerService.getActiveTextRange();
+                const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
                 if (activeRange == null) {
                     this._hideFunctionPanel();
@@ -585,7 +585,7 @@ export class PromptController extends Disposable {
     }
 
     private _changeFunctionPanelState() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRange();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             this._hideFunctionPanel();
@@ -684,7 +684,7 @@ export class PromptController extends Disposable {
      * @returns Return the character under the current cursor in the editor.
      */
     private _getCurrentChar() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRange();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             return;
@@ -813,7 +813,7 @@ export class PromptController extends Disposable {
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-            const activeRange = this._textSelectionManagerService.getActiveTextRange();
+            const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
             if (activeRange == null) {
                 return;
@@ -1215,7 +1215,7 @@ export class PromptController extends Disposable {
         // Get theme color from prompt formula editor when creating a new selection.
         this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
 
-        const activeRange = this._textSelectionManagerService.getActiveTextRange();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
         if (activeRange == null) {
             return;
         }
@@ -1266,7 +1266,7 @@ export class PromptController extends Disposable {
                 options: { fromSelection },
             });
             // The ReplaceContentCommand has canceled the selection operation, so it needs to be triggered externally once.
-            this._textSelectionManagerService.replaceTextRanges([
+            this._docSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: textSelectionOffset + 1 - offset,
                     endOffset: textSelectionOffset + 1 - offset,
@@ -1275,7 +1275,7 @@ export class PromptController extends Disposable {
             ], true, { fromSelection });
         } else {
             this._updateEditorModel(`${formulaString}\r\n`, textRuns);
-            this._textSelectionManagerService.replaceTextRanges([
+            this._docSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: textSelectionOffset + 1 - offset,
                     endOffset: textSelectionOffset + 1 - offset,
@@ -1287,9 +1287,7 @@ export class PromptController extends Disposable {
         /**
          * After selecting the formula, allow the editor to continue entering content.
          */
-        setTimeout(() => {
-            this._layoutService.focus();
-        }, 0);
+        this._layoutService.focus();
     }
 
     private _fitEditorSize() {
@@ -1840,7 +1838,7 @@ export class PromptController extends Disposable {
      * Absolute range, triggered by F4
      */
     private _changeRefString() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRange();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             return;

@@ -16,7 +16,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -55,6 +55,7 @@ export const CellLinkEdit = () => {
     const zenZoneService = useDependency(IZenZoneService);
     const markSelectionService = useDependency(IMarkSelectionService);
     const textSelectionService = useDependency(DocSelectionManagerService);
+    const contextService = useDependency(IContextService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -383,17 +384,20 @@ export const CellLinkEdit = () => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     zenZoneService.hide();
+                                    contextService.setContextValue(FOCUSING_SHEET, true);
                                 }
                                 setHide(true);
                             } else {
                                 await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
-                                    commandService.executeCommand(SetSelectionsOperation.id, {
+                                    await commandService.executeCommand(SetSelectionsOperation.id, {
                                         unitId: editing.unitId,
                                         subUnitId: editing.subUnitId,
                                         selections: [{ range: { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col } }],
                                     } as ISetSelectionsOperationParams);
+
                                     zenZoneService.show();
+                                    contextService.setContextValue(FOCUSING_SHEET, false);
                                 }
                                 setHide(false);
                             }

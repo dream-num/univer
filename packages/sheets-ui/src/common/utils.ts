@@ -88,14 +88,14 @@ export function getClearContentMutationParamsForRanges(
     };
 }
 
-function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
+export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData) {
-            if (!leftTopCellValue && cellData.v !== undefined) {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData)) {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);

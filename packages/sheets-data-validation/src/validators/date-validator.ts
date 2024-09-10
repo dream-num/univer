@@ -133,10 +133,13 @@ export class DateValidator extends BaseDataValidator<number> {
         };
     }
 
-    override normlizeFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
+    override normalizeFormula(rule: IDataValidationRule, _unitId: string, _subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
         const { formula1, formula2, bizInfo } = rule;
         const normlizeSingleFormula = (formula: string | undefined) => {
             if (!formula) {
+                return formula;
+            }
+            if (!Number.isNaN(+formula)) {
                 return formula;
             }
             const res = numfmt.parseDate(formula)?.v as number;

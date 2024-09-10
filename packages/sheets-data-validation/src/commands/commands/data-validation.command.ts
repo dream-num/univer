@@ -364,7 +364,7 @@ export const UpdateSheetDataValidationSettingCommand: ICommand<IUpdateSheetDataV
                 type: UpdateRuleType.SETTING,
                 payload: {
                     ...setting,
-                    ...validator.normlizeFormula(newRule, unitId, subUnitId),
+                    ...validator.normalizeFormula(newRule, unitId, subUnitId),
                 },
             },
         };

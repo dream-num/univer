@@ -63,7 +63,7 @@ export class SheetDataValidationModel extends Disposable {
                         unitId,
                         subUnitId,
                         rule,
-                        source: 'command',
+                        source: 'patched',
                     });
                     this._addRule(unitId, subUnitId, rule);
                 }

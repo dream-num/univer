@@ -203,7 +203,7 @@ importers:
         version: link:../packages/data-validation
       '@univerjs/debugger':
         specifier: workspace:*
-        version: link:../packages/debugger
+        version: link:../packages-experimental/debugger
       '@univerjs/design':
         specifier: workspace:*
         version: link:../packages/design
@@ -400,6 +400,56 @@ importers:
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
+
+  packages-experimental/debugger:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../../packages/design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../../packages/engine-render
+      '@univerjs/facade':
+        specifier: workspace:*
+        version: link:../../packages/facade
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../../packages/sheets
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../../packages/sheets-drawing-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.3.1
+    optionalDependencies:
+      vue:
+        specifier: '>=3.0.0'
+        version: 3.4.38(typescript@5.6.2)
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@vitejs/plugin-vue':
+        specifier: ^5.1.3
+        version: 5.1.3(vite@5.4.3(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
+      vite:
+        specifier: ^5.4.3
+        version: 5.4.3(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.0.5(@types/node@22.5.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-docs-ui:
     dependencies:
@@ -792,56 +842,6 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.6.2
-        version: 5.6.2
-      vite:
-        specifier: ^5.4.3
-        version: 5.4.3(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.0.5
-        version: 2.0.5(@types/node@22.5.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-
-  packages/debugger:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../facade
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-drawing-ui':
-        specifier: workspace:*
-        version: link:../sheets-drawing-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      react:
-        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
-        version: 18.3.1
-    optionalDependencies:
-      vue:
-        specifier: '>=3.0.0'
-        version: 3.4.38(typescript@5.6.2)
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@vitejs/plugin-vue':
-        specifier: ^5.1.3
-        version: 5.1.3(vite@5.4.3(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1

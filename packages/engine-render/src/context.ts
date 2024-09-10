@@ -20,6 +20,8 @@ import { Transform } from './basics';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
+    private _system: string;
+    private _browser: string;
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
@@ -480,13 +482,31 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.closePath();
     }
 
+    getSystem() {
+        if (this._system) {
+            return this._system;
+        } else {
+            this._system = Tools.getSystemType();
+        }
+        return this._system;
+    }
+
+    getBrowser() {
+        if (this._browser) {
+            return this._browser;
+        } else {
+            this._browser = Tools.getBrowserType();
+        }
+        return this._browser;
+    }
+
     /**
      * Chrome hardware acceleration causes canvas stroke to fail to draw lines on Mac.
      */
     closePathByEnv() {
-        const system = Tools.getSystemType();
+        const system = this.getSystem();
         const isMac = system === 'Mac';
-        const browser = Tools.getBrowserType();
+        const browser = this.getBrowser();
         const isChrome = browser === 'Chrome';
 
         if (isMac && isChrome) {

@@ -132,7 +132,7 @@ export class DataValidationRefRangeController extends Disposable {
                 if (formula2) {
                     const disposable = this._formulaRefRangeService.registerFormula(
                         formula2.text,
-                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
+                        (newFormulaString) => handleFormulaChange('formula2', newFormulaString)
                     );
                     disposeSet.add(() => disposable.dispose());
                 }

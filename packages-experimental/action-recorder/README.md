@@ -5,7 +5,7 @@
 
 ## Introduction
 
-> TODO: Introduction
+This plugin is used to record user actions and it can also replay them.
 
 ## Usage
 

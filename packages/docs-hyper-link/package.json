@@ -59,9 +59,6 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*"
     },
-    "dependencies": {
-        "@univerjs/icons": "^0.1.74"
-    },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",

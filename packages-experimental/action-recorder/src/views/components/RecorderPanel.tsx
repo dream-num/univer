@@ -18,8 +18,10 @@ import { ICommandService, useDependency } from '@univerjs/core';
 import React, { useCallback } from 'react';
 import { useObservable } from '@univerjs/ui';
 import { Button } from '@univerjs/design';
+import { RecordSingle } from '@univerjs/icons';
+import clsx from 'clsx';
 import { ActionRecorderService } from '../../services/action-recorder.service';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/command';
+import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
 import { CloseRecordPanelOperation } from '../../commands/operations/operation';
 import styles from './index.module.less';
 
@@ -37,7 +39,7 @@ function RecordPanelImpl() {
 
     const recording = useObservable(actionRecorderService.recording$);
     const recordedCommands = useObservable(actionRecorderService.recordedCommands$);
-    const nums = recordedCommands?.length ?? 0;
+    const len = recordedCommands?.length ?? 0;
 
     const closePanel = useCallback(() => {
         if (!recording) commandService.executeCommand(CloseRecordPanelOperation.id);
@@ -56,16 +58,18 @@ function RecordPanelImpl() {
     }, [commandService, recording]);
 
     const titleText = recording
-        ? nums === 0 ? 'Recording...' : (`${nums}: ${recordedCommands![nums - 1].id}`)
+        ? len === 0 ? 'Recording...' : (`${len}: ${recordedCommands![len - 1].id}`)
         : 'Start Recording';
 
     return (
         <div className={styles.actionRecorderPanel}>
-            <div className={styles.actionRecorderPanelIcon}></div>
+            <div className={clsx(styles.actionRecorderPanelIcon, recording ? styles.actionRecorderPanelIconRecording : false)}>
+                <RecordSingle />
+            </div>
             <div className={styles.actionRecorderPanelTitle}>{titleText}</div>
             <div className={styles.actionRecorderPanelActions}>
-                <Button type="default" onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
-                <Button type="primary" onClick={recording ? completeRecording : startRecording}>{ recording ? 'Save' : 'Start' }</Button>
+                <Button type="default" size="small" onClick={recording ? stopRecording : closePanel}>{ recording ? 'Cancel' : 'Close' }</Button>
+                <Button type="primary" size="small" onClick={recording ? completeRecording : startRecording}>{ recording ? 'Save' : 'Start' }</Button>
             </div>
         </div>
     );

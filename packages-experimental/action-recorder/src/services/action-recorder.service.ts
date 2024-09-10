@@ -36,9 +36,12 @@ export class ActionRecorderService extends Disposable {
     readonly recording$ = this._recording$.asObservable();
     get recording(): boolean { return this._recording$.getValue(); }
 
+    private _recorded$ = new BehaviorSubject<ICommandInfo[]>([]);
+    private get _recorded(): ICommandInfo[] { return this._recorded$.getValue(); }
+
     private _recordedCommands$ = new BehaviorSubject<ICommandInfo[]>([]);
     readonly recordedCommands$ = this._recordedCommands$.asObservable();
-    private get recordedCommands(): ICommandInfo[] { return this._recordedCommands$.getValue(); }
+    private get _recordedCommands(): ICommandInfo[] { return this._recordedCommands$.getValue(); }
 
     constructor(
         @ICommandService private readonly _commandSrv: ICommandService,
@@ -62,17 +65,23 @@ export class ActionRecorderService extends Disposable {
     startRecording(): void {
         this._recorder = this._commandSrv.onCommandExecuted((commandInfo) => {
             if (this._shouldRecordCommands.has(commandInfo.id)) {
-                const recordedCommands = this.recordedCommands;
+                const recorded = this._recorded;
+                const commands = this._recordedCommands;
 
                 if (
                     commandInfo.id === SetSelectionsOperation.id &&
-                    recordedCommands.length > 0 &&
-                    recordedCommands[recordedCommands.length - 1].id === SetSelectionsOperation.id
+                    recorded.length > 0 &&
+                    recorded[recorded.length - 1].id === SetSelectionsOperation.id
                 ) {
-                    recordedCommands[recordedCommands.length - 1] = commandInfo;
+                    recorded[recorded.length - 1] = commandInfo;
                 } else {
-                    recordedCommands.push(commandInfo);
-                    this._recordedCommands$.next(recordedCommands);
+                    recorded.push(commandInfo);
+                    this._recorded$.next(recorded);
+
+                    if (commandInfo.type === CommandType.COMMAND) {
+                        commands.push(commandInfo);
+                        this._recordedCommands$.next(commands);
+                    }
                 }
             }
         });
@@ -84,12 +93,13 @@ export class ActionRecorderService extends Disposable {
         this._recorder?.dispose();
         this._recorder = null;
 
+        this._recorded$.next([]);
         this._recordedCommands$.next([]);
         this._recording$.next(false);
     }
 
     completeRecording(): void {
-        const commands = this.recordedCommands.slice();
+        const commands = this._recorded.slice();
         this._localFileService.downloadFile(new Blob([JSON.stringify(commands, null, 2)]), 'recorded-commands.json');
 
         this._logService.error('Recorded commands:', commands);

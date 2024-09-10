@@ -79,7 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.77",
+        "@univerjs/icons": "^0.1.78",
         "@univerjs/protocol": "0.1.39-alpha.15",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",

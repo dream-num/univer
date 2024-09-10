@@ -15,28 +15,55 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem, MenuSchemaType } from '@univerjs/ui';
+import type { IMenuButtonItem, IMenuSelectorItem, MenuSchemaType } from '@univerjs/ui';
 import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
 import { ActionRecorderService } from '../services/action-recorder.service';
 import { OpenRecordPanelOperation } from '../commands/operations/operation';
+import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
+
+export const RECORD_MENU_ITEM_ID = 'RECORD_MENU_ITEM';
+export function RecordMenuItemFactory(): IMenuSelectorItem {
+    return {
+        id: RECORD_MENU_ITEM_ID,
+        type: MenuItemType.SUBITEMS,
+        icon: 'RecordSingle',
+        tooltip: 'action-recorder.menu.title',
+    };
+}
 
 export function OpenRecorderMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const actionRecorderService = accessor.get(ActionRecorderService);
 
     return {
         id: OpenRecordPanelOperation.id,
-        icon: 'RecorderIcon',
-        tooltip: 'action-recorder.menu.title',
+        title: 'action-recorder.menu.record',
         type: MenuItemType.BUTTON,
         disabled$: actionRecorderService.panelOpened$,
     };
 }
 
+export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem {
+    return {
+        id: ReplayLocalRecordCommand.id,
+        title: 'action-recorder.menu.replay-local',
+        type: MenuItemType.BUTTON,
+    };
+}
+
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
-        [OpenRecordPanelOperation.id]: {
-            order: 1,
-            menuItemFactory: OpenRecorderMenuItemFactory,
+        RECORD_MENU_ID: {
+            order: 10,
+            menuItemFactory: RecordMenuItemFactory,
+            [OpenRecordPanelOperation.id]: {
+                order: 1,
+                menuItemFactory: OpenRecorderMenuItemFactory,
+            },
+            [ReplayLocalRecordCommand.id]: {
+                order: 2,
+                menuItemFactory: ReplayLocalRecordMenuItemFactory,
+            },
         },
+
     },
 };

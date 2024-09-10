@@ -15,13 +15,14 @@
  */
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { BuiltInUIPart, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
 import { CopySheetCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, InsertColAfterCommand, InsertColBeforeCommand, InsertRowAfterCommand, InsertRowBeforeCommand, InsertSheetCommand, RemoveSheetCommand, SetFrozenCancelCommand, SetFrozenCommand, SetHorizontalTextAlignCommand, SetOverlineCommand, SetRangeProtectionCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStrikeThroughCommand, SetStyleCommand, SetTextColorCommand, SetTextRotationCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActivateCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeSubscriptCommand, SetRangeSuperscriptCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteBesidesBorderCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteFormatCommand, SheetPasteShortKeyCommand, SheetPasteValueCommand } from '@univerjs/sheets-ui';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
+import { RecordSingle } from '@univerjs/icons';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
 import { RecorderPanel } from '../views/components/RecorderPanel';
-import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/command';
+import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
 import { ActionRecorderService } from '../services/action-recorder.service';
 import { menuSchema } from './action-recorder.menu';
 
@@ -30,6 +31,7 @@ export class ActionRecorderController extends Disposable {
         @ICommandService private readonly _commandSrv: ICommandService,
         @IUIPartsService private readonly _uiPartsSrv: IUIPartsService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(ActionRecorderService) private readonly _actionRecorderService: ActionRecorderService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -53,7 +55,7 @@ export class ActionRecorderController extends Disposable {
 
     private _initUI(): void {
         this._uiPartsSrv.registerComponent(BuiltInUIPart.GLOBAL, () => connectInjector(RecorderPanel, this._injector));
-
+        this._componentManager.register('RecordSingle', RecordSingle);
         this._menuManagerService.mergeMenu(menuSchema);
     }
 

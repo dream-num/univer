@@ -18,8 +18,34 @@
         &-icon {
             flex-grow: 0;
             flex-shrink: 0;
-            width: 16px;
-            height: 16px;
+            font-size: var(--font-size-xxl);
+            width: var(--font-size-xxl);
+            height: var(--font-size-xxl);
+            margin-right: var(--margin-xs);
+
+            @keyframes recording {
+                0% {
+                    color: rgb(var(--text-color));
+                }
+
+                40% {
+                    color: red;
+                }
+
+                60% {
+                    color: red;
+                }
+
+                100% {
+                    color: rgb(var(--text-color));
+                }
+            }
+
+            &-recording {
+                > svg > g > path:first-of-type {
+                    animation: recording 2s infinite;
+                }
+            }
         }
 
         &-title {

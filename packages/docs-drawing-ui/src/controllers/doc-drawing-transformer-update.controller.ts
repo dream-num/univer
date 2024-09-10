@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     COLORS,
@@ -23,10 +22,11 @@ import {
 } from '@univerjs/core';
 import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, ITextSelectionRenderManager, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
-import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
+import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
+import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 
 const INLINE_DRAWING_ANCHOR_KEY_PREFIX = '__InlineDrawingAnchor__';
 
@@ -155,7 +155,7 @@ export class DocDrawingTransformerController extends Disposable {
                         throttleMultipleDrawingUpdate(objects);
                     } else if (objects.size === 1) {
                         const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
-                        const object: BaseObject = objects.values().next().value;
+                        const object: BaseObject = objects.values().next().value!;
                         const { width, height, top, left, angle } = object;
 
                         if (
@@ -209,7 +209,7 @@ export class DocDrawingTransformerController extends Disposable {
                         this._updateMultipleDrawingDocTransform(objects);
                     } else if (objects.size === 1) {
                         const drawingCache: Nullable<IDrawingCache> = this._transformerCache.values().next().value;
-                        const object: BaseObject = objects.values().next().value;
+                        const object: BaseObject = objects.values().next().value!;
                         const { width, height, top, left, angle } = object;
 
                         if (
@@ -345,8 +345,8 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
-        const drawingCache: IDrawingCache = this._transformerCache.values().next().value;
-        const object = objects.values().next().value;
+        const drawingCache: IDrawingCache = this._transformerCache.values().next().value!;
+        const object = objects.values().next().value!;
 
         const anchor = this._getDrawingAnchor(drawingCache.drawing, object);
     }

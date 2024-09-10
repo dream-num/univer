@@ -15,8 +15,8 @@
  */
 
 import { CustomRangeType, Disposable } from '@univerjs/core';
-import { IUniFormulaService } from '@univerjs/uni-formula';
 import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
+import { IUniFormulaService } from '@univerjs/uni-formula';
 import type { RichText } from '@univerjs/engine-render';
 import type { IAddSlideUniFormulaCommandParams } from '../commands/commands/slide.command';
 import type { UniFormulaService } from './uni-formula.service';
@@ -34,7 +34,7 @@ export class SlideUIFormulaCacheService extends Disposable {
     }
 
     writeCache(rangeId: string, params: IAddSlideUniFormulaCommandParams) {
-        if (this._caches.size && this._caches.values().next().value.unitId !== params.unitId) {
+        if (this._caches.size && this._caches.values().next().value?.unitId !== params.unitId) {
             this.clearCache();
         }
 

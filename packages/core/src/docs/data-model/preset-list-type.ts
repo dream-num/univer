@@ -16,8 +16,8 @@
 
 import { Tools } from '../../shared';
 import { BooleanNumber } from '../../types/enum';
-import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
+import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 
 export enum QuickListType {
     ORDER_LIST_QUICK_1 = '1.',
@@ -118,7 +118,7 @@ const orderListFactory = (options: { glyphFormat: string; glyphType: GlyphType }
 };
 
 const checkListFactory = (symbol: string, textStyle?: ITextStyle): INestingLevel[] => {
-    return Array(9).fill(0).map((_, i) => ({
+    return new Array(9).fill(0).map((_, i) => ({
         glyphFormat: ` %${i + 1}`,
         glyphSymbol: symbol,
         bulletAlignment: BulletAlignment.START,

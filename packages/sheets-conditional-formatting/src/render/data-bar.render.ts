@@ -49,14 +49,13 @@ export class DataBar extends SheetExtension {
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
-                    return;
-                }
-
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
-                const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

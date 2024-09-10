@@ -54,8 +54,8 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
         const { startRow, startColumn, endRow, endColumn } = spreadsheetSkeleton.rowColumnSegment;
-        const start = this.getCellIndex(startRow, startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-        const end = this.getCellIndex(endRow, endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        const start = this.getCellByIndex(startRow, startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        const end = this.getCellByIndex(endRow, endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
         const { hasWorksheetRule = false, selectionProtection = [] } = worksheet.getCell(startRow, startColumn) as IWorksheetProtectionRenderCellData || {};
         if (!this._pattern) {

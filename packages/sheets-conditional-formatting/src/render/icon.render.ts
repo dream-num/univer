@@ -56,12 +56,11 @@ export class ConditionalFormattingIcon extends SheetExtension {
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
-                    return;
-                }
-
                 const { iconType, iconId } = cellData.iconSet;
                 if (iconType === EMPTY_ICON_TYPE) {
                     return;
@@ -70,7 +69,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 if (!icon) {
                     return;
                 }
-                const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

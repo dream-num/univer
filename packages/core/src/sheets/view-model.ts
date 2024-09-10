@@ -55,6 +55,8 @@ export interface IRowFilteredInterceptor {
 export class SheetViewModel extends Disposable {
     private _cellContentInterceptor: Nullable<ICellContentInterceptor> = null;
     private _rowFilteredInterceptor: Nullable<IRowFilteredInterceptor> = null;
+    _commandService: any;
+    _univerInstanceService: any;
 
     constructor(
         private readonly getRawCell: (row: number, col: number) => Nullable<ICellData>
@@ -69,9 +71,22 @@ export class SheetViewModel extends Disposable {
         this._rowFilteredInterceptor = null;
     }
 
+    // _cellDataCacheMap: Map<number, Map<number, Nullable<ICellDataForSheetInterceptor>>> = new Map();
     getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (this._cellContentInterceptor) {
             return this._cellContentInterceptor.getCell(row, col);
+
+            // if (this._cellDataCacheMap.get(row)) {
+            //     if (!this._cellDataCacheMap.get(row)?.get(col)) {
+            //         this._cellDataCacheMap.get(row)?.set(col, this._cellContentInterceptor.getCell(row, col));
+            //         // return this._cellDataCacheMap.get(row)?.get(col);
+            //     }
+            // } else {
+            //     this._cellDataCacheMap.set(row, new Map());
+            //     this._cellDataCacheMap.get(row)?.set(col, this._cellContentInterceptor.getCell(row, col));
+            //     // return this._cellDataCacheMap.get(row)?.get(col);
+            // }
+            // return this._cellDataCacheMap.get(row)?.get(col);
         }
 
         return this.getRawCell(row, col);

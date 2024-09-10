@@ -145,6 +145,8 @@ export class SheetsFilterService extends Disposable {
         const subUnitId = activeSheet.getSheetId();
         const filterModel = this.getFilterModel(unitId, subUnitId);
         this._activeFilterModel$.next(filterModel);
+
+        workbook.getActiveSheet().clearFilteredRowCacheMap();
     }
 
     private _initActiveFilterModel(): void {

@@ -64,7 +64,7 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
         }
         this.renderCache.clear();
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
-            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
                 return;
             }
             const { selectionProtection = [] } = worksheet.getCell(row, col) as IRangeProtectionRenderCellData || {};
@@ -85,8 +85,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
                     }
                     this.renderCache.add(config.ruleId);
                     config.ranges!.forEach((range) => {
-                        const start = this.getCellIndex(range.startRow, range.startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-                        const end = this.getCellIndex(range.endRow, range.endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        const start = this.getCellByIndex(range.startRow, range.startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        const end = this.getCellByIndex(range.endRow, range.endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                         ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
                     });
                 }

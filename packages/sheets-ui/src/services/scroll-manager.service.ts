@@ -117,7 +117,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     /**
-     * set scrollInfo by cmd, call by scroll operation
+     * set scrollInfo by SetScrollOperation, call by scroll operation
      * @param param
      */
     setScrollInfoAndEmitEvent(param: IScrollStateWithSearchParam) {

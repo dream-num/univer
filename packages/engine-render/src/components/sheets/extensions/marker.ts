@@ -50,8 +50,12 @@ export class Marker extends SheetExtension {
 
         // eslint-disable-next-line max-lines-per-function
         Range.foreach(rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
+
             let cellData = worksheet.getCell(row, col);
-            const cellInfo = this.getCellIndex(
+            const cellInfo = this.getCellByIndex(
                 row,
                 col,
                 skeleton.rowHeightAccumulation,
@@ -77,10 +81,6 @@ export class Marker extends SheetExtension {
                 cellData = worksheet.getCell(mainCell.row, mainCell.col);
             }
 
-            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                return true;
-            }
-
             if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
                 const rangeStr = stringifyRange(mergeInfo);
                 if (mergeCellRendered.has(rangeStr)) {
@@ -88,11 +88,6 @@ export class Marker extends SheetExtension {
                 }
 
                 mergeCellRendered.add(rangeStr);
-            }
-
-            // current cell is hidden
-            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
-                return;
             }
 
             if (!cellData) {

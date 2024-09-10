@@ -255,17 +255,18 @@ export class Worksheet {
         if (row < 0 || col < 0) {
             return null;
         }
-        if (this._cellDataCacheMap.get(row)) {
-            if (!this._cellDataCacheMap.get(row)?.get(col)) {
-                this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
-                // return this._cellDataCacheMap.get(row)?.get(col);
-            }
-        } else {
-            this._cellDataCacheMap.set(row, new Map());
-            this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
-            // return this._cellDataCacheMap.get(row)?.get(col);
-        }
-        return this._cellDataCacheMap.get(row)?.get(col);
+        return this._viewModel.getCell(row, col);
+        // if (this._cellDataCacheMap.get(row)) {
+        //     if (!this._cellDataCacheMap.get(row)?.get(col)) {
+        //         this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
+        //         // return this._cellDataCacheMap.get(row)?.get(col);
+        //     }
+        // } else {
+        //     this._cellDataCacheMap.set(row, new Map());
+        //     this._cellDataCacheMap.get(row)?.set(col, this._viewModel.getCell(row, col));
+        //     // return this._cellDataCacheMap.get(row)?.get(col);
+        // }
+        // return this._cellDataCacheMap.get(row)?.get(col);
     }
 
     getCellRaw(row: number, col: number): Nullable<ICellData> {
@@ -481,7 +482,6 @@ export class Worksheet {
      * @returns if the row in visible to the user
      */
     getRowVisible(row: number): boolean {
-        return row <= 2732 && row >= 2727;
         if (!this._filteredRowCacheMap.has(row)) {
             this._filteredRowCacheMap.set(row, this._viewModel.getRowFiltered(row));
         }

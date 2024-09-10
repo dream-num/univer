@@ -34,9 +34,8 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     ) => {
         const res = await commandService.executeCommand(id, params, options);
         callback?.(res);
-    }
-    ,
-    275
+    },
+    1000
 );
 
 export function DataValidationDetail() {

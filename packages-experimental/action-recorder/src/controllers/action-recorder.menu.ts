@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuSelectorItem, MenuSchemaType } from '@univerjs/ui';
-import { MenuItemType, RibbonStartGroup } from '@univerjs/ui';
-import { ActionRecorderService } from '../services/action-recorder.service';
-import { OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
+import { OpenRecordPanelOperation } from '../commands/operations/operation';
+import { ActionRecorderService } from '../services/action-recorder.service';
 
 export const RECORD_MENU_ITEM_ID = 'RECORD_MENU_ITEM';
 export function RecordMenuItemFactory(): IMenuSelectorItem {
@@ -52,7 +52,7 @@ export function ReplayLocalRecordMenuItemFactory(): IMenuButtonItem {
 
 export const menuSchema: MenuSchemaType = {
     [RibbonStartGroup.OTHERS]: {
-        RECORD_MENU_ID: {
+        [RECORD_MENU_ITEM_ID]: {
             order: 10,
             menuItemFactory: RecordMenuItemFactory,
             [OpenRecordPanelOperation.id]: {

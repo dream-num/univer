@@ -61,34 +61,46 @@ export function FormulaBar() {
     }
 
     useLayoutEffect(() => {
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const subscription = merge(
-            worksheetProtectionRuleModel.ruleChange$,
-            rangeProtectionRuleModel.ruleChange$,
-            selectionManager.selectionMoveEnd$,
-            workbook.activeSheet$
-        ).pipe(
-            switchMap(() => {
-                const unitId = workbook.getUnitId();
-                const worksheet = workbook.getActiveSheet();
-                if (!worksheet) return EMPTY;
+        const subscription = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
+            switchMap((workbook) => {
+                if (!workbook) {
+                    return EMPTY;
+                }
+                return workbook.activeSheet$.pipe(
+                    switchMap((worksheet) => {
+                        if (!worksheet) {
+                            return EMPTY;
+                        }
+                        return merge(
+                            worksheetProtectionRuleModel.ruleChange$,
+                            rangeProtectionRuleModel.ruleChange$,
+                            selectionManager.selectionMoveEnd$
+                        ).pipe(
+                            switchMap(() => {
+                                const unitId = workbook.getUnitId();
+                                const worksheet = workbook.getActiveSheet();
+                                if (!worksheet) return EMPTY;
 
-                const subUnitId = worksheet.getSheetId();
-                const range = selectionManager.getCurrentLastSelection()?.range;
-                if (!range) return EMPTY;
+                                const subUnitId = worksheet.getSheetId();
+                                const range = selectionManager.getCurrentLastSelection()?.range;
+                                if (!range) return EMPTY;
 
-                const permissionIds = getPermissionIds(unitId, subUnitId);
+                                const permissionIds = getPermissionIds(unitId, subUnitId);
 
-                const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
-                const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                    return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
-                });
+                                const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
+                                const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                                    return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
+                                });
 
-                permissionList.forEach((p) => {
-                    permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
-                });
+                                permissionList.forEach((p) => {
+                                    permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+                                });
 
-                return permissionService.composePermission$(permissionIds);
+                                return permissionService.composePermission$(permissionIds);
+                            })
+                        );
+                    })
+                );
             })
         ).subscribe((permissions) => {
             if (permissions) {

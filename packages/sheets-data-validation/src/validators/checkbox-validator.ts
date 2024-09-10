@@ -38,6 +38,13 @@ function getFailMessage(formula: string | undefined, localeService: LocaleServic
     return '';
 }
 
+const transformValue = (value: Nullable<CellValue>) =>
+    Tools.isDefine(value) && String(value).toLowerCase() === 'true'
+        ? '1'
+        : String(value).toLowerCase() === 'false'
+            ? '0'
+            : value;
+
 export class CheckboxValidator extends BaseDataValidator {
     override id: string = DataValidationType.CHECKBOX;
     override title: string = 'dataValidation.checkbox.title';
@@ -89,12 +96,6 @@ export class CheckboxValidator extends BaseDataValidator {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const transformValue = (value: Nullable<CellValue>) =>
-            Tools.isDefine(value) && String(value).toLowerCase() === 'true'
-                ? '1'
-                : String(value).toLowerCase() === 'false'
-                    ? '0'
-                    : value;
 
         return {
             formula1: transformValue(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
@@ -106,8 +107,8 @@ export class CheckboxValidator extends BaseDataValidator {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
-            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+            formula1: transformValue(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
+            formula2: transformValue(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
         };
     }
 

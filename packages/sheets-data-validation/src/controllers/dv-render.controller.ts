@@ -187,7 +187,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         }
                         const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                        const cellValue = getCellValueOrigin(cell);
+                        const cellOrigin = worksheet.getCellRaw(row, col);
+                        const cellValue = getCellValueOrigin(cellOrigin);
 
                         let extra: ICellDataForSheetInterceptor = {};
                         if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
@@ -210,7 +211,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
                             const colorMap = (validator as ListValidator).getListWithColorMap(rule);
-                            const valueStr = `${getCellValueOrigin(cell) ?? ''}`;
+                            const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
                             const color = colorMap[valueStr];
                             if (color) {
                                 extra = {
@@ -388,7 +389,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         }
                         const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                        const cellValue = getCellValueOrigin(cell);
+                        const cellOrigin = worksheet.getCellRaw(row, col);
+                        const cellValue = getCellValueOrigin(cellOrigin);
 
                         let extra: ICellDataForSheetInterceptor = {};
                         if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
@@ -412,7 +414,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
 
                         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
                             const colorMap = (validator as ListValidator).getListWithColorMap(rule);
-                            const valueStr = `${getCellValueOrigin(cell) ?? ''}`;
+                            const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
                             const color = colorMap[valueStr];
                             if (color) {
                                 extra = {

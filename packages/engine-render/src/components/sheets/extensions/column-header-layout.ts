@@ -81,7 +81,7 @@ export class ColumnHeaderLayout extends SheetExtension {
             curColSpecCfg = columnsCfg[colIndex] as IColumnStyleCfg & { text: string };
             mergeWithSpecCfg = { ...this.headerStyle, ...curColSpecCfg };
         } else {
-            mergeWithSpecCfg = { ...this.headerStyle, text: colIndex };
+            mergeWithSpecCfg = { ...this.headerStyle, text: numberToABC(colIndex) };
         }
         const specStyle = Object.keys(curColSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this column.
         return [mergeWithSpecCfg, specStyle] as [IAColumnCfgObj, boolean];

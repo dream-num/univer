@@ -55,7 +55,6 @@ export class Worksheet {
         this._rowManager = new RowManager(this._snapshot, this._viewModel, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
 
-        window.ws = this; // for debug
     }
 
     /**

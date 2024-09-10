@@ -62,7 +62,6 @@ export class SheetViewModel extends Disposable {
         private readonly getRawCell: (row: number, col: number) => Nullable<ICellData>
     ) {
         super();
-        window.vm = this;
     }
 
     override dispose(): void {

@@ -15,14 +15,17 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, ILogService } from '@univerjs/core';
-import { ILocalFileService } from '@univerjs/ui';
+import { Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 
 /**
  * This service is for replaying user actions.
  */
-export class ReplayService extends Disposable {
+export class ActionReplayService extends Disposable {
     constructor(
+        @IMessageService private readonly _messageService: IMessageService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @ILocalFileService private readonly _localFileService: ILocalFileService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService
@@ -40,8 +43,12 @@ export class ReplayService extends Disposable {
         const file = files[0];
         try {
             return this.replayCommands(JSON.parse(await file.text()));
-        } catch (e: unknown) {
-            this._logService.error('[ReplayService]', 'failed to execute commands from local file:', file.name, '\n', e);
+        } catch {
+            this._messageService.show({
+                type: MessageType.Error,
+                content: `Failed to replay commands from local file ${file.name}.`,
+            });
+
             return false;
         }
     }
@@ -52,7 +59,30 @@ export class ReplayService extends Disposable {
      * @returns If the replay is successful.
      */
     async replayCommands(commands: ICommandInfo[]): Promise<boolean> {
+        const focusedUnitId = this._instanceService.getFocusedUnit()?.getUnitId();
+        if (!focusedUnitId) {
+            this._logService.error('[ReplayService]', 'no focused unit to replay commands');
+        }
+
+        for (const command of commands) {
+            const { id, params } = command;
+            if (params) {
+                if (typeof (params as ISharedCommandParams).unitId !== 'undefined') {
+                    (params as ISharedCommandParams).unitId = focusedUnitId;
+                }
+
+                const result = await this._commandService.executeCommand(id, params);
+                if (!result) return false;
+            } else {
+                const result = await this._commandService.executeCommand(id);
+                if (!result) return false;
+            }
+        }
+
         return true;
     }
 }
 
+interface ISharedCommandParams {
+    unitId?: string;
+}

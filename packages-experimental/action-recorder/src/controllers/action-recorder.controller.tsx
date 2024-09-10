@@ -24,6 +24,7 @@ import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands
 import { RecorderPanel } from '../views/components/RecorderPanel';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
 import { ActionRecorderService } from '../services/action-recorder.service';
+import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
 import { menuSchema } from './action-recorder.menu';
 
 export class ActionRecorderController extends Disposable {
@@ -50,6 +51,7 @@ export class ActionRecorderController extends Disposable {
             CompleteRecordingActionCommand,
             OpenRecordPanelOperation,
             CloseRecordPanelOperation,
+            ReplayLocalRecordCommand,
         ]).forEach((command) => this._commandSrv.registerCommand(command));
     }
 

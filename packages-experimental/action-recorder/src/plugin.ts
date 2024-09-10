@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin } from '@univerjs/core';
 import { ActionRecorderService } from './services/action-recorder.service';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
+import { ActionReplayService } from './services/replay.service';
 
 /**
  * This plugin provides a recorder for user's interactions with Univer,
@@ -35,6 +36,7 @@ export class UniverActionRecorderPlugin extends Plugin {
     override onStarting(_injector?: Injector): void {
         ([
             [ActionRecorderService],
+            [ActionReplayService],
             [ActionRecorderController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
     }

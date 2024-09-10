@@ -27,7 +27,7 @@ import { BehaviorSubject } from 'rxjs';
 export class ActionRecorderService extends Disposable {
     private readonly _shouldRecordCommands = new Set<string>();
 
-    private readonly _panelOpened$ = new BehaviorSubject<boolean>(true);
+    private readonly _panelOpened$ = new BehaviorSubject<boolean>(false);
     readonly panelOpened$ = this._panelOpened$.asObservable();
 
     private _recorder: Nullable<IDisposable> = null;

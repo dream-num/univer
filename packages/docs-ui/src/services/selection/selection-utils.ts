@@ -60,7 +60,7 @@ export function getTextRangeFromCharIndex(
         return;
     }
 
-    return new TextRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId);
+    return new TextRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage);
 }
 
 export function getRectRangeFromCharIndex(
@@ -80,7 +80,7 @@ export function getRectRangeFromCharIndex(
         return;
     }
 
-    return new RectRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId);
+    return new RectRange(scene, document, skeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage);
 }
 
 export function getRangeListFromCharIndex(
@@ -132,8 +132,9 @@ export function getRangeListFromSelection(
         INodePosition,
         INodePosition,
         ITextSelectionStyle,
-        string
-    ] = [scene, document, skeleton, anchorPosition, focusPosition, style, segmentId];
+        string,
+        number
+    ] = [scene, document, skeleton, anchorPosition, focusPosition, style, segmentId, segmentPage];
 
     // TODO: @JOCS handle NEST table.
     // Handle selection in same table cell.
@@ -212,7 +213,7 @@ export function getRangeListFromSelection(
                         const ap = direction === RANGE_DIRECTION.FORWARD ? sp : ep;
                         const fp = direction === RANGE_DIRECTION.FORWARD ? ep : sp;
 
-                        textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId));
+                        textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
                     }
                     start = tableEnd + 1;
                 }
@@ -228,7 +229,8 @@ export function getRangeListFromSelection(
                         ap,
                         fp,
                         style,
-                        segmentId
+                        segmentId,
+                        segmentPage
                     ));
                 }
             }
@@ -244,7 +246,7 @@ export function getRangeListFromSelection(
                     continue;
                 }
 
-                textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId));
+                textRanges.push(new TextRange(scene, document, skeleton, ap, fp, style, segmentId, segmentPage));
             }
         }
     }
@@ -311,7 +313,7 @@ export function getParagraphInfoByGlyph(node: IDocumentSkeletonGlyph) {
 }
 
 export function serializeTextRange(textRange: IDocRange): ITextRangeWithStyle {
-    const { startOffset, endOffset, collapsed, rangeType, startNodePosition, endNodePosition, direction } = textRange;
+    const { startOffset, endOffset, collapsed, rangeType, startNodePosition, endNodePosition, direction, segmentId, segmentPage } = textRange;
     const serializedTextRange: ITextRangeWithStyle = {
         startOffset: startOffset!,
         endOffset: endOffset!,
@@ -320,6 +322,8 @@ export function serializeTextRange(textRange: IDocRange): ITextRangeWithStyle {
         startNodePosition,
         endNodePosition,
         direction,
+        segmentId,
+        segmentPage,
         isActive: textRange.isActive(),
     };
 

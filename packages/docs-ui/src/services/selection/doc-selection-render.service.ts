@@ -480,7 +480,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
-                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId);
+                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
 
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
@@ -765,7 +765,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-        const lastRange = new TextRange(scene, mainComponent as Documents, skeleton, position, undefined, this._selectionStyle, this._currentSegmentId);
+        const lastRange = new TextRange(scene, mainComponent as Documents, skeleton, position, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
 
         this._addTextRange(lastRange);
     }

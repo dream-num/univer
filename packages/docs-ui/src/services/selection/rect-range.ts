@@ -31,14 +31,15 @@ export function convertPositionsToRectRanges(
     anchorNodePosition: INodePosition,
     focusNodePosition: INodePosition,
     style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-    segmentId: string = ''
+    segmentId: string = '',
+    segmentPage: number = -1
 ): RectRange[] {
     const documentOffsetConfig = document.getOffsetConfig();
     const convertor = new NodePositionConvertToRectRange(documentOffsetConfig, docSkeleton);
     const nodePositionGroup = convertor.getNodePositionGroup(anchorNodePosition, focusNodePosition);
 
     return (nodePositionGroup ?? []).map((position) => new RectRange(
-        scene, document, docSkeleton, position.anchor, position.focus, style, segmentId
+        scene, document, docSkeleton, position.anchor, position.focus, style, segmentId, segmentPage
     ));
 }
 
@@ -66,7 +67,8 @@ export class RectRange implements IDocRange {
         public anchorNodePosition: INodePosition,
         public focusNodePosition: INodePosition,
         public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-        private _segmentId: string = ''
+        private _segmentId: string = '',
+        private _segmentPage: number = -1
     ) {
         this.refresh();
     }
@@ -109,6 +111,10 @@ export class RectRange implements IDocRange {
 
     get segmentId() {
         return this._segmentId;
+    }
+
+    get segmentPage() {
+        return this._segmentPage;
     }
 
     get spanEntireRow(): boolean {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, TextX } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, Nullable, TextX } from '@univerjs/core';
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -111,10 +111,11 @@ export interface IDeleteCustomRangeFactoryParams {
     rangeId: string;
     segmentId?: string;
     unitId: string;
+    insert?: Nullable<IDocumentBody>;
 }
 
 export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeFactoryParams) {
-    const { unitId, segmentId } = params;
+    const { unitId, segmentId, insert } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
@@ -136,7 +137,9 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
     const textX = BuildTextUtils.customRange.delete(accessor, {
         documentDataModel,
         rangeId: params.rangeId,
+        insert,
     });
+
     if (!textX) {
         return false;
     }

@@ -22,6 +22,7 @@ import { DataStreamTreeTokenType } from '../../types';
 import type { IDeleteAction, IRetainAction } from '../action-types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import type { Nullable } from '../../../../shared';
 import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
 
@@ -29,10 +30,11 @@ export interface IDeleteCustomRangeParam {
     rangeId: string;
     segmentId?: string;
     documentDataModel: DocumentDataModel;
+    insert?: Nullable<IDocumentBody>;
 }
 
 export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { rangeId, segmentId, documentDataModel } = params;
+    const { rangeId, segmentId, documentDataModel, insert } = params;
 
     const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
@@ -74,6 +76,15 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         line: 0,
     });
 
+    if (insert) {
+        textX.push({
+            body: insert,
+            t: TextXActionType.INSERT,
+            len: insert.dataStream.length,
+            segmentId,
+            line: 1,
+        });
+    }
     return textX;
 }
 

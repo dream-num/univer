@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -164,8 +164,16 @@ export const CancelRichHyperLinkCommand: ICommand<ICancelRichHyperLinkCommandPar
         }
         const { id: linkId, documentId } = params;
         const commandService = accessor.get(ICommandService);
-
-        const doMutation = deleteCustomRangeFactory(accessor, { unitId: documentId, rangeId: linkId });
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(documentId, UniverInstanceType.UNIVER_DOC);
+        const link = doc?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+        let insert: Nullable<IDocumentBody> = null;
+        if (link && link.endIndex === doc!.getBody()!.dataStream.length - 3) {
+            insert = {
+                dataStream: ' ',
+            };
+        }
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId: documentId, rangeId: linkId, insert });
         if (!doMutation) {
             return false;
         }

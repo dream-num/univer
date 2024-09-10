@@ -35,7 +35,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         super();
 
         this._initCommandInterceptor();
-        // this._initAfterEditor();
+        this._initAfterEditor();
     }
 
     private _initCommandInterceptor() {
@@ -148,7 +148,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                     return next(cell);
                 }
 
-                if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v)) {
+                if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v) && cell.v[cell.v.length - 1] !== ' ') {
                     const { unitId, subUnitId } = context;
                     const renderer = this._renderManagerService.getRenderById(unitId);
                     const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);

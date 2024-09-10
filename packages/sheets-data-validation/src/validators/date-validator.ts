@@ -139,14 +139,17 @@ export class DateValidator extends BaseDataValidator<number> {
             if (!formula) {
                 return formula;
             }
+            let date;
             if (!Number.isNaN(+formula)) {
-                return formula;
+                date = numfmt.dateFromSerial(+formula) as unknown as [number, number, number, number, number, number];
+            } else {
+                const res = numfmt.parseDate(formula)?.v as number;
+                if (res === undefined || res === null) {
+                    return '';
+                }
+                date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
             }
-            const res = numfmt.parseDate(formula)?.v as number;
-            if (res === undefined || res === null) {
-                return '';
-            }
-            const date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
+
             return dayjs(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
         };
 

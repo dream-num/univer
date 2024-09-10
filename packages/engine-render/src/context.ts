@@ -15,8 +15,8 @@
  */
 
 import { Tools } from '@univerjs/core';
-import { fixLineWidthByScale, getColor } from './basics/tools';
 import { Transform } from './basics';
+import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
@@ -27,6 +27,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     constructor(context: CanvasRenderingContext2D) {
         this._context = context;
         this.canvas = context.canvas;
+    }
+
+    isContextLost(): boolean {
+        return this._context.isContextLost();
     }
 
     // globalAlpha: number;

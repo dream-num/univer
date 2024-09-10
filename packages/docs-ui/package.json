@@ -75,22 +75,22 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.77"
-    },
-    "devDependencies": {
-        "@types/react": "^18.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/shared": "workspace:*",
+        "@univerjs/icons": "^0.1.78",
         "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1",
+        "clsx": "^2.1.1"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.5",
+        "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

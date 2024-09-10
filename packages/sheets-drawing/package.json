@@ -61,13 +61,15 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*"
     },
-    "devDependencies": {
+    "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/drawing": "workspace:*",
-        "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "@univerjs/sheets": "workspace:*"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

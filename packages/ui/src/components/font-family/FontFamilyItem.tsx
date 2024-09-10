@@ -27,7 +27,7 @@ export const FontFamilyItem = (props: IFontFamilyItemProps) => {
 
     return (
         <span className={styles.uiPluginSheetsFontFamilyItem} style={{ fontFamily: value }}>
-            {localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`)}
+            {localeService.t(`fontFamily.${(`${value ?? ''}`).replace(/\s/g, '')}`)}
         </span>
     );
 };

@@ -27,6 +27,10 @@ exports.baseRules = {
         SwitchCase: 1,
         ignoreComments: true,
     }],
+    'perfectionist/sort-imports': 'warn',
+    'perfectionist/sort-exports': 'warn',
+    'perfectionist/sort-named-exports': 'warn',
+    'antfu/consistent-chaining': 'warn',
     'sort-imports': [
         'error',
         {

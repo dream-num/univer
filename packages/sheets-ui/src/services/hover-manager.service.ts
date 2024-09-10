@@ -192,18 +192,19 @@ export class HoverManagerService extends Disposable {
 
         const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
         const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
+        const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
 
         if (font) {
             const { paddingLeft, paddingTop } = calcPadding(cell, font);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
-            const innerX = offsetX - position.startX;
-            const innerY = offsetY - position.startY;
+            const innerX = offsetX - position.startX - leftOffset;
+            const innerY = offsetY - position.startY - topOffset;
             customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));
             bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top) <= innerY && innerY <= (list.rect.bottom));
         }
 
         const rect = customRange?.rects.pop() ?? bullet?.rect;
-        const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
+
         return {
             location,
             position,

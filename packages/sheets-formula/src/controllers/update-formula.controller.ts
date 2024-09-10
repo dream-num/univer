@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IExecutionOptions,
-    IRange,
-    IUnitRange,
-    Nullable,
-    SlideDataModel,
-    Workbook,
-} from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -40,7 +30,6 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -53,24 +42,6 @@ import { deserializeRangeWithSheet,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
-
-import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IInsertSheetMutationParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
-    IRemoveRowColCommandParams,
-    IRemoveSheetCommandParams,
-    IRemoveSheetMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetNameCommandParams,
-} from '@univerjs/sheets';
 import {
     ClearSelectionFormatCommand,
     DeleteRangeMoveLeftCommand,
@@ -106,9 +77,38 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { IEditorService } from '@univerjs/ui';
 
 import { filter, map, merge } from 'rxjs';
-import { IEditorService } from '@univerjs/ui';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IExecutionOptions,
+    IRange,
+    IUnitRange,
+    Nullable,
+    SlideDataModel,
+    Workbook,
+} from '@univerjs/core';
+
+import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type {
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IInsertSheetMutationParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommandParams,
+    IRemoveRowColCommandParams,
+    IRemoveSheetCommandParams,
+    IRemoveSheetMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetNameCommandParams,
+} from '@univerjs/sheets';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { formulaDataToCellData, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
 
@@ -266,6 +266,7 @@ export class UpdateFormulaController extends Disposable {
             },
             {
                 onlyLocal: true,
+                fromFormula: true,
             }
         );
 

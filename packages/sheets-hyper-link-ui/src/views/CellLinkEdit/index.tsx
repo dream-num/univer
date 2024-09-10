@@ -21,7 +21,8 @@ import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '
 import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
@@ -387,6 +388,11 @@ export const CellLinkEdit = () => {
                             } else {
                                 await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+                                    commandService.executeCommand(SetSelectionsOperation.id, {
+                                        unitId: editing.unitId,
+                                        subUnitId: editing.subUnitId,
+                                        selections: [{ range: { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col } }],
+                                    } as ISetSelectionsOperationParams);
                                     zenZoneService.show();
                                 }
                                 setHide(false);

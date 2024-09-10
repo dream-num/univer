@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     createIdentifier,
@@ -76,9 +76,13 @@ export interface IEditorBridgeServiceParam {
     isInArrayFormulaRange?: Nullable<boolean>;
 }
 
-const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
-const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
-const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocation>('AFTER_CELL_EDIT_ASYNC');
+interface ISheetLocationForEditor extends ISheetLocation {
+    origin: Nullable<ICellData>;
+}
+
+const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('BEFORE_CELL_EDIT');
+const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocationForEditor>('AFTER_CELL_EDIT');
+const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocationForEditor>('AFTER_CELL_EDIT_ASYNC');
 
 export interface IEditorBridgeService {
     currentEditCellState$: Observable<Nullable<IEditorBridgeServiceParam>>;
@@ -255,6 +259,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             subUnitId: worksheet.getSheetId(),
             row: startRow,
             col: startColumn,
+            origin: worksheet.getCellRaw(startRow, startColumn),
         };
 
         const cell = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT)(

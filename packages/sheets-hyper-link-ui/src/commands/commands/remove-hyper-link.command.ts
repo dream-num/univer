@@ -148,11 +148,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
     },
 };
 
-export interface ICancelRichHyperLinkCommandParams {
-    /**
-     * id of link
-     */
-    id: string;
+export interface ICancelRichHyperLinkCommandParams extends ICancelHyperLinkCommandParams {
     /**
      * document id
      */

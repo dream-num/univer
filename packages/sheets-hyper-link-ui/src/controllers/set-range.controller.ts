@@ -35,7 +35,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
         super();
 
         this._initCommandInterceptor();
-        this._initAfterEditor();
+        // this._initAfterEditor();
     }
 
     private _initCommandInterceptor() {

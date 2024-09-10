@@ -164,7 +164,3 @@ export const DEFAULT_SLIDE = {
     },
 };
 
-/**
- * Univer internal key on cellData.custom to save some internal values
- */
-export const UNIVER_INTERNAL = '__univer_internal__';

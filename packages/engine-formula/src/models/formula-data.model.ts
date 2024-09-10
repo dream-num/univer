@@ -53,6 +53,13 @@ export class FormulaDataModel extends Disposable {
         this.initFormulaData();
     }
 
+    override dispose() {
+        super.dispose();
+        this._formulaData = {};
+        this._arrayFormulaRange = {};
+        this._arrayFormulaCellData = {};
+    }
+
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
         Object.keys(clearArrayFormulaCellData).forEach((unitId) => {
             const clearSheetData = clearArrayFormulaCellData[unitId];

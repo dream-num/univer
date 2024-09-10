@@ -26,7 +26,6 @@ import {
 import {
     AddWorksheetMergeMutation,
     RangeProtectionRenderModel,
-    RangeProtectionRuleModel,
     RangeProtectionService,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
@@ -78,7 +77,6 @@ describe('Test auto fill with formula', () => {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [FormulaAutoFillController],
-            [RangeProtectionRuleModel],
             [RangeProtectionService],
             [RangeProtectionRenderModel],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],

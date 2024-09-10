@@ -18,7 +18,7 @@ import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { IRefSelectionsService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { EditorService, IEditorService } from '@univerjs/ui';
 
@@ -77,6 +77,11 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
         override onStarting(): void {
             const injector = this._injector;
+            injector.add([WorksheetPermissionService]);
+            injector.add([WorksheetProtectionPointModel]);
+            injector.add([RangeProtectionRuleModel]);
+            injector.add([WorkbookPermissionService]);
+            injector.add([WorksheetProtectionRuleModel]);
             injector.add([SheetsSelectionsService]);
             injector.add([SheetInterceptorService]);
             injector.add([CalculateFormulaService]);

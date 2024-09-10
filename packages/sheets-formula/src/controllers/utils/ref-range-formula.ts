@@ -549,6 +549,24 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
     return cellData;
 }
 
+/**
+ * Convert formulaData to cellData
+ * @param formulaData
+ * @returns
+ */
+export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>
+): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellData = new ObjectMatrix<Nullable<ICellData>>({});
+    const formulaDataMatrix = new ObjectMatrix(formulaData);
+
+    formulaDataMatrix.forValue((r, c, formulaDataItem) => {
+        const cellDataItem = formulaDataItemToCellData(formulaDataItem);
+        cellData.setValue(r, c, cellDataItem);
+    });
+
+    return cellData.clone();
+}
+
 export function isFormulaDataItem(cell: IFormulaDataItem) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';
@@ -562,3 +580,4 @@ export function isFormulaDataItem(cell: IFormulaDataItem) {
 
     return false;
 }
+

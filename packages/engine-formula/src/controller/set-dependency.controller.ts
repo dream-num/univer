@@ -99,12 +99,26 @@ export class SetDependencyController extends Disposable {
                 } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData;
                     Object.keys(formulaData).forEach((unitId) => {
-                        if (formulaData[unitId] == null) {
-                            return true;
+                        const unitFormulaData = formulaData[unitId];
+                        // undefined means do nothing
+                        if (unitFormulaData === undefined) {
+                            return;
                         }
-                        Object.keys(formulaData[unitId]!).forEach((subUnitId) => {
-                            const formulaDataItem = formulaData[unitId]![subUnitId];
-                            if (formulaDataItem == null) {
+
+                        // null means clear all formula data with the unitId
+                        if (unitFormulaData === null) {
+                            this._dependencyManagerService.clearFormulaDependency(unitId);
+                            return;
+                        }
+
+                        Object.keys(unitFormulaData).forEach((subUnitId) => {
+                            const formulaDataItem = unitFormulaData[subUnitId];
+
+                            if (formulaDataItem === undefined) {
+                                return;
+                            }
+
+                            if (formulaDataItem === null) {
                                 this._dependencyManagerService.clearFormulaDependency(unitId, subUnitId);
                                 return true;
                             }

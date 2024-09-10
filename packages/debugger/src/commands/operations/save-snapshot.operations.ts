@@ -17,8 +17,8 @@
 /* eslint-disable node/prefer-global/process */
 import type { DocumentDataModel, IAccessor, ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
 import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { ILocalFileService } from '@univerjs/ui';
 import { RecordController } from '../../controllers/local-save/record.controller';
-import { ExportController } from '../../controllers/local-save/export.controller';
 
 export interface ISaveSnapshotParams {
     value: 'sheet' | 'workbook' | 'record';
@@ -48,7 +48,7 @@ export const SaveSnapshotOptions: ICommand = {
     handler: async (accessor: IAccessor, params: ISaveSnapshotParams) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const resourceLoaderService = accessor.get(IResourceLoaderService);
-        const exportController = accessor.get(ExportController);
+        const localFileService = accessor.get(ILocalFileService);
         const recordController = accessor.get(RecordController);
         const gitHash = process.env.GIT_COMMIT_HASH;
         const gitBranch = process.env.GIT_REF_NAME;
@@ -60,7 +60,7 @@ export const SaveSnapshotOptions: ICommand = {
             const snapshot = resourceLoaderService.saveUnit(doc.getUnitId());
             (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
             const text = JSON.stringify(snapshot, null, 2);
-            exportController.exportJson(text, `${preName} snapshot`);
+            localFileService.downloadFile(new Blob([text]), `${preName} snapshot.json`);
             return true;
         }
 
@@ -79,13 +79,13 @@ export const SaveSnapshotOptions: ICommand = {
                 snapshot.sheets = { [sheetId]: sheet };
                 snapshot.sheetOrder = [sheetId];
                 const text = JSON.stringify(filterStyle(snapshot), null, 2);
-                exportController.exportJson(text, `${preName} snapshot`);
+                localFileService.downloadFile(new Blob([text]), `${preName} snapshot.json`);
                 break;
             }
 
             case 'workbook': {
                 const text = JSON.stringify(filterStyle(snapshot), null, 2);
-                exportController.exportJson(text, `${preName} snapshot`);
+                localFileService.downloadFile(new Blob([text]), `${preName} snapshot.json`);
 
                 break;
             }
@@ -98,9 +98,8 @@ export const SaveSnapshotOptions: ICommand = {
                     }
                     if (v.type === 'finish') {
                         const commands = endCommands();
-                        exportController.exportWebm(v.data, `${preName} video`);
-                        const commandsText = JSON.stringify(commands, null, 2);
-                        exportController.exportJson(commandsText, `${preName} commands`);
+                        localFileService.downloadFile(v.data, `${preName} video.webm`);
+                        localFileService.downloadFile(new Blob([JSON.stringify(commands, null, 2)]), `${preName} commands.json`);
                     }
                 });
             }

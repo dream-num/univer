@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import { createDownloadElement } from './util';
+import { createIdentifier } from '@univerjs/core';
 
-export class ExportController {
-    exportJson(data: string, fileName: string) {
-        const blob = new Blob([data], { type: 'text/json' });
-        const startDownload = createDownloadElement(`${fileName}.json`, blob);
-        startDownload();
-    }
-
-    exportWebm(data: Blob, fileName: string) {
-        const startDownload = createDownloadElement(`${fileName}.webm`, data);
-        startDownload();
-    }
+export interface IOpenFileOptions {
+    accept?: string;
+    multiple?: boolean;
 }
+
+export interface ILocalFileService {
+    openFile(options?: IOpenFileOptions): Promise<File[]>;
+    downloadFile(data: Blob, fileName: string): void;
+}
+
+/**
+ * This service is used to upload files.
+ */
+export const ILocalFileService = createIdentifier<ILocalFileService>('univer-ui.local-file.service');
+

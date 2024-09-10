@@ -22,13 +22,13 @@ import { connectInjector, Disposable, Inject, Injector, useDependency, useObserv
 import { Subject } from 'rxjs';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
 import type { IOpenFileOptions } from './file-opener.service';
-import { IFileOpenerService } from './file-opener.service';
+import { ILocalFileService } from './file-opener.service';
 
 interface IOpenFileRequest extends IOpenFileOptions {
     onFileSelected: (files: File[]) => void;
 }
 
-export class DesktopFileOpenerService extends Disposable implements IFileOpenerService {
+export class DesktopLocalFileService extends Disposable implements ILocalFileService {
     private readonly _fileOpenRequest$ = new Subject<IOpenFileRequest | null>();
     readonly fileOpenRequest$ = this._fileOpenRequest$.asObservable();
 
@@ -57,6 +57,13 @@ export class DesktopFileOpenerService extends Disposable implements IFileOpenerS
 
             this._fileOpenRequest$.next(request);
         });
+    }
+
+    downloadFile(data: Blob, fileName: string): void {
+        const a = document.createElement('a');
+        a.download = fileName;
+        a.href = window.URL.createObjectURL(data);
+        a.click();
     }
 }
 
@@ -88,8 +95,8 @@ function DesktopFileOpener(props: { request: IOpenFileRequest }) {
 }
 
 function DesktopFileOpenerWrapper() {
-    const desktopFileOpenerService = useDependency(IFileOpenerService) as DesktopFileOpenerService;
-    const request = useObservable(desktopFileOpenerService.fileOpenRequest$, null);
+    const DesktopLocalFileService = useDependency(ILocalFileService) as DesktopLocalFileService;
+    const request = useObservable(DesktopLocalFileService.fileOpenRequest$, null);
 
     if (!request) return null;
     return <DesktopFileOpener request={request} />;

@@ -38,7 +38,6 @@ import { ImageDemo } from '../components/Image';
 import { ChangeUserCommand } from '../commands/operations/change-user.operation';
 import { ShowCellContentOperation } from '../commands/operations/cell.operation';
 import { RecordController } from './local-save/record.controller';
-import { ExportController } from './local-save/export.controller';
 import { menuSchema } from './menu.schema';
 
 @OnLifecycle(LifecycleStages.Ready, DebuggerController)
@@ -73,7 +72,6 @@ export class DebuggerController extends Disposable {
             ShowCellContentOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
-        this._injector.add([ExportController]);
         this._injector.add([RecordController]);
     }
 

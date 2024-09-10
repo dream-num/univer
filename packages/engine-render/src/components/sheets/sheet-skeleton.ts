@@ -2127,12 +2127,21 @@ export class SpreadsheetSkeleton extends Skeleton {
         let mergeRow = row;
         let mergeColumn = column;
         if (mergeRange) {
-            isMerged = true;
-            isMergedMainCell = mergeRange.startRow === row && mergeRange.startColumn === column;
-            newEndRow = mergeRange.endRow;
-            newEndColumn = mergeRange.endColumn;
-            mergeRow = mergeRange.startRow;
-            mergeColumn = mergeRange.startColumn;
+            isMergedMainCell = (mergeRange.startRow === row && mergeRange.startColumn === column);
+            if (isMergedMainCell) {
+                // do not set to true, the code is not equal to the original code from: getCellInfoInMergeData
+                // isMerged = false;
+                newEndRow = mergeRange.endRow;
+                newEndColumn = mergeRange.endColumn;
+                mergeRow = mergeRange.startRow;
+                mergeColumn = mergeRange.startColumn;
+            } else if (row > mergeRange.startRow && row <= mergeRange.endRow && column > mergeRange.startColumn && column <= mergeRange.endColumn) {
+                isMerged = true;
+                newEndRow = mergeRange.endRow;
+                newEndColumn = mergeRange.endColumn;
+                mergeRow = mergeRange.startRow;
+                mergeColumn = mergeRange.startColumn;
+            }
         }
 
         return {

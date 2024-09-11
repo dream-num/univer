@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DataValidationSingle } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
 import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { CustomFormulaValidator } from '../validators/custom-validator';
-import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
-import { WholeValidator } from '../validators/whole-validator';
-import { ListMultipleValidator } from '../validators/list-multiple-validator';
+import { ComponentManager } from '@univerjs/ui';
+import type { Workbook } from '@univerjs/core';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
+import { CustomFormulaValidator } from '../validators/custom-validator';
+import { ListMultipleValidator } from '../validators/list-multiple-validator';
+import { WholeValidator } from '../validators/whole-validator';
 import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { FORMULA_INPUTS } from '../views/formula-input';
 import { ListRenderModeInput } from '../views/render-mode';
 import { DateShowTimeOption } from '../views/show-time';
-import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationIcon } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)

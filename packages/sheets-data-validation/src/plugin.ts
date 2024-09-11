@@ -25,7 +25,7 @@ import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
+import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, ClearRangeDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -101,6 +101,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             UpdateSheetDataValidationOptionsCommand,
             RemoveSheetDataValidationCommand,
             RemoveSheetAllDataValidationCommand,
+            ClearRangeDataValidationCommand,
 
              // operation
             ShowDataValidationDropdown,

@@ -26,6 +26,7 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
+    Inject,
     Injector,
     isFormulaString,
     IUniverInstanceService,
@@ -38,7 +39,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { IRenderManagerService,  } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -50,10 +52,9 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import { IMessageService } from '@univerjs/ui';
 
+import { IMessageService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
 
 import type {
     ICellData,

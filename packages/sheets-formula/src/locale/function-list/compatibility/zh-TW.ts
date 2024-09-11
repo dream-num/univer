@@ -64,8 +64,8 @@ export default {
         },
     },
     CHIDIST: {
-        description: '傳回 χ2 分佈的單尾機率',
-        abstract: '傳回 χ2 分佈的單尾機率',
+        description: '傳回 χ2 分佈的右尾機率',
+        abstract: '傳回 χ2 分佈的右尾機率',
         links: [
             {
                 title: '教導',
@@ -73,13 +73,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHIINV: {
-        description: '傳回 χ2 分佈的單尾機率的反函數',
-        abstract: '傳回 χ2 分佈的單尾機率的反函數',
+        description: '傳回 χ2 分佈的右尾機率的反函數值。',
+        abstract: '傳回 χ2 分佈的右尾機率的反函數值。',
         links: [
             {
                 title: '教導',
@@ -87,8 +87,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與 χ2 分佈相關聯的機率。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHITEST: {

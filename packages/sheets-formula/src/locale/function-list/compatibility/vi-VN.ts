@@ -63,10 +63,9 @@ export default {
             number2: { name: 'number2', detail: 'thứ hai' },
         },
     },
-
     CHIDIST: {
-        description: 'Trả về xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về xác suất bên phải của phân bố χ2',
+        abstract: 'Trả về xác suất bên phải của phân bố χ2',
         links: [
             {
                 title: 'Giảng dạy',
@@ -74,13 +73,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHIINV: {
-        description: 'Trả về hàm nghịch đảo của xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về hàm nghịch đảo của xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -88,8 +87,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHITEST: {

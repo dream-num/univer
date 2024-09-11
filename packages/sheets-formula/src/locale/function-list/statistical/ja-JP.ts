@@ -167,8 +167,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: 'カイ 2 乗分布を返します。',
-        abstract: 'カイ 2 乗分布を返します。',
+        description: 'カイ 2 乗分布の左側確率の値を返します。',
+        abstract: 'カイ 2 乗分布の左側確率の値を返します。',
         links: [
             {
                 title: '指導',
@@ -182,8 +182,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: 'カイ 2 乗分布の片側確率の値を返します。',
-        abstract: 'カイ 2 乗分布の片側確率の値を返します。',
+        description: 'カイ 2 乗分布の右側確率の値を返します。',
+        abstract: 'カイ 2 乗分布の右側確率の値を返します。',
         links: [
             {
                 title: '指導',
@@ -191,13 +191,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '分布の評価に使用する値を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
         },
     },
     CHISQ_INV: {
-        description: '累積β確率密度関数の値を返します。',
-        abstract: '累積β確率密度関数の値を返します。',
+        description: 'カイ 2 乗分布の左側確率の逆関数の値を返します。',
+        abstract: 'カイ 2 乗分布の左側確率の逆関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -205,13 +205,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'カイ 2 乗分布における確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
         },
     },
     CHISQ_INV_RT: {
-        description: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
-        abstract: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
+        description: 'カイ 2 乗分布の右側確率の逆関数の値を返します。',
+        abstract: 'カイ 2 乗分布の右側確率の逆関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -219,8 +219,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'カイ 2 乗分布における確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
         },
     },
     CHISQ_TEST: {

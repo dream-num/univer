@@ -179,8 +179,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: 'Returns the chi-squared distribution.',
-        abstract: 'Returns the chi-squared distribution.',
+        description: 'Returns the left-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the left-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -194,8 +194,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: 'Returns the one-tailed probability of the chi-squared distribution',
-        abstract: 'Returns the one-tailed probability of the chi-squared distribution',
+        description: 'Returns the right-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the right-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -203,13 +203,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_INV: {
-        description: 'Returns the cumulative beta probability density function',
-        abstract: 'Returns the cumulative beta probability density function',
+        description: 'Returns the inverse of the left-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the inverse of the left-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -217,13 +217,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the chi-squared distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_INV_RT: {
-        description: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
-        abstract: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
+        description: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -231,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the chi-squared distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_TEST: {

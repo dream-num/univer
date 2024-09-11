@@ -17,79 +17,76 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { ChisqDist } from '../index';
+import { ChisqInv } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
-describe('Test chisqDist function', () => {
-    const testFunction = new ChisqDist(FUNCTION_NAMES_STATISTICAL.CHISQ_DIST);
+describe('Test chisqInv function', () => {
+    const testFunction = new ChisqInv(FUNCTION_NAMES_STATISTICAL.CHISQ_INV);
 
-    describe('ChisqDist', () => {
+    describe('ChisqInv', () => {
         it('Value is normal', () => {
-            const x = NumberValueObject.create(0.5);
+            const probability = NumberValueObject.create(0.5);
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.5204998778130242);
+            const result = testFunction.calculate(probability, degFreedom);
+            expect(getObjectValue(result)).toBe(0.45493642311961857);
         });
 
-        it('DegFreedom value test', () => {
-            const x = NumberValueObject.create(0.5);
-            const degFreedom = NumberValueObject.create(0);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
+        it('Probability value test', () => {
+            const probability = NumberValueObject.create(-0.5);
+            const degFreedom = NumberValueObject.create(1);
+            const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
 
-            const degFreedom2 = NumberValueObject.create(10 ** 10 + 1);
-            const result2 = testFunction.calculate(x, degFreedom2, cumulative);
+            const probability2 = NumberValueObject.create(1.5);
+            const result2 = testFunction.calculate(probability2, degFreedom);
             expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
-        it('Cumulative value test', () => {
-            const x = NumberValueObject.create(0.5);
-            const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(false);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.4393912894677035);
+        it('DegFreedom value test', () => {
+            const probability = NumberValueObject.create(0.5);
+            const degFreedom = NumberValueObject.create(0);
+            const result = testFunction.calculate(probability, degFreedom);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const degFreedom2 = NumberValueObject.create(10 ** 10 + 1);
+            const result2 = testFunction.calculate(probability, degFreedom2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is normal string', () => {
-            const x = StringValueObject.create('test');
+            const probability = StringValueObject.create('test');
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
+            const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is boolean', () => {
-            const x = BooleanValueObject.create(true);
+            const probability = BooleanValueObject.create(true);
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
-            expect(getObjectValue(result)).toBe(0.6826894921370564);
+            const result = testFunction.calculate(probability, degFreedom);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
 
         it('Value is null', () => {
-            const x = NullValueObject.create();
+            const probability = NullValueObject.create();
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
+            const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(0);
         });
 
         it('Value is error', () => {
-            const x = ErrorValueObject.create(ErrorType.NAME);
+            const probability = ErrorValueObject.create(ErrorType.NAME);
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
+            const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
-            const x = ArrayValueObject.create({
+            const probability = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, null],
@@ -102,11 +99,10 @@ describe('Test chisqDist function', () => {
                 column: 0,
             });
             const degFreedom = NumberValueObject.create(1);
-            const cumulative = BooleanValueObject.create(true);
-            const result = testFunction.calculate(x, degFreedom, cumulative);
+            const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toStrictEqual([
-                [0.6826894921370564, ErrorType.VALUE, 0.7325929619288529, 0.6826894921370564, 0, 0],
-                [0, 1, 0.8739104460473717, ErrorType.VALUE, ErrorType.NUM, 0],
+                [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, 0, 0],
+                [0, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, 0],
             ]);
         });
     });

@@ -167,8 +167,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: 'Trả về phân bố khi bình phương.',
-        abstract: 'Trả về phân bố khi bình phương.',
+        description: 'Trả về xác suất của vế trái của phân bố χ2.',
+        abstract: 'Trả về xác suất của vế trái của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -182,8 +182,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: 'Trả về xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về xác suất bên phải của phân bố χ2.',
+        abstract: 'Trả về xác suất bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -191,13 +191,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_INV: {
-        description: 'Trả về hàm mật độ xác suất tích lũy beta',
-        abstract: 'Trả về hàm mật độ xác suất tích lũy beta',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi trái của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi trái của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -205,13 +205,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_INV_RT: {
-        description: 'Trả về hàm nghịch đảo xác suất đuôi của phân phối χ2',
-        abstract: 'Trả về hàm nghịch đảo xác suất đuôi của phân phối χ2',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -219,8 +219,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_TEST: {

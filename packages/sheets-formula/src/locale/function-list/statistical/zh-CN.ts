@@ -179,8 +179,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: '返回 χ2 分布。',
-        abstract: '返回 χ2 分布。',
+        description: '返回 χ2 分布的左尾概率。',
+        abstract: '返回 χ2 分布的左尾概率。',
         links: [
             {
                 title: '教学',
@@ -203,13 +203,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_INV: {
-        description: '返回累积 beta 概率密度函数',
-        abstract: '返回累积 beta 概率密度函数',
+        description: '返回 χ2 分布的左尾概率的反函数。',
+        abstract: '返回 χ2 分布的左尾概率的反函数。',
         links: [
             {
                 title: '教学',
@@ -217,13 +217,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 χ2 分布相关联的概率。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_INV_RT: {
-        description: '返回 χ2 分布的单尾概率的反函数',
-        abstract: '返回 χ2 分布的单尾概率的反函数',
+        description: '返回 χ2 分布的右尾概率的反函数。',
+        abstract: '返回 χ2 分布的右尾概率的反函数。',
         links: [
             {
                 title: '教学',
@@ -231,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 χ2 分布相关联的概率。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_TEST: {

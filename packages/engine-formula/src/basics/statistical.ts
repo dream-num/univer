@@ -298,25 +298,46 @@ export function chisquarePDF(x: number, degFreedom: number): number {
     return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
 }
 
+export function chisquareINV(probability: number, degFreedom: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return 2 * lowRegGammaInverse(probability, degFreedom / 2);
+}
+
 function lowRegGamma(a: number, x: number): number {
     if (x < 0 || a <= 0) {
         return Number.NaN;
     }
 
     // calculate maximum number of itterations required for a
-    const MAX_ITER = -~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17);
+    const MAX_ITER = Math.min(-~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17), 10000);
     const aln = logGamma(a);
+    const exp = Math.exp(-x + a * Math.log(x) - aln);
 
     let _a = a;
     let sum = 1 / a;
     let del = sum;
 
     if (x < a + 1) {
+        if (exp === 0) {
+            return 0;
+        }
+
         for (let i = 1; i <= MAX_ITER; i++) {
             sum += del *= x / ++_a;
         }
 
-        return (sum * Math.exp(-x + a * Math.log(x) - aln));
+        return sum * exp;
+    }
+
+    if (exp === 0) {
+        return 1;
     }
 
     let b = x + 1 - a;
@@ -334,5 +355,69 @@ function lowRegGamma(a: number, x: number): number {
         h *= d * c;
     }
 
-    return (1 - h * Math.exp(-x + a * Math.log(x) - aln));
+    return 1 - h * exp;
 };
+
+function lowRegGammaInverse(p: number, a: number): number {
+    if (p <= 0) {
+        return 0;
+    }
+
+    if (p >= 1) {
+        return Math.max(100, a + 100 * Math.sqrt(a));
+    }
+
+    let x;
+
+    if (a > 1) {
+        const _p = (p < 0.5) ? p : 1 - p;
+        const temp = Math.sqrt(-2 * Math.log(_p));
+
+        x = (2.30753 + temp * 0.27061) / (1 + temp * (0.99229 + temp * 0.04481)) - temp;
+
+        if (p < 0.5) {
+            x = -x;
+        }
+
+        x = Math.max(1e-3, a * ((1 - 1 / (9 * a) - x / (3 * Math.sqrt(a))) ** 3));
+    } else {
+        const temp = 1 - a * (0.253 + a * 0.12);
+
+        if (p < temp) {
+            x = (p / temp) ** (1 / a);
+        } else {
+            x = 1 - Math.log(1 - (p - temp) / (1 - temp));
+        }
+    }
+
+    const EPSILON = 1e-8;
+    const aln = logGamma(a);
+
+    let err, t;
+
+    for (let j = 0; j < 12; j++) {
+        if (x <= 0) {
+            return 0;
+        }
+
+        err = lowRegGamma(a, x) - p;
+
+        if (a > 1) {
+            t = Math.exp((a - 1) * (Math.log(a - 1) - 1) - aln) * Math.exp(-(x - (a - 1)) + (a - 1) * (Math.log(x) - Math.log(a - 1)));
+        } else {
+            t = Math.exp(-x + (a - 1) * Math.log(x) - aln);
+        }
+
+        x -= (t = (err / t) / (1 - 0.5 * Math.min(1, (err / t) * ((a - 1) / x - 1))));
+
+        if (x <= 0) {
+            x = 0.5 * (x + t);
+        }
+
+        if (Math.abs(t) < EPSILON * x) {
+            break;
+        }
+    }
+
+    return x;
+}

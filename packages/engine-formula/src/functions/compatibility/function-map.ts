@@ -15,6 +15,8 @@
  */
 
 import { BetaInv } from '../statistical/beta-inv';
+import { ChisqDistRt } from '../statistical/chisq-dist-rt';
+import { ChisqInvRt } from '../statistical/chisq-inv-rt';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
@@ -26,6 +28,8 @@ import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
 export const functionCompatibility = [
     [Betadist, FUNCTION_NAMES_COMPATIBILITY.BETADIST],
     [BetaInv, FUNCTION_NAMES_COMPATIBILITY.BETAINV],
+    [ChisqDistRt, FUNCTION_NAMES_COMPATIBILITY.CHIDIST],
+    [ChisqInvRt, FUNCTION_NAMES_COMPATIBILITY.CHIINV],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

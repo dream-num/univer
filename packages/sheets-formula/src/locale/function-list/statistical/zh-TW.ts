@@ -179,8 +179,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: '返回 χ2 分佈。',
-        abstract: '返回 χ2 分佈。',
+        description: '返回 χ2 分佈的左尾機率。',
+        abstract: '返回 χ2 分佈的左尾機率。',
         links: [
             {
                 title: '教導',
@@ -194,8 +194,8 @@ export default {
         },
     },
     CHISQ_DIST_RT: {
-        description: '傳回 χ2 分佈的單尾機率',
-        abstract: '傳回 χ2 分佈的單尾機率',
+        description: '傳回 χ2 分佈的右尾機率。',
+        abstract: '傳回 χ2 分佈的右尾機率。',
         links: [
             {
                 title: '教導',
@@ -203,13 +203,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHISQ_INV: {
-        description: '傳回累積 beta 機率密度函數',
-        abstract: '返回累積 beta 機率密度函數',
+        description: '返回 χ2 分佈的左尾機率的反函數值。',
+        abstract: '返回 χ2 分佈的左尾機率的反函數值。',
         links: [
             {
                 title: '教導',
@@ -217,13 +217,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與 χ2 分佈相關聯的機率。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHISQ_INV_RT: {
-        description: '傳回 χ2 分佈的單尾機率的反函數',
-        abstract: '傳回 χ2 分佈的單尾機率的反函數',
+        description: '傳回 χ2 分佈的右尾機率的反函數值。',
+        abstract: '傳回 χ2 分佈的右尾機率的反函數值。',
         links: [
             {
                 title: '教導',
@@ -231,8 +231,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與 χ2 分佈相關聯的機率。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHISQ_TEST: {

@@ -23,6 +23,9 @@ import { Averageifs } from './averageifs';
 import { BetaDist } from './beta-dist';
 import { BetaInv } from './beta-inv';
 import { ChisqDist } from './chisq-dist';
+import { ChisqDistRt } from './chisq-dist-rt';
+import { ChisqInv } from './chisq-inv';
+import { ChisqInvRt } from './chisq-inv-rt';
 import { Count } from './count';
 import { Counta } from './counta';
 import { Countblank } from './countblank';
@@ -54,6 +57,9 @@ export const functionStatistical = [
     [BetaDist, FUNCTION_NAMES_STATISTICAL.BETA_DIST],
     [BetaInv, FUNCTION_NAMES_STATISTICAL.BETA_INV],
     [ChisqDist, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST],
+    [ChisqDistRt, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT],
+    [ChisqInv, FUNCTION_NAMES_STATISTICAL.CHISQ_INV],
+    [ChisqInvRt, FUNCTION_NAMES_STATISTICAL.CHISQ_INV_RT],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
     [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],

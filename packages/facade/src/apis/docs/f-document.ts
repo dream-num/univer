@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { DOC_RANGE_TYPE, ICommandService,
     Inject,
     Injector,
@@ -26,6 +25,7 @@ import { DOC_RANGE_TYPE, ICommandService,
 } from '@univerjs/core';
 import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 
 export class FDocument {
     readonly id: string;

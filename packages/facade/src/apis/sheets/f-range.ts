@@ -14,6 +14,27 @@
  * limitations under the License.
  */
 
+import { BooleanNumber, Dimension, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    addMergeCellsUtil,
+    getAddMergeMutationRangeByType,
+    RemoveWorksheetMergeCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeValuesCommand,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
+import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getDT } from '@univerjs/thread-comment-ui';
+import { ComponentManager } from '@univerjs/ui';
 import type {
     CellValue,
     DataValidationStatus,
@@ -30,7 +51,6 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, Dimension, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
@@ -38,32 +58,14 @@ import type {
     ISetVerticalTextAlignCommandParams,
     IStyleTypeValue,
 } from '@univerjs/sheets';
-import {
-    addMergeCellsUtil,
-    getAddMergeMutationRangeByType,
-    RemoveWorksheetMergeCommand,
-    SetHorizontalTextAlignCommand,
-    SetRangeValuesCommand,
-    SetStyleCommand,
-    SetTextWrapCommand,
-    SetVerticalTextAlignCommand,
-} from '@univerjs/sheets';
-import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-import { FormulaDataModel } from '@univerjs/engine-formula';
-import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
-import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
-import { ComponentManager } from '@univerjs/ui';
-import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { getDT } from '@univerjs/thread-comment-ui';
-import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
+import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
+import type { ICanvasPopup } from '@univerjs/sheets-ui';
+import { FDataValidation } from './f-data-validation';
+import { FFilter } from './f-filter';
+import { FThreadComment } from './f-thread-comment';
 import {
     covertCellValue,
     covertCellValues,
@@ -74,9 +76,7 @@ import {
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
-import { FDataValidation } from './f-data-validation';
-import { FFilter } from './f-filter';
-import { FThreadComment } from './f-thread-comment';
+import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -178,7 +178,8 @@ export class FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)!
-            .with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)!.skeleton;
+            .with(SheetSkeletonManagerService)
+            .getWorksheetSkeleton(subUnitId)!.skeleton;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
     }
 

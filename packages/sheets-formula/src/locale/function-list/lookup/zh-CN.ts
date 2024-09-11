@@ -124,8 +124,8 @@ export default {
         },
     },
     DROP: {
-        description: '从数组的开头或末尾排除指定数量的行或列',
-        abstract: '从数组的开头或末尾排除指定数量的行或列',
+        description: '从数组的开头或末尾删除指定数量的行或列',
+        abstract: '从数组的开头或末尾删除指定数量的行或列',
         links: [
             {
                 title: '教学',
@@ -133,8 +133,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要从中删除行或列的数组。' },
+            rows: { name: '行数', detail: '要删除的行数。负数表示从数组末尾开始删除。' },
+            columns: { name: '列数', detail: '要删除的列数。负数表示从数组末尾开始删除。' },
         },
     },
     EXPAND: {
@@ -147,8 +148,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要展开的数组。' },
+            rows: { name: '行数', detail: '扩展数组中的行数。 如果缺少，行将不会展开。' },
+            columns: { name: '列数', detail: '展开数组中的列数。 如果缺少，列将不会展开。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     FILTER: {
@@ -430,8 +433,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要从中获取行或列的数组。' },
+            rows: { name: '行数', detail: '要获取的行数。负数表示从数组末尾开始获取。' },
+            columns: { name: '列数', detail: '要获取的列数。负数表示从数组末尾开始获取。' },
         },
     },
     TOCOL: {
@@ -444,8 +448,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要作为列返回的数组或引用。' },
+            ignore: { name: '忽略值', detail: '是否忽略某些类型的值。默认情况下，不会忽略任何值。 指定下列操作之一：\n0 保留所有值（默认）\n1 忽略空白\n2 忽略错误\n3 忽略空白和错误' },
+            scanByColumn: { name: '按列扫描数组', detail: '按列扫描数组。 默认情况下，按行扫描数组。 扫描确定值是按行排序还是按列排序。' },
         },
     },
     TOROW: {
@@ -458,8 +463,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要作为行返回的数组或引用。' },
+            ignore: { name: '忽略值', detail: '是否忽略某些类型的值。默认情况下，不会忽略任何值。 指定下列操作之一：\n0 保留所有值（默认）\n1 忽略空白\n2 忽略错误\n3 忽略空白和错误' },
+            scanByColumn: { name: '按列扫描数组', detail: '按列扫描数组。 默认情况下，按行扫描数组。 扫描确定值是按行排序还是按列排序。' },
         },
     },
     TRANSPOSE: {
@@ -534,8 +540,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '在指定数量的元素之后按列包装提供的行或值列',
-        abstract: '在指定数量的元素之后按列包装提供的行或值列',
+        description: '将提供的行或列的值按列换行到指定数量的元素之后以形成新数组。',
+        abstract: '将提供的行或列的值按列换行到指定数量的元素之后以形成新数组。',
         links: [
             {
                 title: '教学',
@@ -543,13 +549,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '矢量', detail: '要换行的矢量或引用。' },
+            wrapCount: { name: '换行数量', detail: '每列的值的最大数量。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     WRAPROWS: {
-        description: '在指定数量的元素之后按行包装提供的行或值列',
-        abstract: '在指定数量的元素之后按行包装提供的行或值列',
+        description: '将提供的行或列的值按行换行到指定数量的元素之后以形成新数组。',
+        abstract: '将提供的行或列的值按行换行到指定数量的元素之后以形成新数组。',
         links: [
             {
                 title: '教学',
@@ -557,8 +564,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '矢量', detail: '要换行的矢量或引用。' },
+            wrapCount: { name: '换行数量', detail: '每行的值的最大数量。' },
+            padWith: { name: '填充值', detail: '要填充的值。 默认值为 #N/A。' },
         },
     },
     XLOOKUP: {

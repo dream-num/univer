@@ -57,17 +57,17 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*"
+        "rxjs": "^7.8.1"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.74"
+        "@univerjs/core": "workspace:*",
+        "@univerjs/icons": "^0.1.78"
     },
     "devDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
+        "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

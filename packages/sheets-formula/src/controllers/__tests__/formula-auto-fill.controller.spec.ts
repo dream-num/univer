@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -26,7 +25,6 @@ import {
 import {
     AddWorksheetMergeMutation,
     RangeProtectionRenderModel,
-    RangeProtectionRuleModel,
     RangeProtectionService,
     RemoveWorksheetMergeMutation,
     SetRangeValuesMutation,
@@ -44,6 +42,7 @@ import {
 } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ICellData, Injector, Nullable, Univer } from '@univerjs/core';
 
 import { FormulaAutoFillController } from '../formula-auto-fill.controller';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -78,7 +77,6 @@ describe('Test auto fill with formula', () => {
             [IShortcutService, { useClass: ShortcutService }],
             [IPlatformService, { useClass: PlatformService }],
             [FormulaAutoFillController],
-            [RangeProtectionRuleModel],
             [RangeProtectionService],
             [RangeProtectionRenderModel],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],

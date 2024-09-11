@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import { isFormulaId, isFormulaString } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IFormulaDataItem } from '../../basics/common';
 
 export interface IFormulaIdMap {
@@ -24,6 +24,7 @@ export interface IFormulaIdMap {
     c: number;
 }
 
+// eslint-disable-next-line complexity
 export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newSheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem | null>, formulaIdMap: Map<string, IFormulaIdMap>, deleteFormulaIdMap: Map<string, string | IFormulaIdMap>, r: number, c: number, cell: Nullable<ICellData>) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';
@@ -31,35 +32,12 @@ export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatri
     const checkFormulaString = isFormulaString(formulaString);
     const checkFormulaId = isFormulaId(formulaId);
 
-    if (checkFormulaString && checkFormulaId) {
-        sheetFormulaDataMatrix.setValue(r, c, {
-            f: formulaString,
-            si: formulaId,
-        });
+    const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
+    const f = currentFormulaInfo?.f || '';
+    const si = currentFormulaInfo?.si || '';
 
-        formulaIdMap.set(formulaId, { f: formulaString, r, c });
-
-        newSheetFormulaDataMatrix.setValue(r, c, {
-            f: formulaString,
-            si: formulaId,
-        });
-    } else if (checkFormulaString && !checkFormulaId) {
-        sheetFormulaDataMatrix.setValue(r, c, {
-            f: formulaString,
-        });
-        newSheetFormulaDataMatrix.setValue(r, c, {
-            f: formulaString,
-        });
-    } else if (!checkFormulaString && checkFormulaId) {
-        sheetFormulaDataMatrix.setValue(r, c, {
-            f: '',
-            si: formulaId,
-        });
-    } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getValue(r, c)) {
-        const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
-        const f = currentFormulaInfo?.f || '';
-        const si = currentFormulaInfo?.si || '';
-
+    // Any data update may destroy the original correspondence between f and si, and the relationship between f and si needs to be re-bound.
+    function clearFormulaData() {
         // The id that needs to be offset
         // When the cell containing the formulas f and si is deleted, f and si lose their association, and f needs to be moved to the next cell containing the same si.
         if (isFormulaString(f) && isFormulaId(si)) {
@@ -72,6 +50,45 @@ export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatri
                 deleteFormulaIdMap.set(si, f);
             }
         }
+    }
+
+    if (checkFormulaString && checkFormulaId) {
+        if (si !== formulaId) {
+            clearFormulaData();
+        }
+
+        sheetFormulaDataMatrix.setValue(r, c, {
+            f: formulaString,
+            si: formulaId,
+        });
+
+        formulaIdMap.set(formulaId, { f: formulaString, r, c });
+
+        newSheetFormulaDataMatrix.setValue(r, c, {
+            f: formulaString,
+            si: formulaId,
+        });
+    } else if (checkFormulaString && !checkFormulaId) {
+        if (f !== formulaString) {
+            clearFormulaData();
+        }
+
+        sheetFormulaDataMatrix.setValue(r, c, {
+            f: formulaString,
+        });
+        newSheetFormulaDataMatrix.setValue(r, c, {
+            f: formulaString,
+        });
+    } else if (!checkFormulaString && checkFormulaId) {
+        if (si !== formulaId) {
+            clearFormulaData();
+        }
+        sheetFormulaDataMatrix.setValue(r, c, {
+            f: '',
+            si: formulaId,
+        });
+    } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getValue(r, c)) {
+        clearFormulaData();
 
         sheetFormulaDataMatrix.realDeleteValue(r, c);
         newSheetFormulaDataMatrix.setValue(r, c, null);

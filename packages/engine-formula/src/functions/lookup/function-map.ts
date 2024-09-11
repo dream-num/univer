@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Address } from './address';
 import { Areas } from './areas';
 import { Choose } from './choose';
@@ -22,9 +21,13 @@ import { Choosecols } from './choosecols';
 import { Chooserows } from './chooserows';
 import { Column } from './column';
 import { Columns } from './columns';
+import { Drop } from './drop';
+import { Expand } from './expand';
 import { Filter } from './filter';
+import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
+import { Index } from './index';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
 import { Match } from './match';
@@ -33,13 +36,17 @@ import { Row } from './row';
 import { Rows } from './rows';
 import { Sort } from './sort';
 import { Sortby } from './sortby';
+import { Take } from './take';
+import { Tocol } from './tocol';
+import { Torow } from './torow';
 import { Transpose } from './transpose';
 import { Unique } from './unique';
 import { Vlookup } from './vlookup';
 import { Vstack } from './vstack';
+import { Wrapcols } from './wrapcols';
+import { Wraprows } from './wraprows';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
-import { Index } from './index';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
@@ -49,6 +56,8 @@ export const functionLookup = [
     [Chooserows, FUNCTION_NAMES_LOOKUP.CHOOSEROWS],
     [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Columns, FUNCTION_NAMES_LOOKUP.COLUMNS],
+    [Drop, FUNCTION_NAMES_LOOKUP.DROP],
+    [Expand, FUNCTION_NAMES_LOOKUP.EXPAND],
     [Filter, FUNCTION_NAMES_LOOKUP.FILTER],
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Hstack, FUNCTION_NAMES_LOOKUP.HSTACK],
@@ -61,10 +70,15 @@ export const functionLookup = [
     [Rows, FUNCTION_NAMES_LOOKUP.ROWS],
     [Sort, FUNCTION_NAMES_LOOKUP.SORT],
     [Sortby, FUNCTION_NAMES_LOOKUP.SORTBY],
+    [Take, FUNCTION_NAMES_LOOKUP.TAKE],
+    [Tocol, FUNCTION_NAMES_LOOKUP.TOCOL],
+    [Torow, FUNCTION_NAMES_LOOKUP.TOROW],
     [Transpose, FUNCTION_NAMES_LOOKUP.TRANSPOSE],
     [Unique, FUNCTION_NAMES_LOOKUP.UNIQUE],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Vstack, FUNCTION_NAMES_LOOKUP.VSTACK],
+    [Wrapcols, FUNCTION_NAMES_LOOKUP.WRAPCOLS],
+    [Wraprows, FUNCTION_NAMES_LOOKUP.WRAPROWS],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],
     [Xmatch, FUNCTION_NAMES_LOOKUP.XMATCH],
 ];

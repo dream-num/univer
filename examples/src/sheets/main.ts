@@ -14,35 +14,36 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
-import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { FUniver } from '@univerjs/facade';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
-import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
-import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { FUniver } from '@univerjs/facade';
-import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
-import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
-import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
+import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
+import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { UniverUIPlugin } from '@univerjs/ui';
+import type { Nullable } from '@univerjs/core';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -79,6 +80,8 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+// filter plugin
+univer.registerPlugin(UniverSheetsFilterPlugin);
 // hyperlink
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CellValueType,
@@ -27,14 +26,15 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 
 const getTestWorkbookDataDemo = (): IWorkbookData => ({
     id: 'test',
@@ -295,6 +295,19 @@ describe('Test set range values commands', () => {
                     return params;
                 }
 
+                function getParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: {
+                                name: 'test',
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
                 function getResultParams() {
                     const params: ISetRangeValuesCommandParams = {
                         value: {
@@ -309,9 +322,31 @@ describe('Test set range values commands', () => {
                     return params;
                 }
 
+                function getResultParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                            custom: {
+                                id: 1,
+                                name: 'test',
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
                 expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
                 expect(getValue()).toStrictEqual(getResultParams().value);
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParamsMore())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
+
                 // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
@@ -322,8 +357,8 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual(getResultParams().value);
 
-                // reset
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
             });
 
             it('set value in other worksheet', async () => {

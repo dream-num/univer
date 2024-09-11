@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -33,12 +32,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveSheetMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -61,11 +54,25 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
+import type { IAccessor, ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveSheetMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/sheets';
 
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
+import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
+import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import { otherRule } from '../services/auto-fill/rules';
 import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
+import { IEditorBridgeService } from '../services/editor-bridge.service';
+import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
+import { SheetsRenderService } from '../services/sheets-render.service';
+import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 import type {
     APPLY_FUNCTIONS,
     IAutoFillLocation,
@@ -74,14 +81,7 @@ import type {
     IRuleConfirmedData,
     ISheetAutoFillHook,
 } from '../services/auto-fill/type';
-import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { SheetsRenderService } from '../services/sheets-render.service';
-import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 import type { IDiscreteRange } from './utils/range-tools';
-import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -152,9 +152,11 @@ export class AutoFillController extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             const fromCollab = options?.fromCollab;
             const fromSync = options?.fromSync;
+            const fromFormula = options?.fromFormula;
             if (quitCommands.includes(command.id)
                 && !fromCollab
                 && !fromSync
+                && !fromFormula
                 && (command.params as IMutationCommonParams).trigger !== AutoFillCommand.id
             ) {
                 this._quit();

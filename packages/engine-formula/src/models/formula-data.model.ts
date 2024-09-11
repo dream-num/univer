@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 
+import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+
+import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -27,10 +30,7 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-
-import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import type { IFormulaIdMap } from './utils/formula-data-util';
-import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
 export interface IRangeChange {
     oldCell: IRange;
@@ -51,6 +51,13 @@ export class FormulaDataModel extends Disposable {
         super();
 
         this.initFormulaData();
+    }
+
+    override dispose() {
+        super.dispose();
+        this._formulaData = {};
+        this._arrayFormulaRange = {};
+        this._arrayFormulaCellData = {};
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {

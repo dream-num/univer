@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IPermissionPoint } from '@univerjs/core';
 import { PermissionStatus } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
+import type { IPermissionPoint } from '@univerjs/core';
 
 export class RangeProtectionPermissionEditPoint implements IPermissionPoint {
     type = UnitObject.SelectRange;

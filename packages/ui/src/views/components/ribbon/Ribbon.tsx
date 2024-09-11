@@ -15,19 +15,19 @@
  */
 
 import { LocaleService, useDependency } from '@univerjs/core';
-import type { ComponentType } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import clsx from 'clsx';
 import { MoreFunctionSingle } from '@univerjs/icons';
+import clsx from 'clsx';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { ComponentContainer } from '../ComponentContainer';
 import { ToolbarButton } from '../ribbon/Button/ToolbarButton';
-import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
+import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
-import styles from './index.module.less';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 
 interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;

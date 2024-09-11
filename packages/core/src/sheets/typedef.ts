@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { LocaleType } from '../types/enum/locale-type';
-import type { IStyleData } from '../types/interfaces/i-style-data';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import { type BooleanNumber, CellValueType } from '../types/enum';
+import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
+import type { IStyleData } from '../types/interfaces/i-style-data';
 
 /**
  * Snapshot of a workbook.
@@ -253,7 +253,8 @@ export function isICellData(value: any): value is ICellData {
             (value as ICellData).v !== undefined ||
             (value as ICellData).t !== undefined ||
             (value as ICellData).f !== undefined ||
-            (value as ICellData).si !== undefined)
+            (value as ICellData).si !== undefined ||
+            (value as ICellData).custom !== undefined)
     );
 }
 

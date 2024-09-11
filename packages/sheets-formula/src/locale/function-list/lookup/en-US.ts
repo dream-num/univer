@@ -143,8 +143,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array from which to drop rows or columns.' },
+            rows: { name: 'rows', detail: 'The number of rows to drop. A negative value drops from the end of the array.' },
+            columns: { name: 'columns', detail: 'The number of columns to exclude. A negative value drops from the end of the array.' },
         },
     },
     EXPAND: {
@@ -157,8 +158,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array to expand.' },
+            rows: { name: 'rows', detail: 'The number of rows in the expanded array. If missing, rows will not be expanded.' },
+            columns: { name: 'columns', detail: 'The number of columns in the expanded array. If missing, columns will not be expanded.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     FILTER: {
@@ -443,8 +446,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array from which to take rows or columns.' },
+            rows: { name: 'rows', detail: 'The number of rows to take. A negative value takes from the end of the array.' },
+            columns: { name: 'columns', detail: 'The number of columns to take. A negative value takes from the end of the array.' },
         },
     },
     TOCOL: {
@@ -457,8 +461,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or reference to return as a column.' },
+            ignore: { name: 'ignore', detail: 'Whether to ignore certain types of values. By default, no values are ignored. Specify one of the following:\n0 Keep all values (default)\n1 Ignore blanks\n2 Ignore errors\n3 Ignore blanks and errors' },
+            scanByColumn: { name: 'scan_by_column', detail: 'Scan the array by column. By default, the array is scanned by row. Scanning determines whether the values are ordered by row or by column.' },
         },
     },
     TOROW: {
@@ -471,8 +476,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or reference to return as a row.' },
+            ignore: { name: 'ignore', detail: 'Whether to ignore certain types of values. By default, no values are ignored. Specify one of the following:\n0 Keep all values (default)\n1 Ignore blanks\n2 Ignore errors\n3 Ignore blanks and errors' },
+            scanByColumn: { name: 'scan_by_column', detail: 'Scan the array by column. By default, the array is scanned by row. Scanning determines whether the values are ordered by row or by column.' },
         },
     },
     TRANSPOSE: {
@@ -555,8 +561,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'vector', detail: 'The vector or reference to wrap.' },
+            wrapCount: { name: 'wrap_count', detail: 'The maximum number of values for each column.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     WRAPROWS: {
@@ -569,8 +576,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'vector', detail: 'The vector or reference to wrap.' },
+            wrapCount: { name: 'wrap_count', detail: 'The maximum number of values for each row.' },
+            padWith: { name: 'pad_with', detail: 'The value with which to pad. The default is #N/A.' },
         },
     },
     XLOOKUP: {

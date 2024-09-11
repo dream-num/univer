@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
+import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
+import * as cjk from 'cjk-regex';
 import type {
     IRange,
     IRangeWithCoord,
     IScale,
+    ISelectionCell,
     ISelectionCellWithMergeInfo,
     IStyleBase,
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
-import * as cjk from 'cjk-regex';
 
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
-import type { IBoundRectNoAngle } from './vector2';
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
+import type { IBoundRectNoAngle } from './vector2';
 
 const DEG180 = 180;
 
@@ -519,6 +520,78 @@ export function getCellPositionByIndex(
         endY,
         startX,
         endX,
+    };
+}
+
+export function getCellByIndexWithMergeInfo(
+    row: number,
+    column: number,
+    rowHeightAccumulation: number[],
+    columnWidthAccumulation: number[],
+    mergeDataInfo: ISelectionCell
+) {
+      // eslint-disable-next-line prefer-const
+    let { startY, endY, startX, endX } = getCellPositionByIndex(
+        row,
+        column,
+        rowHeightAccumulation,
+        columnWidthAccumulation
+    );
+
+    const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = mergeDataInfo;
+
+    let mergeInfo = {
+        startRow,
+        startColumn,
+        endRow,
+        endColumn,
+
+        startY: 0,
+        endY: 0,
+        startX: 0,
+        endX: 0,
+    };
+
+    const rowAccumulationCount = rowHeightAccumulation.length - 1;
+
+    const columnAccumulationCount = columnWidthAccumulation.length - 1;
+
+    if (isMerged && startRow !== -1 && startColumn !== -1) {
+        const mergeStartY = rowHeightAccumulation[startRow - 1] || 0;
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
+
+        const mergeStartX = columnWidthAccumulation[startColumn - 1] || 0;
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
+        mergeInfo = {
+            ...mergeInfo,
+            startY: mergeStartY,
+            endY: mergeEndY,
+            startX: mergeStartX,
+            endX: mergeEndX,
+        };
+    } else if (!isMerged && endRow !== -1 && endColumn !== -1) {
+        const mergeEndY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowAccumulationCount];
+        const mergeEndX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnAccumulationCount];
+
+        mergeInfo = {
+            ...mergeInfo,
+            startY,
+            endY: mergeEndY,
+            startX,
+            endX: mergeEndX,
+        };
+    }
+
+    return {
+        isMerged,
+        isMergedMainCell,
+        actualRow: row,
+        actualColumn: column,
+        startY,
+        endY,
+        startX,
+        endX,
+        mergeInfo,
     };
 }
 

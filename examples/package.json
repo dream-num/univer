@@ -12,6 +12,7 @@
         "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"
     },
     "dependencies": {
+        "@univerjs/action-recorder": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/debugger": "workspace:*",
@@ -29,7 +30,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.1.77",
+        "@univerjs/icons": "^0.1.78",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
@@ -73,7 +74,7 @@
     "devDependencies": {
         "@types/react": "^18.3.5",
         "@types/react-dom": "^18.3.0",
-        "@univerjs/shared": "workspace:*",
+        "@univerjs-infra/shared": "workspace:*",
         "esbuild": "^0.23.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
@@ -81,6 +82,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.5.4"
+        "typescript": "^5.6.2"
     }
 }

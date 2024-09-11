@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
 import { normalizeTextRuns, Tools } from '@univerjs/core';
+import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
 
 export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
     // use null to clear style
@@ -34,7 +34,9 @@ export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData
     const merge = mergeStyle(oldStyle, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
 
     // then remove null
-    merge && Tools.removeNull(merge);
+    if (merge) {
+        Tools.removeNull(merge);
+    }
 
     if (Tools.isEmptyObject(merge)) {
         delete oldVal.s;
@@ -58,17 +60,6 @@ export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData
  * @param style
  */
 export function transformStyle(oldStyle: Nullable<IStyleData>, newStyle: Nullable<IStyleData>): Nullable<IStyleData> {
-    const backupStyle = transformNormalKey(oldStyle, newStyle);
-    return backupStyle;
-}
-/**
- * Convert old style normal key for storage
- * @param style
- */
-function transformNormalKey(
-    oldStyle: Nullable<IStyleData>,
-    newStyle: Nullable<IStyleData>
-): Nullable<IStyleData> {
     // If there is no newly set style, directly store the historical style
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
@@ -125,7 +116,7 @@ function mergeStyle(
     if (newStyle === undefined) return oldStyle;
 
     const backupStyle: Record<string, any> = Tools.deepClone(oldStyle) || {};
-    if (!backupStyle) return;
+
     for (const k in newStyle) {
         // Do not copy cell background color to rich text background color.
         if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd', 'bg'].includes(k)) {

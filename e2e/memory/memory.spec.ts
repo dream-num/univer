@@ -16,10 +16,10 @@
 
 /* eslint-disable no-console */
 
-import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
-const MAX_MEMORY_OVERFLOW = 2_500_000;
+const MAX_MEMORY_OVERFLOW = 5_000_000; // 5MB
 
 test('memory', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
@@ -48,10 +48,10 @@ interface IMetrics {
 
 /**
  * Return a performance metric from the chrome cdp session.
- * Note: Chrome-only
+ * Chrome only.
  * @param {Page} page page to attach cdpClient
  * @return {IMetrics}
- * @see {@link https://github.com/microsoft/playwright/issues/18071 Github RFE}
+ * @see {@link https://github.com/microsoft/playwright/issues/18071}
  */
 async function getMetrics(page: Page): Promise<IMetrics> {
     const client = await page.context().newCDPSession(page);

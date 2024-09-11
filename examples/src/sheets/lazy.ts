@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Plugin, PluginCtor } from '@univerjs/core';
+import { UniverActionRecorderPlugin } from '@univerjs/action-recorder';
+import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
+import type { Plugin, PluginCtor } from '@univerjs/core';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
@@ -39,6 +40,7 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
                 return '/vs/editor/editor.worker.js';
             },
         }],
+        [UniverActionRecorderPlugin],
         [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: false }],
         [UniverSheetsFindReplacePlugin],

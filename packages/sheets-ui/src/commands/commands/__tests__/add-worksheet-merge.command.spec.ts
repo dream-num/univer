@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -52,7 +51,9 @@ import {
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 
+import { getClearContentMutationParamForRange } from '../../../common/utils';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -158,7 +159,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -204,7 +206,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -248,7 +251,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -282,7 +286,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -303,6 +308,96 @@ describe('Test add worksheet merge commands', () => {
                 const result = await commandService.executeCommand(RemoveWorksheetMergeCommand.id);
                 expect(result).toBeFalsy();
             });
+        });
+    });
+
+    describe('merge cell with set cell data', () => {
+        it('test clear util', () => {
+            const commandService = get(ICommandService);
+            const univerInstanceService = get(IUniverInstanceService);
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+            const worksheet = workbook.getActiveSheet();
+            if (!worksheet) throw new Error('No active sheet found');
+
+            commandService.executeCommand(SetRangeValuesMutation.id, {
+                unitId: workbook.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
+                cellValue: {
+                    2: {
+                        2: {
+                            p: {
+                                id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                                documentStyle: {
+                                    pageSize: {
+                                        width: 82.20805358886719,
+                                        height: null,
+                                    },
+                                    marginTop: 0,
+                                    marginBottom: 1,
+                                    marginRight: 2,
+                                    marginLeft: 2,
+                                    renderConfig: {
+                                        horizontalAlign: 0,
+                                        verticalAlign: 0,
+                                        centerAngle: 0,
+                                        vertexAngle: 0,
+                                        wrapStrategy: 0,
+                                    },
+                                },
+                                body: {
+                                    dataStream: 'hahaha\r\n',
+                                    textRuns: [
+                                        {
+                                            st: 3,
+                                            ed: 5,
+                                            ts: {
+                                                fs: 28,
+                                            },
+                                        },
+                                    ],
+                                    paragraphs: [
+                                        {
+                                            startIndex: 6,
+                                            paragraphStyle: {
+                                                horizontalAlign: 0,
+                                            },
+                                        },
+                                    ],
+                                    sectionBreaks: [
+                                        {
+                                            startIndex: 7,
+                                        },
+                                    ],
+                                    customRanges: [],
+                                    customDecorations: [],
+                                },
+                                drawings: {},
+                                drawingsOrder: [],
+                                settings: {
+                                    zoomRatio: 1,
+                                },
+                                resources: [
+                                    {
+                                        name: 'SHEET_THREAD_COMMENT_PLUGIN',
+                                        data: '{}',
+                                    },
+                                    {
+                                        name: 'SHEET_AuthzIoMockService_PLUGIN',
+                                        data: '{}',
+                                    },
+                                ],
+                            },
+                            v: null,
+                            f: null,
+                            si: null,
+                            custom: {},
+                        },
+                    },
+                },
+            });
+            const res = getClearContentMutationParamForRange(worksheet, { startRow: 0, startColumn: 2, endRow: 2, endColumn: 2 });
+            expect(res.getValue(0, 2)?.p).toBeTruthy();
+            expect(res.getValue(2, 2)).toBeNull();
         });
     });
 

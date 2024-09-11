@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo } from '@univerjs/core';
 
-import type {
-    IRemoveFeatureCalculationMutationParam,
-    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
-import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
-import { IDependencyManagerService } from '../services/dependency-manager.service';
-import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
-import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
+import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import { IDependencyManagerService } from '../services/dependency-manager.service';
+import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import type {
+    IRemoveFeatureCalculationMutationParam,
+    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, SetDependencyController)
 export class SetDependencyController extends Disposable {
@@ -99,12 +99,26 @@ export class SetDependencyController extends Disposable {
                 } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData;
                     Object.keys(formulaData).forEach((unitId) => {
-                        if (formulaData[unitId] == null) {
-                            return true;
+                        const unitFormulaData = formulaData[unitId];
+                        // undefined means do nothing
+                        if (unitFormulaData === undefined) {
+                            return;
                         }
-                        Object.keys(formulaData[unitId]!).forEach((subUnitId) => {
-                            const formulaDataItem = formulaData[unitId]![subUnitId];
-                            if (formulaDataItem == null) {
+
+                        // null means clear all formula data with the unitId
+                        if (unitFormulaData === null) {
+                            this._dependencyManagerService.clearFormulaDependency(unitId);
+                            return;
+                        }
+
+                        Object.keys(unitFormulaData).forEach((subUnitId) => {
+                            const formulaDataItem = unitFormulaData[subUnitId];
+
+                            if (formulaDataItem === undefined) {
+                                return;
+                            }
+
+                            if (formulaDataItem === null) {
                                 this._dependencyManagerService.clearFormulaDependency(unitId, subUnitId);
                                 return true;
                             }

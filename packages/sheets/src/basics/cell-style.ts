@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
 import { normalizeTextRuns, Tools } from '@univerjs/core';
+import type { IBorderData, ICellData, IDocumentData, IKeyValue, IParagraph, IStyleData, ITextRun, ITextStyle, Nullable, Styles } from '@univerjs/core';
 
 export function handleStyle(styles: Styles, oldVal: ICellData, newVal: ICellData) {
     // use null to clear style

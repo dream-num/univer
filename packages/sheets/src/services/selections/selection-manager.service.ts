@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
+import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 
 import type { ISelectionWithStyle } from '../../basics/selection';
 

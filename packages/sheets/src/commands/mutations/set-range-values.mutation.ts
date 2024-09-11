@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import type {
     IAccessor,
     ICellData,
@@ -25,11 +26,10 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
-import { handleStyle, transformStyle } from '../../basics/cell-style';
-import { getCellValue, setNull } from '../../basics/cell-value';
-import { getCellType } from '../../basics/cell-type';
 import { handleCustom, transformCustom } from '../../basics/cell-custom';
+import { handleStyle, transformStyle } from '../../basics/cell-style';
+import { getCellType } from '../../basics/cell-type';
+import { getCellValue, setNull } from '../../basics/cell-value';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {

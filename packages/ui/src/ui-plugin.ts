@@ -57,8 +57,8 @@ import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import type { IUniverUIConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { IFileOpenerService } from './services/file-opener/file-opener.service';
-import { DesktopFileOpenerService } from './services/file-opener/desktop-file-opener.service';
+import { ILocalFileService } from './services/local-file/file-opener.service';
+import { DesktopLocalFileService } from './services/local-file/desktop-file-opener.service';
 
 export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 
@@ -113,7 +113,7 @@ export class UniverUIPlugin extends Plugin {
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
-            [IFileOpenerService, { useClass: DesktopFileOpenerService }],
+            [ILocalFileService, { useClass: DesktopLocalFileService }],
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -52,14 +51,15 @@ import {
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { IDisposable, Injector, IRange, Univer, Workbook } from '@univerjs/core';
 
+import { getClearContentMutationParamForRange } from '../../../common/utils';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
 } from '../add-worksheet-merge.command';
-import { getClearContentMutationParamForRange } from '../../../common/utils';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test add worksheet merge commands', () => {
@@ -159,7 +159,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -205,7 +206,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -249,7 +251,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);
@@ -283,7 +286,8 @@ describe('Test add worksheet merge commands', () => {
                     return get(IUniverInstanceService)
                         .getUniverSheetInstance('test')
                         ?.getSheetBySheetId('sheet1')
-                        ?.getConfig().mergeData;
+                        ?.getConfig()
+                        .mergeData;
                 }
 
                 expect(getMerge()?.length).toBe(0);

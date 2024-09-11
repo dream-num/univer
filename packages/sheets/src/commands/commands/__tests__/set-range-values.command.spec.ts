@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CellValueType,
@@ -27,14 +26,15 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+import type { ICellData, IDocumentData, Injector, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
-import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 import { SetRangeValuesCommand } from '../set-range-values.command';
 import { createCommandTestBed } from './create-command-test-bed';
+import type { ISetRangeValuesCommandParams } from '../set-range-values.command';
 
 const getTestWorkbookDataDemo = (): IWorkbookData => ({
     id: 'test',

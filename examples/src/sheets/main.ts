@@ -41,6 +41,7 @@ import { FUniver } from '@univerjs/facade';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 
@@ -79,6 +80,8 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+// filter plugin
+univer.registerPlugin(UniverSheetsFilterPlugin);
 // hyperlink
 univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 // data validation

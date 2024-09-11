@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } f
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import type { IImageIoServiceParam } from '@univerjs/drawing';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { IFileOpenerService, IMessageService } from '@univerjs/ui';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
@@ -38,7 +38,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
-        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService,
+        @ILocalFileService private readonly _fileOpenerService: ILocalFileService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,

@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@univerjs/core';
+import type zhCN from './zh-CN';
 
-export interface IOpenFileOptions {
-    accept?: string;
-    multiple?: boolean;
-}
+const locale: typeof zhCN = {
+    'action-recorder': {
+        menu: {
+            title: 'Record Actions',
+            record: 'Record Actions...',
+            'replay-local': 'Replace Local Record...',
+        },
+    },
+};
 
-export interface IFileOpenerService {
-    openFile(options?: IOpenFileOptions): Promise<File[]>;
-}
-
-/**
- * This service is used to upload files.
- */
-export const IFileOpenerService = createIdentifier<IFileOpenerService>('univer.ui.file-opener.service');
-
+export default locale;

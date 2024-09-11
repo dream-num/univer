@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import { isFormulaId, isFormulaString } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IFormulaDataItem } from '../../basics/common';
 
 export interface IFormulaIdMap {

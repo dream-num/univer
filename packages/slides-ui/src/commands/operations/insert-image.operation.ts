@@ -17,7 +17,7 @@
 import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, getImageSize, IImageIoService } from '@univerjs/drawing';
-import { IFileOpenerService } from '@univerjs/ui';
+import { ILocalFileService } from '@univerjs/ui';
 import { CanvasView } from '../../controllers/canvas-view';
 
 export const InsertSlideFloatImageCommand: ICommand<{}> = {
@@ -28,7 +28,7 @@ export const InsertSlideFloatImageCommand: ICommand<{}> = {
         const unitId = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SLIDE)?.getUnitId();
         if (!unitId) return false;
 
-        const fileOpenerService = accessor.get(IFileOpenerService);
+        const fileOpenerService = accessor.get(ILocalFileService);
         const files = await fileOpenerService.openFile({
             multiple: true,
             accept: DRAWING_IMAGE_ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(','),

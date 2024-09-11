@@ -23,7 +23,7 @@ import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IFileOpenerService, IMessageService } from '@univerjs/ui';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
@@ -43,7 +43,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
         @ICommandService private readonly _commandService: ICommandService,
         @ISheetSelectionRenderService private readonly _selectionRenderService: ISheetSelectionRenderService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
-        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService,
+        @ILocalFileService private readonly _fileOpenerService: ILocalFileService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
         @IContextService private readonly _contextService: IContextService,

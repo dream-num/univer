@@ -32,7 +32,7 @@ export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.contr
 export { type IUniverUIConfig } from './controllers/config.schema';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
-export { type IOpenFileOptions, IFileOpenerService } from './services/file-opener/file-opener.service';
+export { type IOpenFileOptions, ILocalFileService } from './services/local-file/file-opener.service';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export {

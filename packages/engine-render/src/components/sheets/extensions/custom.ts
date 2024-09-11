@@ -36,7 +36,7 @@ export class Custom extends SheetExtension {
     override uKey: string = UNIQUE_KEY;
 
     override draw(ctx: UniverRenderingContext, _parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges: IRange[] | undefined): void {
-        const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache, rowColumnSegment } = skeleton;
+        const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;
         }
@@ -52,7 +52,7 @@ export class Custom extends SheetExtension {
                 return;
             }
 
-            let primaryWithCoord = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+            let primaryWithCoord = skeleton.getCellByIndex(row, col);
 
             const { mergeInfo } = primaryWithCoord;
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
@@ -78,7 +78,7 @@ export class Custom extends SheetExtension {
                     return;
                 }
 
-                primaryWithCoord = this.getCellByIndex(mainCell.row, mainCell.col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                primaryWithCoord = skeleton.getCellByIndex(mainCell.row, mainCell.col);
             }
 
             const renderInfo = {

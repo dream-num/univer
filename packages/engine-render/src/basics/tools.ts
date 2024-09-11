@@ -523,14 +523,23 @@ export function getCellPositionByIndex(
     };
 }
 
+/**
+ * @description Get the cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
+ * @param {number} row The row index of the cell
+ * @param {number} column The column index of the cell
+ * @param {number[]} rowHeightAccumulation The accumulated height of each row
+ * @param {number[]} columnWidthAccumulation The accumulated width of each column
+ * @param {ISelectionCell} mergeData The merge information of the cell
+ * @returns {ISelectionCellWithMergeInfo} The cell position information of the specified row and column, including the position information of the cell and the merge information of the cell
+ */
 export function getCellByIndexWithMergeInfo(
     row: number,
     column: number,
     rowHeightAccumulation: number[],
     columnWidthAccumulation: number[],
     mergeDataInfo: ISelectionCell
-) {
-      // eslint-disable-next-line prefer-const
+): ISelectionCellWithMergeInfo {
+    // eslint-disable-next-line prefer-const
     let { startY, endY, startX, endX } = getCellPositionByIndex(
         row,
         column,
@@ -594,7 +603,9 @@ export function getCellByIndexWithMergeInfo(
         mergeInfo,
     };
 }
-
+/**
+ * @deprecated please use getCellByIndexWithMergeInfo instead
+ */
 export function getCellByIndex(
     row: number,
     column: number,

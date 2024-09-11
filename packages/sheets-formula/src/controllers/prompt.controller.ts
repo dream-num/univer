@@ -25,7 +25,6 @@ import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FORMULA_EDITOR_ACTIVATED,
-    getCellInfoInMergeData,
     ICommandService,
     IContextService,
     Inject,
@@ -1514,7 +1513,19 @@ export class PromptController extends Disposable {
         }
 
         let { startRow, endRow, startColumn, endColumn } = toRange;
-        const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
+        // const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
+        const primary = skeleton
+            ? skeleton.worksheet.getCellInfoInMergeData(startRow, startColumn)
+            : {
+                actualRow: startRow,
+                actualColumn: startColumn,
+                isMergedMainCell: false,
+                isMerged: false,
+                endRow: startRow,
+                endColumn: startColumn,
+                startRow,
+                startColumn,
+            };
 
         if (primary) {
             const {

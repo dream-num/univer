@@ -52,7 +52,7 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
-        const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
+        const { stylesCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet || !fontList) {
             return;
@@ -96,12 +96,9 @@ export class Font extends SheetExtension {
                         return true;
                     }
                 }
-                const cellInfo = this.getCellByIndex(
+                const cellInfo = spreadsheetSkeleton.getCellByIndex(
                     rowIndex,
-                    columnIndex,
-                    rowHeightAccumulation,
-                    columnWidthAccumulation,
-                    dataMergeCache
+                    columnIndex
                 );
                 let { startY, endY, startX, endX } = cellInfo;
                 const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

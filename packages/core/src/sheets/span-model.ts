@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Rectangle } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
 import type { IRange } from './typedef';
@@ -21,7 +22,7 @@ import type { IRange } from './typedef';
 interface IMergeDataCache {
     [key: string]: number;
 }
-class WorkSheetSpanModel extends Disposable {
+export class SpanModel extends Disposable {
     /**
      * @property Cache for RANGE_TYPE.NORMAL
      */
@@ -124,12 +125,29 @@ class WorkSheetSpanModel extends Disposable {
         }
     }
 
-    public getMergeData(row: number, column: number) {
+    public getMergedCell(row: number, column: number) {
         const index = this.getMergeDataIndex(row, column);
         if (index !== -1) {
             return this._mergeData[index];
         }
-        return undefined;
+        return null;
+    }
+
+    public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {
+        const ranges: IRange[] = [];
+        for (const range of this._mergeData || []) {
+            if (Rectangle.intersects(range, {
+                startRow,
+                endRow,
+                startColumn,
+                endColumn,
+            })) {
+                ranges.push({
+                    ...range,
+                });
+            }
+        }
+        return ranges;
     }
 
     private getMergeDataIndex(row: number, column: number) {
@@ -153,5 +171,10 @@ class WorkSheetSpanModel extends Disposable {
 
     public getMergeDataSnapshot() {
         return this._mergeData;
+    }
+
+    override dispose() {
+        this._clearCache();
+        this._mergeData = [];
     }
 }

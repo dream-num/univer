@@ -15,17 +15,18 @@
  */
 
 import { BuildTextUtils } from '../docs';
-import { ObjectMatrix, Rectangle, Tools } from '../shared';
+import { ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
+import { SpanModel } from './span-model';
 import { SheetViewModel } from './view-model';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from './typedef';
+import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 
 /**
  * The model of a Worksheet.
@@ -39,6 +40,8 @@ export class Worksheet {
     protected _columnManager: ColumnManager;
 
     protected readonly _viewModel: SheetViewModel;
+
+    protected _spanModel: SpanModel;
 
     constructor(
         public readonly unitId: string,
@@ -55,6 +58,7 @@ export class Worksheet {
         this._viewModel = new SheetViewModel((row, col) => this.getCellRaw(row, col));
         this._rowManager = new RowManager(this._snapshot, this._viewModel, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
+        this._spanModel = new SpanModel(this._snapshot.mergeData);
     }
 
     /**
@@ -67,6 +71,10 @@ export class Worksheet {
 
     getSnapshot(): IWorksheetData {
         return this._snapshot;
+    }
+
+    getSpanModel(): SpanModel {
+        return this._spanModel;
     }
 
     /**
@@ -213,30 +221,87 @@ export class Worksheet {
         return new Worksheet(this.unitId, copy, this._styles);
     }
 
+    /**
+     * Get the merged cell list of the sheet.
+     * @returns {IRange[]} merged cell list
+     */
     getMergeData(): IRange[] {
-        return this._snapshot.mergeData;
+        return this._spanModel.getMergeDataSnapshot();
     }
 
+    /**
+     * Get the merged cell Range of the sheet cell.
+     * @param {number} row The row index of test cell
+     * @param {number} col The column index of test cell
+     * @returns {Nullable<IRange>} The merged cell range of the cell, if the cell is not in a merged cell, return null
+     */
     getMergedCell(row: number, col: number): Nullable<IRange> {
-        const rectangleList = this._snapshot.mergeData;
-        for (let i = 0; i < rectangleList.length; i++) {
-            const range = rectangleList[i];
-            if (
-                Rectangle.intersects(
-                    {
-                        startRow: row,
-                        startColumn: col,
-                        endRow: row,
-                        endColumn: col,
-                    },
-                    range
-                )
-            ) {
-                return range;
+        return this._spanModel.getMergedCell(row, col);
+    }
+
+    /**
+     *  Get the merged cell info list which has intersection with the given range.
+     * @param {number} startRow The start row index of the range
+     * @param {number} startColumn The start column index of the range
+     * @param {number} endRow The end row index of the range
+     * @param {number} endColumn The end column index of the range
+     * @returns {IRange} The merged cell info list which has intersection with the given range or empty array if no merged cell in the range
+     */
+    getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange[] {
+        return this._spanModel.getMergedCellRange(startRow, startColumn, endRow, endColumn);
+    }
+
+    /**
+     * Get cell info with merge data
+     * @param {number} row
+     * @param {number} column
+     * @type {selectionCell}
+     * @property {number} actualRow - The actual row index of the cell
+     * @property {number} actualColumn - The actual column index of the cell
+     * @property {boolean} isMergedMainCell - Whether the cell is the main cell of the merged cell, only the upper left cell in the merged cell returns true here
+     * @property {boolean} isMerged - Whether the cell is in a merged cell, the upper left cell in the merged cell returns false here
+     * @property {number} endRow - The end row index of the merged cell
+     * @property {number} endColumn - The end column index of the merged cell
+     * @property {number} startRow - The start row index of the merged cell
+     * @property {number} startColumn - The start column index of the merged cell
+     * @returns  {selectionCell} - The cell info with merge data
+     */
+    getCellInfoInMergeData(row: number, column: number): ISelectionCell {
+        const mergeRange = this.getMergedCell(row, column);
+        let isMerged = false; // The upper left cell only renders the content
+        let isMergedMainCell = false;
+        let newEndRow = row;
+        let newEndColumn = column;
+        let mergeRow = row;
+        let mergeColumn = column;
+        if (mergeRange) {
+            isMergedMainCell = (mergeRange.startRow === row && mergeRange.startColumn === column);
+            if (isMergedMainCell) {
+                // do not set to true, the code is not equal to the original code from: getCellInfoInMergeData
+                // isMerged = false;
+                newEndRow = mergeRange.endRow;
+                newEndColumn = mergeRange.endColumn;
+                mergeRow = mergeRange.startRow;
+                mergeColumn = mergeRange.startColumn;
+            } else if (row > mergeRange.startRow && row <= mergeRange.endRow && column > mergeRange.startColumn && column <= mergeRange.endColumn) {
+                isMerged = true;
+                newEndRow = mergeRange.endRow;
+                newEndColumn = mergeRange.endColumn;
+                mergeRow = mergeRange.startRow;
+                mergeColumn = mergeRange.startColumn;
             }
         }
 
-        return null;
+        return {
+            actualRow: row,
+            actualColumn: column,
+            isMergedMainCell,
+            isMerged,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+            startRow: mergeRow,
+            startColumn: mergeColumn,
+        };
     }
 
     /**
@@ -281,9 +346,7 @@ export class Worksheet {
         const matrix = this.getCellMatrix();
 
         // get all merged cells
-        const mergedCellsInRange = this._snapshot.mergeData.filter((rect) =>
-            Rectangle.intersects({ startRow: row, startColumn: col, endRow, endColumn: endCol }, rect)
-        );
+        const mergedCellsInRange = this._spanModel.getMergedCellRange(row, col, endRow, endCol);
 
         // iterate all cells in the range
         const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();

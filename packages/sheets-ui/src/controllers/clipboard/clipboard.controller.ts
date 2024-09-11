@@ -34,7 +34,9 @@ import {
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    RxDisposable, UniverInstanceType,
+    RxDisposable,
+    Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';

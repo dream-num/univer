@@ -68,7 +68,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-hyper-link": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",

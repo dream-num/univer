@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
-import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
+import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
 import type { ISheetHyperLinkInfo } from '../types/interfaces/i-sheet-hyper-link-info';
+import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();

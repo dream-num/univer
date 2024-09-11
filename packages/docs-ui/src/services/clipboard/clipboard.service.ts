@@ -415,43 +415,55 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private _generateBody(text: string): IDocumentBody {
         // Convert all \n to \r, because we use \r to indicate paragraph break.
-        let dataStream = text.replace(/\n/g, '\r').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+        const dataStream = text.replace(/\n/g, '\r').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
         const paragraphs: IParagraph[] = [];
         const customRanges: ICustomRange[] = [];
-        if (dataStream[dataStream.length - 1] !== '\r') {
-            dataStream += '\r';
-        }
         let cursor = 0;
         let newDataStream = '';
         let linkCount = 0;
-        for (let i = 0; i < dataStream.length; i++) {
-            if (dataStream[i] === '\r') {
-                const paragraphText = dataStream.slice(cursor, i);
-                if (Tools.isLegalUrl(paragraphText)) {
-                    const id = generateRandomId();
-                    const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${paragraphText}${DataStreamTreeTokenType.CUSTOM_RANGE_END}\r`;
-                    const range: ICustomRange = {
-                        startIndex: cursor + linkCount * 2,
-                        endIndex: cursor + linkCount * 2 + urlText.length - 1,
-                        rangeId: id,
-                        rangeType: CustomRangeType.HYPERLINK,
-                        properties: {
-                            url: text,
-                        },
-                    };
-                    customRanges.push(range);
-                    newDataStream += urlText;
-                    cursor = i + 1;
-                    linkCount++;
+
+        const loopParagraph = (i: number, insertP = true) => {
+            const paragraphText = dataStream.slice(cursor, i);
+            if (Tools.isLegalUrl(paragraphText)) {
+                const id = generateRandomId();
+                const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${paragraphText}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+                const range: ICustomRange = {
+                    startIndex: cursor + linkCount * 2,
+                    endIndex: cursor + linkCount * 2 + urlText.length - 1,
+                    rangeId: id,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    properties: {
+                        url: text,
+                    },
+                };
+                customRanges.push(range);
+                newDataStream += urlText;
+                cursor = i + 1;
+                linkCount++;
+                if (insertP) {
+                    newDataStream += '\r';
                     paragraphs.push({ startIndex: i + linkCount * 2 });
-                } else {
-                    newDataStream += dataStream.slice(cursor, i + 1);
-                    cursor = i + 1;
+                }
+            } else {
+                newDataStream += dataStream.slice(cursor, i + 1);
+                cursor = i + 1;
+                if (insertP) {
                     paragraphs.push({ startIndex: i + linkCount * 2 });
                 }
             }
+        };
+
+        let end = 0;
+        for (let i = 0; i < dataStream.length; i++) {
+            if (dataStream[i] === '\r') {
+                loopParagraph(i);
+                end = i;
+            }
         }
 
+        if (end !== dataStream.length - 1) {
+            loopParagraph(dataStream.length - 1, false);
+        }
         return {
             dataStream: newDataStream,
             paragraphs,

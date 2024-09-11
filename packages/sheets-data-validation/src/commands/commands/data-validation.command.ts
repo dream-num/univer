@@ -15,17 +15,17 @@
  */
 
 import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
+import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
-import type { RangeMutation } from '../../models/rule-matrix';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
-import { getStringCellValue } from '../../utils/get-cell-data-origin';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { createDefaultNewRule } from '../../utils/create';
+import { getStringCellValue } from '../../utils/get-cell-data-origin';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
+import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
+import type { RangeMutation } from '../../models/rule-matrix';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
@@ -169,7 +169,7 @@ export function getDataValidationDiffMutations(
                 if (diff.rule.type === DataValidationType.CHECKBOX) {
                     const validator = sheetDataValidationModel.getValidator(DataValidationType.CHECKBOX) as CheckboxValidator;
                     const formula = validator.parseFormulaSync(diff.rule, unitId, subUnitId);
-                    setRangesDefaultValue(diff.rule.ranges, formula.formula2!);
+                    setRangesDefaultValue(diff.rule.ranges, formula.originFormula2!);
                 }
                 break;
             }

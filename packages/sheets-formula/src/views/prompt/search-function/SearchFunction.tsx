@@ -16,13 +16,13 @@
 
 import { Direction, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import React, { useEffect, useRef, useState } from 'react';
-
 import { IEditorService } from '@univerjs/ui';
-import type { ISearchItem } from '../../../services/description.service';
-import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
+
+import React, { useEffect, useRef, useState } from 'react';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';
+import type { ISearchItem } from '../../../services/description.service';
+import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
 
 export function SearchFunction() {
     const [visible, setVisible] = useState(false);

@@ -16,16 +16,6 @@
 
 // FIXME: why so many calling to close the editor here?
 
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    ITextRun,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -53,7 +43,7 @@ import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
 } from '@univerjs/docs';
-import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import { DocSelectionRenderService, MoveCursorOperation, ReplaceContentCommand } from '@univerjs/docs-ui';
 import {
     compareToken,
     deserializeRangeWithSheet,
@@ -71,9 +61,6 @@ import {
     DeviceInputEventType,
     IRenderManagerService,
 } from '@univerjs/engine-render';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
 
@@ -83,7 +70,6 @@ import {
     setEndForRange,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
     getEditorObject,
@@ -92,21 +78,35 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import type { Editor } from '@univerjs/ui';
 import { IContextMenuService, IEditorService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
-import { DocSelectionRenderService, MoveCursorOperation, ReplaceContentCommand } from '@univerjs/docs-ui';
-import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+
+import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { Editor } from '@univerjs/ui';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
+import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IDescriptionService } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
-import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 
 interface IRefSelection {
     refIndex: number;
@@ -133,6 +133,7 @@ const sheetEditorUnitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDI
 
 @OnLifecycle(LifecycleStages.Steady, PromptController)
 export class PromptController extends Disposable {
+    private _listenInputCache: Set<string> = new Set();
     private _formulaRefColors: string[] = [];
 
     private _previousSequenceNodes: Nullable<Array<string | ISequenceNode>>;
@@ -298,41 +299,54 @@ export class PromptController extends Disposable {
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
 
-        // FIXME: Which editors need to be listened to?
-        this._editorService.getAllEditor().forEach((editor) => {
-            const editorId = editor.editorUnitId;
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
+            const unitId = documentDataModel?.getUnitId();
 
-            if (editor.isSheetEditor() || editor.isFormulaEditor()) {
-                const docSelectionRenderService = this._renderManagerService.getRenderById(editorId)?.with(DocSelectionRenderService);
-
-                if (docSelectionRenderService) {
-                    this.disposeWithMe(
-                        docSelectionRenderService.onInputBefore$.subscribe((param) => {
-                            this._previousSequenceNodes = null;
-                            this._previousInsertRefStringIndex = null;
-
-                            this._selectionRenderService.setSkipLastEnabled(true);
-
-                            const event = param?.event as KeyboardEvent;
-                            if (!event) return;
-
-                            if (!arrows.includes(event.which)) {
-                                if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
-                                    this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
-                                }
-
-                                this._inputPanelState = InputPanelState.keyNormal;
-                            } else {
-                                this._inputPanelState = InputPanelState.keyArrow;
-                            }
-
-                            if (event.which !== KeyCode.F4) {
-                                this._userCursorMove = false;
-                            }
-                        })
-                    );
-                }
+            if (unitId == null) {
+                return;
             }
+
+            if (this._listenInputCache.has(unitId)) {
+                return;
+            }
+
+            const editor = this._editorService.getEditor(unitId);
+
+            if (editor == null) {
+                return;
+            }
+
+            const docSelectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+
+            if (docSelectionRenderService) {
+                this.disposeWithMe(
+                    docSelectionRenderService.onInputBefore$.subscribe((param) => {
+                        this._previousSequenceNodes = null;
+                        this._previousInsertRefStringIndex = null;
+
+                        this._selectionRenderService.setSkipLastEnabled(true);
+
+                        const event = param?.event as KeyboardEvent;
+                        if (!event) return;
+
+                        if (!arrows.includes(event.which)) {
+                            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                            }
+
+                            this._inputPanelState = InputPanelState.keyNormal;
+                        } else {
+                            this._inputPanelState = InputPanelState.keyArrow;
+                        }
+
+                        if (event.which !== KeyCode.F4) {
+                            this._userCursorMove = false;
+                        }
+                    })
+                );
+            }
+
+            this._listenInputCache.add(unitId);
         });
     }
 

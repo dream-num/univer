@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { RangeSelector, TextEditor } from '@univerjs/ui';
-import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
-import { ErrorSingle } from '@univerjs/icons';
 import { hasCJKText } from '@univerjs/engine-render';
-import styles from './index.module.less';
+import { ErrorSingle } from '@univerjs/icons';
+import { RangeSelector, TextEditor } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
+import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
     inputId: string;
@@ -210,10 +210,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 </RadioGroup>
             </div>
             <div style={{ display: typeValue === 'range' ? 'block' : 'none' }}>
-                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={(value) => typeValue === 'range' && setValidFormulaOrRange(value)} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
+                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
             </div>
             <div style={{ display: typeValue === 'range' ? 'none' : 'block' }}>
-                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={(value) => typeValue !== 'range' && setValidFormulaOrRange(value)} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
+                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
             </div>
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />

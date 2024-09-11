@@ -32,6 +32,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     isContextLost(): boolean {
+        // @ts-ignore
         return this._context.isContextLost();
     }
 

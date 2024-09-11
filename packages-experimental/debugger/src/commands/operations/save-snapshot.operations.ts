@@ -17,8 +17,8 @@
 /* eslint-disable node/prefer-global/process */
 
 import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { ILocalFileService } from '@univerjs/ui';
 import type { DocumentDataModel, IAccessor, ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
-import { ILocalFileService } from '../../controllers/local-save/export.controller';
 import { RecordController } from '../../controllers/local-save/record.controller';
 
 export interface ISaveSnapshotParams {
@@ -43,6 +43,7 @@ const filterStyle = (workbookData: IWorkbookData) => {
     workbookData.styles = cacheStyle;
     return workbookData;
 };
+
 export const SaveSnapshotOptions: ICommand = {
     id: 'debugger.operation.saveSnapshot',
     type: CommandType.OPERATION,

@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { SheetsHyperLinkPopupService } from '../../services/popup.service';
-import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
-import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
-import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
+import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
+import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
+import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
+import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
+import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
@@ -197,6 +197,12 @@ export const CellLinkEdit = () => {
     }, [editing, markSelectionService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
+
+    useEffect(() => {
+        return () => {
+            editorBridgeService.disableForceKeepVisible();
+        };
+    }, [editorBridgeService]);
 
     const linkTypeOptions: Array<{
         label: string;
@@ -386,6 +392,9 @@ export const CellLinkEdit = () => {
                                     zenZoneService.hide();
                                     contextService.setContextValue(FOCUSING_SHEET, true);
                                 }
+                                if (editing.type !== HyperLinkEditSourceType.VIEWING) {
+                                    editorBridgeService.enableForceKeepVisible();
+                                }
                                 setHide(true);
                             } else {
                                 await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
@@ -399,6 +408,7 @@ export const CellLinkEdit = () => {
                                     zenZoneService.show();
                                     contextService.setContextValue(FOCUSING_SHEET, false);
                                 }
+                                editorBridgeService.disableForceKeepVisible();
                                 setHide(false);
                             }
                         }}

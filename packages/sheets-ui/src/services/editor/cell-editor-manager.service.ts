@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, Nullable } from '@univerjs/core';
 import { createIdentifier } from '@univerjs/core';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import type { IDisposable, IPosition, Nullable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 
 export interface ICellEditorManagerParam extends Partial<IPosition> {
     show: boolean;

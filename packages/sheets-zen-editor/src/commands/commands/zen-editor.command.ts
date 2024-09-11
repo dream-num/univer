@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, ITextRange, Workbook } from '@univerjs/core';
 import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
+import type { IAccessor, ICommand, ITextRange, Workbook } from '@univerjs/core';
 
 function scrollToTop(accessor: IAccessor) {
     const renderManagerService = accessor.get(IRenderManagerService);

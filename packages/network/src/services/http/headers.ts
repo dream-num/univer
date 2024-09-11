@@ -50,6 +50,10 @@ export class HTTPHeaders {
         return this._headers.has(k) ? this._headers.get(k)! : null;
     }
 
+    set(key: string, value: string | number | boolean): void {
+        this._setHeader(key, value);
+    }
+
     toHeadersInit(): HeadersInit {
         const headers: HeadersInit = {};
         this._headers.forEach((values, key) => {

@@ -16,23 +16,23 @@
 
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MoreDownSingle } from '@univerjs/icons';
-import type { IDropdownProps } from '@univerjs/design';
-import type { Ref } from 'react';
+import clsx from 'clsx';
 import React, { forwardRef, useMemo } from 'react';
 import { isObservable, Observable } from 'rxjs';
-import clsx from 'clsx';
+import type { IDropdownProps } from '@univerjs/design';
+import type { Ref } from 'react';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
 import { Menu } from '../../../components/menu/desktop/Menu';
-import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
-import { MenuItemType } from '../../../services/menu/menu';
 import { ILayoutService } from '../../../services/layout/layout.service';
+import { MenuItemType } from '../../../services/menu/menu';
 import { ToolbarButton } from './Button/ToolbarButton';
 import { useToolbarItemStatus } from './hook';
-import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
 import styles from './index.module.less';
+import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
+import type { IDisplayMenuItem, IMenuItem, IMenuSelectorItem, IValueOption } from '../../../services/menu/menu';
 
 export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { align?: IDropdownProps['align'] }, ref: Ref<any>) => {
     const { align } = props;
@@ -126,6 +126,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
                         />
                     </div>
                     <DropdownWrapper
+                        disabled={disabled}
                         align={align ?? {
                             targetOffset: [32, -12],
                         }}
@@ -154,6 +155,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem> & { al
         } else {
             return (
                 <DropdownWrapper
+                    disabled={disabled}
                     overlay={(
                         <Menu
                             overViewport="scroll"

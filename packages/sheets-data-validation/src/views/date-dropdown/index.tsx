@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
-import type { CellValue, Nullable } from '@univerjs/core';
 import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
+import { getPatternType } from '@univerjs/sheets-numfmt';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import React, { useState } from 'react';
+import type { CellValue, Nullable } from '@univerjs/core';
+import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
+import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
+import styles from './index.module.less';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { DateValidator } from '../../validators';
-import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
-import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
-import styles from './index.module.less';
 
 dayjs.extend(utc);
 
@@ -71,6 +72,9 @@ export function DateDropdown(props: IDropdownComponentProps) {
         // convert current date to utc date
         const dateStr = newValue.format(showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD 00:00:00');
         const serialTime = numfmt.parseDate(dateStr)?.v as number;
+        const cellStyle = workbook.getStyles().getStyleByCell(cellData);
+        const format = cellStyle?.n?.pattern ?? '';
+        const patternType = getPatternType(format);
 
         if (
             rule.errorStyle !== DataValidationErrorStyle.STOP ||
@@ -103,7 +107,9 @@ export function DateDropdown(props: IDropdownComponentProps) {
                     si: null,
                     s: {
                         n: {
-                            pattern: showTime ? 'yyyy-MM-dd hh:mm:ss' : 'yyyy-MM-dd',
+                            pattern: showTime
+                                ? patternType === 'datetime' ? format : 'yyyy-MM-dd hh:mm:ss'
+                                : patternType === 'date' ? format : 'yyyy-MM-dd',
                         },
                     },
                 },

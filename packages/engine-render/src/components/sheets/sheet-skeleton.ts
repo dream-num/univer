@@ -23,7 +23,6 @@ import {
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
-    getCellInfoInMergeData,
     getColorStyle,
     HorizontalAlign,
     IContextService,
@@ -38,6 +37,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { distinctUntilChanged, startWith } from 'rxjs';
+
 import type {
     BorderStyleTypes,
     IBorderStyleData,
@@ -52,6 +53,7 @@ import type {
     IRange,
     IRowAutoHeightInfo,
     IRowData,
+    ISelectionCell,
     ISelectionCellWithMergeInfo,
     ISize,
     IStyleBase,
@@ -64,26 +66,24 @@ import type {
     TextDirection,
     Worksheet,
 } from '@univerjs/core';
-
-import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
     degToRad,
-    getCellByIndex,
+    getCellByIndexWithMergeInfo,
     getCellPositionByIndex,
     getFontStyleString,
     hasUnMergedCellInRow,
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import { columnIterator } from '../docs/layout/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 /**
@@ -234,6 +234,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     private _dataMergeCache: IRange[] = [];
+    private _dataMergeCacheMap: Map<string, IRange> = new Map();
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
@@ -417,6 +418,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { mergeData } = this._worksheetData;
 
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
+        this._dataMergeCacheMap = mergeData && this._getMergeCellsCache(mergeData);
 
         this._calculateStylesCache();
 
@@ -484,7 +486,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
-            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(rowNum, i, mergeData);
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowNum, i, mergeData);
 
             if (isMerged || isMergedMainCell) {
                 continue;
@@ -957,12 +959,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnHeaderHeightAndMarginTop,
         } = this;
 
-        const primary = getCellByIndex(
+        const primary = getCellByIndexWithMergeInfo(
             row,
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._worksheetData.mergeData
+            this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
@@ -990,12 +992,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     getCellByIndexWithNoHeader(row: number, column: number): ISelectionCellWithMergeInfo {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 
-        const primary = getCellByIndex(
+        const primary = getCellByIndexWithMergeInfo(
             row,
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._worksheetData.mergeData
+            this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
         );
         const { isMerged, isMergedMainCell } = primary;
         const { startY, endY, startX, endX, mergeInfo } = primary;
@@ -1123,6 +1125,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,
+                paddingData,
                 {
                     horizontalAlign,
                     verticalAlign,
@@ -1250,12 +1253,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             if (vertexAngle !== 0) {
-                const { startY, endY, startX, endX } = getCellByIndex(
+                const { startY, endY, startX, endX } = getCellByIndexWithMergeInfo(
                     row,
                     column,
                     this.rowHeightAccumulation,
                     this.columnWidthAccumulation,
-                    this.mergeData
+                    this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
                 );
                 const cellWidth = endX - startX;
                 const cellHeight = endY - startY;
@@ -1288,12 +1291,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return true;
             }
 
-            const { startY, endY } = getCellByIndex(
+            const { startY, endY } = getCellByIndexWithMergeInfo(
                 row,
                 column,
                 this.rowHeightAccumulation,
                 this.columnWidthAccumulation,
-                this.mergeData
+                this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
             );
 
             const cellHeight = endY - startY;
@@ -1694,7 +1697,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const hidden = this.worksheet.getColVisible(c) === false || this.worksheet.getRowVisible(r) === false;
         if (hidden) {
-            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(
                 r,
                 c,
                 this._dataMergeCache
@@ -1815,6 +1818,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _updateConfigAndGetDocumentModel(
         documentData: IDocumentData,
         horizontalAlign: HorizontalAlign,
+        paddingData: IPaddingData,
         renderConfig?: IDocumentRenderConfig
     ): Nullable<DocumentDataModel> {
         if (!renderConfig) {
@@ -1828,6 +1832,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!documentData.documentStyle) {
             documentData.documentStyle = {};
         }
+
+        documentData.documentStyle.marginTop = paddingData.t ?? 0;
+        documentData.documentStyle.marginBottom = paddingData.b ?? 2;
+        documentData.documentStyle.marginLeft = paddingData.l ?? 2;
+        documentData.documentStyle.marginRight = paddingData.r ?? 2;
 
         // Fix https://github.com/dream-num/univer/issues/1586
         documentData.documentStyle.pageSize = {
@@ -2090,6 +2099,52 @@ export class SpreadsheetSkeleton extends Skeleton {
             wrapStrategy,
             paddingData,
         } as ICellOtherConfig;
+    }
+
+    private _getMergeCellsCache(mergeData: IRange[]) {
+        const map = new Map<string, IRange>();
+        mergeData.forEach((range) => {
+            for (let r = range.startRow; r <= range.endRow; r++) {
+                for (let c = range.startColumn; c <= range.endColumn; c++) {
+                    map.set(`${r}-${c}`, range);
+                }
+            }
+        });
+        return map;
+    }
+
+    private _getCellMergeInfo(row: number, column: number, mergeData: IRange[]): ISelectionCell {
+        if (!this._dataMergeCacheMap) {
+            this._dataMergeCacheMap = this._getMergeCellsCache(mergeData);
+        }
+        const key = `${row}-${column}`;
+        const mergeRange = this._dataMergeCacheMap.get(key);
+
+        let isMerged = false; // The upper left cell only renders the content
+        let isMergedMainCell = false;
+        let newEndRow = row;
+        let newEndColumn = column;
+        let mergeRow = row;
+        let mergeColumn = column;
+        if (mergeRange) {
+            isMerged = true;
+            isMergedMainCell = mergeRange.startRow === row && mergeRange.startColumn === column;
+            newEndRow = mergeRange.endRow;
+            newEndColumn = mergeRange.endColumn;
+            mergeRow = mergeRange.startRow;
+            mergeColumn = mergeRange.startColumn;
+        }
+
+        return {
+            actualRow: row,
+            actualColumn: column,
+            isMergedMainCell,
+            isMerged,
+            endRow: newEndRow,
+            endColumn: newEndColumn,
+            startRow: mergeRow,
+            startColumn: mergeColumn,
+        };
     }
 
     /**

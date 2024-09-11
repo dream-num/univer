@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { FormulaDependencyTreeCache } from '../engine/dependency/dependency-tree';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 
@@ -62,7 +62,7 @@ export interface IDependencyManagerService {
 
     hasFormulaDependency(unitId: string, sheetId: string, row: number, column: number): boolean;
 
-    clearFormulaDependency(unitId: string, sheetId: string): void;
+    clearFormulaDependency(unitId: string, sheetId?: string): void;
 }
 
 /**
@@ -303,9 +303,11 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         }
     }
 
-    clearFormulaDependency(unitId: string, sheetId: string) {
-        if (this._formulaData[unitId] && this._formulaData[unitId]![sheetId]) {
+    clearFormulaDependency(unitId: string, sheetId?: string) {
+        if (sheetId && this._formulaData[unitId] && this._formulaData[unitId]![sheetId]) {
             this._formulaData[unitId]![sheetId].reset();
+        } else if (this._formulaData[unitId]) {
+            this._formulaData[unitId] = null;
         }
     }
 

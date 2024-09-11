@@ -74,27 +74,27 @@
     },
     "dependencies": {
         "@floating-ui/react-dom": "^2.1.1",
-        "@univerjs/icons": "^0.1.78",
-        "@xyflow/react": "^12.2.0",
-        "rc-util": "^5.43.0"
-    },
-    "devDependencies": {
         "@types/react": "^18.3.5",
         "@types/react-dom": "^18.3.0",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/shared": "workspace:*",
+        "@univerjs/icons": "^0.1.78",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
+        "@xyflow/react": "^12.2.1",
         "clsx": "^2.1.1",
+        "rc-util": "^5.43.0"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.0",
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

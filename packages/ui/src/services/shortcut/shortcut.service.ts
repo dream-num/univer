@@ -15,15 +15,15 @@
  */
 
 import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
 
 import { fromGlobalEvent } from '../../common/lifecycle';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
-import type { KeyCode } from './keycode';
 import { KeyCodeToChar, MetaKeys } from './keycode';
+import type { KeyCode } from './keycode';
 
 /**
  * A shortcut item that could be registered to the {@link IShortcutService}.
@@ -203,7 +203,12 @@ export class ShortcutService extends Disposable implements IShortcutService {
             return null;
         }
 
-        return this.getShortcutDisplay(set.values().next().value);
+        const shortcut = set.values().next().value;
+        if (shortcut) {
+            return this.getShortcutDisplay(shortcut);
+        }
+
+        return null;
     }
 
     getShortcutDisplay(shortcut: IShortcutItem): string {

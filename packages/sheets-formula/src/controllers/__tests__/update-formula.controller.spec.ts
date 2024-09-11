@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+
+import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { UpdateFormulaController } from '../update-formula.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -96,7 +96,7 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                         si: 'CarNau',
                     },
                     9: {
-                        f: 'CarNau',
+                        si: 'CarNau',
                     },
                 },
                 8: {
@@ -129,7 +129,7 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                         si: 'y0gLJX',
                     },
                     9: {
-                        f: 'y0gLJX',
+                        si: 'y0gLJX',
                     },
                 },
                 9: {
@@ -161,7 +161,7 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                         si: 'y0gLJX',
                     },
                     9: {
-                        f: 'y0gLJX',
+                        si: 'y0gLJX',
                     },
                 },
                 10: {
@@ -322,6 +322,7 @@ describe('Test insert function operation', () => {
         commandService.registerCommand(RemoveSheetMutation);
 
         commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetFormulaDataMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
@@ -339,8 +340,7 @@ describe('Test insert function operation', () => {
                 .getValues();
 
         getCellData = () => {
-            return get(IUniverInstanceService).getUniverSheetInstance('test')
-                ?.getSheetBySheetId('sheet1')?.getCellMatrix().clone();
+            return get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getCellMatrix().clone();
         };
     });
 
@@ -1320,6 +1320,116 @@ describe('Test insert function operation', () => {
             expect(await commandService.executeCommand(RemoveSheetCommand.id, params)).toBeTruthy();
             const values = getValues(14, 2, 14, 2);
             expect(values).toStrictEqual([[{ f: '=#REF!' }]]);
+        });
+
+        it('set range values, set new formula string and formula id', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 8,
+                    endRow: 7,
+                    endColumn: 8,
+                },
+                value: {
+                    f: '=A1',
+                    si: 'qwerty',
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ f: '=A1', si: 'qwerty' }, { f: '=SUM(C8:E10)', si: 'CarNau' }]]);
+        });
+        it('set range values, set same formula string and formula id', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 8,
+                    endRow: 7,
+                    endColumn: 8,
+                },
+                value: {
+                    f: '=SUM(B8:D10)',
+                    si: 'CarNau',
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ f: '=SUM(B8:D10)', si: 'CarNau' }, { si: 'CarNau' }]]);
+        });
+        it('set range values, set same formula id', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 9,
+                    endRow: 7,
+                    endColumn: 9,
+                },
+                value: {
+                    si: 'CarNau',
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ f: '=SUM(B8:D10)', si: 'CarNau' }, { si: 'CarNau' }]]);
+        });
+        it('set range values, set new formula string', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 8,
+                    endRow: 7,
+                    endColumn: 8,
+                },
+                value: {
+                    f: '=A1',
+                    si: null,
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ f: '=A1' }, { f: '=SUM(C8:E10)', si: 'CarNau' }]]);
+        });
+
+        it('set range values, set new formula id', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 8,
+                    endRow: 7,
+                    endColumn: 8,
+                },
+                value: {
+                    f: null,
+                    si: 'y0gLJX',
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ si: 'y0gLJX' }, { f: '=SUM(C8:E10)', si: 'CarNau' }]]);
+        });
+
+        it('set range values, remove formula string and id', async () => {
+            const params: ISetRangeValuesCommandParams = {
+                range: {
+                    startRow: 7,
+                    startColumn: 8,
+                    endRow: 7,
+                    endColumn: 8,
+                },
+                value: {
+                    f: null,
+                    si: null,
+                },
+            };
+
+            expect(await commandService.executeCommand(SetRangeValuesCommand.id, params)).toBeTruthy();
+            const values = getValues(7, 8, 7, 9);
+            expect(values).toStrictEqual([[{ }, { f: '=SUM(C8:E10)', si: 'CarNau' }]]);
         });
     });
 });

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
+import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IRangeChange } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
@@ -549,6 +549,24 @@ export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaData
     return cellData;
 }
 
+/**
+ * Convert formulaData to cellData
+ * @param formulaData
+ * @returns
+ */
+export function formulaDataToCellData(formulaData: IObjectMatrixPrimitiveType<IFormulaDataItem | null>
+): IObjectMatrixPrimitiveType<Nullable<ICellData>> {
+    const cellData = new ObjectMatrix<Nullable<ICellData>>({});
+    const formulaDataMatrix = new ObjectMatrix(formulaData);
+
+    formulaDataMatrix.forValue((r, c, formulaDataItem) => {
+        const cellDataItem = formulaDataItemToCellData(formulaDataItem);
+        cellData.setValue(r, c, cellDataItem);
+    });
+
+    return cellData.clone();
+}
+
 export function isFormulaDataItem(cell: IFormulaDataItem) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';
@@ -562,3 +580,4 @@ export function isFormulaDataItem(cell: IFormulaDataItem) {
 
     return false;
 }
+

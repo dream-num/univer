@@ -60,10 +60,9 @@
         "sync:cnpm": "cnpm sync"
     },
     "devDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/shared": "workspace:*",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "@univerjs-infra/shared": "workspace:*",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

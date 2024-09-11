@@ -14,58 +14,82 @@
  * limitations under the License.
  */
 
-import { type IKeyValue, Rectangle } from '@univerjs/core';
+import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import type { UniverRenderingContext } from '../context';
-import type { IViewportInfo } from '../basics/vector2';
 import { ObjectType } from '../base-object';
-import type { IShapeProps } from './shape';
 import { Shape } from './shape';
+import type { UniverRenderingContext } from '../context';
+import type { IShapeProps } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;
+    visualHeight?: number;
+    visualWidth?: number;
 }
 
 export const RECT_OBJECT_ARRAY = ['radius'];
 
 export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
-    private _radius: number = 0;
-
     override objectType = ObjectType.RECT;
+
+    private _radius: number = 0;
+    /**
+     * For rendering, in many case object size is bigger than visual size for better user interaction.
+     */
+    private _visualHeight: Nullable<number>;
+    private _visualWidth: Nullable<number>;
 
     constructor(key?: string, props?: T) {
         super(key, props);
         if (props?.radius) {
             this._radius = props.radius;
         }
+        if (props?.visualHeight) {
+            this._visualHeight = props.visualHeight;
+        }
+        if (props?.visualWidth) {
+            this._visualWidth = props.visualWidth;
+        }
+    }
+
+    get visualHeight(): Nullable<number> {
+        return this._visualHeight;
+    }
+
+    get visualWidth(): Nullable<number> {
+        return this._visualWidth;
     }
 
     get radius() {
         return this._radius;
     }
 
-    static override drawWith(ctx: UniverRenderingContext, props: IRectProps | Rect) {
-        let { radius, left, top, width, height } = props;
+    static override drawWith(ctx: UniverRenderingContext, props: IRectProps) {
+        let { radius, width, height } = props;
 
         radius = radius ?? 0;
         width = width ?? 0;
         height = height ?? 0;
-        left = left ?? 0;
-        top = top ?? 0;
 
+        ctx.save();
         ctx.beginPath();
 
         if (props.strokeDashArray) {
             ctx.setLineDash(props.strokeDashArray);
-        } else {
-            // only dashrect needs top & left(which relative to topleft of viewport)
-            top = 0;
-            left = 0;
+        }
+
+        if (props.visualHeight) {
+            ctx.translate(0, (height - (props.visualHeight || 0)) / 2);
+            height = props.visualHeight;
+        }
+        if (props.visualWidth) {
+            ctx.translate((width - (props.visualWidth || 0)) / 2, 0);
+            width = props.visualWidth;
         }
 
         if (!radius) {
-            // simple rect - don't bother doing all that complicated maths stuff.
-            ctx.rect(left, top, width, height);
+            // transform of this rect has been handled in shape@render
+            ctx.rect(0, 0, width, height);
         } else {
             let topLeft = 0;
             let topRight = 0;
@@ -86,6 +110,8 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
 
         ctx.closePath();
         this._renderPaintInOrder(ctx, props);
+
+        ctx.restore();
     }
 
     override toJson() {
@@ -102,36 +128,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         };
     }
 
-    protected override _draw(ctx: UniverRenderingContext, viewportInfo?: IViewportInfo) {
-        const { radius, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray } = this;
-        if (!strokeDashArray) {
-            Rect.drawWith(ctx, this);
-        } else {
-            const parentTrans = this.getParent().transform;
-            // group.transform contains startXY
-            // selection-shape@_updateControl -->  this.selectionShape.translate(startX, startY);
-
-            // startXY comes from selecitonModel
-            // const { startX, startY, endX, endY } = this._selectionModel;
-            const startX = parentTrans.getMatrix()[4];
-            const startY = parentTrans.getMatrix()[5];
-            const endX = startX + this.width;
-            const endY = startY + this.height;
-            const rect = { left: startX, top: startY, right: endX, bottom: endY };
-            let { left, top, right, bottom } = rect;
-
-            let width = right - left;
-            let height = bottom - top;
-            if (viewportInfo && Rectangle.hasIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound)) {
-                const intersectRect = Rectangle.getIntersectionBetweenTwoRect(rect, viewportInfo.cacheBound)!;
-                left = intersectRect.left - startX;
-                top = intersectRect.top - startY;
-                right = intersectRect.right;
-                bottom = intersectRect.bottom;
-                width = intersectRect.width;
-                height = intersectRect.height;
-            }
-            Rect.drawWith(ctx, { ...{ radius, width, height, paintFirst, stroke, strokeWidth, fill, strokeScaleEnabled, fillRule, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, strokeDashArray }, ...{ width, height, left, top } });
-        }
+    protected override _draw(ctx: UniverRenderingContext) {
+        Rect.drawWith(ctx, this as IRectProps);
     }
 }

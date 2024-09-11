@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
+import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
+import { Documents } from '../docs/document';
+import { SpreadsheetExtensionRegistry } from '../extension';
+import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
+import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
+// import type { BorderCacheItem } from './interfaces';
+import { SheetComponent } from './sheet-component';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
-import { Documents } from '../docs/document';
-import { SpreadsheetExtensionRegistry } from '../extension';
+
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
-
-// import type { BorderCacheItem } from './interfaces';
-import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
-import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
-import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -545,7 +545,7 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, dataMergeCache, overflowCache, showGridlines } = spreadsheetSkeleton;
+        const { rowColumnSegment, dataMergeCache: mergeCellRanges, overflowCache, showGridlines } = spreadsheetSkeleton;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
@@ -597,6 +597,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.closePathByEnv();
         ctx.stroke();
 
+        //#region draw horizontal lines
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
@@ -608,6 +609,7 @@ export class Spreadsheet extends SheetComponent {
             ctx.closePathByEnv();
             ctx.stroke();
         }
+        //#endregion
 
         for (let c = columnStart; c <= columnEnd; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
@@ -620,48 +622,13 @@ export class Spreadsheet extends SheetComponent {
             ctx.closePathByEnv();
             ctx.stroke();
         }
-        // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
+        //#endregion
 
-        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
-        //     if (!borderCaches) {
-        //         return true;
-        //     }
+        // clear line of merge cell
+        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, mergeCellRanges);
 
-        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
-
-        //     let { startY, endY, startX, endX } = cellInfo;
-        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-
-        //     if (isMerged) {
-        //         return true;
-        //     }
-
-        //     if (isMergedMainCell) {
-        //         startY = mergeInfo.startY;
-        //         endY = mergeInfo.endY;
-        //         startX = mergeInfo.startX;
-        //         endX = mergeInfo.endX;
-        //     }
-
-        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-        //         return true;
-        //     }
-
-        //     for (const key in borderCaches) {
-        //         const { type } = borderCaches[key] as BorderCacheItem;
-
-        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-        //     }
-        // });
-
-        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-        // merge cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-
-        // overflow cell
+        // clear line of overflow cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
-
-        // this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }
@@ -673,20 +640,20 @@ export class Spreadsheet extends SheetComponent {
         ctx: UniverRenderingContext2D,
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
-        dataMergeCache?: IRange[]
+        cellRanges?: IRange[]
     ) {
-        if (dataMergeCache == null) {
+        if (cellRanges == null) {
             return;
         }
-        for (const dataCache of dataMergeCache) {
-            const { startRow, endRow, startColumn, endColumn } = dataCache;
+        for (const range of cellRanges) {
+            const { startRow, endRow, startColumn, endColumn } = range;
 
-            const startY = rowHeightAccumulation[startRow - 1] || 0;
-            const endY = rowHeightAccumulation[endRow] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+            const startY = rowHeightAccumulation[startRow - 1] ?? 0;
+            const endY = rowHeightAccumulation[endRow] ?? rowHeightAccumulation[rowHeightAccumulation.length - 1];
 
-            const startX = columnWidthAccumulation[startColumn - 1] || 0;
+            const startX = columnWidthAccumulation[startColumn - 1] ?? 0;
             const endX =
-                columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+                columnWidthAccumulation[endColumn] ?? columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
             ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
 

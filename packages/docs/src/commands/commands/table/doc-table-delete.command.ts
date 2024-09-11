@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { getCommandSkeleton, getRichTextEditPath, RichTextEditingMutation, TextSelectionManagerService } from '@univerjs/docs';
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { TextSelectionManagerService } from '../../../services/text-selection-manager.service';
+import { type IRichTextEditingMutationParams, RichTextEditingMutation } from '../../mutations/core-editing.mutation';
+import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { getDeleteColumnsActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams, getRangeInfoFromRanges } from './table';
 
 export interface IDocTableDeleteRowsCommandParams {}

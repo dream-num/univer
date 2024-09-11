@@ -72,7 +72,7 @@
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
-    "devDependencies": {
+    "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -80,16 +80,18 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.78",
         "@univerjs/rpc": "workspace:*",
-        "@univerjs/shared": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uni-formula": "workspace:*",
-        "clsx": "^2.1.1",
+        "clsx": "^2.1.1"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.5.4",
-        "vite": "^5.4.2",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

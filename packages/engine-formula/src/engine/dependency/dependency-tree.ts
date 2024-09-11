@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import type {
     IDirtyUnitSheetNameMap,
@@ -23,9 +23,9 @@ import type {
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../../basics/common';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -392,10 +392,11 @@ export class FormulaDependencyTreeCache extends Disposable {
     getDependencyId(dependenceTree: FormulaDependencyTree, ids: Set<string>) {
         const parentIdList = this._parentIdMap.get(dependenceTree.id);
         if (parentIdList) {
-            for (const parentId of parentIdList) {
+            const list = [...parentIdList];
+            for (const parentId of list) {
                 ids.add(parentId);
                 const tree = this._dependencyMap.get(parentId);
-                if (tree) {
+                if (tree && parentId !== dependenceTree.id) {
                     this.getDependencyId(tree, ids);
                 }
             }

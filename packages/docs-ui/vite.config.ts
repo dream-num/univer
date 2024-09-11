@@ -1,4 +1,4 @@
-import createViteConfig from '@univerjs/shared/vite';
+import createViteConfig from '@univerjs-infra/shared/vite';
 import pkg from './package.json';
 
 export default ({ mode }) => createViteConfig({

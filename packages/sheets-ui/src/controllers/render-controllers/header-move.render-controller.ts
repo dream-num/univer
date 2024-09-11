@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-import type {
-    EventState,
-    IRange,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
 import {
     createInterceptorKey, Disposable, ICommandService,
     Inject,
     InterceptorManager,
     RANGE_TYPE } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import {
     CURSOR_TYPE,
     Rect,
@@ -34,29 +27,31 @@ import {
     SHEET_VIEWPORT_KEY,
     Vector2,
 } from '@univerjs/engine-render';
-import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
 import {
     MoveColsCommand,
     MoveRowsCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { Subscription } from 'rxjs';
+import type {
+    EventState,
+    IRange,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+
+import type { IMoveColsCommandParams, IMoveRowsCommandParams, ISelectionWithStyle, WorkbookSelections } from '@univerjs/sheets';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset } from '../utils/component-tools';
 import { matchedSelectionByRowColIndex } from '../utils/selections-tools';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
-
 const HEADER_MOVE_CONTROLLER_LINE = '__SpreadsheetHeaderMoveControllerShapeLine__';
-
 const HEADER_MOVE_CONTROLLER_BACKGROUND_FILL = 'rgba(0, 0, 0, 0.1)';
-
 const HEADER_MOVE_CONTROLLER_LINE_FILL = 'rgb(119, 119, 119)';
-
 const HEADER_MOVE_CONTROLLER_LINE_SIZE = 4;
-
 export const HEADER_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, IRange>('headerMovePermissionCheck');
 
 export class HeaderMoveRenderController extends Disposable implements IRenderModule {

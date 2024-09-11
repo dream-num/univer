@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
 import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import type { IAccessor, ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
+import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
@@ -88,14 +88,14 @@ export function getClearContentMutationParamsForRanges(
     };
 }
 
-function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
+export function getClearContentMutationParamForRange(worksheet: Worksheet, range: IRange): ObjectMatrix<Nullable<ICellData>> {
     const { startRow, startColumn, endColumn, endRow } = range;
     const cellMatrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn, true);
     const redoMatrix = new ObjectMatrix<Nullable<ICellData>>();
     let leftTopCellValue: Nullable<ICellData> = null;
     cellMatrix.forValue((row, col, cellData) => {
         if (cellData) {
-            if (!leftTopCellValue && cellData.v !== undefined) {
+            if (!leftTopCellValue && worksheet.cellHasValue(cellData)) {
                 leftTopCellValue = cellData;
             }
             redoMatrix.setValue(row, col, null);

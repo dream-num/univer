@@ -76,9 +76,9 @@
         "@univerjs/icons": "^0.1.78"
     },
     "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",

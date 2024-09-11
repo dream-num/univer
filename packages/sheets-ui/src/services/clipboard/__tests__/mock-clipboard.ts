@@ -15,11 +15,13 @@
  */
 
 export interface IClipboardItem {
+    presentationStyle: PresentationStyle;
     readonly types: readonly string[];
     getType(type: string): Promise<Blob>;
 }
 
 export class MockClipboardItem implements IClipboardItem {
+    presentationStyle: PresentationStyle;
     private readonly itemTypes: readonly string[];
     constructor(private props: IMockClipboardProps) {
         this.itemTypes = Object.keys(props);

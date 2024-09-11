@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
-import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
 import { cancelRequestFrame, DashedRect, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
     SELECTION_CONTROL_BORDER_BUFFER_COLOR,
     SELECTION_CONTROL_BORDER_BUFFER_WIDTH,
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { IRangeWithCoord, ISelectionCellWithMergeInfo, Nullable, ThemeService } from '@univerjs/core';
+import type { IObjectFullState, IRectProps, Scene } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SelectionRenderModel } from './selection-render-model';
@@ -40,6 +40,7 @@ export enum SELECTION_MANAGER_KEY {
     backgroundMiddleRight = '__SpreadsheetSelectionBackgroundControlMiddleRight__',
     backgroundBottom = '__SpreadsheetSelectionBackgroundControlBottom__',
     fill = '__SpreadsheetSelectionFillControl__',
+
     // fillTopLeft & fillBottomRight are used for mobile selection
     fillTopLeft = '__SpreadsheetSelectionFillControlTopLeft__',
     fillBottomRight = '__SpreadsheetSelectionFillControlBottomRight__',
@@ -75,10 +76,10 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
  * The main selection canvas component, includes leftControl,rightControl,topControl,bottomControl,backgroundControlTop,backgroundControlMiddleLeft,backgroundControlMiddleRight,backgroundControlBottom,fillControl
  */
 export class SelectionControl extends Disposable {
-    private _leftControl!: Rect;
-    private _rightControl!: Rect;
-    private _topControl!: Rect;
-    private _bottomControl!: Rect;
+    private _leftBorder!: Rect;
+    private _rightBorder!: Rect;
+    private _topBorder!: Rect;
+    private _bottomBorder!: Rect;
 
     private _backgroundControlTop!: Rect;
     private _backgroundControlBottom!: Rect;
@@ -98,6 +99,7 @@ export class SelectionControl extends Disposable {
     private _columnHeaderGroup!: Group;
     // private _columnHeaderHighlight!: Rect;
 
+    // for ref selection
     private _topLeftWidget!: Rect;
     private _topCenterWidget!: Rect;
     private _topRightWidget!: Rect;
@@ -107,7 +109,7 @@ export class SelectionControl extends Disposable {
     private _bottomCenterWidget!: Rect;
     private _bottomRightWidget!: Rect;
 
-    private _dashRect!: Rect;
+    private _dashedRect!: Rect;
 
     protected _selectionModel!: SelectionRenderModel;
 
@@ -161,19 +163,19 @@ export class SelectionControl extends Disposable {
     }
 
     get leftControl(): Rect {
-        return this._leftControl;
+        return this._leftBorder;
     }
 
     get rightControl(): Rect {
-        return this._rightControl;
+        return this._rightBorder;
     }
 
     get topControl(): Rect {
-        return this._topControl;
+        return this._topBorder;
     }
 
     get bottomControl(): Rect {
-        return this._bottomControl;
+        return this._bottomBorder;
     }
 
     get fillControl(): Rect {
@@ -268,8 +270,8 @@ export class SelectionControl extends Disposable {
         this._defaultStyle = style;
     }
 
-    get dashRect(): Rect {
-        return this._dashRect;
+    get dashedRect(): Rect {
+        return this._dashedRect;
     }
 
     get currentStyle(): Nullable<ISelectionStyle> {
@@ -401,11 +403,11 @@ export class SelectionControl extends Disposable {
         });
 
         if (strokeDash === null || strokeDash === undefined) {
-            this.dashRect.hide();
+            this.dashedRect.hide();
             this._stopAntLineAnimation();
         } else {
             const dashRectBorderWidth = currentStyle.strokeWidth * 2 / scale;
-            this.dashRect.transformByState({
+            this.dashedRect.transformByState({
                 height: endY - startY,
                 width: endX - startX,
                 strokeWidth: dashRectBorderWidth,
@@ -413,7 +415,7 @@ export class SelectionControl extends Disposable {
                 top: -dashRectBorderWidth / 2 + fixOnePixelBlurOffset,
             });
 
-            this.dashRect.setProps({
+            this.dashedRect.setProps({
                 strokeDashArray: [0, strokeDash / scale],
             });
 
@@ -423,7 +425,7 @@ export class SelectionControl extends Disposable {
                 this._startAntLineAnimation();
             }
 
-            this.dashRect.show();
+            this.dashedRect.show();
         }
 
         if (hasAutoFill === true && !this._hasWidgets(widgets)) {
@@ -515,10 +517,10 @@ export class SelectionControl extends Disposable {
 
     // eslint-disable-next-line complexity
     override dispose(): void {
-        this._leftControl?.dispose();
-        this._rightControl?.dispose();
-        this._topControl?.dispose();
-        this._bottomControl?.dispose();
+        this._leftBorder?.dispose();
+        this._rightBorder?.dispose();
+        this._topBorder?.dispose();
+        this._bottomBorder?.dispose();
         this._backgroundControlTop?.dispose();
         this._backgroundControlMiddleLeft?.dispose();
         this._backgroundControlMiddleRight?.dispose();
@@ -615,19 +617,19 @@ export class SelectionControl extends Disposable {
 
         this._selectionModel = new SelectionRenderModel();
         const zIndex = this._zIndex;
-        this._leftControl = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
+        this._leftBorder = new Rect(SELECTION_MANAGER_KEY.left + zIndex, {
             zIndex,
         });
 
-        this._rightControl = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
+        this._rightBorder = new Rect(SELECTION_MANAGER_KEY.right + zIndex, {
             zIndex,
         });
 
-        this._topControl = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
+        this._topBorder = new Rect(SELECTION_MANAGER_KEY.top + zIndex, {
             zIndex,
         });
 
-        this._bottomControl = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
+        this._bottomBorder = new Rect(SELECTION_MANAGER_KEY.bottom + zIndex, {
             zIndex,
         });
 
@@ -658,7 +660,7 @@ export class SelectionControl extends Disposable {
 
         // That weird, new Dashedrect should called when strokeDash. not every selectionControl need dashedRect.
         // strokeDash === null || strokeDash === undefined ---> _dashRect.hide()
-        this._dashRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
+        this._dashedRect = new DashedRect(SELECTION_MANAGER_KEY.dash + zIndex, {
             zIndex: zIndex + 2,
             evented: false,
             stroke: '#fff',
@@ -666,10 +668,10 @@ export class SelectionControl extends Disposable {
 
         const shapes = [
             this._fillControl,
-            this._leftControl, this._rightControl, this._topControl, this._bottomControl,
+            this._leftBorder, this._rightBorder, this._topBorder, this._bottomBorder,
             this._backgroundControlTop, this._backgroundControlMiddleLeft,
             this._backgroundControlMiddleRight, this._backgroundControlBottom,
-            this._dashRect,
+            this._dashedRect,
         ];
 
         this._widgetRects = this._initialWidget();
@@ -1070,7 +1072,7 @@ export class SelectionControl extends Disposable {
         if (this._antLineOffset > 160 / scale) {
             this._antLineOffset = 0;
         }
-        this.dashRect.setProps({
+        this.dashedRect.setProps({
             strokeDashOffset: -this._antLineOffset,
         });
         this._antRequestNewFrame = requestNewFrame(() => {

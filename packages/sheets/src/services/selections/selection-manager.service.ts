@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
+import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 
 import type { ISelectionWithStyle } from '../../basics/selection';
 
@@ -248,7 +248,7 @@ export class WorkbookSelections extends Disposable {
      * @param selectionDatas
      * @param type
      */
-    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType): void {
+    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[] = [], type: SelectionMoveType): void {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 import { CustomRangeType, DataStreamTreeTokenType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
 import { handleStringToStyle, textTrim } from '@univerjs/ui';
+import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { extractNodeStyle } from './parse-node-style';
+import parseToDom, { generateParagraphs } from './utils';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
     ICellDataWithSpanInfo,
@@ -26,9 +28,7 @@ import type {
     IParsedCellValueByClipboard,
     IUniverSheetCopyDataModel,
 } from '../type';
-import { extractNodeStyle } from './parse-node-style';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
-import parseToDom, { generateParagraphs } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -107,7 +107,7 @@ export class HtmlToUSMService {
         this._getCurrentSkeleton = props.getCurrentSkeleton;
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     convert(html: string): IUniverSheetCopyDataModel {
         const pastePlugin = HtmlToUSMService._pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
@@ -207,7 +207,7 @@ export class HtmlToUSMService {
 
                 const dataStreamLength = dataStream.length;
                 const textRunsLength = textRuns?.length ?? 0;
-                if (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength)) {
+                if (!customRanges?.length && (!textRunsLength || (textRunsLength === 1 && textRuns![0].st === 0 && textRuns![0].ed === dataStreamLength))) {
                     valueMatrix.setValue(0, 0, {
                         v: dataStream,
                     });

@@ -409,7 +409,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (copyId && this._copyContentCache.get(copyId)) {
             return this._pasteInternal(copyId, pasteType);
         }
-
         return this._pasteExternal(html, pasteType);
     }
 

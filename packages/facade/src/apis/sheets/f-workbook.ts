@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     ILogService,
@@ -29,22 +28,23 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetDataValidationModel, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { filter } from 'rxjs';
+import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
+import type { IUpdateCommandParams } from '@univerjs/docs-ui';
 import type {
     ISetSelectionsOperationParams,
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
-import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetDataValidationModel, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
-import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
-import type { IUpdateCommandParams } from '@univerjs/docs';
+import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { filter } from 'rxjs';
-import type { IFComponentKey } from './utils';
-import { FWorksheet } from './f-worksheet';
 import { FRange } from './f-range';
+import { FWorksheet } from './f-worksheet';
+import type { IFComponentKey } from './utils';
 
 export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {
 

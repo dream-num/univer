@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
-import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { Subject } from 'rxjs';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -705,6 +705,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 editor.setValueLegality(false);
                 return false;
             }
+
             editor.setValueLegality(isReferenceStrings(value));
         }
 

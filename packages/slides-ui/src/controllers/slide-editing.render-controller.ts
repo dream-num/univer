@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    IDisposable,
-    IDocumentBody,
-    IPosition,
-    Nullable,
-    SlideDataModel,
-    UnitModel } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -43,45 +35,47 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import type { IDocObjectParam } from '@univerjs/docs';
 import {
-    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
-    DOCS_VIEW_KEY,
+    DocSelectionManagerService,
     DocSkeletonManagerService,
-    MoveCursorOperation,
-    MoveSelectionOperation,
     RichTextEditingMutation,
-    TextSelectionManagerService,
 } from '@univerjs/docs';
-import type {
-    DocBackground,
-    Documents,
-    DocumentSkeleton,
-    IDocumentLayoutObject,
-    IEditorInputConfig,
-    IRenderContext,
-    IRenderModule,
-    Scene,
-} from '@univerjs/engine-render';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import {
     convertTextRotation,
     DeviceInputEventType,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
     IRenderManagerService,
-    ITextSelectionRenderManager,
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
 import { IEditorService, ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
-import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
+import type {
+    ICommandInfo,
+    IDisposable,
+    IDocumentBody,
+    IPosition,
+    Nullable,
+    SlideDataModel,
+    UnitModel } from '@univerjs/core';
+import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
+import type {
+    DocBackground,
+    Documents,
+    DocumentSkeleton,
+    IDocumentLayoutObject,
+    IRenderContext,
+    IRenderModule,
+    Scene,
+} from '@univerjs/engine-render';
+import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
+import { SLIDE_EDITOR_ID } from '../const';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
-import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { CursorChange } from '../type';
-import { SLIDE_EDITOR_ID } from '../const';
+import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -114,10 +108,7 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISlideEditorBridgeService private readonly _editorBridgeService: ISlideEditorBridgeService,
         @ISlideEditorManagerService private readonly _cellEditorManagerService: ISlideEditorManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        // @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        // @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService
@@ -208,7 +199,11 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
 
     private _initialCursorSync(d: DisposableCollection) {
         d.add(this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
-            this._textSelectionRenderManager.sync();
+            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
+            if (docSelectionRenderManager) {
+                docSelectionRenderManager.sync();
+            }
         }));
     }
 
@@ -257,7 +252,11 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
             // ---> _focus$.next --> editingRenderController
             // _textSelectionRenderManager.sync() --> _updateInputPosition --> activate(left, top)
 
-            this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
+            if (docSelectionRenderManager) {
+                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            }
         }));
     }
 
@@ -663,16 +662,16 @@ export class SlideEditingRenderController extends Disposable implements IRenderM
      * @param d DisposableCollection
      */
     private _initialKeyboardListener(d: DisposableCollection) {
-        d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            // const isFocusFormulaEditor = this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED);
-            // const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+        // d.add(this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
+        //     // const isFocusFormulaEditor = this._contextService.getContextValue(FORMULA_EDITOR_ACTIVATED);
+        //     // const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
 
-            // // TODO@Jocs: should get editor instead of current doc
-            // const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
-            // if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
-            //     this._showEditorByKeyboard(config);
-            // }
-        }));
+        //     // // TODO@Jocs: should get editor instead of current doc
+        //     // const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
+        //     // if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+        //     //     this._showEditorByKeyboard(config);
+        //     // }
+        // }));
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {

@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IInsertCommandParams } from '@univerjs/docs';
-import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
-import { IEditorService } from '@univerjs/ui';
-import { DocEventManagerService } from '@univerjs/docs-ui';
-
-import { filter, map, mergeMap } from 'rxjs';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { DeleteLeftCommand, DocEventManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
+import { filter, map, mergeMap } from 'rxjs';
+
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
-import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
-import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
+import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
+import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 
@@ -39,8 +39,8 @@ export class DocUniFormulaInputController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @ILogService private readonly _logService: ILogService,
         @Inject(UniFormulaPopupService) private readonly _formulaPopupSrv: UniFormulaPopupService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

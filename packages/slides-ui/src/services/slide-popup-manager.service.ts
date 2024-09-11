@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
-import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import { SLIDE_KEY } from '@univerjs/slides';
-import type { IPopup } from '@univerjs/ui';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import type { IDisposable } from '@univerjs/core';
+import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
+import type { IPopup } from '@univerjs/ui';
 
 export interface ISlideCanvasPopup extends Pick<IPopup,
     'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
@@ -113,19 +113,6 @@ export class SlideCanvasPopMangerService extends Disposable {
         const position = calc();
         const position$ = new BehaviorSubject(position);
         const disposable = new DisposableCollection();
-
-        // disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
-        //     if (commandInfo.id === SetDocZoomRatioOperation.id) {
-        //         position$.next(calc());
-        //     }
-        // }));
-
-        // const viewMain = currentRender.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
-        // if (viewMain) {
-        //     disposable.add(viewMain.onScrollAfter$.subscribeEvent(() => {
-        //         position$.next(calc());
-        //     }));
-        // }
 
         return {
             position,

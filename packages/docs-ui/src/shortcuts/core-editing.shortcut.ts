@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
-
-import { DeleteLeftCommand, DeleteRightCommand, EnterCommand } from '@univerjs/docs';
+import type { IShortcutItem } from '@univerjs/ui';
+import { EnterCommand } from '../commands/commands/auto-format.command';
+import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/delete.command';
 import { whenDocAndEditorFocused, whenDocAndEditorFocusedWithBreakLine } from './utils';
 
 export const BreakLineShortcut: IShortcutItem = {

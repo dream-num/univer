@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -34,25 +33,25 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
-    CoverContentCommand,
-    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
+    DocSelectionManagerService,
     DocSkeletonManagerService,
     RichTextEditingMutation,
-    TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
+import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { takeUntil } from 'rxjs';
-
 import { SetEditorResizeOperation } from '@univerjs/ui';
+import { takeUntil } from 'rxjs';
+import type { DocumentDataModel, ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+
+import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
+import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
@@ -66,9 +65,9 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

@@ -68,6 +68,8 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-hyper-link": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -81,6 +83,8 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-hyper-link": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.78",
@@ -94,7 +98,7 @@
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",
-        "vite": "^5.4.3",
+        "vite": "^5.4.4",
         "vitest": "^2.0.5"
     },
     "univerSpace": {

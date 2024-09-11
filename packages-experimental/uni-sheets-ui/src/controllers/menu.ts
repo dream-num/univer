@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_SHEET, FontItalic, FontWeight, ICommandService, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetInlineFormatCommand, SetTextSelectionsOperation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
     RangeProtectionPermissionEditPoint,
     SetRangeValuesMutation,
@@ -30,6 +30,7 @@ import {
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
 
 export const SHEET_BOLD_MUTATION_ID = 'sheet.command.uni-bold';
 export const SHEET_ITALIC_MUTATION_ID = 'sheet.command.uni-italic';
@@ -266,7 +267,7 @@ export function SheetStrikeThroughMenuItemFactory(accessor: IAccessor): IMenuBut
 
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const textSelectionService = accessor.get(DocSelectionManagerService);
 
     const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const activeTextRange = textSelectionService.getActiveRectRange();

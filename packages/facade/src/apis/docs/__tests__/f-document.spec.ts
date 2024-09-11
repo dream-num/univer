@@ -15,12 +15,13 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import type { Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { RichTextEditingMutation } from '@univerjs/docs';
+import { InsertCommand } from '@univerjs/docs-ui';
 
-import { InsertCommand, RichTextEditingMutation } from '@univerjs/docs';
-import type { FUniver } from '../../facade';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { Injector } from '@univerjs/core';
 import { createTestBed } from './create-test-bed';
+import type { FUniver } from '../../facade';
 
 describe('Test FDocument', () => {
     let get: Injector['get'];

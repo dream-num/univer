@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { RangeSelector, TextEditor } from '@univerjs/ui';
-import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
-import { ErrorSingle } from '@univerjs/icons';
 import { hasCJKText } from '@univerjs/engine-render';
-import styles from './index.module.less';
+import { ErrorSingle } from '@univerjs/icons';
+import { RangeSelector, TextEditor } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
+import styles from './index.module.less';
 
 export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
     inputId: string;

@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, ITextRangeParam } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
-import { getLineBounding, IRenderManagerService, NodePositionConvertToCursor, pxToNum } from '@univerjs/engine-render';
-import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
-import type { IPopup } from '@univerjs/ui';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map } from 'rxjs';
-import { DocSkeletonManagerService, SetDocZoomRatioOperation, VIEWPORT_KEY } from '@univerjs/docs';
+import type { IDisposable, ITextRangeParam } from '@univerjs/core';
+import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
+import type { IPopup } from '@univerjs/ui';
+import { VIEWPORT_KEY } from '../basics/docs-view-key';
+import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
+import { NodePositionConvertToCursor } from './selection/convert-text-range';
+import { getLineBounding } from './selection/text-range';
 
 export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene): IBoundRectNoAngle {
     const topLeft = transformPosition2Offset(originBound.left, originBound.top, scene);

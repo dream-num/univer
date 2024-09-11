@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     createIdentifier,
@@ -33,18 +32,20 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine, IRenderManagerService } from '@univerjs/engine-render';
-import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import { getCanvasOffsetByEngine } from '@univerjs/docs-ui';
+import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
-import type { KeyCode } from '@univerjs/ui';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import type { ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import type { KeyCode } from '@univerjs/ui';
 
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import type { Observable } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IEditorBridgeServiceVisibleParam {
     visible: boolean;

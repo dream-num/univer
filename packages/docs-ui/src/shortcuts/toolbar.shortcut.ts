@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand, BulletListCommand, OrderListCommand, SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs';
-import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
+import { SetInlineFormatBoldCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatUnderlineCommand } from '../commands/commands/inline-format.command';
+import { BulletListCommand, OrderListCommand } from '../commands/commands/list.command';
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '../commands/commands/paragraph-align.command';
 import { whenDocAndEditorFocused } from './utils';
 
 export const BoldShortCut: IShortcutItem = {

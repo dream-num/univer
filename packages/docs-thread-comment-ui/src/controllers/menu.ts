@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem } from '@univerjs/ui';
 import { StartAddCommentOperation, ToggleCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 export const shouldDisableAddComment = (accessor: IAccessor) => {
     const renderManagerService = accessor.get(IRenderManagerService);
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const render = renderManagerService.getCurrent();
     const skeleton = render?.with(DocSkeletonManagerService).getSkeleton();
     const editArea = skeleton?.getViewModel().getEditArea();
@@ -33,7 +33,7 @@ export const shouldDisableAddComment = (accessor: IAccessor) => {
         return true;
     }
 
-    const range = textSelectionManagerService.getActiveTextRangeWithStyle();
+    const range = docSelectionManagerService.getActiveTextRange();
 
     if (range == null || range.collapsed) {
         return true;
@@ -51,7 +51,7 @@ export function AddDocCommentMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'threadCommentUI.panel.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {
-            const textSelectionService = accessor.get(TextSelectionManagerService);
+            const textSelectionService = accessor.get(DocSelectionManagerService);
             const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
                 subscribe.next(shouldDisableAddComment(accessor));
             });

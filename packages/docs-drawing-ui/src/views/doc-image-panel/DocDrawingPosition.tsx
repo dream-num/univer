@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import clsx from 'clsx';
-import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
-
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IDrawingManagerService, type IDrawingParam } from '@univerjs/drawing';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import type { ICommandInfo, IObjectPositionH, IObjectPositionV, Nullable } from '@univerjs/core';
+
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDocumentSkeletonDrawing } from '@univerjs/engine-render';
 import { UpdateDrawingDocTransformCommand } from '../../commands/commands/update-doc-drawing.command';
 import styles from './index.module.less';
 
@@ -41,7 +42,6 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const textSelectionRenderService = useDependency(ITextSelectionRenderManager);
 
     const { drawings } = props;
 
@@ -132,7 +132,11 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
             })),
         });
 
-        textSelectionRenderService.blur();
+        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+
+        if (docSelectionRenderService) {
+            docSelectionRenderService.blur();
+        }
 
         transformer.refreshControls();
     }
@@ -157,7 +161,8 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         let drawing: Nullable<IDocumentSkeletonDrawing> = null;
         let pageMarginLeft = 0;
         const skeleton = renderManagerService.getRenderById(unitId)
-            ?.with(DocSkeletonManagerService).getSkeleton();
+            ?.with(DocSkeletonManagerService)
+            .getSkeleton();
 
         const skeletonData = skeleton?.getSkeletonData();
 
@@ -236,13 +241,17 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         const { drawingId, unitId } = focusDrawings[0];
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const skeleton = renderManagerService.getRenderById(unitId)
-            ?.with(DocSkeletonManagerService).getSkeleton();
-        const segmentId = textSelectionRenderService.getSegment();
-        const segmentPage = textSelectionRenderService.getSegmentPage();
+            ?.with(DocSkeletonManagerService)
+            .getSkeleton();
+
+        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+
+        const segmentId = docSelectionRenderService?.getSegment();
+        const segmentPage = docSelectionRenderService?.getSegmentPage();
 
         const drawing = documentDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody()?.customBlocks?.find((c) => c.blockId === drawingId);
 
-        if (drawing == null || skeleton == null) {
+        if (drawing == null || skeleton == null || docSelectionRenderService == null) {
             return;
         }
 

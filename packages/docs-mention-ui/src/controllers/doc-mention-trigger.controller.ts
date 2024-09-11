@@ -15,18 +15,19 @@
  */
 
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
-import type { IInsertCommandParams } from '@univerjs/docs';
-import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
-import { DocMentionPopupService } from '../services/doc-mention-popup.service';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 import { DocMentionService } from '../services/doc-mention.service';
+import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMentionTriggerController)
 export class DocMentionTriggerController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocMentionService) private readonly _docMentionService: DocMentionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @Inject(DocMentionPopupService) private readonly _docMentionPopupService: DocMentionPopupService
     ) {
         super();
@@ -39,7 +40,7 @@ export class DocMentionTriggerController extends Disposable {
             this._commandService.onCommandExecuted((commandInfo) => {
                 if (commandInfo.id === InsertCommand.id) {
                     const params = commandInfo.params as IInsertCommandParams;
-                    const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+                    const activeRange = this._textSelectionManagerService.getActiveTextRange();
                     if (params.body.dataStream === '@' && activeRange && !Tools.isDefine(this._docMentionService.editing)) {
                         this._commandService.executeCommand(ShowMentionEditPopupOperation.id, {
                             startIndex: activeRange.startOffset - 1,
@@ -56,7 +57,7 @@ export class DocMentionTriggerController extends Disposable {
                     if (this._docMentionPopupService.editPopup == null) {
                         return;
                     }
-                    const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+                    const activeRange = this._textSelectionManagerService.getActiveTextRange();
                     if (activeRange && activeRange.endOffset <= this._docMentionPopupService.editPopup.anchor) {
                         this._commandService.executeCommand(CloseMentionEditPopupOperation.id);
                     }

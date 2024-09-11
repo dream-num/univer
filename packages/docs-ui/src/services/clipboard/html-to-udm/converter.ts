@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
 import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, skipParseTagNames, Tools } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
 
-import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '@univerjs/docs';
+import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
 import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';

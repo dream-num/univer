@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     FOCUSING_DOC,
@@ -23,11 +22,16 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+
 import { IEditorService } from '@univerjs/ui';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { neoGetDocObject } from '../../basics/component-tools';
+import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
+import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -36,7 +40,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
     ) {

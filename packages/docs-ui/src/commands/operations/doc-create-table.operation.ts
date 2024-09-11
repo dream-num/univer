@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, LocaleService } from '@univerjs/core';
 import { IConfirmService } from '@univerjs/ui';
-import { CreateDocTableCommand } from '@univerjs/docs';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { COMPONENT_DOC_CREATE_TABLE_CONFIRM } from '../../views/table/create/component-name';
+import { CreateDocTableCommand } from '../commands/table/doc-table-create.command';
 
 const COMPONENT_DOC_CREATE_TABLE_CONFIRM_ID = 'doc.component.create-table-confirm';
 

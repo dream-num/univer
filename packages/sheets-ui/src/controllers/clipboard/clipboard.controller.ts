@@ -20,6 +20,7 @@ import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     extractPureTextFromCell,
     handleStyleToString,
     ICommandService,
@@ -33,10 +34,11 @@ import {
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    Optional, RxDisposable, UniverInstanceType,
+    RxDisposable, UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -48,6 +50,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
+
 import { IMessageService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 
@@ -113,25 +116,28 @@ export class SheetClipboardController extends RxDisposable {
         @IConfigService private readonly _configService: IConfigService,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @IMessageService private readonly _messageService: IMessageService,
-        @Inject(LocaleService) private readonly _localService: LocaleService,
-        @Optional(ITextSelectionRenderManager) private readonly _textSelectionRenderManager?: ITextSelectionRenderManager
+        @Inject(LocaleService) private readonly _localService: LocaleService
     ) {
         super();
         this._init();
 
-        this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-            if (!whenSheetEditorFocused(this._contextService)) {
-                return;
-            }
+        const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
-            // editor's value should not change and avoid triggering input event
-            config!.event.preventDefault();
+        if (docSelectionRenderService) {
+            docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+                if (!whenSheetEditorFocused(this._contextService)) {
+                    return;
+                }
 
-            const clipboardEvent = config!.event as ClipboardEvent;
-            const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
-            const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-            this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
-        });
+                // editor's value should not change and avoid triggering input event
+                config!.event.preventDefault();
+
+                const clipboardEvent = config!.event as ClipboardEvent;
+                const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
+                const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
+            });
+        }
     }
 
     private _init(): void {
@@ -157,6 +163,7 @@ export class SheetClipboardController extends RxDisposable {
         this.disposeWithMe({ dispose: () => disposables.forEach((d) => d.dispose()) });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initCopyingHooks(): ISheetClipboardHook {
         const self = this;
         let currentSheet: Worksheet | null = null;
@@ -280,6 +287,7 @@ export class SheetClipboardController extends RxDisposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initPastingHook(): ISheetClipboardHook {
         const self = this;
 
@@ -311,6 +319,7 @@ export class SheetClipboardController extends RxDisposable {
                 return true;
             },
 
+            // eslint-disable-next-line max-lines-per-function
             onPasteRows(pasteTo, rowProperties) {
                 const { range } = pasteTo;
                 const redoMutations: IMutationInfo[] = [];
@@ -416,6 +425,7 @@ export class SheetClipboardController extends RxDisposable {
                 };
             },
 
+            // eslint-disable-next-line max-lines-per-function
             onPasteColumns(pasteTo, colProperties, pasteType) {
                 const { range } = pasteTo;
                 const redoMutations: IMutationInfo[] = [];
@@ -607,6 +617,7 @@ export class SheetClipboardController extends RxDisposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initSpecialPasteHooks() {
         const self = this;
 

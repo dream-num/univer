@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
 
 export interface IDocsRenameMutationParams {
     name: string;
@@ -32,6 +32,7 @@ export const DocsRenameMutation: ICommand = {
             return false;
         }
         doc.setName(params.name);
+
         return true;
     },
 };

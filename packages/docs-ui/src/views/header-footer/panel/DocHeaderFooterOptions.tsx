@@ -15,12 +15,13 @@
  */
 
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import clsx from 'clsx';
-import { DocumentEditArea, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { DocSkeletonManagerService, TextSelectionManagerService } from '@univerjs/docs';
+import React, { useEffect, useState } from 'react';
 import { CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
+import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import styles from './index.module.less';
 
 export interface IDocHeaderFooterOptionsProps {
@@ -32,9 +33,10 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const commandService = useDependency(ICommandService);
-    const textSelectionRenderService = useDependency(ITextSelectionRenderManager);
-    const textSelectionManagerService = useDependency(TextSelectionManagerService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const { unitId } = props;
+
+    const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService)!;
 
     const [options, setOptions] = useState<IHeaderFooterProps>({});
 
@@ -56,7 +58,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         const editArea = viewModel.getEditArea();
 
         let needCreateHeaderFooter = false;
-        const segmentPage = textSelectionRenderService.getSegmentPage();
+        const segmentPage = docSelectionRenderService.getSegmentPage();
         let needChangeSegmentId = false;
         if (type === 'useFirstPageHeaderFooter' && val === true) {
             if (editArea === DocumentEditArea.HEADER && !documentStyle.firstPageHeaderId) {
@@ -87,7 +89,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
             const segmentId = Tools.generateRandomId(SEGMENT_ID_LEN);
             // Set segment id first, then exec command.
             if (needChangeSegmentId) {
-                textSelectionRenderService.setSegment(segmentId);
+                docSelectionRenderService.setSegment(segmentId);
             }
 
             commandService.executeCommand(CoreHeaderFooterCommandId, {
@@ -121,8 +123,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         });
 
         // To make sure input always has focus.
-        textSelectionRenderService.removeAllRanges();
-        textSelectionRenderService.blur();
+        docSelectionRenderService.removeAllRanges();
+        docSelectionRenderService.blur();
     };
 
     const closeHeaderFooter = () => {
@@ -143,10 +145,10 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
         }
 
         // TODO: @JOCS, these codes bellow should be automatically executed?
-        textSelectionManagerService.replaceTextRanges([]); // Clear text selection.
+        docSelectionManagerService.replaceTextRanges([]); // Clear text selection.
         transformer.clearSelectedObjects();
-        textSelectionRenderService.setSegment('');
-        textSelectionRenderService.setSegmentPage(-1);
+        docSelectionRenderService.setSegment('');
+        docSelectionRenderService.setSegmentPage(-1);
         viewModel.setEditArea(DocumentEditArea.BODY);
         skeleton.calculate();
         render.mainComponent?.makeDirty(true);

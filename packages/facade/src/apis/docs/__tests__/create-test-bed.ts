@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -26,11 +25,12 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
+import { DocIMEInputManagerService, DocsRenderService, DocStateChangeManagerService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
-import { DocSkeletonManagerService, DocStateChangeManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
-import { IRenderManagerService, ITextSelectionRenderManager, RenderManagerService, TextSelectionRenderManager } from '@univerjs/engine-render';
-import { DocsRenderService } from '@univerjs/docs-ui';
+import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
 
 import { FUniver } from '../../facade';
 
@@ -77,16 +77,16 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
         override onStarting(): void {
             const injector = this._injector;
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
-            injector.add([TextSelectionManagerService]);
+            injector.add([DocSelectionManagerService]);
+            injector.add([DocStateEmitService]);
             injector.add([DocStateChangeManagerService]);
-            injector.add([IMEInputManagerService]);
             injector.add([DocsRenderService]);
-            injector.add([ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }]);
 
             dependencies?.forEach((d) => injector.add(d));
 
             const renderManagerService = injector.get(IRenderManagerService);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSkeletonManagerService] as Dependency);
+            renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocIMEInputManagerService] as Dependency);
         }
     }
 

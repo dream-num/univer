@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    DocumentDataModel,
-    IBullet,
-    INumberUnit,
-    IObjectPositionH,
-    IObjectPositionV,
-    IParagraph,
-    IParagraphStyle,
-    ISectionBreak,
-    ITextStyle,
-    Nullable,
-} from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
@@ -44,8 +32,25 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import type {
+    DocumentDataModel,
+    IBullet,
+    INumberUnit,
+    IObjectPositionH,
+    IObjectPositionV,
+    IParagraph,
+    IParagraphStyle,
+    ISectionBreak,
+    ITextStyle,
+    Nullable,
+} from '@univerjs/core';
 
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
+import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
+import { getCustomDecorationStyle } from './style/custom-decoration';
+import { getCustomRangeStyle } from './style/custom-range';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -58,16 +63,11 @@ import type {
     IDocumentSkeletonSection,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
-import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
-import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
-import { getCustomDecorationStyle } from './style/custom-decoration';
-import { getCustomRangeStyle } from './style/custom-range';
-import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -1093,4 +1093,28 @@ export function mergeByV<T = unknown>(object: unknown, originObject: unknown, ty
         return originObj ?? obj;
     };
     return Tools.mergeWith(object, originObject, mergeIterator) as T;
+}
+
+export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (string | number)[]): Nullable<IDocumentSkeletonPage> {
+    const pathCopy = [...path];
+    let page: Nullable<IDocumentSkeletonPage> = null;
+
+    while (pathCopy.length > 0) {
+        const field = pathCopy.shift();
+
+        if (field === 'pages') {
+            const pageIndex = pathCopy.shift() as number;
+            page = skeletonData.pages[pageIndex];
+        } else if (field === 'skeTables') {
+            const tableId = pathCopy.shift() as string;
+            pathCopy.shift(); // rows
+            const rowIndex = pathCopy.shift() as number;
+            pathCopy.shift(); // cells
+            const cellIndex = pathCopy.shift() as number;
+
+            page = page!.skeTables?.get(tableId)?.rows[rowIndex]?.cells[cellIndex];
+        }
+    }
+
+    return page;
 }

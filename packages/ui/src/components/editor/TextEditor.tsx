@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, Nullable } from '@univerjs/core';
 import { debounce, isInternalEditorID, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
-import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { IDocumentData, Nullable } from '@univerjs/core';
 import { IEditorService } from '../../services/editor/editor.service';
 import { isElementVisible } from '../../utils/util';
 import styles from './index.module.less';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
@@ -231,6 +231,12 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
+            const focusEditor = editorService.getFocusEditor();
+
+            if (focusEditor && focusEditor.editorUnitId !== id) {
+                return;
+            }
+
             valueChange(editor);
         });
 
@@ -258,6 +264,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         if (value == null) {
             return;
         }
+
         editorService.setValueNoRefresh(value, id);
     }, [value]);
 

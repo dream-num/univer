@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import { CommandType, EDITOR_ACTIVATED, ICommandService, IContextService } from '@univerjs/core';
-import {
-    SetInlineFormatBoldCommand,
-    SetInlineFormatFontFamilyCommand,
-    SetInlineFormatFontSizeCommand,
-    SetInlineFormatItalicCommand,
-    SetInlineFormatStrikethroughCommand,
-    SetInlineFormatSubscriptCommand,
-    SetInlineFormatSuperscriptCommand,
-    SetInlineFormatTextColorCommand,
-    SetInlineFormatUnderlineCommand,
-} from '@univerjs/docs';
+import { SetInlineFormatBoldCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '@univerjs/docs-ui';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -36,6 +25,7 @@ import {
     SetTextColorCommand,
     SetUnderlineCommand,
 } from '@univerjs/sheets';
+import type { ICommand } from '@univerjs/core';
 
 /**
  * It is used to set the bold style of selections or one cell, need to distinguish between

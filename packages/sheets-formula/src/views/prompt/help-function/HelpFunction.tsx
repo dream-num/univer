@@ -16,18 +16,17 @@
 
 import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
+import { IEditorService, ILayoutService, ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 
-import { IEditorService, ISidebarService } from '@univerjs/ui';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { throttleTime } from 'rxjs';
-import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import { generateParam } from '../../../services/utils';
 import { useResizeScrollObserver } from '../resize-scroll-observer';
 import styles from './index.module.less';
+import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 
 export function HelpFunction() {
     const [visible, setVisible] = useState(false);
@@ -123,8 +122,9 @@ export function HelpFunction() {
         setHelpVisible(!helpVisible);
 
         // focus editor
-        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-        textSelectionRenderManager.focus();
+        // FIXME: @Jocs, still need re focus?
+        const layoutService = injector.get(ILayoutService);
+        layoutService.focus();
     }
 
     return (

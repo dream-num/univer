@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import { neoGetDocObject, VIEWPORT_KEY } from '@univerjs/docs';
+import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { neoGetDocObject } from '../basics/component-tools';
+import { VIEWPORT_KEY } from '../basics/docs-view-key';
 
 export class DocPageLayoutService extends Disposable implements IRenderModule {
     constructor(

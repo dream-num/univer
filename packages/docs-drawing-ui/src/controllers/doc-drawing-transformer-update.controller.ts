@@ -20,9 +20,10 @@ import {
     Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectRelativeFromH, ObjectRelativeFromV,
     OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
 } from '@univerjs/core';
-import { DocSkeletonManagerService, getDocObject } from '@univerjs/docs';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
-import { DocumentSkeletonPageType, getAnchorBounding, getColor, getOneTextSelectionRange, IRenderManagerService, ITextSelectionRenderManager, Liquid, NodePositionConvertToCursor, PageLayoutType, Rect, TEXT_RANGE_LAYER_INDEX, Vector2 } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
@@ -67,8 +68,7 @@ export class DocDrawingTransformerController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
 
@@ -390,12 +390,19 @@ export class DocDrawingTransformerController extends Disposable {
         if (coord == null) {
             return;
         }
+
+        const docSelectionRenderService = this._renderManagerService.getRenderById(drawing.unitId)?.with(DocSelectionRenderService);
+
+        if (docSelectionRenderService == null) {
+            return;
+        }
+
         const nodeInfo = skeleton?.findNodeByCoord(
             coord, pageLayoutType, pageMarginLeft, pageMarginTop,
             {
                 strict: false,
-                segmentId: this._textSelectionRenderManager.getSegment(),
-                segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+                segmentId: docSelectionRenderService.getSegment(),
+                segmentPage: docSelectionRenderService.getSegmentPage(),
             }
         );
         if (nodeInfo) {
@@ -484,10 +491,16 @@ export class DocDrawingTransformerController extends Disposable {
             return;
         }
 
+        const docSelectionRenderService = this._renderManagerService.getRenderById(drawing.unitId)?.with(DocSelectionRenderService);
+
+        if (docSelectionRenderService == null) {
+            return;
+        }
+
         const nodeInfo = skeleton?.findNodeByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop, {
             strict: false,
-            segmentId: this._textSelectionRenderManager.getSegment(),
-            segmentPage: this._textSelectionRenderManager.getSegmentPage(),
+            segmentId: docSelectionRenderService.getSegment(),
+            segmentPage: docSelectionRenderService.getSegmentPage(),
         });
         if (nodeInfo) {
             const { node, segmentPage: segmentPageIndex, segmentId: nodeSegmentId } = nodeInfo;

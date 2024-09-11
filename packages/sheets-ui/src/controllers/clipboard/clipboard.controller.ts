@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICellData,
-    IDocumentData,
-    IMutationInfo,
-    IObjectArrayPrimitiveType,
-    IObjectMatrixPrimitiveType,
-    IRange,
-    IRowData,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
 import {
     BooleanNumber,
     convertBodyToHtml,
@@ -37,7 +26,6 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
-    Inject,
     Injector,
     isFormulaString,
     IUniverInstanceService,
@@ -50,13 +38,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
+import { IRenderManagerService,  } from '@univerjs/engine-render';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -70,9 +52,27 @@ import {
 } from '@univerjs/sheets';
 import { IMessageService } from '@univerjs/ui';
 
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
+
+import type {
+    ICellData,
+    IDocumentData,
+    IMutationInfo,
+    IObjectArrayPrimitiveType,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IRowData,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -84,13 +84,6 @@ import {
     SheetPasteValueCommand,
 } from '../../commands/commands/clipboard.command';
 import { ISheetClipboardService, PREDEFINED_HOOK_NAME } from '../../services/clipboard/clipboard.service';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyPastePayload,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-} from '../../services/clipboard/type';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { whenSheetEditorFocused } from '../shortcuts/utils';
 import {
@@ -101,6 +94,13 @@ import {
     getSetCellStyleMutations,
     getSetCellValueMutations,
 } from './utils';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyPastePayload,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '../../services/clipboard/type';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -736,7 +736,7 @@ export class SheetClipboardController extends RxDisposable {
 
                 return {
                     redos: redoMutations,
-                    undos: [] || undoMutations,
+                    undos: undoMutations,
                 };
             },
         };

@@ -262,7 +262,8 @@ export function isICellData(value: any): value is ICellData {
             (value as ICellData).v !== undefined ||
             (value as ICellData).t !== undefined ||
             (value as ICellData).f !== undefined ||
-            (value as ICellData).si !== undefined)
+            (value as ICellData).si !== undefined ||
+            (value as ICellData).custom !== undefined)
     );
 }
 

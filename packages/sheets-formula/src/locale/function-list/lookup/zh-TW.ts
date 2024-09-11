@@ -133,8 +133,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要排除列或欄的陣列。' },
+            rows: { name: '列數', detail: '要排除的列數。負值會從陣列結尾排除。' },
+            columns: { name: '欄數', detail: '要排除的欄數。負值會從陣列結尾排除。' },
         },
     },
     EXPAND: {
@@ -147,8 +148,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要展開的陣列。' },
+            rows: { name: '列數', detail: '展開陣列中的列數。 如果遺失，將不會展開列。' },
+            columns: { name: '欄數', detail: '展開陣列中的欄數。 如果遺失，欄將不會展開。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     FILTER: {
@@ -430,13 +433,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要取用列或欄的陣列。' },
+            rows: { name: '列數', detail: '要取用的列數。負值會從陣列結尾取用。' },
+            columns: { name: '欄數', detail: '要取用的欄數。負值會從陣列結尾取用。' },
         },
     },
     TOCOL: {
-        description: '傳回單一列中的陣列',
-        abstract: '傳回單一列中的陣列',
+        description: '傳回單一欄中的陣列。',
+        abstract: '傳回單一欄中的陣列。',
         links: [
             {
                 title: '教導',
@@ -444,13 +448,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要以欄返回的陣列或參照。' },
+            ignore: { name: '忽略值', detail: '是否要忽略特定類型的值。 根據預設，不會忽略任何值。 指定下列其中一項動作：\n0 保留所有值 (預設)\n1 略過空白\n2 略過錯誤\n3 略過空白和錯誤' },
+            scanByColumn: { name: '依欄掃描陣列', detail: '依欄掃描陣列。 根據預設，陣列會以列掃描。 掃描會決定值是依列或欄排序。' },
         },
     },
     TOROW: {
-        description: '傳回單一行中的陣列',
-        abstract: '傳回單一行中的陣列',
+        description: '傳回單一列中的陣列。',
+        abstract: '傳回單一列中的陣列。',
         links: [
             {
                 title: '教導',
@@ -458,8 +463,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要以列返回的陣列或參照。' },
+            ignore: { name: '忽略值', detail: '是否要忽略特定類型的值。 根據預設，不會忽略任何值。 指定下列其中一項動作：\n0 保留所有值 (預設)\n1 略過空白\n2 略過錯誤\n3 略過空白和錯誤' },
+            scanByColumn: { name: '依欄掃描陣列', detail: '依欄掃描陣列。 根據預設，陣列會以列掃描。 掃描會決定值是依列或欄排序。' },
         },
     },
     TRANSPOSE: {
@@ -534,8 +540,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '在指定數量的元素之後按列包裝提供的行或值列',
-        abstract: '在指定數量的元素之後按列包裝提供的行或值列',
+        description: '在指定的元素數之後，將提供的列或欄的值以欄換行，以形成新陣列。',
+        abstract: '在指定的元素數之後，將提供的列或欄的值以欄換行，以形成新陣列。',
         links: [
             {
                 title: '教導',
@@ -543,13 +549,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '向量', detail: '要換行的向量或參照。' },
+            wrapCount: { name: '換行數目', detail: '每一欄的最大值數目。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     WRAPROWS: {
-        description: '在指定數量的元素之後按行包裝提供的行或值列',
-        abstract: '在指定數量的元素之後按行包裝提供的行或值列',
+        description: '在指定的元素數之後，將提供的列或欄的值以列換行，以形成新陣列。',
+        abstract: '在指定的元素數之後，將提供的列或欄的值以列換行，以形成新陣列。',
         links: [
             {
                 title: '教導',
@@ -557,8 +564,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: '向量', detail: '要換行的向量或參照。' },
+            wrapCount: { name: '換行數目', detail: '每一列的最大值數目。' },
+            padWith: { name: '填塞值', detail: '要填塞的值。 預設值為 #N/A。' },
         },
     },
     XLOOKUP: {

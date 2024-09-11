@@ -16,7 +16,7 @@
         "build:storybook": "storybook build"
     },
     "dependencies": {
-        "@chromatic-com/storybook": "^1.8.0",
+        "@chromatic-com/storybook": "^2.0.0",
         "@storybook/addon-essentials": "8.2.9",
         "@storybook/addon-interactions": "8.2.9",
         "@storybook/addon-links": "8.2.9",
@@ -36,9 +36,9 @@
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^4.0.0",
         "tsconfig-paths-webpack-plugin": "^4.1.0",
-        "typescript": "^5.5.4"
+        "typescript": "^5.6.2"
     },
     "devDependencies": {
-        "@univerjs/shared": "workspace:*"
+        "@univerjs-infra/shared": "workspace:*"
     }
 }

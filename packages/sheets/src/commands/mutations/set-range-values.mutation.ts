@@ -29,6 +29,7 @@ import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@unive
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellValue, setNull } from '../../basics/cell-value';
 import { getCellType } from '../../basics/cell-type';
+import { handleCustom, transformCustom } from '../../basics/cell-custom';
 
 /** Params of `SetRangeValuesMutation` */
 export interface ISetRangeValuesMutationParams extends IMutationCommonParams {
@@ -84,10 +85,11 @@ export const SetRangeValuesUndoMutationFactory = (
         const cell = Tools.deepClone(cellMatrix?.getValue(row, col)) || {}; // clone cell data，prevent modify the original data
         const oldStyle = styles.getStyleByCell(cell);
         // transformStyle does not accept style id
-        let newStyle = styles.getStyleByCell(newVal);
-        newStyle = transformStyle(oldStyle, newStyle);
+        const newStyle = styles.getStyleByCell(newVal);
 
-        cell.s = newStyle;
+        cell.s = transformStyle(oldStyle, newStyle);
+
+        cell.custom = transformCustom(cell.custom, newVal?.custom);
 
         undoData.setValue(row, col, setNull(cell));
     });
@@ -99,10 +101,6 @@ export const SetRangeValuesUndoMutationFactory = (
     } as ISetRangeValuesMutationParams;
 };
 
-/**
- * TODO@Dushusir: Excel can display numbers with up to about 15 digits of precision. When the user inputs more than 15 digits, interception is required, but there are unknown performance risks.
-   Intercept 15-digit number reference function truncateNumber
- */
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
 
@@ -164,7 +162,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 }
 
                 if (newVal.custom !== undefined) {
-                    oldVal.custom = newVal.custom;
+                    handleCustom(oldVal, newVal);
                 }
 
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));

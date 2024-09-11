@@ -248,7 +248,7 @@ export class WorkbookSelections extends Disposable {
      * @param selectionDatas
      * @param type
      */
-    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[], type: SelectionMoveType): void {
+    setSelections(sheetId: string, selectionDatas: ISelectionWithStyle[] = [], type: SelectionMoveType): void {
         // selectionDatas should not be same variable as this._worksheetSelections !!!
         // but there are some place get selection from this._worksheetSelections and set selectionDatas(2nd parameter of this function ) cause selectionDatas is always []
         // see univer/pull/2909

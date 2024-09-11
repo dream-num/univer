@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '../sheets/typedef';
 import { Tools } from './tools';
+import type { IRange } from '../sheets/typedef';
 import type { Nullable } from './types';
 
 /**
@@ -528,7 +528,7 @@ export class ObjectMatrix<T> {
         const { endColumn, endRow } = range;
         const array: T[][] = [];
         for (let i = 0; i <= endRow; i++) {
-            const subArr = Array(endColumn + 1).fill(undefined);
+            const subArr = new Array(endColumn + 1).fill(undefined);
             array.push(subArr);
         }
 

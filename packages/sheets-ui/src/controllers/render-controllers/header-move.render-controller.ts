@@ -48,15 +48,10 @@ import { getCoordByOffset } from '../utils/component-tools';
 import { matchedSelectionByRowColIndex } from '../utils/selections-tools';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
-
 const HEADER_MOVE_CONTROLLER_LINE = '__SpreadsheetHeaderMoveControllerShapeLine__';
-
 const HEADER_MOVE_CONTROLLER_BACKGROUND_FILL = 'rgba(0, 0, 0, 0.1)';
-
 const HEADER_MOVE_CONTROLLER_LINE_FILL = 'rgb(119, 119, 119)';
-
 const HEADER_MOVE_CONTROLLER_LINE_SIZE = 4;
-
 export const HEADER_MOVE_PERMISSION_CHECK = createInterceptorKey<boolean, IRange>('headerMovePermissionCheck');
 
 export class HeaderMoveRenderController extends Disposable implements IRenderModule {

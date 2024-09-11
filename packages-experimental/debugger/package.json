@@ -1,0 +1,100 @@
+{
+    "name": "@univerjs/debugger",
+    "version": "0.2.12",
+    "private": false,
+    "description": "",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [],
+    "exports": {
+        ".": "./src/index.ts",
+        "./*": "./src/*"
+    },
+    "main": "./lib/cjs/index.js",
+    "module": "./lib/es/index.js",
+    "types": "./lib/types/index.d.ts",
+    "publishConfig": {
+        "access": "public",
+        "main": "./lib/cjs/index.js",
+        "module": "./lib/es/index.js",
+        "exports": {
+            ".": {
+                "import": "./lib/es/index.js",
+                "require": "./lib/cjs/index.js",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./*": {
+                "import": "./lib/es/*",
+                "require": "./lib/cjs/*",
+                "types": "./lib/types/index.d.ts"
+            },
+            "./lib/*": "./lib/*"
+        }
+    },
+    "directories": {
+        "lib": "lib"
+    },
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "lint:types": "tsc --noEmit",
+        "build": "tsc && vite build",
+        "sync:cnpm": "cnpm sync"
+    },
+    "peerDependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
+        "rxjs": ">=7.0.0"
+    },
+    "dependencies": {
+        "@univerjs/core": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/facade": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*"
+    },
+    "optionalDependencies": {
+        "vue": ">=3.0.0"
+    },
+    "devDependencies": {
+        "@univerjs-infra/shared": "workspace:*",
+        "@vitejs/plugin-vue": "^5.1.3",
+        "rxjs": "^7.8.1",
+        "typescript": "^5.6.2",
+        "vite": "^5.4.3",
+        "vitest": "^2.0.5",
+        "vue": "^3.5.3"
+    },
+    "univerSpace": {
+        ".": {
+            "import": "./lib/es/index.js",
+            "require": "./lib/cjs/index.js",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./*": {
+            "import": "./lib/es/*",
+            "require": "./lib/cjs/*",
+            "types": "./lib/types/index.d.ts"
+        },
+        "./lib/*": "./lib/*"
+    }
+}

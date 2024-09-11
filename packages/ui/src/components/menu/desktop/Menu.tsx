@@ -27,6 +27,13 @@ import clsx from 'clsx';
 import React, { useState } from 'react';
 import { isObservable } from 'rxjs';
 
+import { ILayoutService } from '../../../services/layout/layout.service';
+import { MenuItemType } from '../../../services/menu/menu';
+import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
+import { CustomLabel } from '../../custom-label/CustomLabel';
+import { useScrollYOverContainer } from '../../hooks/layout';
+import { useObservable } from '../../hooks/observable';
+import styles from './index.module.less';
 import type {
     IDisplayMenuItem,
     IMenuButtonItem,
@@ -35,13 +42,6 @@ import type {
     IValueOption,
     MenuItemDefaultValueType,
 } from '../../../services/menu/menu';
-import { MenuItemType } from '../../../services/menu/menu';
-import { CustomLabel } from '../../custom-label/CustomLabel';
-import { useObservable } from '../../hooks/observable';
-import { useScrollYOverContainer } from '../../hooks/layout';
-import { ILayoutService } from '../../../services/layout/layout.service';
-import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
-import styles from './index.module.less';
 
 // TODO: @jikkai disabled and hidden are not working
 

@@ -392,10 +392,11 @@ export class FormulaDependencyTreeCache extends Disposable {
     getDependencyId(dependenceTree: FormulaDependencyTree, ids: Set<string>) {
         const parentIdList = this._parentIdMap.get(dependenceTree.id);
         if (parentIdList) {
-            for (const parentId of parentIdList) {
+            const list = [...parentIdList];
+            for (const parentId of list) {
                 ids.add(parentId);
                 const tree = this._dependencyMap.get(parentId);
-                if (tree) {
+                if (tree && parentId !== dependenceTree.id) {
                     this.getDependencyId(tree, ids);
                 }
             }

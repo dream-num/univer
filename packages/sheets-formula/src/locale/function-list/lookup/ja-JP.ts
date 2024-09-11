@@ -123,8 +123,8 @@ export default {
         },
     },
     DROP: {
-        description: '配列の先頭または末尾から指定した数の行または列を除外します',
-        abstract: '配列の先頭または末尾から指定した数の行または列を除外します',
+        description: '配列の先頭または末尾から指定した数の行または列を削除します',
+        abstract: '配列の先頭または末尾から指定した数の行または列を削除します',
         links: [
             {
                 title: '指導',
@@ -132,8 +132,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行または列を削除する配列。' },
+            rows: { name: '行の数', detail: '削除する行の数。 負の値は配列の末尾から削除されます。' },
+            columns: { name: '列の数', detail: '削除する列の数。 負の値は配列の末尾から削除されます。' },
         },
     },
     EXPAND: {
@@ -146,8 +147,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '展開する配列。' },
+            rows: { name: '行の数', detail: '展開された配列内の行数。 存在しない場合、行は展開されません。' },
+            columns: { name: '列の数', detail: '展開された配列内の列の数。 存在しない場合、列は展開されません。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     FILTER: {
@@ -432,8 +435,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行または列を取得する配列。' },
+            rows: { name: '行の数', detail: '取得する行の数。 負の値は配列の最後から取得します。' },
+            columns: { name: '列の数', detail: '取得する列の数。 負の値は配列の最後から取得します。' },
         },
     },
     TOCOL: {
@@ -446,8 +450,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '列として返す配列または参照。' },
+            ignore: { name: '無視値', detail: '特定の種類の値を無視するかどうか。 既定では、値は無視されません。 次のいずれかを指定します。\n0 すべての値を保持する (既定)\n1 空白を無視する\n2 エラーを無視する\n3 空白とエラーを無視する' },
+            scanByColumn: { name: '配列を列でスキャンします', detail: '配列を列でスキャンします。 既定では、配列は行ごとにスキャンされます。 スキャンにより、値が行順か列順かが決まります。' },
         },
     },
     TOROW: {
@@ -460,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行として返す配列または参照。' },
+            ignore: { name: '無視値', detail: '特定の種類の値を無視するかどうか。 既定では、値は無視されません。 次のいずれかを指定します。\n0 すべての値を保持する (既定)\n1 空白を無視する\n2 エラーを無視する\n3 空白とエラーを無視する' },
+            scanByColumn: { name: '配列を列でスキャンします', detail: '配列を列でスキャンします。 既定では、配列は行ごとにスキャンされます。 スキャンにより、値が行順か列順かが決まります。' },
         },
     },
     TRANSPOSE: {
@@ -535,8 +541,8 @@ export default {
         },
     },
     WRAPCOLS: {
-        description: '指定した数の要素の後に、指定した行または列の値を列でラップします',
-        abstract: '指定した数の要素の後に、指定した行または列の値を列でラップします',
+        description: '指定した数の要素の後に、指定された値の行または列を列ごとにラップして、新しい配列を形成します。',
+        abstract: '指定した数の要素の後に、指定された値の行または列を列ごとにラップして、新しい配列を形成します。',
         links: [
             {
                 title: '指導',
@@ -544,13 +550,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'ベクター', detail: 'ラップするベクターまたは参照。' },
+            wrapCount: { name: '改行の数', detail: '各列の値の最大数。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     WRAPROWS: {
-        description: '指定した数の要素の後に、指定された行または値の列を行ごとにラップします',
-        abstract: '指定した数の要素の後に、指定された行または値の列を行ごとにラップします',
+        description: '指定した数の要素の後に、指定された行または値の列を行ごとにラップして、新しい配列を形成します。',
+        abstract: '指定した数の要素の後に、指定された行または値の列を行ごとにラップして、新しい配列を形成します。',
         links: [
             {
                 title: '指導',
@@ -558,8 +565,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            vector: { name: 'ベクター', detail: 'ラップするベクターまたは参照。' },
+            wrapCount: { name: '改行の数', detail: '各行の値の最大数。' },
+            padWith: { name: '埋め込む値', detail: '埋め込む値。 既定値は #N/A です。' },
         },
     },
     XLOOKUP: {

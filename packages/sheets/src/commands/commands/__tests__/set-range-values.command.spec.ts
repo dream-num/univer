@@ -295,6 +295,19 @@ describe('Test set range values commands', () => {
                     return params;
                 }
 
+                function getParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: {
+                                name: 'test',
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
                 function getResultParams() {
                     const params: ISetRangeValuesCommandParams = {
                         value: {
@@ -309,9 +322,31 @@ describe('Test set range values commands', () => {
                     return params;
                 }
 
+                function getResultParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                            custom: {
+                                id: 1,
+                                name: 'test',
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
                 expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
                 expect(getValue()).toStrictEqual(getResultParams().value);
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParamsMore())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
+
                 // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual({
                     v: 'A1',
@@ -322,8 +357,8 @@ describe('Test set range values commands', () => {
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual(getResultParams().value);
 
-                // reset
-                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
             });
 
             it('set value in other worksheet', async () => {

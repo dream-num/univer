@@ -69,6 +69,7 @@ describe('Test cell data', () => {
         expect(isICellData({ f: '=SUM(1)' })).toBeTruthy();
         expect(isICellData({ si: '1' })).toBeTruthy();
         expect(isICellData({ t: 1 })).toBeTruthy();
+        expect(isICellData({ custom: {} })).toBeTruthy();
 
         expect(isICellData({ a: '1' })).toBeFalsy();
         expect(isICellData(null)).toBeFalsy();

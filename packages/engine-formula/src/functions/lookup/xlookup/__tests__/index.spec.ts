@@ -25,6 +25,7 @@ import {
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xlookup } from '../index';
+import { ErrorType } from '../../../../basics/error-type';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;
@@ -62,7 +63,7 @@ const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
     801, 3500
 }`);
 
-describe('Test vlookup', () => {
+describe('Test xlookup', () => {
     const testFunction = new Xlookup(FUNCTION_NAMES_LOOKUP.XLOOKUP);
 
     describe('The value of the lookup', () => {
@@ -90,7 +91,7 @@ describe('Test vlookup', () => {
                 arrayValueObject1.transpose().slice([1, 2])!,
                 arrayValueObject1.transpose().slice([0, 1])!
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('2');
+            expect(resultObject.getValue().toString()).toBe('First');
         });
 
         it('Search array', async () => {
@@ -170,7 +171,8 @@ describe('Test vlookup', () => {
         });
 
         it('match_mode binary asc', async () => {
-            const resultObject = testFunction.calculate(
+            // match_mode 0
+            let resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,
@@ -178,11 +180,45 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('1700');
+            expect(resultObject.getValue().toString()).toBe('0');
+
+            // match_mode -1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(-1),
+                NumberValueObject.create(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('2000');
+
+            // match_mode 1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(1),
+                NumberValueObject.create(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('5000');
+
+            // match_mode 2
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
         });
 
         it('match_mode binary desc', async () => {
-            const resultObject = testFunction.calculate(
+            // match_mode 0
+            let resultObject = testFunction.calculate(
                 NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,
@@ -190,7 +226,143 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(0),
                 NumberValueObject.create(-2)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('3500');
+            expect(resultObject.getValue().toString()).toBe('0');
+
+            // match_mode 0, matched
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(601),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(0),
+                NumberValueObject.create(-2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('2900');
+
+            // match_mode -1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('2900');
+
+            // match_mode 1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(1),
+                NumberValueObject.create(-2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('6000');
+
+            // match_mode 2
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(-2)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
+        });
+
+        it('match_mode search first-to-last', async () => {
+            // match_mode 0
+            let resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(0),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('0');
+
+            // match_mode -1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(-1),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('2900');
+
+            // match_mode 1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(1),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('3000');
+
+            // match_mode 2
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('0');
+        });
+
+        it('match_mode search last-to-first', async () => {
+            // match_mode 0
+            let resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(0),
+                NumberValueObject.create(-1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('0');
+
+            // match_mode -1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(-1),
+                NumberValueObject.create(-1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('2900');
+
+            // match_mode 1
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(1),
+                NumberValueObject.create(-1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('3000');
+
+            // match_mode 2
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(660),
+                arrayValueObject4.slice(undefined, [0, 1])!,
+                arrayValueObject4.slice(undefined, [1])!,
+                NullValueObject.create(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(-1)
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe('0');
         });
     });
 });

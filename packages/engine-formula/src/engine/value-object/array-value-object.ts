@@ -742,54 +742,53 @@ export class ArrayValueObject extends BaseValueObject {
     ) {
         const compareFunc = getCompare();
 
-        // case insensitive
-        const value = valueObject.getValue().toString().toLocaleLowerCase();
+        // Convert to number if possible, otherwise use string
+        const value = Number(valueObject.getValue());
+        const isValueNumber = !isNaN(value);
 
         let start = 0;
         let end = searchArray.length - 1;
-
-        let lastValue = null;
+        let resultIndex = -1;
 
         while (start <= end) {
             const middle = Math.floor((start + end) / 2);
             const compareTo = searchArray[middle];
 
-            let compare = 0;
+            let compareResult: number;
             if (compareTo.isNull()) {
-                compare = 1;
+                compareResult = 1; // Treat null as greater than any value
             } else {
                 const compareToValue = compareTo.getValue();
-
-                // case insensitive
-                compare = compareFunc(compareToValue.toString().toLocaleLowerCase(), value);
+                if (isValueNumber) {
+                    const compareToNumber = Number(compareToValue);
+                    compareResult = isNaN(compareToNumber) ? 1 : Math.sign(compareToNumber - value);
+                } else {
+                    compareResult = compareFunc(compareToValue.toString().toLocaleLowerCase(), valueObject.getValue().toString().toLocaleLowerCase());
+                }
             }
 
-            if (compare === 0) {
-                // Found the value, return the value from the returnColumn
+            if (compareResult === 0) {
+                // Exact match found
                 return positionArray[middle];
             }
 
-            if (compare === -1) {
-                start = middle + 1;
-
+            if (compareResult < 0) {
+                // compareTo < value
                 if (searchType === ArrayBinarySearchType.MIN) {
-                    lastValue = middle;
+                    resultIndex = middle;
                 }
+                start = middle + 1;
             } else {
                 // compareTo > value
-                end = middle - 1;
-
                 if (searchType === ArrayBinarySearchType.MAX) {
-                    lastValue = middle;
+                    resultIndex = middle;
                 }
+                end = middle - 1;
             }
         }
 
-        // Value not found
-        if (lastValue == null) {
-            return;
-        }
-        return positionArray[lastValue];
+        // No exact match found, return the result based on searchType
+        return resultIndex !== -1 ? positionArray[resultIndex] : undefined;
     }
 
     override sum() {

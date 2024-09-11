@@ -16,13 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Wraprows } from '../index';
-import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test wraprows function', () => {
     const testFunction = new Wraprows(FUNCTION_NAMES_LOOKUP.WRAPROWS);

@@ -37,7 +37,6 @@ import { ImageDemo } from '../components/Image';
 import VueI18nIcon from '../components/VueI18nIcon.vue';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
 import { TestEditorContainer } from '../views/test-editor/TestTextEditor';
-import { ExportController } from './local-save/export.controller';
 import { RecordController } from './local-save/record.controller';
 import { menuSchema } from './menu.schema';
 
@@ -73,7 +72,6 @@ export class DebuggerController extends Disposable {
             ShowCellContentOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
-        this._injector.add([ExportController]);
         this._injector.add([RecordController]);
     }
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 
 import type {
     IDirtyUnitSheetNameMap,
@@ -23,9 +23,9 @@ import type {
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../../basics/common';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 
 export enum FDtreeStateType {
     DEFAULT,

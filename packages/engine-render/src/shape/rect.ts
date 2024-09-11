@@ -16,10 +16,10 @@
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import type { UniverRenderingContext } from '../context';
 import { ObjectType } from '../base-object';
-import type { IShapeProps } from './shape';
 import { Shape } from './shape';
+import type { UniverRenderingContext } from '../context';
+import type { IShapeProps } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;

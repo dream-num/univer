@@ -40,6 +40,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import { distinctUntilChanged, startWith } from 'rxjs';
+
 import type {
     BorderStyleTypes,
     IBorderStyleData,
@@ -68,10 +70,9 @@ import type {
     TextDirection,
     Worksheet,
 } from '@univerjs/core';
-import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
     degToRad,
     getCellByIndexWithMergeInfo,
@@ -81,12 +82,12 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import { columnIterator } from '../docs/layout/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
+import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {

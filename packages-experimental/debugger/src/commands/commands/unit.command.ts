@@ -15,7 +15,7 @@
  */
 
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IFileOpenerService } from '@univerjs/ui';
+import { ILocalFileService } from '@univerjs/ui';
 import type { ICommand, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { FUniver } from '@univerjs/facade';
 
@@ -65,7 +65,7 @@ export const LoadSheetSnapshotCommand: ICommand = {
     id: 'debugger.command.load-sheet-snapshot',
     type: CommandType.COMMAND,
     handler: async (accessor) => {
-        const fileOpenerService = accessor.get(IFileOpenerService);
+        const fileOpenerService = accessor.get(ILocalFileService);
         const snapshotFile = await fileOpenerService.openFile({ multiple: false, accept: '.json' });
         if (snapshotFile.length !== 1) return false;
 

@@ -15,26 +15,27 @@
  */
 
 /* eslint-disable node/prefer-global/process */
+/* eslint-disable no-console */
+
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverUIPlugin } from '@univerjs/ui';
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
-import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
 import { UniverDocsHyperLinkUIPlugin } from '@univerjs/docs-hyper-link-ui';
 import { UniverDocsMentionUIPlugin } from '@univerjs/docs-mention-ui';
+import { UniverDocsThreadCommentUIPlugin } from '@univerjs/docs-thread-comment-ui';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
+import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
 // package info
-// eslint-disable-next-line no-console
 console.table({
     NODE_ENV: process.env.NODE_ENV,
     GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,

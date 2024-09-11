@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Address } from './address';
 import { Areas } from './areas';
 import { Choose } from './choose';
@@ -25,8 +24,10 @@ import { Columns } from './columns';
 import { Drop } from './drop';
 import { Expand } from './expand';
 import { Filter } from './filter';
+import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Hstack } from './hstack';
+import { Index } from './index';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
 import { Match } from './match';
@@ -46,7 +47,6 @@ import { Wrapcols } from './wrapcols';
 import { Wraprows } from './wraprows';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
-import { Index } from './index';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],

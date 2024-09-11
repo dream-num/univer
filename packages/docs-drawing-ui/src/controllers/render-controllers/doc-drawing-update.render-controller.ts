@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
-import type { IImageIoServiceParam } from '@univerjs/drawing';
-import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
-import { IFileOpenerService, IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
-import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IImageIoServiceParam } from '@univerjs/drawing';
+import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
-import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
-import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
-import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
+import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
+import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
+import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -48,7 +48,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
-        @IFileOpenerService private readonly _fileOpenerService: IFileOpenerService
+        @ILocalFileService private readonly _fileOpenerService: ILocalFileService
     ) {
         super();
 
@@ -324,7 +324,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const { unit: docDataModel, scene, unitId } = this._context;
         const viewModel = this._renderManagerSrv
             .getRenderById(unitId)
-            ?.with(DocSkeletonManagerService).getViewModel();
+            ?.with(DocSkeletonManagerService)
+            .getViewModel();
 
         if (viewModel == null || docDataModel == null) {
             return;
@@ -359,7 +360,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         const { unitId } = this._context;
         const viewModel = this._renderManagerSrv
             .getRenderById(unitId)
-            ?.with(DocSkeletonManagerService).getViewModel();
+            ?.with(DocSkeletonManagerService)
+            .getViewModel();
 
         if (viewModel == null) {
             return;

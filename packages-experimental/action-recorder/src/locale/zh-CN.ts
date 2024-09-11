@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-import { createDownloadElement } from './util';
+const locale = {
+    'action-recorder': {
+        menu: {
+            title: '操作录制',
+            record: '录制操作...',
+            'replay-local': '回放本地录制...',
+        },
+    },
+};
 
-export class ExportController {
-    exportJson(data: string, fileName: string) {
-        const blob = new Blob([data], { type: 'text/json' });
-        const startDownload = createDownloadElement(`${fileName}.json`, blob);
-        startDownload();
-    }
-
-    exportWebm(data: Blob, fileName: string) {
-        const startDownload = createDownloadElement(`${fileName}.webm`, data);
-        startDownload();
-    }
-}
+export default locale;

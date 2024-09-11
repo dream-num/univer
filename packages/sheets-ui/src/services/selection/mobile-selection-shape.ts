@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ThemeService } from '@univerjs/core';
 import { RANGE_TYPE } from '@univerjs/core';
-import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
 import { Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import type { ThemeService } from '@univerjs/core';
+import type { BaseObject, IRectProps, Scene } from '@univerjs/engine-render';
 import type { ISelectionStyle } from '@univerjs/sheets';
 
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';

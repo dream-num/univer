@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import { FormulaDependencyTreeCache } from '../engine/dependency/dependency-tree';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 

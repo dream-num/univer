@@ -12,6 +12,7 @@
         "lint:types": "node ./scripts/generate-locales.mjs && tsc --noEmit"
     },
     "dependencies": {
+        "@univerjs/action-recorder": "workspace:*",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/debugger": "workspace:*",

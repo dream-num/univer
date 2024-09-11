@@ -16,10 +16,10 @@
 
 import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IInsertCommandParams } from '@univerjs/docs';
-import { DeleteLeftCommand, InsertCommand, MoveCursorOperation, TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService } from '@univerjs/ui';
-import { DocEventManagerService } from '@univerjs/docs-ui';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import { DeleteLeftCommand, DocEventManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 
 import { filter, map, mergeMap } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -39,8 +39,8 @@ export class DocUniFormulaInputController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @ILogService private readonly _logService: ILogService,
         @Inject(UniFormulaPopupService) private readonly _formulaPopupSrv: UniFormulaPopupService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-
+import { connectInjector, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -26,7 +25,8 @@ import {
 } from '@univerjs/sheets';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -351,8 +351,10 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(
             this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
-                const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
-                textSelectionManagerService.focus();
+                const renderManagerService = this._injector.get(IRenderManagerService);
+                const docSelectionRenderService = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+
+                docSelectionRenderService?.focus();
             })
         );
     }

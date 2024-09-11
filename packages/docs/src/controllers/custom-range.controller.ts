@@ -19,14 +19,14 @@ import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleS
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
 import { isSegmentIntersects } from '../basics/selection';
 
 @OnLifecycle(LifecycleStages.Ready, DocCustomRangeController)
 export class DocCustomRangeController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();

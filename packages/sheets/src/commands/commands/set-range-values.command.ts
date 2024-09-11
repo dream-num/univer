@@ -136,6 +136,7 @@ export const SetRangeValuesCommand: ICommand = {
         });
 
         const result = sequenceExecute([...redos], commandService);
+
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

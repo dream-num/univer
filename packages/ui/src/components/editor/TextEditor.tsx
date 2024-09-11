@@ -231,6 +231,12 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
+            const focusEditor = editorService.getFocusEditor();
+
+            if (focusEditor && focusEditor.editorUnitId !== id) {
+                return;
+            }
+
             valueChange(editor);
         });
 
@@ -258,6 +264,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         if (value == null) {
             return;
         }
+
         editorService.setValueNoRefresh(value, id);
     }, [value]);
 

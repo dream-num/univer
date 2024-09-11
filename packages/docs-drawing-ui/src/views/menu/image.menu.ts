@@ -17,7 +17,8 @@
 import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@univerjs/core';
-import { TextSelectionManagerService } from '@univerjs/docs';
+
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { Observable } from 'rxjs';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
@@ -27,12 +28,12 @@ export const IMAGE_MENU_UPLOAD_FLOAT_ID = InsertDocImageCommand.id;
 
 // TODO: @Jocs, remove this when cell support drawing.
 const getDisableWhenSelectionInTableObservable = (accessor: IAccessor) => {
-    const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable<boolean>((subscriber) => {
-        const observable = textSelectionManagerService.textSelection$.subscribe(() => {
-            const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+        const observable = docSelectionManagerService.textSelection$.subscribe(() => {
+            const activeRange = docSelectionManagerService.getActiveTextRange();
 
             if (activeRange) {
                 const { segmentId, startOffset, endOffset } = activeRange;

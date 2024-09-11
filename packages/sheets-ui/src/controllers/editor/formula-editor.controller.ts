@@ -36,11 +36,9 @@ import {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
-    CoverContentCommand,
-    VIEWPORT_KEY as DOC_VIEWPORT_KEY,
+    DocSelectionManagerService,
     DocSkeletonManagerService,
     RichTextEditingMutation,
-    TextSelectionManagerService,
 } from '@univerjs/docs';
 import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
@@ -49,6 +47,7 @@ import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, Wo
 import { takeUntil } from 'rxjs';
 
 import { SetEditorResizeOperation } from '@univerjs/ui';
+import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -66,9 +65,9 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
 

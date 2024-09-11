@@ -105,8 +105,8 @@ export class SheetsSelectionsService extends RxDisposable {
     setSelections(selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     setSelections(unitId: string, worksheetId: string, selectionDatas: ISelectionWithStyle[], type?: SelectionMoveType): void;
     /**
-     * Set seleciton data to WorkbookSelections.
-     * If type is not specfied, this method would clear all existing selections.
+     * Set selection data to WorkbookSelections.
+     * If type is not specified, this method would clear all existing selections.
      * @param unitIdOrSelections
      * @param worksheetIdOrType
      * @param selectionDatas

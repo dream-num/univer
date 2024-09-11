@@ -18,11 +18,12 @@ import type { IThreadComment } from '@univerjs/thread-comment';
 import type { MentionProps } from '@univerjs/design';
 import { Button, Mention, Mentions } from '@univerjs/design';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { ICommandService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { IDocumentBody } from '@univerjs/core';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { KeyCode } from '@univerjs/ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
@@ -62,8 +63,9 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
     const [localComment, setLocalComment] = useState({ ...comment });
     const [editing, setEditing] = useState(false);
     const inputRef = useRef(null);
-    const textSelectionRenderManager = useDependency(ITextSelectionRenderManager);
-    const textSelectionManagerService = useDependency(TextSelectionManagerService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const docSelectionRenderService = renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
     useImperativeHandle(ref, () => ({
         reply(text) {
@@ -104,11 +106,11 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     setLocalComment?.({ ...comment, text: transformTextNodes2Document(parseMentions(e.target.value)) });
                 }}
                 onFocus={() => {
-                    const activeRange = textSelectionManagerService.getActiveTextRangeWithStyle();
+                    const activeRange = docSelectionManagerService.getActiveTextRange();
                     if (activeRange && activeRange.collapsed) {
-                        textSelectionRenderManager.removeAllRanges();
+                        docSelectionRenderService?.removeAllRanges();
                     }
-                    textSelectionRenderManager.blur();
+                    docSelectionRenderService?.blur();
                     setEditing(true);
                 }}
                 onKeyDown={(e) => {

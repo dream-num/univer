@@ -15,7 +15,7 @@
  */
 
 import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
+import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
@@ -30,7 +30,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             return false;
         }
 
-        const { payload, unitId } = params;
+        const { payload } = params;
         const commandService = accessor.get(ICommandService);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(

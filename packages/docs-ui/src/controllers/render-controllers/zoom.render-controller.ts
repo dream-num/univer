@@ -23,11 +23,15 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, neoGetDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService } from '@univerjs/docs';
+
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { neoGetDocObject } from '../../basics/component-tools';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -36,7 +40,7 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(DocPageLayoutService) private readonly _docPageLayoutService: DocPageLayoutService
     ) {

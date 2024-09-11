@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useDependency } from '@univerjs/core';
 
 import { Dropdown, Input } from '@univerjs/design';
-import { MoreDownSingle } from '@univerjs/icons';
-import { useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import styles from './index.module.less';
+import React, { useEffect } from 'react';
 import { DefinedNameOverlay } from './DefinedNameOverlay';
+import styles from './index.module.less';
 
 export function DefinedName({ disable }: { disable: boolean }) {
     const [rangeString, setRangeString] = React.useState('');

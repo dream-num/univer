@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
-import { deleteCustomRangeFactory } from '@univerjs/docs';
+import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 
 export interface IDeleteDocHyperLinkMutationParams {
     unitId: string;

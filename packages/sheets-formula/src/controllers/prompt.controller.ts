@@ -16,16 +16,6 @@
 
 // FIXME: why so many calling to close the editor here?
 
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    ITextRun,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -50,12 +40,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    DocSelectionManagerService,
     DocSkeletonManagerService,
-    MoveCursorOperation,
-    ReplaceContentCommand,
-    TextSelectionManagerService,
 } from '@univerjs/docs';
-import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import { DocSelectionRenderService, MoveCursorOperation, ReplaceContentCommand } from '@univerjs/docs-ui';
 import {
     compareToken,
     deserializeRangeWithSheet,
@@ -72,11 +60,7 @@ import {
 import {
     DeviceInputEventType,
     IRenderManagerService,
-    ITextSelectionRenderManager,
 } from '@univerjs/engine-render';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
 
@@ -86,7 +70,6 @@ import {
     setEndForRange,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
     getEditorObject,
@@ -95,20 +78,35 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import type { Editor } from '@univerjs/ui';
-import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-
+import { IContextMenuService, IEditorService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
-import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+
+import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { Editor } from '@univerjs/ui';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
+import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IDescriptionService } from '../services/description.service';
 import { IFormulaPromptService } from '../services/prompt.service';
-import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 
 interface IRefSelection {
     refIndex: number;
@@ -135,6 +133,7 @@ const sheetEditorUnitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDI
 
 @OnLifecycle(LifecycleStages.Steady, PromptController)
 export class PromptController extends Disposable {
+    private _listenInputCache: Set<string> = new Set();
     private _formulaRefColors: string[] = [];
 
     private _previousSequenceNodes: Nullable<Array<string | ISequenceNode>>;
@@ -181,7 +180,6 @@ export class PromptController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
@@ -191,9 +189,10 @@ export class PromptController extends Disposable {
         @IRefSelectionsService private readonly _refSelectionsService: SheetsSelectionsService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @ILayoutService private readonly _layoutService: ILayoutService
     ) {
         super();
 
@@ -256,7 +255,7 @@ export class PromptController extends Disposable {
 
     private _initialCursorSync() {
         this.disposeWithMe(
-            this._textSelectionManagerService.textSelection$.subscribe((params) => {
+            this._docSelectionManagerService.textSelection$.subscribe((params) => {
                 if (params?.unitId == null) {
                     return;
                 }
@@ -299,32 +298,56 @@ export class PromptController extends Disposable {
 
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
+        // TODO: @runzhe Should there be a registration mechanism, rather than a unified process here?
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
+            const unitId = documentDataModel?.getUnitId();
 
-        this.disposeWithMe(
-            this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
-                this._previousSequenceNodes = null;
-                this._previousInsertRefStringIndex = null;
+            if (unitId == null) {
+                return;
+            }
 
-                this._selectionRenderService.setSkipLastEnabled(true);
+            if (this._listenInputCache.has(unitId)) {
+                return;
+            }
 
-                const event = param?.event as KeyboardEvent;
-                if (!event) return;
+            const editor = this._editorService.getEditor(unitId);
 
-                if (!arrows.includes(event.which)) {
-                    if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
-                        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
-                    }
+            if (editor == null) {
+                return;
+            }
 
-                    this._inputPanelState = InputPanelState.keyNormal;
-                } else {
-                    this._inputPanelState = InputPanelState.keyArrow;
-                }
+            const docSelectionRenderService = this._renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
 
-                if (event.which !== KeyCode.F4) {
-                    this._userCursorMove = false;
-                }
-            })
-        );
+            if (docSelectionRenderService) {
+                this.disposeWithMe(
+                    docSelectionRenderService.onInputBefore$.subscribe((param) => {
+                        this._previousSequenceNodes = null;
+                        this._previousInsertRefStringIndex = null;
+
+                        this._selectionRenderService.setSkipLastEnabled(true);
+
+                        const event = param?.event as KeyboardEvent;
+                        if (!event) return;
+
+                        if (!arrows.includes(event.which)) {
+                            if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                                this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
+                            }
+
+                            this._inputPanelState = InputPanelState.keyNormal;
+                        } else {
+                            this._inputPanelState = InputPanelState.keyArrow;
+                        }
+
+                        if (event.which !== KeyCode.F4) {
+                            this._userCursorMove = false;
+                        }
+                    })
+                );
+            }
+
+            this._listenInputCache.add(unitId);
+        });
     }
 
     private _closeRangePromptWhenEditorInvisible() {
@@ -510,7 +533,7 @@ export class PromptController extends Disposable {
     private _initAcceptFormula() {
         this.disposeWithMe(
             this._formulaPromptService.acceptFormulaName$.subscribe((formulaString: string) => {
-                const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+                const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
                 if (activeRange == null) {
                     this._hideFunctionPanel();
@@ -576,7 +599,7 @@ export class PromptController extends Disposable {
     }
 
     private _changeFunctionPanelState() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             this._hideFunctionPanel();
@@ -675,7 +698,7 @@ export class PromptController extends Disposable {
      * @returns Return the character under the current cursor in the editor.
      */
     private _getCurrentChar() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             return;
@@ -804,7 +827,7 @@ export class PromptController extends Disposable {
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-            const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+            const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
             if (activeRange == null) {
                 return;
@@ -1206,7 +1229,7 @@ export class PromptController extends Disposable {
         // Get theme color from prompt formula editor when creating a new selection.
         this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
 
-        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
         if (activeRange == null) {
             return;
         }
@@ -1257,7 +1280,7 @@ export class PromptController extends Disposable {
                 options: { fromSelection },
             });
             // The ReplaceContentCommand has canceled the selection operation, so it needs to be triggered externally once.
-            this._textSelectionManagerService.replaceTextRanges([
+            this._docSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: textSelectionOffset + 1 - offset,
                     endOffset: textSelectionOffset + 1 - offset,
@@ -1266,7 +1289,7 @@ export class PromptController extends Disposable {
             ], true, { fromSelection });
         } else {
             this._updateEditorModel(`${formulaString}\r\n`, textRuns);
-            this._textSelectionManagerService.replaceTextRanges([
+            this._docSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: textSelectionOffset + 1 - offset,
                     endOffset: textSelectionOffset + 1 - offset,
@@ -1278,9 +1301,7 @@ export class PromptController extends Disposable {
         /**
          * After selecting the formula, allow the editor to continue entering content.
          */
-        setTimeout(() => {
-            this._textSelectionRenderManager.focus();
-        }, 0);
+        this._layoutService.focus();
     }
 
     private _fitEditorSize() {
@@ -1831,7 +1852,7 @@ export class PromptController extends Disposable {
      * Absolute range, triggered by F4
      */
     private _changeRefString() {
-        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
 
         if (activeRange == null) {
             return;

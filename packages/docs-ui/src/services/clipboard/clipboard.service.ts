@@ -15,12 +15,15 @@
  */
 
 import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import { copyCustomRange, CutContentCommand, getCursorWhenDelete, getDeleteSelection, InnerPasteCommand, TextSelectionManagerService } from '@univerjs/docs';
-import type { RectRange, TextRange } from '@univerjs/engine-render';
-import { DOC_RANGE_TYPE } from '@univerjs/engine-render';
+import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { getCursorWhenDelete } from '../../commands/commands/delete.command';
+import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
+import { getDeleteSelection } from '../../basics/selection';
+import { copyCustomRange } from '../../basics/custom-range';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
@@ -93,7 +96,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
     ) {
         super();
     }
@@ -106,7 +109,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         try {
-            const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+            const activeRange = this._docSelectionManagerService.getActiveTextRange();
             const isCopyInHeaderFooter = !!activeRange?.segmentId;
 
             this._setClipboardData(bodyList, snapshot, !isCopyInHeaderFooter && needCache);
@@ -149,9 +152,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             segmentId,
             endOffset: activeEndOffset,
             style,
-        } = this._textSelectionManagerService.getActiveTextRangeWithStyle() ?? {};
-        const textRanges = this._textSelectionManagerService.getCurrentTextRanges() ?? [];
-        const rectRanges = this._textSelectionManagerService.getCurrentRectRanges() ?? [];
+        } = this._docSelectionManagerService.getActiveTextRange() ?? {};
+        const textRanges = this._docSelectionManagerService.getCurrentTextRanges() ?? [];
+        const rectRanges = this._docSelectionManagerService.getCurrentRectRanges() ?? [];
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
@@ -168,7 +171,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             let cursor = 0;
 
             if (rectRanges.length > 0) {
-                cursor = getCursorWhenDelete(textRanges as Readonly<TextRange[]>, rectRanges);
+                cursor = getCursorWhenDelete(textRanges as Readonly<ITextRangeWithStyle[]>, rectRanges);
             } else if (activeEndOffset != null) {
                 cursor = activeEndOffset;
                 for (const range of textRanges) {
@@ -223,9 +226,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         // copy custom ranges
         body.customRanges = body.customRanges?.map(copyCustomRange);
 
-        const activeRange = this._textSelectionManagerService.getActiveTextRangeWithStyle();
+        const activeRange = this._docSelectionManagerService.getActiveTextRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
-        const ranges = this._textSelectionManagerService.getCurrentTextRanges();
+        const ranges = this._docSelectionManagerService.getCurrentTextRanges();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId does not exist!');
@@ -330,7 +333,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         snapshot: IDocumentData;
     }> {
         const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        const allRanges = this._textSelectionManagerService.getDocRanges();
+        const allRanges = this._docSelectionManagerService.getDocRanges();
 
         const results: IDocumentBody[] = [];
         let needCache = true;
@@ -359,7 +362,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             if (rangeType === DOC_RANGE_TYPE.RECT) {
                 needCache = false;
 
-                const { spanEntireRow } = range as unknown as RectRange;
+                const { spanEntireRow } = range as IRectRangeWithStyle;
                 let bodySlice: IDocumentBody;
                 if (!spanEntireRow) {
                     bodySlice = getTableSlice(body, startOffset, endOffset);

@@ -19,7 +19,7 @@ import { UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem, IShortcutItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
 import { debounceTime, Observable } from 'rxjs';
-import { TextSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { whenDocAndEditorFocused } from '@univerjs/docs-ui';
 import { shouldDisableAddLink, ShowDocHyperLinkEditPopupOperation } from '../commands/operations/popup.operation';
 
@@ -34,7 +34,7 @@ export function AddHyperLinkMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         tooltip: 'docLink.menu.tooltip',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         disabled$: new Observable(function (subscribe) {
-            const textSelectionService = accessor.get(TextSelectionManagerService);
+            const textSelectionService = accessor.get(DocSelectionManagerService);
             const observer = textSelectionService.textSelection$.pipe(debounceTime(16)).subscribe(() => {
                 subscribe.next(shouldDisableAddLink(accessor));
             });

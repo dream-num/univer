@@ -17,11 +17,12 @@
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import { FOCUSING_DOC, ICommandService, IConfigService, IContextService, Inject, RxDisposable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
+import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 
 export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(

@@ -705,6 +705,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 editor.setValueLegality(false);
                 return false;
             }
+
             editor.setValueLegality(isReferenceStrings(value));
         }
 

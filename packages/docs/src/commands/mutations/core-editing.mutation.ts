@@ -17,11 +17,10 @@
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
 import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import { serializeDocRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
-import type { IDocStateChangeParams } from '../../services/doc-state-change-manager.service';
-import { DocStateChangeManagerService } from '../../services/doc-state-change-manager.service';
-import { IMEInputManagerService } from '../../services/ime-input-manager.service';
+import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
+import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
+import { DocStateEmitService } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
@@ -48,7 +47,6 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
     type: CommandType.MUTATION,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const {
             unitId,
@@ -64,6 +62,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
+        const docStateEmitService = accessor.get(DocStateEmitService);
 
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const documentViewModel = renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService).getViewModel();
@@ -71,14 +70,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
         }
 
-        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const docRanges = textSelectionManagerService.getDocRanges() ?? [];
-
-        const serializedSelections = docRanges.map(serializeDocRange);
-
-        const docStateChangeManagerService = accessor.get(DocStateChangeManagerService);
-
-        const imeInputManagerService = accessor.get(IMEInputManagerService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+        const docRanges = docSelectionManagerService.getDocRanges() ?? [];
 
         // TODO: `disabled` is only used for read only demo, and will be removed in the future.
         const disabled = !!documentDataModel.getSnapshot().disabled;
@@ -89,7 +82,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             return {
                 unitId,
                 actions: [],
-                textRanges: serializedSelections,
+                textRanges: docRanges,
             };
         }
 
@@ -102,12 +95,12 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                textSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
+                docSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
             });
         }
 
         // Step 4: Emit state change event.
-        const changeState: IDocStateChangeParams = {
+        const changeState: IDocStateChangeInfo = {
             commandId: RichTextEditingMutationId,
             unitId,
             segmentId,
@@ -120,30 +113,16 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             },
             undoState: {
                 actions: undoActions,
-                textRanges: prevTextRanges ?? serializedSelections,
+                textRanges: prevTextRanges ?? docRanges,
             },
+            isCompositionEnd,
         };
-
-        // Handle IME input.
-        if (isCompositionEnd) {
-            const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
-
-            if (historyParams == null) {
-                throw new Error('historyParams is null in RichTextEditingMutation');
-            }
-
-            const { undoMutationParams, redoMutationParams, previousActiveRange } = historyParams;
-            changeState.redoState.actions = redoMutationParams.actions;
-            changeState.undoState.actions = undoMutationParams.actions;
-            changeState.undoState.textRanges = [previousActiveRange];
-        }
-
-        docStateChangeManagerService.setChangeState(changeState);
+        docStateEmitService.emitStateChangeInfo(changeState);
 
         return {
             unitId,
             actions: undoActions,
-            textRanges: serializedSelections,
+            textRanges: docRanges,
         };
     },
 };

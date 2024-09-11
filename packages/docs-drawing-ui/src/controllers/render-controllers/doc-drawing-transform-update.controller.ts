@@ -27,12 +27,13 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import type { Documents, DocumentSkeleton, IDocumentSkeletonHeaderFooter, IDocumentSkeletonPage, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { debounceTime, filter } from 'rxjs';
+import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 interface IDrawingParamsWithBehindText {

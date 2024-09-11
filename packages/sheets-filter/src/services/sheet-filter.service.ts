@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType, Disposable,
     fromCallback,
@@ -24,14 +23,15 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
+import type { Nullable, Workbook } from '@univerjs/core';
 
-import { FilterModel } from '../models/filter-model';
 import {
     ReCalcSheetsFilterMutation,
     RemoveSheetsFilterMutation,
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
 } from '../commands/mutations/sheets-filter.mutation';
+import { FilterModel } from '../models/filter-model';
 import type { IAutoFilter } from '../models/types';
 
 export const FILTER_MUTATIONS = new Set([
@@ -131,6 +131,7 @@ export class SheetsFilterService extends Disposable {
                 return;
             }
         } catch (err) {
+            console.error('[SheetsFilterService]: could not get active workbook!', err);
             return;
         }
 
@@ -145,8 +146,6 @@ export class SheetsFilterService extends Disposable {
         const subUnitId = activeSheet.getSheetId();
         const filterModel = this.getFilterModel(unitId, subUnitId);
         this._activeFilterModel$.next(filterModel);
-
-        workbook.getActiveSheet().clearFilteredRowCacheMap();
     }
 
     private _initActiveFilterModel(): void {

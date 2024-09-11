@@ -38,7 +38,6 @@ export class Worksheet {
     protected _columnManager: ColumnManager;
 
     protected readonly _viewModel: SheetViewModel;
-    private _filteredRowCacheMap: Map<number, boolean> = new Map();
 
     constructor(
         public readonly unitId: string,
@@ -466,17 +465,10 @@ export class Worksheet {
     /**
      * Row is filtered out, that means this row is invisible.
      * @param row
-     * @returns {boolean}
+     * @returns {boolean} is row hidden by filter
      */
     isRowFiltered(row: number): boolean {
-        if (!this._filteredRowCacheMap.has(row)) {
-            this._filteredRowCacheMap.set(row, this._viewModel.getRowFiltered(row));
-        }
-        return !!this._filteredRowCacheMap.get(row);
-    }
-
-    clearFilteredRowCacheMap() {
-        this._filteredRowCacheMap.clear();
+        return this._viewModel.getRowFiltered(row);
     }
 
     /**

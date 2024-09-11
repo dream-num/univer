@@ -176,16 +176,16 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
         abstract: 'formula.functionList.CHITEST.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.CHITEST.functionParameter.number1.name',
-                detail: 'formula.functionList.CHITEST.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CHITEST.functionParameter.actualRange.name',
+                detail: 'formula.functionList.CHITEST.functionParameter.actualRange.detail',
+                example: '{58,35;11,25;10,23}',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.CHITEST.functionParameter.number2.name',
-                detail: 'formula.functionList.CHITEST.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CHITEST.functionParameter.expectedRange.name',
+                detail: 'formula.functionList.CHITEST.functionParameter.expectedRange.detail',
+                example: '{45.35,47.65;17.56,18.44;16.09,16.91}',
                 require: 1,
                 repeat: 0,
             },

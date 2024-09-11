@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IFunctionInfo } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_STATISTICAL, FunctionType } from '@univerjs/engine-formula';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 
 export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
     {
@@ -418,16 +418,16 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.CHISQ_TEST.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.CHISQ_TEST.functionParameter.number1.name',
-                detail: 'formula.functionList.CHISQ_TEST.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CHISQ_TEST.functionParameter.actualRange.name',
+                detail: 'formula.functionList.CHISQ_TEST.functionParameter.actualRange.detail',
+                example: '{58,35;11,25;10,23}',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.CHISQ_TEST.functionParameter.number2.name',
-                detail: 'formula.functionList.CHISQ_TEST.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.CHISQ_TEST.functionParameter.expectedRange.name',
+                detail: 'formula.functionList.CHISQ_TEST.functionParameter.expectedRange.detail',
+                example: '{45.35,47.65;17.56,18.44;16.09,16.91}',
                 require: 1,
                 repeat: 0,
             },

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Avedev } from './avedev';
 import { Average } from './average';
 import { Averagea } from './averagea';
@@ -26,11 +25,13 @@ import { ChisqDist } from './chisq-dist';
 import { ChisqDistRt } from './chisq-dist-rt';
 import { ChisqInv } from './chisq-inv';
 import { ChisqInvRt } from './chisq-inv-rt';
+import { ChisqTest } from './chisq-test';
 import { Count } from './count';
 import { Counta } from './counta';
 import { Countblank } from './countblank';
 import { Countif } from './countif';
 import { Countifs } from './countifs';
+import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
@@ -60,6 +61,7 @@ export const functionStatistical = [
     [ChisqDistRt, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT],
     [ChisqInv, FUNCTION_NAMES_STATISTICAL.CHISQ_INV],
     [ChisqInvRt, FUNCTION_NAMES_STATISTICAL.CHISQ_INV_RT],
+    [ChisqTest, FUNCTION_NAMES_STATISTICAL.CHISQ_TEST],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
     [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],

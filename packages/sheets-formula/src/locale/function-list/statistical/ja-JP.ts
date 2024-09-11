@@ -233,8 +233,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '実測値範囲', detail: '期待値に対する検定の実測値が入力されているデータ範囲を指定します。' },
+            expectedRange: { name: '期待値範囲', detail: '期待値が入力されているデータ範囲を指定します。実測値と期待値では、行方向の値の合計と列方向の値の合計がそれぞれ等しくなっている必要があります。' },
         },
     },
     CONFIDENCE_NORM: {

@@ -101,8 +101,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: 'actual_range', detail: 'The range of data that contains observations to test against expected values.' },
+            expectedRange: { name: 'expected_range', detail: 'The range of data that contains the ratio of the product of row totals and column totals to the grand total.' },
         },
     },
     CONFIDENCE: {

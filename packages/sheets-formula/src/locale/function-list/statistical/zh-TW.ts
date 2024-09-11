@@ -245,8 +245,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '觀察範圍', detail: '這是觀察值範圍，用來檢定預期值。' },
+            expectedRange: { name: '預期範圍', detail: '這是資料範圍，其內容為各欄總和乘各列總和後的值，再除以全部值總和的比率。' },
         },
     },
     CONFIDENCE_NORM: {

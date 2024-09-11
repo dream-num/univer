@@ -101,8 +101,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '观察范围', detail: '包含观察值的数据区域，用于检验预期值。' },
+            expectedRange: { name: '预期范围', detail: '包含行列汇总的乘积与总计值之比率的数据区域。' },
         },
     },
     CONFIDENCE: {

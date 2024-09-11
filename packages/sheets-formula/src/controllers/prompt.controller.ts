@@ -298,7 +298,7 @@ export class PromptController extends Disposable {
 
     private _initialEditorInputChange() {
         const arrows = [KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.CTRL, KeyCode.SHIFT];
-
+        // TODO: @runzhe Should there be a registration mechanism, rather than a unified process here?
         this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
             const unitId = documentDataModel?.getUnitId();
 

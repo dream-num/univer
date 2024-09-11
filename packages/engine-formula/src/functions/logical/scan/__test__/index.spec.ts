@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-import type { Injector } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { Injector } from '@univerjs/core';
 
+import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
-import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
-import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { IFunctionService } from '../../../../services/function.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Lambda } from '../../lambda';
 import { Scan } from '../index';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 
 describe('Test scan', () => {
     // const testFunction = new Scan(FUNCTION_NAMES_LOGICAL.SCAN);
@@ -63,7 +61,7 @@ describe('Test scan', () => {
             let lexerNode = lexer.treeBuilder('=SCAN(1,{1;2;3},LAMBDA(x,y,x*y))');
             let astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             let result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1],
                 [2],
                 [6],
@@ -72,22 +70,31 @@ describe('Test scan', () => {
             lexerNode = lexer.treeBuilder('=SCAN(1,1,LAMBDA(x,y,x*y))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
+            expect(getObjectValue(result)).toStrictEqual(1);
 
             lexerNode = lexer.treeBuilder('=SCAN(1,{1;2;3},LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            lexerNode = lexer.treeBuilder('=SCAN("test",{1;2;3},LAMBDA(x,y,x*y))');
+            astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+            result = await interpreter.executeAsync(astNode as BaseAstNode);
+            expect(getObjectValue(result)).toStrictEqual([
+                [ErrorType.VALUE],
+                [ErrorType.VALUE],
+                [ErrorType.VALUE],
+            ]);
 
             lexerNode = lexer.treeBuilder('=SCAN({1,a,#NAME?;4,5,6},1,LAMBDA(x,y,x*y))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.CALC);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.CALC);
 
             lexerNode = lexer.treeBuilder('=SCAN(1,{1,2,#NAME?;4,5,6},LAMBDA(x,y,x*y))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 2, ErrorType.NAME],
                 [ErrorType.NAME, ErrorType.NAME, ErrorType.NAME],
             ]);
@@ -97,22 +104,22 @@ describe('Test scan', () => {
             let lexerNode = lexer.treeBuilder('=SCAN(#NAME?,1,LAMBDA(x,x*2))');
             let astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             let result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             lexerNode = lexer.treeBuilder('=SCAN({1;2;3},#NAME?,LAMBDA(x,x*2))');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             lexerNode = lexer.treeBuilder('=SCAN(1,1,#NAME?)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
 
             lexerNode = lexer.treeBuilder('=SCAN({1},1,1)');
             astNode = astTreeBuilder.parse(lexerNode as LexerNode);
             result = await interpreter.executeAsync(astNode as BaseAstNode);
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

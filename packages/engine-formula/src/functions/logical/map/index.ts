@@ -18,8 +18,9 @@ import type { Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
 export class Map extends BaseFunction {
     override minParams = 2;
@@ -109,13 +110,17 @@ export class Map extends BaseFunction {
                     continue;
                 }
 
-                let value = (lambda as LambdaValueObjectObject).execute(...lambdaVariant);
+                let value = (lambda as LambdaValueObjectObject).execute(...lambdaVariant) as BaseValueObject;
 
                 if (value.isArray()) {
                     value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
                 }
 
-                row.push(value as BaseValueObject);
+                if (value.isNull()) {
+                    value = NumberValueObject.create(0);
+                }
+
+                row.push(value);
             }
 
             resultArray.push(row);

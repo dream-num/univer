@@ -15,11 +15,11 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
-import { BaseFunction } from '../../base-function';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
 export class Reduce extends BaseFunction {
     override minParams = 3;
@@ -47,7 +47,7 @@ export class Reduce extends BaseFunction {
             return lambda;
         }
 
-        if (!(lambda.isValueObject() && (lambda as LambdaValueObjectObject).isLambda())) {
+        if (!(lambda.isValueObject() && (lambda as LambdaValueObjectObject).isLambda() && (lambda as LambdaValueObjectObject).getLambdaPrivacyVarKeys().length === 2)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -74,6 +74,10 @@ export class Reduce extends BaseFunction {
 
                 if (value.isError()) {
                     return value;
+                }
+
+                if (value.isNull()) {
+                    value = NumberValueObject.create(0);
                 }
 
                 accumulator = value;

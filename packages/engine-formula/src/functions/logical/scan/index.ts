@@ -17,8 +17,9 @@
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
 export class Scan extends BaseFunction {
     override minParams = 3;
@@ -38,7 +39,7 @@ export class Scan extends BaseFunction {
             return lambda;
         }
 
-        if (!(lambda.isValueObject() && (lambda as LambdaValueObjectObject).isLambda())) {
+        if (!(lambda.isValueObject() && (lambda as LambdaValueObjectObject).isLambda() && (lambda as LambdaValueObjectObject).getLambdaPrivacyVarKeys().length === 2)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -88,8 +89,8 @@ export class Scan extends BaseFunction {
                     value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
                 }
 
-                if (value.isError()) {
-                    return value;
+                if (value.isNull()) {
+                    value = NumberValueObject.create(0);
                 }
 
                 accumulator = value;

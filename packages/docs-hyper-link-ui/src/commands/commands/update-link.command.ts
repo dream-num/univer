@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;

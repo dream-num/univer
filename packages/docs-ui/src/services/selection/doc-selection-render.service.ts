@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, RxDisposable } from '@univerjs/core';
-import type { Subscription } from 'rxjs';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
-import { ILayoutService } from '@univerjs/ui';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import type { RectRange } from './rect-range';
+import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
+import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle, Viewport } from '@univerjs/engine-render';
+import type { Subscription } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
+import type { RectRange } from './rect-range';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -480,7 +480,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
-                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId);
+                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
 
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
@@ -765,7 +765,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-        const lastRange = new TextRange(scene, mainComponent as Documents, skeleton, position, undefined, this._selectionStyle, this._currentSegmentId);
+        const lastRange = new TextRange(scene, mainComponent as Documents, skeleton, position, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
 
         this._addTextRange(lastRange);
     }

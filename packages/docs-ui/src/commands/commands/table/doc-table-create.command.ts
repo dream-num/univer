@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { generateParagraphs } from '../break-line.command';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
+import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';

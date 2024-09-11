@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph } from '@univerjs/core';
 import { BooleanNumber, BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import type { ICommand, IParagraph } from '@univerjs/core';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {

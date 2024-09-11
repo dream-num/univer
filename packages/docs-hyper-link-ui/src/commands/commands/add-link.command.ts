@@ -30,7 +30,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             return false;
         }
 
-        const { payload, unitId } = params;
+        const { payload } = params;
         const commandService = accessor.get(ICommandService);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(

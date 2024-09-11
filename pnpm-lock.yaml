@@ -2279,6 +2279,9 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/docs-hyper-link':
+        specifier: workspace:*
+        version: link:../docs-hyper-link
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui

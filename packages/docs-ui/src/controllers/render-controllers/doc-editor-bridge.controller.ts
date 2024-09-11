@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
 import { fromEvent } from 'rxjs';
+import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { CoverContentCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -159,6 +159,10 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialSetValue() {
         this.disposeWithMe(
             this._editorService.setValue$.subscribe((param) => {
+                if (param.editorUnitId !== this._context.unitId) {
+                    return;
+                }
+
                 this._commandService.executeCommand(CoverContentCommand.id, {
                     unitId: param.editorUnitId,
                     body: param.body,
@@ -197,6 +201,10 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialFocus() {
         this.disposeWithMe(
             this._editorService.focus$.subscribe((textRange) => {
+                if (this._editorService.getFocusEditor()?.editorUnitId !== this._context.unitId) {
+                    return;
+                }
+
                 this._docSelectionRenderService.removeAllRanges();
                 this._docSelectionRenderService.addDocRanges([textRange]);
             })

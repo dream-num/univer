@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Dependency, ICommand } from '@univerjs/core';
 import {
     ICommandService,
     IConfigService,
@@ -23,16 +22,17 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { Dependency, ICommand } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { DocSelectionManagerService } from './services/doc-selection-manager.service';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocCustomRangeController } from './controllers/custom-range.controller';
+import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
 import type { IUniverDocsConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
-const PLUGIN_NAME = 'DOC_PLUGIN';
+const PLUGIN_NAME = 'DOCS_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;

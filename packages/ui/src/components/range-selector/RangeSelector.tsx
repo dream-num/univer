@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
-import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import React, { useEffect, useRef, useState } from 'react';
-
 import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import { TextEditor } from '../editor/TextEditor';
+
+import React, { useEffect, useRef, useState } from 'react';
+import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
+import { TextEditor } from '../editor/TextEditor';
 import { useEvent } from '../hooks/event';
 import styles from './index.module.less';
 
@@ -259,6 +259,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
 
         editorService.setValue(result, id);
+
+        handleTextValueChange(result);
 
         handleCloseModal();
     }

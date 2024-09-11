@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { BuildTextUtils, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 import { DocSelectionManagerService } from '../services/doc-selection-manager.service';
+import type { ISetTextSelectionsOperationParams } from '../commands/operations/text-selection.operation';
 
 @OnLifecycle(LifecycleStages.Ready, DocCustomRangeController)
 export class DocCustomRangeController extends Disposable {

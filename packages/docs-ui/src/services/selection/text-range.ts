@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ITextRange, Nullable } from '@univerjs/core';
 import { BooleanNumber, COLORS, DOC_RANGE_TYPE, RANGE_DIRECTION, Tools } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene, ThinScene } from '@univerjs/engine-render';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, Rect, RegularPolygon } from '@univerjs/engine-render';
+import type { ITextRange, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IDocumentSkeletonGlyph, INodePosition, IPoint, ISuccinctDocRangeParam, ITextSelectionStyle, Scene, ThinScene } from '@univerjs/engine-render';
 import {
     compareNodePosition,
     compareNodePositionLogic,
@@ -48,7 +48,7 @@ export function cursorConvertToTextRange(
         ? docSkeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage)
         : null;
     const textRange = new TextRange(
-        scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId
+        scene, document, docSkeleton, anchorNodePosition, focusNodePosition, style, segmentId, segmentPage
     );
 
     return textRange;
@@ -112,7 +112,8 @@ export class TextRange implements IDocRange {
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
         public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE,
-        private _segmentId: string = ''
+        private _segmentId: string = '',
+        private _segmentPage: number = -1
     ) {
         this._anchorBlink();
 
@@ -225,6 +226,10 @@ export class TextRange implements IDocRange {
 
     get segmentId() {
         return this._segmentId;
+    }
+
+    get segmentPage() {
+        return this._segmentPage;
     }
 
     getAbsolutePosition() {

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import {
     BuildTextUtils,
     CommandType,
@@ -24,9 +23,10 @@ import {
     TextX,
     TextXActionType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
+import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 /**

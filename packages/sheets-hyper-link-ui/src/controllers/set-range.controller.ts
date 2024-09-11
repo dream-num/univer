@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
 import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, TextX, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { IMutationInfo } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 
 @OnLifecycle(LifecycleStages.Starting, SheetHyperLinkSetRangeController)
 export class SheetHyperLinkSetRangeController extends Disposable {

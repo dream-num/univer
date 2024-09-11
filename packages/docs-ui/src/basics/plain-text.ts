@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData } from '@univerjs/core';
 
 export const getPlainText = (text: string) => {
     return text.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')

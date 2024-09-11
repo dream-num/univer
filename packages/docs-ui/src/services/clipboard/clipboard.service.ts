@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
 import { BuildTextUtils, createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
+import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { getCursorWhenDelete } from '../../commands/commands/delete.command';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
+import { getCursorWhenDelete } from '../../commands/commands/delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
-import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
 import PastePluginUniver from './html-to-udm/paste-plugins/plugin-univer';
+import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
 import { UDMToHtmlService } from './udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);

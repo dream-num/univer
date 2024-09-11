@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, Nullable, TextX } from '@univerjs/core';
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, Nullable, TextX } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../commands/util';
 
 interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
@@ -129,7 +129,6 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
             actions: [],
             textRanges: undefined,
             segmentId,
-
         },
     };
 

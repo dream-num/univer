@@ -34,13 +34,12 @@ import {
     LocaleService,
     ObjectMatrix,
     OnLifecycle,
-    RxDisposable,
-    Tools,
-    UniverInstanceType,
+    RxDisposable, UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     InsertColMutation,
     InsertRowMutation,

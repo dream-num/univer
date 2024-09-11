@@ -35,6 +35,10 @@ export interface IDocRange {
     get startNodePosition(): Nullable<INodePosition>;
     get endNodePosition(): Nullable<INodePosition>;
     get direction(): RANGE_DIRECTION;
+    // Get the segmentId of the range.
+    get segmentId(): string;
+    // Get the page number of the range when in header or footer.
+    get segmentPage(): number;
     // Whether the range is active.
     isActive(): boolean;
 

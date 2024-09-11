@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
+import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
+import { InsertCommand } from '../../commands/commands/core-editing.command';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
     private _onInputSubscription: Nullable<Subscription>;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -54,12 +53,7 @@ export class DocInputController extends Disposable implements IRenderModule {
                 return;
             }
 
-            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-            if (!documentModel) {
-                return;
-            }
-
-            const unitId = documentModel.getUnitId();
+            const unitId = this._context.unitId;
 
             const { event, content = '', activeRange } = config;
 

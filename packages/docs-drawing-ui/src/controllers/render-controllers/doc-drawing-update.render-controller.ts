@@ -52,8 +52,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     ) {
         super();
 
-        // this._updateDrawingListener();
-        // this._initCommandListeners();
         this._updateOrderListener();
         this._groupDrawingListener();
         this._focusDrawingListener();

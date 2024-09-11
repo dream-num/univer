@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import { BuildTextUtils, IUniverInstanceService, JSONX } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRichTextEditPath } from '../commands/util';
 
 export interface IReplaceSelectionFactoryParams {

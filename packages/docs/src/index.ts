@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
+// #region - all commands
+export {
+    type IRichTextEditingMutationParams,
+    RichTextEditingMutation,
+} from './commands/mutations/core-editing.mutation';
+
+export {
+    type ISetTextSelectionsOperationParams,
+    SetTextSelectionsOperation,
+} from './commands/operations/text-selection.operation';
+export type { IUniverDocsConfig } from './controllers/config.schema';
 export { UniverDocsPlugin } from './doc-plugin';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
-export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';
-export type { IDocStateChangeParams, IDocStateChangeInfo } from './services/doc-state-emit.service';
-export { DocStateEmitService } from './services/doc-state-emit.service';
-export type { IUniverDocsConfig } from './controllers/config.schema';
+export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 
-// #region - all commands
-export {
-    RichTextEditingMutation,
-    type IRichTextEditingMutationParams,
-} from './commands/mutations/core-editing.mutation';
-export {
-    SetTextSelectionsOperation,
-    type ISetTextSelectionsOperationParams,
-} from './commands/operations/text-selection.operation';
+export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
+export { DocStateEmitService } from './services/doc-state-emit.service';
 // #endregion

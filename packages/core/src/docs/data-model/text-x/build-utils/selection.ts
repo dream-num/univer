@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType } from '@univerjs/core';
-import { isSegmentIntersects } from '@univerjs/docs';
-import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
-import { DeleteDirection } from '../../../docs-ui/src/types/delete-direction';
-import { isCustomRangeSplitSymbol } from './custom-range';
+import { DeleteDirection } from '../../../../types/enum';
+import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
+import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import type { Nullable } from '../../../../shared';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { IDocumentBody } from '../../../../types/interfaces';
+import type { IDeleteAction, IRetainAction } from '../action-types';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {

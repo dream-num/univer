@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeTokenType } from '../docs';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';

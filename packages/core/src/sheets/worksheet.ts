@@ -73,6 +73,15 @@ export class Worksheet {
         return this._snapshot;
     }
 
+    /**
+     * Set the merge data of the sheet, all the merged cells will be rebuilt.
+     * @param mergeData
+     */
+    setMergeData(mergeData: IRange[]): void {
+        this._snapshot.mergeData = mergeData;
+        this.getSpanModel().rebuild(mergeData);
+    }
+
     getSpanModel(): SpanModel {
         return this._spanModel;
     }
@@ -249,6 +258,24 @@ export class Worksheet {
      */
     getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange[] {
         return this._spanModel.getMergedCellRange(startRow, startColumn, endRow, endColumn);
+    }
+
+    /**
+     * Get if the row contains merged cell
+     * @param {number} row The row index
+     * @returns {boolean} Is merge cell across row
+     */
+    isRowContainsMergedCell(row: number): boolean {
+        return this._spanModel.isRowContainsMergedCell(row);
+    }
+
+    /**
+     * Get if the column contains merged cell
+     * @param {number} column The column index
+     * @returns {boolean} Is merge cell across column
+     */
+    isColumnContainsMergedCell(column: number): boolean {
+        return this._spanModel.isColumnContainsMergedCell(column);
     }
 
     /**

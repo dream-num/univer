@@ -17,12 +17,16 @@
 import type { Worksheet } from '@univerjs/core';
 
 /**
+ * @deprecated Use worksheet.isRowContainsMergedCell
  * @param row after this row
  */
 export function rowAcrossMergedCell(row: number, worksheet: Worksheet): boolean {
     return worksheet.getMergeData().some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
 }
 
+/**
+ * @deprecated Use worksheet.isColumnContainsMergedCell
+ */
 export function columnAcrossMergedCell(col: number, worksheet: Worksheet): boolean {
     return worksheet.getMergeData().some((mergedCell) => mergedCell.startColumn < col && col <= mergedCell.endColumn);
 }

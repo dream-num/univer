@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 import type {
     IRange,
     ISelection,
@@ -22,7 +23,6 @@ import type {
     Nullable,
     ThemeService,
 } from '@univerjs/core';
-import { ColorKit, getCellInfoInMergeData, makeCellRangeToRangeData } from '@univerjs/core';
 
 export const SELECTION_CONTROL_BORDER_BUFFER_WIDTH = 1.5; // The draggable range of the selection is too thin, making it easy for users to miss. Therefore, a buffer gap is provided to make it easier for users to select.
 
@@ -233,6 +233,7 @@ export function convertPrimaryWithCoordToPrimary(primaryWithCoord: ISelectionCel
 }
 
 /**
+ * @deprecated Use worksheet.getCellInfoInMergeData or SpreadsheetSkeleton.getCellByIndex instead
  * Convert the coordinates of a single cell into a selection data.
  * @param row Specified Row Coordinate
  * @param column Specified Column Coordinate

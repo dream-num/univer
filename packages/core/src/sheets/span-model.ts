@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Rectangle } from '../shared';
+import { Rectangle, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
 import type { IRange } from './typedef';
@@ -84,6 +84,15 @@ export class SpanModel extends Disposable {
         }
     }
 
+    /**
+     * Rebuild the merge data cache when the merge data is changed.
+     * @param {IRange[]} mergeData
+     */
+    rebuild(mergeData: IRange[]) {
+        this._clearCache();
+        this._init(mergeData.concat());
+    }
+
     private _createRowCache(range: IRange, index: number) {
         const { startRow, endRow } = range;
         for (let i = startRow; i <= endRow; i++) {
@@ -117,7 +126,7 @@ export class SpanModel extends Disposable {
     }
 
     public remove(row: number, column: number) {
-        const index = this.getMergeDataIndex(row, column);
+        const index = this._getMergeDataIndex(row, column);
         if (index !== -1) {
             this._mergeData.splice(index, 1);
             this._clearCache();
@@ -126,11 +135,31 @@ export class SpanModel extends Disposable {
     }
 
     public getMergedCell(row: number, column: number) {
-        const index = this.getMergeDataIndex(row, column);
+        const index = this._getMergeDataIndex(row, column);
         if (index !== -1) {
             return this._mergeData[index];
         }
         return null;
+    }
+
+    public isRowContainsMergedCell(row: number) {
+        if (this._hasAll) {
+            return true;
+        }
+        if (!Tools.isEmptyObject(this._columnCache)) {
+            return true;
+        }
+        return this._mergeData.some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
+    }
+
+    public isColumnContainsMergedCell(column: number) {
+        if (this._hasAll) {
+            return true;
+        }
+        if (!Tools.isEmptyObject(this._rowCache)) {
+            return true;
+        }
+        return this._mergeData.some((mergedCell) => mergedCell.startColumn < column && column <= mergedCell.endColumn);
     }
 
     public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {
@@ -150,7 +179,7 @@ export class SpanModel extends Disposable {
         return ranges;
     }
 
-    private getMergeDataIndex(row: number, column: number) {
+    private _getMergeDataIndex(row: number, column: number) {
         if (this._hasAll) {
             return this._allIndex;
         }

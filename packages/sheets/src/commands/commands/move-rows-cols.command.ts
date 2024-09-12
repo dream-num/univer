@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
@@ -26,22 +25,23 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
     MoveColsMutation,
     MoveColsMutationUndoFactory,
     MoveRowsMutation,
     MoveRowsMutationUndoFactory,
 } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import type { ISelectionWithStyle } from '../../basics';
-import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
+// import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISelectionWithStyle } from '../../basics';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface IMoveRowsCommandParams {
     unitId?: string;
@@ -102,7 +102,11 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
-        if (rowAcrossMergedCell(toRow, worksheet)) {
+        // if (rowAcrossMergedCell(toRow, worksheet)) {
+        //     errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
+        //     return false;
+        // }
+        if (worksheet.isRowContainsMergedCell(toRow)) {
             errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
@@ -243,7 +247,11 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
-        if (columnAcrossMergedCell(toCol, worksheet)) {
+        // if (columnAcrossMergedCell(toCol, worksheet)) {
+        //     errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
+        //     return false;
+        // }
+        if (worksheet.isColumnContainsMergedCell(toCol)) {
             errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }

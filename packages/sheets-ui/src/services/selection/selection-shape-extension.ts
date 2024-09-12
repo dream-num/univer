@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
+import { CURSOR_TYPE, IRenderManagerService, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 /* eslint-disable max-lines-per-function */
 import type { IFreeze, Injector, IRangeWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import { ColorKit, Quantity, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, isRectIntersect, Rect, ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { getNormalSelectionStyle, SELECTION_CONTROL_BORDER_BUFFER_WIDTH } from '@univerjs/sheets';
 
 import type { Subscription } from 'rxjs';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
@@ -112,7 +112,10 @@ export class SelectionShapeExtension {
     private _getFreeze() {
         const renderManagerService = this._injector.get(IRenderManagerService);
         const freeze = renderManagerService.withCurrentTypeOfUnit(UniverInstanceType.UNIVER_SHEET, SheetSkeletonManagerService)
-            ?.getCurrent()?.skeleton.getWorksheetConfig().freeze;
+            ?.getCurrent()
+            ?.skeleton
+            .getWorksheetConfig()
+            .freeze;
         return freeze;
     }
 
@@ -159,7 +162,8 @@ export class SelectionShapeExtension {
         [leftControl, rightControl, topControl, bottomControl].forEach((control) => {
             control.onPointerEnter$.subscribeEvent(() => {
                 const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
-                    ?.interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
+                    ?.interceptor
+                    .fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
                 if (permissionCheck === false) {
                     return;
                 }
@@ -338,7 +342,8 @@ export class SelectionShapeExtension {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
             const permissionCheck = this._injector.get(ISheetSelectionRenderService, Quantity.OPTIONAL)
-                ?.interceptor.fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
+                ?.interceptor
+                .fetchThroughInterceptors(RANGE_MOVE_PERMISSION_CHECK)(false, null);
             if (permissionCheck === false) {
                 return;
             }
@@ -918,38 +923,7 @@ export class SelectionShapeExtension {
     }
 
     private _hasMergeInRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        const mergeData = this._skeleton.mergeData;
-        if (!mergeData) {
-            return false;
-        }
-
-        for (const data of mergeData) {
-            const {
-                startRow: mainStartRow,
-                startColumn: mainStartColumn,
-                endRow: mainEndRow,
-                endColumn: mainEndColumn,
-            } = data;
-            const rect1 = {
-                left: startColumn,
-                top: startRow,
-                right: endColumn,
-                bottom: endRow,
-            };
-
-            const rect2 = {
-                left: mainStartColumn,
-                top: mainStartRow,
-                right: mainEndColumn,
-                bottom: mainEndRow,
-            };
-
-            if (isRectIntersect(rect1, rect2)) {
-                return true;
-            }
-        }
-
-        return false;
+        return this._skeleton.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn).length > 0;
     }
 
     private _swapPositions(startRow: number, startColumn: number, endRow: number, endColumn: number) {

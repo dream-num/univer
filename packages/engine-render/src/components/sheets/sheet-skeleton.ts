@@ -79,7 +79,6 @@ import {
     getCellByIndexWithMergeInfo,
     getCellPositionByIndex,
     getFontStyleString,
-    hasUnMergedCellInRow,
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
@@ -260,7 +259,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     private _dataMergeCache: IRange[] = [];
-    private _dataMergeCacheMap: Map<string, IRange> = new Map();
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
@@ -471,7 +469,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { mergeData } = this._worksheetData;
 
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
-        this._dataMergeCacheMap = mergeData && this._getMergeCellsCache(mergeData);
 
         this._calculateStylesCache();
 
@@ -510,7 +507,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                const hasUnMergedCell = hasUnMergedCellInRow(rowIndex, startColumn, endColumn, mergeData);
+                const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
 
                 if (hasUnMergedCell) {
                     const autoHeight = this._calculateRowAutoHeight(rowIndex);
@@ -524,6 +521,23 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         return results;
+    }
+
+    private _hasUnMergedCellInRow(rowIndex: number, startColumn: number, endColumn: number): boolean {
+        const mergeData = this.worksheet.getMergeData();
+        if (!mergeData) {
+            return false;
+        }
+
+        for (let i = startColumn; i <= endColumn; i++) {
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowIndex, i);
+
+            if (!isMerged && !isMergedMainCell) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // TODO: auto height
@@ -941,7 +955,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (closeFirst) {
-             // check if upper row was closer than current
+            // check if upper row was closer than current
             if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
                 row = row + 1;
             }

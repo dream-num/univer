@@ -683,6 +683,7 @@ export function getCellByIndex(
 }
 
 /**
+ * @deprecated please use _hasUnMergedCellInRow in SpreadsheetSkeleton
  * Determine whether there are any cells in a row that are not in the merged cells, mainly used for the calculation of auto height
  */
 export function hasUnMergedCellInRow(

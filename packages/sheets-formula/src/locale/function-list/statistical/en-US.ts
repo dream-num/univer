@@ -415,8 +415,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The fist argument for which you want to calculate the sum of squared deviations.' },
+            number2: { name: 'number2', detail: 'The 2 to 255 arguments for which you want to calculate the sum of squared deviations.' },
         },
     },
     EXPON_DIST: {
@@ -429,8 +429,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            lambda: { name: 'lambda', detail: 'The parameter value.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, CHISQ.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     F_DIST: {

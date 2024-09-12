@@ -435,3 +435,19 @@ export function studentTINV(probability: number, degFreedom: number): number {
 
     return (probability > 0.5) ? x : -x;
 }
+
+export function exponentialCDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return 1 - Math.exp(-lambda * x);
+}
+
+export function exponentialPDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return lambda * Math.exp(-lambda * x);
+}

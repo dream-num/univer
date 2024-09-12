@@ -130,8 +130,8 @@ export default {
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
-            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     CRITBINOM: {
@@ -158,8 +158,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     FDIST: {

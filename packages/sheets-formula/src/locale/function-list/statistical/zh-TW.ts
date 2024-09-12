@@ -414,8 +414,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '這是要計算平方差之總和的第 1 個引數。' },
+            number2: { name: '數值2', detail: '這是要計算平方差之總和的第 2 到 255 個引數。' },
         },
     },
     EXPON_DIST: {
@@ -428,8 +428,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            lambda: { name: 'lambda', detail: '這是參數值。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，CHISQ.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     F_DIST: {

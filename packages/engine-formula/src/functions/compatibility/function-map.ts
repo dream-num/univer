@@ -20,6 +20,7 @@ import { ChisqInvRt } from '../statistical/chisq-inv-rt';
 import { ChisqTest } from '../statistical/chisq-test';
 import { ConfidenceNorm } from '../statistical/confidence-norm';
 import { CovarianceP } from '../statistical/covariance-p';
+import { ExponDist } from '../statistical/expon-dist';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
@@ -36,6 +37,7 @@ export const functionCompatibility = [
     [ChisqTest, FUNCTION_NAMES_COMPATIBILITY.CHITEST],
     [ConfidenceNorm, FUNCTION_NAMES_COMPATIBILITY.CONFIDENCE],
     [CovarianceP, FUNCTION_NAMES_COMPATIBILITY.COVAR],
+    [ExponDist, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

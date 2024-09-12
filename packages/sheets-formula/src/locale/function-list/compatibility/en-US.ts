@@ -158,8 +158,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            lambda: { name: 'lambda', detail: 'The parameter value.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, CHISQ.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     FDIST: {

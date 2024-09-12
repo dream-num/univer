@@ -36,6 +36,8 @@ import { Countif } from './countif';
 import { Countifs } from './countifs';
 import { CovarianceP } from './covariance-p';
 import { CovarianceS } from './covariance-s';
+import { Devsq } from './devsq';
+import { ExponDist } from './expon-dist';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Maxa } from './maxa';
@@ -77,6 +79,8 @@ export const functionStatistical = [
     [Countifs, FUNCTION_NAMES_STATISTICAL.COUNTIFS],
     [CovarianceP, FUNCTION_NAMES_STATISTICAL.COVARIANCE_P],
     [CovarianceS, FUNCTION_NAMES_STATISTICAL.COVARIANCE_S],
+    [Devsq, FUNCTION_NAMES_STATISTICAL.DEVSQ],
+    [ExponDist, FUNCTION_NAMES_STATISTICAL.EXPON_DIST],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],

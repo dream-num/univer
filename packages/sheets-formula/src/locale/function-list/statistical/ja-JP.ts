@@ -390,8 +390,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '偏差二乗の合計を計算するために使用される 1 番目のパラメーター。' },
+            number2: { name: '数値2', detail: 'パラメータ 2 ～ 255 は、二乗偏差の合計を計算するために使用されます。' },
         },
     },
     EXPON_DIST: {
@@ -404,8 +404,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '分布の評価に使用する値を指定します。' },
+            lambda: { name: 'lambda', detail: 'パラメーターの値を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     F_DIST: {

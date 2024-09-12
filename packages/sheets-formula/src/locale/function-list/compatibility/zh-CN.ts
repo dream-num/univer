@@ -158,8 +158,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            lambda: { name: 'lambda', detail: '参数值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 CHISQ.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     FDIST: {

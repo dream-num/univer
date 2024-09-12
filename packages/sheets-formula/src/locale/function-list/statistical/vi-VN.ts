@@ -277,8 +277,8 @@ export default {
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
-            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     COUNT: {
@@ -375,8 +375,8 @@ export default {
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
-            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     COVARIANCE_S: {
@@ -389,8 +389,37 @@ export default {
             },
         ],
         functionParameter: {
-            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
-            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
+        },
+    },
+    DEVSQ: {
+        description: 'Trả về tổng độ lệch bình phương',
+        abstract: 'Trả về tổng độ lệch bình phương',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/devsq-%E5%87%BD%E6%95%B0-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Tham số thứ nhất mà bạn muốn tính tổng bình phương độ lệch.' },
+            number2: { name: 'số 2', detail: 'Tham số từ 2 đến 255 mà bạn muốn tính tổng bình phương độ lệch.' },
+        },
+    },
+    EXPON_DIST: {
+        description: 'Trả về phân bố hàm mũ.',
+        abstract: 'Trả về phân bố hàm mũ.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/expon-dist-%E5%87%BD%E6%95%B0-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     MAX: {

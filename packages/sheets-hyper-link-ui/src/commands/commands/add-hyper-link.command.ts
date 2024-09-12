@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -121,6 +121,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
                 [link.row]: {
                     [link.column]: {
                         p: rangeValue,
+                        t: CellValueType.STRING,
                     },
                 },
             },

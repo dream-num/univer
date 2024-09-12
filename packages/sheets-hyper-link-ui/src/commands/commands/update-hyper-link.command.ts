@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -118,6 +118,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
                                 ...snapshot,
                                 body: newBody,
                             },
+                            t: CellValueType.STRING,
                         },
                     },
                 },

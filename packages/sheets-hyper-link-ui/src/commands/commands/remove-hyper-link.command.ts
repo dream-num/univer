@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -95,6 +95,7 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
                             ...snapshot,
                             body: newBody,
                         },
+                        t: CellValueType.STRING,
                     },
                 },
             },

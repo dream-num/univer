@@ -45,9 +45,9 @@ export {
 } from './commands/commands/core-editing.command';
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 export { getCursorWhenDelete } from './commands/commands/delete.command';
-export { IMEInputCommand } from './commands/commands/ime-input.command';
-// #region - all commands
 
+// #region - all commands
+export { IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
@@ -62,7 +62,6 @@ export {
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
-
 export { getParagraphsInRange, getParagraphsInRanges } from './commands/commands/list.command';
 export {
     BulletListCommand,

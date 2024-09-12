@@ -15,13 +15,13 @@
  */
 
 import { ICommandService, IUniverInstanceService, Tools, UniverInstanceType, useDependency, useObservable, UserManagerService } from '@univerjs/core';
-import React, { useEffect } from 'react';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
-import { MentionList } from '../mention-list';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import React, { useEffect } from 'react';
 import { AddDocMentionCommand } from '../../commands/commands/doc-mention.command';
+import { DocMentionPopupService } from '../../services/doc-mention-popup.service';
 import { MentionType } from '../../types/enums/mention-type';
+import { MentionList } from '../mention-list';
 import type { IMention } from '../../types/interfaces/i-mention';
 
 export const MentionEditPopup = () => {

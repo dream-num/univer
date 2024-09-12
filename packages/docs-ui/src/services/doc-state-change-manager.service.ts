@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { JSONXActions, Nullable } from '@univerjs/core';
 import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, LifecycleStages, OnLifecycle, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import { DocStateEmitService, type IDocStateChangeParams, type IRichTextEditingMutationParams } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
+import type { JSONXActions, Nullable } from '@univerjs/core';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';
 
 type ChangeStateCacheType = 'history' | 'collaboration';

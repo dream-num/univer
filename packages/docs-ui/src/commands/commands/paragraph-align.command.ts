@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import {
     CommandType, HorizontalAlign,
     ICommandService,
@@ -25,9 +24,10 @@ import {
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+
+import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 import { getParagraphsInRanges } from './list.command';
 

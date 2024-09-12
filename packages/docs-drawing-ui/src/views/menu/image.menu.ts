@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IAccessor } from '@univerjs/core';
-
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
+
 import { Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
 import { InsertDocImageCommand } from '../../commands/commands/insert-image.command';
 
 export const ImageUploadIcon = 'addition-and-subtraction-single';

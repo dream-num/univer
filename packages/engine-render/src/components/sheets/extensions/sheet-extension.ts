@@ -40,9 +40,9 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
      * @param rowHeightAccumulation
      * @param columnWidthAccumulation
      * @param dataMergeCache
-     * @returns ISelectionCellWithMergeInfo
+     * @returns {ISelectionCellWithMergeInfo} cell Position & mergeInfo
      */
-    getCellIndex(
+    getCellByIndex(
         rowIndex: number,
         columnIndex: number,
         rowHeightAccumulation: number[],

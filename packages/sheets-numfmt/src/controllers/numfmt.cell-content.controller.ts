@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICellData,
-    ICellDataForSheetInterceptor,
-    Workbook,
-} from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -33,10 +28,15 @@ import {
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-
 import { of, skip, switchMap } from 'rxjs';
+import type {
+    ICellData,
+    ICellDataForSheetInterceptor,
+    Workbook,
+} from '@univerjs/core';
+
+import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { getPatternPreview } from '../utils/pattern';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsNumfmtCellContentController)

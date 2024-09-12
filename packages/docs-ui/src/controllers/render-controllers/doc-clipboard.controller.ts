@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import {
     ICommandService,
     IContextService,
     Inject,
     RxDisposable,
 } from '@univerjs/core';
-
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
+
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { whenDocOrEditor, whenFocusEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

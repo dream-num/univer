@@ -16,7 +16,6 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -30,7 +29,9 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
     RangeProtectionRuleModel,
@@ -42,6 +43,10 @@ import {
     WorksheetProtectionPointModel,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
+import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import {
     DescriptionService,
     IDescriptionService,
@@ -51,16 +56,11 @@ import {
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula/locale/en-US';
 import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
-
-import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
-import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, DataValidationModel, SheetDataValidationManager, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -184,6 +184,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [RegisterOtherFormulaService],
                 [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [SheetsDataValidationValidatorService],
+                [SheetDataValidationModel],
 
                 // sheets filter
                 // comment
@@ -220,16 +221,6 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
     logService.setLogLevel(LogLevel.SILENT); // NOTE: change this to `LogLevel.VERBOSE` to debug tests via logs
 
     // init data validation
-    const createSheetDataValidationManager = (unitId: string, subUnitId: string) => {
-        return new SheetDataValidationManager(
-            unitId,
-            subUnitId,
-            injector
-        );
-    };
-    const dataValidationModel = injector.get(DataValidationModel);
-    dataValidationModel.setManagerCreator(createSheetDataValidationManager);
-
     const univerAPI = FUniver.newAPI(injector);
 
     return {

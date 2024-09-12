@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IThreadComment } from '@univerjs/thread-comment';
-import type { MentionProps } from '@univerjs/design';
-import { Button, Mention, Mentions } from '@univerjs/design';
-import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { ICommandService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { IDocumentBody } from '@univerjs/core';
+import { Button, Mention, Mentions } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { KeyCode } from '@univerjs/ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { KeyCode } from '@univerjs/ui';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import type { IDocumentBody } from '@univerjs/core';
+import type { MentionProps } from '@univerjs/design';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
 import styles from './index.module.less';
 import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
 
@@ -123,7 +123,8 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     key={mentionDataService.trigger}
                     trigger={mentionDataService.trigger}
                     data={(query, callback) => mentionDataService.getMentions!(query, unitId, subUnitId)
-                        .then((res) => res.map(transformMention)).then(callback) as any}
+                        .then((res) => res.map(transformMention))
+                        .then(callback) as any}
                     displayTransform={(id, label) => `@${label} `}
                     renderSuggestion={mentionDataService.renderSuggestion ?? defaultRenderSuggestion}
 

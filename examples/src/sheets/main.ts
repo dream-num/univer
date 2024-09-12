@@ -87,8 +87,12 @@ setTimeout(() => {
     // hyperlink
     univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
 }, 500);
-// data validation
-univer.registerPlugin(UniverSheetsDataValidationPlugin);
+
+// mock lazy load data validation
+setTimeout(() => {
+    univer.registerPlugin(UniverSheetsDataValidationPlugin);
+}, 500);
+
 // sort
 univer.registerPlugin(UniverSheetsSortUIPlugin);
 // condition formatting

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import type { ICommand, Nullable } from '@univerjs/core';
 import { getCommandSkeleton } from '../../util';
-import type { IOffsets } from './table';
-import { CellPosition, getCellOffsets, INSERT_ROW_POSITION } from './table';
 import { DocTableInsertRowCommand } from './doc-table-insert.command';
+import { CellPosition, getCellOffsets, INSERT_ROW_POSITION } from './table';
+import type { IOffsets } from './table';
 
 export interface IDocTableTabCommandParams {
     shift: boolean;

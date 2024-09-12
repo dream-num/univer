@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
-import type { IIconType } from '../models/icon-map';
+import type { IRange, IScale } from '@univerjs/core';
+import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
+import type { IIconType } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
@@ -56,12 +56,11 @@ export class ConditionalFormattingIcon extends SheetExtension {
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
-                    return;
-                }
-
                 const { iconType, iconId } = cellData.iconSet;
                 if (iconType === EMPTY_ICON_TYPE) {
                     return;
@@ -70,7 +69,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 if (!icon) {
                     return;
                 }
-                const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

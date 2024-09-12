@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
-import { SetRangeValuesCommand } from '@univerjs/sheets';
-import React, { useEffect, useMemo, useState } from 'react';
-import { CheckMarkSingle } from '@univerjs/icons';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { KeyCode, useObservable } from '@univerjs/ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import { RectPopup, Scrollbar } from '@univerjs/design';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { debounceTime } from 'rxjs';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { RectPopup, Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { getPlainTextFormDocument } from '@univerjs/docs-ui';
-import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
-import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
-import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
-import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import { CheckMarkSingle } from '@univerjs/icons';
+import { SetRangeValuesCommand } from '@univerjs/sheets';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { KeyCode, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { debounceTime } from 'rxjs';
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
+import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import styles from './index.module.less';
+import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
+import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 
 interface ISelectListProps {
     value: string[];

@@ -25,28 +25,28 @@ import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { SheetsDataValidationMobileRenderController } from './controllers/dv-render.controller';
-import { DataValidationController } from './controllers/dv.controller';
-import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
-import { DataValidationCacheService } from './services/dv-cache.service';
-import { DataValidationFormulaService } from './services/dv-formula.service';
-import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-import { DataValidationModelController } from './controllers/dv-model.controller';
-import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
+import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, ClearRangeDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
-import { DataValidationPanelService } from './services/data-validation-panel.service';
-import { DataValidationFormulaController } from './controllers/dv-formula.controller';
-import { DataValidationPermissionController } from './controllers/dv-permission.controller';
-import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import {
     defaultPluginConfig,
     type IUniverSheetsDataValidationConfig,
     PLUGIN_CONFIG_KEY,
 } from './controllers/config.schema';
+import { DataValidationController } from './controllers/dv.controller';
+import { DataValidationAlertController } from './controllers/dv-alert.controller';
+import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
+import { DataValidationFormulaController } from './controllers/dv-formula.controller';
+import { DataValidationPermissionController } from './controllers/dv-permission.controller';
+import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
+import { SheetsDataValidationMobileRenderController } from './controllers/dv-render.controller';
+import { SheetDataValidationModel } from './models/sheet-data-validation-model';
+import { DataValidationPanelService } from './services/data-validation-panel.service';
+import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
+import { DataValidationCacheService } from './services/dv-cache.service';
+import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+import { DataValidationFormulaService } from './services/dv-formula.service';
+import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
 @DependentOn(UniverDataValidationPlugin, UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationMobilePlugin extends Plugin {
@@ -77,9 +77,8 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             [DataValidationCustomFormulaService],
             [DataValidationDropdownManagerService],
             [SheetsDataValidationValidatorService],
-
+            [SheetDataValidationModel],
             // controller
-            [DataValidationModelController],
             [DataValidationController],
             [SheetsDataValidationMobileRenderController],
             [DataValidationAlertController],
@@ -95,6 +94,11 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             AddSheetDataValidationCommand,
             AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
+            UpdateSheetDataValidationSettingCommand,
+            UpdateSheetDataValidationOptionsCommand,
+            RemoveSheetDataValidationCommand,
+            RemoveSheetAllDataValidationCommand,
+            ClearRangeDataValidationCommand,
 
              // operation
             ShowDataValidationDropdown,

@@ -16,7 +16,6 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -31,13 +30,14 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
-
-import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
-import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
+import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject, takeUntil } from 'rxjs';
+
+import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
+import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
 const TEST_DOCUMENT_DATA_EN: IDocumentData = {

@@ -14,48 +14,43 @@
  * limitations under the License.
  */
 
-export { UniverSheetsDataValidationPlugin } from './plugin';
-export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
-export { DataValidationCacheService } from './services/dv-cache.service';
-export type { IDataValidationResCache } from './services/dv-cache.service';
-export { DataValidationFormulaService } from './services/dv-formula.service';
-export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-export {
-    DataValidationModel,
-    RemoveAllDataValidationCommand as RemoveSheetAllDataValidationCommand,
-    type IRemoveAllDataValidationCommandParams as IRemoveSheetAllDataValidationCommandParams,
-} from '@univerjs/data-validation';
-export { SheetDataValidationManager } from './models/sheet-data-validation-manager';
-
 // #region - all commands
 export {
-    RemoveDataValidationCommand as RemoveSheetDataValidationCommand,
-    type IRemoveDataValidationCommandParams as IRemoveSheetDataValidationCommandParams,
-} from '@univerjs/data-validation';
-export {
-    UpdateSheetDataValidationRangeCommand,
-    UpdateSheetDataValidationOptionsCommand,
-    UpdateSheetDataValidationSettingCommand,
-    AddSheetDataValidationCommand,
     AddSheetDataValidationAndOpenCommand,
+    AddSheetDataValidationCommand,
     ClearRangeDataValidationCommand,
     type IAddSheetDataValidationCommandParams,
-    type IUpdateSheetDataValidationRangeCommandParams,
-    type IUpdateSheetDataValidationOptionsCommandParams,
-    type IUpdateSheetDataValidationSettingCommandParams,
     type IClearRangeDataValidationCommandParams,
+    type IRemoveSheetAllDataValidationCommandParams,
+    type IRemoveSheetDataValidationCommandParams,
+    type IUpdateSheetDataValidationOptionsCommandParams,
+    type IUpdateSheetDataValidationRangeCommandParams,
+    type IUpdateSheetDataValidationSettingCommandParams,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
-
 export {
-    OpenValidationPanelOperation,
     CloseValidationPanelOperation,
-    ToggleValidationPanelOperation,
-    ShowDataValidationDropdown,
     HideDataValidationDropdown,
+    OpenValidationPanelOperation,
+    ShowDataValidationDropdown,
+    ToggleValidationPanelOperation,
 } from './commands/operations/data-validation.operation';
+export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
+export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
+export { SheetDataValidationModel } from './models/sheet-data-validation-model';
+export { UniverSheetsDataValidationPlugin } from './plugin';
+export { DataValidationCacheService } from './services/dv-cache.service';
+export type { IDataValidationResCache } from './services/dv-cache.service';
+export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+export { DataValidationFormulaService } from './services/dv-formula.service';
+export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
-export { LIST_DROPDOWN_KEY, DATE_DROPDOWN_KEY } from './views';
+export { DATE_DROPDOWN_KEY, LIST_DROPDOWN_KEY } from './views';
+
+export { DataValidationModel } from '@univerjs/data-validation';
 
 // #endregion

@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    ICommandInfo,
-    IDisposable,
-    IDocumentBody,
-    IPosition,
-    Nullable,
-    SlideDataModel,
-    UnitModel } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
@@ -48,15 +40,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import type {
-    DocBackground,
-    Documents,
-    DocumentSkeleton,
-    IDocumentLayoutObject,
-    IRenderContext,
-    IRenderModule,
-    Scene,
-} from '@univerjs/engine-render';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -68,14 +52,30 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
+import type {
+    ICommandInfo,
+    IDisposable,
+    IDocumentBody,
+    IPosition,
+    Nullable,
+    SlideDataModel,
+    UnitModel } from '@univerjs/core';
 import type { IDocObjectParam, IEditorInputConfig } from '@univerjs/docs-ui';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
-import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
+import type {
+    DocBackground,
+    Documents,
+    DocumentSkeleton,
+    IDocumentLayoutObject,
+    IRenderContext,
+    IRenderModule,
+    Scene,
+} from '@univerjs/engine-render';
+import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
+import { SLIDE_EDITOR_ID } from '../const';
 import { ISlideEditorBridgeService } from '../services/slide-editor-bridge.service';
 import { ISlideEditorManagerService } from '../services/slide-editor-manager.service';
-import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
 import { CursorChange } from '../type';
-import { SLIDE_EDITOR_ID } from '../const';
+import type { IEditorBridgeServiceVisibleParam } from '../services/slide-editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { JSONXActions, Nullable } from '@univerjs/core';
 import { RxDisposable } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
+import type { JSONXActions, Nullable } from '@univerjs/core';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
 interface IDocChangeState {
     actions: JSONXActions;

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType } from '../docs';
-import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
@@ -23,9 +21,10 @@ import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
+import { SheetViewModel } from './view-model';
+import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { Styles } from './styles';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from './typedef';
-import { SheetViewModel } from './view-model';
 
 /**
  * The model of a Worksheet.
@@ -464,19 +463,25 @@ export class Worksheet {
     }
 
     /**
-     * Get if the row in visible. It may be affected by features like filter and view.
-     * @param row the row index
-     * @returns if the row in visible to the user
+     * Row is filtered out, that means this row is invisible.
+     * @param row
+     * @returns {boolean} is row hidden by filter
      */
-    getRowVisible(row: number): boolean {
-        const filtered = this._viewModel.getRowFiltered(row);
-        if (filtered) return false;
-
-        return this.getRowRawVisible(row);
+    isRowFiltered(row: number): boolean {
+        return this._viewModel.getRowFiltered(row);
     }
 
     /**
-     * Get if the row does not have `hidden` property.
+     * Get if the row is visible. It may be affected by features like filter and view.
+     * @param row the row index
+     * @returns {boolean} if the row in visible to the user
+     */
+    getRowVisible(row: number): boolean {
+        return !this.isRowFiltered(row) && this.getRowRawVisible(row);
+    }
+
+    /**
+     * Get if the row does not have `hidden` property. This value won't affected by features like filter and view.
      * @param row the row index
      * @returns if the row does not have `hidden` property
      */
@@ -505,7 +510,7 @@ export class Worksheet {
     }
 
     /**
-     * Get all visible rows in the sheet.
+     * Get all visible rows in the sheet.(not include filter & view, like getRawVisibleRows)
      * @returns Visible rows range list
      */
     getVisibleRows(): IRange[] {
@@ -514,7 +519,7 @@ export class Worksheet {
     }
 
     /**
-     * Get all visible columns in the sheet.
+     * Get all visible columns in the sheet.(not include filter & view)
      * @returns Visible columns range list
      */
     getVisibleCols(): IRange[] {

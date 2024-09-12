@@ -15,16 +15,16 @@
  */
 
 import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
-import dayjs from 'dayjs';
-import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
+import dayjs from 'dayjs';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
-import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
+import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DateShowTimeOption } from '../views/show-time';
 
 const FORMULA1 = '{FORMULA1}';
@@ -133,17 +133,23 @@ export class DateValidator extends BaseDataValidator<number> {
         };
     }
 
-    override normlizeFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
+    override normalizeFormula(rule: IDataValidationRule, _unitId: string, _subUnitId: string): { formula1: string | undefined; formula2: string | undefined } {
         const { formula1, formula2, bizInfo } = rule;
         const normlizeSingleFormula = (formula: string | undefined) => {
             if (!formula) {
                 return formula;
             }
-            const res = numfmt.parseDate(formula)?.v as number;
-            if (res === undefined || res === null) {
-                return '';
+            let date;
+            if (!Number.isNaN(+formula)) {
+                date = numfmt.dateFromSerial(+formula) as unknown as [number, number, number, number, number, number];
+            } else {
+                const res = numfmt.parseDate(formula)?.v as number;
+                if (res === undefined || res === null) {
+                    return '';
+                }
+                date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
             }
-            const date = numfmt.dateFromSerial(res) as unknown as [number, number, number, number, number, number];
+
             return dayjs(`${date[0]}/${date[1]}/${date[2]} ${date[3]}:${date[4]}:${date[5]}`).format(bizInfo?.showTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
         };
 

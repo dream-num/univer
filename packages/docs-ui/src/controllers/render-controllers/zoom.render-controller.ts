@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
     FOCUSING_DOC,
@@ -23,15 +22,16 @@ import {
     Inject,
     IUniverInstanceService,
 } from '@univerjs/core';
-
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+
 import { IEditorService } from '@univerjs/ui';
-import { DocPageLayoutService } from '../../services/doc-page-layout.service';
-import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
-import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
+import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
+import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { DocPageLayoutService } from '../../services/doc-page-layout.service';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(

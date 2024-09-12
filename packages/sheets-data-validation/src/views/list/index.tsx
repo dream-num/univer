@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
-import { DataValidationItem } from '../item';
-import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
-import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
+import { useObservable } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand } from '../../commands/commands/data-validation.command';
+import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+import { createDefaultNewRule } from '../../utils/create';
+import { DataValidationItem } from '../item';
 import styles from './index.module.less';
+import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 
 export function DataValidationList() {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -41,7 +42,7 @@ export function DataValidationList() {
 }
 
 function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
-    const dataValidationModel = useDependency(DataValidationModel);
+    const sheetDataValidationModel = useDependency(SheetDataValidationModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
@@ -53,19 +54,20 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const worksheet = useObservable(workbook.activeSheet$, undefined, true)!;
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet?.getSheetId();
-    const manager = dataValidationModel.ensureManager(unitId, subUnitId);
 
     useEffect(() => {
-        setRules(manager.getDataValidations());
+        setRules(sheetDataValidationModel.getRules(unitId, subUnitId));
 
-        const subscription = manager.dataValidations$.subscribe((currentRules) => {
-            setRules([...currentRules]);
+        const subscription = sheetDataValidationModel.ruleChange$.subscribe((change) => {
+            if (change.unitId === unitId && change.subUnitId === subUnitId) {
+                setRules(sheetDataValidationModel.getRules(unitId, subUnitId));
+            }
         });
 
         return () => {
             subscription.unsubscribe();
         };
-    }, [manager]);
+    }, [unitId, subUnitId, sheetDataValidationModel]);
 
     const handleAddRule = async () => {
         const rule = createDefaultNewRule(injector);
@@ -83,7 +85,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     };
 
     const handleRemoveAll = () => {
-        commandService.executeCommand(RemoveAllDataValidationCommand.id, {
+        commandService.executeCommand(RemoveSheetAllDataValidationCommand.id, {
             unitId,
             subUnitId,
         });

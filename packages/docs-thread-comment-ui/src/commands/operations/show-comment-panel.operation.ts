@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocSelectionRenderService, getSelectionText } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { DocSelectionRenderService, getSelectionText } from '@univerjs/docs-ui';
-import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import type { ActiveCommentInfo } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
+import { DocThreadCommentPanel } from '../../views/doc-thread-comment-panel';
 
 export interface IShowCommentPanelOperationParams {
     activeComment: ActiveCommentInfo;

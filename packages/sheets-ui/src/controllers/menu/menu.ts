@@ -33,6 +33,8 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { SetInlineFormatCommand } from '@univerjs/docs-ui';
+
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -67,8 +69,6 @@ import {
     WorksheetSetColumnStylePermission,
     WorksheetSetRowStylePermission,
 } from '@univerjs/sheets';
-
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CutCommand,
     FONT_FAMILY_LIST,
@@ -77,10 +77,10 @@ import {
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
 import { combineLatestWith, map, Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
 
-import { SetInlineFormatCommand } from '@univerjs/docs-ui';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     SheetCutCommand,

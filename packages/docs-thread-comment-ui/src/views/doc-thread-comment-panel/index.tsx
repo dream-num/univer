@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { ICommandService, Injector, IUniverInstanceService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { ThreadCommentPanel } from '@univerjs/thread-comment-ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime, Observable } from 'rxjs';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
-import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
-import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
-import type { IAddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
+import type { DocumentDataModel } from '@univerjs/core';
 import { AddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 import { DeleteDocCommentComment, type IDeleteDocCommentComment } from '../../commands/commands/delete-doc-comment.command';
+import { StartAddCommentOperation } from '../../commands/operations/show-comment-panel.operation';
+import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 import { shouldDisableAddComment } from '../../controllers/menu';
+import { DocThreadCommentService } from '../../services/doc-thread-comment.service';
+import type { IAddDocCommentComment } from '../../commands/commands/add-doc-comment.command';
 
 export const DocThreadCommentPanel = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);

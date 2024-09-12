@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-
 import { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable, type IMenuButtonItem, type IMenuItem, MenuItemType } from '@univerjs/ui';
+
 import { combineLatest, Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
 
 export const DOC_ITALIC_MUTATION_ID = 'doc.command.uni-italic';
 export const DOC_BOLD_MUTATION_ID = 'doc.command.uni-bold';

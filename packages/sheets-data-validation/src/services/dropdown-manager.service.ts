@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { IZenZoneService } from '@univerjs/ui';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { IZenZoneService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DROP_DOWN_KEY } from '../views/drop-down';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 
 export interface IDropdownParam {
     location: ISheetLocation;
@@ -57,7 +57,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
     ) {
         super();
@@ -91,8 +91,7 @@ export class DataValidationDropdownManagerService extends Disposable {
             return;
         }
 
-        const manager = this._dataValidationModel.ensureManager(workbook.getUnitId(), worksheet.getSheetId()) as SheetDataValidationManager;
-        const rule = manager.getRuleByLocation(row, col);
+        const rule = this._dataValidationModel.getRuleByLocation(workbook.getUnitId(), worksheet.getSheetId(), row, col);
         if (!rule) {
             return;
         }
@@ -179,8 +178,7 @@ export class DataValidationDropdownManagerService extends Disposable {
             return;
         }
 
-        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-        const rule = manager.getRuleByLocation(row, col);
+        const rule = this._dataValidationModel.getRuleByLocation(workbook.getUnitId(), worksheet.getSheetId(), row, col);
         if (!rule) {
             return;
         }

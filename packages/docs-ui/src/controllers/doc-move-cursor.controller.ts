@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
     DataStreamTreeTokenType,
     Direction,
@@ -26,6 +25,9 @@ import {
     OnLifecycle,
     RANGE_DIRECTION,
 } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
     IDocumentSkeletonCached,
@@ -36,15 +38,13 @@ import type {
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
-import type { Subscription } from 'rxjs';
 
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import type { Subscription } from 'rxjs';
+import { getDocObject } from '../basics/component-tools';
+import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
+import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
 import type { IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
-import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
-import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
-import { getDocObject } from '../basics/component-tools';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMoveCursorController)
 export class DocMoveCursorController extends Disposable {
@@ -105,7 +105,8 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton();
+            ?.with(DocSkeletonManagerService)
+            .getSkeleton();
         const docObject = this._getDocObject();
 
         if (activeRange == null || skeleton == null || docObject == null) {
@@ -218,7 +219,8 @@ export class DocMoveCursorController extends Disposable {
         }
 
         const skeleton = this._renderManagerService.getRenderById(docDataModel.getUnitId())
-            ?.with(DocSkeletonManagerService).getSkeleton();
+            ?.with(DocSkeletonManagerService)
+            .getSkeleton();
         const docObject = this._getDocObject();
         if (activeRange == null || skeleton == null || docObject == null || allRanges == null) {
             return;

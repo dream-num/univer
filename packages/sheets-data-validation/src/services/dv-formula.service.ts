@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
-import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import type { Nullable } from '@univerjs/core';
+import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 type RuleId = string;
@@ -49,10 +49,9 @@ export class DataValidationFormulaService extends Disposable {
                 for (const subUnitId in unitMap) {
                     const results = unitMap[subUnitId];
                     const formulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
-                    const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
                     results.forEach((result) => {
                         if (formulaMap.get(result.extra?.ruleId)) {
-                            const rule = manager.getRuleById(result.extra?.ruleId);
+                            const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
                             if (rule) {
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }

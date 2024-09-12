@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
-
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
+
+import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
 import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -139,6 +139,8 @@ const dataValidation: IDataValidationRule[] = [
             startColumn: 0,
             endColumn: 5,
         }],
+        formula1: 'TRUE',
+        formula2: 'FALSE',
     },
     {
         uid: 'xxx-3',

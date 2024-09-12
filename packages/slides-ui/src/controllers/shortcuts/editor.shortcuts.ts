@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { DeviceInputEventType } from '@univerjs/engine-render';
-import type { IShortcutItem } from '@univerjs/ui';
-import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { DeleteLeftCommand } from '@univerjs/docs-ui';
+import { DeviceInputEventType } from '@univerjs/engine-render';
+import { KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
 import { SetTextEditArrowOperation } from '../../commands/operations/text-edit.operation';
 import {
     whenEditorActivated,

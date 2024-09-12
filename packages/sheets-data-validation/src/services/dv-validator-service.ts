@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import { DataValidationStatus, Inject, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import type { IDataValidationResCache } from './dv-cache.service';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
+import type { IDataValidationResCache } from './dv-cache.service';
 
 export class SheetsDataValidationValidatorService {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
 
@@ -45,15 +44,14 @@ export class SheetsDataValidationValidatorService {
             throw new Error(`row or col is not defined, row: ${row}, col: ${col}`);
         }
 
-        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
         const cell = worksheet.getCell(row, col);
-        const rule = manager.getRuleByLocation(row, col);
+        const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
         if (!rule) {
             return DataValidationStatus.VALID;
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            manager.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
+            this._sheetDataValidationModel.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
         });
     }
 
@@ -68,8 +66,7 @@ export class SheetsDataValidationValidatorService {
     }
 
     async validatorWorksheet(unitId: string, subUnitId: string) {
-        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-        const rules = manager.getDataValidations();
+        const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
         await Promise.all(rules.map((rule) => {
             return Promise.all(rule.ranges.map((range) => {
                 const promises: Promise<DataValidationStatus>[] = [];
@@ -84,7 +81,7 @@ export class SheetsDataValidationValidatorService {
     }
 
     async validatorWorkbook(unitId: string) {
-        const sheetIds = this._dataValidationModel.getSubUnitIds(unitId);
+        const sheetIds = this._sheetDataValidationModel.getSubUnitIds(unitId);
         const results = await Promise.all(sheetIds.map((id) => this.validatorWorksheet(unitId, id)));
 
         const map: Record<string, ObjectMatrix<Nullable<IDataValidationResCache>>> = {};
@@ -97,8 +94,7 @@ export class SheetsDataValidationValidatorService {
     }
 
     getDataValidations(unitId: string, subUnitId: string, ranges: IRange[]): IDataValidationRule[] {
-        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-        const ruleMatrix = manager.getRuleObjectMatrix();
+        const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId);
         const ruleIdSet = new Set<string>();
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
@@ -109,7 +105,7 @@ export class SheetsDataValidationValidatorService {
             });
         });
 
-        const rules = Array.from(ruleIdSet).map((id) => manager.getRuleById(id)).filter(Boolean) as IDataValidationRule[];
+        const rules = Array.from(ruleIdSet).map((id) => this._sheetDataValidationModel.getRuleById(unitId, subUnitId, id)).filter(Boolean) as IDataValidationRule[];
         return rules;
     }
 

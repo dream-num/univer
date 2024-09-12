@@ -15,11 +15,11 @@
  */
 
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
-import clsx from 'clsx';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
 import { CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import styles from './index.module.less';

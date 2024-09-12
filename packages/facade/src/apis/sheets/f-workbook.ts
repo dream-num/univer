@@ -29,12 +29,12 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
-import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter } from 'rxjs';
-import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, ISheetDataValidationRule, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
 import type { IUpdateCommandParams } from '@univerjs/docs-ui';
 import type {
@@ -71,8 +71,8 @@ export class FWorkbook {
         this.id = this._workbook.getUnitId();
     }
 
-    private get _dataValidationModel(): DataValidationModel {
-        return this._injector.get(DataValidationModel);
+    private get _dataValidationModel(): SheetDataValidationModel {
+        return this._injector.get(SheetDataValidationModel);
     }
 
     private get _threadCommentModel(): ThreadCommentModel {
@@ -390,7 +390,7 @@ export class FWorkbook {
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
-    onDataValidationChange(callback: (ruleChange: IRuleChange<ISheetDataValidationRule>) => void): IDisposable {
+    onDataValidationChange(callback: (ruleChange: IRuleChange) => void): IDisposable {
         return toDisposable(this._dataValidationModel.ruleChange$.pipe(filter((change) => change.unitId === this._workbook.getUnitId())).subscribe(callback));
     }
 

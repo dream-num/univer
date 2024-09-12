@@ -15,8 +15,8 @@
  */
 
 import { type Nullable, Tools } from '@univerjs/core';
-import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { DocumentSkeletonPageType, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
+import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,

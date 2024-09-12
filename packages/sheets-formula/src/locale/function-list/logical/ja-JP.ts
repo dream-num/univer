@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '列で区切られる配列。' },
+            lambda: { name: 'lambda', detail: '列を 1 つのパラメーターとして受け取り、1 つの結果を計算する LAMBDA。LAMBDA は以下のシングル パラメーターを取ります: 配列からの列。' },
         },
     },
     BYROW: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行で区切られる配列。' },
+            lambda: { name: 'lambda', detail: '行を 1 つのパラメーターとして受け取り、1 つの結果を計算する LAMBDA。 LAMBDA は以下のシングル パラメーターを取ります: 配列からの行。' },
         },
     },
     FALSE: {
@@ -183,8 +183,8 @@ export default {
         },
     },
     MAP: {
-        description: 'LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。',
-        abstract: 'LAMBDA を適用して新しい値を作成することで、配列内の各値を新しい値にマッピングして形成された配列を返します。',
+        description: 'LAMBDA を適用して新しい値を作成することにより、配列内の各値を新しい値にマッピングして形成された配列を返します。',
+        abstract: 'LAMBDA を適用して新しい値を作成することにより、配列内の各値を新しい値にマッピングして形成された配列を返します。',
         links: [
             {
                 title: '指導',
@@ -192,8 +192,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: 'マップする配列1。' },
+            array2: { name: '配列2', detail: 'マップする配列2。' },
+            lambda: { name: 'lambda', detail: 'LAMBDAは最後の引数でなければならず、渡される配列ごとにパラメータを持つ必要があります。' },
         },
     },
     NOT: {
@@ -233,8 +234,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '開始値', detail: 'アキュムレーターの開始値を設定します。' },
+            array: { name: '配列', detail: '減らす配列。' },
+            lambda: { name: 'lambda', detail: '配列を減らすために呼び出される LAMBDA。 LAMBDA は、次の 3 つのパラメーターを受け取ります。1.値が合計され、最終結果として返されました。2.配列の現在の値。3.配列内の各要素に適用される計算。' },
         },
     },
     SCAN: {
@@ -247,8 +249,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '開始値', detail: 'アキュムレーターの開始値を設定します。' },
+            array: { name: '配列', detail: 'スキャンする配列。' },
+            lambda: { name: 'lambda', detail: '配列をスキャンする呼び出される LAMBDA。 LAMBDA は、次の 3 つのパラメーターを受け取ります。1.値が合計され、最終結果として返されました。2.配列の現在の値。3.配列内の各要素に適用される計算。' },
         },
     },
     SWITCH: {

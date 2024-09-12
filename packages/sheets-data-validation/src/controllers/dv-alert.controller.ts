@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { DataValidationStatus, Disposable, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
-import type { BaseDataValidator } from '@univerjs/data-validation';
+import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime } from 'rxjs';
+import type { Workbook } from '@univerjs/core';
+import type { BaseDataValidator } from '@univerjs/data-validation';
 
 const ALERT_KEY = 'SHEET_DATA_VALIDATION_ALERT';
 
@@ -28,7 +29,8 @@ export class DataValidationAlertController extends Disposable {
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
         this._init();
@@ -36,6 +38,7 @@ export class DataValidationAlertController extends Disposable {
 
     private _init() {
         this._initCellAlertPopup();
+        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -78,6 +81,14 @@ export class DataValidationAlertController extends Disposable {
             }
 
             this._cellAlertManagerService.removeAlert(ALERT_KEY);
+        }));
+    }
+
+    private _initZenService() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            if (visible) {
+                this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            }
         }));
     }
 }

@@ -26,10 +26,12 @@ import {
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import { TodoList } from '@univerjs/icons';
+import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
+import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
+import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -38,9 +40,9 @@ import {
     FontFamilyItem,
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
-import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
-import { SidebarDocHeaderFooterPanelOperation } from '../commands/operations/doc-header-footer-panel.operation';
-import { DocFooter } from '../views/doc-footer';
+import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
+import { TabShortCut } from '../shortcuts/format.shortcut';
 import {
     AlignCenterShortCut,
     AlignJustifyShortCut,
@@ -55,12 +57,10 @@ import {
     SuperscriptShortCut,
     UnderlineShortCut,
 } from '../shortcuts/toolbar.shortcut';
-import { TabShortCut } from '../shortcuts/format.shortcut';
-import { BULLET_LIST_TYPE_COMPONENT, BulletListTypePicker, ORDER_LIST_TYPE_COMPONENT, OrderListTypePicker } from '../components/list-type-picker';
-import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
+import { DocFooter } from '../views/doc-footer';
+import { PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import type { IUniverDocsUIConfig } from './config.schema';
-import { PLUGIN_CONFIG_KEY } from './config.schema';
 
 // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
 @OnLifecycle(LifecycleStages.Rendered, DocUIController)

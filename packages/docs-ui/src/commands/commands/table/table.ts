@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, generateRandomId, ObjectRelativeFromH, ObjectRelativeFromV, TableAlignmentType, TableCellHeightRule, TableSizeType, TableTextWrapType, Tools } from '@univerjs/core';
+import type { IParagraph, ISectionBreak, ITable, ITableCell, ITableColumn, ITableRow, Nullable } from '@univerjs/core';
 import type { DataStreamTreeNode, DocumentViewModel, ITextRangeWithStyle } from '@univerjs/engine-render';
 
 export enum INSERT_ROW_POSITION {

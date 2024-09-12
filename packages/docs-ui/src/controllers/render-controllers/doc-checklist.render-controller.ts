@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
-import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocEventManagerService } from '../../services/doc-event-manager.service';
+import { CURSOR_TYPE, Vector2 } from '@univerjs/engine-render';
+import type { DocumentDataModel } from '@univerjs/core';
+import type { Documents, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import { ToggleCheckListCommand } from '../../commands/commands/list.command';
+import { DocEventManagerService } from '../../services/doc-event-manager.service';
 
 export class DocChecklistRenderController extends Disposable implements IRenderModule {
     constructor(

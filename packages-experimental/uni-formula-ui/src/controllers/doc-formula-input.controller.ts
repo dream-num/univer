@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { IEditorService } from '@univerjs/ui';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { DeleteLeftCommand, DocEventManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
-
-import { filter, map, mergeMap } from 'rxjs';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
+import { filter, map, mergeMap } from 'rxjs';
+
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
-import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
-import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
+import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
+import type { IShowFormulaPopupOperationParams } from '../commands/operations/operation';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 

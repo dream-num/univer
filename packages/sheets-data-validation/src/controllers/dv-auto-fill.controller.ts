@@ -15,18 +15,17 @@
  */
 
 import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
-import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { DataValidationModel } from '@univerjs/data-validation';
-import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationAutoFillController)
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private readonly _dataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -39,8 +38,7 @@ export class DataValidationAutoFillController extends Disposable {
 
         const generalApplyFunc = (location: IAutoFillLocation, applyType: APPLY_TYPE) => {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
-            const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-            const ruleMatrixCopy = manager.getRuleObjectMatrix().clone();
+            const ruleMatrixCopy = this._dataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
 
             const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
             const [vSourceRange, vTargetRange] = virtualRange.ranges;
@@ -76,7 +74,7 @@ export class DataValidationAutoFillController extends Disposable {
                         sourceRange
                     );
                     const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
-                    const ruleId = manager.getRuleIdByLocation(sourceRow, sourceCol);
+                    const ruleId = this._dataValidationModel.getRuleIdByLocation(unitId, subUnitId, sourceRow, sourceCol);
                     if (ruleId) {
                         const targetPositionRange = Rectangle.getPositionRange(
                             {
@@ -94,7 +92,7 @@ export class DataValidationAutoFillController extends Disposable {
                 });
             });
 
-            const diffs = ruleMatrixCopy.diff(manager.getDataValidations());
+            const diffs = ruleMatrixCopy.diff(this._dataValidationModel.getRules(unitId, subUnitId));
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched', applyType === APPLY_TYPE.ONLY_FORMAT);
             return {
                 undos: undoMutations,
@@ -108,10 +106,9 @@ export class DataValidationAutoFillController extends Disposable {
             id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeFillData: (location) => {
                 const { source: sourceRange, unitId, subUnitId } = location;
-                const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
                 for (const row of sourceRange.rows) {
                     for (const col of sourceRange.cols) {
-                        const dv = manager.getRuleByLocation(row, col);
+                        const dv = this._dataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
                         if (dv && disabledDataVallation.indexOf(dv.type) > -1) {
                             this._autoFillService.setDisableApplyType(APPLY_TYPE.SERIES, true);
                             return;

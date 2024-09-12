@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { ICommandService, RxDisposable } from '@univerjs/core';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import { BehaviorSubject } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
 import type {
     IDocSelectionInnerParam,
     IRectRangeWithStyle,
     ISuccinctDocRangeParam,
     ITextRangeWithStyle,
 } from '@univerjs/engine-render';
-import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { BehaviorSubject } from 'rxjs';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 
 interface IDocSelectionManagerSearchParam {

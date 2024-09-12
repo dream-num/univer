@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
 import { Range, sortRules } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { IRange, IScale } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
+import type { UniverRenderingContext } from '../../../context';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 const UNIQUE_KEY = 'DefaultCustomExtension';
 
@@ -44,12 +44,15 @@ export class Custom extends SheetExtension {
         const subUnitId = worksheet.getSheetId();
 
         Range.foreach(rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
             let cellData = worksheet.getCell(row, col);
             if (!cellData?.customRender) {
                 return;
             }
 
-            let primaryWithCoord = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+            let primaryWithCoord = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
             const { mergeInfo } = primaryWithCoord;
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
@@ -75,7 +78,7 @@ export class Custom extends SheetExtension {
                     return;
                 }
 
-                primaryWithCoord = this.getCellIndex(mainCell.row, mainCell.col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                primaryWithCoord = this.getCellByIndex(mainCell.row, mainCell.col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
             }
 
             const renderInfo = {
@@ -88,11 +91,6 @@ export class Custom extends SheetExtension {
                 worksheet,
                 unitId: worksheet.unitId,
             };
-
-                // current cell is hidden
-            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
-                return;
-            }
 
             const customRender = cellData.customRender.sort(sortRules);
 

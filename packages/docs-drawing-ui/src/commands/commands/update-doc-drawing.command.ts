@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -28,11 +27,12 @@ import {
     TextXActionType,
     Tools,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService, getRichTextEditPath } from '@univerjs/docs-ui';
+import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 export enum TextWrappingStyle {

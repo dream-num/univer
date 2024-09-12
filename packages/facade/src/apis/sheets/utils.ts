@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
 import {
     DisposableCollection,
     generateRandomId,
@@ -27,6 +26,7 @@ import {
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
 import type { ComponentManager, ComponentType } from '@univerjs/ui';
 
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
@@ -175,7 +175,7 @@ export function transformComponentKey(component: IFComponentKey, componentManage
     if (typeof componentKey === 'string') {
         key = componentKey;
     } else {
-        key = componentManager.getKey(componentKey) ?? `External_${generateRandomId(6)}`;
+        key = `External_${generateRandomId(6)}`;
         disposableCollection.add(componentManager.register(key, componentKey, { framework: isVue3 ? 'vue3' : 'react' }));
     }
 

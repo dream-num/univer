@@ -1555,6 +1555,9 @@ importers:
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
+      '@univerjs/sheets-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../sheets-hyper-link-ui
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
 import { BuildTextUtils, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;

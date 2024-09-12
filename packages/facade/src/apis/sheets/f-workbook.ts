@@ -30,7 +30,9 @@ import {
 } from '@univerjs/core';
 import { getPrimaryForRange, InsertSheetCommand, RemoveSheetCommand, SetSelectionsOperation, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookEditablePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, DataValidationModel, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, SheetsDataValidationValidatorService, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { IDialogService, ISidebarService } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import type { CommandListener, ICommandInfo, IDisposable, IExecutionOptions, IRange, ISheetDataValidationRule, IWorkbookData, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
@@ -41,7 +43,9 @@ import type {
 } from '@univerjs/sheets';
 import type { IAddSheetDataValidationCommandParams, IDataValidationResCache, IRemoveSheetAllDataValidationCommandParams, IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
 import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
+import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
+import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
 import type { IFComponentKey } from './utils';
@@ -242,7 +246,25 @@ export class FWorkbook {
     }
 
     // #endregion
+    /**
+     * open a sidebar
+     * @param params the sidebar options
+     * @returns the disposable object
+     */
+    openSiderbar(params: ISidebarMethodOptions): IDisposable {
+        const sideBarService = this._injector.get(ISidebarService);
+        return sideBarService.open(params);
+    }
 
+    /**
+     * open a dialog
+     * @param dialog the dialog options
+     * @returns the disposable object
+     */
+    openDialog(dialog: IDialogPartMethodOptions): IDisposable {
+        const dialogService = this._injector.get(IDialogService);
+        return dialogService.open(dialog);
+    }
     // #region callbacks
 
     /**
@@ -570,10 +592,35 @@ export class FWorkbook {
     // endregion
 
     // #region hyperlink
-    createSheetHyperlink(sheetId: string): string;
-    createSheetHyperlink(sheetId: string, range: string | IRange): string {
-        return `#gid=${sheetId}&range=${range}`;
+    /**
+     * create a hyperlink for the sheet
+     * @param sheetId the sheet id to link
+     * @param range the range to link, or define-name id
+     * @returns the hyperlink string
+     */
+    createSheetHyperlink(sheetId: string, range?: string | IRange): string {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        return resolverService.buildHyperLink(this.getId(), sheetId, range);
     }
 
+    /**
+     * parse the hyperlink string to get the hyperlink info
+     * @param hyperlink the hyperlink string
+     * @returns the hyperlink info
+     */
+    parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        return resolverService.parseHyperLink(hyperlink);
+    }
+
+    /**
+     * navigate to the sheet hyperlink
+     * @param hyperlink the hyperlink string
+     */
+    navigateToSheetHyperlink(hyperlink: string): void {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        const info = resolverService.parseHyperLink(hyperlink);
+        info.handler();
+    }
     // #endregion
 }

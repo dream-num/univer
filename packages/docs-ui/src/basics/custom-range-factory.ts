@@ -16,7 +16,7 @@
 
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, Nullable, TextX } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../commands/util';
 
@@ -57,14 +57,15 @@ interface IAddCustomRangeFactoryParam {
     wholeEntity?: boolean;
     properties?: Record<string, any>;
     unitId: string;
+    selection?: ITextRangeParam;
 }
 
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { rangeId, rangeType, wholeEntity, properties, unitId } = param;
+    const { rangeId, rangeType, wholeEntity, properties, unitId, selection: propSelection } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selection = docSelectionManagerService.getActiveTextRange();
+    const selection = propSelection ?? docSelectionManagerService.getActiveTextRange();
     const segmentId = selection?.segmentId;
     if (!selection) {
         return false;

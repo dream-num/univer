@@ -920,4 +920,8 @@ export class FRange {
         return this;
     }
     //#endregion
+
+    // #region hyperlink
+
+    // #endregion
 }

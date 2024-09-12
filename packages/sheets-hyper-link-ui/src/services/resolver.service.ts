@@ -16,7 +16,7 @@
 
 import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
@@ -142,6 +142,10 @@ export class SheetsHyperLinkResolverService {
         }
 
         this.navigateToSheetById(unitId, gid);
+    }
+
+    buildHyperLink(unitId: string, sheetId: string, range?: string | IRange): string {
+        return `#${SheetHyperLinkType.SHEET}=${sheetId}}${range ? `${typeof range === 'string' ? SheetHyperLinkType.DEFINE_NAME : SheetHyperLinkType.RANGE}=${typeof range === 'string' ? range : serializeRange(range)}` : ''}`;
     }
 
     parseHyperLink(urlStr: string): ISheetHyperLinkInfo {

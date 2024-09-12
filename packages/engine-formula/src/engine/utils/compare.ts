@@ -104,3 +104,20 @@ export function compareWithWildcard(currentValue: string, value: string, operato
 export function escapeRegExp(str: string) {
     return str.replace(/[.+^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
+
+export function getMatchModeValue(matchModeValue: number) {
+    switch (matchModeValue) {
+        case 1:
+            return ArrayOrderSearchType.MAX;
+        case 0:
+            return ArrayOrderSearchType.NORMAL;
+        case -1:
+            return ArrayOrderSearchType.MIN;
+        default:
+            return ArrayOrderSearchType.NORMAL;
+    }
+}
+
+export function getSearchModeValue(searchModeValue: number) {
+    return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
+}

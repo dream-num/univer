@@ -737,7 +737,6 @@ export class ArrayValueObject extends BaseValueObject {
      * @param matchType
      * @returns
      */
-    // eslint-disable-next-line max-lines-per-function, complexity
     private _binarySearch(
         valueObject: BaseValueObject,
         searchArray: BaseValueObject[],
@@ -799,22 +798,20 @@ export class ArrayValueObject extends BaseValueObject {
         // Determine the result based on matchType
         if (matchType === ArrayOrderSearchType.NORMAL) {
             return exactMatchIndex !== -1 ? positionArray[exactMatchIndex] : undefined;
-        } else if (matchType === ArrayOrderSearchType.MIN) {
-            if (exactMatchIndex !== -1) {
-                return positionArray[exactMatchIndex];
-            } else if (searchType === ArrayBinarySearchType.MIN) {
-                return nearestSmallerIndex !== -1 ? positionArray[nearestSmallerIndex] : undefined;
-            } else {
-                return nearestLargerIndex !== -1 ? positionArray[nearestLargerIndex] : undefined;
-            }
-        } else if (matchType === ArrayOrderSearchType.MAX) {
-            if (exactMatchIndex !== -1) {
-                return positionArray[exactMatchIndex];
-            } else if (searchType === ArrayBinarySearchType.MIN) {
-                return nearestLargerIndex !== -1 ? positionArray[nearestLargerIndex] : undefined;
-            } else {
-                return nearestSmallerIndex !== -1 ? positionArray[nearestSmallerIndex] : undefined;
-            }
+        }
+
+        if (matchType === ArrayOrderSearchType.MIN) {
+            if (exactMatchIndex !== -1) return positionArray[exactMatchIndex];
+            return searchType === ArrayBinarySearchType.MIN ?
+                positionArray[nearestSmallerIndex]
+                : positionArray[nearestLargerIndex];
+        }
+
+        if (matchType === ArrayOrderSearchType.MAX) {
+            if (exactMatchIndex !== -1) return positionArray[exactMatchIndex];
+            return searchType === ArrayBinarySearchType.MIN ?
+                positionArray[nearestLargerIndex]
+                : positionArray[nearestSmallerIndex];
         }
 
         // If no suitable match found based on matchType

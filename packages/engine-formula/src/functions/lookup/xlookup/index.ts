@@ -17,12 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayBinarySearchType, ArrayOrderSearchType } from '../../../engine/utils/compare';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Xlookup extends BaseFunction {
     override minParams = 3;
@@ -175,8 +175,8 @@ export class Xlookup extends BaseFunction {
         axis: number = 0
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            const searchType = this._getSearchModeValue(searchModeValue);
-            const matchType = this._getMatchModeValue(matchModeValue);
+            const searchType = getSearchModeValue(searchModeValue);
+            const matchType = getMatchModeValue(matchModeValue);
             return this.binarySearchExpand(
                 value,
                 searchArray,
@@ -212,8 +212,8 @@ export class Xlookup extends BaseFunction {
         searchModeValue: number
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            const searchType = this._getSearchModeValue(searchModeValue);
-            const matchType = this._getMatchModeValue(matchModeValue);
+            const searchType = getSearchModeValue(searchModeValue);
+            const matchType = getMatchModeValue(matchModeValue);
             return this.binarySearch(value, searchArray, resultArray, searchType, matchType);
         }
 
@@ -232,23 +232,6 @@ export class Xlookup extends BaseFunction {
         }
 
         return this.equalSearch(value, searchArray, resultArray, searchModeValue !== -1);
-    }
-
-    private _getSearchModeValue(searchModeValue: number) {
-        return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
-    }
-
-    private _getMatchModeValue(matchModeValue: number) {
-        switch (matchModeValue) {
-            case 1:
-                return ArrayOrderSearchType.MAX;
-            case 0:
-                return ArrayOrderSearchType.NORMAL;
-            case -1:
-                return ArrayOrderSearchType.MIN;
-            default:
-                return ArrayOrderSearchType.NORMAL;
-        }
     }
 
     /**

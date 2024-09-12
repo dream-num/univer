@@ -17,13 +17,13 @@
 import type { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayBinarySearchType, ArrayOrderSearchType } from '../../../engine/utils/compare';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { compareToken } from '../../../basics/token';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { compareToken } from '../../../basics/token';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Xmatch extends BaseFunction {
     override minParams = 2;
@@ -101,8 +101,8 @@ export class Xmatch extends BaseFunction {
     ) {
         let rowOrColumn: Nullable<number>;
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            const searchType = this._getSearchModeValue(searchModeValue);
-            const matchType = this._getMatchModeValue(matchModeValue);
+            const searchType = getSearchModeValue(searchModeValue);
+            const matchType = getMatchModeValue(matchModeValue);
             rowOrColumn = searchArray.binarySearch(value, searchType, matchType);
         } else if (matchModeValue === 2) {
             const matchObject = searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject;
@@ -154,22 +154,5 @@ export class Xmatch extends BaseFunction {
         }
 
         return NumberValueObject.create(rowOrColumn + 1);
-    }
-
-    private _getSearchModeValue(searchModeValue: number) {
-        return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
-    }
-
-    private _getMatchModeValue(matchModeValue: number) {
-        switch (matchModeValue) {
-            case 1:
-                return ArrayOrderSearchType.MAX;
-            case 0:
-                return ArrayOrderSearchType.NORMAL;
-            case -1:
-                return ArrayOrderSearchType.MIN;
-            default:
-                return ArrayOrderSearchType.NORMAL;
-        }
     }
 }

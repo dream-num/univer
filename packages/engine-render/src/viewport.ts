@@ -47,8 +47,8 @@ interface IViewProps extends IViewPosition {
     isWheelPreventDefaultY?: boolean;
     active?: boolean;
 
-    isRelativeX?: boolean;
-    isRelativeY?: boolean;
+    explicitViewportWidthSet?: boolean;
+    explicitViewportHeightSet?: boolean;
 
     allowCache?: boolean;
     bufferEdgeX?: number;
@@ -194,9 +194,12 @@ export class Viewport {
 
     private _paddingEndY: number = 0;
 
-    private _isRelativeX: boolean = false;
-
-    private _isRelativeY: boolean = false;
+    private _explicitViewportWidthSet: boolean = false;
+    /**
+     * _isRelativeY true means this height is dynamic decided by canvas size and other viewport height
+     * ex: if freeze horizontally, viewMain _isRelativeY is true, the height of viewMain is decided by canvas height - viewMainTop.height.
+     */
+    private _explicitViewportHeightSet: boolean = false;
 
     // private _preViewportInfo: Nullable<IViewportInfo>;
 
@@ -234,34 +237,14 @@ export class Viewport {
 
     constructor(viewportKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewportKey = viewportKey;
-
         this._scene = scene;
-
-        if (props?.active != null) {
-            this._active = props.active;
-        }
-
         this._scene.addViewport(this);
+        this._active = Tools.isDefine(props?.active) ? props?.active : true;
 
-        // if (props?.width) {
-        //     this.width = props?.width;
-        //     this._widthOrigin = this.width;
-        // }
+        this._explicitViewportWidthSet = props?.explicitViewportWidthSet || false;
+        this._explicitViewportHeightSet = props?.explicitViewportHeightSet || false;
 
-        // if (props?.height) {
-        //     this.height = props?.height;
-        //     this._heightOrigin = this.height;
-        // }
-
-        if (props?.isRelativeX != null) {
-            this._isRelativeX = props.isRelativeX;
-        }
-
-        if (props?.isRelativeY != null) {
-            this._isRelativeY = props.isRelativeY;
-        }
-
-        this._setViewportWidthAndHeight(props);
+        this._setViewportSize(props);
         this.initCacheCanvas(props);
 
         this._isWheelPreventDefaultX = props?.isWheelPreventDefaultX || false;
@@ -383,7 +366,7 @@ export class Viewport {
 
     set height(height: Nullable<number>) {
         const maxHeight = this.scene.getParent().height;
-        if(height !== null && height !== undefined) {
+        if (height !== null && height !== undefined) {
             this._height = Tools.clamp(height, 0, maxHeight);
         } else {
             this._height = height;
@@ -518,7 +501,7 @@ export class Viewport {
         //         (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
         //     }
         // });
-        this._setViewportWidthAndHeight(position);
+        this._setViewportSize(position);
         this.resetCanvasSizeAndUpdateScroll();
     }
 
@@ -677,7 +660,6 @@ export class Viewport {
                 y = 0;
             }
 
-            // console.log(y, this._scrollBar.miniThumbRatioY);
             // x *= this._scrollBar.miniThumbRatioX;
             // y *= this._scrollBar.miniThumbRatioY;
         } else {
@@ -1245,7 +1227,8 @@ export class Viewport {
      */
     private _resizeCacheCanvas() {
         const { width, height } = this._getViewPortSize();
-
+        this.width = width;
+        this.height = height;
         const scaleX = this.scene.scaleX;
         const scaleY = this.scene.scaleY;
         const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
@@ -1300,40 +1283,24 @@ export class Viewport {
 
         this._left = left;
         this._top = top;
-        if (this._isRelativeX) {
-            width = parentWidth - (this._left + this._right);
-        } else {
+
+        if (this._explicitViewportWidthSet) {
+            // viewMainLeft viewMainLeftTop ---> width is specific by freezeline
             width = (this._widthOrigin || 0) * scaleX;
+        } else {
+            // viewMainTop  viewMain
+            width = parentWidth - (this._left + this._right);
         }
 
-        if (this._isRelativeY) {
-            height = parentHeight - (this._top + this._bottom);
-        } else {
+        if (this._explicitViewportHeightSet) {
+            //viewMainLeftTop viewMainTop ---> height is specific by freezeline
             height = (this._heightOrigin || 0) * scaleY;
+        } else {
+            // viewMainLeft viewMain
+            height = parentHeight - (this._top + this._bottom);
         }
         // width = Math.max(0, width);
         // height = Math.max(0, height);
-
-        this.width = width;
-        this.height = height;
-
-        // if (!forceCalculate && this._widthOrigin != null) {
-        //     width = this._widthOrigin;
-        // } else {
-        //     const referenceWidth = parent.width;
-        //     const containerWidth =
-        //         parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceWidth * parent.scaleX : referenceWidth;
-        //     width = containerWidth - (this._left + this._right);
-        // }
-
-        // if (!forceCalculate && this._heightOrigin != null) {
-        //     height = this._heightOrigin;
-        // } else {
-        //     const referenceHeight = parent.height;
-        //     const containerHeight =
-        //         parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER ? referenceHeight * parent.scaleY : referenceHeight;
-        //     height = containerHeight - (this._top + this._bottom);
-        // }
 
         return {
             width,
@@ -1448,7 +1415,6 @@ export class Viewport {
         this.scrollY = scrollY;
         this.viewportScrollX = viewportScrollX;
         this.viewportScrollY = viewportScrollY;
-
         const scrollSubParam: IScrollObserverParam = {
             isTrigger,
             viewport: this,
@@ -1614,24 +1580,24 @@ export class Viewport {
         }
     }
 
-    private _setViewportWidthAndHeight(props?: IViewProps) {
-        if (props?.top != null) {
+    private _setViewportSize(props?: IViewProps) {
+        if (Tools.isDefine(props?.top)) {
             this.top = props.top;
         }
 
-        if (props?.left != null) {
+        if (Tools.isDefine(props?.left)) {
             this.left = props.left;
         }
 
-        if (props?.bottom != null) {
+        if (Tools.isDefine(props?.bottom)) {
             this.bottom = props.bottom;
         }
 
-        if (props?.right != null) {
+        if (Tools.isDefine(props?.right)) {
             this.right = props.right;
         }
 
-        if (Tools.isDefine(props?.width) && !this._isRelativeX) {
+        if (Tools.isDefine(props?.width) && this._explicitViewportWidthSet) {
             this.width = props?.width;
             this._widthOrigin = this.width;
         } else {
@@ -1639,20 +1605,13 @@ export class Viewport {
             this._widthOrigin = null;
         }
 
-        if (Tools.isDefine(props?.height) && !this._isRelativeY) {
+        if (Tools.isDefine(props?.height) && this._explicitViewportHeightSet) {
             this.height = props?.height;
             this._heightOrigin = this.height;
         } else {
             this.height = null;
             this._heightOrigin = null;
         }
-    }
-
-    private _getBoundScale(scaleX: number, scaleY: number) {
-        scaleX = this._isRelativeX ? (scaleX < 1 ? 1 : scaleX) : scaleX;
-        scaleY = this._isRelativeY ? (scaleY < 1 ? 1 : scaleY) : scaleY;
-
-        return { scaleX, scaleY };
     }
 
     /**

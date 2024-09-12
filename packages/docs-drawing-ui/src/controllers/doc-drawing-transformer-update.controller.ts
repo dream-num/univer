@@ -21,11 +21,11 @@ import {
     OnLifecycle, PositionedObjectLayoutType, throttle, toDisposable, Tools,
 } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
 import type { IDocDrawingBase, IDocDrawingPosition, Nullable } from '@univerjs/core';
 import type { BaseObject, Documents, IDocumentSkeletonGlyph, IDocumentSkeletonPage, Image, INodeSearch, IPoint, Viewport } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, getColor, IRenderManagerService, Liquid, PageLayoutType, Rect, Vector2 } from '@univerjs/engine-render';
-import { DocSelectionRenderService, getAnchorBounding, getDocObject, getOneTextSelectionRange, NodePositionConvertToCursor, TEXT_RANGE_LAYER_INDEX } from '@univerjs/docs-ui';
 import { IMoveInlineDrawingCommand, ITransformNonInlineDrawingCommand, UpdateDrawingDocTransformCommand } from '../commands/commands/update-doc-drawing.command';
 import type { IDrawingDocTransform } from '../commands/commands/update-doc-drawing.command';
 

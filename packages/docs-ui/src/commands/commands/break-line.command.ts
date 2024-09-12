@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph } from '@univerjs/core';
 import { BooleanNumber, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { getInsertSelection } from '../../basics/selection';
+import type { ICommand, IParagraph } from '@univerjs/core';
 import { copyCustomRange } from '../../basics/custom-range';
+import { getInsertSelection } from '../../basics/selection';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {

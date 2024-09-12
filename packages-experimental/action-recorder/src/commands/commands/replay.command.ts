@@ -15,8 +15,8 @@
  */
 
 import { CommandType, type ICommand } from '@univerjs/core';
-import { IMessageService } from '@univerjs/ui';
 import { MessageType } from '@univerjs/design';
+import { IMessageService } from '@univerjs/ui';
 import { ActionReplayService } from '../../services/replay.service';
 
 export const ReplayLocalRecordCommand: ICommand = {

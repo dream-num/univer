@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 

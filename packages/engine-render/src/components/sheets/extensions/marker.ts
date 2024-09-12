@@ -16,10 +16,10 @@
 
 import { Range } from '@univerjs/core';
 import type { IRange, IScale } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
+import type { UniverRenderingContext } from '../../../context';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 const UNIQUE_KEY = 'DefaultMarkerExtension';
 

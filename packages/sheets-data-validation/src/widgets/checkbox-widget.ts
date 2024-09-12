@@ -22,7 +22,7 @@ import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import type { CheckboxValidator } from '../validators/checkbox-validator';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, transformCheckboxValue } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -191,7 +191,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
                 endRow: primaryWithCoord.actualRow,
             },
             value: {
-                v: String(value) === String(formula1) ? formula2 : formula1,
+                v: String(value) === transformCheckboxValue(String(formula1)) ? formula2 : formula1,
                 p: null,
             },
         };

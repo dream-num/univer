@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
+import { InsertCommand } from '../../commands/commands/core-editing.command';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
     private _onInputSubscription: Nullable<Subscription>;

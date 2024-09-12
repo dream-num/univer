@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
+import type { ICommandInfo } from '@univerjs/core';
 
 /**
  * This service is for replaying user actions.

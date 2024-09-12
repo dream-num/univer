@@ -15,8 +15,8 @@
  */
 
 import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
-import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IShortcutItem } from '@univerjs/ui';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { SelectAllOperation } from '../commands/operations/select-all.operation';
 import { whenDocAndEditorFocused } from './utils';

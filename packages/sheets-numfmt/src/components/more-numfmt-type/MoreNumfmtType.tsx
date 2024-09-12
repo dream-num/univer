@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-// FIXME: DO NOT USE GLOBAL STYLES
-import './index.less';
-
 import { ICommandService, LocaleService, Range, useDependency, useInjector } from '@univerjs/core';
-import type { FormatType } from '@univerjs/sheets';
-import { SheetsSelectionsService } from '@univerjs/sheets';
-import React from 'react';
 
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ILayoutService } from '@univerjs/ui';
+import React from 'react';
+import type { FormatType } from '@univerjs/sheets';
+
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';
 import { SetNumfmtCommand } from '../../commands/commands/set-numfmt.command';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
 import { getPatternPreview, getPatternType } from '../../utils/pattern';
+// FIXME: DO NOT USE GLOBAL STYLES
+import './index.less';
 
 export const MORE_NUMFMT_TYPE_KEY = 'sheet.numfmt.moreNumfmtType';
 export const OPTIONS_KEY = 'sheet.numfmt.moreNumfmtType.options';

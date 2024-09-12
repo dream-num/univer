@@ -31,11 +31,11 @@
  */
 
 import { type Nullable, RANGE_DIRECTION, Tools } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, Engine, IDocumentSkeletonGlyph, INodePosition, IRectRangeWithStyle, ITextRangeWithStyle, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
 import { getOffsetRectForDom } from '@univerjs/engine-render';
+import type { Documents, DocumentSkeleton, Engine, IDocumentSkeletonGlyph, INodePosition, IRectRangeWithStyle, ITextRangeWithStyle, ITextSelectionStyle, Scene } from '@univerjs/engine-render';
+import { isInSameTableCell, isValidRectRange } from './convert-rect-range';
 import { convertPositionsToRectRanges, RectRange } from './rect-range';
 import { TextRange } from './text-range';
-import { isInSameTableCell, isValidRectRange } from './convert-rect-range';
 import type { IDocRange } from './range-interface';
 
 interface IDocRangeList {

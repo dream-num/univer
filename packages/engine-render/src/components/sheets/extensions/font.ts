@@ -16,20 +16,20 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { expandRangeIfIntersects, inRowViewRanges, inViewRanges } from '../../../basics/tools';
+import { SpreadsheetExtensionRegistry } from '../../extension';
+import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
+import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
-import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
-import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
-import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 

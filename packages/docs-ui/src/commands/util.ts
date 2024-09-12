@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { DocumentDataModel, IAccessor } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
 
 /**
  * Get the skeleton of the command's target.

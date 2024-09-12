@@ -15,10 +15,10 @@
  */
 
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { getColumnWidths, getEmptyTableCell, getEmptyTableRow, getInsertColumnActionsParams, getInsertColumnBody, getInsertRowActionsParams, getInsertRowBody, getRangeInfoFromRanges, getTableColumn, INSERT_COLUMN_POSITION, INSERT_ROW_POSITION } from './table';
 

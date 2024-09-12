@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDeleteAction, IDocumentBody, IRetainAction, ITextRange } from '@univerjs/core';
 import { TextXActionType } from '@univerjs/core';
+import type { IDeleteAction, IDocumentBody, IRetainAction, ITextRange } from '@univerjs/core';
 import { isIntersecting, shouldDeleteCustomRange } from './custom-range';
 
 export function getRetainAndDeleteFromReplace(

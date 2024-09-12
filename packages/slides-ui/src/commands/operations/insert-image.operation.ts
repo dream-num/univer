@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, PageElementType, UniverInstanceType } from '@univerjs/core';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, getImageSize, IImageIoService } from '@univerjs/drawing';
 import { ILocalFileService } from '@univerjs/ui';
+import type { ICommand, SlideDataModel } from '@univerjs/core';
 import { CanvasView } from '../../controllers/canvas-view';
 
 export const InsertSlideFloatImageCommand: ICommand<{}> = {

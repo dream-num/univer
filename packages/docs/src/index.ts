@@ -15,22 +15,22 @@
  */
 
 export { isSegmentIntersects } from './basics/selection';
-export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
-
-export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
-export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
-export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
-export { DocSelectionManagerService } from './services/doc-selection-manager.service';
-export type { IDocStateChangeParams, IDocStateChangeInfo } from './services/doc-state-emit.service';
-export { DocStateEmitService } from './services/doc-state-emit.service';
-
 // #region - all commands
 export {
-    RichTextEditingMutation,
     type IRichTextEditingMutationParams,
+    RichTextEditingMutation,
 } from './commands/mutations/core-editing.mutation';
+
 export {
-    SetTextSelectionsOperation,
     type ISetTextSelectionsOperationParams,
+    SetTextSelectionsOperation,
 } from './commands/operations/text-selection.operation';
+export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
+export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
+export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
+export { DocSelectionManagerService } from './services/doc-selection-manager.service';
+export { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
+
+export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
+export { DocStateEmitService } from './services/doc-state-emit.service';
 // #endregion

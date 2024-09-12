@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type {
     DocumentDataModel,
     ICommand,
@@ -23,15 +25,13 @@ import type {
     ITextRange,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getInsertSelection } from '../../basics/selection';
 import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
+import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
+import { getInsertSelection } from '../../basics/selection';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getRichTextEditPath } from '../util';
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 
 export interface IInsertCommandParams {
     unitId: string;

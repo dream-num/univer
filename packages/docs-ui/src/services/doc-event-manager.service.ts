@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import { distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
 import { getLineBounding } from './selection/text-range';

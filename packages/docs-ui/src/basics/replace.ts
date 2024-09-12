@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange, ITextRangeParam } from '@univerjs/core';
 import { IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { DocumentDataModel, IAccessor, IDeleteAction, IDocumentBody, IMutationInfo, IRetainAction, ITextRange, ITextRangeParam } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRichTextEditPath } from '../commands/util';
 import { isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { getDeleteSelection } from './selection';

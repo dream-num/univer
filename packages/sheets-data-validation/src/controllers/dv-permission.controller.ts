@@ -17,10 +17,9 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import { AddDataValidationCommand } from '@univerjs/data-validation';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
-import { UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
+import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationPermissionController)
 export class DataValidationPermissionController extends Disposable {
@@ -36,7 +35,7 @@ export class DataValidationPermissionController extends Disposable {
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (command.id === AddDataValidationCommand.id) {
+                if (command.id === AddSheetDataValidationCommand.id) {
                     const permission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
                         workbookTypes: [WorkbookEditablePermission],
                         rangeTypes: [RangeProtectionPermissionEditPoint],

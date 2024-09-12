@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 import { getRichTextEditPath } from '../util';

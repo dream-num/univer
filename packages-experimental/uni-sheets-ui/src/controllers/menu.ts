@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
 import { BooleanNumber, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_SHEET, FontItalic, FontWeight, ICommandService, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
+import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
     RangeProtectionPermissionEditPoint,
     SetRangeValuesMutation,
@@ -27,10 +27,10 @@ import {
     WorksheetEditPermission,
     WorksheetSetCellStylePermission,
 } from '@univerjs/sheets';
-import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import { deriveStateFromActiveSheet$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
 import { Observable } from 'rxjs';
+import type { IAccessor } from '@univerjs/core';
 
 export const SHEET_BOLD_MUTATION_ID = 'sheet.command.uni-bold';
 export const SHEET_ITALIC_MUTATION_ID = 'sheet.command.uni-italic';

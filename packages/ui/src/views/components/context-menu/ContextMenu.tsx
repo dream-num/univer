@@ -16,8 +16,8 @@
 
 import { ICommandService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import type { IMouseEvent } from '@univerjs/engine-render';
 import React, { useEffect, useRef, useState } from 'react';
+import type { IMouseEvent } from '@univerjs/engine-render';
 
 import { Menu } from '../../../components/menu/desktop/Menu';
 import { IContextMenuService } from '../../../services/contextmenu/contextmenu.service';

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { CustomRangeType, DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../commands/util';
 import { getSelectionForAddCustomRange, normalizeSelection } from './selection';
 

@@ -15,16 +15,21 @@
  */
 
 import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { CheckboxRender } from '../widgets/checkbox-widget';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
+
+interface ICheckboxFormulaResult extends IFormulaResult {
+    originFormula1: Nullable<CellValue>;
+    originFormula2: Nullable<CellValue>;
+}
 
 function getFailMessage(formula: string | undefined, localeService: LocaleService) {
     if (Tools.isBlank(formula)) {
@@ -37,6 +42,13 @@ function getFailMessage(formula: string | undefined, localeService: LocaleServic
 
     return '';
 }
+
+export const transformCheckboxValue = (value: Nullable<CellValue>) =>
+    Tools.isDefine(value) && String(value).toLowerCase() === 'true'
+        ? '1'
+        : String(value).toLowerCase() === 'false'
+            ? '0'
+            : value;
 
 export class CheckboxValidator extends BaseDataValidator {
     override id: string = DataValidationType.CHECKBOX;
@@ -86,32 +98,46 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<ICheckboxFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
-            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+            formula1: transformCheckboxValue(originFormula1),
+            formula2: transformCheckboxValue(originFormula2),
+            originFormula1,
+            originFormula2,
         };
     }
 
     parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
+
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
-            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+            formula1: transformCheckboxValue(originFormula1),
+            formula2: transformCheckboxValue(originFormula2),
+            originFormula1,
+            originFormula2,
         };
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
         const { value, unitId, subUnitId } = cellInfo;
-        const { formula1, formula2 } = await this.parseFormula(rule, unitId, subUnitId);
+        const { formula1, formula2, originFormula1, originFormula2 } = await this.parseFormula(rule, unitId, subUnitId);
         if (!Tools.isDefine(formula1) || !Tools.isDefine(formula2)) {
             return true;
         }
 
-        return Tools.isDefine(value) && (String(value) === String(formula1) || String(value) === String(formula2));
+        return Tools.isDefine(value) && (
+            String(value) === String(formula1)
+            || String(value) === String(formula2)
+            || String(value) === String(originFormula1 ?? '')
+            || String(value) === String(originFormula2 ?? '')
+        );
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {

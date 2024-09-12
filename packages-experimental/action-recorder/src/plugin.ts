@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
 import { Inject, Injector, Plugin } from '@univerjs/core';
-import { ActionRecorderService } from './services/action-recorder.service';
+import type { Dependency } from '@univerjs/core';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
+import { ActionRecorderService } from './services/action-recorder.service';
 import { ActionReplayService } from './services/replay.service';
 
 /**

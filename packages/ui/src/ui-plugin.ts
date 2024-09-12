@@ -15,14 +15,12 @@
  */
 
 import { DependentOn, IConfigService, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import type { Dependency } from '@univerjs/core';
 
-import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
-import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ErrorController } from './controllers/error/error.controller';
 import { SharedController } from './controllers/shared-shortcut.controller';
 import { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
@@ -35,30 +33,32 @@ import { DesktopConfirmService } from './services/confirm/desktop-confirm.servic
 import { ContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
+import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
+import { EditorService, IEditorService } from './services/editor/editor.service';
+import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
+import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
+import { DesktopLocalFileService } from './services/local-file/desktop-file-opener.service';
+import { ILocalFileService } from './services/local-file/file-opener.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { IMenuService, MenuService } from './services/menu/menu.service';
+import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
 import { IMessageService } from './services/message/message.service';
 import { DesktopNotificationService } from './services/notification/desktop-notification.service';
 import { INotificationService } from './services/notification/notification.service';
+import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
+import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+import { IProgressService, ProgressService } from './services/progress/progress.service';
+import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
-import { EditorService, IEditorService } from './services/editor/editor.service';
-import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
-import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
-import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';
 import type { IUniverUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { ILocalFileService } from './services/local-file/file-opener.service';
-import { DesktopLocalFileService } from './services/local-file/desktop-file-opener.service';
 
 export const UNIVER_UI_PLUGIN_NAME = 'UNIVER_UI_PLUGIN';
 

@@ -22,18 +22,9 @@ export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-export {
-    DataValidationModel,
-    RemoveAllDataValidationCommand as RemoveSheetAllDataValidationCommand,
-    type IRemoveAllDataValidationCommandParams as IRemoveSheetAllDataValidationCommandParams,
-} from '@univerjs/data-validation';
-export { SheetDataValidationManager } from './models/sheet-data-validation-manager';
-
+export { SheetDataValidationModel } from './models/sheet-data-validation-model';
+export { DataValidationModel } from '@univerjs/data-validation';
 // #region - all commands
-export {
-    RemoveDataValidationCommand as RemoveSheetDataValidationCommand,
-    type IRemoveDataValidationCommandParams as IRemoveSheetDataValidationCommandParams,
-} from '@univerjs/data-validation';
 export {
     UpdateSheetDataValidationRangeCommand,
     UpdateSheetDataValidationOptionsCommand,
@@ -41,11 +32,15 @@ export {
     AddSheetDataValidationCommand,
     AddSheetDataValidationAndOpenCommand,
     ClearRangeDataValidationCommand,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    type IRemoveSheetDataValidationCommandParams,
     type IAddSheetDataValidationCommandParams,
     type IUpdateSheetDataValidationRangeCommandParams,
     type IUpdateSheetDataValidationOptionsCommandParams,
     type IUpdateSheetDataValidationSettingCommandParams,
     type IClearRangeDataValidationCommandParams,
+    type IRemoveSheetAllDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

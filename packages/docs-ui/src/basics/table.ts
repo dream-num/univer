@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 import type { Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
-import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 
 export function firstLineInTable(table: IDocumentSkeletonTable) {
     const firstRow = table.rows[0];

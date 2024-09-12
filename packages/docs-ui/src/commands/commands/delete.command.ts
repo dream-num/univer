@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import {
     CommandType,
     DataStreamTreeTokenType,
@@ -30,14 +29,15 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
+import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getDeleteSelection } from '../../basics/selection';
-import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { DeleteDirection } from '../../types/delete-direction';
+import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
 

@@ -16,11 +16,11 @@
 
 import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
-import { DocMentionPopupService } from '../services/doc-mention-popup.service';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 import { DocMentionService } from '../services/doc-mention.service';
+import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMentionTriggerController)
 export class DocMentionTriggerController extends Disposable {

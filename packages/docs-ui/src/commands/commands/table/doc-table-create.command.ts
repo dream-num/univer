@@ -15,13 +15,13 @@
  */
 
 import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getInsertSelection } from '../../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { genEmptyTable, genTableSource } from './table';
 
 export const CreateDocTableCommandId = 'doc.command.create-table';

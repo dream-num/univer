@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType } from '@univerjs/core';
 import { isSegmentIntersects } from '@univerjs/docs';
+import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
 import { DeleteDirection } from '../../../docs-ui/src/types/delete-direction';
 import { isCustomRangeSplitSymbol } from './custom-range';
 

@@ -16,18 +16,18 @@
 
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
+import { AddDataValidationMutation, RemoveDataValidationMutation } from '@univerjs/data-validation';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '../commands/mutations/data-validation.mutation';
-import { AddDataValidationMutation, RemoveDataValidationMutation } from '../commands/mutations/data-validation.mutation';
-import { DataValidationModel } from '../models/data-validation-model';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationSheetController)
-export class DataValidationSheetController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, SheetDataValidationSheetController)
+export class SheetDataValidationSheetController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
     ) {
         super();
         this._initSheetChange();
@@ -50,12 +50,7 @@ export class DataValidationSheetController extends Disposable {
                             return { redos: [], undos: [] };
                         }
 
-                        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
-                        if (!manager) {
-                            return { redos: [], undos: [] };
-                        }
-
-                        const rules = manager.getDataValidations();
+                        const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
                         const ids = rules.map((i) => i.uid);
                         const redoParams: IRemoveDataValidationMutationParams = {
                             unitId,

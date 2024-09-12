@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { isRealNum } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
@@ -23,9 +23,9 @@ import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
-import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
+import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 
 enum BatchOperatorType {
     MINUS,

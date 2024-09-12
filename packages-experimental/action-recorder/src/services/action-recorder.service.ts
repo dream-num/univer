@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, IDisposable, Nullable } from '@univerjs/core';
 import { CommandType, Disposable, ICommandService, ILogService } from '@univerjs/core';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { ILocalFileService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
+import type { ICommand, ICommandInfo, IDisposable, Nullable } from '@univerjs/core';
 
 /**
  * This service is for recording commands. What commands should be recorded can be configured by other

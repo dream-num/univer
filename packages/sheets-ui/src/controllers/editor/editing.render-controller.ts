@@ -16,7 +16,6 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -42,13 +41,13 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -58,24 +57,25 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
-import type { WorkbookSelections } from '@univerjs/sheets';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
-import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
-
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IEditorInputConfig } from '@univerjs/docs-ui';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+
+import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+import type { WorkbookSelections } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
-import styles from '../../views/sheet-container/index.module.less';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
+import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import styles from '../../views/sheet-container/index.module.less';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 

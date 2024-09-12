@@ -15,16 +15,16 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { IEditorService } from '@univerjs/ui';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { InsertCommand } from '@univerjs/docs-ui';
+import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
+import { IEditorService } from '@univerjs/ui';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
-import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
-import { UniFormulaPopupService } from '../services/formula-popup.service';
-import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/operation';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
+import { UniFormulaPopupService } from '../services/formula-popup.service';
+import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
+import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/operation';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 

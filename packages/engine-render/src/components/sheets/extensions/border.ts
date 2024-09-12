@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { BorderStyleTypes } from '@univerjs/core';
+import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
+import { SheetExtension } from './sheet-extension';
+import type { UniverRenderingContext } from '../../../context';
 import type { BorderCacheItem } from '../interfaces';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
-import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBorderExtension';
 

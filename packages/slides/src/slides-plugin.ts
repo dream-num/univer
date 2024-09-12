@@ -15,9 +15,9 @@
  */
 
 import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine, IRenderManagerService } from '@univerjs/engine-render';
 import type { Dependency } from '@univerjs/core';
+import type { Engine } from '@univerjs/engine-render';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 // import { DocSelectionManagerService } from '@univerjs/docs';
 // import { CanvasView } from './views/render';

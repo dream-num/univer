@@ -17,8 +17,8 @@
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
@@ -86,11 +86,10 @@ export class DataValidationCustomFormulaService extends Disposable {
                 for (const subUnitId in unitMap) {
                     const results = unitMap[subUnitId];
                     const { formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
-                    const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
                     results.forEach((result) => {
                         const ruleInfo = ruleFormulaMap.get(result.extra?.ruleId);
                         const cellInfo = formulaCellMap.get(result.formulaId);
-                        const rule = manager.getRuleById(result.extra?.ruleId);
+                        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
 
                         if (rule && ruleInfo && !ruleInfo.isTransformable) {
                             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);

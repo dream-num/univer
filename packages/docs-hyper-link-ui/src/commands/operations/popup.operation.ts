@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
 import { CommandType, CustomRangeType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getCustomRangesInterestsWithRange } from '@univerjs/docs-ui';
+import type { DocumentDataModel, IAccessor, ICommand, ITextRange } from '@univerjs/core';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {

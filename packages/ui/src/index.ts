@@ -14,13 +14,25 @@
  * limitations under the License.
  */
 
+export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 export * from './common';
-export { getMenuHiddenObservable, getHeaderFooterMenuHiddenObservable } from './common/menu-hidden-observable';
+export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
+export { mergeMenuConfigs } from './common/menu-merge-configs';
 export * from './components';
+export { TextEditor } from './components/editor/TextEditor';
+export { useEvent } from './components/hooks/event';
 export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';
-export { useEvent } from './components/hooks/event';
 export { useVirtualList } from './components/hooks/virtual-list';
+export { Menu } from './components/menu/desktop/Menu';
+export { type INotificationOptions, type NotificationType } from './components/notification/Notification';
+export { ProgressBar } from './components/progress-bar/ProgressBar';
+export { RangeSelector } from './components/range-selector/RangeSelector';
+export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { type IUniverUIConfig } from './controllers/config.schema';
+export { ErrorController } from './controllers/error/error.controller';
+export { menuSchema } from './controllers/menus/menu.schema';
 export {
     CopyShortcutItem,
     CutShortcutItem,
@@ -28,11 +40,10 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
+export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
 export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
-export { type IUniverUIConfig } from './controllers/config.schema';
 export { DesktopUIController } from './controllers/ui/ui-desktop.controller';
-export { IUIPartsService, BuiltInUIPart, UIPartsService } from './services/parts/parts.service';
-export { type IOpenFileOptions, ILocalFileService } from './services/local-file/file-opener.service';
+export { UniverMobileUIPlugin } from './mobile-ui-plugin';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';
 export {
@@ -49,9 +60,14 @@ export {
     IContextMenuService,
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
-export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
 export { IDialogService } from './services/dialog/dialog.service';
-export { ILayoutService, DesktopLayoutService } from './services/layout/layout.service';
+export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
+export { Editor, EditorService, IEditorService } from './services/editor/editor.service';
+export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
+export { IGlobalZoneService } from './services/global-zone/global-zone.service';
+export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
+export { ILocalFileService, type IOpenFileOptions } from './services/local-file/file-opener.service';
+export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export {
     type ICustomComponentProps,
     type IDisplayMenuItem,
@@ -62,84 +78,68 @@ export {
     type IValueOption,
     type MenuConfig,
     MenuGroup,
+    type MenuItemDefaultValueType,
     MenuItemType,
     MenuPosition,
-    type MenuItemDefaultValueType,
 } from './services/menu/menu';
-export { MenuService, IMenuService } from './services/menu/menu.service';
+export { IMenuService, MenuService } from './services/menu/menu.service';
+export { IMenuManagerService, MenuManagerService, type MenuSchemaType } from './services/menu/menu-manager.service';
+export { type IMenuSchema } from './services/menu/menu-manager.service';
+export {
+    ContextMenuGroup,
+    ContextMenuPosition,
+    MenuManagerPosition,
+    RibbonDataGroup,
+    RibbonFormulasGroup,
+    RibbonInsertGroup,
+    RibbonOthersGroup,
+    RibbonPosition,
+    RibbonStartGroup,
+    RibbonViewGroup,
+} from './services/menu/types';
 export { DesktopMessageService } from './services/message/desktop-message.service';
 export { IMessageService } from './services/message/message.service';
 export { DesktopNotificationService } from './services/notification/desktop-notification.service';
-export { type NotificationType, type INotificationOptions } from './components/notification/Notification';
 export { INotificationService } from './services/notification/notification.service';
-export { PlatformService, IPlatformService } from './services/platform/platform.service';
-export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
-export { IGlobalZoneService } from './services/global-zone/global-zone.service';
-export { KeyCode, MetaKeys } from './services/shortcut/keycode';
-export { ShortcutService, type IShortcutItem, IShortcutService } from './services/shortcut/shortcut.service';
-export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
-export { ISidebarService, ILeftSidebarService } from './services/sidebar/sidebar.service';
-export { IZenZoneService } from './services/zen-zone/zen-zone.service';
-export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
-export { UniverMobileUIPlugin } from './mobile-ui-plugin';
-export * from './utils';
-export { Menu } from './components/menu/desktop/Menu';
-export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
-export { ComponentContainer, useComponentsOfPart, type IComponentContainerProps } from './views/components/ComponentContainer';
-export { IEditorService, EditorService, Editor } from './services/editor/editor.service';
-export { TextEditor } from './components/editor/TextEditor';
-export { RangeSelector } from './components/range-selector/RangeSelector';
-export { ProgressBar } from './components/progress-bar/ProgressBar';
-export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus } from './views/components/ribbon/hook';
-export { mergeMenuConfigs } from './common/menu-merge-configs';
-export { ShortcutPanelController } from './controllers/shortcut-display/shortcut-panel.controller';
-export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
-export { IProgressService, type IProgressCount, type IProgressStep, ProgressService } from './services/progress/progress.service';
-export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
+export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
+export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
-export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
-export { ErrorController } from './controllers/error/error.controller';
+export { type IProgressCount, IProgressService, type IProgressStep, ProgressService } from './services/progress/progress.service';
+export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
+export { KeyCode, MetaKeys } from './services/shortcut/keycode';
+export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
+export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
+export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
+export { ILeftSidebarService, ISidebarService } from './services/sidebar/sidebar.service';
 export { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
-export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
-export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
+export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 
-export { menuSchema } from './controllers/menus/menu.schema';
+export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
 
-export { IMenuManagerService, type MenuSchemaType, MenuManagerService } from './services/menu/menu-manager.service';
-export {
-    MenuManagerPosition,
-    RibbonPosition,
-    RibbonStartGroup,
-    RibbonInsertGroup,
-    RibbonFormulasGroup,
-    RibbonDataGroup,
-    RibbonViewGroup,
-    RibbonOthersGroup,
-    ContextMenuGroup,
-    ContextMenuPosition,
-} from './services/menu/types';
-export { type IMenuSchema } from './services/menu/menu-manager.service';
+export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
+export * from './utils';
+export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
 
 // #region - workbench components
 
-export { GlobalZone } from './views/components/global-zone/GlobalZone';
-export { builtInGlobalComponents } from './views/parts';
+export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { DesktopContextMenu as ContextMenu } from './views/components/context-menu/ContextMenu';
-export { Sidebar } from './views/components/sidebar/Sidebar';
-export { type ISidebarMethodOptions } from './views/components/sidebar/interface';
-export { ZenZone } from './views/components/zen-zone/ZenZone';
-export { CanvasPopup } from './views/components/popup/CanvasPopup';
-export { CanvasFloatDomService, type IFloatDomLayout } from './services/dom/canvas-dom-layer.service';
-export { FloatDom } from './views/components/dom/FloatDom';
 export { MobileContextMenu } from './views/components/context-menu/MobileContextMenu';
+export { type IDialogPartMethodOptions } from './views/components/dialog-part/interface';
+export { FloatDom } from './views/components/dom/FloatDom';
+export { GlobalZone } from './views/components/global-zone/GlobalZone';
+export { CanvasPopup } from './views/components/popup/CanvasPopup';
+export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
+export { type IMenuGroup, useSimpleToolbarGroups, useToolbarGroups, useToolbarItemStatus } from './views/components/ribbon/hook';
 export { Ribbon } from './views/components/ribbon/Ribbon';
 export { ToolbarItem } from './views/components/ribbon/ToolbarItem';
-export { ToolbarButton } from './views/components/ribbon/Button/ToolbarButton';
+export { type ISidebarMethodOptions } from './views/components/sidebar/interface';
+export { Sidebar } from './views/components/sidebar/Sidebar';
 // #endregion
 
 // #region - all commands
 
-export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
-export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+export { ZenZone } from './views/components/zen-zone/ZenZone';
+export { builtInGlobalComponents } from './views/parts';
 
 // #endregion

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type {
-    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
-} from '@univerjs/core';
 import {
     BaselineOffset, BooleanNumber, CommandType,
     ICommandService, IUniverInstanceService,
     JSONX, MemoryCursor,
     TextX, TextXActionType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import type {
+    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+} from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRichTextEditPath } from '../util';
 

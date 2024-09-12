@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
 import { Range, sortRules } from '@univerjs/core';
-import type { UniverRenderingContext } from '../../../context';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { IRange, IScale } from '@univerjs/core';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
+import type { UniverRenderingContext } from '../../../context';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 const UNIQUE_KEY = 'DefaultCustomExtension';
 

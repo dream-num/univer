@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
 import { UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocBackground, Documents, Engine, IRenderContext, IRenderManagerService, Scene } from '@univerjs/engine-render';
 import { DOCS_VIEW_KEY } from './docs-view-key';
 

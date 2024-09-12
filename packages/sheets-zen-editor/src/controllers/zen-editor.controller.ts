@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -30,21 +29,22 @@ import {
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import type { Viewport } from '@univerjs/engine-render';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, getDocObject } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-
+import type { ICommandInfo, ICustomBlock, ICustomRange, IDocumentData, IDrawings, IParagraph, ITextRun } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IDocObjectParam } from '@univerjs/docs-ui';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, getDocObject } from '@univerjs/docs-ui';
+
+import type { Viewport } from '@univerjs/engine-render';
+import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
 import { IZenEditorManagerService } from '../services/zen-editor.service';
 

@@ -18,10 +18,9 @@ import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core'
 import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { DataValidationModel } from '@univerjs/data-validation';
-import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationCopyPasteController)
 export class DataValidationCopyPasteController extends Disposable {
@@ -33,7 +32,7 @@ export class DataValidationCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
-        @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private _injector: Injector
     ) {
         super();
@@ -61,8 +60,6 @@ export class DataValidationCopyPasteController extends Disposable {
             matrix,
         };
 
-        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-
         const discreteRange = this._injector.invoke((accessor) => {
             return rangeToDiscreteRange(range, accessor, unitId, subUnitId);
         });
@@ -72,8 +69,7 @@ export class DataValidationCopyPasteController extends Disposable {
         const { rows, cols } = discreteRange;
         rows.forEach((row, rowIndex) => {
             cols.forEach((col, colIndex) => {
-                const ruleId = manager.getRuleIdByLocation(row, col);
-
+                const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                 matrix.setValue(rowIndex, colIndex, ruleId ?? '');
             });
         });
@@ -117,9 +113,7 @@ export class DataValidationCopyPasteController extends Disposable {
         const { unitId, subUnitId } = this._copyInfo;
 
         if (copyInfo.unitId !== unitId || subUnitId !== copyInfo.subUnitId) {
-            const originManager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-            const manager = this._dataValidationModel.ensureManager(copyInfo.unitId, copyInfo.subUnitId) as SheetDataValidationManager;
-            const ruleMatrix = manager.getRuleObjectMatrix().clone();
+            const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(copyInfo.unitId, copyInfo.subUnitId).clone();
 
             const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
 
@@ -138,9 +132,9 @@ export class DataValidationCopyPasteController extends Disposable {
                         startRange
                     );
                     const transformedRuleId = `${subUnitId}-${ruleId}`;
-                    const oldRule = originManager.getRuleById(ruleId);
+                    const oldRule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
 
-                    if (!manager.getRuleById(transformedRuleId) && oldRule) {
+                    if (!this._sheetDataValidationModel.getRuleById(copyInfo.unitId, copyInfo.subUnitId, transformedRuleId) && oldRule) {
                         additionRules.set(transformedRuleId, { ...oldRule, uid: transformedRuleId });
                     }
 
@@ -152,7 +146,7 @@ export class DataValidationCopyPasteController extends Disposable {
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 copyInfo.unitId,
                 copyInfo.subUnitId,
-                ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules.values()),
+                ruleMatrix.diffWithAddition(this._sheetDataValidationModel.getRules(copyInfo.unitId, copyInfo.subUnitId), additionRules.values()),
                 this._injector,
                 'patched'
             );
@@ -162,8 +156,7 @@ export class DataValidationCopyPasteController extends Disposable {
                 undos: undoMutations,
             };
         } else {
-            const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
-            const ruleMatrix = manager.getRuleObjectMatrix().clone();
+            const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
 
             const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
 
@@ -188,7 +181,7 @@ export class DataValidationCopyPasteController extends Disposable {
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 unitId,
                 subUnitId,
-                ruleMatrix.diff(manager.getDataValidations()),
+                ruleMatrix.diff(this._sheetDataValidationModel.getRules(unitId, subUnitId)),
                 this._injector,
                 'patched'
             );

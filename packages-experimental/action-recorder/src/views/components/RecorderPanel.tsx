@@ -15,14 +15,14 @@
  */
 
 import { ICommandService, useDependency } from '@univerjs/core';
-import React, { useCallback } from 'react';
-import { useObservable } from '@univerjs/ui';
 import { Button } from '@univerjs/design';
 import { RecordSingle } from '@univerjs/icons';
+import { useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
-import { ActionRecorderService } from '../../services/action-recorder.service';
+import React, { useCallback } from 'react';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../../commands/commands/record.command';
 import { CloseRecordPanelOperation } from '../../commands/operations/operation';
+import { ActionRecorderService } from '../../services/action-recorder.service';
 import styles from './index.module.less';
 
 export function RecorderPanel() {

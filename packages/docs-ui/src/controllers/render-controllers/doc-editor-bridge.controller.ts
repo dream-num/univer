@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
 import { fromEvent } from 'rxjs';
+import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { CoverContentCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';

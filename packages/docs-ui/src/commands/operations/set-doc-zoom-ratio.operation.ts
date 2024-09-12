@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IAccessor, IOperation } from '@univerjs/core';
 
 export interface ISetDocZoomRatioOperationParams {
     zoomRatio: number;

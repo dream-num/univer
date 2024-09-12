@@ -131,7 +131,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult;
 
-    normlizeFormula(rule: IDataValidationRule, unitId: string, subUnitId: string) {
+    normalizeFormula(rule: IDataValidationRule, unitId: string, subUnitId: string) {
         return {
             formula1: rule.formula1,
             formula2: rule.formula2,

@@ -19,10 +19,11 @@ import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, Lifecy
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Starting, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
@@ -131,7 +132,7 @@ export class DataValidationRefRangeController extends Disposable {
                 if (formula2) {
                     const disposable = this._formulaRefRangeService.registerFormula(
                         formula2.text,
-                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
+                        (newFormulaString) => handleFormulaChange('formula2', newFormulaString)
                     );
                     disposeSet.add(() => disposable.dispose());
                 }
@@ -210,13 +211,17 @@ export class DataValidationRefRangeController extends Disposable {
                     }
                     case 'remove': {
                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        if (disposeSet) {
+                            disposeSet.forEach((dispose) => dispose());
+                        }
                         break;
                     }
                     case 'update': {
                         const rule = option.rule!;
                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                        disposeSet && disposeSet.forEach((dispose) => dispose());
+                        if (disposeSet) {
+                            disposeSet.forEach((dispose) => dispose());
+                        }
                         this.registerRule(option.unitId, option.subUnitId, rule);
                         break;
                     }

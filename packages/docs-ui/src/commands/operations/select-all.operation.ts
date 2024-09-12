@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import type { ICommand } from '@univerjs/core';
 
 interface ISelectAllOperationParams { }
 

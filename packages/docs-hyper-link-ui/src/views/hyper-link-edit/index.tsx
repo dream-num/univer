@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Button, FormLayout, Input } from '@univerjs/design';
-import React, { useEffect, useState } from 'react';
 import { getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
-import type { DocumentDataModel } from '@univerjs/core';
+import { Button, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { KeyCode } from '@univerjs/ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService, getPlainTextFormBody } from '@univerjs/docs-ui';
-import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { KeyCode } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { DocumentDataModel } from '@univerjs/core';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
+import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 import styles from './index.module.less';
 
 function hasProtocol(urlString: string) {

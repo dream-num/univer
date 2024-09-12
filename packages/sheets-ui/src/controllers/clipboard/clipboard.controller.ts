@@ -37,6 +37,7 @@ import {
     RxDisposable, UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     InsertColMutation,
@@ -49,7 +50,9 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
+
 import { IMessageService } from '@univerjs/ui';
+import { takeUntil } from 'rxjs';
 
 import type {
     ICellData,
@@ -69,9 +72,6 @@ import type {
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
-
-import { takeUntil } from 'rxjs';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import {
     SheetCopyCommand,
     SheetCutCommand,

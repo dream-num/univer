@@ -16,13 +16,13 @@
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand, useDependency } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationCommand, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
-import { UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '../../commands/commands/data-validation.command';
+import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import styles from './index.module.less';
@@ -34,9 +34,8 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     ) => {
         const res = await commandService.executeCommand(id, params, options);
         callback?.(res);
-    }
-    ,
-    275
+    },
+    1000
 );
 
 export function DataValidationDetail() {
@@ -140,7 +139,7 @@ export function DataValidationDetail() {
     };
 
     const handleDelete = async () => {
-        await commandService.executeCommand(RemoveDataValidationCommand.id, {
+        await commandService.executeCommand(RemoveSheetDataValidationCommand.id, {
             ruleId,
             unitId,
             subUnitId,

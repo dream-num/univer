@@ -16,13 +16,13 @@
 
 /* eslint-disable react-refresh/only-export-components */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-
 import { connectInjector, Disposable, Inject, Injector, useDependency, useObservable } from '@univerjs/core';
+
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 import { BuiltInUIPart, IUIPartsService } from '../parts/parts.service';
-import type { IOpenFileOptions } from './file-opener.service';
 import { ILocalFileService } from './file-opener.service';
+import type { IOpenFileOptions } from './file-opener.service';
 
 interface IOpenFileRequest extends IOpenFileOptions {
     onFileSelected: (files: File[]) => void;

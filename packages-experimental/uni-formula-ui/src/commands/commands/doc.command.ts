@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
 import { CommandType, CustomRangeType, generateRandomId, ICommandService, LocaleService, makeCustomRangeStream, sequenceExecute } from '@univerjs/core';
 import { makeSelection, replaceSelectionFactory } from '@univerjs/docs-ui';
-import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from '@univerjs/uni-formula';
 import { AddDocUniFormulaMutation, RemoveDocUniFormulaMutation, UpdateDocUniFormulaMutation } from '@univerjs/uni-formula';
+import type { ICommand, IDocumentBody, IMutationInfo } from '@univerjs/core';
+import type { IAddDocUniFormulaMutationParams, IRemoveDocUniFormulaMutationParams, IUpdateDocUniFormulaMutationParams } from '@univerjs/uni-formula';
 
 export interface IAddDocUniFormulaCommandParams {
     unitId: string;

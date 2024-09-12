@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
 import {
     CommandType,
     GridType,
@@ -30,12 +29,13 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getCharSpaceApply, getNumberUnitValue } from '@univerjs/engine-render';
-import { getRichTextEditPath } from '../util';
+import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { hasParagraphInTable } from '../../basics/paragraph';
+import { getRichTextEditPath } from '../util';
 
 interface IListOperationCommandParams {
     listType: PresetListType;

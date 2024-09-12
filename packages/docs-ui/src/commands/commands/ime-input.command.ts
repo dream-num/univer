@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
-import { getInsertSelection } from '../../basics/selection';
-import { getRichTextEditPath } from '../util';
+import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { ICommand, ICommandInfo } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
+import { getInsertSelection } from '../../basics/selection';
+import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
+import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
     unitId: string;

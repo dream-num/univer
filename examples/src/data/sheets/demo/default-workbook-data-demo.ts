@@ -139,6 +139,8 @@ const dataValidation: IDataValidationRule[] = [
             startColumn: 0,
             endColumn: 5,
         }],
+        formula1: 'TRUE',
+        formula2: 'FALSE',
     },
     {
         uid: 'xxx-3',

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
-import { DocEventManagerService } from '@univerjs/docs-ui';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocEventManagerService } from '@univerjs/docs-ui';
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ClickDocHyperLinkOperation, ToggleDocHyperLinkInfoPopupOperation } from '../../commands/operations/popup.operation';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
 

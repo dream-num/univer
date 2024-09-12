@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_LOGICAL } from './function-names';
 import { And } from './and';
 import { Bycol } from './bycol';
 import { Byrow } from './byrow';
 import { False } from './false';
+import { FUNCTION_NAMES_LOGICAL } from './function-names';
 import { If } from './if';
 import { Iferror } from './iferror';
 import { Ifna } from './ifna';

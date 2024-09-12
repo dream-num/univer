@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'An array to be separated by column.' },
+            lambda: { name: 'lambda', detail: 'A LAMBDA that takes a column as a single parameter and calculates one result. The LAMBDA takes a single parameter: A column from array.' },
         },
     },
     BYROW: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'An array to be separated by row.' },
+            lambda: { name: 'lambda', detail: 'A LAMBDA that takes a row as a single parameter and calculates one result. The LAMBDA takes a single parameter: A row from array.' },
         },
     },
     FALSE: {
@@ -189,8 +189,8 @@ export default {
         },
     },
     MAP: {
-        description: 'Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value',
-        abstract: 'Returns an array&nbsp;formed by mapping&nbsp;each value in the array(s) to a new value by applying a&nbsp;LAMBDA&nbsp;to create a new value',
+        description: 'Returns an array formed by mapping each value in the array(s) to a new value by applying a LAMBDA to create a new value.',
+        abstract: 'Returns an array formed by mapping each value in the array(s) to a new value by applying a LAMBDA to create a new value.',
         links: [
             {
                 title: 'Instruction',
@@ -198,8 +198,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'An array1 to be mapped.' },
+            array2: { name: 'array2', detail: 'An array2 to be mapped.' },
+            lambda: { name: 'lambda', detail: 'A LAMBDA which must be the last argument and which must have either a parameter for each array passed.' },
         },
     },
     NOT: {
@@ -230,8 +231,8 @@ export default {
         },
     },
     REDUCE: {
-        description: 'Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator',
-        abstract: 'Reduces an array to an accumulated value by applying a&nbsp;LAMBDA&nbsp;to each value and returning the total value in the accumulator',
+        description: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator. ',
+        abstract: 'Reduces an array to an accumulated value by applying a LAMBDA to each value and returning the total value in the accumulator. ',
         links: [
             {
                 title: 'Instruction',
@@ -239,13 +240,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: 'initial_value', detail: 'Sets the starting value for the accumulator.' },
+            array: { name: 'array', detail: 'An array to be reduced.' },
+            lambda: { name: 'lambda', detail: 'A LAMBDA that is called to reduce the array. The LAMBDA takes three parameters: 1.The value totaled up and returned as the final result. 2.The current value from the array. 3.The calculation applied to each element in the array.' },
         },
     },
     SCAN: {
-        description: 'Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value',
-        abstract: 'Scans&nbsp;an array by applying a&nbsp;LAMBDA&nbsp;to each value and returns an array that has each intermediate value',
+        description: 'Scans an array by applying a LAMBDA to each value and returns an array that has each intermediate value.',
+        abstract: 'Scans an array by applying a LAMBDA to each value and returns an array that has each intermediate value.',
         links: [
             {
                 title: 'Instruction',
@@ -253,8 +255,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: 'initial_value', detail: 'Sets the starting value for the accumulator.' },
+            array: { name: 'array', detail: 'An array to be scanned.' },
+            lambda: { name: 'lambda', detail: 'A LAMBDA that is called to scanned the array. The LAMBDA takes three parameters: 1.The value totaled up and returned as the final result. 2.The current value from the array. 3.The calculation applied to each element in the array.' },
         },
     },
     SWITCH: {

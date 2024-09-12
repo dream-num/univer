@@ -256,7 +256,7 @@ export class ArrayValueObject extends BaseValueObject {
         // if (v == null) {
         //     return null;
         // }
-        return this._values[row]?.[column];
+        return this._values[row]?.[column] || this._defaultValue;
     }
 
     getRealValue(row: number, column: number) {

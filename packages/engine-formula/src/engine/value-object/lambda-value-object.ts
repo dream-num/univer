@@ -18,12 +18,12 @@ import type { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
+import { AsyncObject } from '../reference-object/base-reference-object';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
-import { AsyncObject } from '../reference-object/base-reference-object';
-import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
     if (!node) {
@@ -134,5 +134,9 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
             this._lambdaPrivacyValueMap.set(key, variant);
         }
+    }
+
+    getLambdaPrivacyVarKeys() {
+        return this._lambdaPrivacyVarKeys;
     }
 }

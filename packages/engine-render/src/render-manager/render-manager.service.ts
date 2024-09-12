@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
 import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 
+import { Engine } from '../engine';
+import { Scene } from '../scene';
+import { type IRender, RenderUnit } from './render-unit';
 import type { BaseObject } from '../base-object';
 import type { DocComponent } from '../components/docs/doc-component';
 import type { SheetComponent } from '../components/sheets/sheet-component';
 import type { Slide } from '../components/slides/slide';
-import { Engine } from '../engine';
-import { Scene } from '../scene';
-import { type IRender, RenderUnit } from './render-unit';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 
@@ -245,7 +245,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
      * @param isMainScene
      * @returns renderUnit:IRender
      */
-    private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
+    protected _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {
         const existItem = this.getRenderById(unitId);
         let shouldDestroyEngine = true;
 

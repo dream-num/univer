@@ -15,14 +15,13 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-
 import { expandRangeIfIntersects, fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
+import { SpreadsheetExtensionRegistry } from '../../extension';
+import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
-import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 

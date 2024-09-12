@@ -194,10 +194,17 @@ export class Viewport {
 
     private _paddingEndY: number = 0;
 
-    private _explicitViewportWidthSet: boolean = false;
     /**
-     * _isRelativeY true means this height is dynamic decided by canvas size and other viewport height
-     * ex: if freeze horizontally, viewMain _isRelativeY is true, the height of viewMain is decided by canvas height - viewMainTop.height.
+     * Usually for viewport by after freeze, _explicitViewportWidthSet true means viewport's width is specify explicitly.
+     * ex: ViewMainLeft _explicitViewportWidthSet is true when freeze at a certain col, the width of viewMainLeft is decided by freeze line.
+     * Usually this prop is false for viewMain, viewport width is decided by engine size - freeze line
+     */
+    private _explicitViewportWidthSet: boolean = false;
+
+    /**
+     * _explicitViewportHeightSet true means viewport's height is specify explicitly.
+     * Used for viewport by after freeze.
+     * ex: ViewMainTop _explicitViewportHeightSet is true when freeze at a certain row, the height of viewMainTop is decided by freeze line.
      */
     private _explicitViewportHeightSet: boolean = false;
 
@@ -577,7 +584,14 @@ export class Viewport {
      * @returns IViewportScrollPosition
      */
     scrollToViewportPos(pos: Partial<IViewportScrollPosition>, isTrigger = true) {
-        if (!this._scrollBar || this.isActive === false) {
+        // TODO @lumixraku Now scrollManager only call viewportMain@scrollToViewportPos.
+        // this method in other viewports won't get called.
+        // viewport is inactive when it's out of visible area (see #univer-pro/issues/2479)
+        // so there should not return when inactive.
+        // it's not right, this method in other viewport should be called.
+
+        // if (!this._scrollBar || this.isActive === false) {
+        if (!this._scrollBar) {
             return;
         }
         const { viewportScrollX, viewportScrollY } = pos;

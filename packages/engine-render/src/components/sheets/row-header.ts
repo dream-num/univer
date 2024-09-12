@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import { SheetRowHeaderExtensionRegistry } from '../extension';
+import { SpreadsheetHeader } from './sheet-component';
 import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
-import { SheetRowHeaderExtensionRegistry } from '../extension';
 import type { IRowsHeaderCfgParam, RowHeaderLayout } from './extensions/row-header-layout';
-import { SpreadsheetHeader } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 export class SpreadsheetRowHeader extends SpreadsheetHeader {

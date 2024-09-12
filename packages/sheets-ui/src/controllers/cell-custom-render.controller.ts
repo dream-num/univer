@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellCustomRender, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import type { ICellCustomRender, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable implements IRenderModule {
@@ -82,10 +82,11 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
 
                     const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
-                    const mergeCell = skeleton.mergeData.find((range) => {
-                        const { startColumn, startRow, endColumn, endRow } = range;
-                        return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
-                    });
+                    // const mergeCell = skeleton.mergeData.find((range) => {
+                    //     const { startColumn, startRow, endColumn, endRow } = range;
+                    //     return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
+                    // });
+                    const mergeCell = skeleton.worksheet.getMergedCell(cellPos.row, cellPos.column);
 
                     const cellIndex = {
                         actualRow: mergeCell ? mergeCell.startRow : cellPos.row,

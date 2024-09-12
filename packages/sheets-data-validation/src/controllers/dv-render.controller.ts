@@ -254,10 +254,11 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 ...extra.interceptorStyle,
                             },
                             interceptorAutoHeight: () => {
-                                const mergeCell = skeleton.mergeData.find((range) => {
-                                    const { startColumn, startRow, endColumn, endRow } = range;
-                                    return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
-                                });
+                                // const mergeCell = skeleton.mergeData.find((range) => {
+                                //     const { startColumn, startRow, endColumn, endRow } = range;
+                                //     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
+                                // });
+                                const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
                                     data: {
@@ -458,10 +459,11 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                 ...extra.interceptorStyle,
                             },
                             interceptorAutoHeight: () => {
-                                const mergeCell = skeleton.mergeData.find((range) => {
-                                    const { startColumn, startRow, endColumn, endRow } = range;
-                                    return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
-                                });
+                                // const mergeCell = skeleton.mergeData.find((range) => {
+                                //     const { startColumn, startRow, endColumn, endRow } = range;
+                                //     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
+                                // });
+                                const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
                                     data: {

@@ -115,8 +115,11 @@ export class SpanModel extends Disposable {
     }
 
     private _createCellCache(range: IRange, index: number) {
-        const key = `${range.startRow}-${range.startColumn}`;
-        this._cellCache[key] = index;
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            for (let j = range.startColumn; j <= range.endColumn; j++) {
+                this._cellCache[`${i}-${j}`] = index;
+            }
+        }
     }
 
     public add(range: IRange) {

@@ -1,14 +1,14 @@
-import './scripts/generate-locales.mjs';
+import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 
-import { execSync } from 'node:child_process';
 import esbuild from 'esbuild';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
+import vue from 'esbuild-plugin-vue3';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
-import vue from 'esbuild-plugin-vue3';
+import './scripts/generate-locales.mjs';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -25,8 +25,8 @@ const monacoEditorEntryPoints = [
 ];
 
 // Get git commit hash and ref name
-const gitCommitHash = execSync('git rev-parse --short HEAD').toString().trim();
-const gitRefName = execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
+const gitCommitHash = isE2E ? 'E2E' : execSync('git rev-parse --short HEAD').toString().trim();
+const gitRefName = isE2E ? 'E2E' : execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
 
 function monacoBuildTask() {
     return esbuild.build({

@@ -15,12 +15,12 @@
  */
 
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
+import React, { useEffect, useRef, useState } from 'react';
 import { RemoveSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
 import styles from './index.module.less';
 

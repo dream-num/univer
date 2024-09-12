@@ -43,7 +43,7 @@ import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerj
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SetEditorResizeOperation } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-import type { DocumentDataModel, ICommandInfo, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo, ICustomRange, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 
 import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
@@ -281,8 +281,9 @@ export class FormulaEditorController extends RxDisposable {
         let dataStream = body?.dataStream;
         let paragraphs = body?.paragraphs;
         let textRuns = body?.textRuns;
+        const customRanges = body?.customRanges;
 
-        if (dataStream == null || paragraphs == null) {
+        if (dataStream == null || (!paragraphs && !customRanges)) {
             return;
         }
 
@@ -299,7 +300,7 @@ export class FormulaEditorController extends RxDisposable {
             textRuns = [];
         }
 
-        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs ?? [], textRuns, customRanges);
 
         // Also need to resize document and scene after sync content.
         this._autoScroll();
@@ -323,6 +324,7 @@ export class FormulaEditorController extends RxDisposable {
                     const dataStream = editorDocDataModel?.getBody()?.dataStream;
                     const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
                     const textRuns = editorDocDataModel?.getBody()?.textRuns;
+                    const customRanges = editorDocDataModel?.getBody()?.customRanges;
 
                     const syncId =
                         unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
@@ -337,7 +339,7 @@ export class FormulaEditorController extends RxDisposable {
                         this._checkAndSetRenderStyleConfig(editorDocDataModel!);
                         this._syncActionsAndRender(syncId, actions);
                     } else {
-                        this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+                        this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns, customRanges);
                     }
 
                     // handle weather need to show scroll bar.
@@ -361,6 +363,7 @@ export class FormulaEditorController extends RxDisposable {
                     const dataStream = editorDocDataModel?.getBody()?.dataStream;
                     const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
                     const textRuns = editorDocDataModel?.getBody()?.textRuns;
+                    const customRanges = editorDocDataModel?.getBody()?.customRanges;
 
                     const syncId =
                         unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
@@ -371,7 +374,7 @@ export class FormulaEditorController extends RxDisposable {
                         return;
                     }
 
-                    this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns);
+                    this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns, customRanges);
 
                     // handle weather need to show scroll bar.
                     this._autoScroll();
@@ -412,8 +415,8 @@ export class FormulaEditorController extends RxDisposable {
                         if (body == null) {
                             return;
                         }
-                        const { dataStream, paragraphs = [] } = body;
-                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs);
+                        const { dataStream, paragraphs = [], customRanges } = body;
+                        this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, undefined, customRanges);
                         // handle weather need to show scroll bar.
                         this._autoScroll();
                     }
@@ -459,7 +462,8 @@ export class FormulaEditorController extends RxDisposable {
         unitId: string,
         dataStream: string,
         paragraphs: IParagraph[],
-        textRuns: ITextRun[] = []
+        textRuns: ITextRun[] = [],
+        customRanges: ICustomRange[] | undefined
     ) {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
@@ -473,6 +477,7 @@ export class FormulaEditorController extends RxDisposable {
 
         docDataModel.getBody()!.dataStream = dataStream;
         docDataModel.getBody()!.paragraphs = this._clearParagraph(paragraphs);
+        docDataModel.getBody()!.customRanges = customRanges;
 
         if (textRuns.length > 0) {
             docDataModel.getBody()!.textRuns = textRuns;

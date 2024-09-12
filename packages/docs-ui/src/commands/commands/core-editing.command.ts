@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type {
     DocumentDataModel,
@@ -27,9 +27,6 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { isIntersecting, shouldDeleteCustomRange } from '../../basics/custom-range';
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
-import { getInsertSelection } from '../../basics/selection';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getRichTextEditPath } from '../util';
 
@@ -39,6 +36,7 @@ export interface IInsertCommandParams {
     range: ITextRange;
     segmentId?: string;
     cursorOffset?: number;
+    extendLastRange?: boolean;
 }
 
 export const EditorInsertTextCommandId = 'doc.command.insert-text';
@@ -50,10 +48,11 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
 
-        const { range, segmentId, body, unitId, cursorOffset } = params;
+        const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -68,7 +67,9 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (!originBody) {
             return false;
         }
-        const actualRange = getInsertSelection(range, originBody);
+        const actualRange = extendLastRange
+            ? BuildTextUtils.selection.getDeleteSelection(range, originBody)
+            : BuildTextUtils.selection.getInsertSelection(range, originBody);
         const { startOffset, collapsed } = actualRange;
         const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [
@@ -102,7 +103,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            const { dos, retain } = getRetainAndDeleteFromReplace(actualRange, segmentId, 0, originBody);
+            const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
             textX.push(...dos);
             doMutation.params.textRanges = [{
                 startOffset: startOffset + cursorMove + retain,
@@ -160,8 +161,8 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const dataStream = body.dataStream;
         const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
         const end = start + len - 1;
-        const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
-        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(start, len, customRange, dataStream));
+        const relativeCustomRanges = body.customRanges?.filter((customRange) => BuildTextUtils.customRange.isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
+        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => BuildTextUtils.customRange.shouldDeleteCustomRange(start, len, customRange, dataStream));
         const deleteIndexes: number[] = [];
         for (let i = 0; i < len; i++) {
             deleteIndexes.push(start + i);

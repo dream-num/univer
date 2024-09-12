@@ -14,102 +14,171 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
-import { SheetInterceptorService } from '@univerjs/sheets';
-import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
+import { BuildTextUtils, CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 
-export interface IRemoveHyperLinkCommandParams {
+export interface ICancelHyperLinkCommandParams {
     unitId: string;
     subUnitId: string;
     /**
      * id of link
      */
     id: string;
+    row: number;
+    column: number;
 }
 
-export const RemoveHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.remove-hyper-link',
-    async handler(accessor, params) {
+    id: 'sheets.command.cancel-hyper-link',
+
+    // eslint-disable-next-line max-lines-per-function
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id } = params;
-        const link = model.getHyperLink(unitId, subUnitId, id);
-        const { redos, undos } = sheetInterceptorService.onCommandExecute({
-            id: RemoveHyperLinkCommand.id,
-            params,
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const hyperLinkModel = accessor.get(HyperLinkModel);
+
+        const { unitId, subUnitId, row, column, id } = params;
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const currentRender = renderManagerService.getRenderById(unitId);
+        if (!currentRender || !workbook) {
+            return false;
+        }
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+        const skeleton = skeletonManagerService.getCurrent()?.skeleton;
+        if (!worksheet || !skeleton) {
+            return false;
+        }
+        const cellData = worksheet.getCell(row, column);
+        if (!cellData) {
+            return false;
+        }
+        const doc = skeleton.getCellDocumentModelWithFormula(cellData);
+        if (!doc?.documentModel) {
+            return false;
+        }
+        const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());
+
+        const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
+        if (!range) {
+            return false;
+        }
+
+        const textX = BuildTextUtils.customRange.delete(accessor, { documentDataModel: doc.documentModel, rangeId: id });
+
+        if (!textX) {
+            return false;
+        }
+
+        const newBody = TextX.apply(snapshot.body!, textX.serialize());
+        const redos: IMutationInfo[] = [];
+        const undos: IMutationInfo[] = [];
+        const setRangeParams = {
+            unitId,
+            subUnitId,
+            cellValue: {
+                [row]: {
+                    [column]: {
+                        p: {
+                            ...snapshot,
+                            body: newBody,
+                        },
+                        t: CellValueType.STRING,
+                    },
+                },
+            },
+        };
+
+        redos.push({
+            id: SetRangeValuesMutation.id,
+            params: setRangeParams,
         });
 
-        const redo: IMutationInfo = {
-            id: RemoveHyperLinkMutation.id,
-            params,
-        };
-        const undo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                link,
-            } as IAddHyperLinkMutationParams,
-        };
+        const undoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeParams);
 
-        const res = await sequenceExecuteAsync([redo, ...redos], commandService);
-        if (res.result) {
+        undos.push({
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        });
+
+        const link = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
+        if (link) {
+            redos.push({
+                id: RemoveHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    id,
+                },
+            });
+            undos.push({
+                id: AddHyperLinkMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    link: {
+                        ...link,
+                    },
+                } as IAddHyperLinkMutationParams,
+            });
+        }
+
+        const res = sequenceExecute(redos, commandService).result;
+
+        if (res) {
             undoRedoService.pushUndoRedo({
-                redoMutations: [redo, ...redos],
-                undoMutations: [undo, ...undos],
+                redoMutations: redos,
+                undoMutations: undos,
                 unitID: unitId,
             });
             return true;
         }
-
         return false;
     },
 };
 
-export const CancelHyperLinkCommand: ICommand<IRemoveHyperLinkCommandParams> = {
+export interface ICancelRichHyperLinkCommandParams extends ICancelHyperLinkCommandParams {
+    /**
+     * document id
+     */
+    documentId: string;
+}
+
+export const CancelRichHyperLinkCommand: ICommand<ICancelRichHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'sheets.command.cancel-hyper-link',
-    async handler(accessor, params) {
+    id: 'sheets.command.cancel-rich-hyper-link',
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
+        const { id: linkId, documentId } = params;
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const model = accessor.get(HyperLinkModel);
-        const { unitId, subUnitId, id } = params;
-        const link = model.getHyperLink(unitId, subUnitId, id);
-
-        const redo: IMutationInfo = {
-            id: RemoveHyperLinkMutation.id,
-            params,
-        };
-        const undo: IMutationInfo = {
-            id: AddHyperLinkMutation.id,
-            params: {
-                unitId,
-                subUnitId,
-                link,
-            } as IAddHyperLinkMutationParams,
-        };
-
-        const res = await sequenceExecuteAsync([redo], commandService);
-        if (res.result) {
-            undoRedoService.pushUndoRedo({
-                redoMutations: [redo],
-                undoMutations: [undo],
-                unitID: unitId,
-            });
-            return true;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(documentId, UniverInstanceType.UNIVER_DOC);
+        const link = doc?.getBody()?.customRanges?.find((i) => i.rangeId === linkId);
+        let insert: Nullable<IDocumentBody> = null;
+        if (link && link.endIndex === doc!.getBody()!.dataStream.length - 3) {
+            insert = {
+                dataStream: ' ',
+            };
+        }
+        const doMutation = deleteCustomRangeFactory(accessor, { unitId: documentId, rangeId: linkId, insert });
+        if (!doMutation) {
+            return false;
         }
 
-        return false;
+        return commandService.syncExecuteCommand(doMutation.id, doMutation.params);
     },
 };

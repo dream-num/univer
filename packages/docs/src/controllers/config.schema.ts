@@ -19,6 +19,7 @@ export const PLUGIN_CONFIG_KEY = 'docs.config';
 export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverDocsConfig {
+    hasScroll?: boolean;
 }
 
 export const defaultPluginConfig: IUniverDocsConfig = {};

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
-import { DocCanvasPopManagerService, makeSelection } from '@univerjs/docs-ui';
+import { BuildTextUtils, Disposable, FORMULA_EDITOR_ACTIVATED, ICommandService, IContextService, ILogService, Inject } from '@univerjs/core';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { FORMULA_PROMPT_ACTIVATED } from '@univerjs/sheets-formula';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { IUniFormulaService } from '@univerjs/uni-formula';
@@ -104,7 +104,7 @@ export class UniFormulaPopupService extends Disposable {
             : '=';
 
         const disposable = this._docCanvasPopupManagerService.attachPopupToRange(
-            makeSelection(startIndex),
+            BuildTextUtils.selection.makeSelection(startIndex),
             {
                 componentKey: DOC_FORMULA_POPUP_KEY,
                 onClickOutside: () => this.closePopup(), // user may update ref range selections

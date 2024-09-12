@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, generateRandomId, type ICommand, ICommandService } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, ICommandService } from '@univerjs/core';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
+import type { ICommand, ITextRangeParam } from '@univerjs/core';
 
 export interface IAddDocHyperLinkCommandParams {
     payload: string;
     unitId: string;
+    selection?: ITextRangeParam;
 }
 
 export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
@@ -30,7 +32,7 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
             return false;
         }
 
-        const { payload } = params;
+        const { payload, unitId, selection } = params;
         const commandService = accessor.get(ICommandService);
         const id = generateRandomId();
         const doMutation = addCustomRangeBySelectionFactory(
@@ -41,6 +43,8 @@ export const AddDocHyperLinkCommand: ICommand<IAddDocHyperLinkCommandParams> = {
                 properties: {
                     url: payload,
                 },
+                unitId,
+                selection,
             }
         );
         if (doMutation) {

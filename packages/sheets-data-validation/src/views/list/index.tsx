@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { useObservable } from '@univerjs/ui';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
-import { DataValidationItem } from '../item';
-import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
+import { useObservable } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand } from '../../commands/commands/data-validation.command';
-import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { createDefaultNewRule } from '../../utils/create';
+import { DataValidationItem } from '../item';
 import styles from './index.module.less';
+import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 
 export function DataValidationList() {
     const univerInstanceService = useDependency(IUniverInstanceService);

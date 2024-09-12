@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import { DataValidationStatus, Inject, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
-import type { IDataValidationResCache } from './dv-cache.service';
 import { DataValidationCacheService } from './dv-cache.service';
+import type { IDataValidationResCache } from './dv-cache.service';
 
 export class SheetsDataValidationValidatorService {
     constructor(

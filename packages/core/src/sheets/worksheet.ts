@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { DataStreamTreeTokenType } from '../docs';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
@@ -731,7 +732,7 @@ export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
 
     const richTextValue = cell.p?.body?.dataStream;
     if (richTextValue) {
-        return richTextValue;
+        return richTextValue.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
     }
 
     const rawValue = cell.v;

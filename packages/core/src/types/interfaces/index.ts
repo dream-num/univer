@@ -21,3 +21,4 @@ export * from './i-placeholder';
 export * from './i-shape-properties';
 export * from './i-slide-data';
 export * from './i-style-data';
+export * from './i-need-check-disposable';

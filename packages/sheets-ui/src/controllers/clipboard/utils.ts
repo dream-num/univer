@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
-import { cellToRange, DEFAULT_STYLES, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
+import { cellToRange, CustomRangeType, DataStreamTreeTokenType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
@@ -551,6 +551,25 @@ export function getClearAndSetMergeMutations(
 }
 
 export function generateBody(text: string): IDocumentBody {
+    if (!text.includes('\r') && Tools.isLegalUrl(text)) {
+        const id = generateRandomId();
+        const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+        const range: ICustomRange = {
+            startIndex: 0,
+            endIndex: urlText.length - 1,
+            rangeId: id,
+            rangeType: CustomRangeType.HYPERLINK,
+            properties: {
+                url: text,
+            },
+        };
+
+        return {
+            dataStream: `${urlText}\r\n`,
+            customRanges: [range],
+        };
+    }
+
     // Convert all \n to \r, because we use \r to indicate paragraph break.
     let dataStream = text.replace(/(\r\n|\n)/g, '\r');
     if (!dataStream.endsWith('\r\n')) {

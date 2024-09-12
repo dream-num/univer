@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-export enum HyperLinkType {
-    range = 0,
-    link = 1,
+export enum SheetHyperLinkType {
+    SHEET = 'gid',
+    RANGE = 'range',
+    DEFINE_NAME = 'rangeid',
+    INVALID = 'invalid',
+    URL = 'url',
 }

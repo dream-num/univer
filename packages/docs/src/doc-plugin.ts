@@ -30,10 +30,7 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
-
-export interface IUniverDocsConfig {
-    hasScroll?: boolean;
-}
+import type { IUniverDocsConfig } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DOCS_PLUGIN';
 

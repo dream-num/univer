@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule } from '@univerjs/core';
 import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 import { serializeRangeToRefString } from '@univerjs/engine-formula';
-import type { FRange } from './f-range';
+import type { IDataValidationRule } from '@univerjs/core';
 import { FDataValidation } from './f-data-validation';
+import type { FRange } from './f-range';
 
  /**
   * Builder for data validation rules.

@@ -20,6 +20,7 @@ import {
     ICommandService,
     Inject,
     Injector,
+    isInternalEditorID,
     IUniverInstanceService,
     LifecycleStages,
     ObjectMatrix,
@@ -224,7 +225,8 @@ export class UpdateFormulaController extends Disposable {
                     this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
                     this._univerInstanceService.getTypeOfUnitAdded$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
                 ).pipe(
-                    filter((unit) => this._editorService.getEditor(unit.getUnitId()) == null)
+                    filter((unit) => this._editorService.getEditor(unit.getUnitId()) == null),
+                    filter((unit) => !isInternalEditorID(unit.getUnitId()))
                 ).subscribe((unit) => this._handleUnitAdded(unit))
             )
         );

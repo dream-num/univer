@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus, IDataValidationRule } from '@univerjs/core';
 import { Disposable, ILogService, Tools } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
-import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
-import { UpdateRuleType } from '../types/enum/update-rule-type';
+import type { DataValidationStatus, IDataValidationRule } from '@univerjs/core';
 import { getRuleOptions, getRuleSetting } from '../common/util';
+import { UpdateRuleType } from '../types/enum/update-rule-type';
+import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 
 type DataValidationChangeType = 'update' | 'add' | 'remove';
 export type DataValidationChangeSource = 'command' | 'patched';

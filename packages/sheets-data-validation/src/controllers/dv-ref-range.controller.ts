@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
-import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
+import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import type { EffectRefRangeParams } from '@univerjs/sheets';
+import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Starting, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {

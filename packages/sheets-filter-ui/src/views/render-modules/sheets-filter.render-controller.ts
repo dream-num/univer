@@ -185,9 +185,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
 
                 return next({
                     ...cell,
-                    // @ts-ignore
                     fontRenderExtension: {
-                        // @ts-ignore
                         ...cell?.fontRenderExtension,
                         rightOffset: FILTER_ICON_SIZE,
                     },

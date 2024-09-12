@@ -18,7 +18,9 @@
 /* eslint-disable no-param-reassign */
 import {
     BooleanNumber,
+    BuildTextUtils,
     CellValueType,
+    CustomRangeType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
     DocumentDataModel,
@@ -33,6 +35,7 @@ import {
     LocaleService,
     ObjectMatrix,
     searchArray,
+    TextX,
     Tools,
     VerticalAlign,
     WrapStrategy,
@@ -43,6 +46,7 @@ import type {
     BorderStyleTypes,
     IBorderStyleData,
     ICellData,
+    ICellDataForSheetInterceptor,
     IColumnData,
     IColumnRange,
     IDocumentData,
@@ -86,6 +90,33 @@ import { Skeleton } from '../skeleton';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+
+function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
+    const body = documentModel.getBody()!;
+    if (body.customRanges?.some((range) => range.rangeType === CustomRangeType.HYPERLINK)) {
+        return;
+    }
+
+    const textX = BuildTextUtils.customRange.add({
+        range: {
+            startOffset: 0,
+            endOffset: body.dataStream.length - 1,
+            collapsed: false,
+        },
+        rangeId: linkId,
+        rangeType: CustomRangeType.HYPERLINK,
+        body,
+        properties: {
+            url: linkUrl,
+            refId: linkId,
+        },
+    });
+    if (!textX) {
+        return;
+    }
+
+    TextX.apply(body, textX.serialize());
+}
 
 /**
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
@@ -390,6 +421,23 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     setMarginTop(top: number): void {
         this._marginTop = top;
+    }
+
+    getFont(rowIndex: number, columnIndex: number): Nullable<IFontCacheItem> {
+        const fontCache = this.stylesCache.font;
+        if (!fontCache) {
+            return null;
+        }
+
+        for (const font in fontCache) {
+            const fontMatrix = fontCache[font];
+            const fontItem = fontMatrix.getValue(rowIndex, columnIndex);
+            if (fontItem) {
+                return fontItem;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -1094,8 +1142,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         });
     }
 
+    // eslint-disable-next-line complexity
     private _getCellDocumentModel(
-        cell: Nullable<ICellData>,
+        cell: Nullable<ICellDataForSheetInterceptor>,
         options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
     ): Nullable<IDocumentLayoutObject> {
         const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
@@ -1157,6 +1206,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 textRotation,
                 cellValueType: cell.t!,
             });
+        }
+        if (documentModel && cell.linkUrl && cell.linkId) {
+            addLinkToDocumentModel(documentModel, cell.linkUrl, cell.linkId);
         }
 
         /**

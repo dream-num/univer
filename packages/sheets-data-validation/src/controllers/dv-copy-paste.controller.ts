@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle } from '@univerjs/core';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
+import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationCopyPasteController)

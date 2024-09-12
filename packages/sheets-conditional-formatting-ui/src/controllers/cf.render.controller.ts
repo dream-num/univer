@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { bufferTime, filter } from 'rxjs/operators';
-import type { ISheetFontRenderExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
@@ -237,7 +236,7 @@ export class SheetsCfRenderController extends Disposable {
                 const styleMap = context.workbook.getStyles();
                 const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                 const s = { ...defaultStyle };
-                const cloneCell = { ...cell, s } as IConditionalFormattingCellData & ISheetFontRenderExtension;
+                const cloneCell = { ...cell, s } as IConditionalFormattingCellData & ICellDataForSheetInterceptor;
                 if (result.style) {
                     Object.assign(s, result.style);
                 }

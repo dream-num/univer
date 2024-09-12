@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
@@ -70,7 +70,7 @@ export class DocInputController extends Disposable implements IRenderModule {
             }
 
             const { segmentId } = activeRange;
-
+            const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,
                 body: {
@@ -78,6 +78,7 @@ export class DocInputController extends Disposable implements IRenderModule {
                 },
                 range: activeRange,
                 segmentId,
+                extendLastRange: UNITS.includes(unitId),
             });
 
             // Space

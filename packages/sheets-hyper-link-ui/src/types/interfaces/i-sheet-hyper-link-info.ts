@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-export * from '../index';
-declare module '@univerjs/docs-ui' {}
+import type { Nullable } from '@univerjs/core';
+import type { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import type { ISheetUrlParams } from './i-sheet-url-params';
+
+export interface ISheetHyperLinkInfo {
+    type: SheetHyperLinkType;
+    name: string;
+    url: string;
+    searchObj: Nullable<ISheetUrlParams>;
+    handler: () => void;
+}

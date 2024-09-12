@@ -19,12 +19,12 @@ import { ComponentManager, IMenuManagerService, IShortcutService } from '@univer
 import { LinkSingle } from '@univerjs/icons';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 import { CellLinkEdit } from '../views/CellLinkEdit';
-import { CloseHyperLinkSidebarOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkSidebarOperation } from '../commands/operations/sidebar.operations';
-import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
-import { CancelHyperLinkCommand, RemoveHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { InsertLinkShortcut } from './menu';
+import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
 import { menuSchema } from './menu.schema';
+import { InsertLinkShortcut } from './menu';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
@@ -55,15 +55,17 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initCommands() {
         [
-            OpenHyperLinkSidebarOperation,
-            CloseHyperLinkSidebarOperation,
+            OpenHyperLinkEditPanelOperation,
+            CloseHyperLinkPopupOperation,
             InsertHyperLinkOperation,
             InsertHyperLinkToolbarOperation,
 
             AddHyperLinkCommand,
             UpdateHyperLinkCommand,
-            RemoveHyperLinkCommand,
             CancelHyperLinkCommand,
+            UpdateRichHyperLinkCommand,
+            CancelRichHyperLinkCommand,
+            AddRichHyperLinkCommand,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

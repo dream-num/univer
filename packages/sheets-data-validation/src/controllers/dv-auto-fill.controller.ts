@@ -15,10 +15,10 @@
  */
 
 import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
-import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationAutoFillController)

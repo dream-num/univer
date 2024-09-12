@@ -15,16 +15,16 @@
  */
 
 import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
-import dayjs from 'dayjs';
-import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
+import dayjs from 'dayjs';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
-import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
+import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DateShowTimeOption } from '../views/show-time';
 
 const FORMULA1 = '{FORMULA1}';

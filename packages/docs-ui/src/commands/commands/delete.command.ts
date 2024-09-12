@@ -15,6 +15,7 @@
  */
 
 import {
+    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
     generateRandomId,
@@ -35,11 +36,12 @@ import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, I
 
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getDeleteSelection } from '../../basics/selection';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
+
+const getDeleteSelection = BuildTextUtils.selection.getDeleteSelection;
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;

@@ -15,6 +15,7 @@
  */
 
 import {
+    BuildTextUtils,
     CommandType,
     ICommandService,
     IUniverInstanceService,
@@ -23,7 +24,7 @@ import {
     TextXActionType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getCustomBlockIdsInSelections, getRetainAndDeleteFromReplace, getRichTextEditPath } from '@univerjs/docs-ui';
+import { getCustomBlockIdsInSelections, getRichTextEditPath } from '@univerjs/docs-ui';
 import type { IAccessor, ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IInsertDrawingCommandParams } from './interfaces';
@@ -77,7 +78,7 @@ export const InsertDocDrawingCommand: ICommand = {
                 });
             }
         } else {
-            const { dos } = getRetainAndDeleteFromReplace(activeTextRange, segmentId, 0, body);
+            const { dos } = BuildTextUtils.selection.getDeleteActions(activeTextRange, segmentId, 0, body);
             textX.push(...dos);
 
             const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [activeTextRange]);

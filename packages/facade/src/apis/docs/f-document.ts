@@ -126,4 +126,11 @@ export class FDocument {
             , true
         );
     }
+
+    // setHyperLink(linkUrl: string): FDocument;
+    // setHyperLink(startOffset: number, endOffset: number, linkUrl: string | null): FDocument {
+    //     this._commandService.executeCommand(
+    //         AddDocHyperLinkCommand.id,
+    //     )
+    // }
 }

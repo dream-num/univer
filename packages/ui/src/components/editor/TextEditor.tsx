@@ -82,6 +82,7 @@ export interface ITextEditorProps {
 
     placeholder?: string; // Placeholder text.
     isValueValid?: boolean; // Whether the value is valid.
+    disbaled?: boolean;
 }
 
 /**

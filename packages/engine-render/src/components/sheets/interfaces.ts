@@ -52,13 +52,9 @@ export interface IFontCacheItem {
     // content?: string;
 }
 
-interface backgroundCache {
-    [key: string]: ObjectMatrix<string>;
-}
+type backgroundCache = Record<string, ObjectMatrix<string>>;
 
-interface fontCache {
-    [key: string]: ObjectMatrix<IFontCacheItem>;
-}
+type fontCache = Record<string, ObjectMatrix<IFontCacheItem>>;
 
 export interface IStylesCache {
     background?: backgroundCache;

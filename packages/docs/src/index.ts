@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { isSegmentIntersects } from './basics/selection';
 // #region - all commands
 export {
     type IRichTextEditingMutationParams,
@@ -25,7 +24,8 @@ export {
     type ISetTextSelectionsOperationParams,
     SetTextSelectionsOperation,
 } from './commands/operations/text-selection.operation';
-export { type IUniverDocsConfig, UniverDocsPlugin } from './doc-plugin';
+export type { IUniverDocsConfig } from './controllers/config.schema';
+export { UniverDocsPlugin } from './doc-plugin';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
 export { DOC_INTERCEPTOR_POINT } from './services/doc-interceptor/interceptor-const';
 export { DocSelectionManagerService } from './services/doc-selection-manager.service';

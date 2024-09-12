@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { isReferenceString } from '@univerjs/engine-formula';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
+import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
+import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';

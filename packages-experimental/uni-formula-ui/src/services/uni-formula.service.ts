@@ -15,6 +15,7 @@
  */
 
 import {
+    BuildTextUtils,
     CommandType,
     CustomRangeType,
     ICommandService,
@@ -28,7 +29,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { makeSelection, replaceSelectionFactory } from '@univerjs/docs-ui';
+import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { RichText } from '@univerjs/engine-render';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
@@ -104,9 +105,9 @@ export const UpdateSlideUniFormulaCacheCommand: ICommand<IUpdateSlideUniFormulaC
 
             const redoMutation = replaceSelectionFactory(accessor, {
                 unitId,
-                originBody,
                 body,
-                selection: makeSelection(range.startIndex, range.endIndex),
+                selection: BuildTextUtils.selection.makeSelection(range.startIndex, range.endIndex),
+                doc: documentModel,
             });
 
             if (!redoMutation) return false;
@@ -170,7 +171,7 @@ export const UpdateDocUniFormulaCacheCommand: ICommand<IUpdateDocUniFormulaCache
             const redoMutation = replaceSelectionFactory(accessor, {
                 unitId,
                 body,
-                selection: makeSelection(range.startIndex, range.endIndex),
+                selection: BuildTextUtils.selection.makeSelection(range.startIndex, range.endIndex),
             });
 
             if (redoMutation) {

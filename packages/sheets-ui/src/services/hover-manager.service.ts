@@ -14,37 +14,121 @@
  * limitations under the License.
  */
 
-import type { IPosition, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { distinctUntilChanged, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
+import type { IBoundRectNoAngle, IFontCacheItem } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getHoverCellPosition } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { SheetScrollManagerService } from './scroll-manager.service';
+import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
 export interface IHoverCellPosition {
     position: IPosition;
+    /**
+     * location of cell
+     */
     location: ISheetLocation;
 }
 
+export interface IHoverRichTextPosition extends IHoverCellPosition {
+    /**
+     * active custom range in cell, if cell is rich-text
+     */
+    customRange?: Nullable<ICustomRange>;
+    /**
+     * active bullet in cell, if cell is rich-text
+     */
+    bullet?: Nullable<IParagraph>;
+    /**
+     * rect of custom-range or bullet
+     */
+    rect?: Nullable<IBoundRectNoAngle>;
+}
+
+function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
+    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const vt = font.verticalAlign;
+    const ht = font.horizontalAlign;
+
+    let paddingTop = 0;
+    switch (vt) {
+        case VerticalAlign.UNSPECIFIED:
+        case VerticalAlign.BOTTOM:
+            paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
+            break;
+        case VerticalAlign.MIDDLE:
+            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startY - height) / 2;
+            break;
+        default:
+            break;
+    }
+
+    let paddingLeft = 0;
+    switch (ht) {
+        case HorizontalAlign.RIGHT:
+            paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            break;
+        case HorizontalAlign.CENTER:
+            paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
+            break;
+        default:
+            break;
+    }
+
+    return {
+        paddingLeft,
+        paddingTop,
+    };
+}
+
 export class HoverManagerService extends Disposable {
-    private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
+    private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
+    private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextPosition>>(null);
+    private _currentClickedCell$ = new Subject<IHoverCellPosition>();
 
     // Notify when hovering over different cells
-    currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
-        (pre, aft) => (
-            pre?.location?.unitId === aft?.location?.unitId
-            && pre?.location?.subUnitId === aft?.location?.subUnitId
-            && pre?.location?.row === aft?.location?.row
-            && pre?.location?.col === aft?.location?.col
+    currentCell$ = this._currentCell$.asObservable().pipe(
+        distinctUntilChanged(
+            (pre, aft) => (
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
+            )
         )
-    )));
+    );
+
+    // Notify when hovering over different cells and different custom range or bullet
+    currentRichText$ = this._currentRichText$.pipe(
+        distinctUntilChanged(
+            // eslint-disable-next-line complexity
+            (pre, aft) => (
+                pre?.location?.unitId === aft?.location?.unitId
+                && pre?.location?.subUnitId === aft?.location?.subUnitId
+                && pre?.location?.row === aft?.location?.row
+                && pre?.location?.col === aft?.location?.col
+                && pre?.customRange?.rangeId === aft?.customRange?.rangeId
+                && pre?.bullet?.startIndex === aft?.bullet?.startIndex
+            )
+        ),
+        map((cell) => cell && {
+            unitId: cell.location.unitId,
+            subUnitId: cell.location.subUnitId,
+            row: cell.location.row,
+            col: cell.location.col,
+            customRange: cell.customRange,
+            bullet: cell.bullet,
+            rect: cell.rect,
+        })
+    );
 
     // Notify when mouse position changes
     currentPosition$ = this._currentCell$.asObservable();
-
-    private _lastPosition: Nullable<{ offsetX: number; offsetY: number }> = null;
+    currentClickedCell$ = this._currentClickedCell$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -59,6 +143,7 @@ export class HoverManagerService extends Disposable {
     override dispose(): void {
         super.dispose();
         this._currentCell$.complete();
+        this._currentClickedCell$.complete();
     }
 
     private _initCellDisposableListener(): void {
@@ -67,53 +152,95 @@ export class HoverManagerService extends Disposable {
         }));
     }
 
-    private _calcActiveCell() {
-        if (!this._lastPosition) return;
-
-        const { offsetX, offsetY } = this._lastPosition;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    // eslint-disable-next-line complexity
+    private _calcActiveCell(unitId: string, offsetX: number, offsetY: number) {
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
         const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
         const scrollManagerService = currentRender?.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService?.getCurrentScrollState();
+        const skeleton = skeletonParam?.skeleton;
 
-        if (!skeletonParam || !scrollInfo || !currentRender) return;
+        if (!skeleton || !scrollInfo || !currentRender) return;
 
         const hoverPosition = getHoverCellPosition(currentRender, workbook, worksheet, skeletonParam, offsetX, offsetY);
 
         if (!hoverPosition) {
-            this._currentCell$.next(null);
-            return;
+            return null;
         }
 
-        const { location, position } = hoverPosition;
+        const { position, overflowLocation, location } = hoverPosition;
 
-        this._currentCell$.next({
+        const font = skeleton.getFont(overflowLocation.row, overflowLocation.col);
+        let customRange: Nullable<{
+            rects: IBoundRectNoAngle[];
+            range: ICustomRange<Record<string, any>>;
+        }> = null;
+        let bullet: Nullable<{
+            rect: IBoundRectNoAngle;
+            paragraph: IParagraph;
+        }> = null;
+
+        const cell = skeleton.getCellByIndex(overflowLocation.row, overflowLocation.col);
+        const cellData = worksheet.getCell(overflowLocation.row, overflowLocation.col);
+        const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
+
+        if (font) {
+            const { paddingLeft, paddingTop } = calcPadding(cell, font);
+            const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
+            const innerX = offsetX - position.startX - leftOffset;
+            const innerY = offsetY - position.startY - topOffset;
+            customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));
+            bullet = rects.checkLists.find((list) => list.rect.left <= innerX && innerX <= list.rect.right && (list.rect.top) <= innerY && innerY <= (list.rect.bottom));
+        }
+
+        const rect = customRange?.rects.pop() ?? bullet?.rect;
+
+        return {
             location,
             position,
+            overflowLocation,
+            customRange: customRange?.range,
+            bullet: bullet?.paragraph,
+            rect: rect && {
+                top: rect.top + cell.mergeInfo.startY + topOffset,
+                bottom: rect.bottom + cell.mergeInfo.startY + topOffset,
+                left: rect.left + cell.mergeInfo.startX + leftOffset,
+                right: rect.right + cell.mergeInfo.startX + leftOffset,
+            },
+        };
+    }
+
+    triggerMouseMove(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        this._currentCell$.next(activeCell && {
+            location: activeCell.location,
+            position: activeCell.position,
+        });
+
+        this._currentRichText$.next(activeCell && {
+            ...activeCell,
+            location: activeCell.overflowLocation,
         });
     }
 
-    onMouseMove(offsetX: number, offsetY: number) {
-        this._lastPosition = {
-            offsetX,
-            offsetY,
-        };
-        this._calcActiveCell();
+    triggerClick(unitId: string, offsetX: number, offsetY: number) {
+        const activeCell = this._calcActiveCell(unitId, offsetX, offsetY);
+        if (activeCell) {
+            this._currentClickedCell$.next(activeCell);
+        }
     }
 
-    onScroll() {
+    triggerScroll() {
         this._currentCell$.next(null);
     }
 }

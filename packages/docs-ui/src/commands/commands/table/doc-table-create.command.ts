@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getInsertSelection } from '../../../basics/selection';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
@@ -62,7 +61,7 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
         if (skeleton == null) {
             return false;
         }
-        const { startOffset } = getInsertSelection(activeRange, body);
+        const { startOffset } = BuildTextUtils.selection.getInsertSelection(activeRange, body);
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle, UNIVER_INTERNAL } from '@univerjs/core';
+import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { Button } from '@univerjs/design';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
-import { Button } from '@univerjs/design';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationRejectInputController)
 export class DataValidationRejectInputController extends Disposable {
@@ -57,7 +57,7 @@ export class DataValidationRejectInputController extends Disposable {
                     const success = await validator.validator(
                         {
                             value: getCellValueOrigin(cell),
-                            interceptValue: getCellValueOrigin(cell?.custom?.[UNIVER_INTERNAL]?.origin ?? cell),
+                            interceptValue: getCellValueOrigin(context?.origin ?? cell),
                             row,
                             column: col,
                             unitId,

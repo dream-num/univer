@@ -14,149 +14,215 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
-import { createInternalEditorID, ICommandService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { IUnitRangeWithName, Workbook } from '@univerjs/core';
-import { RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import { ERROR_RANGE, HyperLinkModel } from '@univerjs/sheets-hyper-link';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
+import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
+import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
+import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { CloseHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
-import { LinkType, SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
-import { AddHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
+import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
 export const CellLinkEdit = () => {
     const [id, setId] = useState('');
+    const [hide, setHide] = useState(false);
     const [display, setDisplay] = useState('');
-    const [type, setType] = useState<LinkType | string>(LinkType.link);
+    const [showLabel, setShowLabel] = useState(true);
+    const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);
     const editing = useObservable(popupService.currentEditing$);
-    const hyperLinkModel = useDependency(HyperLinkModel);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const commandService = useDependency(ICommandService);
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
+    const zenZoneService = useDependency(IZenZoneService);
+    const markSelectionService = useDependency(IMarkSelectionService);
+    const textSelectionService = useDependency(DocSelectionManagerService);
+    const contextService = useDependency(IContextService);
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
         }
         return sidePanelService.getCustomHyperLink(type);
     }, [sidePanelService, type]);
+
     const [showError, setShowError] = useState(false);
 
     const setByPayload = useRef(false);
 
     useEffect(() => {
-        if (editing?.row !== undefined && editing.column !== undefined) {
-            const link = hyperLinkModel.getHyperLinkByLocationSync(editing.unitId, editing.subUnitId, editing.row, editing.column);
+        if (editing?.row !== undefined && editing.col !== undefined) {
+            const { label, customRange, row, col } = editing;
+            let link;
+            if (customRange) {
+                link = {
+                    id: customRange?.rangeId ?? '',
+                    display: label ?? '',
+                    payload: customRange?.properties?.url ?? '',
+                    row,
+                    column: col,
+                };
+            } else {
+                if (editing.type === HyperLinkEditSourceType.VIEWING) {
+                    const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
+                    const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
+                    const cell = worksheet?.getCellRaw(editing.row, editing.col);
+                    const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
+                    const cellValue = `${getCellValueOrigin(cell) ?? ''}`;
+                    if (cell && (cell.p || cellValue)) {
+                        setShowLabel(false);
+                    }
+                    link = {
+                        id: '',
+                        display: '',
+                        payload: range?.properties?.url ?? '',
+                        row,
+                        column: col,
+                    };
+                } else {
+                    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+                    const selection = textSelectionService.getActiveTextRange();
+                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc?.getBody()?.customRanges ?? [])?.[0];
 
-            if (link) {
-                setId(link.id);
-                const customLink = sidePanelService.findCustomHyperLink(link);
-                if (customLink) {
-                    const customLinkInfo = customLink.convert(link);
-                    setType(customLinkInfo.type);
-                    setPayload(customLinkInfo.payload);
-                    setDisplay(customLinkInfo.display);
-                    return;
+                    setShowLabel(false);
+                    link = {
+                        id: '',
+                        display: label ?? '',
+                        payload: customRange?.properties?.url ?? '',
+                        row,
+                        column: col,
+                    };
                 }
-                setDisplay(link.display);
-                const linkInfo = resolverService.parseHyperLink(link.payload);
-                if (linkInfo.type === 'outer') {
-                    setType(LinkType.link);
+            }
+
+            setId(link.id);
+            const customLink = sidePanelService.findCustomHyperLink(link);
+            if (customLink) {
+                const customLinkInfo = customLink.convert(link);
+                setType(customLinkInfo.type);
+                setPayload(customLinkInfo.payload);
+                setDisplay(customLinkInfo.display);
+                return;
+            }
+            setDisplay(link.display);
+            const linkInfo = resolverService.parseHyperLink(link.payload);
+            setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
+            switch (linkInfo.type) {
+                case SheetHyperLinkType.URL:{
                     setPayload(linkInfo.url);
                     if (linkInfo.url === link.display) {
                         setByPayload.current = true;
                     }
-                    return;
-                } else {
-                    const params = linkInfo.searchObj;
-                    if (params.rangeid) {
-                        setType(LinkType.definedName);
-                        setPayload(params.rangeid);
-
-                        return;
-                    }
-
-                    if (params.range) {
-                        const sheetName = params.gid ?
-                            univerInstanceService
-                                .getUnit<Workbook>(editing.unitId)
-                                ?.getSheetBySheetId(params.gid)
-                                ?.getName()
-                            ?? ''
-                            : '';
-                        setType(LinkType.range);
-                        if (params.range === ERROR_RANGE) {
-                            setPayload('');
-                        } else {
-                            const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range).range));
-                            setPayload(payload);
-                            if (payload === link.display) {
-                                setByPayload.current = true;
-                            }
-                        }
-
-                        return;
-                    }
-
-                    if (params.gid) {
-                        setType(LinkType.sheet);
-                        setPayload(params.gid);
-                        return;
-                    }
+                    break;
                 }
+                case SheetHyperLinkType.RANGE:{
+                    const params = linkInfo.searchObj!;
+                    const sheetName = params.gid ?
+                        univerInstanceService
+                            .getUnit<Workbook>(editing.unitId)
+                            ?.getSheetBySheetId(params.gid)
+                            ?.getName()
+                            ?? ''
+                        : '';
+                    const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
+                    setPayload(payload);
+                    if (payload === link.display) {
+                        setByPayload.current = true;
+                    }
+                    break;
+                }
+                case SheetHyperLinkType.SHEET:{
+                    const params = linkInfo.searchObj!;
+                    setPayload(params.gid!);
+                    break;
+                }
+                case SheetHyperLinkType.DEFINE_NAME:{
+                    const params = linkInfo.searchObj!;
+                    setPayload(params.rangeid!);
+                    break;
+                }
+                default:
+                    setPayload('');
+                    break;
             }
-            const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId);
-            const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
-            const cell = worksheet?.getCellRaw(editing.row, editing.column);
-
-            const cellValue = getCellValueOrigin(cell);
-            setType(LinkType.link);
-            setPayload('');
-            setDisplay((cellValue ?? '').toString());
-            setId('');
-            return;
         }
+    }, [editing, resolverService, sidePanelService, textSelectionService, univerInstanceService]);
 
-        setType(LinkType.link);
-        setPayload('');
-        setDisplay('');
-        setId('');
-    }, [editing, hyperLinkModel, resolverService, univerInstanceService]);
+    useEffect(() => {
+        let id: Nullable<string> = null;
+        if (editing && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
+            id = markSelectionService.addShape(
+                {
+                    range: {
+                        startColumn: editing.col,
+                        endColumn: editing.col,
+                        startRow: editing.row,
+                        endRow: editing.row,
+                    },
+                    style: {
+                        hasAutoFill: false,
+                        fill: 'rgb(255, 189, 55, 0.35)',
+                        strokeWidth: 1,
+                        stroke: '#FFBD37',
+                        widgets: {},
+                    },
+                    primary: null,
+                },
+                [],
+                -1
+            );
+        }
+        return () => {
+            if (id) {
+                markSelectionService.removeShape(id);
+            }
+        };
+    }, [editing, markSelectionService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
 
+    useEffect(() => {
+        return () => {
+            editorBridgeService.disableForceKeepVisible();
+        };
+    }, [editorBridgeService]);
+
     const linkTypeOptions: Array<{
         label: string;
-        value: LinkType | string;
+        value: SheetHyperLinkType | string;
     }> = [
         {
             label: localeService.t('hyperLink.form.link'),
-            value: LinkType.link,
+            value: SheetHyperLinkType.URL,
         },
         {
             label: localeService.t('hyperLink.form.range'),
-            value: LinkType.range,
+            value: SheetHyperLinkType.RANGE,
         },
         {
             label: localeService.t('hyperLink.form.worksheet'),
-            value: LinkType.sheet,
+            value: SheetHyperLinkType.SHEET,
         },
         {
             label: localeService.t('hyperLink.form.definedName'),
-            value: LinkType.definedName,
+            value: SheetHyperLinkType.DEFINE_NAME,
         },
         ...sidePanelOptions,
     ];
@@ -172,12 +238,12 @@ export const CellLinkEdit = () => {
         value: value.id,
     }));
 
-    const formatUrl = (type: LinkType | string, payload: string) => {
-        if (type === LinkType.link) {
+    const formatUrl = (type: SheetHyperLinkType | string, payload: string) => {
+        if (type === SheetHyperLinkType.URL) {
             return serializeUrl(payload);
         }
 
-        if (type === LinkType.range) {
+        if (type === SheetHyperLinkType.RANGE) {
             const info = deserializeRangeWithSheet(payload);
             const worksheet = workbook.getSheetBySheetName(info.sheetName);
             if (worksheet) {
@@ -208,30 +274,40 @@ export const CellLinkEdit = () => {
     const handleSubmit = async () => {
         if (editing) {
             if (id) {
-                await commandService.executeCommand(UpdateHyperLinkCommand.id, {
+                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
+                await commandService.executeCommand(commandId, {
+                    id,
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
-                    id,
                     payload: {
-                        display,
+                        display: showLabel ? display : '',
                         payload: formatUrl(type, payload),
                     },
+                    row: editing.row,
+                    column: editing.col,
+                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                        : editorBridgeService.getCurrentEditorId(),
                 });
             } else {
-                await commandService.executeCommand(AddHyperLinkCommand.id, {
+                const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? AddRichHyperLinkCommand.id : AddHyperLinkCommand.id;
+                await commandService.executeCommand(commandId, {
                     unitId: editing.unitId,
                     subUnitId: editing.subUnitId,
                     link: {
-                        id: Tools.generateRandomId(),
+                        id: generateRandomId(),
                         row: editing.row,
-                        column: editing.column,
+                        column: editing.col,
                         payload: formatUrl(type, payload),
-                        display,
+                        display: showLabel ? display : '',
                     },
+                    documentId: editing.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                        : editorBridgeService.getCurrentEditorId(),
                 });
             }
         }
-        if (editing) {
+        if (editing?.type === HyperLinkEditSourceType.VIEWING) {
             await commandService.executeCommand(SetWorksheetActiveOperation.id, {
                 unitId: editing.unitId,
                 subUnitId: editing.subUnitId,
@@ -242,41 +318,49 @@ export const CellLinkEdit = () => {
                 range: {
                     startRow: Math.max(editing.row - GAP, 0),
                     endRow: editing.row + GAP,
-                    startColumn: Math.max(editing.column - GAP, 0),
-                    endColumn: editing.column + GAP,
+                    startColumn: Math.max(editing.col - GAP, 0),
+                    endColumn: editing.col + GAP,
                 },
             });
         }
 
-        commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
 
+    if (!editing) {
+        return null;
+    }
+
     return (
-        <div>
-            <FormLayout
-                label={localeService.t('hyperLink.form.label')}
-                error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
-            >
-                <Input
-                    value={display}
-                    onChange={(v) => {
-                        setDisplay(v);
-                        setByPayload.current = false;
-                    }}
-                    placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
-                />
-            </FormLayout>
-            <FormLayout label={localeService.t('hyperLink.form.type')}>
+        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
+            {showLabel
+                ? (
+                    <FormLayout
+                        label={localeService.t('hyperLink.form.label')}
+                        error={showError && !display ? localeService.t('hyperLink.form.inputError') : ''}
+                    >
+                        <Input
+                            value={display}
+                            onChange={(v) => {
+                                setDisplay(v);
+                                setByPayload.current = false;
+                            }}
+                            placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
+                        />
+                    </FormLayout>
+                )
+                : null}
+            <FormLayout label={localeService.t('hyperLink.form.type')} contentStyle={{ marginBottom: 0 }}>
                 <Select
                     options={linkTypeOptions}
                     value={type}
                     onChange={(newType) => {
-                        setType(newType as LinkType);
+                        setType(newType as SheetHyperLinkType);
                         setPayload('');
                     }}
                 />
             </FormLayout>
-            {type === LinkType.link && (
+            {type === SheetHyperLinkType.URL && (
                 <FormLayout
                     error={showError ? !payload ? localeService.t('hyperLink.form.inputError') : !isLegalLink(payload) ? localeService.t('hyperLink.form.linkError') : '' : ''}
                 >
@@ -293,7 +377,7 @@ export const CellLinkEdit = () => {
                     />
                 </FormLayout>
             )}
-            {type === LinkType.range && (
+            {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
                         openForSheetUnitId={workbook.getUnitId()}
@@ -301,10 +385,37 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
+                        disableInput={editing.type === HyperLinkEditSourceType.ZEN_EDITOR}
+                        onSelectorVisibleChange={async (visible) => {
+                            if (visible) {
+                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+                                    zenZoneService.hide();
+                                    contextService.setContextValue(FOCUSING_SHEET, true);
+                                }
+                                if (editing.type !== HyperLinkEditSourceType.VIEWING) {
+                                    editorBridgeService.enableForceKeepVisible();
+                                }
+                                setHide(true);
+                            } else {
+                                await resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
+                                if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
+                                    await commandService.executeCommand(SetSelectionsOperation.id, {
+                                        unitId: editing.unitId,
+                                        subUnitId: editing.subUnitId,
+                                        selections: [{ range: { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col } }],
+                                    } as ISetSelectionsOperationParams);
+
+                                    zenZoneService.show();
+                                    contextService.setContextValue(FOCUSING_SHEET, false);
+                                }
+                                editorBridgeService.disableForceKeepVisible();
+                                setHide(false);
+                            }
+                        }}
                     />
                 </FormLayout>
             )}
-            {type === LinkType.sheet && (
+            {type === SheetHyperLinkType.SHEET && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
                         options={sheetsOption}
@@ -321,7 +432,7 @@ export const CellLinkEdit = () => {
                     />
                 </FormLayout>
             )}
-            {type === LinkType.definedName && (
+            {type === SheetHyperLinkType.DEFINE_NAME && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.selectError') : ''}>
                     <Select
                         options={definedNames}
@@ -356,12 +467,9 @@ export const CellLinkEdit = () => {
                 <Button
                     onClick={() => {
                         if (editing) {
-                            commandService.executeCommand(SetWorksheetActiveOperation.id, {
-                                unitId: editing.unitId,
-                                subUnitId: editing.subUnitId,
-                            });
+                            resolverService.navigateToRange(editing.unitId, editing.subUnitId, { startRow: editing.row, endRow: editing.row, startColumn: editing.col, endColumn: editing.col });
                         }
-                        commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+                        commandService.executeCommand(CloseHyperLinkPopupOperation.id);
                     }}
                 >
                     {localeService.t('hyperLink.form.cancel')}
@@ -370,7 +478,7 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
-                        if (!display || !payload || (type === LinkType.link && !isLegalLink(payload))) {
+                        if ((showLabel && !display) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
                             setShowError(true);
                             return;
                         }

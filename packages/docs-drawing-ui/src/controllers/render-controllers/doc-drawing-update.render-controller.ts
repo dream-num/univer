@@ -38,7 +38,6 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ICommandService private readonly _commandService: ICommandService,
-        @ILocalFileService private readonly _fileOpenerService: ILocalFileService,
         @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
         @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @IImageIoService private readonly _imageIoService: IImageIoService,
@@ -48,7 +47,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         @IMessageService private readonly _messageService: IMessageService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService
+        @Inject(DocRefreshDrawingsService) private readonly _docRefreshDrawingsService: DocRefreshDrawingsService,
+        @ILocalFileService private readonly _fileOpenerService: ILocalFileService
     ) {
         super();
 

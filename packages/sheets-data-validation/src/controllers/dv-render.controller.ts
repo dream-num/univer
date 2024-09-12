@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { IMenuManagerService } from '@univerjs/ui';
-import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, debounceTime, filter } from 'rxjs';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
-import type { ListValidator } from '../validators';
-import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
+import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
+import type { Spreadsheet } from '@univerjs/engine-render';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { menuSchema } from './menu.schema';
+import type { ListValidator } from '../validators';
 
 const INVALID_MARK = {
     tr: {
@@ -139,7 +139,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             if (!subUnitId) return;
 
             const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
+                ?.with(SheetSkeletonManagerService)
+                .getWorksheetSkeleton(subUnitId)
                 ?.skeleton;
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -168,7 +169,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
 
                         const skeleton = this._renderManagerService.getRenderById(unitId)
-                            ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
+                            ?.with(SheetSkeletonManagerService)
+                            .getWorksheetSkeleton(subUnitId)
                             ?.skeleton;
                         if (!skeleton) {
                             return next(cell);
@@ -243,11 +245,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 ...(cell?.customRender ?? []),
                                 ...(validator?.canvasRender ? [validator.canvasRender] : []),
                             ],
-                            // @ts-ignore
                             fontRenderExtension: {
-                                // @ts-ignore
                                 ...cell?.fontRenderExtension,
-                                // @ts-ignore
                                 isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender(rule, cellValue, pos),
                             },
                             interceptorStyle: {
@@ -342,7 +341,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             if (!subUnitId) return;
 
             const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
+                ?.with(SheetSkeletonManagerService)
+                .getWorksheetSkeleton(subUnitId)
                 ?.skeleton;
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
@@ -370,7 +370,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
 
                         const skeleton = this._renderManagerService.getRenderById(unitId)
-                            ?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)
+                            ?.with(SheetSkeletonManagerService)
+                            .getWorksheetSkeleton(subUnitId)
                             ?.skeleton;
                         if (!skeleton) {
                             return next(cell);
@@ -495,7 +496,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             .pipe(
                 filter((change) => change.source === 'command'),
                 bufferTime(16)
-            ).subscribe((infos) => {
+            )
+            .subscribe((infos) => {
                 const ranges: IRange[] = [];
                 infos.forEach((info) => {
                     if (info.rule?.ranges) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
@@ -29,7 +29,7 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 
-export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
+export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible' | 'hiddenType' | 'onClick'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }
@@ -46,25 +46,15 @@ export class SheetCanvasPopManagerService extends Disposable {
     }
 
     // #region attach to object
-
-    private _createObjectPositionObserver(
-        targetObject: BaseObject,
+    private _createPositionObserver(
+        bound: IBoundRectNoAngle,
         currentRender: IRender,
         skeleton: SpreadsheetSkeleton,
         worksheet: Worksheet
     ) {
         const calc = () => {
             const { scene } = currentRender;
-            const { left, top, width, height } = targetObject;
-
-            const bound: IBoundRectNoAngle = {
-                left,
-                right: left + width,
-                top,
-                bottom: top + height,
-            };
             const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
-
             const canvasElement = currentRender.engine.getCanvasElement();
             const canvasClientRect = canvasElement.getBoundingClientRect();
 
@@ -78,6 +68,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 top: (offsetBound.top * scaleAdjust) + canvasClientRect.top,
                 bottom: (offsetBound.bottom * scaleAdjust) + canvasClientRect.top,
             };
+
             return position;
         };
 
@@ -104,7 +95,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param popup popup item
      * @returns disposable
      */
-    attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): IDisposable {
+    attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): INeedCheckDisposable {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
@@ -112,6 +103,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 dispose: () => {
                     // empty
                 },
+                canDispose: () => true,
             };
         }
 
@@ -127,10 +119,19 @@ export class SheetCanvasPopManagerService extends Disposable {
                 dispose: () => {
                     // empty
                 },
+                canDispose: () => true,
             };
         }
+        const { left, top, width, height } = targetObject;
 
-        const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet);
+        const bound: IBoundRectNoAngle = {
+            left,
+            right: left + width,
+            top,
+            bottom: top + height,
+        };
+
+        const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -147,22 +148,112 @@ export class SheetCanvasPopManagerService extends Disposable {
                 position$.complete();
                 disposable.dispose();
             },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
+    // #endregion
 
+    // #region attach to position
+    attachPopupByPosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string): Nullable<INeedCheckDisposable> {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return null;
+        }
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        if ((_unitId && unitId !== _unitId) || (_subUnitId && _subUnitId !== subUnitId)) {
+            return null;
+        }
+
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
+            sheetId: subUnitId,
+        });
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender || !skeleton) {
+            return null;
+        }
+
+        const { position, position$, disposable } = this._createPositionObserver(bound, currentRender, skeleton, worksheet);
+        const id = this._globalPopupManagerService.addPopup({
+            ...popup,
+            unitId,
+            subUnitId,
+            anchorRect: position,
+            anchorRect$: position$,
+            canvasElement: currentRender.engine.getCanvasElement(),
+        });
+
+        return {
+            dispose: () => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+                disposable.dispose();
+            },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
+    }
+    // #endregion
+
+    // #region attach to absolute position
+    attachPopupToAbsolutePosition(bound: IBoundRectNoAngle, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string) {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet();
+        if (!worksheet) {
+            return null;
+        }
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        if ((_unitId && unitId !== _unitId) || (_subUnitId && _subUnitId !== subUnitId)) {
+            return null;
+        }
+
+        const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getOrCreateSkeleton({
+            sheetId: subUnitId,
+        });
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender || !skeleton) {
+            return null;
+        }
+
+        const position$ = new BehaviorSubject(bound);
+        const id = this._globalPopupManagerService.addPopup({
+            ...popup,
+            unitId,
+            subUnitId,
+            anchorRect: bound,
+            anchorRect$: position$.asObservable(),
+            canvasElement: currentRender.engine.getCanvasElement(),
+        });
+
+        return {
+            dispose: () => {
+                this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+            },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
+    }
     // #endregion
 
     // #region attach to cell
 
     /**
-     * attach a popup to given cell
-     * @param row cell row index
-     * @param col cell column index
-     * @param popup popup item
-     * @param viewport target viewport
-     * @returns disposable
+     *
+     * @param row
+     * @param col
+     * @param popup
+     * @param _unitId
+     * @param _subUnitId
+     * @param viewport
+     * @param showOnSelectionMoving
+     * @returns
      */
-    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<IDisposable> {
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, _unitId?: string, _subUnitId?: string, viewport?: Viewport, showOnSelectionMoving = false): Nullable<INeedCheckDisposable> {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) {
@@ -220,7 +311,12 @@ export class SheetCanvasPopManagerService extends Disposable {
             }
         }));
 
-        return disposableCollection;
+        return {
+            dispose() {
+                disposableCollection.dispose();
+            },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
+        };
     }
 
     private _createCellPositionObserver(

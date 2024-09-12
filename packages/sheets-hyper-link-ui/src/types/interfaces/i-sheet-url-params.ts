@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
-    return Math.max(start, start2) <= Math.min(end, end2);
+export interface ISheetUrlParams {
+    gid?: string;
+    range?: string;
+    rangeid?: string;
+    unitid?: string;
 }

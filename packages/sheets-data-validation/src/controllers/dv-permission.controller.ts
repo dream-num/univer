@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
+import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import type { ICommandInfo } from '@univerjs/core';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
+import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationPermissionController)
 export class DataValidationPermissionController extends Disposable {

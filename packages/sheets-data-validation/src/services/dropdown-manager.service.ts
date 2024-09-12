@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { IZenZoneService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DROP_DOWN_KEY } from '../views/drop-down';
+import { type ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { IZenZoneService } from '@univerjs/ui';
+import { Subject } from 'rxjs';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
+import { DROP_DOWN_KEY } from '../views/drop-down';
 
 export interface IDropdownParam {
     location: ISheetLocation;

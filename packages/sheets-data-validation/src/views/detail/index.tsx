@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
+import { serializeRange } from '@univerjs/engine-formula';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { serializeRange } from '@univerjs/engine-formula';
-import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
+import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '../../commands/commands/data-validation.command';
-import { DataValidationOptions } from '../options';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+import { DataValidationOptions } from '../options';
 import styles from './index.module.less';
+import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 
 // debounce execute commands, for better redo-undo experience
 const debounceExecuteFactory = (commandService: ICommandService) => debounce(

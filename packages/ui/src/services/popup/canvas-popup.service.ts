@@ -21,7 +21,7 @@ import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'direction' | 'excludeOutside' | 'onClickOutside' > {
+export interface IPopup extends Pick<IRectPopupProps, 'direction' | 'excludeOutside' | 'onClickOutside' > {
     anchorRect: Nullable<IBoundRectNoAngle>;
     anchorRect$: Observable<IBoundRectNoAngle>;
     excludeRects?: IBoundRectNoAngle[];
@@ -34,6 +34,10 @@ export interface IPopup extends Pick<IRectPopupProps, 'closeOnSelfTarget' | 'dir
     offset?: [number, number];
     canvasElement: HTMLCanvasElement;
     hideOnInvisible?: boolean;
+    hiddenType?: 'hide' | 'destroy';
+    onPointerEnter?: () => void;
+    onPointerLeave?: () => void;
+    onClick?: () => void;
 }
 
 export interface ICanvasPopupService {
@@ -43,6 +47,11 @@ export interface ICanvasPopupService {
     popups$: Observable<[string, IPopup][]>;
 
     get popups(): [string, IPopup][];
+
+    /**
+     * which popup is under hovering now
+     */
+    get activePopupId(): Nullable<string>;
 }
 
 export const ICanvasPopupService = createIdentifier<ICanvasPopupService>('ui.popup.service');
@@ -52,6 +61,12 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
     private readonly _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
     readonly popups$ = this._popups$.asObservable();
     get popups() { return Array.from(this._popupMap.entries()); }
+
+    private _activePopupId: Nullable<string> = null;
+
+    get activePopupId() {
+        return this._activePopupId;
+    }
 
     private _update() {
         this._popups$.next(Array.from(this._popupMap.entries()));
@@ -67,7 +82,17 @@ export class CanvasPopupService extends Disposable implements ICanvasPopupServic
 
     addPopup(item: IPopup): string {
         const id = Tools.generateRandomId();
-        this._popupMap.set(id, item);
+        this._popupMap.set(id, {
+            ...item,
+            onPointerEnter: () => {
+                this._activePopupId = id;
+            },
+            onPointerLeave: () => {
+                if (this._activePopupId === id) {
+                    this._activePopupId = null;
+                }
+            },
+        });
         this._update();
         return id;
     }

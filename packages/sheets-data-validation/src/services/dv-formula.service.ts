@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationModel } from '@univerjs/data-validation';
+import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
+import type { Nullable } from '@univerjs/core';
+import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 type RuleId = string;

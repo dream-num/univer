@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-export { SheetsHyperLinkSidePanelService, type ICustomHyperLinkView } from './services/side-panel.service';
-export { SheetsHyperLinkPopupService } from './services/popup.service';
-export { SheetsHyperLinkResolverService } from './services/resolver.service';
-export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
-export { UniverSheetsHyperLinkUIPlugin } from './plugin';
-export { InsertLinkShortcut } from './controllers/menu';
-
+export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
+export { CancelHyperLinkCommand, type ICancelHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
+export { type IUpdateHyperLinkCommandParams, UpdateHyperLinkCommand } from './commands/commands/update-hyper-link.command';
 // #region - all commands
 export {
-    OpenHyperLinkSidebarOperation,
+    CloseHyperLinkPopupOperation,
     InsertHyperLinkOperation,
-    CloseHyperLinkSidebarOperation,
-    type IOpenHyperLinkSidebarOperationParams,
-} from './commands/operations/sidebar.operations';
+    type IOpenHyperLinkEditPanelOperationParams,
+    OpenHyperLinkEditPanelOperation,
+} from './commands/operations/popup.operations';
+export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
+export { InsertLinkShortcut } from './controllers/menu';
+export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 
-export { AddHyperLinkCommand, type IAddHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
-export { RemoveHyperLinkCommand, CancelHyperLinkCommand, type IRemoveHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
-export { UpdateHyperLinkCommand, type IUpdateHyperLinkCommandParams } from './commands/commands/update-hyper-link.command';
+export { SheetsHyperLinkPopupService } from './services/popup.service';
+
+export { SheetsHyperLinkResolverService } from './services/resolver.service';
+export { type ICustomHyperLinkView, SheetsHyperLinkSidePanelService } from './services/side-panel.service';
+export type { ISheetHyperLinkInfo, ISheetUrlParams } from './types/interfaces';
 // #endregion

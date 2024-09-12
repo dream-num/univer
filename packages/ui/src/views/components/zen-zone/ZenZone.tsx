@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
+import { useDependency, useObservable } from '@univerjs/core';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 
@@ -27,7 +27,7 @@ export function ZenZone() {
 
     const [visible, setVisible] = useState(false);
     const [componentKey, setComponentKey] = useState<string>();
-
+    const hidden = useObservable(zenZoneService.temporaryHidden$);
     const componentManager = useDependency(ComponentManager);
 
     useEffect(() => {
@@ -56,5 +56,5 @@ export function ZenZone() {
         }
     }, [componentKey]);
 
-    return <section className={_className}>{Component && <Component />}</section>;
+    return <section style={hidden ? { display: 'none' } : undefined} className={_className}>{Component && <Component />}</section>;
 }

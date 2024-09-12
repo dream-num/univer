@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useState } from 'react';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
 import cs from 'clsx';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import type { IHyperLinkPopup } from '../../services/popup.service';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { OpenHyperLinkSidebarOperation } from '../../commands/operations/sidebar.operations';
-import { CancelHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
+import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
 const iconsMap = {
-    outer: <LinkSingle />,
-    link: <LinkSingle />,
-    sheet: <Xlsx />,
-    range: <AllBorderSingle />,
-    defineName: <AllBorderSingle />,
-    'range-error': <AllBorderSingle />,
-    'sheet-error': <Xlsx />,
+    [SheetHyperLinkType.URL]: <LinkSingle />,
+    [SheetHyperLinkType.SHEET]: <Xlsx />,
+    [SheetHyperLinkType.RANGE]: <AllBorderSingle />,
+    [SheetHyperLinkType.DEFINE_NAME]: <AllBorderSingle />,
+    [SheetHyperLinkType.INVALID]: <AllBorderSingle />,
 };
 
 export const CellLinkPopup = () => {
     const popupService = useDependency(SheetsHyperLinkPopupService);
-    const hyperLinkModel = useDependency(HyperLinkModel);
     const commandService = useDependency(ICommandService);
     const messageService = useDependency(IMessageService);
     const localeService = useDependency(LocaleService);
     const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
+    const editorBridgeService = useDependency(IEditorBridgeService);
 
     useEffect(() => {
         setCurrentPopup(popupService.currentPopup);
@@ -60,13 +60,13 @@ export const CellLinkPopup = () => {
     if (!currentPopup) {
         return null;
     }
-    const { unitId, subUnitId, id } = currentPopup;
-    const link = hyperLinkModel.getHyperLink(unitId, subUnitId, id);
-    if (!link) {
+
+    const { unitId, subUnitId, customRange, row, col } = currentPopup;
+    if (!customRange?.properties?.url) {
         return null;
     }
-    const linkObj = resolverService.parseHyperLink(link.payload);
-    const isError = linkObj.type.indexOf('error') > -1;
+    const linkObj = resolverService.parseHyperLink(customRange.properties.url ?? '');
+    const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
         <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
@@ -86,7 +86,7 @@ export const CellLinkPopup = () => {
                             if (isError) {
                                 return;
                             }
-                            if (linkObj.type !== 'outer') {
+                            if (linkObj.type !== SheetHyperLinkType.URL) {
                                 const url = new URL(window.location.href);
                                 url.hash = linkObj.url.slice(1);
                                 navigator.clipboard.writeText(url.href);
@@ -110,11 +110,13 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+                                commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
                                     unitId,
                                     subUnitId,
-                                    row: link.row,
-                                    column: link.column,
+                                    row,
+                                    col,
+                                    customRangeId: customRange.rangeId,
+                                    type: currentPopup.type,
                                 });
                             }}
                         >
@@ -125,11 +127,19 @@ export const CellLinkPopup = () => {
                         <div
                             className={styles.cellLinkOperation}
                             onClick={() => {
-                                commandService.executeCommand(CancelHyperLinkCommand.id, {
+                                const commandId = (currentPopup.type === HyperLinkEditSourceType.EDITING || currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR) ? CancelRichHyperLinkCommand.id : CancelHyperLinkCommand.id;
+                                if (commandService.syncExecuteCommand(commandId, {
                                     unitId,
                                     subUnitId,
-                                    id: link.id,
-                                });
+                                    id: customRange.rangeId,
+                                    row,
+                                    column: col,
+                                    documentId: currentPopup.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+                                        DOCS_ZEN_EDITOR_UNIT_ID_KEY
+                                        : editorBridgeService.getCurrentEditorId(),
+                                })) {
+                                    popupService.hideCurrentPopup(undefined, true);
+                                }
                             }}
                         >
                             <Tooltip placement="bottom" title={localeService.t('hyperLink.popup.cancel')}>

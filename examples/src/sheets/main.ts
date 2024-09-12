@@ -82,8 +82,11 @@ univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
 // filter plugin
 univer.registerPlugin(UniverSheetsFilterPlugin);
-// hyperlink
-univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+// mock lazy load
+setTimeout(() => {
+    // hyperlink
+    univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
+}, 500);
 
 // mock lazy load data validation
 setTimeout(() => {

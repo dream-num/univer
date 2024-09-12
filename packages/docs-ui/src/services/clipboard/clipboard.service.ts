@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
 import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { copyCustomRange } from '../../basics/custom-range';
-import { getDeleteSelection } from '../../basics/selection';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
@@ -224,7 +222,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         });
 
         // copy custom ranges
-        body.customRanges = body.customRanges?.map(copyCustomRange);
+        body.customRanges = body.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
 
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
@@ -278,9 +276,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private async _setClipboardData(documentBodyList: IDocumentBody[], snapshot: IDocumentData, needCache = true): Promise<void> {
         const copyId = genId();
         const text =
-            documentBodyList.length > 1
+            (documentBodyList.length > 1
                 ? documentBodyList.map((body) => body.dataStream).join('\n')
-                : documentBodyList[0].dataStream;
+                : documentBodyList[0].dataStream)
+                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
+                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+
         let html = this._umdToHtml.convert(documentBodyList);
 
         // Only cache copy content when the range is 1.
@@ -375,7 +376,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const deleteRange = getDeleteSelection({ startOffset, endOffset, collapsed }, body);
+            const deleteRange = BuildTextUtils.selection.getDeleteSelection({ startOffset, endOffset, collapsed }, body);
 
             const docBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).sliceBody(deleteRange.startOffset, deleteRange.endOffset, sliceType);
             if (docBody == null) {
@@ -417,38 +418,59 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private _generateBody(text: string): IDocumentBody {
         // Convert all \n to \r, because we use \r to indicate paragraph break.
-        const dataStream = text.replace(/\n/g, '\r');
-
-        if (!text.includes('\r') && Tools.isLegalUrl(text)) {
-            const id = generateRandomId();
-            const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-            const range: ICustomRange = {
-                startIndex: 0,
-                endIndex: urlText.length - 1,
-                rangeId: id,
-                rangeType: CustomRangeType.HYPERLINK,
-                properties: {
-                    url: text,
-                },
-            };
-
-            return {
-                dataStream: urlText,
-                customRanges: [range],
-            };
-        }
-
+        const dataStream = text.replace(/\n/g, '\r').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
         const paragraphs: IParagraph[] = [];
+        const customRanges: ICustomRange[] = [];
+        let cursor = 0;
+        let newDataStream = '';
+        let linkCount = 0;
 
+        const loopParagraph = (i: number, insertP = true) => {
+            const paragraphText = dataStream.slice(cursor, i);
+            if (Tools.isLegalUrl(paragraphText)) {
+                const id = generateRandomId();
+                const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${paragraphText}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+                const range: ICustomRange = {
+                    startIndex: cursor + linkCount * 2,
+                    endIndex: cursor + linkCount * 2 + urlText.length - 1,
+                    rangeId: id,
+                    rangeType: CustomRangeType.HYPERLINK,
+                    properties: {
+                        url: text,
+                    },
+                };
+                customRanges.push(range);
+                newDataStream += urlText;
+                cursor = i + 1;
+                linkCount++;
+                if (insertP) {
+                    newDataStream += '\r';
+                    paragraphs.push({ startIndex: i + linkCount * 2 });
+                }
+            } else {
+                newDataStream += dataStream.slice(cursor, i + 1);
+                cursor = i + 1;
+                if (insertP) {
+                    paragraphs.push({ startIndex: i + linkCount * 2 });
+                }
+            }
+        };
+
+        let end = 0;
         for (let i = 0; i < dataStream.length; i++) {
             if (dataStream[i] === '\r') {
-                paragraphs.push({ startIndex: i });
+                loopParagraph(i);
+                end = i;
             }
         }
 
+        if (end !== dataStream.length - 1) {
+            loopParagraph(dataStream.length - 1, false);
+        }
         return {
-            dataStream,
+            dataStream: newDataStream,
             paragraphs,
+            customRanges,
         };
     }
 

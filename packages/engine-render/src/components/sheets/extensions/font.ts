@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
@@ -34,15 +34,7 @@ import type { SheetComponent } from '../sheet-component';
 const UNIQUE_KEY = 'DefaultFontExtension';
 
 const EXTENSION_Z_INDEX = 45;
-export interface ISheetFontRenderExtension {
-    fontRenderExtension?: {
-        leftOffset?: number;
-        rightOffset?: number;
-        topOffset?: number;
-        downOffset?: number;
-        isSkip?: boolean;
-    };
-};
+
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
@@ -177,7 +169,7 @@ export class Font extends SheetExtension {
                     }
                 }
 
-                const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension || {};
+                const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellDataForSheetInterceptor || {};
                 if (cellData.fontRenderExtension?.isSkip) {
                     return true;
                 }

@@ -20,7 +20,7 @@ import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
-import { isLegalLink, serializeUrl } from '../common/util';
+import { isLegalLink } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
@@ -71,9 +71,8 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
                 const filterResult = this._filterPlainText(clipText);
-                if (isLegalLink(clipText) && filterResult) {
-                    const text = serializeUrl(clipText);
 
+                if (isLegalLink(clipText) && filterResult) {
                     const { range, unitId, subUnitId } = pasteTo;
                     const { ranges: [pasteToRange], mapFunc } = virtualizeDiscreteRanges([range]);
                     const redos: IMutationInfo[] = [];
@@ -91,28 +90,6 @@ export class SheetsHyperLinkCopyPasteController extends Disposable {
                                 },
                             });
                         }
-                        const newId = Tools.generateRandomId();
-                        redos.push({
-                            id: AddHyperLinkMutation.id,
-                            params: {
-                                unitId,
-                                subUnitId,
-                                link: {
-                                    id: newId,
-                                    row,
-                                    column,
-                                    payload: text,
-                                },
-                            },
-                        });
-                        undos.push({
-                            id: RemoveHyperLinkMutation.id,
-                            params: {
-                                unitId,
-                                subUnitId,
-                                id: newId,
-                            },
-                        });
                         if (link) {
                             undos.push({
                                 id: AddHyperLinkMutation.id,

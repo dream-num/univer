@@ -14,54 +14,43 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
-import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
-import { ISidebarService } from '@univerjs/ui';
-import { CellLinkEdit } from '../../views/CellLinkEdit';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
+import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
-export interface IOpenHyperLinkSidebarOperationParams extends ISheetCommandSharedParams {
+export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {
     row: number;
-    column: number;
+    col: number;
+    customRangeId?: string;
+    type: HyperLinkEditSourceType;
 }
 
-export const OpenHyperLinkSidebarOperation: ICommand<IOpenHyperLinkSidebarOperationParams> = {
+export const OpenHyperLinkEditPanelOperation: ICommand<IOpenHyperLinkEditPanelOperationParams> = {
     type: CommandType.OPERATION,
-    id: 'sheet.operation.open-hyper-link-sidebar',
+    id: 'sheet.operation.open-hyper-link-edit-panel',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
 
-        const { unitId, subUnitId, row, column } = params;
-        const hyperLinkModel = accessor.get(HyperLinkModel);
-        const sidebarService = accessor.get(ISidebarService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
-        const currentLink = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
-        popupService.startEditing(params);
-
-        sidebarService.open({
-            header: {
-                title: !currentLink ? 'hyperLink.form.addTitle' : 'hyperLink.form.editTitle',
-            },
-            children: {
-                label: CellLinkEdit.componentKey,
-            },
-        });
-
+        if (!params.customRangeId) {
+            popupService.startAddEditing(params);
+        } else {
+            popupService.startEditing(params as Required<IOpenHyperLinkEditPanelOperationParams>);
+        }
         return true;
     },
 };
 
-export const CloseHyperLinkSidebarOperation: ICommand = {
+export const CloseHyperLinkPopupOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'sheet.operation.close-hyper-link-sidebar',
+    id: 'sheet.operation.close-hyper-link-popup',
     handler(accessor) {
-        const sidebarService = accessor.get(ISidebarService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
 
-        sidebarService.close();
         popupService.endEditing();
         return true;
     },
@@ -73,6 +62,7 @@ export const InsertHyperLinkOperation: ICommand = {
     handler(accessor) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
+        const editorBridgeService = accessor.get(IEditorBridgeService);
         if (!target) {
             return false;
         }
@@ -83,13 +73,18 @@ export const InsertHyperLinkOperation: ICommand = {
             return false;
         }
 
-        const row = selection.primary.startRow;
-        const column = selection.primary.startColumn;
-        return commandService.executeCommand(OpenHyperLinkSidebarOperation.id, {
+        const row = selection.range.startRow;
+        const col = selection.range.startColumn;
+        const visible = editorBridgeService.isVisible();
+        const isZenEditor = univerInstanceService.getFocusedUnit()?.getUnitId() === DOCS_ZEN_EDITOR_UNIT_ID_KEY;
+        return commandService.executeCommand(OpenHyperLinkEditPanelOperation.id, {
             unitId: target.unitId,
             subUnitId: target.subUnitId,
             row,
-            column,
+            col,
+            type: isZenEditor ?
+                HyperLinkEditSourceType.ZEN_EDITOR
+                : visible.visible ? HyperLinkEditSourceType.EDITING : HyperLinkEditSourceType.VIEWING,
         });
     },
 };
@@ -101,7 +96,7 @@ export const InsertHyperLinkToolbarOperation: ICommand = {
         const commandService = accessor.get(ICommandService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
         if (popupService.currentEditing) {
-            return commandService.executeCommand(CloseHyperLinkSidebarOperation.id);
+            return commandService.executeCommand(CloseHyperLinkPopupOperation.id);
         } else {
             return commandService.executeCommand(InsertHyperLinkOperation.id);
         }

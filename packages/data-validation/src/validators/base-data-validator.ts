@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { CellValueType } from '@univerjs/protocol';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IBaseDataValidationWidget } from './base-widget';

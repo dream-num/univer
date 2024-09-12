@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, RemoveDataValidationMutation } from '@univerjs/data-validation';
-import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { Workbook } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
+import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, SheetDataValidationSheetController)

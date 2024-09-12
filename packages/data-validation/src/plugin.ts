@@ -16,13 +16,13 @@
 
 import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DataValidatorRegistryService } from './services/data-validator-registry.service';
-import { DataValidationModel } from './models/data-validation-model';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
-import { DataValidationResourceController } from './controllers/dv-resource.controller';
-import type { IUniverDataValidationConfig } from './controllers/config.schema';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DataValidationResourceController } from './controllers/dv-resource.controller';
+import { DataValidationModel } from './models/data-validation-model';
+import { DataValidatorRegistryService } from './services/data-validator-registry.service';
+import type { IUniverDataValidationConfig } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_DATA_VALIDATION_PLUGIN';
 

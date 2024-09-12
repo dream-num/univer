@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { Disposable, Inject } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
-import { Disposable, Inject } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 

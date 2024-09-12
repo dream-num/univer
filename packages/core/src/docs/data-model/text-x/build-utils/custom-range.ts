@@ -78,3 +78,27 @@ export function copyCustomRange(range: ICustomRange) {
         rangeId: generateRandomId(),
     };
 }
+
+export function excludePointsFromRange(range: [number, number], points: number[]): [number, number][] {
+    const newRanges = [];
+    let start = range[0];
+
+    for (const point of points) {
+        if (point < range[0] || point > range[1]) {
+            continue;
+        }
+
+        if (start < point) {
+            newRanges.push([start, point - 1] as [number, number]);
+        }
+
+        start = point + 1;
+    }
+
+    if (start <= range[1]) {
+        newRanges.push([start, range[1]] as [number, number]);
+    }
+
+    return newRanges;
+}
+

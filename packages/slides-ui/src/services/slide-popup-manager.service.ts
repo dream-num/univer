@@ -24,7 +24,7 @@ import type { BaseObject, IBoundRectNoAngle, IRender, Scene } from '@univerjs/en
 import type { IPopup } from '@univerjs/ui';
 
 export interface ISlideCanvasPopup extends Pick<IPopup,
-    'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
+    'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'
 > {
     mask?: boolean;
     extraProps?: Record<string, any>;

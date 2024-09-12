@@ -20,13 +20,17 @@ import { Observable } from 'rxjs';
 
 export function getMenuHiddenObservable(
     accessor: IAccessor,
-    targetUniverType: UniverInstanceType
+    targetUniverType: UniverInstanceType,
+    matchUnitId?: string
 ): Observable<boolean> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     return new Observable((subscriber) => {
         const subscription = univerInstanceService.focused$.subscribe((unitId) => {
             if (unitId == null) {
+                return subscriber.next(true);
+            }
+            if (matchUnitId && matchUnitId !== unitId) {
                 return subscriber.next(true);
             }
             const univerType = univerInstanceService.getUnitType(unitId);

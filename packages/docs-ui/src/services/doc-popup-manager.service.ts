@@ -19,7 +19,7 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, pxToNum } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject, map } from 'rxjs';
-import type { IDisposable, ITextRangeParam } from '@univerjs/core';
+import type { IDisposable, INeedCheckDisposable, ITextRangeParam } from '@univerjs/core';
 import type { BaseObject, Documents, IBoundRectNoAngle, IRender, Scene } from '@univerjs/engine-render';
 import type { IPopup } from '@univerjs/ui';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
@@ -83,7 +83,7 @@ export function transformOffset2Bound(offsetX: number, offsetY: number, scene: S
     };
 }
 
-export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'closeOnSelfTarget' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
+export interface IDocCanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
     multipleDirection?: IPopup['direction'];
@@ -131,8 +131,6 @@ export class DocCanvasPopManagerService extends Disposable {
     ) {
         super();
     }
-
-    // #region attach to object
 
     private _createObjectPositionObserver(
         targetObject: BaseObject,
@@ -220,6 +218,7 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    // #region attach to object
     /**
      * attach a popup to canvas object
      * @param targetObject target canvas object
@@ -233,7 +232,6 @@ export class DocCanvasPopManagerService extends Disposable {
         }
 
         const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender);
-
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
@@ -252,6 +250,8 @@ export class DocCanvasPopManagerService extends Disposable {
         };
     }
 
+    // #endregion
+    // #region attach to range
     /**
      * attach a popup to doc range
      * @param range doc range
@@ -259,7 +259,7 @@ export class DocCanvasPopManagerService extends Disposable {
      * @param unitId unit id
      * @returns disposable
      */
-    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, unitId: string): IDisposable {
+    attachPopupToRange(range: ITextRangeParam, popup: IDocCanvasPopup, unitId: string): INeedCheckDisposable {
         const doc = this._univerInstanceService.getUnit(unitId);
         if (!doc) {
             throw new Error(`Document not found, unitId: ${unitId}`);
@@ -293,6 +293,8 @@ export class DocCanvasPopManagerService extends Disposable {
                 bounds$.complete();
                 disposable.dispose();
             },
+            canDispose: () => this._globalPopupManagerService.activePopupId !== id,
         };
     }
+    // #endregion
 }

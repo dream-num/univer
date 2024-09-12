@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, isNullCell, moveRangeByOffset } from '@univerjs/core';
+import type { ICellData, IRange, Nullable } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
+import { getCellValue } from '../utils/cell';
+import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
@@ -30,8 +31,7 @@ import {
     NumberValueObject,
     StringValueObject,
 } from '../value-object/primitive-object';
-import { getCellValue } from '../utils/cell';
-import { getRuntimeFeatureCell } from '../utils/get-runtime-feature-cell';
+import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 

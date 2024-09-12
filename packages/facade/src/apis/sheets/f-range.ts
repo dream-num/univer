@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    addMergeCellsUtil,
+    getAddMergeMutationRangeByType,
+    RemoveWorksheetMergeCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeValuesCommand,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
+import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link-ui';
+import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getDT } from '@univerjs/thread-comment-ui';
+import { ComponentManager } from '@univerjs/ui';
 import type {
     CellValue,
     DataValidationStatus,
@@ -30,40 +52,23 @@ import type {
     Workbook,
     Worksheet,
 } from '@univerjs/core';
-import { BooleanNumber, Dimension, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
 import type {
     ISetHorizontalTextAlignCommandParams,
     ISetStyleCommandParams,
     ISetTextWrapCommandParams,
     ISetVerticalTextAlignCommandParams,
+    ISheetLocation,
     IStyleTypeValue,
 } from '@univerjs/sheets';
-import {
-    addMergeCellsUtil,
-    getAddMergeMutationRangeByType,
-    RemoveWorksheetMergeCommand,
-    SetHorizontalTextAlignCommand,
-    SetRangeValuesCommand,
-    SetStyleCommand,
-    SetTextWrapCommand,
-    SetVerticalTextAlignCommand,
-} from '@univerjs/sheets';
-import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
-import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-import { FormulaDataModel } from '@univerjs/engine-formula';
-import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
-import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
-import { ComponentManager } from '@univerjs/ui';
-import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { getDT } from '@univerjs/thread-comment-ui';
-import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
+import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link-ui';
+import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
+import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
+import { FDataValidation } from './f-data-validation';
+import { FFilter } from './f-filter';
+import { FThreadComment } from './f-thread-comment';
 import {
     covertCellValue,
     covertCellValues,
@@ -74,9 +79,7 @@ import {
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
-import { FDataValidation } from './f-data-validation';
-import { FFilter } from './f-filter';
-import { FThreadComment } from './f-thread-comment';
+import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';
@@ -84,6 +87,14 @@ export type FontWeight = 'normal' | 'bold';
 
 export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey {
 
+}
+
+export interface ICellHyperLink {
+    id: string;
+    startIndex: number;
+    endIndex: number;
+    url: string;
+    label: string;
 }
 
 export class FRange {
@@ -178,7 +189,8 @@ export class FRange {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
         const skeleton = this._renderManagerService.getRenderById(unitId)!
-            .with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId)!.skeleton;
+            .with(SheetSkeletonManagerService)
+            .getWorksheetSkeleton(subUnitId)!.skeleton;
         return skeleton.getCellByIndex(this._range.startRow, this._range.startColumn);
     }
 
@@ -781,6 +793,33 @@ export class FRange {
     }
 
     /**
+     * Attach an alert popup to the start cell of current range.
+     * @param alert The alert to attach
+     * @returns The disposable object to detach the alert.
+     */
+    attachAlertPopup(alert: Omit<ICellAlert, 'location'>): IDisposable {
+        const cellAlertService = this._injector.get(CellAlertManagerService);
+        const location: ISheetLocation = {
+            workbook: this._workbook,
+            worksheet: this._worksheet,
+            row: this._range.startRow,
+            col: this._range.startColumn,
+            unitId: this.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+        };
+        cellAlertService.showAlert({
+            ...alert,
+            location,
+        });
+
+        return {
+            dispose: (): void => {
+                cellAlertService.removeAlert(alert.key);
+            },
+        };
+    }
+
+    /**
      * Get the comment of the start cell in the current range.
      * @returns The comment of the start cell in the current range. If the cell does not have a comment, return `null`.
      */
@@ -919,4 +958,89 @@ export class FRange {
         return this;
     }
     //#endregion
+
+    // #region hyperlink
+    /**
+     * Set a hyperlink to the cell in the range.
+     * @param url url
+     * @param label optional, label of the url
+     * @returns success or not
+     */
+    setHyperLink(url: string, label?: string): Promise<boolean> {
+        const params: IAddHyperLinkCommandParams = {
+            unitId: this.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            link: {
+                row: this._range.startRow,
+                column: this._range.startColumn,
+                payload: url,
+                display: label,
+                id: generateRandomId(),
+            },
+        };
+
+        return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
+    }
+
+    /**
+     * Get all hyperlinks in the cell in the range.
+     * @returns hyperlinks
+     */
+    getHyperLinks(): ICellHyperLink[] {
+        const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
+        if (!cellValue?.p) {
+            return [];
+        }
+
+        return cellValue.p.body?.customRanges
+            ?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)
+            .map((range) => ({
+                id: range.rangeId,
+                startIndex: range.startIndex,
+                endIndex: range.endIndex,
+                url: range.properties?.url ?? '',
+                label: cellValue.p?.body?.dataStream.slice(range.startIndex + 1, range.endIndex) ?? '',
+            })) ?? [];
+    }
+
+    /**
+     * Update hyperlink in the cell in the range.
+     * @param id id of the hyperlink
+     * @param url url
+     * @param label optional, label of the url
+     * @returns success or not
+     */
+    updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
+        const params: IUpdateHyperLinkCommandParams = {
+            unitId: this.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            row: this._range.startRow,
+            column: this._range.startColumn,
+            id,
+            payload: {
+                payload: url,
+                display: label,
+            },
+        };
+
+        return this._commandService.executeCommand(UpdateHyperLinkCommand.id, params);
+    }
+
+    /**
+     * Cancel hyperlink in the cell in the range.
+     * @param id id of the hyperlink
+     * @returns success or not
+     */
+    cancelHyperLink(id: string): Promise<boolean> {
+        const params: ICancelHyperLinkCommandParams = {
+            unitId: this.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            row: this._range.startRow,
+            column: this._range.startColumn,
+            id,
+        };
+
+        return this._commandService.executeCommand(CancelHyperLinkCommand.id, params);
+    }
+    // #endregion
 }

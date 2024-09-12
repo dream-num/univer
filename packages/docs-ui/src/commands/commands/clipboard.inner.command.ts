@@ -15,6 +15,7 @@
  */
 
 import {
+    BuildTextUtils,
     CommandType,
     ICommandService,
     IUniverInstanceService,
@@ -37,8 +38,6 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
-import { getRetainAndDeleteFromReplace } from '../../basics/retain-delete-params';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -187,7 +186,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                const { dos } = getRetainAndDeleteFromReplace(selection, segmentId, memoryCursor.cursor, originBody);
+                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor, originBody);
                 textX.push(...dos);
             }
 
@@ -254,7 +253,7 @@ function getCutActionsFromTextRanges(
                 segmentId,
             });
         } else {
-            textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, originBody, segmentId, memoryCursor.cursor, false));
+            textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
         }
 
         memoryCursor.reset();

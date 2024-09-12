@@ -17,7 +17,7 @@
 import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
 import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
-import type { IMouseEvent, IPointerEvent, ISheetFontRenderExtension, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
@@ -155,13 +155,6 @@ export interface IDropdownInfo {
 }
 
 export class DropdownWidget implements IBaseDataValidationWidget {
-    // static padding: IPaddingData = {
-    //     l: MARGIN_H + PADDING_H,
-    //     r: ICON_PLACE + MARGIN_H,
-    //     t: MARGIN_V,
-    //     b: MARGIN_V,
-    // };
-
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
 
     constructor(
@@ -227,8 +220,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as ListValidator;
-        // @ts-ignore
-        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const fontRenderExtension = data.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
         if (!rule || !validator || !validator || validator.id.indexOf(DataValidationType.LIST) !== 0) {
@@ -358,8 +350,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const { primaryWithCoord, style, data } = info;
         const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
-        // @ts-ignore
-        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const fontRenderExtension = data.fontRenderExtension;
         const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
         const rule = data.dataValidation?.rule;

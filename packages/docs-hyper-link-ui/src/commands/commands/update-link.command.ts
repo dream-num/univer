@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, type ICommand, ICommandService } from '@univerjs/core';
+import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -35,13 +36,21 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         }
         const { unitId, payload, segmentId } = params;
         const commandService = accessor.get(ICommandService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const currentSelection = docSelectionManagerService.getActiveTextRange();
-        if (!currentSelection) {
+        const doc = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        if (!currentSelection || !doc) {
             return false;
         }
 
         const newId = generateRandomId();
+        const oldBody = getBodySlice(doc.getSelfOrHeaderFooterModel(segmentId).getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
+        const textRun = oldBody.textRuns?.[0];
+        if (textRun) {
+            textRun.ed = params.label.length + 1;
+        }
+
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
@@ -55,6 +64,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
                         url: payload,
                     },
                 }],
+                textRuns: textRun ? [textRun] : undefined,
             },
             selection: {
                 startOffset: currentSelection.startOffset!,

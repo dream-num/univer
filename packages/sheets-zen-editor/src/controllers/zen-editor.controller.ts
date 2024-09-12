@@ -196,9 +196,14 @@ export class ZenEditorController extends RxDisposable {
         const body = param.documentLayoutObject.documentModel?.getBody();
         const dataStream = body?.dataStream;
         const paragraphs = body?.paragraphs;
+        const customBlocks = body?.customBlocks;
+        const drawings = param.documentLayoutObject.documentModel?.getDrawings();
+        const drawingsOrder = param.documentLayoutObject.documentModel?.getDrawingsOrder();
+        const customRanges = body?.customRanges;
+
         let textRuns: ITextRun[] = [];
 
-        if (dataStream == null || paragraphs == null) {
+        if (dataStream == null || (!paragraphs && !customRanges)) {
             return;
         }
 
@@ -206,7 +211,7 @@ export class ZenEditorController extends RxDisposable {
             textRuns = body?.textRuns;
         }
 
-        this._syncContentAndRender(DOCS_ZEN_EDITOR_UNIT_ID_KEY, dataStream, paragraphs, textRuns);
+        this._syncContentAndRender(DOCS_ZEN_EDITOR_UNIT_ID_KEY, dataStream, paragraphs ?? [], textRuns, customBlocks, drawings, drawingsOrder, customRanges);
 
         // Also need to resize document and scene after sync content.
         // this._autoScroll();
@@ -244,17 +249,13 @@ export class ZenEditorController extends RxDisposable {
         docBody.paragraphs = paragraphs;
         docBody.customBlocks = customBlocks;
         docBody.customRanges = customRanges;
-
         snapshot.drawings = drawings;
         snapshot.drawingsOrder = drawingsOrder;
+        docBody.textRuns = textRuns;
 
         // Need to empty textRuns(previous formula highlight) every time when sync content(change selection or edit cell or edit formula bar).
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
             docBody.textRuns = [];
-        }
-
-        if (textRuns.length > 0) {
-            docBody.textRuns = textRuns;
         }
 
         docViewModel.reset(docDataModel);

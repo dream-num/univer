@@ -23,7 +23,7 @@ export function getCustomRangeStyle(customRange: ICustomRangeForInterceptor): Nu
         customRange.rangeType === CustomRangeType.MENTION
     ) {
         return {
-            ...customRange.active ? { ul: { s: BooleanNumber.TRUE } } : null,
+            ...(customRange.active ?? true) ? { ul: { s: BooleanNumber.TRUE } } : null,
             cl: { rgb: '#274fee' },
         };
     }

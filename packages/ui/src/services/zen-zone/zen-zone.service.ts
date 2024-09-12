@@ -16,13 +16,14 @@
 
 import type { IDisposable } from '@univerjs/core';
 import { createIdentifier } from '@univerjs/core';
-import type { Subject } from 'rxjs';
+import type { Observable, Subject } from 'rxjs';
 
 export const IZenZoneService = createIdentifier<IZenZoneService>('univer.zen-zone-service');
 
 export interface IZenZoneService {
     readonly visible$: Subject<boolean>;
     readonly componentKey$: Subject<string>;
+    readonly temporaryHidden$: Observable<boolean>;
 
     readonly visible: boolean;
 
@@ -31,4 +32,13 @@ export interface IZenZoneService {
     open(): void;
 
     close(): void;
+
+    /**
+     * temporarily hide the zen zone, often
+     */
+    hide(): void;
+    /**
+     * show the zen zone
+     */
+    show(): void;
 }

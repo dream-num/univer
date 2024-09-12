@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getRetainAndDeleteAndExcludeLineBreak } from '../../basics/replace';
 import { getRichTextEditPath } from '../util';
 
 interface IReplaceContentCommandParams {
@@ -192,7 +191,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...getRetainAndDeleteAndExcludeLineBreak(selection, body, '', 0, false));
+        textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, body, '', 0, false));
         // insert
         textX.push({
             t: TextXActionType.INSERT,

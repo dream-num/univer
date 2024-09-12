@@ -14,3 +14,7 @@
  * limitations under the License.
  */
 
+export enum DeleteDirection {
+    LEFT,
+    RIGHT,
+}

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { DataValidationStatus, Disposable, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
-import type { BaseDataValidator } from '@univerjs/data-validation';
-import { debounceTime } from 'rxjs';
 import { IZenZoneService } from '@univerjs/ui';
+import { debounceTime } from 'rxjs';
+import type { Workbook } from '@univerjs/core';
+import type { BaseDataValidator } from '@univerjs/data-validation';
 
 const ALERT_KEY = 'SHEET_DATA_VALIDATION_ALERT';
 

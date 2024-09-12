@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType } from '@univerjs/core';
-import { isSegmentIntersects } from '@univerjs/docs';
-import type { IDocumentBody, ITextRange, Nullable } from '@univerjs/core';
-import { DeleteDirection } from '../../../docs-ui/src/types/delete-direction';
-import { isCustomRangeSplitSymbol } from './custom-range';
+import { DeleteDirection } from '../../../../types/enum';
+import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
+import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import type { Nullable } from '../../../../shared';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { IDocumentBody } from '../../../../types/interfaces';
+import type { IDeleteAction, IRetainAction } from '../action-types';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -220,26 +223,84 @@ export function getSelectionForAddCustomRange(selection: ITextRange, body: IDocu
         collapsed: false,
     };
 }
-const tags = [
-    DataStreamTreeTokenType.PARAGRAPH, // 段落
-    DataStreamTreeTokenType.SECTION_BREAK, // 章节
-    DataStreamTreeTokenType.TABLE_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_ROW_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_CELL_START, // 表格开始
-    DataStreamTreeTokenType.TABLE_CELL_END, // 表格开始
-    DataStreamTreeTokenType.TABLE_ROW_END, // 表格开始
-    DataStreamTreeTokenType.TABLE_END, // 表格结束
-    DataStreamTreeTokenType.CUSTOM_RANGE_START, // 自定义范围开始
-    DataStreamTreeTokenType.CUSTOM_RANGE_END, // 自定义范围结束
-    DataStreamTreeTokenType.COLUMN_BREAK, // 换列
-    DataStreamTreeTokenType.PAGE_BREAK, // 换页
-    DataStreamTreeTokenType.DOCS_END, // 文档结尾
-    DataStreamTreeTokenType.TAB, // 制表符
-    DataStreamTreeTokenType.CUSTOM_BLOCK, // 图片 mention 等不参与文档流的场景
 
-];
-export function getSelectionText(dataStream: string, start: number, end: number) {
-    const text = dataStream.slice(start, end);
-    return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
+export function isSegmentIntersects(start: number, end: number, start2: number, end2: number) {
+    return Math.max(start, start2) <= Math.min(end, end2);
+}
+
+export function getRetainAndDeleteFromReplace(
+    range: ITextRange,
+    segmentId: string = '',
+    memoryCursor: number,
+    body: IDocumentBody
+) {
+    const { startOffset, endOffset } = range;
+    const dos: Array<IRetainAction | IDeleteAction> = [];
+    const textStart = startOffset - memoryCursor;
+    const textEnd = endOffset - memoryCursor;
+    const dataStream = body.dataStream;
+    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
+    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
+    const retainPoints = new Set<number>();
+    relativeCustomRanges?.forEach((range) => {
+        if (toDeleteRanges.has(range)) {
+            return;
+        }
+
+        if (range.startIndex - memoryCursor >= textStart &&
+            range.startIndex - memoryCursor <= textEnd &&
+            range.endIndex - memoryCursor > textEnd) {
+            retainPoints.add(range.startIndex);
+        }
+        if (range.endIndex - memoryCursor >= textStart &&
+            range.endIndex - memoryCursor <= textEnd &&
+            range.startIndex < textStart) {
+            retainPoints.add(range.endIndex);
+        }
+    });
+
+    if (textStart > 0) {
+        dos.push({
+            t: TextXActionType.RETAIN,
+            len: textStart,
+            segmentId,
+        });
+    }
+
+    const sortedRetains = [...retainPoints].sort((pre, aft) => pre - aft);
+    let cursor = textStart;
+    sortedRetains.forEach((pos) => {
+        const len = pos - cursor;
+        if (len > 0) {
+            dos.push({
+                t: TextXActionType.DELETE,
+                len,
+                line: 0,
+                segmentId,
+            });
+        }
+        dos.push({
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId,
+        });
+        cursor = pos + 1;
+    });
+
+    if (cursor < textEnd) {
+        dos.push({
+            t: TextXActionType.DELETE,
+            len: textEnd - cursor,
+            line: 0,
+            segmentId,
+        });
+        cursor = textEnd + 1;
+    }
+
+    return {
+        dos,
+        cursor,
+        retain: retainPoints.size,
+    };
 }
 

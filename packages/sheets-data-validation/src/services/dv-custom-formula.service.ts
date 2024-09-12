@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import { DataValidationModel } from '@univerjs/data-validation';
+import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {

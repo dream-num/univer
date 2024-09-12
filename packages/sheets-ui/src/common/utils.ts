@@ -217,6 +217,7 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
     const { scene } = currentRender;
 
@@ -229,27 +230,44 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
         return null;
     }
 
-    const { row, col, mergeCell, actualCol, actualRow } = cellIndex;
+    let { actualCol, actualRow } = cellIndex;
+
+    skeleton.overflowCache.forValue((r, c, range) => {
+        if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
+            actualCol = c;
+            actualRow = r;
+        }
+    });
+
+    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+    const originCell = skeleton.getCellByIndex(cellIndex.row, cellIndex.col);
+    const originLocation = {
+        unitId,
+        subUnitId: sheetId,
+        workbook,
+        worksheet,
+        row: originCell.actualRow,
+        col: originCell.actualColumn,
+    };
 
     const location: ISheetLocation = {
         unitId,
         subUnitId: sheetId,
         workbook,
         worksheet,
-        row: actualRow,
-        col: actualCol,
+        row: actualCell.actualRow,
+        col: actualCell.actualColumn,
     };
 
     let anchorCell: IRange;
-
-    if (mergeCell) {
-        anchorCell = mergeCell;
+    if (actualCell.mergeInfo) {
+        anchorCell = actualCell.mergeInfo;
     } else {
         anchorCell = {
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
+            startRow: location.row,
+            endRow: location.row,
+            startColumn: location.col,
+            endColumn: location.col,
         };
     }
 
@@ -277,6 +295,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
 
     return {
         position,
-        location,
+        location: originLocation,
+        overflowLocation: location,
     };
 }

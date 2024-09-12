@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
-import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
-import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
-import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
+import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
 import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
-import type { CheckboxValidator } from '../validators/checkbox-validator';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, transformCheckboxValue } from '../validators/checkbox-validator';
+import type { IMouseEvent, IPointerEvent, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, transformCheckboxValue } from '../validators/checkbox-validator';
+import type { CheckboxValidator } from '../validators/checkbox-validator';
 
 const MARGIN_H = 6;
 

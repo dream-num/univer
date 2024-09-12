@@ -14,76 +14,14 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { CustomRangeType, DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
+import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { getRichTextEditPath } from '../commands/util';
-import { getSelectionForAddCustomRange, normalizeSelection } from './selection';
 
-interface IAddCustomRangeParam {
+interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
     unitId: string;
-    range: ITextRange;
-    segmentId?: string;
-    rangeId: string;
-    rangeType: CustomRangeType;
-}
-
-function addCustomRangeTextX(param: IAddCustomRangeParam, body: IDocumentBody) {
-    const { range, rangeId, rangeType, segmentId } = param;
-    const actualRange = getSelectionForAddCustomRange(range, body);
-    if (!actualRange) {
-        return null;
-    }
-
-    const { startOffset: start, endOffset: end } = actualRange;
-
-    const textX = new TextX();
-
-    if (start > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: start,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
-        },
-        len: 1,
-        line: 0,
-    });
-
-    textX.push({
-        t: TextXActionType.RETAIN,
-        body: {
-            dataStream: '',
-        },
-        len: end - start,
-        segmentId,
-    });
-
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
-            customRanges: [
-                {
-                    rangeId,
-                    rangeType,
-                    startIndex: -(end - start) - 1,
-                    endIndex: 0,
-                },
-            ],
-        },
-        len: 1,
-        line: 0,
-    });
-
-    return textX;
 }
 
 export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRangeParam, body: IDocumentBody) {
@@ -103,7 +41,7 @@ export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRang
         },
     };
     const jsonX = JSONX.getInstance();
-    const textX = addCustomRangeTextX(param, body);
+    const textX = BuildTextUtils.customRange.add({ ...param, body });
     if (!textX) {
         return false;
     }
@@ -118,196 +56,67 @@ interface IAddCustomRangeFactoryParam {
     rangeType: CustomRangeType;
     wholeEntity?: boolean;
     properties?: Record<string, any>;
+    unitId: string;
+    selection?: ITextRangeParam;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAddCustomRangeFactoryParam) {
-    const { rangeId, rangeType, wholeEntity, properties } = param;
+    const { rangeId, rangeType, wholeEntity, properties, unitId, selection: propSelection } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selection = docSelectionManagerService.getActiveTextRange();
+    const selection = propSelection ?? docSelectionManagerService.getActiveTextRange();
     const segmentId = selection?.segmentId;
     if (!selection) {
         return false;
     }
 
-    const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }
     const body = documentDataModel.getSelfOrHeaderFooterModel(selection.segmentId).getBody();
-    const unitId = documentDataModel.getUnitId();
     if (!body) {
         return false;
     }
-    const { startOffset, endOffset } = normalizeSelection(selection);
+    const { startOffset, endOffset } = BuildTextUtils.selection.normalizeSelection(selection);
 
-    const customRanges = body.customRanges ?? [];
-
-    const relativeCustomRanges = [];
-    for (let i = 0, len = customRanges.length; i < len; i++) {
-        const customRange = customRanges[i];
-        // intersect
-        if (customRange.rangeType === rangeType && Math.max(customRange.startIndex, startOffset) <= Math.min(customRange.endIndex, endOffset - 1)) {
-            relativeCustomRanges.push({ ...customRange });
-        }
-
-        // optimize
-        if (customRange.startIndex >= endOffset) {
-            break;
-        }
-    }
-    const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort((pre, aft) => pre - aft);
-
-    let cursor = 0;
-    const textX = new TextX();
-
-    const range = deletes.length
-        ? {
-            startOffset: Math.min(deletes[0], startOffset),
-            endOffset: Math.max(deletes[deletes.length - 1] + 1, endOffset),
-        }
-        : selection;
-
-    if (range.startOffset !== cursor) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: range.startOffset - cursor,
-            segmentId,
-        });
-        cursor = range.startOffset;
-    }
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
-        },
-        len: 1,
-        line: 0,
+    const textX = BuildTextUtils.customRange.add({
+        range: { startOffset, endOffset, collapsed: startOffset === endOffset },
+        rangeId,
+        rangeType,
         segmentId,
+        wholeEntity,
+        properties,
+        body,
     });
-
-    deletes.forEach((index, i) => {
-        if (index !== cursor) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: index - cursor,
-                segmentId,
-            });
-            cursor = index;
-        }
-        textX.push({
-            t: TextXActionType.DELETE,
-            len: 1,
-            line: 0,
-            segmentId,
-        });
-        cursor++;
-    });
-
-    if (cursor !== range.endOffset) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: range.endOffset - cursor,
-            segmentId,
-        });
-        cursor = range.endOffset;
+    if (!textX) {
+        return false;
     }
-
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: {
-            dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
-            customRanges: [
-                {
-                    rangeId,
-                    rangeType,
-                    startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
-                    endIndex: 0,
-                    wholeEntity,
-                    properties,
-                },
-            ],
-        },
-        len: 1,
-        line: 0,
-        segmentId,
-    });
     const jsonX = JSONX.getInstance();
-    const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
+    const doMutation: IMutationInfo<IRichTextEditingMutationParams> & { textX: TextX } = {
         id: RichTextEditingMutation.id,
         params: {
             unitId,
             actions: [],
             textRanges: undefined,
         },
+        textX,
     };
     const path = getRichTextEditPath(documentDataModel, segmentId);
     doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
     return doMutation;
 }
 
-export interface IDeleteCustomRangeParam {
-    unitId: string;
+export interface IDeleteCustomRangeFactoryParams {
     rangeId: string;
     segmentId?: string;
+    unitId: string;
+    insert?: Nullable<IDocumentBody>;
 }
 
-function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { unitId, rangeId, segmentId } = params;
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-
-    const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
-    if (!documentDataModel) {
-        return false;
-    }
-
-    const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
-    if (!range) {
-        return false;
-    }
-
-    const { startIndex, endIndex } = range;
-    const textX = new TextX();
-
-    const len = endIndex - startIndex + 1;
-
-    if (startIndex > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: startIndex,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
-        segmentId,
-        line: 0,
-    });
-
-    if (len - 2 > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: len - 2,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
-        segmentId,
-        line: 0,
-    });
-
-    return textX;
-}
-
-export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { unitId, segmentId } = params;
+export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeFactoryParams) {
+    const { unitId, segmentId, insert } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
@@ -325,7 +134,13 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
     };
 
     const jsonX = JSONX.getInstance();
-    const textX = deleteCustomRangeTextX(accessor, params);
+    const textX = BuildTextUtils.customRange.delete(accessor, {
+        documentDataModel,
+        rangeId: params.rangeId,
+        insert,
+        segmentId,
+    });
+
     if (!textX) {
         return false;
     }

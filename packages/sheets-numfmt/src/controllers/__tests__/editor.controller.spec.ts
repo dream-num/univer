@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, Workbook, Worksheet } from '@univerjs/core';
 import { createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
+import type { ICellDataForSheetInterceptor, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
 
 import { SheetsNumfmtCellContentController } from '../numfmt.cell-content.controller';
 import { NumfmtEditorController } from '../numfmt.editor.controller';
@@ -74,6 +74,7 @@ describe('test editor', () => {
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
         const editorBridgeService = testBed.get(IEditorBridgeService);
+        const cellData = worksheet.getCell(0, 0);
         const location = {
             workbook,
             worksheet,
@@ -81,8 +82,9 @@ describe('test editor', () => {
             subUnitId,
             row: 0,
             col: 0,
+            origin: cellData,
         };
-        const cellData = worksheet.getCell(0, 0);
+
         expect(cellData!.v).toEqual('$0');
         expect(cellData!.t).toEqual(2);
 
@@ -110,6 +112,7 @@ describe('test editor', () => {
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
         const editorBridgeService = testBed.get(IEditorBridgeService);
+        const cellData = worksheet.getCell(0, 0);
         const location = {
             workbook,
             worksheet,
@@ -117,8 +120,9 @@ describe('test editor', () => {
             subUnitId,
             row: 0,
             col: 0,
+            origin: cellData,
         };
-        const cellData = worksheet.getCell(0, 0);
+
         const result = editorBridgeService.interceptor.fetchThroughInterceptors(
             editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
         )(cellData, location);
@@ -142,6 +146,7 @@ describe('test editor', () => {
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
         const editorBridgeService = testBed.get(IEditorBridgeService);
+        const cellData = { v: '12:33:22', t: 2 };
         const location = {
             workbook,
             worksheet,
@@ -149,8 +154,9 @@ describe('test editor', () => {
             subUnitId,
             row: 0,
             col: 0,
+            origin: cellData,
         };
-        const cellData = { v: '12:33:22', t: 2 };
+
         const result = editorBridgeService.interceptor.fetchThroughInterceptors(
             editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
         )(cellData, location);

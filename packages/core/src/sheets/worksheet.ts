@@ -753,3 +753,23 @@ export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
 
     return '';
 }
+
+export function getOriginCellValue(cell: Nullable<ICellData>) {
+    if (cell === null) {
+        return '';
+    }
+
+    if (cell?.p) {
+        const body = cell?.p.body;
+
+        if (body == null) {
+            return '';
+        }
+
+        const data = body.dataStream;
+        const newDataStream = BuildTextUtils.transform.getPlainText(data);
+        return newDataStream;
+    }
+
+    return cell?.v;
+}

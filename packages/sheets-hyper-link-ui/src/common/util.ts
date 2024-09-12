@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, Tools } from '@univerjs/core';
-import type { ICellData, Nullable } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 
 export function isLegalLink(link: string) {
     return Tools.isLegalUrl(link);
@@ -59,22 +58,3 @@ export function serializeUrl(urlStr: string) {
     return urlStr;
 }
 
-export function getCellValueOrigin(cell: Nullable<ICellData>) {
-    if (cell === null) {
-        return '';
-    }
-
-    if (cell?.p) {
-        const body = cell?.p.body;
-
-        if (body == null) {
-            return '';
-        }
-
-        const data = body.dataStream;
-        const newDataStream = BuildTextUtils.transform.getPlainText(data);
-        return newDataStream;
-    }
-
-    return cell?.v;
-}

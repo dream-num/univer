@@ -14,26 +14,10 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, type ICellData, type Nullable } from '@univerjs/core';
+import { getOriginCellValue, type ICellData, type Nullable } from '@univerjs/core';
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {
-    if (cell === null) {
-        return '';
-    }
-
-    if (cell?.p) {
-        const body = cell?.p.body;
-
-        if (body == null) {
-            return '';
-        }
-
-        const data = body.dataStream;
-        const newDataStream = BuildTextUtils.transform.getPlainText(data);
-        return newDataStream;
-    }
-
-    return cell?.v;
+    return getOriginCellValue(cell);
 }
 
 export function getStringCellValue(cell: Nullable<ICellData>) {

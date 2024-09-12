@@ -106,8 +106,8 @@ export default {
         },
     },
     CONFIDENCE: {
-        description: '母集団に対する信頼区間を返します。',
-        abstract: '母集団に対する信頼区間を返します。',
+        description: '正規分布を使用して、母集団の平均に対する信頼区間を求めます。',
+        abstract: '正規分布を使用して、母集団の平均に対する信頼区間を求めます。',
         links: [
             {
                 title: '指導',
@@ -115,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '信頼度を計算するために使用する有意水準を指定します。 信頼度は 100*(1- α)% で計算されます。つまり、α が 0.05 であるとき、信頼度は 95% になります。' },
+            standardDev: { name: '標準偏差', detail: 'データ範囲の母標準偏差を指定します。これは既知の値であると仮定されます。' },
+            size: { name: '標本数', detail: '標本数を指定します。' },
         },
     },
     COVAR: {

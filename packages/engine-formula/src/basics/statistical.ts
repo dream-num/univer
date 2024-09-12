@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { erfcINV } from './engineering';
+
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
         return 0;
@@ -420,4 +422,16 @@ function lowRegGammaInverse(p: number, a: number): number {
     }
 
     return x;
+}
+
+export function normalINV(probability: number, mean: number, standardDev: number): number {
+    // eslint-disable-next-line
+    return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
+}
+
+export function studentTINV(probability: number, degFreedom: number): number {
+    let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
+    x = Math.sqrt(degFreedom * (1 - x) / x);
+
+    return (probability > 0.5) ? x : -x;
 }

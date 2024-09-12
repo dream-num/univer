@@ -106,8 +106,8 @@ export default {
         },
     },
     CONFIDENCE: {
-        description: '返回总体平均值的置信区间',
-        abstract: '返回总体平均值的置信区间',
+        description: '使用正态分布返回总体平均值的置信区间。',
+        abstract: '使用正态分布返回总体平均值的置信区间。',
         links: [
             {
                 title: '教学',
@@ -115,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用来计算置信水平的显著性水平。 置信水平等于 100*(1 - alpha)%，亦即，如果 alpha 为 0.05，则置信水平为 95%。' },
+            standardDev: { name: '总体标准偏差', detail: '数据区域的总体标准偏差，假定为已知。' },
+            size: { name: '样本大小', detail: '样本大小。' },
         },
     },
     COVAR: {

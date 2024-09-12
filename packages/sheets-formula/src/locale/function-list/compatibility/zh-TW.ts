@@ -106,8 +106,8 @@ export default {
         },
     },
     CONFIDENCE: {
-        description: '傳回總體平均值的置信區間',
-        abstract: '傳回總體平均值的置信區間',
+        description: '使用常態分佈傳回總體平均值的置信區間。',
+        abstract: '使用常態分佈傳回總體平均值的置信區間。',
         links: [
             {
                 title: '教導',
@@ -115,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用於計算置信水準的顯著水準。置信水準等於 100*(1 - alpha)%，換句話說，alpha 0.05 表示信賴水準為 95%。' },
+            standardDev: { name: '總體標準差', detail: '假設資料範圍的總體標準差已知。' },
+            size: { name: '樣本大小', detail: '這是樣本大小。' },
         },
     },
     COVAR: {

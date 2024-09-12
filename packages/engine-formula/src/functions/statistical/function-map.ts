@@ -26,6 +26,8 @@ import { ChisqDistRt } from './chisq-dist-rt';
 import { ChisqInv } from './chisq-inv';
 import { ChisqInvRt } from './chisq-inv-rt';
 import { ChisqTest } from './chisq-test';
+import { ConfidenceNorm } from './confidence-norm';
+import { ConfidenceT } from './confidence-t';
 import { Count } from './count';
 import { Counta } from './counta';
 import { Countblank } from './countblank';
@@ -62,6 +64,8 @@ export const functionStatistical = [
     [ChisqInv, FUNCTION_NAMES_STATISTICAL.CHISQ_INV],
     [ChisqInvRt, FUNCTION_NAMES_STATISTICAL.CHISQ_INV_RT],
     [ChisqTest, FUNCTION_NAMES_STATISTICAL.CHISQ_TEST],
+    [ConfidenceNorm, FUNCTION_NAMES_STATISTICAL.CONFIDENCE_NORM],
+    [ConfidenceT, FUNCTION_NAMES_STATISTICAL.CONFIDENCE_T],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
     [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],

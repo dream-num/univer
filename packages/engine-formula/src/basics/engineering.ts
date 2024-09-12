@@ -436,3 +436,30 @@ export function erf(x: number): number {
 
     return isNeg ? res - 1 : 1 - res;
 };
+
+export function erfc(x: number): number {
+    return 1 - erf(x);
+}
+
+export function erfcINV(p: number): number {
+    if (p >= 2) {
+        return -100;
+    }
+
+    if (p <= 0) {
+        return 100;
+    }
+
+    const _p = (p < 1) ? p : 2 - p;
+    const temp = Math.sqrt(-2 * Math.log(_p / 2));
+
+    let x = -0.70711 * ((2.30753 + temp * 0.27061) / (1 + temp * (0.99229 + temp * 0.04481)) - temp);
+
+    for (let j = 0; j < 2; j++) {
+        const err = erfc(x) - _p;
+
+        x += err / (1.12837916709551257 * Math.exp(-x * x) - x * err); // eslint-disable-line
+    }
+
+    return (p < 1) ? x : -x;
+};

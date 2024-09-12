@@ -106,8 +106,8 @@ export default {
         },
     },
     CONFIDENCE: {
-        description: 'Returns the confidence interval for a population mean',
-        abstract: 'Returns the confidence interval for a population mean',
+        description: 'Returns the confidence interval for a population mean, using a normal distribution.',
+        abstract: 'Returns the confidence interval for a population mean, using a normal distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -115,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: 'The significance level used to compute the confidence level. The confidence level equals 100*(1 - alpha)%, or in other words, an alpha of 0.05 indicates a 95 percent confidence level.' },
+            standardDev: { name: 'standard_dev', detail: 'The population standard deviation for the data range and is assumed to be known.' },
+            size: { name: 'size', detail: 'The sample size.' },
         },
     },
     COVAR: {

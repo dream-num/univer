@@ -238,8 +238,8 @@ export default {
         },
     },
     CONFIDENCE_NORM: {
-        description: 'Trả về khoảng tin cậy của giá trị trung bình tổng thể',
-        abstract: 'Trả về khoảng tin cậy của giá trị trung bình tổng thể',
+        description: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
+        abstract: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
         links: [
             {
                 title: 'Dạy học',
@@ -247,8 +247,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
         },
     },
     CONFIDENCE_T: {
@@ -261,8 +262,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
         },
     },
     CORREL: {

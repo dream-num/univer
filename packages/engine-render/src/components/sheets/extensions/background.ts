@@ -17,12 +17,12 @@
 import type { IRange, IScale } from '@univerjs/core';
 
 import { expandRangeIfIntersects, fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
+import { SpreadsheetExtensionRegistry } from '../../extension';
+import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
 import type { IDrawInfo } from '../../extension';
-import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import type { Spreadsheet } from '../spreadsheet';
-import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
@@ -35,7 +35,6 @@ const PRINTING_Z_INDEX = 21;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
-
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
     PRINTING_Z_INDEX = PRINTING_Z_INDEX;
@@ -52,9 +51,9 @@ export class Background extends SheetExtension {
         { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
-        const { background, backgroundPositions } = stylesCache;
-        if (!worksheet || !background) return;
-
+        const { background: backgroundCache, backgroundPositions } = stylesCache;
+        if (!worksheet || !backgroundCache) return;
+        window.bgc = backgroundCache;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -67,11 +66,11 @@ export class Background extends SheetExtension {
         const { scaleX, scaleY } = ctx.getScale();
 
         const renderBGByCell = (rgb: string) => {
-            const backgroundCache = background[rgb];
+            const backgroundObjectMatrix = backgroundCache[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
 
             const backgroundPaths = new Path2D();
-            backgroundCache.forValue((rowIndex, columnIndex) => {
+            backgroundObjectMatrix.forValue((rowIndex, columnIndex) => {
                 if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
                     return true;
                 }
@@ -117,7 +116,7 @@ export class Background extends SheetExtension {
             ctx.fill(backgroundPaths);
         };
 
-        Object.keys(background).forEach(renderBGByCell);
+        Object.keys(backgroundCache).forEach(renderBGByCell);
         ctx.restore();
     }
 }

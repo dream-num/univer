@@ -110,6 +110,7 @@ storybook-static
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+playwright-report.json
 
 *storybook.log
 typedoc.json

@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng được phân tách bởi cột.' },
+            lambda: { name: 'lambda', detail: 'Hàm LAMBDA nhận một cột làm tham số đơn và tính toán một kết quả. LAMBDA có một tham số duy nhất: Một cột từ mảng.' },
         },
     },
     BYROW: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng được phân tách theo hàng.' },
+            lambda: { name: 'lambda', detail: 'Hàm LAMBDA nhận một hàng làm tham số duy nhất và tính toán một kết quả. LAMBDA có một tham số duy nhất: Một hàng từ mảng.' },
         },
     },
     FALSE: {
@@ -184,8 +184,8 @@ export default {
         },
     },
     MAP: {
-        description: 'Trả về một mảng bằng cách áp dụng LAMBDA tạo giá trị mới, ánh xạ mảng () thành giá trị mới',
-        abstract: 'Trả về một mảng bằng cách áp dụng LAMBDA tạo giá trị mới, ánh xạ mảng () thành giá trị mới',
+        description: 'Trả về một mảng được hình thành bằng cách ánh xạ mỗi giá trị trong (các) mảng với một giá trị mới bằng cách áp dụng lambda để tạo một giá trị mới.',
+        abstract: 'Trả về một mảng được hình thành bằng cách ánh xạ mỗi giá trị trong (các) mảng với một giá trị mới bằng cách áp dụng lambda để tạo một giá trị mới.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -193,8 +193,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array1: { name: 'mảng1', detail: 'Một mảng1 cần ánh xạ.' },
+            array2: { name: 'mảng2', detail: 'Một mảng2 cần ánh xạ.' },
+            lambda: { name: 'lambda', detail: 'Một LAMBDA phải là đối số cuối cùng và phải có tham số cho mỗi mảng được truyền.' },
         },
     },
     NOT: {
@@ -234,8 +235,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            initialValue: { name: 'giá trị bắt đầu cho', detail: 'Đặt giá trị bắt đầu cho bộ tích lũy.' },
+            array: { name: 'mảng', detail: 'Một mảng cần giảm.' },
+            lambda: { name: 'lambda', detail: 'Một LAMBDA được gọi là giảm mảng. LAMBDA có ba thông số: 1.Giá trị được tính tổng và trả về là kết quả cuối cùng. 2.Giá trị hiện tại từ mảng. 3.Phép tính được áp dụng cho từng thành phần trong mảng.' },
         },
     },
     SCAN: {
@@ -248,8 +250,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'đầu tiên' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            initialValue: { name: 'giá trị bắt đầu cho', detail: 'Đặt giá trị bắt đầu cho bộ tích lũy.' },
+            array: { name: 'mảng', detail: 'Một mảng cần quét.' },
+            lambda: { name: 'lambda', detail: 'Một LAMBDA được gọi là quét mảng. LAMBDA có ba thông số: 1.Giá trị được tính tổng và trả về là kết quả cuối cùng. 2.Giá trị hiện tại từ mảng. 3.Phép tính được áp dụng cho từng thành phần trong mảng.' },
         },
     },
     SWITCH: {

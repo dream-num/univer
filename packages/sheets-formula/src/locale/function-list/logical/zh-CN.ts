@@ -39,8 +39,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '用列分隔的数组。' },
+            lambda: { name: 'lambda', detail: '将列作为单个参数并计算一个结果的 LAMBDA。 LAMBDA 接受单个参数：数组中的列。' },
         },
     },
     BYROW: {
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '用行分隔的数组。' },
+            lambda: { name: 'lambda', detail: '将行作为单个参数并计算结果的 LAMBDA。 LAMBDA 接受单个参数：数组中的行。' },
         },
     },
     FALSE: {
@@ -184,8 +184,8 @@ export default {
         },
     },
     MAP: {
-        description: '返回一个数组，该数组通过应用 LAMBDA 创建新值，将数组 () 映射到新值',
-        abstract: '返回一个数组，该数组通过应用 LAMBDA 创建新值，将数组 () 映射到新值',
+        description: '通过应用 LAMBDA 来创建新值，返回将数组中每个值映射到新值而形成的数组。',
+        abstract: '通过应用 LAMBDA 来创建新值，返回将数组中每个值映射到新值而形成的数组。',
         links: [
             {
                 title: '教学',
@@ -193,8 +193,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '要映射的数组1。' },
+            array2: { name: '数组2', detail: '要映射的数组2。' },
+            lambda: { name: 'lambda', detail: '一个 LAMBDA，必须是最后一个参数，并且必须具有传递的每个数组的参数。' },
         },
     },
     NOT: {
@@ -234,8 +235,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '起始值', detail: '设置累加器的起始值。' },
+            array: { name: '数组', detail: '要减小的数组。' },
+            lambda: { name: 'lambda', detail: '调用 LAMBDA 来减小数组。 LAMBDA 采用三个参数：1.该值累加后作为最终结果返回。2.数组中的当前值。3.应用于数组中每个元素的计算。' },
         },
     },
     SCAN: {
@@ -248,8 +250,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '起始值', detail: '设置累加器的起始值。' },
+            array: { name: '数组', detail: '要扫描的数组。' },
+            lambda: { name: 'lambda', detail: '调用 LAMBDA 来扫描数组。 LAMBDA 采用三个参数：1.该值累加后作为最终结果返回。2.数组中的当前值。3.应用于数组中每个元素的计算。' },
         },
     },
     SWITCH: {

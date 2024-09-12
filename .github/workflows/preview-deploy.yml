@@ -3,8 +3,9 @@ name: 📤 Preview Deploy
 on:
     workflow_run:
         workflows:
-            - 📦 Build
-        types: [completed]
+            - 🎬 Setup
+        types:
+            - completed
 
 permissions:
     contents: read

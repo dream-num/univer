@@ -39,13 +39,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '以欄分隔的陣列。' },
+            lambda: { name: 'lambda', detail: '採用欄作為單一參數並計算一個結果的 LAMBDA。LAMBDA 採用單一參數：陣列中的欄位。' },
         },
     },
     BYROW: {
-        description: '將 LAMBDA 套用到每一行並傳回結果陣列',
-        abstract: '將 LAMBDA 套用至每一行並傳回結果陣列',
+        description: '將 LAMBDA 套用到每一列，並傳回結果陣列。',
+        abstract: '將 LAMBDA 套用到每一列，並傳回結果陣列。',
         links: [
             {
                 title: '教導',
@@ -53,8 +53,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '以列分隔的陣列。' },
+            lambda: { name: 'lambda', detail: '採用資料列作為單一參數並計算一個結果的 LAMBDA。 LAMBDA 接受單一參數：陣列中的一列。' },
         },
     },
     FALSE: {
@@ -185,8 +185,8 @@ export default {
         },
     },
     MAP: {
-        description: '傳回一個數組，該數組透過應用 LAMBDA 建立新值，將數組 () 映射到新值',
-        abstract: '傳回一個數組，該數組透過應用 LAMBDA 建立新值，將數組 () 映射到新值',
+        description: '透過套用 LAMBDA 建立新值，傳回將陣列中每個值對應到新值所形成的陣列。',
+        abstract: '透過套用 LAMBDA 建立新值，傳回將陣列中每個值對應到新值所形成的陣列。',
         links: [
             {
                 title: '教導',
@@ -194,8 +194,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '要對應的陣列1。' },
+            array2: { name: '陣列2', detail: '要對應的陣列2。' },
+            lambda: { name: 'lambda', detail: 'LAMBDA 必須是最後一個引數，也必須為每個陣列傳遞一個參數。' },
         },
     },
     NOT: {
@@ -235,8 +236,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '起始值', detail: '設定累計值的起始值。' },
+            array: { name: '陣列', detail: '要縮減的陣列。' },
+            lambda: { name: 'lambda', detail: '呼叫用於縮減陣列的 LAMBDA。 LAMBDA 需要三個參數：1.值已加總且傳回為最終結果。2.陣列的目前值。3.計算套用至陣列中每個元素。' },
         },
     },
     SCAN: {
@@ -249,8 +251,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            initialValue: { name: '起始值', detail: '設定累計值的起始值。' },
+            array: { name: '陣列', detail: '要掃描的陣列。' },
+            lambda: { name: 'lambda', detail: '呼叫用於掃描陣列的 LAMBDA。 LAMBDA 需要三個參數：1.值已加總且傳回為最終結果。2.陣列的目前值。3.計算套用至陣列中每個元素。' },
         },
     },
     SWITCH: {

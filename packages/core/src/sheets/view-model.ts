@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '../common/di';
-
 import { Disposable, toDisposable } from '../shared/lifecycle';
+
+import type { IDisposable } from '../common/di';
 import type { Nullable } from '../shared/types';
 import type { ICellData, ICellDataForSheetInterceptor } from './typedef';
 

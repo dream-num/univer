@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
-import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension, SpreadsheetExtensionRegistry } from '@univerjs/engine-render';
+import type { IRange, IScale } from '@univerjs/core';
+import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
@@ -49,14 +49,13 @@ export class DataBar extends SheetExtension {
         ctx.save();
         // ctx.globalCompositeOperation = 'destination-over';
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
-                    return;
-                }
-
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
-                const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

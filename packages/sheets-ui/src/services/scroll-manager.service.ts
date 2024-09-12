@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable, Workbook } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Inject } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface IScrollState {
@@ -117,7 +117,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     /**
-     * set scrollInfo by cmd, call by scroll operation
+     * set scrollInfo by SetScrollOperation, call by scroll operation
      * @param param
      */
     setScrollInfoAndEmitEvent(param: IScrollStateWithSearchParam) {

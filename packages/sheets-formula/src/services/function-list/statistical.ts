@@ -844,16 +844,9 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.FISHER.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.FISHER.functionParameter.number1.name',
-                detail: 'formula.functionList.FISHER.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.FISHER.functionParameter.number2.name',
-                detail: 'formula.functionList.FISHER.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.FISHER.functionParameter.x.name',
+                detail: 'formula.functionList.FISHER.functionParameter.x.detail',
+                example: '0.75',
                 require: 1,
                 repeat: 0,
             },
@@ -866,16 +859,9 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.FISHERINV.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.FISHERINV.functionParameter.number1.name',
-                detail: 'formula.functionList.FISHERINV.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.FISHERINV.functionParameter.number2.name',
-                detail: 'formula.functionList.FISHERINV.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.FISHERINV.functionParameter.y.name',
+                detail: 'formula.functionList.FISHERINV.functionParameter.y.detail',
+                example: '0.75',
                 require: 1,
                 repeat: 0,
             },

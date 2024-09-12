@@ -513,8 +513,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '數值', detail: '這是要轉換的數值。' },
         },
     },
     FISHERINV: {
@@ -527,8 +526,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: '數值', detail: '這是要執行反轉換的數值。' },
         },
     },
     FORECAST: {

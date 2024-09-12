@@ -489,8 +489,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '数値', detail: '変換の対象となる数値を指定します。' },
         },
     },
     FISHERINV: {
@@ -503,8 +502,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: '数値', detail: '逆変換の対象となる値を指定します。' },
         },
     },
     FORECAST: {

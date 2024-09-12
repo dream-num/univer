@@ -280,6 +280,16 @@ function gammaFunction(x: number): number {
     return res;
 }
 
+export function binomialCDF(x: number, trials: number, probability: number): number {
+    // TODO: Implement binomialCDF
+    return 0;
+}
+
+export function binomialPDF(x: number, trials: number, probability: number): number {
+    // TODO: Implement binomialPDF
+    return 0;
+}
+
 export function chisquareCDF(x: number, degFreedom: number): number {
     if (x <= 0) {
         return 0;
@@ -450,4 +460,41 @@ export function exponentialPDF(x: number, lambda: number): number {
     }
 
     return lambda * Math.exp(-lambda * x);
+}
+
+export function centralFCDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return incompleteBetaFunction((degFreedom1 * x) / (degFreedom1 * x + degFreedom2), degFreedom1 / 2, degFreedom2 / 2);
+}
+
+export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (degFreedom1 <= 2) {
+        if (x === 0 && degFreedom1 < 2) {
+            return Infinity;
+        }
+
+        if (x === 0 && degFreedom1 === 2) {
+            return 1;
+        }
+
+        let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
+        result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
+        result *= x ** ((degFreedom1 / 2) - 1);
+        result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
+
+        return result;
+    }
+
+    let result = binomialPDF((degFreedom1 - 2) / 2, (degFreedom1 + degFreedom2 - 2) / 2, degFreedom1 * x / (degFreedom1 * x + degFreedom2));
+    result *= degFreedom2 / (degFreedom2 + degFreedom1 * x);
+    result *= degFreedom1 / 2;
+
+    return result;
 }

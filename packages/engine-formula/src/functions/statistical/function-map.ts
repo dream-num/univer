@@ -38,6 +38,8 @@ import { CovarianceP } from './covariance-p';
 import { CovarianceS } from './covariance-s';
 import { Devsq } from './devsq';
 import { ExponDist } from './expon-dist';
+import { Fisher } from './fisher';
+import { Fisherinv } from './fisherinv';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Maxa } from './maxa';
@@ -81,6 +83,8 @@ export const functionStatistical = [
     [CovarianceS, FUNCTION_NAMES_STATISTICAL.COVARIANCE_S],
     [Devsq, FUNCTION_NAMES_STATISTICAL.DEVSQ],
     [ExponDist, FUNCTION_NAMES_STATISTICAL.EXPON_DIST],
+    [Fisher, FUNCTION_NAMES_STATISTICAL.FISHER],
+    [Fisherinv, FUNCTION_NAMES_STATISTICAL.FISHERINV],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],

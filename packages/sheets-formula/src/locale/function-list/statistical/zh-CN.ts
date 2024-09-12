@@ -514,8 +514,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '数值', detail: '要对其进行变换的数值。' },
         },
     },
     FISHERINV: {
@@ -528,8 +527,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: '数值', detail: '要对其进行逆变换的数值。' },
         },
     },
     FORECAST: {

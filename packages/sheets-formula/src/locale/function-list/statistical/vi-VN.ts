@@ -422,6 +422,32 @@ export default {
             cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
+    FISHER: {
+        description: 'Trả về phép biến đổi Fisher tại x.',
+        abstract: 'Trả về phép biến đổi Fisher tại x.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/fisher-%E5%87%BD%E6%95%B0-d656523c-5076-4f95-b87b-7741bf236c69',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị số mà bạn muốn biến đổi.' },
+        },
+    },
+    FISHERINV: {
+        description: 'Trả về nghịch đảo của phép biến đổi Fisher. ',
+        abstract: 'Trả về nghịch đảo của phép biến đổi Fisher. ',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/fisherinv-%E5%87%BD%E6%95%B0-62504b39-415a-4284-a285-19c8e82f86bb',
+            },
+        ],
+        functionParameter: {
+            y: { name: 'số', detail: 'Giá trị mà bạn muốn thực hiện nghịch đảo của phép biến đổi.' },
+        },
+    },
     MAX: {
         description: 'Trả về giá trị lớn nhất trong tập giá trị.',
         abstract: 'Trả về giá trị lớn nhất trong tập giá trị.',

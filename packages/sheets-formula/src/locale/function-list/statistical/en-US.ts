@@ -514,8 +514,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'A numeric value for which you want the transformation.' },
         },
     },
     FISHERINV: {
@@ -528,8 +527,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: 'y', detail: 'The value for which you want to perform the inverse of the transformation.' },
         },
     },
     FORECAST: {

@@ -291,9 +291,9 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '必需。包含您要提取的字符的文本字符串。' },
-            startNum: { name: 'start_num', detail: '必需。您希望从文本中提取的第一个字符的位置。' },
-            numChars: { name: 'num_chars', detail: '必需。指定MID应从文本中返回的字符数。' },
+            text: { name: 'text', detail: '包含要提取字符的文本字符串。' },
+            startNum: { name: 'start_num', detail: '文本中要提取的第一个字符的位置。 文本中第一个字符的 start_num 为 1，以此类推。\n如果start_num大于文本长度，则 MID/MIDB 将返回“” (空文本) 。\n如果start_num小于文本长度，但start_num加num_chars超过文本长度，则 MID/MIDB 将返回字符到文本末尾。\n如果start_num小于 1，则 MID/MIDB 返回 #VALUE！ 。' },
+            numChars: { name: 'num_chars', detail: '指定希望 MID 从文本中返回字符的个数。\n如果num_chars为负数，则 MID 返回 #VALUE！ 。' },
         },
     },
     MIDB: {

@@ -577,7 +577,14 @@ export class Viewport {
      * @returns IViewportScrollPosition
      */
     scrollToViewportPos(pos: Partial<IViewportScrollPosition>, isTrigger = true) {
-        if (!this._scrollBar || this.isActive === false) {
+        // TODO @lumixraku Now scrollManager only call viewportMain@scrollToViewportPos.
+        // this method in other viewports won't get called.
+        // viewport is inactive when it's out of visible area (see #univer-pro/issues/2479)
+        // so there should not return when inactive.
+        // it's not right, this method in other viewport should be called.
+
+        // if (!this._scrollBar || this.isActive === false) {
+        if (!this._scrollBar) {
             return;
         }
         const { viewportScrollX, viewportScrollY } = pos;

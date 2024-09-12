@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     PointerInput,
     Rect,
@@ -32,6 +30,8 @@ import {
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
+import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
 import {

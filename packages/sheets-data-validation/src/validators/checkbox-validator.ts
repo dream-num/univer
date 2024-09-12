@@ -111,7 +111,7 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
-    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, ctx) {
+    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>) {
         return {
             tb: WrapStrategy.CLIP,
         };

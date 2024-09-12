@@ -39,7 +39,7 @@ const locale: typeof zhCN = {
             'sort-reminder-desc': 'Extend range sorting or keep range sorting?',
             'sort-reminder-ext': 'Extend range sorting',
             'sort-reminder-no': 'Keep range sorting',
-            'first-row-check': 'First row participates in sorting',
+            'first-row-check': 'First row does not participate in sorting',
             'add-condition': 'Add condition',
             cancel: 'Cancel',
             confirm: 'Confirm',

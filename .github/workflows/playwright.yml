@@ -1,26 +1,105 @@
 name: 🎭 Playwright Tests
 
 on:
-    push:
-        branches: [main, dev]
-    pull_request:
-        branches: [main, dev]
+    workflow_run:
+        workflows:
+            - 🎬 Setup
+        types:
+            - completed
 
 jobs:
-    e2e_test:
-        timeout-minutes: 10
+    setup:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
         runs-on: ubuntu-latest
 
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+        outputs:
+            id: ${{ steps.pr.outputs.value }}
+            ref: ${{ steps.ref.outputs.value }}
+            repo: ${{ steps.repo.outputs.value }}
+
+        steps:
+            # Get PR id from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-id
+
+            - name: get PR id
+              id: pr
+              run: echo "value=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR ref from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-ref
+
+            - name: get PR ref
+              id: ref
+              run: echo "value=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR repo from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-repo
+
+            - name: get PR repo
+              id: repo
+              run: echo "value=$(<pr-repo.txt)" >> $GITHUB_OUTPUT
+
+    prepare:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        steps:
+            # ================= Create Comment =================
+            - name: 🧽 Find And Delete Comment
+              uses: peter-evans/find-comment@v2
+              if: ${{ needs.setup.outputs.id != '' }}
+              id: fc
+              with:
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: View Deployment
+
+            - name: 📝 Create or update comment
+              uses: peter-evans/create-or-update-comment@v3
+              if: ${{ needs.setup.outputs.id != '' }}
+              with:
+                  comment-id: ${{ steps.fc.outputs.comment-id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  body: |
+                      ## Playwright Test Report
+
+                      [#${{ github.run_id }}](https://github.com/dream-num/univer/actions/runs/${{ github.run_id }})
+
+                      <p align="center">
+                        🥐 🍔 🥓 🥗 🥘 🌯 🍚 🍛 🍖 🍭 🍧 🍝 🥪 🥖 🍪 <br />
+                        Still cooking, please come back later <br />
+                        🥙 🥮 🥨 🌭 🍦 🍙 🍕 🍰 🍮 🍜 🍡 🍱 🍿 🍕 🥟
+                      </p>
+                  edit-mode: replace
+
+    e2e-test:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        outputs:
+            preview-url: ${{ steps.vercel-e2e-report.outputs.preview-url}}
 
         steps:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                  repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-                  ref: ${{ github.head_ref }}
+                  repository: ${{ needs.setup.outputs.repo }}
+                  ref: ${{ needs.setup.outputs.ref }}
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -28,16 +107,43 @@ jobs:
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps chromium
 
-            # build the example locally and run from the built files
             - name: Build E2E Client
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
               run: pnpm exec playwright test
 
-            - uses: actions/upload-artifact@v3
-              if: failure() # only upload artifact when failed
+            - name: 🚀 Deploy to Vercel
+              uses: amondnet/vercel-action@v25
+              id: vercel-e2e-report
               with:
-                  name: playwright-report
-                  path: playwright-report/
-                  retention-days: 30
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_E2E}}
+
+    notify:
+        runs-on: ubuntu-latest
+        needs: [setup, e2e-test]
+
+        steps:
+            # ================= Create Comment =================
+            - name: 🧽 Find And Delete Comment
+              uses: peter-evans/find-comment@v2
+              if: ${{ needs.setup.outputs.id != '' }}
+              id: fc
+              with:
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: Playwright Test Report
+
+            - name: 📝 Create or update comment
+              uses: peter-evans/create-or-update-comment@v3
+              if: ${{ needs.setup.outputs.id != '' }}
+              with:
+                  comment-id: ${{ steps.fc.outputs.comment-id }}
+                  issue-number: ${{ needs.setup.outputs.id }}
+                  body: |
+                      ## Playwright Test Report
+
+                      [🔗 Report link](${{ needs.e2e-test.outputs.preview-url }}/)
+                  edit-mode: replace

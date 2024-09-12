@@ -138,6 +138,7 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
         documentDataModel,
         rangeId: params.rangeId,
         insert,
+        segmentId,
     });
 
     if (!textX) {

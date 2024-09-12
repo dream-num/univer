@@ -15,16 +15,16 @@
  */
 
 import type { IAccessor } from '@wendellhu/redi';
+import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
+import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
+import type { Nullable } from '../../../../shared';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
-import { DataStreamTreeTokenType } from '../../types';
 import type { IDeleteAction, IRetainAction } from '../action-types';
-import { TextXActionType } from '../action-types';
-import { TextX } from '../text-x';
-import type { Nullable } from '../../../../shared';
-import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
-import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
 
 export interface IDeleteCustomRangeParam {
     rangeId: string;

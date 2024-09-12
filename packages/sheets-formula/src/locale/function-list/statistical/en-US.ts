@@ -289,8 +289,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     COUNT: {
@@ -378,8 +378,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: 'Returns covariance, the average of the products of paired deviations',
-        abstract: 'Returns covariance, the average of the products of paired deviations',
+        description: 'Returns population covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns population covariance',
         links: [
             {
                 title: 'Instruction',
@@ -387,13 +387,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     COVARIANCE_S: {
-        description: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
-        abstract: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
+        description: 'Returns the sample covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns the sample covariance',
         links: [
             {
                 title: 'Instruction',
@@ -401,8 +401,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     DEVSQ: {

@@ -28,11 +28,14 @@ import { ChisqInvRt } from './chisq-inv-rt';
 import { ChisqTest } from './chisq-test';
 import { ConfidenceNorm } from './confidence-norm';
 import { ConfidenceT } from './confidence-t';
+import { Correl } from './correl';
 import { Count } from './count';
 import { Counta } from './counta';
 import { Countblank } from './countblank';
 import { Countif } from './countif';
 import { Countifs } from './countifs';
+import { CovarianceP } from './covariance-p';
+import { CovarianceS } from './covariance-s';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Maxa } from './maxa';
@@ -66,11 +69,14 @@ export const functionStatistical = [
     [ChisqTest, FUNCTION_NAMES_STATISTICAL.CHISQ_TEST],
     [ConfidenceNorm, FUNCTION_NAMES_STATISTICAL.CONFIDENCE_NORM],
     [ConfidenceT, FUNCTION_NAMES_STATISTICAL.CONFIDENCE_T],
+    [Correl, FUNCTION_NAMES_STATISTICAL.CORREL],
     [Count, FUNCTION_NAMES_STATISTICAL.COUNT],
     [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
     [Countblank, FUNCTION_NAMES_STATISTICAL.COUNTBLANK],
     [Countif, FUNCTION_NAMES_STATISTICAL.COUNTIF],
     [Countifs, FUNCTION_NAMES_STATISTICAL.COUNTIFS],
+    [CovarianceP, FUNCTION_NAMES_STATISTICAL.COVARIANCE_P],
+    [CovarianceS, FUNCTION_NAMES_STATISTICAL.COVARIANCE_S],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],

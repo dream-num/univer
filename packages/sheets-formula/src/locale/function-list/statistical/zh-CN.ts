@@ -289,8 +289,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     COUNT: {
@@ -378,8 +378,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: '返回协方差（成对偏差乘积的平均值）',
-        abstract: '返回协方差（成对偏差乘积的平均值）',
+        description: '返回总体协方差，即两个数据集中每对数据点的偏差乘积的平均值。',
+        abstract: '返回总体协方差',
         links: [
             {
                 title: '教学',
@@ -387,13 +387,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     COVARIANCE_S: {
-        description: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值',
-        abstract: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值',
+        description: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值。',
+        abstract: '返回样本协方差',
         links: [
             {
                 title: '教学',
@@ -401,8 +401,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     DEVSQ: {

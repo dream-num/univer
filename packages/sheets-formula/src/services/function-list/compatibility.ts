@@ -227,16 +227,16 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
         abstract: 'formula.functionList.COVAR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.COVAR.functionParameter.number1.name',
-                detail: 'formula.functionList.COVAR.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.COVAR.functionParameter.array1.name',
+                detail: 'formula.functionList.COVAR.functionParameter.array1.detail',
+                example: '{3,2,4,5,6}',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.COVAR.functionParameter.number2.name',
-                detail: 'formula.functionList.COVAR.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.COVAR.functionParameter.array2.name',
+                detail: 'formula.functionList.COVAR.functionParameter.array2.detail',
+                example: '{9,7,12,15,17}',
                 require: 1,
                 repeat: 0,
             },

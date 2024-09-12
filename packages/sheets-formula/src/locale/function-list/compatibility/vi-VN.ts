@@ -121,8 +121,8 @@ export default {
         },
     },
     COVAR: {
-        description: 'Trả về hiệp phương sai (trung bình của tích các độ lệch cặp)',
-        abstract: 'Trả về hiệp phương sai (trung bình của tích các độ lệch cặp)',
+        description: 'Trả về hiệp phương sai của tập hợp, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai của tập hợp',
         links: [
             {
                 title: 'Giảng dạy',
@@ -130,8 +130,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     CRITBINOM: {

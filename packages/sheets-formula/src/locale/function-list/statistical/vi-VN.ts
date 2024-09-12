@@ -277,8 +277,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     COUNT: {
@@ -363,6 +363,34 @@ export default {
             criteria1: { name: 'tiêu chí 1', detail: 'Tiêu chí dưới dạng một số, biểu thức, tham chiếu ô hoặc văn bản để xác định những ô nào cần đếm. Ví dụ: tiêu chí có thể được biểu thị là 32, ">32", B4, "táo" hoặc "32".' },
             criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    COVARIANCE_P: {
+        description: 'Trả về hiệp phương sai của tập hợp, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai của tập hợp',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/covariance-p-%E5%87%BD%E6%95%B0-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
+        },
+    },
+    COVARIANCE_S: {
+        description: 'Trả về hiệp phương sai mẫu, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/covariance-s-%E5%87%BD%E6%95%B0-0a539b74-7371-42aa-a18f-1f5320314977',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     MAX: {

@@ -121,8 +121,8 @@ export default {
         },
     },
     COVAR: {
-        description: 'Returns covariance, the average of the products of paired deviations',
-        abstract: 'Returns covariance, the average of the products of paired deviations',
+        description: 'Returns population covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns population covariance',
         links: [
             {
                 title: 'Instruction',
@@ -130,8 +130,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     CRITBINOM: {

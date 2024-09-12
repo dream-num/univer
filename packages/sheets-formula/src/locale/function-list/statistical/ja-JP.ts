@@ -277,8 +277,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: 'セル値の最初の範囲。' },
+            array2: { name: '配列2', detail: 'セル値の 2 番目の範囲。' },
         },
     },
     COUNT: {
@@ -353,8 +353,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
-        abstract: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
+        description: '母共分散 (2 組の対応するデータ間での標準偏差の積の平均値) を返します。',
+        abstract: '母共分散を返します。',
         links: [
             {
                 title: '指導',
@@ -362,13 +362,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: 'セル値の最初の範囲。' },
+            array2: { name: '配列2', detail: 'セル値の 2 番目の範囲。' },
         },
     },
     COVARIANCE_S: {
-        description: '標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
-        abstract: '標本の共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
+        description: '標本の共分散 (2 組の対応するデータ間での標準偏差の積の平均値) を返します。',
+        abstract: '標本の共分散を返します。',
         links: [
             {
                 title: '指導',
@@ -376,8 +376,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: 'セル値の最初の範囲。' },
+            array2: { name: '配列2', detail: 'セル値の 2 番目の範囲。' },
         },
     },
     DEVSQ: {

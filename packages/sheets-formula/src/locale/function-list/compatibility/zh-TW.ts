@@ -121,8 +121,8 @@ export default {
         },
     },
     COVAR: {
-        description: '傳回協方差（成對偏差乘積的平均值）',
-        abstract: '傳回協方差（成對偏差乘積的平均值）',
+        description: '傳回總體協方差，即兩個資料集中每對資料點的偏差乘積的平均值。',
+        abstract: '傳回總體協方差',
         links: [
             {
                 title: '教導',
@@ -130,8 +130,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '第一個儲存格值範圍。' },
+            array2: { name: '陣列2', detail: '第二個儲存格值範圍。' },
         },
     },
     CRITBINOM: {

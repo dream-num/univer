@@ -116,6 +116,12 @@ export class Xlookup extends BaseFunction {
             }
 
             return lookupValue.map((value) => {
+                const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
+
+                if (checkErrorCombination) {
+                    return checkErrorCombination;
+                }
+
                 const result = this._handleSingleObject(value, lookupArray, resultArray!, matchModeValue, searchModeValue);
 
                 if (result.isError()) {
@@ -127,6 +133,12 @@ export class Xlookup extends BaseFunction {
         }
 
         if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
+            const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
+
+            if (checkErrorCombination) {
+                return checkErrorCombination;
+            }
+
             const result = this._handleSingleObject(lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
 
             if (result.isError()) {
@@ -163,12 +175,15 @@ export class Xlookup extends BaseFunction {
         axis: number = 0
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
+            const searchType = this._getSearchModeValue(searchModeValue);
+            const matchType = this._getMatchModeValue(matchModeValue);
             return this.binarySearchExpand(
                 value,
                 searchArray,
                 resultArray,
                 axis,
-                this._getSearchModeValue(searchModeValue)
+                searchType,
+                matchType
             );
         }
 
@@ -197,12 +212,15 @@ export class Xlookup extends BaseFunction {
         searchModeValue: number
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            return this.binarySearch(value, searchArray, resultArray, this._getSearchModeValue(searchModeValue));
+            const searchType = this._getSearchModeValue(searchModeValue);
+            const matchType = this._getMatchModeValue(matchModeValue);
+            return this.binarySearch(value, searchArray, resultArray, searchType, matchType);
         }
 
         if (matchModeValue === 2) {
             return this.fuzzySearch(value, searchArray, resultArray, searchModeValue !== -1);
         }
+
         if (matchModeValue === -1 || matchModeValue === 1) {
             return this.orderSearch(
                 value,
@@ -218,5 +236,32 @@ export class Xlookup extends BaseFunction {
 
     private _getSearchModeValue(searchModeValue: number) {
         return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
+    }
+
+    private _getMatchModeValue(matchModeValue: number) {
+        switch (matchModeValue) {
+            case 1:
+                return ArrayOrderSearchType.MAX;
+            case 0:
+                return ArrayOrderSearchType.NORMAL;
+            case -1:
+                return ArrayOrderSearchType.MIN;
+            default:
+                return ArrayOrderSearchType.NORMAL;
+        }
+    }
+
+    /**
+     * Wildcard matching and binary search cannot appear at the same time
+     * @param matchModeValue
+     * @param searchModeValue
+     * @returns
+     */
+    private _checkErrorCombination(matchModeValue: number, searchModeValue: number) {
+        if (matchModeValue === 2 && (searchModeValue === -2 || searchModeValue === 2)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return null;
     }
 }

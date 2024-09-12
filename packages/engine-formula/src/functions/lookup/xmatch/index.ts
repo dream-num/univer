@@ -102,7 +102,8 @@ export class Xmatch extends BaseFunction {
         let rowOrColumn: Nullable<number>;
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
             const searchType = this._getSearchModeValue(searchModeValue);
-            rowOrColumn = searchArray.binarySearch(value, searchType);
+            const matchType = this._getMatchModeValue(matchModeValue);
+            rowOrColumn = searchArray.binarySearch(value, searchType, matchType);
         } else if (matchModeValue === 2) {
             const matchObject = searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject;
 
@@ -157,5 +158,18 @@ export class Xmatch extends BaseFunction {
 
     private _getSearchModeValue(searchModeValue: number) {
         return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
+    }
+
+    private _getMatchModeValue(matchModeValue: number) {
+        switch (matchModeValue) {
+            case 1:
+                return ArrayOrderSearchType.MAX;
+            case 0:
+                return ArrayOrderSearchType.NORMAL;
+            case -1:
+                return ArrayOrderSearchType.MIN;
+            default:
+                return ArrayOrderSearchType.NORMAL;
+        }
     }
 }

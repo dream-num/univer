@@ -621,6 +621,7 @@ export class ArrayValueObject extends BaseValueObject {
      * the sequential matching approach is only used for special matches in XLOOKUP and XMATCH.
      * For example, when match_mode is set to 1 and -1 for an exact match. If not found, it returns the next smaller item.
      */
+
     orderSearch(
         valueObject: BaseValueObject,
         searchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN,
@@ -683,21 +684,12 @@ export class ArrayValueObject extends BaseValueObject {
         };
 
         if (isDesc) {
-            const rowCount = this._values.length;
-            if (this._values[0] == null) {
-                return;
-            }
-            const columnCount = this._values[0].length;
-
-            for (let r = rowCount - 1; r >= 0; r--) {
-                for (let c = columnCount - 1; c >= 0; c--) {
-                    const itemValue = this._values[r][c];
-                    _handleMatch(itemValue, r, c);
-                }
-            }
+            this.iteratorReverse((itemValue, r, c) => {
+                return _handleMatch(itemValue, r, c);
+            });
         } else {
             this.iterator((itemValue, r, c) => {
-                _handleMatch(itemValue, r, c);
+                return _handleMatch(itemValue, r, c);
             });
         }
 
@@ -710,7 +702,7 @@ export class ArrayValueObject extends BaseValueObject {
         }
     }
 
-    binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN) {
+    binarySearch(valueObject: BaseValueObject, searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN, matchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN) {
         if (valueObject.isError()) {
             return;
         }
@@ -718,10 +710,10 @@ export class ArrayValueObject extends BaseValueObject {
         const { stringArray, stringPosition, numberArray, numberPosition } = this.flattenPosition();
 
         if (valueObject.isString()) {
-            return this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+            return this._binarySearch(valueObject, stringArray, stringPosition, searchType, matchType);
         }
 
-        const result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
+        const result = this._binarySearch(valueObject, numberArray, numberPosition, searchType, matchType);
         // if (result == null) {
         //     result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
         // }
@@ -734,21 +726,36 @@ export class ArrayValueObject extends BaseValueObject {
         // const valueNumberArray = numberMatrix[0];
     }
 
+    /**
+     * searchType defaults to ascending order
+     *
+     * matchType defaults to the maximum value less than the search value, which is used for the default matching mode of VLOOKUP/LOOKUP/HLOOKUP.
+     * @param valueObject
+     * @param searchArray
+     * @param positionArray
+     * @param searchType
+     * @param matchType
+     * @returns
+     */
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _binarySearch(
         valueObject: BaseValueObject,
         searchArray: BaseValueObject[],
         positionArray: number[],
-        searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN
+        searchType: ArrayBinarySearchType = ArrayBinarySearchType.MIN,
+        matchType: ArrayOrderSearchType = ArrayOrderSearchType.MIN
     ) {
         const compareFunc = getCompare();
 
         // Convert to number if possible, otherwise use string
         const value = Number(valueObject.getValue());
-        const isValueNumber = !isNaN(value);
+        const isValueNumber = !Number.isNaN(value);
 
         let start = 0;
         let end = searchArray.length - 1;
-        let resultIndex = -1;
+        let exactMatchIndex = -1;
+        let nearestSmallerIndex = -1;
+        let nearestLargerIndex = -1;
 
         while (start <= end) {
             const middle = Math.floor((start + end) / 2);
@@ -756,39 +763,62 @@ export class ArrayValueObject extends BaseValueObject {
 
             let compareResult: number;
             if (compareTo.isNull()) {
-                compareResult = 1; // Treat null as greater than any value
+                compareResult = searchType === ArrayBinarySearchType.MIN ? 1 : -1;
             } else {
                 const compareToValue = compareTo.getValue();
                 if (isValueNumber) {
                     const compareToNumber = Number(compareToValue);
-                    compareResult = isNaN(compareToNumber) ? 1 : Math.sign(compareToNumber - value);
+                    compareResult = Number.isNaN(compareToNumber) ? 1 : Math.sign(compareToNumber - value);
                 } else {
                     compareResult = compareFunc(compareToValue.toString().toLocaleLowerCase(), valueObject.getValue().toString().toLocaleLowerCase());
                 }
             }
 
+            // Reverse comparison result if searchType is MAX (descending order)
+            if (searchType === ArrayBinarySearchType.MAX) {
+                compareResult = -compareResult;
+            }
+
             if (compareResult === 0) {
                 // Exact match found
-                return positionArray[middle];
+                exactMatchIndex = middle;
+                break;
             }
 
             if (compareResult < 0) {
                 // compareTo < value
-                if (searchType === ArrayBinarySearchType.MIN) {
-                    resultIndex = middle;
-                }
+                nearestSmallerIndex = middle;
                 start = middle + 1;
             } else {
                 // compareTo > value
-                if (searchType === ArrayBinarySearchType.MAX) {
-                    resultIndex = middle;
-                }
+                nearestLargerIndex = middle;
                 end = middle - 1;
             }
         }
 
-        // No exact match found, return the result based on searchType
-        return resultIndex !== -1 ? positionArray[resultIndex] : undefined;
+        // Determine the result based on matchType
+        if (matchType === ArrayOrderSearchType.NORMAL) {
+            return exactMatchIndex !== -1 ? positionArray[exactMatchIndex] : undefined;
+        } else if (matchType === ArrayOrderSearchType.MIN) {
+            if (exactMatchIndex !== -1) {
+                return positionArray[exactMatchIndex];
+            } else if (searchType === ArrayBinarySearchType.MIN) {
+                return nearestSmallerIndex !== -1 ? positionArray[nearestSmallerIndex] : undefined;
+            } else {
+                return nearestLargerIndex !== -1 ? positionArray[nearestLargerIndex] : undefined;
+            }
+        } else if (matchType === ArrayOrderSearchType.MAX) {
+            if (exactMatchIndex !== -1) {
+                return positionArray[exactMatchIndex];
+            } else if (searchType === ArrayBinarySearchType.MIN) {
+                return nearestLargerIndex !== -1 ? positionArray[nearestLargerIndex] : undefined;
+            } else {
+                return nearestSmallerIndex !== -1 ? positionArray[nearestSmallerIndex] : undefined;
+            }
+        }
+
+        // If no suitable match found based on matchType
+        return undefined;
     }
 
     override sum() {

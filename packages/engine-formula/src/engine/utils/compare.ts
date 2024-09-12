@@ -16,15 +16,21 @@
 
 import { compareToken } from '../../basics/token';
 
+/**
+ * For SearchType
+ */
 export enum ArrayBinarySearchType {
-    MIN,
-    MAX,
+    MIN, // Ascending order
+    MAX, // Descending order
 }
 
+/**
+ * For MatchType
+ */
 export enum ArrayOrderSearchType {
-    NORMAL,
-    MIN,
-    MAX,
+    NORMAL, // Exact match.
+    MIN, // Exact match. If none found, return the next smaller item.
+    MAX, // Exact match. If none found, return the next larger item.
 }
 
 export function getCompare() {

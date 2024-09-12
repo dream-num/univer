@@ -45,7 +45,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         }
 
         const newId = generateRandomId();
-        const oldBody = getBodySlice(doc.getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
+        const oldBody = getBodySlice(doc.getSelfOrHeaderFooterModel(segmentId).getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
         const textRun = oldBody.textRuns?.[0];
         if (textRun) {
             textRun.ed = params.label.length + 1;

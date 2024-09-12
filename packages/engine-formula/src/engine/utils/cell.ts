@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, DEFAULT_EMPTY_DOCUMENT_VALUE } from '@univerjs/core';
+import { BuildTextUtils } from '@univerjs/core';
 import type { ICellData, Nullable } from '@univerjs/core';
 
 export function getCellValue(cell: Nullable<ICellData>) {
@@ -22,7 +22,6 @@ export function getCellValue(cell: Nullable<ICellData>) {
         return 0;
     }
 
-    // TODO: @weird94 this method is need to unified to a same handler function
     if (cell?.p) {
         const body = cell?.p.body;
 
@@ -31,12 +30,7 @@ export function getCellValue(cell: Nullable<ICellData>) {
         }
 
         const data = body.dataStream;
-        const lastString = data.substring(data.length - 2, data.length);
-        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ?
-            data.substring(0, data.length - 2)
-                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
-                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '')
-            : data;
+        const newDataStream = BuildTextUtils.transform.getPlainText(data);
 
         return newDataStream;
     }

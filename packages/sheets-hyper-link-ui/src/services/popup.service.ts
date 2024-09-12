@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
+import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
+import { IEditorService, IRangeSelectorService, IZenZoneService } from '@univerjs/ui';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import { DocCanvasPopManagerService, getPlainText, getPlainTextFormBody, getPlainTextFormDocument } from '@univerjs/docs-ui';
-import { IEditorService, IRangeSelectorService, IZenZoneService } from '@univerjs/ui';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { CellLinkPopup } from '../views/CellLinkPopup';
-import { CellLinkEdit } from '../views/CellLinkEdit';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
+import { CellLinkEdit } from '../views/CellLinkEdit';
+import { CellLinkPopup } from '../views/CellLinkPopup';
 
 export interface IHyperLinkPopup {
     unitId: string;
@@ -200,7 +200,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                     startOffset: 0,
                     endOffset: body.dataStream.length - 2,
                     collapsed: body.dataStream.length - 2 === 0,
-                    label: getPlainTextFormBody(body),
+                    label: BuildTextUtils.transform.getPlainText(body.dataStream),
                 };
             }
             const links = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(textRange, body.customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK) ?? []);
@@ -214,7 +214,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 startOffset: start,
                 endOffset: end,
                 collapsed: start === end,
-                label: getPlainText(body.dataStream.slice(start, end)),
+                label: BuildTextUtils.transform.getPlainText(body.dataStream.slice(start, end)),
             };
         }
 
@@ -292,7 +292,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
             const cell = worksheet?.getCellRaw(link.row, link.col);
             this._currentEditing$.next({
                 ...link,
-                label: cell?.p ? getPlainTextFormDocument(cell.p) : (cell?.v ?? '').toString(),
+                label: cell?.p ? BuildTextUtils.transform.getPlainText(cell.p.body?.dataStream ?? '') : (cell?.v ?? '').toString(),
             });
         }
     }

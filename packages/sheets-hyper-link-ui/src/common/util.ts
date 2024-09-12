@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { BuildTextUtils, Tools } from '@univerjs/core';
 import type { ICellData, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Tools } from '@univerjs/core';
 
 export function isLegalLink(link: string) {
     return Tools.isLegalUrl(link);
@@ -72,9 +72,7 @@ export function getCellValueOrigin(cell: Nullable<ICellData>) {
         }
 
         const data = body.dataStream;
-        const lastString = data.substring(data.length - 2, data.length);
-        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
+        const newDataStream = BuildTextUtils.transform.getPlainText(data);
         return newDataStream;
     }
 

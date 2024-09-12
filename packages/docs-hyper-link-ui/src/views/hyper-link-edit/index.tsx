@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
+import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService, getPlainTextFormBody } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
@@ -71,7 +71,7 @@ export const DocHyperLinkEdit = () => {
             const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId);
             if (doc && matchedRange) {
                 setLink(matchedRange.properties?.url ?? '');
-                setLabel(getPlainTextFormBody(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex)));
+                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex).dataStream));
             }
             return;
         }

@@ -17,6 +17,7 @@
 import { copyCustomRange, getCustomRangesInterestsWithRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, getSelectionWithNoSymbolSide, getSelectionWithSymbolMax, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
+import { fromPlainText, getPlainText } from './transform';
 
 export class BuildTextUtils {
     static customRange = {
@@ -45,6 +46,11 @@ export class BuildTextUtils {
 
     static range = {
         isIntersects: isSegmentIntersects,
+    };
+
+    static transform = {
+        getPlainText,
+        fromPlainText,
     };
 }
 

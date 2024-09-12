@@ -276,9 +276,12 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private async _setClipboardData(documentBodyList: IDocumentBody[], snapshot: IDocumentData, needCache = true): Promise<void> {
         const copyId = genId();
         const text =
-            documentBodyList.length > 1
+            (documentBodyList.length > 1
                 ? documentBodyList.map((body) => body.dataStream).join('\n')
-                : documentBodyList[0].dataStream;
+                : documentBodyList[0].dataStream)
+                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
+                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+
         let html = this._umdToHtml.convert(documentBodyList);
 
         // Only cache copy content when the range is 1.

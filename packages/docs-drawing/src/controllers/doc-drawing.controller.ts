@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
@@ -51,9 +51,16 @@ export class DocDrawingController extends Disposable {
 
     private _initSnapshot() {
         const toJson = (unitId: string) => {
-            const map = this._docDrawingService.getDrawingDataForUnit(unitId);
-            if (map?.[unitId]) {
-                return JSON.stringify(map?.[unitId]);
+            const doc = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+            if (doc) {
+                const drawings = doc.getSnapshot().drawings;
+                const drawingOrder = doc.getSnapshot().drawingsOrder;
+                const data: IDrawingMapItem<IDocDrawing> = {
+                    data: drawings ?? {},
+                    order: drawingOrder ?? [],
+
+                };
+                return JSON.stringify(data);
             }
             return '';
         };

@@ -15,6 +15,7 @@
  */
 
 import {
+    BuildTextUtils,
     Disposable,
     Inject,
     LifecycleStages,
@@ -22,8 +23,8 @@ import {
     toDisposable,
 } from '@univerjs/core';
 
+import { ConditionalFormattingService } from '@univerjs/sheets-conditional-formatting';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { ConditionalFormattingService, getStringFromDataStream } from '@univerjs/sheets-conditional-formatting';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingEditorController)
 export class ConditionalFormattingEditorController extends Disposable {
@@ -52,7 +53,7 @@ export class ConditionalFormattingEditorController extends Disposable {
                             if (result?.style && value?.p) {
                                 const keys = Object.keys(result?.style);
                                 if (keys.length > 0) {
-                                    const v = getStringFromDataStream(value.p);
+                                    const v = BuildTextUtils.transform.getPlainText(value.p.body?.dataStream ?? '');
                                     const s = { ...(typeof value.s === 'string' ? context.workbook.getStyles().get(value.s) : value.s) || {} };
                                     keys.forEach((key) => {
                                         delete s[key as keyof typeof s];

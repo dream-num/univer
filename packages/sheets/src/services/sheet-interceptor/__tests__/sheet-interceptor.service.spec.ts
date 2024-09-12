@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 import { createInterceptorKey, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 
 import { INTERCEPTOR_POINT } from '../interceptor-const';
 import { SheetInterceptorService } from '../sheet-interceptor.service';
-import type { ISheetLocation } from '../utils/interceptor';
 import { createSheetTestBed } from './create-core-test-bed';
+import type { ISheetLocation } from '../utils/interceptor';
 
 describe('Test SheetInterceptorService', () => {
     let univer: Univer;
@@ -49,7 +49,7 @@ describe('Test SheetInterceptorService', () => {
         return sheet.getRowFiltered(row);
     }
 
-    function getRowRawVisible(row: number): boolean {
+    function getRowVisible(row: number): boolean {
         const cus = get(IUniverInstanceService);
         const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getRowVisible(row);
@@ -112,13 +112,13 @@ describe('Test SheetInterceptorService', () => {
             });
 
             expect(getRowFiltered(1)).toBeFalsy();
-            expect(getRowRawVisible(1)).toBeTruthy();
+            expect(getRowVisible(1)).toBeTruthy();
 
             realFiltered = true;
             expect(getRowFiltered(1)).toBeTruthy();
-            expect(getRowRawVisible(1)).toBeFalsy();
+            expect(getRowVisible(1)).toBeFalsy();
             expect(getRowFiltered(2)).toBeFalsy();
-            expect(getRowRawVisible(2)).toBeTruthy();
+            expect(getRowVisible(2)).toBeTruthy();
         });
     });
 

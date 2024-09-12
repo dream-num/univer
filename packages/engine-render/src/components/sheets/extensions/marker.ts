@@ -50,8 +50,12 @@ export class Marker extends SheetExtension {
 
         // eslint-disable-next-line max-lines-per-function
         Range.foreach(rowColumnSegment, (row, col) => {
+            if (!worksheet.getRowVisible(row) || !worksheet.getColVisible(col)) {
+                return;
+            }
+
             let cellData = worksheet.getCell(row, col);
-            const cellInfo = this.getCellIndex(
+            const cellInfo = this.getCellByIndex(
                 row,
                 col,
                 skeleton.rowHeightAccumulation,
@@ -88,11 +92,6 @@ export class Marker extends SheetExtension {
                 }
 
                 mergeCellRendered.add(rangeStr);
-            }
-
-            // current cell is hidden
-            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
-                return;
             }
 
             if (!cellData) {

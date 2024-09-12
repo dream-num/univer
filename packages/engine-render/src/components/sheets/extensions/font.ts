@@ -60,10 +60,14 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
-        const { stylesCache, dataMergeCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
-        if (!worksheet || !fontList) return;
+        if (!spreadsheetSkeleton || !worksheet || !fontList) {
+            return;
+        }
 
+        const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
+            spreadsheetSkeleton;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -100,7 +104,7 @@ export class Font extends SheetExtension {
                         return true;
                     }
                 }
-                const cellInfo = this.getCellIndex(
+                const cellInfo = this.getCellByIndex(
                     rowIndex,
                     columnIndex,
                     rowHeightAccumulation,
@@ -296,6 +300,7 @@ export class Font extends SheetExtension {
         const cellHeight = endY - startY;
         const cellWidth = endX - startX;
 
+        // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
@@ -306,7 +311,9 @@ export class Font extends SheetExtension {
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, column);
-        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0)) {
+
+        const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0);
+        if (isOverflow) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
 
             const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;

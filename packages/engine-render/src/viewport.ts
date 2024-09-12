@@ -109,8 +109,6 @@ export class Viewport {
     private _viewportScrollY: number = 0;
     private _preViewportScrollX: number = 0;
     private _preViewportScrollY: number = 0;
-    private _deltaViewportScrollX: number = 0;
-    private _deltaViewportScrollY: number = 0;
 
     /**
      * scene size in current viewport port with scale
@@ -455,6 +453,22 @@ export class Viewport {
         this._preCacheVisibleBound = Object.assign({}, val);
     }
 
+    get _deltaScrollX() {
+        return this.scrollX - this._preScrollX;
+    }
+
+    get _deltaScrollY() {
+        return this.scrollY - this._preScrollY;
+    }
+
+    get _deltaViewportScrollX() {
+        return this.viewportScrollX - this._preViewportScrollX;
+    }
+
+    get _deltaViewportScrollY() {
+        return this.viewportScrollY - this._preViewportScrollY;
+    }
+
     enable() {
         this._active = true;
     }
@@ -699,6 +713,7 @@ export class Viewport {
 
     /**
      * Just record state of scroll. This method won't scroll viewport and scrollbar.
+     * TODO: @lumixraku this method is so wierd, viewportMain did not call it, now only called in freeze situation.
      * @param current
      * @returns Viewport
      */
@@ -719,13 +734,11 @@ export class Viewport {
         if (viewportScrollX !== undefined) {
             this._preViewportScrollX = this.viewportScrollX;
             this.viewportScrollX = viewportScrollX;
-            this._deltaViewportScrollX = viewportScrollX - this._preViewportScrollX;
         }
 
         if (viewportScrollY !== undefined) {
             this._preViewportScrollY = this.viewportScrollY;
             this.viewportScrollY = viewportScrollY;
-            this._deltaViewportScrollY = viewportScrollY - this._preViewportScrollY;
         }
         return this;
     }
@@ -1395,7 +1408,7 @@ export class Viewport {
     }
 
     /**
-     *
+     * Scroll to position in viewport.
      * When scroll just in X direction, there is no y definition in scrollVpPos. So scrollVpPos is Partial<IViewportScrollPosition>
      * @param scrollVpPos Partial<IViewportScrollPosition>
      * @param isTrigger
@@ -1422,6 +1435,10 @@ export class Viewport {
         const scrollX = afterLimitScrollXY.x;
         const scrollY = afterLimitScrollXY.y;
 
+        this._preScrollX = this.scrollX;
+        this._preScrollY = this.scrollY;
+        this._preViewportScrollX = this.viewportScrollX;
+        this._preViewportScrollY = this.viewportScrollY;
         this.scrollX = scrollX;
         this.scrollY = scrollY;
         this.viewportScrollX = viewportScrollX;

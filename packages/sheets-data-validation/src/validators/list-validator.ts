@@ -128,6 +128,7 @@ export class ListValidator extends BaseDataValidator {
     }
 
     override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, { style: defaultStyle }: { style: IStyleData }): Nullable<IStyleData> {
+        const tb = (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP;
         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
             const colorMap = this.getListWithColorMap(rule);
             const valueStr = `${value ?? ''}`;
@@ -137,13 +138,13 @@ export class ListValidator extends BaseDataValidator {
                     bg: {
                         rgb: color,
                     },
-                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP,
+                    tb,
                 };
             }
         }
 
         return {
-            tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP,
+            tb,
         };
     }
 

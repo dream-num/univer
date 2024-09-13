@@ -834,7 +834,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
-
         this._setOpenForCurrent(null, null);
 
         this._cursorChange = CursorChange.InitialState;
@@ -892,7 +891,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            (model) => this._resourceLoaderService.saveUnit(model.getUnitId())!,
+            (model) => model.getSnapshot(),
             this._localService,
             this._functionService
         );

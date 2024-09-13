@@ -560,23 +560,6 @@ export class Viewport {
         return this._scrollToBarPosCore({ x, y }, isTrigger);
     }
 
-    scrollByBar(delta: Partial<IScrollBarPosition>, isTrigger = true) {
-        this.scrollByBarDeltaValue(delta, isTrigger);
-        const { x, y } = delta;
-        this.onScrollByBar$.emitEvent({
-            viewport: this,
-            scrollX: this.scrollX,
-            scrollY: this.scrollY,
-            rawScrollX: x,
-            rawScrollY: y,
-            viewportScrollX: this.viewportScrollX,
-            viewportScrollY: this.viewportScrollY,
-            limitX: this._scrollBar?.limitX,
-            limitY: this._scrollBar?.limitY,
-            isTrigger,
-        });
-    }
-
     /**
      * Viewport scroll to certain position.
      * @param pos
@@ -605,23 +588,6 @@ export class Viewport {
         const viewportScrollX = this.viewportScrollX + (delta.viewportScrollX || 0);
         const viewportScrollY = this.viewportScrollY + (delta.viewportScrollY || 0);
         return this._scrollToViewportPosCore({ viewportScrollX, viewportScrollY }, isTrigger);
-    }
-
-    /**
-     * current position plus offset relatively
-     * the caller no need to deal with the padding when frozen
-     * @param offsetX
-     * @param offsetY
-     * @param isTrigger
-     */
-    scrollByOffset(offsetX = 0, offsetY = 0, isTrigger = true) {
-        if (!this._scrollBar || this.isActive === false) {
-            return;
-        }
-        const x = offsetX + this._paddingStartX;
-        const y = offsetY + this._paddingStartY;
-        const param = this.transViewportScroll2ScrollValue(x, y);
-        return this.scrollByBarDeltaValue(param, isTrigger);
     }
 
     transViewportScroll2ScrollValue(viewportScrollX: number, viewportScrollY: number) {
@@ -1331,6 +1297,10 @@ export class Viewport {
         // this._preScrollY = this.scrollY;
     }
 
+    /**
+     * mock scrollend.
+     * @param scrollSubParam
+     */
     private _emitScrollEnd$(scrollSubParam: IScrollObserverParam) {
         clearTimeout(this._scrollStopNum);
         this._scrollStopNum = setTimeout(() => {
@@ -1385,11 +1355,20 @@ export class Viewport {
             isTrigger,
         };
         this._scrollBar?.makeDirty(true);
-
-        this.onScrollBefore$.emitEvent(scrollSubParam);
         this.onScrollAfter$.emitEvent(scrollSubParam);
         this._emitScrollEnd$(scrollSubParam);
 
+        // exec sheet.command.scroll-view
+        this.onScrollByBar$.emitEvent({
+            viewport: this,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            viewportScrollX: this.viewportScrollX,
+            viewportScrollY: this.viewportScrollY,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+            isTrigger,
+        });
         return afterLimit;
     }
 

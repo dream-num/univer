@@ -204,6 +204,34 @@ export default {
             significance: { name: 'bội số', detail: 'Bội số mà bạn muốn làm tròn đến.' },
         },
     },
+    COMBIN: {
+        description: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
+        abstract: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/combin-%E5%87%BD%E6%95%B0-12a3f276-0a21-423a-8de6-06990aaf638a',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'tổng cộng', detail: 'Số hạng mục.' },
+            numberChosen: { name: 'số lượng mẫu', detail: 'Số hạng mục trong mỗi tổ hợp.' },
+        },
+    },
+    COMBINA: {
+        description: 'Trả về số lần kết hợp (có kèm những lần lặp lại) đối với số lượng mục cho trước.',
+        abstract: 'Trả về số lần kết hợp (có kèm những lần lặp lại) đối với số lượng mục cho trước.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/combina-%E5%87%BD%E6%95%B0-efb49eaa-4f4c-4cd2-8179-0ddfcf9d035d',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'tổng cộng', detail: 'Số hạng mục.' },
+            numberChosen: { name: 'số lượng mẫu', detail: 'Số hạng mục trong mỗi tổ hợp.' },
+        },
+    },
     COS: {
         description: 'Trả về cosin của góc đã cho.',
         abstract: 'Trả về cosin của góc đã cho.',
@@ -335,6 +363,32 @@ export default {
             number: { name: 'số', detail: 'Số mũ áp dụng cho cơ số e.' },
         },
     },
+    FACT: {
+        description: 'Trả về giai thừa của một số.',
+        abstract: 'Trả về giai thừa của một số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/fact-%E5%87%BD%E6%95%B0-ca8588c2-15f2-41c0-8e8c-c11bd471a4f3',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số không âm mà bạn muốn tìm giai thừa của nó. Nếu number không phải là số nguyên thì nó bị cắt cụt.' },
+        },
+    },
+    FACTDOUBLE: {
+        description: 'Trả về giai thừa kép của một số.',
+        abstract: 'Trả về giai thừa kép của một số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/factdouble-%E5%87%BD%E6%95%B0-e67697ac-d214-48eb-b7b7-cce2589ecac8',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Giá trị để trả về giai thừa kép của nó. Nếu number không phải là số nguyên thì nó bị cắt cụt.' },
+        },
+    },
     FLOOR: {
         description: 'Làm tròn số theo giá trị tuyệt đối giảm dần',
         abstract: 'Làm tròn số theo giá trị tuyệt đối giảm dần',
@@ -378,6 +432,47 @@ export default {
             significance: { name: 'bội số', detail: 'Bội số mà bạn muốn làm tròn đến.' },
         },
     },
+    GCD: {
+        description: 'Trả về ước số chung lớn nhất của hai hoặc nhiều số nguyên.',
+        abstract: 'Trả về ước số chung lớn nhất của hai hoặc nhiều số nguyên.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gcd-%E5%87%BD%E6%95%B0-d5107a51-69e3-461f-8e4c-ddfc21b5073a',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
+        },
+    },
+    INT: {
+        description: 'Làm tròn số xuống tới số nguyên gần nhất.',
+        abstract: 'Làm tròn số xuống tới số nguyên gần nhất.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/int-%E5%87%BD%E6%95%B0-a6c4af9e-356d-4369-ab6a-cb1fd9d343ef',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số thực mà bạn muốn làm tròn xuống một số nguyên.' },
+        },
+    },
+    LCM: {
+        description: 'Trả về bội số chung ít nhất của các số nguyên.',
+        abstract: 'Trả về bội số chung ít nhất của các số nguyên.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/lcm-%E5%87%BD%E6%95%B0-7152b67a-8bb5-4075-ae5c-06ede5563c94',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
+        },
+    },
     LN: {
         description: 'Trả về lô-ga-rit tự nhiên của một số.',
         abstract: 'Trả về lô-ga-rit tự nhiên của một số.',
@@ -418,6 +513,46 @@ export default {
             number: { name: 'số', detail: 'Số thực dương mà bạn muốn tính lô-ga-rít cơ số 10 của nó.' },
         },
     },
+    MDETERM: {
+        description: 'Trả về định thức ma trận của một mảng.',
+        abstract: 'Trả về định thức ma trận của một mảng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mdeterm-%E5%87%BD%E6%95%B0-e7bfa857-3834-422b-b871-0ffd03717020',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Một mảng số với số hàng và số cột bằng nhau.' },
+        },
+    },
+    MINVERSE: {
+        description: 'Trả về ma trận nghịch đảo của một mảng',
+        abstract: 'Trả về ma trận nghịch đảo của một mảng',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/minverse-%E5%87%BD%E6%95%B0-11f55086-adde-4c9f-8eb9-59da2d72efc6',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Một mảng số với số hàng và số cột bằng nhau.' },
+        },
+    },
+    MMULT: {
+        description: 'Trả về tích ma trận của hai mảng',
+        abstract: 'Trả về tích ma trận của hai mảng',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mmult-%E5%87%BD%E6%95%B0-40593ed7-a3cd-4b6b-b9a3-e4ad3c7245eb',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng1', detail: 'Những mảng mà bạn muốn nhân.' },
+            array2: { name: 'mảng2', detail: 'Những mảng mà bạn muốn nhân.' },
+        },
+    },
     MOD: {
         description: 'Trả về số dư sau khi chia một số cho ước số. Kết quả có cùng dấu với ước số.',
         abstract: 'Trả về số dư sau khi chia một số cho ước số.',
@@ -444,6 +579,33 @@ export default {
         functionParameter: {
             number: { name: 'số', detail: 'Giá trị cần làm tròn.' },
             multiple: { name: 'bội số', detail: 'Số mà bạn muốn làm tròn số tới bội số của nó.' },
+        },
+    },
+    MULTINOMIAL: {
+        description: 'Trả về đa thức của một tập hợp số',
+        abstract: 'Trả về đa thức của một tập hợp số',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/multinomial-%E5%87%BD%E6%95%B0-6fa6373c-6533-41a2-a45e-a56db1db1bf6',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số1', detail: 'Giá trị hoặc dải ô đầu tiên được sử dụng để tính toán.' },
+            number2: { name: 'số2', detail: 'Các giá trị hoặc phạm vi bổ sung để sử dụng cho việc tính toán.' },
+        },
+    },
+    MUNIT: {
+        description: 'Trả về ma trận đơn vị cho chiều đã xác định.',
+        abstract: 'Trả về ma trận đơn vị cho chiều đã xác định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/munit-%E5%87%BD%E6%95%B0-c9fe916a-dc26-4105-997d-ba22799853a3',
+            },
+        ],
+        functionParameter: {
+            dimension: { name: 'kích thước', detail: 'Chiều là một số nguyên định rõ chiều của ma trận đơn vị mà bạn muốn trả về. Hàm trả về một mảng. Chiều phải lớn hơn 0.' },
         },
     },
     ODD: {
@@ -497,6 +659,20 @@ export default {
         functionParameter: {
             number1: { name: 'số 1', detail: 'Số hoặc phạm vi thứ nhất mà bạn muốn nhân.' },
             number2: { name: 'số 2', detail: 'Các số hoặc phạm vi bổ sung mà bạn muốn nhân, tối đa 255 đối số.' },
+        },
+    },
+    QUOTIENT: {
+        description: 'Trả về phần nguyên của một phép chia.',
+        abstract: 'Trả về phần nguyên của một phép chia.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/quotient-%E5%87%BD%E6%95%B0-9f7bf099-2a18-4282-8fa4-65290cc99dee',
+            },
+        ],
+        functionParameter: {
+            numerator: { name: 'tử số', detail: 'Số bị chia.' },
+            denominator: { name: 'mẫu số', detail: 'Số chia.' },
         },
     },
     RADIANS: {
@@ -621,6 +797,51 @@ export default {
         ],
         functionParameter: {
             number: { name: 'số', detail: 'Đối số number là góc tính bằng radian mà bạn muốn tìm sec hyperbolic cho nó.' },
+        },
+    },
+    SERIESSUM: {
+        description: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
+        abstract: 'Trả về tổng của một chuỗi lũy thừa dựa trên công thức.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/seriessum-%E5%87%BD%E6%95%B0-a3ab25b5-1093-4f5b-b084-96c49087f637',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị đầu vào cho chuỗi lũy thừa.' },
+            n: { name: 'n', detail: 'Lũy thừa ban đầu bạn muốn tăng x lên.' },
+            m: { name: 'm', detail: 'Số bước lũy thừa sẽ tăng cho mỗi toán hạng trong chuỗi.' },
+            coefficients: { name: 'hệ số', detail: 'Bộ hệ số mà mỗi lũy thừa liên tiếp của x được nhân với nó.' },
+        },
+    },
+    SEQUENCE: {
+        description: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
+        abstract: 'Hàm SEQUENCE cho phép bạn tạo một danh sách các số liên tiếp trong một mảng, chẳng hạn như 1, 2, 3, 4.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sequence-%E5%87%BD%E6%95%B0-57467a98-57e0-4817-9f14-2eb78519ca90',
+            },
+        ],
+        functionParameter: {
+            rows: { name: 'hàng', detail: 'Số hàng cần trả về.' },
+            columns: { name: 'cột', detail: 'Số cột cần trả về.' },
+            start: { name: 'bắt đầu', detail: 'Số đầu tiên trong trình tự.' },
+            step: { name: 'khoảng cách', detail: 'Số lượng cần tăng cho mỗi giá trị tiếp theo trong mảng.' },
+        },
+    },
+    SIGN: {
+        description: 'Xác định dấu của một số.',
+        abstract: 'Xác định dấu của một số.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sign-%E5%87%BD%E6%95%B0-109c932d-fcdc-4023-91f1-2dd0e916a1d8',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Bất kỳ số thực nào.' },
         },
     },
     SIN: {

@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
-export class Mod extends BaseFunction {
-    override minParams = 2;
+export class Int extends BaseFunction {
+    override minParams = 1;
 
-    override maxParams = 2;
+    override maxParams = 1;
 
-    override calculate(number: BaseValueObject, divisor: BaseValueObject) {
+    override calculate(number: BaseValueObject): BaseValueObject {
+        if (number.isArray()) {
+            return (number as ArrayValueObject).mapValue((numberObject) => this._handleSingleObject(numberObject));
+        }
+
+        return this._handleSingleObject(number);
+    }
+
+    private _handleSingleObject(number: BaseValueObject): BaseValueObject {
         let _number = number;
 
         if (_number.isString()) {
@@ -33,16 +43,8 @@ export class Mod extends BaseFunction {
             return _number;
         }
 
-        let _divisor = divisor;
+        const numberValue = Math.floor(+_number.getValue());
 
-        if (_divisor.isString()) {
-            _divisor = _divisor.convertToNumberObjectValue();
-        }
-
-        if (_divisor.isError()) {
-            return _divisor;
-        }
-
-        return _number.mod(_divisor);
+        return NumberValueObject.create(numberValue);
     }
 }

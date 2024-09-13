@@ -208,7 +208,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             options,
         });
 
-        this._updateInputPosition();
+        this._updateInputPosition(options?.forceFocus);
     }
 
     setCursorManually(evtOffsetX: number, evtOffsetY: number) {
@@ -247,12 +247,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._updateInputPosition();
     }
 
-    activate(x: number, y: number) {
+    activate(x: number, y: number, force = false) {
+        const isFocusing = this._input === document.activeElement;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        this.focus();
+        if (isFocusing || force) {
+            this.focus();
+        }
     }
 
     hasFocus(): boolean {
@@ -345,7 +348,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 },
             ];
 
-            this.addDocRanges(textRanges, false);
+            this.addDocRanges(textRanges, false, { forceFocus: true });
         }
     }
 
@@ -381,7 +384,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             },
         ];
 
-        this.addDocRanges(textRanges, false);
+        this.addDocRanges(textRanges, false, { forceFocus: true });
     }
 
     // Handle pointer down.
@@ -514,7 +517,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._scrollTimers = [];
 
-            this._updateInputPosition();
+            this._updateInputPosition(true);
         }));
     }
 
@@ -828,7 +831,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return getCanvasOffsetByEngine(engine);
     }
 
-    private _updateInputPosition() {
+    private _updateInputPosition(forceFocus = false) {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
@@ -849,7 +852,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         canvasTop += y;
 
-        this.activate(canvasLeft, canvasTop);
+        this.activate(canvasLeft, canvasTop, forceFocus);
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number) {

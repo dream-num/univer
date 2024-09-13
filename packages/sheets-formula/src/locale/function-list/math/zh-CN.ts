@@ -244,8 +244,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一组合中项目的数量。' },
         },
     },
     COMBINA: {
@@ -258,8 +258,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一组合中项目的数量。' },
         },
     },
     COS: {
@@ -403,8 +403,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算其阶乘的非负数。 如果 number 不是整数，将被截尾取整。' },
         },
     },
     FACTDOUBLE: {
@@ -417,8 +416,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算其双倍阶乘的非负数。 如果 number 不是整数，将被截尾取整。' },
         },
     },
     FLOOR: {
@@ -474,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     INT: {
@@ -488,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要进行向下舍入取整的实数。' },
         },
     },
     ISO_CEILING: {
@@ -516,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     LET: {
@@ -584,8 +581,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '行数和列数相等的数值数组。' },
         },
     },
     MINVERSE: {
@@ -598,8 +594,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '行数和列数相等的数值数组。' },
         },
     },
     MMULT: {
@@ -612,8 +607,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '要进行矩阵乘法运算的两个数组。' },
+            array2: { name: '数组2', detail: '要进行矩阵乘法运算的两个数组。' },
         },
     },
     MOD: {
@@ -654,8 +649,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '用于计算的第一项数值或范围。' },
+            number2: { name: '数值2', detail: '用于计算的其他数值或范围。' },
         },
     },
     MUNIT: {
@@ -668,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: '维度', detail: '是一个整数，用于指定要返回的单位矩阵的维度。 它返回一个数组。 维度必须大于零。' },
         },
     },
     ODD: {
@@ -735,8 +729,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '被除数。' },
+            denominator: { name: '分母', detail: '除数。' },
         },
     },
     RADIANS: {
@@ -887,8 +881,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '幂级数的输入值。' },
+            n: { name: 'n', detail: 'x 的首项乘幂。' },
+            m: { name: 'm', detail: '级数中每一项的乘幂 n 的步长增加值。' },
+            coefficients: { name: '系数', detail: '与 x 的每个连续乘幂相乘的一组系数。' },
         },
     },
     SEQUENCE: {
@@ -901,8 +897,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行数', detail: '要返回的行数。' },
+            columns: { name: '列数', detail: '要返回的列数。' },
+            start: { name: '起始数字', detail: '序列中第一个数字。' },
+            step: { name: '递增值', detail: '数组中每个连续值递增的值。' },
         },
     },
     SIGN: {
@@ -915,8 +913,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '任意实数。' },
         },
     },
     SIN: {

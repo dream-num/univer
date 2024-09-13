@@ -29,6 +29,8 @@ import { Base } from './base';
 import { Ceiling } from './ceiling';
 import { CeilingMath } from './ceiling-math';
 import { CeilingPrecise } from './ceiling-precise';
+import { Combin } from './combin';
+import { Combina } from './combina';
 import { Cos } from './cos';
 import { Cosh } from './cosh';
 import { Cot } from './cot';
@@ -39,18 +41,29 @@ import { Decimal } from './decimal';
 import { Degrees } from './degrees';
 import { Even } from './even';
 import { Exp } from './exp';
+import { Fact } from './fact';
+import { Factdouble } from './factdouble';
 import { Floor } from './floor';
 import { FloorMath } from './floor-math';
 import { FloorPrecise } from './floor-precise';
+import { Gcd } from './gcd';
+import { Int } from './int';
+import { Lcm } from './lcm';
 import { Ln } from './ln';
 import { Log } from './log';
 import { Log10 } from './log10';
+import { Mdeterm } from './mdeterm';
+import { Minverse } from './minverse';
+import { Mmult } from './mmult';
 import { Mod } from './mod';
 import { Mround } from './mround';
+import { Multinomial } from './multinomial';
+import { Munit } from './munit';
 import { Odd } from './odd';
 import { Pi } from './pi';
 import { Power } from './power';
 import { Product } from './product';
+import { Quotient } from './quotient';
 import { Radians } from './radians';
 import { Rand } from './rand';
 import { Randarray } from './randarray';
@@ -60,6 +73,9 @@ import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
 import { Sec } from './sec';
 import { Sech } from './sech';
+import { Seriessum } from './seriessum';
+import { Sequence } from './sequence';
+import { Sign } from './sign';
 import { Sin } from './sin';
 import { Sinh } from './sinh';
 import { Sqrt } from './sqrt';
@@ -92,6 +108,8 @@ export const functionMath = [
     [Ceiling, FUNCTION_NAMES_MATH.CEILING],
     [CeilingMath, FUNCTION_NAMES_MATH.CEILING_MATH],
     [CeilingPrecise, FUNCTION_NAMES_MATH.CEILING_PRECISE],
+    [Combin, FUNCTION_NAMES_MATH.COMBIN],
+    [Combina, FUNCTION_NAMES_MATH.COMBINA],
     [Cos, FUNCTION_NAMES_MATH.COS],
     [Cosh, FUNCTION_NAMES_MATH.COSH],
     [Cot, FUNCTION_NAMES_MATH.COT],
@@ -102,18 +120,29 @@ export const functionMath = [
     [Degrees, FUNCTION_NAMES_MATH.DEGREES],
     [Even, FUNCTION_NAMES_MATH.EVEN],
     [Exp, FUNCTION_NAMES_MATH.EXP],
+    [Fact, FUNCTION_NAMES_MATH.FACT],
+    [Factdouble, FUNCTION_NAMES_MATH.FACTDOUBLE],
     [Floor, FUNCTION_NAMES_MATH.FLOOR],
     [FloorMath, FUNCTION_NAMES_MATH.FLOOR_MATH],
     [FloorPrecise, FUNCTION_NAMES_MATH.FLOOR_PRECISE],
+    [Gcd, FUNCTION_NAMES_MATH.GCD],
+    [Int, FUNCTION_NAMES_MATH.INT],
+    [Lcm, FUNCTION_NAMES_MATH.LCM],
     [Ln, FUNCTION_NAMES_MATH.LN],
     [Log, FUNCTION_NAMES_MATH.LOG],
     [Log10, FUNCTION_NAMES_MATH.LOG10],
+    [Mdeterm, FUNCTION_NAMES_MATH.MDETERM],
+    [Minverse, FUNCTION_NAMES_MATH.MINVERSE],
+    [Mmult, FUNCTION_NAMES_MATH.MMULT],
     [Mod, FUNCTION_NAMES_MATH.MOD],
     [Mround, FUNCTION_NAMES_MATH.MROUND],
+    [Multinomial, FUNCTION_NAMES_MATH.MULTINOMIAL],
+    [Munit, FUNCTION_NAMES_MATH.MUNIT],
     [Odd, FUNCTION_NAMES_MATH.ODD],
     [Pi, FUNCTION_NAMES_MATH.PI],
     [Power, FUNCTION_NAMES_MATH.POWER],
     [Product, FUNCTION_NAMES_MATH.PRODUCT],
+    [Quotient, FUNCTION_NAMES_MATH.QUOTIENT],
     [Radians, FUNCTION_NAMES_MATH.RADIANS],
     [Rand, FUNCTION_NAMES_MATH.RAND],
     [Randarray, FUNCTION_NAMES_MATH.RANDARRAY],
@@ -123,6 +152,9 @@ export const functionMath = [
     [Roundup, FUNCTION_NAMES_MATH.ROUNDUP],
     [Sec, FUNCTION_NAMES_MATH.SEC],
     [Sech, FUNCTION_NAMES_MATH.SECH],
+    [Seriessum, FUNCTION_NAMES_MATH.SERIESSUM],
+    [Sequence, FUNCTION_NAMES_MATH.SEQUENCE],
+    [Sign, FUNCTION_NAMES_MATH.SIGN],
     [Sin, FUNCTION_NAMES_MATH.SIN],
     [Sinh, FUNCTION_NAMES_MATH.SINH],
     [Sqrt, FUNCTION_NAMES_MATH.SQRT],

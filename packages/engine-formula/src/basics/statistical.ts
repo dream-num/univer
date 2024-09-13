@@ -15,6 +15,7 @@
  */
 
 import { erfcINV } from './engineering';
+import { calculateCombin } from './math';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -281,13 +282,37 @@ function gammaFunction(x: number): number {
 }
 
 export function binomialCDF(x: number, trials: number, probability: number): number {
-    // TODO: Implement binomialCDF
-    return 0;
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x >= trials) {
+        return 1;
+    }
+
+    if (probability < 0 || probability > 1 || trials <= 0) {
+        return Number.NaN;
+    }
+
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += binomialPDF(i, trials, probability);
+    }
+
+    return result;
 }
 
 export function binomialPDF(x: number, trials: number, probability: number): number {
-    // TODO: Implement binomialPDF
-    return 0;
+    if (probability === 0 || probability === 1) {
+        if (trials * probability === x) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    return calculateCombin(trials, x) * (probability ** x) * ((1 - probability) ** (trials - x));
 }
 
 export function chisquareCDF(x: number, degFreedom: number): number {

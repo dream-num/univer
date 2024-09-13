@@ -59,8 +59,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功次數', detail: '為實驗的成功次數。' },
+            trials: { name: '實驗次數', detail: '為獨立實驗的次數。' },
+            probabilityS: { name: '成功機率', detail: '每一次實驗的成功機率。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 BINOMDIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     CHIDIST: {
@@ -144,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '實驗次數', detail: '伯努利實驗的次數。' },
+            probabilityS: { name: '成功機率', detail: '每一次實驗的成功機率。' },
+            alpha: { name: '目標機率', detail: '這是臨界值。' },
         },
     },
     EXPONDIST: {
@@ -160,7 +163,7 @@ export default {
         functionParameter: {
             x: { name: '值', detail: '這是用來評估分佈的值。' },
             lambda: { name: 'lambda', detail: '這是參數值。' },
-            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，CHISQ.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，EXPONDIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     FDIST: {

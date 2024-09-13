@@ -59,8 +59,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功数', detail: '試行における成功数を指定します。' },
+            trials: { name: '試行回数', detail: '独立試行の回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '各試行が成功する確率を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     CHIDIST: {
@@ -144,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '試行回数', detail: 'ベルヌーイ試行の回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '各試行が成功する確率を指定します。' },
+            alpha: { name: '目標確率', detail: '基準値を指定します。' },
         },
     },
     EXPONDIST: {

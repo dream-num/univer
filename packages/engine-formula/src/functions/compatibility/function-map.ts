@@ -15,6 +15,8 @@
  */
 
 import { BetaInv } from '../statistical/beta-inv';
+import { BinomDist } from '../statistical/binom-dist';
+import { BinomInv } from '../statistical/binom-inv';
 import { ChisqDistRt } from '../statistical/chisq-dist-rt';
 import { ChisqInvRt } from '../statistical/chisq-inv-rt';
 import { ChisqTest } from '../statistical/chisq-test';
@@ -32,11 +34,13 @@ import { Rank } from './rank';
 export const functionCompatibility = [
     [Betadist, FUNCTION_NAMES_COMPATIBILITY.BETADIST],
     [BetaInv, FUNCTION_NAMES_COMPATIBILITY.BETAINV],
+    [BinomDist, FUNCTION_NAMES_COMPATIBILITY.BINOMDIST],
     [ChisqDistRt, FUNCTION_NAMES_COMPATIBILITY.CHIDIST],
     [ChisqInvRt, FUNCTION_NAMES_COMPATIBILITY.CHIINV],
     [ChisqTest, FUNCTION_NAMES_COMPATIBILITY.CHITEST],
     [ConfidenceNorm, FUNCTION_NAMES_COMPATIBILITY.CONFIDENCE],
     [CovarianceP, FUNCTION_NAMES_COMPATIBILITY.COVAR],
+    [BinomInv, FUNCTION_NAMES_COMPATIBILITY.CRITBINOM],
     [ExponDist, FUNCTION_NAMES_COMPATIBILITY.EXPONDIST],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],

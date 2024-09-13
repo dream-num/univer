@@ -59,8 +59,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功次数', detail: '试验的成功次数。' },
+            trials: { name: '试验次数', detail: '独立试验次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为 TRUE，则 BINOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     CHIDIST: {
@@ -144,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '试验次数', detail: '伯努利试验的次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            alpha: { name: '目标概率', detail: '临界值。' },
         },
     },
     EXPONDIST: {
@@ -160,7 +163,7 @@ export default {
         functionParameter: {
             x: { name: '值', detail: '用来计算分布的数值。' },
             lambda: { name: 'lambda', detail: '参数值。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 CHISQ.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 EXPONDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     FDIST: {

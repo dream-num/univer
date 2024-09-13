@@ -21,6 +21,9 @@ import { Averageif } from './averageif';
 import { Averageifs } from './averageifs';
 import { BetaDist } from './beta-dist';
 import { BetaInv } from './beta-inv';
+import { BinomDist } from './binom-dist';
+import { BinomDistRange } from './binom-dist-range';
+import { BinomInv } from './binom-inv';
 import { ChisqDist } from './chisq-dist';
 import { ChisqDistRt } from './chisq-dist-rt';
 import { ChisqInv } from './chisq-inv';
@@ -66,6 +69,9 @@ export const functionStatistical = [
     [Averageifs, FUNCTION_NAMES_STATISTICAL.AVERAGEIFS],
     [BetaDist, FUNCTION_NAMES_STATISTICAL.BETA_DIST],
     [BetaInv, FUNCTION_NAMES_STATISTICAL.BETA_INV],
+    [BinomDist, FUNCTION_NAMES_STATISTICAL.BINOM_DIST],
+    [BinomDistRange, FUNCTION_NAMES_STATISTICAL.BINOM_DIST_RANGE],
+    [BinomInv, FUNCTION_NAMES_STATISTICAL.BINOM_INV],
     [ChisqDist, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST],
     [ChisqDistRt, FUNCTION_NAMES_STATISTICAL.CHISQ_DIST_RT],
     [ChisqInv, FUNCTION_NAMES_STATISTICAL.CHISQ_INV],

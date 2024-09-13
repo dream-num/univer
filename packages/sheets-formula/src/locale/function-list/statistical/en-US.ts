@@ -146,8 +146,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: 'number_s', detail: 'The number of successes in trials.' },
+            trials: { name: 'trials', detail: 'The number of independent trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, BINOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     BINOM_DIST_RANGE: {
@@ -160,8 +162,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: 'trials', detail: 'The number of independent trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            numberS: { name: 'number_s', detail: 'The number of successes in trials.' },
+            numberS2: { name: 'number_s2', detail: 'If provided, returns the probability that the number of successful trials will fall between number_s and number_s2.' },
         },
     },
     BINOM_INV: {
@@ -174,8 +178,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: 'trials', detail: 'The number of Bernoulli trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            alpha: { name: 'alpha', detail: 'The criterion value.' },
         },
     },
     CHISQ_DIST: {
@@ -431,7 +436,7 @@ export default {
         functionParameter: {
             x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
             lambda: { name: 'lambda', detail: 'The parameter value.' },
-            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, CHISQ.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, EXPON.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     F_DIST: {

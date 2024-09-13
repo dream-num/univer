@@ -59,8 +59,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            numberS: { name: 'số lần thành công', detail: 'Số lần thành công trong các phép thử.' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử độc lập.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     CHIDIST: {
@@ -144,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử Bernoulli.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            alpha: { name: 'xác suất mục tiêu', detail: 'Giá trị tiêu chí.' },
         },
     },
     EXPONDIST: {
@@ -160,7 +163,7 @@ export default {
         functionParameter: {
             x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
             lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
-            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì EXPONDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     FDIST: {

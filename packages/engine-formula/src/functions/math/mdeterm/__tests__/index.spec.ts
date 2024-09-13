@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Mdeterm } from '../index';
@@ -60,6 +60,27 @@ describe('Test mdeterm function', () => {
             });
             const result2 = testFunction.calculate(array2);
             expect(getObjectValue(result2)).toBe(-13.5);
+
+            const array3 = NumberValueObject.create(1);
+            const result3 = testFunction.calculate(array3);
+            expect(getObjectValue(result3)).toBe(1);
+        });
+
+        it('ArrayRowCount !== arrayColumnCount', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3],
+                    [4, 5, 6],
+                ]),
+                rowCount: 2,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(array);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {

@@ -60,6 +60,36 @@ describe('Test mmult function', () => {
             ]);
         });
 
+        it('Array1ColumnCount !== array2RowCount', () => {
+            const array1 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [4, 5],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const array2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [3, 4],
+                    [5, 6],
+                ]),
+                rowCount: 3,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(array1, array2);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
         it('Value is normal string', () => {
             const array1 = StringValueObject.create('test');
             const array2 = NumberValueObject.create(1);
@@ -84,6 +114,11 @@ describe('Test mmult function', () => {
             const array2 = NumberValueObject.create(1);
             const result = testFunction.calculate(array1, array2);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const array3 = NumberValueObject.create(1);
+            const array4 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(array3, array4);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
     });
 });

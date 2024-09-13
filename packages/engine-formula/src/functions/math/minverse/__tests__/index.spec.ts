@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Minverse } from '../index';
@@ -64,6 +64,29 @@ describe('Test minverse function', () => {
                 [-1.7777777777777777, 0.5555555555555556, 0.2222222222222222],
                 [1.4074074074074074, -0.14814814814814814, -0.25925925925925924],
             ]);
+
+            const array3 = NumberValueObject.create(1);
+            const result3 = testFunction.calculate(array3);
+            expect(getObjectValue(result3)).toStrictEqual([
+                [1],
+            ]);
+        });
+
+        it('ArrayRowCount !== arrayColumnCount', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3],
+                    [4, 5, 6],
+                ]),
+                rowCount: 2,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(array);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
         });
 
         it('Value is normal string', () => {

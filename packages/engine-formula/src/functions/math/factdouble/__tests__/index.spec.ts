@@ -89,6 +89,20 @@ describe('Test factdouble function', () => {
             });
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            const number2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [3],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(number2);
+            expect(getObjectValue(result2)).toStrictEqual(3);
         });
     });
 });

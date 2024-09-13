@@ -88,6 +88,22 @@ describe('Test munit function', () => {
                 [1, ErrorType.VALUE, 1, 1, ErrorType.VALUE, ErrorType.VALUE],
                 [ErrorType.VALUE, 1, 1, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
             ]);
+
+            const dimension2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(dimension2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [1],
+            ]);
         });
     });
 });

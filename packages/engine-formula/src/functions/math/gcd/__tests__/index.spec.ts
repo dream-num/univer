@@ -85,7 +85,7 @@ describe('Test gcd function', () => {
         it('Value is array', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
+                    [1, null, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,

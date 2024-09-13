@@ -33,6 +33,11 @@ describe('Test lcm function', () => {
             const number2 = NumberValueObject.create(2);
             const result = testFunction.calculate(number1, number2);
             expect(getObjectValue(result)).toBe(10);
+
+            const number3 = NumberValueObject.create(0);
+            const number4 = NumberValueObject.create(0);
+            const result2 = testFunction.calculate(number3, number4);
+            expect(getObjectValue(result2)).toBe(0);
         });
 
         it('Value is big number', () => {
@@ -97,6 +102,21 @@ describe('Test lcm function', () => {
             });
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            const number2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, null, null, null, null, null],
+                    [null, null, null, null, null, null],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(number2);
+            expect(getObjectValue(result2)).toStrictEqual(0);
         });
     });
 });

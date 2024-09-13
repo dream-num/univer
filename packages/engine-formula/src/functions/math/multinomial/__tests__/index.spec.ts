@@ -87,7 +87,7 @@ describe('Test multinomial function', () => {
         it('Value is array', () => {
             const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null],
+                    [1, null, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
@@ -99,6 +99,21 @@ describe('Test multinomial function', () => {
             });
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            const number2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [10, 20, 40, 60],
+                    [80, 1, 2, 3],
+                ]),
+                rowCount: 2,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(number2);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
         });
     });
 });

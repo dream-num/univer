@@ -63,12 +63,6 @@ export class Multinomial extends BaseFunction {
                     }
 
                     den *= calculateFactorial(number as number);
-
-                    if (Number.isNaN(den) || !Number.isFinite(den)) {
-                        isError = true;
-                        errorObject = ErrorValueObject.create(ErrorType.NUM);
-                        return false;
-                    }
                 });
 
                 if (isError) {
@@ -88,18 +82,10 @@ export class Multinomial extends BaseFunction {
                 }
 
                 den *= calculateFactorial(number as number);
-
-                if (Number.isNaN(den) || !Number.isFinite(den)) {
-                    return ErrorValueObject.create(ErrorType.NUM);
-                }
             }
         }
 
         const result = calculateFactorial(sum) / den;
-
-        if (Number.isNaN(result) || !Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
 
         return NumberValueObject.create(result);
     }

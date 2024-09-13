@@ -119,6 +119,19 @@ describe('Test sequence function', () => {
             const step = NumberValueObject.create(2);
             const result = testFunction.calculate(rows, columns, start, step);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+
+            const rows2 = NumberValueObject.create(4);
+            const columns2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(rows2, columns2, start, step);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+
+            const start2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(rows2, columns, start2, step);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NAME);
+
+            const step2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(rows2, columns, start, step2);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is array', () => {

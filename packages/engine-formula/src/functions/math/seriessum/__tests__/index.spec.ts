@@ -35,6 +35,10 @@ describe('Test seriessum function', () => {
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
             expect(getObjectValue(result)).toBe(0.7071032152046538);
+
+            const coefficients2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(x, n, m, coefficients2);
+            expect(getObjectValue(result2)).toBe(1);
         });
 
         it('Value is number negative', () => {
@@ -108,6 +112,11 @@ describe('Test seriessum function', () => {
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(0.785398163);
+            const coefficients2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, n, m, coefficients2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -128,6 +137,52 @@ describe('Test seriessum function', () => {
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+
+            const x2 = NumberValueObject.create(0.785398163);
+            const coefficients2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(x2, n, m, coefficients2);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
+
+            const coefficients3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, ErrorType.NAME, 1.23, true, false, null],
+                    [0, '100', '2.34', 'test', -3, ' '],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(x2, n, m, coefficients3);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const coefficients4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, true, ' ', 1.23, false, null],
+                    [0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 2,
+                columnCount: 6,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(x2, n, m, coefficients4);
+            expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
         });
 
         it('Result is NaN or Infinity', () => {

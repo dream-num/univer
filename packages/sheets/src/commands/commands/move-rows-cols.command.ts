@@ -25,7 +25,7 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
@@ -36,7 +36,6 @@ import {
     MoveRowsMutationUndoFactory,
 } from '../mutations/move-rows-cols.mutation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-// import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
 import type { ISelectionWithStyle } from '../../basics';
@@ -49,6 +48,14 @@ export interface IMoveRowsCommandParams {
     range?: IRange; // for facade to use, accepting user parameters
     fromRange: IRange;
     toRange: IRange;
+}
+
+function rowAcrossMergedCell(row: number, worksheet: Worksheet): boolean {
+    return worksheet.getMergeData().some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
+}
+
+function columnAcrossMergedCell(col: number, worksheet: Worksheet): boolean {
+    return worksheet.getMergeData().some((mergedCell) => mergedCell.startColumn < col && col <= mergedCell.endColumn);
 }
 
 export const MoveRowsCommandId = 'sheet.command.move-rows' as const;
@@ -102,11 +109,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
             return false;
         }
 
-        // if (rowAcrossMergedCell(toRow, worksheet)) {
-        //     errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
-        //     return false;
-        // }
-        if (worksheet.isRowContainsMergedCell(toRow)) {
+        if (rowAcrossMergedCell(toRow, worksheet)) {
             errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
@@ -247,11 +250,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
             return false;
         }
 
-        // if (columnAcrossMergedCell(toCol, worksheet)) {
-        //     errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
-        //     return false;
-        // }
-        if (worksheet.isColumnContainsMergedCell(toCol)) {
+        if (columnAcrossMergedCell(toCol, worksheet)) {
             errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }

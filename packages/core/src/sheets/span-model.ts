@@ -125,20 +125,20 @@ export class SpanModel extends Disposable {
         }
     }
 
-    public add(range: IRange) {
-        this._mergeData.push(range);
-        this._clearCache();
-        this._createCache(this._mergeData);
-    }
+    // public add(range: IRange) {
+    //     this._mergeData.push(range);
+    //     this._clearCache();
+    //     this._createCache(this._mergeData);
+    // }
 
-    public remove(row: number, column: number) {
-        const index = this._getMergeDataIndex(row, column);
-        if (index !== -1) {
-            this._mergeData.splice(index, 1);
-            this._clearCache();
-            this._createCache(this._mergeData);
-        }
-    }
+    // public remove(row: number, column: number) {
+    //     const index = this._getMergeDataIndex(row, column);
+    //     if (index !== -1) {
+    //         this._mergeData.splice(index, 1);
+    //         this._clearCache();
+    //         this._createCache(this._mergeData);
+    //     }
+    // }
 
     public getMergedCell(row: number, column: number) {
         const index = this._getMergeDataIndex(row, column);
@@ -148,24 +148,24 @@ export class SpanModel extends Disposable {
         return null;
     }
 
-    public isRowContainsMergedCell(row: number) {
+    public isRowContainsMergedCell(row: number): boolean {
         if (this._hasAll) {
             return true;
         }
         if (!Tools.isEmptyObject(this._columnCache)) {
             return true;
         }
-        return this._mergeData.some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
+        return this._mergeData.some((mergedCell) => mergedCell.startRow <= row && row <= mergedCell.endRow);
     }
 
-    public isColumnContainsMergedCell(column: number) {
+    public isColumnContainsMergedCell(column: number): boolean {
         if (this._hasAll) {
             return true;
         }
         if (!Tools.isEmptyObject(this._rowCache)) {
             return true;
         }
-        return this._mergeData.some((mergedCell) => mergedCell.startColumn < column && column <= mergedCell.endColumn);
+        return this._mergeData.some((mergedCell) => mergedCell.startColumn <= column && column <= mergedCell.endColumn);
     }
 
     public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {

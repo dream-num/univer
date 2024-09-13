@@ -36,7 +36,8 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -76,10 +77,18 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 if (unitId !== this._context.unitId) {
                     return;
                 }
+                const focusedUnitId = this._univerInstanceService.getFocusedUnit()?.getUnitId();
 
                 this._docSelectionRenderService.removeAllRanges();
                 if (docRanges.length) {
-                    this._docSelectionRenderService.addDocRanges(docRanges, isEditing, options);
+                    this._docSelectionRenderService.addDocRanges(
+                        docRanges,
+                        isEditing,
+                        {
+                            ...options,
+                            forceFocus: focusedUnitId === unitId,
+                        }
+                    );
                 }
             })
         );

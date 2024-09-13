@@ -198,9 +198,6 @@ export function ListDropDown(props: IDropdownComponentProps) {
                         p: null,
                         f: null,
                         si: null,
-                        custom: {
-                            __link_url: '',
-                        },
                     },
                 };
 

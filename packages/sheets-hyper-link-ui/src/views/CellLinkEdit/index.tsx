@@ -21,7 +21,7 @@ import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serial
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
-import { IZenZoneService, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import { IZenZoneService, KeyCode, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
@@ -272,6 +272,11 @@ export const CellLinkEdit = () => {
     });
 
     const handleSubmit = async () => {
+        if ((showLabel && !display) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
+            setShowError(true);
+            return;
+        }
+
         if (editing) {
             if (id) {
                 const commandId = (editing.type === HyperLinkEditSourceType.ZEN_EDITOR || editing.type === HyperLinkEditSourceType.EDITING) ? UpdateRichHyperLinkCommand.id : UpdateHyperLinkCommand.id;
@@ -346,6 +351,12 @@ export const CellLinkEdit = () => {
                                 setByPayload.current = false;
                             }}
                             placeholder={localeService.t('hyperLink.form.labelPlaceholder')}
+                            autoFocus
+                            onKeyDown={(e) => {
+                                if (e.keyCode === KeyCode.ENTER) {
+                                    handleSubmit();
+                                }
+                            }}
                         />
                     </FormLayout>
                 )
@@ -374,6 +385,12 @@ export const CellLinkEdit = () => {
                             }
                         }}
                         placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
+                        autoFocus={!showLabel}
+                        onKeyDown={(e) => {
+                            if (e.keyCode === KeyCode.ENTER) {
+                                handleSubmit();
+                            }
+                        }}
                     />
                 </FormLayout>
             )}
@@ -478,11 +495,6 @@ export const CellLinkEdit = () => {
                     type="primary"
                     style={{ marginLeft: 8 }}
                     onClick={async () => {
-                        if ((showLabel && !display) || !payload || (type === SheetHyperLinkType.URL && !isLegalLink(payload))) {
-                            setShowError(true);
-                            return;
-                        }
-
                         handleSubmit();
                     }}
                 >

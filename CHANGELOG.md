@@ -1,5 +1,40 @@
 
 
+## [0.2.13](https://github.com/dream-num/univer/compare/v0.2.12...v0.2.13) (2024-09-13)
+
+
+### Bug Fixes
+
+* border auxiliary is unexpectedly cleared after the merge cell is hidden ([#3358](https://github.com/dream-num/univer/issues/3358)) ([c11c324](https://github.com/dream-num/univer/commit/c11c324bfb7455727828316a692cc29d0b8be7d5))
+* cell margin top is not right ([#3382](https://github.com/dream-num/univer/issues/3382)) ([8b4027e](https://github.com/dream-num/univer/commit/8b4027efecc9814334961b89e276f1acaa862b64))
+* cell value should adjust rich text & function ([#3385](https://github.com/dream-num/univer/issues/3385)) ([ca628e1](https://github.com/dream-num/univer/commit/ca628e1f2b34d33240229d8f084c9f01d8f8cef1))
+* **docs-drawing:** drawing resource ([#3410](https://github.com/dream-num/univer/issues/3410)) ([4f2b148](https://github.com/dream-num/univer/commit/4f2b1480d03eb44247658343e9bbfe29beeacdb3))
+* **docs-ui:** editor focusing conflict when update content ([#3423](https://github.com/dream-num/univer/issues/3423)) ([f2deabc](https://github.com/dream-num/univer/commit/f2deabc1eaf8b5c6b1646a83672bb7764f218a4c))
+* **formular:** fix sheet maximum ([#3384](https://github.com/dream-num/univer/issues/3384)) ([41affb7](https://github.com/dream-num/univer/commit/41affb74573b69ad1731916e2b5a2017b0c6a2fa))
+* **formula:** update formula id ([#3339](https://github.com/dream-num/univer/issues/3339)) ([1434966](https://github.com/dream-num/univer/commit/1434966620e4f4e0e5523eb7f5449d4a9ccde3ae))
+* incorrectly quit autofill mode ([#3390](https://github.com/dream-num/univer/issues/3390)) ([f0fc942](https://github.com/dream-num/univer/commit/f0fc942c571560828b4e9a2462cb84e0ed812d35))
+* **render:** fix the issue loop span many times ([#3394](https://github.com/dream-num/univer/issues/3394)) ([f3d55f7](https://github.com/dream-num/univer/commit/f3d55f78983e202220124d90fa72f43187ca5662))
+* sheet getRowVisible lags after filter ([#3396](https://github.com/dream-num/univer/issues/3396)) ([cb2cf7e](https://github.com/dream-num/univer/commit/cb2cf7ef2e96087b990f5beca6df272103b3c242))
+* **sheet:** adjust move range old mutation not has fromRange property ([#3361](https://github.com/dream-num/univer/issues/3361)) ([11748a5](https://github.com/dream-num/univer/commit/11748a53eacc62992f2dc00b4af3a5e2a2e9e869))
+* **sheet:** fix type error ([#3401](https://github.com/dream-num/univer/issues/3401)) ([7ce40a5](https://github.com/dream-num/univer/commit/7ce40a58df0525b23ada41ae53c4835eab090a71))
+* **sheet:** merge cell custom property ([#3365](https://github.com/dream-num/univer/issues/3365)) ([880ef44](https://github.com/dream-num/univer/commit/880ef4433464a75d2be9975ef653a920e80e7fa8))
+* **sheets-ui:** recover float-dom delete menu & focusing when zen-editor mount ([#3426](https://github.com/dream-num/univer/issues/3426)) ([2bf1177](https://github.com/dream-num/univer/commit/2bf1177ac967989939bd5d1096f72641503ab0d6))
+* **sheet:** the first style of span is not set is merge to true ([#3398](https://github.com/dream-num/univer/issues/3398)) ([6def773](https://github.com/dream-num/univer/commit/6def773da061af84166d525c021bd63c9a341b2f))
+* **sort:** i18n error in sheet sort ([#3419](https://github.com/dream-num/univer/issues/3419)) ([771eeb6](https://github.com/dream-num/univer/commit/771eeb64a5c10a53de9e39fb36ec32df0df0e8f4))
+* the viewport size is too big after cancel filter rule, then viewport main is blank because graphic mem is full. ([#3415](https://github.com/dream-num/univer/issues/3415)) ([f31cefd](https://github.com/dream-num/univer/commit/f31cefd6de79187c48ad94da2435bf048779b518))
+* **ui:** prevent dropdown usage when menu bar is disabled ([#3400](https://github.com/dream-num/univer/issues/3400)) ([5f2e9fa](https://github.com/dream-num/univer/commit/5f2e9fa12aa3ed1683aaa0e5f76bd609baa4f386))
+
+
+### Features
+
+* **action-recorder:** add experimental action recorder plugin ([#3386](https://github.com/dream-num/univer/issues/3386)) ([83238fa](https://github.com/dream-num/univer/commit/83238fa2be5742a4b815ee0f5443ee889e142637))
+* **conditional-formatting:** support formatting painter ([#3420](https://github.com/dream-num/univer/issues/3420)) ([2b121d7](https://github.com/dream-num/univer/commit/2b121d7e368e89737f90ac401768fa4748de133d))
+* **doc-hyper-link:** polyfill history data for doc hyper link ([#3406](https://github.com/dream-num/univer/issues/3406)) ([5f2c2fe](https://github.com/dream-num/univer/commit/5f2c2fe217aae389b6426951fb3b872b62ee42b5))
+* **formula:** add some lookup formulas ([#3352](https://github.com/dream-num/univer/issues/3352)) ([5ab9c7d](https://github.com/dream-num/univer/commit/5ab9c7d109cb65abb9d9f8f5489a0e05f8ea1143))
+* **formula:** add some math formulas ([#3381](https://github.com/dream-num/univer/issues/3381)) ([e736b8a](https://github.com/dream-num/univer/commit/e736b8ad9d2cf351c624c8bc0cf70dc78a5e8dd6))
+* **formula:** bycol/byrow/map/reduce/scan ([#3320](https://github.com/dream-num/univer/issues/3320)) ([85b9d90](https://github.com/dream-num/univer/commit/85b9d90d48417d5e971ac579674d2286f4c0164f))
+* **sheets-hyper-link-ui:** sheet link support rich-text mode ([#3322](https://github.com/dream-num/univer/issues/3322)) ([d19d224](https://github.com/dream-num/univer/commit/d19d224a4260f1e1632989f70baae227c86bdfb8))
+
 ## [0.2.12](https://github.com/dream-num/univer/compare/v0.2.11...v0.2.12) (2024-09-07)
 
 

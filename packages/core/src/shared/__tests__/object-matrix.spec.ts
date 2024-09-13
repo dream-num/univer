@@ -184,4 +184,22 @@ describe('test ObjectMatrix', () => {
         expect(range.endRow).toBe(range1.endRow);
         expect(range.endColumn).toBe(range1.endColumn);
     });
+
+    it('test getDiscreteRanges', () => {
+        const matrix = new ObjectMatrix({
+            0: {
+                0: {},
+                1: { v: 2 },
+            },
+        });
+
+        const range = matrix.getDiscreteRanges();
+
+        expect(range).toStrictEqual([{
+            endColumn: 1,
+            endRow: 0,
+            startColumn: 1,
+            startRow: 0,
+        }]);
+    });
 });

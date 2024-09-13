@@ -244,8 +244,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個組合中的項目數。' },
         },
     },
     COMBINA: {
@@ -258,8 +258,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個組合中的項目數。' },
         },
     },
     COS: {
@@ -403,8 +403,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是您要階乘的非負數數字。 如果數字不是整數，則只會取整數。' },
         },
     },
     FACTDOUBLE: {
@@ -417,8 +416,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是您要雙倍階乘的非負數數字。 如果數字不是整數，則只會取整數。' },
         },
     },
     FLOOR: {
@@ -474,8 +472,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     INT: {
@@ -488,8 +486,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要將數字向下捨去到最接近的整數的實數。' },
         },
     },
     ISO_CEILING: {
@@ -516,8 +513,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     LET: {
@@ -584,8 +581,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是具有相同列數與欄數的數值陣列。' },
         },
     },
     MINVERSE: {
@@ -598,8 +594,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是具有相同列數與欄數的數值陣列。' },
         },
     },
     MMULT: {
@@ -612,8 +607,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '這是您要相乘的陣列。' },
+            array2: { name: '陣列2', detail: '這是您要相乘的陣列。' },
         },
     },
     MOD: {
@@ -654,8 +649,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值1', detail: '用於計算的第一項數值或範圍。' },
+            number2: { name: '數值2', detail: '用於計算的其他數值或範圍。' },
         },
     },
     MUNIT: {
@@ -668,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: '维度', detail: '是指定要傳回之單位矩陣維度的整數。 它會傳回陣列。 維度必須大於零。' },
         },
     },
     ODD: {
@@ -735,8 +729,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '這是被除數。' },
+            denominator: { name: '分母', detail: '這是除數。' },
         },
     },
     RADIANS: {
@@ -886,8 +880,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是冪級數的輸入值。' },
+            n: { name: 'n', detail: '這是要增加 x 的初始乘冪。' },
+            m: { name: 'm', detail: '這是要將級數中的每一項增加 n 所用的間距。' },
+            coefficients: { name: '係數集', detail: '這是一組由 x 的每一個連續乘冪相乘的係數集。' },
         },
     },
     SEQUENCE: {
@@ -900,8 +896,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '列數', detail: '要傳回的列數。' },
+            columns: { name: '欄數', detail: '要傳回的欄數。' },
+            start: { name: '起始數字', detail: '連續值的第一個數字。' },
+            step: { name: '遞增量', detail: '陣列中每個連續值遞增的量。' },
         },
     },
     SIGN: {
@@ -914,8 +912,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是任意實數。' },
         },
     },
     SIN: {

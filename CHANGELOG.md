@@ -1,5 +1,18 @@
 
 
+## [0.2.14](https://github.com/dream-num/univer/compare/v0.2.13...v0.2.14) (2024-09-13)
+
+
+### Bug Fixes
+
+* **sheet:** custom will overwrite the original value ([#3431](https://github.com/dream-num/univer/issues/3431)) ([e1042d4](https://github.com/dream-num/univer/commit/e1042d449c64e13448bb1bace80ed3cfab2467dd))
+* **sheets-ui:** formula error when cross sub-sheet ([#3436](https://github.com/dream-num/univer/issues/3436)) ([97ae314](https://github.com/dream-num/univer/commit/97ae314008745a3e641ff5aaf6c659556306fc4f))
+
+
+### Features
+
+* **sheets-ui:** optimize shortcut for comment & hyperlink editor ([#3434](https://github.com/dream-num/univer/issues/3434)) ([9604020](https://github.com/dream-num/univer/commit/9604020c333981a29d72ed62b0bf1241fa77d2bf))
+
 ## [0.2.13](https://github.com/dream-num/univer/compare/v0.2.12...v0.2.13) (2024-09-13)
 
 

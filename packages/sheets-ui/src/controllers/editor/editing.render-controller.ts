@@ -280,7 +280,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
             if (docSelectionRenderManager) {
-                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION, !document.activeElement || document.activeElement.classList.contains('univer-editor'));
             }
         }));
     }

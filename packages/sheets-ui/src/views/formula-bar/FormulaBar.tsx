@@ -78,9 +78,6 @@ export function FormulaBar() {
                         ).pipe(
                             switchMap(() => {
                                 const unitId = workbook.getUnitId();
-                                const worksheet = workbook.getActiveSheet();
-                                if (!worksheet) return EMPTY;
-
                                 const subUnitId = worksheet.getSheetId();
                                 const range = selectionManager.getCurrentLastSelection()?.range;
                                 if (!range) return EMPTY;

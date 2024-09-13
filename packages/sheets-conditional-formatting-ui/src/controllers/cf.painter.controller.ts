@@ -36,6 +36,17 @@ const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
         startColumn: 0,
         endColumn: getColLength(sourceRange) - 1,
     };
+    // If the target area is a single cell, copy the entire source area.
+    if (getRowLength(targetRange) === 1 && getColLength(targetRange) === 1) {
+        const startRange: IRange = {
+            startRow: targetRange.startRow,
+            endRow: targetRange.startRow,
+            startColumn: targetRange.startColumn,
+            endColumn: targetRange.startColumn,
+        };
+        repeatList.push({ repeatRelativeRange, startRange });
+        return repeatList;
+    }
 
     for (let countRow = 0; countRow < (repeatRow + (rowMod ? 0.1 : 0)); countRow++) {
         for (let countCol = 0; countCol < (repeatCol + (colMod ? 0.1 : 0)); countCol++) {
@@ -172,7 +183,7 @@ export class ConditionalFormattingPainterController extends Disposable {
                 }
             });
         };
-
+        // eslint-disable-next-line max-lines-per-function
         const generalApplyFunc = (targetUnitId: string, targetSubUnitId: string, targetRange: IRange) => {
             const { range: sourceRange, unitId: sourceUnitId, subUnitId: sourceSubUnitId } = this._painterConfig!;
             const isSkipSheet = targetUnitId !== sourceUnitId || sourceSubUnitId !== targetSubUnitId;

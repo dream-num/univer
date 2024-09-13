@@ -16,8 +16,8 @@
 
 import { toDisposable } from '@univerjs/core';
 import { type IDisposable, Inject } from '@univerjs/core';
-import type { ForwardRefExoticComponent } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { ForwardRefExoticComponent } from 'react';
 
 import { ComponentManager } from '../../common/component-manager';
 import type { IZenZoneService } from './zen-zone.service';
@@ -32,6 +32,10 @@ export class DesktopZenZoneService implements IZenZoneService {
     private _visible = false;
     get visible() {
         return this._visible;
+    }
+
+    get temporaryHidden() {
+        return this._temporaryHidden$.getValue();
     }
 
     constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {

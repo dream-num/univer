@@ -465,8 +465,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
 
         if (end !== dataStream.length - 1) {
-            loopParagraph(dataStream.length - 1, false);
+            loopParagraph(dataStream.length, false);
         }
+
         return {
             dataStream: newDataStream,
             paragraphs,

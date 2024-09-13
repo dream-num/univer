@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     PointerInput,
     Rect,
@@ -32,6 +30,8 @@ import {
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
+import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
 import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 
 import {
@@ -251,8 +251,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY,
@@ -260,8 +260,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            isRelativeX: false,
-            isRelativeY: false,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY: 0,
@@ -270,8 +270,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            isRelativeX: false,
-            isRelativeY: true,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY,
@@ -280,8 +280,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            isRelativeX: true,
-            isRelativeY: false,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY: 0,
@@ -290,8 +290,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewRowTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            isRelativeX: false,
-            isRelativeY: false,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: true,
         });
 
         const viewRowBottom = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
@@ -300,15 +300,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             bottom: 0,
             width: rowHeader.width,
             isWheelPreventDefaultX: true,
-            isRelativeX: false,
-            isRelativeY: true,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: false,
         });
 
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            isRelativeX: false,
-            isRelativeY: false,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: true,
         });
 
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
@@ -317,8 +317,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             height: columnHeader.height,
             right: 0,
             isWheelPreventDefaultX: true,
-            isRelativeX: true,
-            isRelativeY: false,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: true,
         });
 
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
@@ -327,8 +327,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             width: rowHeader.width,
             height: columnHeader.height,
             isWheelPreventDefaultX: true,
-            isRelativeX: false,
-            isRelativeY: false,
+            explicitViewportWidthSet: true,
+            explicitViewportHeightSet: true,
         });
 
         return {

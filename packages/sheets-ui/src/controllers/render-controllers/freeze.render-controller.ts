@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import {
     ColorKit,
     createInterceptorKey,
@@ -28,21 +27,7 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
-import type {
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRowsCommandParams,
-    IRemoveRowColCommandParams,
-    ISetColHiddenMutationParams,
-    ISetFrozenMutationParams,
-    ISetRowHiddenMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
 import {
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -66,16 +51,31 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { Subscription } from 'rxjs';
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
+
+import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IMoveColsCommandParams,
+    IMoveRowsCommandParams,
+    IRemoveRowColCommandParams,
+    ISetColHiddenMutationParams,
+    ISetFrozenMutationParams,
+    ISetRowHiddenMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowAutoHeightMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX } from '../../common/keys';
 
-import type { IViewportScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from '../utils/component-tools';
+import type { IViewportScrollState } from '../../services/scroll-manager.service';
 
 enum FREEZE_DIRECTION_TYPE {
     ROW,
@@ -786,7 +786,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         );
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _updateViewport(
         row: number = -1,
         column: number = -1,
@@ -1567,7 +1567,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
     private _getFreeze() {
         const config: IWorksheetData | undefined = this._sheetSkeletonManagerService
             .getCurrent()
-            ?.skeleton.getWorksheetConfig();
+            ?.skeleton
+            .getWorksheetConfig();
 
         if (config == null) {
             return;

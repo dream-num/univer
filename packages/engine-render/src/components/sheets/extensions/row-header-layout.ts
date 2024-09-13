@@ -18,11 +18,11 @@ import type { IScale } from '@univerjs/core';
 
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
-import type { UniverRenderingContext } from '../../../context';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
-import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces';
 import { SheetExtension } from './sheet-extension';
+import type { UniverRenderingContext } from '../../../context';
+import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
 

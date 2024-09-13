@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
 import { debounce, getColorStyle, Inject, Injector, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
     Rect,
@@ -25,8 +23,10 @@ import {
     Slide,
     Viewport,
 } from '@univerjs/engine-render';
-
 import { ObjectProvider, SLIDE_KEY } from '@univerjs/slides';
+import type { EventState, IColorStyle, IPageElement, ISlidePage, Nullable, SlideDataModel, UnitModel } from '@univerjs/core';
+
+import type { BaseObject, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import type { PageID } from '../type';
 
 // export const ICanvasView = createIdentifier<IUniverInstanceService>('univer.slide.canvas-view');
@@ -72,8 +72,8 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
             top: 0,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
         scene.attachControl();
@@ -368,8 +368,8 @@ export class SlideRenderController extends RxDisposable implements IRenderModule
             top: 0,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
         });
         viewMain.closeClip();
 

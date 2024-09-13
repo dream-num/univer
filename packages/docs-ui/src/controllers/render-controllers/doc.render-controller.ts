@@ -73,8 +73,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
             top: 0,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
 

@@ -16,15 +16,15 @@
 
 import { LocaleType, Univer, UniverInstanceType } from '@univerjs/core';
 import { greenTheme } from '@univerjs/design';
+import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
+
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import { UniverDocsPlugin } from '@univerjs/docs';
-import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverDrawingPlugin } from '@univerjs/drawing';
 import { DEFAULT_SLIDE_DATA } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 

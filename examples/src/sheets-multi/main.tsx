@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import 'react-mosaic-component/react-mosaic-component.css';
-import './index.css';
-
 import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
+
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -30,9 +28,11 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
+
+import 'react-mosaic-component/react-mosaic-component.css';
+import './index.css';
 
 function factory(id: string) {
     return function createUniverOnContainer() {

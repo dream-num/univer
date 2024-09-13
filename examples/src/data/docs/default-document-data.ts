@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -28,6 +27,7 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA: IDocumentData = {
     id: 'd',

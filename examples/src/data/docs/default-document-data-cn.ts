@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
 import { BooleanNumber, DocumentFlavor } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
+import type { IDocumentData } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'd',

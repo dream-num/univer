@@ -47,6 +47,8 @@ function monacoBuildTask() {
 
 const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
+    format: 'esm',
+    splitting: true,
     color: true,
     loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: args.watch,

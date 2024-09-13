@@ -361,6 +361,115 @@ describe('Test set range values commands', () => {
                 expect(getValue()).toStrictEqual(getResultParamsMore().value);
             });
 
+            it('will set range values when there is a selected range, includes custom property blank object and undefined', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: { },
+                        },
+                    };
+
+                    return params;
+                }
+
+                function getParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: undefined,
+                        },
+                    };
+
+                    return params;
+                }
+
+                function getResultParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                            custom: { },
+                        },
+                    };
+
+                    return params;
+                }
+
+                function getResultParamsMore() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                            custom: { },
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParamsMore())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                    t: CellValueType.STRING,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParamsMore().value);
+            });
+
+            it('will set range values when there is a selected range, includes custom property null', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: null,
+                        },
+                    };
+
+                    return params;
+                }
+
+                function getResultParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                    t: CellValueType.STRING,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+            });
+
             it('set value in other worksheet', async () => {
                 function getParams() {
                     const params: ISetRangeValuesCommandParams = {

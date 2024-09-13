@@ -1701,14 +1701,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-            // for (let c = Math.max(startColumn - 20, 0); c < startColumn; c++) {
             for (let c = 0; c < startColumn; c++) {
                 this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
             }
             if (endColumn === 0) continue;
 
             // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-            // for (let c = endColumn + 1; c < Math.min(endColumn + 20, columnWidthAccumulation.length); c++) {
             for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
                 this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
             }

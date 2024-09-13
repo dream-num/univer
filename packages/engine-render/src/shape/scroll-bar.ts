@@ -108,7 +108,7 @@ export class ScrollBar extends BaseScrollBar {
         const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         if (this.enableHorizontal) {
-            this.horizonBarRect!.render(ctx);
+            this.horizonScrollTrack!.render(ctx);
             this.horizonThumbRect!.translate(scrollX).render(ctx);
         }
 
@@ -149,7 +149,7 @@ export class ScrollBar extends BaseScrollBar {
     }
 
     override makeDirty(state: boolean) {
-        this.horizonBarRect?.makeDirty(state);
+        this.horizonScrollTrack?.makeDirty(state);
         this.horizonThumbRect?.makeDirty(state);
         this.verticalScrollTrack?.makeDirty(state);
         this.verticalThumbRect?.makeDirty(state);
@@ -172,8 +172,8 @@ export class ScrollBar extends BaseScrollBar {
             return this.verticalThumbRect;
         }
 
-        if (this.horizonBarRect?.isHit(coord)) {
-            return this.horizonBarRect;
+        if (this.horizonScrollTrack?.isHit(coord)) {
+            return this.horizonScrollTrack;
         }
 
         if (this.verticalScrollTrack?.isHit(coord)) {
@@ -218,7 +218,7 @@ export class ScrollBar extends BaseScrollBar {
             this.horizontalThumbWidth = MINI_THUMB_SIZE;
         }
 
-        this.horizonBarRect?.transformByState({
+        this.horizonScrollTrack?.transformByState({
             left: 0,
             top: parentHeight - this.barSize,
             width: this.horizontalBarWidth,
@@ -289,7 +289,7 @@ export class ScrollBar extends BaseScrollBar {
 
     private _initialScrollRect() {
         if (this.enableHorizontal) {
-            this.horizonBarRect = new Rect('__horizonBarRect__', {
+            this.horizonScrollTrack = new Rect('__horizonBarRect__', {
                 fill: this.barBackgroundColor!,
                 strokeWidth: this.barBorder,
                 stroke: this.barBorderColor!,
@@ -439,8 +439,8 @@ export class ScrollBar extends BaseScrollBar {
                 this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
             }));
         }
-        if (this.horizonBarRect) {
-            this._eventSub.add(this.horizonBarRect.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
+        if (this.horizonScrollTrack) {
+            this._eventSub.add(this.horizonScrollTrack.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
                 const e = evt as IPointerEvent | IMouseEvent;
                 this._viewport.scrollToBarPos({
                     x: e.offsetX - this._viewport.left - this.horizontalThumbWidth / 2,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -58,17 +58,18 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverUniscriptPlugin, {
     getWorkerUrl(moduleID: string, label: string) {
         if (label === 'typescript' || label === 'javascript') {
-            return './vs/language/typescript/ts.worker.js';
+            return '/vs/language/typescript/ts.worker.js';
         }
 
-        return './vs/editor/editor.worker.js';
+        return '/vs/editor/editor.worker.js';
     },
 });
 
 // create univer doc instance
-univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
+univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);
 
 declare global {
+    // eslint-disable-next-line ts/naming-convention
     interface Window {
         univer?: Univer;
     }

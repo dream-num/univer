@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
@@ -64,15 +64,15 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverUniscriptPlugin, {
     getWorkerUrl(moduleID: string, label: string) {
         if (label === 'typescript' || label === 'javascript') {
-            return './vs/language/typescript/ts.worker.js';
+            return '/vs/language/typescript/ts.worker.js';
         }
 
-        return './vs/editor/editor.worker.js';
+        return '/vs/editor/editor.worker.js';
     },
 });
 
 // create univer sheet instance
-univer.createUniverSheet(UNISCRIT_WORKBOOK_DATA_DEMO);
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, UNISCRIT_WORKBOOK_DATA_DEMO);
 
 declare global {
     interface Window {

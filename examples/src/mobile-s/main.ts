@@ -50,9 +50,12 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 // core plugins
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverMobileUIPlugin, { container: 'app', contextMenu: true });
+univer.registerPlugin(UniverMobileUIPlugin, {
+    container: 'app',
+    contextMenu: true,
+});
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: './worker.js',
+    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
 } as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverDocsUIPlugin);

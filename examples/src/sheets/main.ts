@@ -65,7 +65,7 @@ const univer = new Univer({
 });
 
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: './worker.js',
+    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
 } as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverDocsPlugin);

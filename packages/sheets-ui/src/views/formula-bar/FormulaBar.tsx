@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
@@ -51,6 +51,7 @@ export function FormulaBar() {
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const permissionService = useDependency(IPermissionService);
     const currentWorkbook = useActiveWorkbook();
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -61,41 +62,34 @@ export function FormulaBar() {
     }
 
     useLayoutEffect(() => {
-        const subscription = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(
-            switchMap((workbook) => {
-                if (!workbook) {
+        const subscription = workbook.activeSheet$.pipe(
+            switchMap((worksheet) => {
+                if (!worksheet) {
                     return EMPTY;
                 }
-                return workbook.activeSheet$.pipe(
-                    switchMap((worksheet) => {
-                        if (!worksheet) {
-                            return EMPTY;
-                        }
-                        return merge(
-                            worksheetProtectionRuleModel.ruleChange$,
-                            rangeProtectionRuleModel.ruleChange$,
-                            selectionManager.selectionMoveEnd$
-                        ).pipe(
-                            switchMap(() => {
-                                const unitId = workbook.getUnitId();
-                                const subUnitId = worksheet.getSheetId();
-                                const range = selectionManager.getCurrentLastSelection()?.range;
-                                if (!range) return EMPTY;
+                return merge(
+                    worksheetProtectionRuleModel.ruleChange$,
+                    rangeProtectionRuleModel.ruleChange$,
+                    selectionManager.selectionMoveEnd$
+                ).pipe(
+                    switchMap(() => {
+                        const unitId = workbook.getUnitId();
+                        const subUnitId = worksheet.getSheetId();
+                        const range = selectionManager.getCurrentLastSelection()?.range;
+                        if (!range) return EMPTY;
 
-                                const permissionIds = getPermissionIds(unitId, subUnitId);
+                        const permissionIds = getPermissionIds(unitId, subUnitId);
 
-                                const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
-                                const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
-                                    return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
-                                });
+                        const selectionRanges = selectionManager.getCurrentSelections()?.map((selection) => selection.range);
+                        const permissionList = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                            return rule.ranges.some((r) => selectionRanges?.some((selectionRange) => Rectangle.intersects(r, selectionRange)));
+                        });
 
-                                permissionList.forEach((p) => {
-                                    permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
-                                });
+                        permissionList.forEach((p) => {
+                            permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, p.permissionId).id);
+                        });
 
-                                return permissionService.composePermission$(permissionIds);
-                            })
-                        );
+                        return permissionService.composePermission$(permissionIds);
                     })
                 );
             })
@@ -108,7 +102,7 @@ export function FormulaBar() {
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
+    }, [workbook]);
 
     const INITIAL_SNAPSHOT: IDocumentData = {
         id: DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,

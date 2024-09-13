@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellDataForSheetInterceptor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { UnitAction } from '@univerjs/protocol';
-
-import type { ICellPermission } from '@univerjs/sheets';
-import { IExclusiveRangeService, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
+import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { combineLatest, map, of, startWith, switchMap } from 'rxjs';
 
 interface IActive {
     workbook: Workbook;
@@ -182,37 +179,31 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
+    const permissionService = accessor.get(IPermissionService);
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+            if (!workbook || !worksheet) {
                 return true;
             }
 
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
-            const permissionLapRanges = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((acc, rule) => {
-                return [...acc, ...rule.ranges];
-            }, [] as IRange[]).filter((ruleRange) => Rectangle.intersects(range, ruleRange));
+            const permissionIds: string[] = [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id];
 
-            return permissionLapRanges.some((ruleRange) => {
-                const { startRow, startColumn, endRow, endColumn } = ruleRange;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+            rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                return rule.ranges.some((ruleRange) => Rectangle.intersects(range, ruleRange));
+            }).forEach((rule) => {
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
             });
+
+            return permissionService.composePermission(permissionIds).some((item) => item.value === false);
         })
     );
 }
@@ -222,43 +213,39 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
+    const permissionService = accessor.get(IPermissionService);
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+            if (!workbook || !worksheet) {
                 return true;
             }
 
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
-            const permissionLapRanges = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((acc, rule) => {
-                return [...acc, ...rule.ranges];
-            }, [] as IRange[]).filter((ruleRange) => {
+            const permissionIds: string[] = [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id];
+
+            rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 if (type === 'row') {
-                    return range.endRow > ruleRange.startRow && range.endRow <= ruleRange.endRow;
+                    return rule.ranges.some((ruleRange) => {
+                        return range.endRow > ruleRange.startRow && range.endRow <= ruleRange.endRow;
+                    });
                 } else {
-                    return range.endColumn > ruleRange.startColumn && range.endColumn <= ruleRange.endColumn;
+                    return rule.ranges.some((ruleRange) => {
+                        return range.endColumn > ruleRange.startColumn && range.endColumn <= ruleRange.endColumn;
+                    });
                 }
+            }).forEach((rule) => {
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
             });
 
-            return permissionLapRanges.some((ruleRange) => {
-                const { startRow, startColumn, endRow, endColumn } = ruleRange;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
+            return permissionService.composePermission(permissionIds).some((item) => item.value === false);
         })
     );
 }
@@ -268,43 +255,39 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
 
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
+    const permissionService = accessor.get(IPermissionService);
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+            if (!workbook || !worksheet) {
                 return true;
             }
 
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
 
-            const permissionLapRanges = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((acc, rule) => {
-                return [...acc, ...rule.ranges];
-            }, [] as IRange[]).filter((ruleRange) => {
+            const permissionIds: string[] = [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id];
+
+            rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
                 if (type === 'row') {
-                    return range.startRow > ruleRange.startRow && range.startRow <= ruleRange.endRow;
+                    return rule.ranges.some((ruleRange) => {
+                        return range.startRow > ruleRange.startRow && range.startRow <= ruleRange.endRow;
+                    });
                 } else {
-                    return range.startColumn > ruleRange.startColumn && range.startColumn <= ruleRange.endColumn;
+                    return rule.ranges.some((ruleRange) => {
+                        return range.startColumn > ruleRange.startColumn && range.startColumn <= ruleRange.endColumn;
+                    });
                 }
+            }).forEach((rule) => {
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
             });
 
-            return permissionLapRanges.some((ruleRange) => {
-                const { startRow, startColumn, endRow, endColumn } = ruleRange;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            });
+            return permissionService.composePermission(permissionIds).some((item) => item.value === false);
         })
     );
 }
@@ -315,19 +298,23 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
+    const permissionService = accessor.get(IPermissionService);
+
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+            if (!workbook || !worksheet) {
                 return true;
             }
 
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
+
+            const permissionIds: string[] = [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id];
 
             const rowColRangeExpand = Tools.deepClone(range) as IRange;
 
@@ -338,22 +325,14 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
                 rowColRangeExpand.startRow = 0;
                 rowColRangeExpand.endRow = worksheet.getRowCount() - 1;
             }
-            const permissionLapRanges = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((acc, rule) => {
-                return [...acc, ...rule.ranges];
-            }, [] as IRange[]).filter((ruleRange) => Rectangle.intersects(rowColRangeExpand, ruleRange));
 
-            return permissionLapRanges.some((ruleRange) => {
-                const { startRow, startColumn, endRow, endColumn } = ruleRange;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+            rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                return rule.ranges.some((ruleRange) => Rectangle.intersects(rowColRangeExpand, ruleRange));
+            }).forEach((rule) => {
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
             });
+
+            return permissionService.composePermission(permissionIds).some((item) => item.value === false);
         })
     );
 }
@@ -364,19 +343,23 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
     const selectionManagerService = accessor.get(SheetsSelectionsService);
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
 
-    return selectionManagerService.selectionMoveEnd$.pipe(
+    const permissionService = accessor.get(IPermissionService);
+
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
 
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            if (!worksheet) {
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+            if (!workbook || !worksheet) {
                 return true;
             }
 
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
+
+            const permissionIds: string[] = [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id];
 
             const rowColRangeExpand = Tools.deepClone(range) as IRange;
             if (type === 'row') {
@@ -385,22 +368,13 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
                 rowColRangeExpand.endColumn = worksheet.getColumnCount() - 1;
             }
 
-            const permissionLapRanges = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((acc, rule) => {
-                return [...acc, ...rule.ranges];
-            }, [] as IRange[]).filter((ruleRange) => Rectangle.intersects(ruleRange, rowColRangeExpand));
-
-            return permissionLapRanges.some((ruleRange) => {
-                const { startRow, startColumn, endRow, endColumn } = ruleRange;
-                for (let row = startRow; row <= endRow; row++) {
-                    for (let col = startColumn; col <= endColumn; col++) {
-                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                        if (permission?.[UnitAction.Edit] === false) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
+            rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
+                return rule.ranges.some((ruleRange) => Rectangle.intersects(rowColRangeExpand, ruleRange));
+            }).forEach((rule) => {
+                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
             });
+
+            return permissionService.composePermission(permissionIds).some((item) => item.value === false);
         })
     );
 }

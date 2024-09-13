@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
 import {
     BorderType,
     CommandType,

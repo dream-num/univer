@@ -236,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'The text string that contains the characters you want to extract.' },
-            numBytes: { name: 'num_bytes', detail: ' Optional. Specifies the number of bytes you want LEFTB to extract.' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            numBytes: { name: 'バイト数', detail: 'LEFTB で取り出す文字数をバイト数で指定します。' },
         },
     },
     LEN: {

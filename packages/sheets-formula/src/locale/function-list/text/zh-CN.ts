@@ -226,7 +226,7 @@ export default {
         },
     },
     LEFTB: {
-        description: '返回文本值中最左边的字符',
+        description: '返回文本值中最左边的字符。',
         abstract: '返回文本值中最左边的字符',
         links: [
             {
@@ -235,8 +235,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'The text string that contains the characters you want to extract.' },
-            numBytes: { name: 'num_bytes', detail: ' Optional. Specifies the number of bytes you want LEFTB to extract.' },
+            text: { name: '文本', detail: '包含要提取的字符的文本字符串。' },
+            numBytes: { name: '字节数', detail: '按字节指定要由 LEFTB 提取的字符的数量。' },
         },
     },
     LEN: {

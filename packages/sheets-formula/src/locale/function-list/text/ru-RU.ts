@@ -235,8 +235,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'The text string that contains the characters you want to extract.' },
-            numBytes: { name: 'num_bytes', detail: ' Optional. Specifies the number of bytes you want LEFTB to extract.' },
+            text: { name: 'Текст', detail: 'Текстовая строка, содержащая символы, которые требуется извлечь.' },
+            numBytes: { name: 'Количество_байт', detail: 'Количество символов, извлекаемых функцией ЛЕВБ.' },
         },
     },
     LEN: {

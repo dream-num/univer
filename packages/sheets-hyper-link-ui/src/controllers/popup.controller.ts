@@ -271,12 +271,9 @@ export class SheetsHyperLinkPopupController extends Disposable {
     private _initTextSelectionListener() {
         this.disposeWithMe(
             this._textSelectionManagerService.textSelection$.subscribe((selection) => {
-                if (!selection || (selection.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && selection.unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY)) {
-                    return;
+                if (selection && selection.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
                 }
-
-                this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
-                this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.ZEN_EDITOR);
             })
         );
     }

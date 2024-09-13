@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
 import { BooleanNumber, BorderStyleTypes, LocaleType } from '@univerjs/core';
+import type { IWorkbookData } from '@univerjs/core';
 
 export const DEFAULT_WORKBOOK_DATA_DEMO1: IWorkbookData = {
     id: 'workbook-right',

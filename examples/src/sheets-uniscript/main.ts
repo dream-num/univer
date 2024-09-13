@@ -15,6 +15,7 @@
  */
 
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -26,7 +27,6 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
 
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '../data/sheets/uniscript-data';
 import { enUS, ruRU, zhCN } from '../locales';

@@ -14,37 +14,37 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
 import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
-import { UniverUniUIPlugin } from '@univerjs/uniui';
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { FUniver } from '@univerjs/facade';
-import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
-import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
-import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
-import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
-import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
-import { UniverDocsDrawingUIPlugin } from '@univerjs/docs-drawing-ui';
-import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
+import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
+import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniDocsUIController } from '@univerjs/uni-docs-ui';
+import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
+import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
+import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
+import { UniverUniUIPlugin } from '@univerjs/uniui';
+import type { Nullable } from '@univerjs/core';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
 

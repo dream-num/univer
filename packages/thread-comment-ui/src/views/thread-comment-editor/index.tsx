@@ -19,7 +19,6 @@ import { Button, Mention, Mentions } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { IDocumentBody } from '@univerjs/core';
 import type { MentionProps } from '@univerjs/design';
@@ -112,11 +111,6 @@ export const ThreadCommentEditor = forwardRef<IThreadCommentEditorInstance, IThr
                     }
                     docSelectionRenderService?.blur();
                     setEditing(true);
-                }}
-                onKeyDown={(e) => {
-                    if (e.keyCode === KeyCode.ENTER) {
-                        handleSave();
-                    }
                 }}
             >
                 <Mention

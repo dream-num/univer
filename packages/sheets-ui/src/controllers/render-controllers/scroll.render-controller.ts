@@ -17,18 +17,19 @@
 import {
     Direction,
     Disposable,
+    FOCUSING_SHEET,
     ICommandService,
     IContextService,
     Inject,
     Injector,
     RANGE_TYPE, toDisposable } from '@univerjs/core';
-import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { IRenderManagerService, PointerInput, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
 import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import type { SheetsSelectionsService } from '@univerjs/sheets';
 
-import { ScrollCommand } from '../../commands/commands/set-scroll.command';
+import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -55,7 +56,8 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         super();
 
         this._initCommandListener();
-        this._initScrollEventListener();
+        this._wheelEventListener();
+        this._scrollBarEventListener();
         this._initSkeletonListener();
     }
 
@@ -151,8 +153,84 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         return snapshot.freeze;
     }
 
+    private _wheelEventListener() {
+        const { scene } = this._context;
+        if (!scene) return;
+
+        const viewMain = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!viewMain) return;
+
+        this.disposeWithMe(
+            // eslint-disable-next-line complexity
+            scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
+                if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
+                    return;
+                }
+
+                let offsetX = 0;
+                let offsetY = 0;
+
+                const isLimitedStore = viewMain.limitedScroll();
+                if (evt.inputIndex === PointerInput.MouseWheelX) {
+                    const deltaFactor = Math.abs(evt.deltaX);
+                    const scrollNum = deltaFactor;
+                    // show more content on the right，evt.deltaX > 0, more content on the left, evt.deltaX < 0
+                    offsetX = evt.deltaX > 0 ? scrollNum : -scrollNum;
+                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+
+                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        if (!isLimitedStore?.isLimitedX) {
+                            state.stopPropagation();
+                        }
+                    } else if (viewMain.isWheelPreventDefaultX) {
+                        evt.preventDefault();
+                    } else if (!isLimitedStore?.isLimitedX) {
+                        evt.preventDefault();
+                    }
+                }
+                if (evt.inputIndex === PointerInput.MouseWheelY) {
+                    const deltaFactor = Math.abs(evt.deltaY);
+                    let scrollNum = deltaFactor;
+                    if (evt.shiftKey) {
+                        scrollNum *= 3;
+                        if (evt.deltaY > 0) {
+                            offsetX = scrollNum;
+                        } else {
+                            offsetX = -scrollNum;
+                        }
+                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
+
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (!isLimitedStore?.isLimitedX) {
+                                state.stopPropagation();
+                            }
+                        } else if (viewMain.isWheelPreventDefaultX) {
+                            evt.preventDefault();
+                        } else if (!isLimitedStore?.isLimitedX) {
+                            evt.preventDefault();
+                        }
+                    } else {
+                        offsetY = evt.deltaY > 0 ? scrollNum : -scrollNum;
+                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (!isLimitedStore?.isLimitedY) {
+                                state.stopPropagation();
+                            }
+                        } else if (viewMain.isWheelPreventDefaultY) {
+                            evt.preventDefault();
+                        } else if (!isLimitedStore?.isLimitedY) {
+                            evt.preventDefault();
+                        }
+                    }
+                }
+                this._context.scene.makeDirty(true);
+            })
+        );
+    }
+
     // eslint-disable-next-line max-lines-per-function
-    private _initScrollEventListener() {
+    private _scrollBarEventListener() {
         const { scene } = this._context;
         if (scene == null) return;
 

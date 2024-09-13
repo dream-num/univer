@@ -373,8 +373,8 @@ export class Viewport {
 
     set height(height: Nullable<number>) {
         const maxHeight = this.scene.getParent().height;
-        if (height !== null && height !== undefined) {
-            this._height = Tools.clamp(height, 0, maxHeight);
+        if (Tools.isDefine(height)) {
+            this._height = Tools.clamp(height!, 0, maxHeight);
         } else {
             this._height = height;
         }

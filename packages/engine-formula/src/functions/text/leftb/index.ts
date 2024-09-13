@@ -16,11 +16,11 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { charLenByte } from '../../../engine/utils/char-kit';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { charLenByte } from '../../../engine/utils/char-kit';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Leftb extends BaseFunction {
     override minParams = 1;
@@ -68,11 +68,7 @@ export class Leftb extends BaseFunction {
                 }
 
                 const textValueString = `${textValue.getValue()}`;
-                const byteLength = charLenByte(textValueString);
-                if (numBytesValueNumber >= byteLength) {
-                    return ArrayValueObject.createByArray([[textValueString]]); // Return original string if numBytes >= byteLength
-                }
-                return StringValueObject.create(Array.from(textValueString).slice(0, numBytesValueNumber).join(''));
+                return StringValueObject.create(this._sliceByBytes(textValueString, numBytesValueNumber));
             });
         }
 
@@ -90,12 +86,25 @@ export class Leftb extends BaseFunction {
         if (typeof numBytesValueNumber !== 'number' || numBytesValueNumber < 0) {
             return ArrayValueObject.createByArray([[ErrorType.VALUE]]);
         }
-        const byteLength = charLenByte(textValueString);
 
-        if (numBytesValueNumber >= byteLength) {
-            return ArrayValueObject.createByArray([[textValueString]]); // Return original string if numBytes >= byteLength
+        return ArrayValueObject.createByArray([[this._sliceByBytes(textValueString, numBytesValueNumber)]]);
+    }
+
+    private _sliceByBytes(text: string, numBytes: number) {
+        let byteCount = 0;
+        let sliceIndex = 0;
+
+        // Iterate over each Unicode character (correctly handling multi-byte characters and emoji)
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const charByteLength = charLenByte(char);
+            if (byteCount + charByteLength > numBytes) {
+                break;
+            }
+            byteCount += charByteLength;
+            sliceIndex++;
         }
 
-        return ArrayValueObject.createByArray([[Array.from(textValueString).slice(0, numBytesValueNumber).join('')]]);
+        return [...text].slice(0, sliceIndex).join('');
     }
 }

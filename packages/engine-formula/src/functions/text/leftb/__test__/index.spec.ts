@@ -16,16 +16,16 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Leftb } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
-describe('Test LEFT function', () => {
+describe('Test LEFTB function', () => {
     const leftbFunction = new Leftb(FUNCTION_NAMES_TEXT.LEFTB);
 
-    describe('Left', () => {
+    describe('Leftb', () => {
         describe('Single Value Tests', () => {
             it('Should return leftmost bytes of a single text', () => {
                 const text = StringValueObject.create('Hello World');
@@ -160,6 +160,73 @@ describe('Test LEFT function', () => {
             const numChars = NumberValueObject.create(0);
             const result = leftbFunction.calculate(text, numChars);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['']]);
+        });
+
+        it('Handles extracting CJK, first byte', () => {
+            const textArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    ['销售额'],
+                    ['から'],
+                    ['이트'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = leftbFunction.calculate(textArray);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                [''],
+                [''],
+                [''],
+            ]);
+        });
+
+        it('Handles extracting CJK, first character', () => {
+            const textArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    ['销售额'],
+                    ['から'],
+                    ['이트'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = leftbFunction.calculate(textArray, NumberValueObject.create(2));
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                ['销'],
+                ['か'],
+                ['이'],
+            ]);
+        });
+        it('Handles extracting multiple languages', () => {
+            const textArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    ['销售额'],
+                    ['uから'],
+                    ['이u트'],
+                    ['이트u'],
+                ]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = leftbFunction.calculate(textArray, NumberValueObject.create(3));
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+                ['销'],
+                ['uか'],
+                ['이u'],
+                ['이'],
+            ]);
         });
     });
 });

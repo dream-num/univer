@@ -489,7 +489,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const results: IRowAutoHeightInfo[] = [];
-        const { mergeData, rowData } = this._worksheetData;
+        const { rowData } = this._worksheetData;
         const rowObjectArray = rowData;
         const calculatedRows = new Set<number>();
 
@@ -1631,29 +1631,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     intersectMergeRange(row: number, column: number): boolean {
-        const dataMergeCache = this.dataMergeCache;
-        for (const dataCache of dataMergeCache) {
-            const {
-                startRow: startRowMargeIndex,
-                endRow: endRowMargeIndex,
-                startColumn: startColumnMargeIndex,
-                endColumn: endColumnMargeIndex,
-            } = dataCache;
-            if (
-                row >= startRowMargeIndex &&
-                row <= endRowMargeIndex &&
-                column >= startColumnMargeIndex &&
-                column <= endColumnMargeIndex
-            ) {
-                return true;
-            }
-        }
-        // dataMergeCache?.forEach((r, dataMergeRow) => {
-        //     dataMergeRow?.forEach((c, dataCache) => {
-
-        //     });
-        // });
-        return false;
+        const mergedData = this.worksheet.getMergedCell(row, column);
+        return Boolean(mergedData);
     }
 
     // private _getMergeRangeCache() {
@@ -2153,18 +2132,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             wrapStrategy,
             paddingData,
         } as ICellOtherConfig;
-    }
-
-    private _getMergeCellsCache(mergeData: IRange[]) {
-        const map = new Map<string, IRange>();
-        mergeData.forEach((range) => {
-            for (let r = range.startRow; r <= range.endRow; r++) {
-                for (let c = range.startColumn; c <= range.endColumn; c++) {
-                    map.set(`${r}-${c}`, range);
-                }
-            }
-        });
-        return map;
     }
 
     private _getCellMergeInfo(row: number, column: number): ISelectionCell {

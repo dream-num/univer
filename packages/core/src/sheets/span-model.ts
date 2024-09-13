@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Rectangle, Tools } from '../shared';
+import { LRUMap, Rectangle, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
 import type { IRange } from './typedef';
@@ -49,6 +49,8 @@ export class SpanModel extends Disposable {
      */
     private _mergeData: IRange[];
 
+    private _rangeMap: LRUMap<string, number[]> = new LRUMap<string, number[]>(50000);
+
     constructor(mergeData: IRange[]) {
         super();
         this._init(mergeData.concat());
@@ -65,6 +67,7 @@ export class SpanModel extends Disposable {
         this._columnCache = {};
         this._hasAll = false;
         this._allIndex = -1;
+        this._rangeMap.clear();
     }
 
     private _createCache(mergeData: IRange[]) {
@@ -167,6 +170,13 @@ export class SpanModel extends Disposable {
 
     public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         const ranges: IRange[] = [];
+
+        const key = `${startRow}-${startColumn}-${endRow}-${endColumn}`;
+        if (this._rangeMap.has(key)) {
+            return this._getRangeFromCache(key);
+        }
+        let index = 0;
+        const indexes: number[] = [];
         for (const range of this._mergeData || []) {
             if (Rectangle.intersects(range, {
                 startRow,
@@ -177,7 +187,21 @@ export class SpanModel extends Disposable {
                 ranges.push({
                     ...range,
                 });
+                index++;
+                indexes.push(index);
             }
+        }
+        this._rangeMap.set(key, indexes);
+        return ranges;
+    }
+
+    private _getRangeFromCache(key: string) {
+        const indexes = this._rangeMap.get(key) || [];
+        const ranges: IRange[] = [];
+        for (const index of indexes) {
+            ranges.push({
+                ...this._mergeData[index],
+            });
         }
         return ranges;
     }

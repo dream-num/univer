@@ -73,7 +73,6 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",

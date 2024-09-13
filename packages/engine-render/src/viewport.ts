@@ -128,7 +128,7 @@ export class Viewport {
 
     onScrollAfter$ = new EventSubject<IScrollObserverParam>();
 
-    onScrollBefore$ = new EventSubject<IScrollObserverParam>();
+    // onScrollBefore$ = new EventSubject<IScrollObserverParam>();
 
     onScrollEnd$ = new EventSubject<IScrollObserverParam>();
 
@@ -534,7 +534,7 @@ export class Viewport {
     // 2. changing curr skeleton
     // 3. changing selection which cross viewport
     // 4. changing the viewport size (also include change window size)
-    // 5. changing the scroll bar position
+    // 5. changing the scroll bar position(click at certain pos of scrolltrack)
     // Debug
     // window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
@@ -542,7 +542,7 @@ export class Viewport {
     }
 
     /**
-     * scrolling by current position plus offset
+     * Srolling by current position plus delta.
      * the most common case is triggered by scroll-timer(in sheet)
      * @param delta
      * @returns isLimited
@@ -1094,7 +1094,7 @@ export class Viewport {
     dispose() {
         this.onMouseWheel$.complete();
         this.onScrollAfter$.complete();
-        this.onScrollBefore$.complete();
+        // this.onScrollBefore$.complete();
         this.onScrollEnd$.complete();
         this._scrollBar?.dispose();
         this._cacheCanvas?.dispose();
@@ -1416,7 +1416,7 @@ export class Viewport {
 
         this._scrollBar?.makeDirty(true);
 
-        this.onScrollBefore$.emitEvent(scrollSubParam);
+        // set valid scrollInfo
         this.onScrollAfter$.emitEvent(scrollSubParam);
         this._emitScrollEnd$(scrollSubParam);
 

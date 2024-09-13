@@ -16,7 +16,6 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { EventState, Nullable, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Disposable,
@@ -25,16 +24,17 @@ import {
     InterceptorManager,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
+import { Subscription } from 'rxjs';
+import type { EventState, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
-import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-
-import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -316,7 +316,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     const viewPort = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
                     const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
-                    const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;
+                    const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalScrollTrack?.width || 0) + 10;
                     const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
                     const { scaleX, scaleY } = scene.getAncestorScale();
 

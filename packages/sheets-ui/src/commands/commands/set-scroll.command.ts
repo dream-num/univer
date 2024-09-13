@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { getSheetCommandTarget } from '@univerjs/sheets';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IScrollState } from '../../services/scroll-manager.service';
+import type { ICommand, IRange, Nullable } from '@univerjs/core';
+import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
-import { SheetsScrollRenderController } from '../../controllers/render-controllers/scroll.render-controller';
+import type { IScrollState } from '../../services/scroll-manager.service';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -39,6 +39,7 @@ export interface IScrollCommandParams {
 /**
  * This command is used to manage the scroll by relative offset
  * Usually triggered by wheel event.
+ * NOT same as ScrollCommand, which is usually triggered by scrollbar.
  */
 export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams> = {
     id: 'sheet.command.set-scroll-relative',
@@ -79,7 +80,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
 
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
- * Usually triggered by click scrollbar or moving selection range.
+ * Usually triggered by dragging srcollbar and click scrolltrack or moving selection range.
+ * NOT same as SetScrollRelativeCommand which usually trigger by wheelevent.
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',

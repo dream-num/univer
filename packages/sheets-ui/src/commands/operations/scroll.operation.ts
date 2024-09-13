@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
+
+import type { IOperation } from '@univerjs/core';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
+import type { IScrollStateWithSearchParam } from '../../services/scroll-manager.service';
 
 export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
     id: 'sheet.operation.set-scroll',
@@ -31,7 +31,6 @@ export const SetScrollOperation: IOperation<IScrollStateWithSearchParam> = {
         }
 
         // freeze is handled by set-scroll.command.ts
-
         const { unitId, sheetId, offsetX, offsetY, sheetViewStartColumn, sheetViewStartRow } = params;
         const currentService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);

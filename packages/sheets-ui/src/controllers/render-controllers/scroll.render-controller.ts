@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -23,19 +22,20 @@ import {
     Inject,
     Injector,
     RANGE_TYPE, toDisposable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
 import { IRenderManagerService, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
-import type { SheetsSelectionsService } from '@univerjs/sheets';
 import { getSelectionsService, ScrollToCellOperation } from '@univerjs/sheets';
+import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, IScrollObserverParam } from '@univerjs/engine-render';
+import type { SheetsSelectionsService } from '@univerjs/sheets';
 
 import { ScrollCommand } from '../../commands/commands/set-scroll.command';
-import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
+import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
+import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
@@ -238,6 +238,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
 
         //#region scroll by bar
         this.disposeWithMe(
+            // get scrollByBar event from viewport and exec ScrollCommand.id.
             viewportMain.onScrollByBar$.subscribeEvent((param) => {
                 const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                 if (skeleton == null || param.isTrigger === false) {
@@ -257,6 +258,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
                     viewportScrollY
                 );
 
+                // NOT same as SetScrollRelativeCommand. that was exec in sheetRenderController
                 this._commandService.executeCommand(ScrollCommand.id, {
                     sheetViewStartRow: row + (freeze?.ySplit || 0),
                     sheetViewStartColumn: column + (freeze?.xSplit || 0),

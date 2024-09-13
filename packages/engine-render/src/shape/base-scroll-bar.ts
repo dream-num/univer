@@ -55,11 +55,11 @@ export abstract class BaseScrollBar extends Disposable {
 
     verticalMinusMiniThumb: number = 0;
 
-    horizonBarRect: Nullable<Rect>;
+    horizonScrollTrack: Nullable<Rect>;
 
     horizonThumbRect: Nullable<Rect>;
 
-    verticalBarRect: Nullable<Rect>;
+    verticalScrollTrack: Nullable<Rect>;
 
     verticalThumbRect: Nullable<Rect>;
 
@@ -160,27 +160,27 @@ export abstract class BaseScrollBar extends Disposable {
             return this.verticalThumbRect;
         }
 
-        if (this.horizonBarRect?.isHit(coord)) {
-            return this.horizonBarRect;
+        if (this.horizonScrollTrack?.isHit(coord)) {
+            return this.horizonScrollTrack;
         }
 
-        if (this.verticalBarRect?.isHit(coord)) {
-            return this.verticalBarRect;
+        if (this.verticalScrollTrack?.isHit(coord)) {
+            return this.verticalScrollTrack;
         }
 
         return null;
     }
 
     override dispose() {
-        this.horizonBarRect?.dispose();
+        this.horizonScrollTrack?.dispose();
         this.horizonThumbRect?.dispose();
-        this.verticalBarRect?.dispose();
+        this.verticalScrollTrack?.dispose();
         this.verticalThumbRect?.dispose();
         this.placeholderBarRect?.dispose();
 
-        this.horizonBarRect = null;
+        this.horizonScrollTrack = null;
         this.horizonThumbRect = null;
-        this.verticalBarRect = null;
+        this.verticalScrollTrack = null;
         this.verticalThumbRect = null;
         this.placeholderBarRect = null;
     }

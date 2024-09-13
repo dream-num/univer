@@ -67,13 +67,13 @@ export class SheetScrollManagerService implements IRenderModule {
      */
     private readonly _scrollStateMap: IScrollStateMap = new Map();
     /**
-     * a subject for current sheet scrollInfo
+     * a subject for current sheet scrollInfo, no limit by viewport.
      */
-    private readonly _scrollInfo$ = new BehaviorSubject<Nullable<IScrollState>>(null);
+    private readonly _rawscrollInfo$ = new BehaviorSubject<Nullable<IScrollState>>(null);
     /**
      * a subject for current sheet scrollInfo ( events, ex wheel event and point events add deltaXY to rawScrollInfo$)
      */
-    readonly rawScrollInfo$ = this._scrollInfo$.asObservable();
+    readonly rawScrollInfo$ = this._rawscrollInfo$.asObservable();
     /**
      * a subject for current valid scrollInfo, viewport@_scrollCore would limit rawScrollInfo$ exclude negative value or over max value.
      * use this subject not rawScrollInfo$ when get scrolling state of viewport.
@@ -96,7 +96,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     dispose(): void {
-        this._scrollInfo$.complete();
+        this._rawscrollInfo$.complete();
     }
 
     setSearchParam(param: IScrollStateSearchParam) {
@@ -117,7 +117,7 @@ export class SheetScrollManagerService implements IRenderModule {
     }
 
     /**
-     * set scrollInfo by SetScrollOperation, call by scroll operation
+     * Set scrollInfo by SetScrollOperation, call by ScrollCommand.id.
      * @param param
      */
     setScrollInfoAndEmitEvent(param: IScrollStateWithSearchParam) {
@@ -228,6 +228,6 @@ export class SheetScrollManagerService implements IRenderModule {
         const scrollInfo = this._getCurrentScroll(param);
 
         // subscriber can be found in scrollManagerService.rawScrollInfo$.subscribe
-        this._scrollInfo$.next(scrollInfo);
+        this._rawscrollInfo$.next(scrollInfo);
     }
 }

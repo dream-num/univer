@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IRange, Rectangle } from '@univerjs/core';
+import { ObjectMatrix, Rectangle } from '@univerjs/core';
+import type { IRange, ISelectionCellWithMergeInfo } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';
@@ -32,6 +33,7 @@ export const SHEET_EXTENSION_PREFIX = 'sheet-ext-';
 export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEET_EXTENSION_TYPE, IRange[]> {
     override type = SHEET_EXTENSION_TYPE.GRID;
 
+    cellCache: ObjectMatrix<ISelectionCellWithMergeInfo> = new ObjectMatrix();
     /**
      * @deprecated The function maybe cause performance issue, use spreadsheetSkeleton.getCellByIndexWithNoHeader instead.
      * Get ISelectionCellWithMergeInfo by cell rowIndex and cell columnIndex.
@@ -51,7 +53,14 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         dataMergeCache: IRange[]
     ) {
         // TODO @lumixraku: there are two coords in sheet!! This one does not include rowHeader and columnHeader. Should keep coord to be only one.
-        return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        // return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+
+        const cache = this.cellCache.getValue(rowIndex, columnIndex);
+        if (cache) return cache;
+
+        const cell = getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        this.cellCache.setValue(rowIndex, columnIndex, cell);
+        return cell;
     }
 
     isRenderDiffRangesByCell(rangeP: IRange, diffRanges?: IRange[]) {

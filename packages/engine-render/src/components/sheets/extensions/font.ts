@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
 
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
@@ -72,8 +73,8 @@ export class Font extends SheetExtension {
 
         ctx.save();
         const scale = this._getScale(parentScale);
-        const renderFontByCell = (fontFormat: string) => {
-            const fontObjectArray = fontList[fontFormat];
+        const renderFontCore = (fontFormat: string) => {
+            const fontObjectArray: ObjectMatrix<IFontCacheItem> = fontList[fontFormat];
 
             // Since the overflow can spill out to both the left and right sides,
             // we need to consider the content outside the viewBounds.
@@ -88,9 +89,9 @@ export class Font extends SheetExtension {
 
             // If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
 
-            const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
-            // eslint-disable-next-line complexity
-            fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
+            const { viewRanges = [], checkOutOfViewBound, viewportKey } = moreBoundsInfo;
+
+            const renderFontByCell = (rowIndex: number, columnIndex: number, docsConfig: IFontCacheItem) => {
                 if (!checkOutOfViewBound) {
                     if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
                         return true;
@@ -103,12 +104,13 @@ export class Font extends SheetExtension {
                 let { startY, endY, startX, endX } = cellInfo;
                 const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                if (isMerged) {
-                    return true;
-                } else {
+                {
                     const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
                     const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
                     if (!visibleRow || !visibleCol) return true;
+                }
+                if (isMerged) {
+                    return true;
                 }
 
                 // If the merged cell area intersects with the current viewRange,
@@ -117,6 +119,7 @@ export class Font extends SheetExtension {
                 // also needs to be drawn once.
                 // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
                 // At this moment, we can only exclude the cells that are not within the current row.
+
                 const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
                 const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
                 if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
@@ -261,10 +264,12 @@ export class Font extends SheetExtension {
 
                 ctx.closePath();
                 ctx.restore();
-            });
+            };
+
+            fontObjectArray.forValue(renderFontByCell);
         };
 
-        Object.keys(fontList).forEach(renderFontByCell);
+        Object.keys(fontList).forEach(renderFontCore);
         ctx.restore();
     }
 

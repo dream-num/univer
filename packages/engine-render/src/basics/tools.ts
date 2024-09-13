@@ -845,7 +845,7 @@ export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) 
     return mainRanges.concat(intersects); // do not use [...mainRanges, ...intersects], because concat is slightly faster than spread
 }
 
-export function clampRanges(range: IRange) {
+export function clampRange(range: IRange) {
     return {
         startRow: Math.max(0, range.startRow),
         startColumn: Math.max(0, range.startColumn),

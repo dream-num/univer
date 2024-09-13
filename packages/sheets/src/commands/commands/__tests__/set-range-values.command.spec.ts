@@ -328,7 +328,7 @@ describe('Test set range values commands', () => {
                             v: 'a1',
                             t: CellValueType.STRING,
                             custom: {
-                                id: 1,
+                                // id: 1,
                                 name: 'test',
                             },
                         },

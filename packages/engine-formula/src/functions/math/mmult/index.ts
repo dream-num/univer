@@ -94,7 +94,7 @@ export class Mmult extends BaseFunction {
         array1ColumnCount: number,
         array2ColumnCount: number
     ): number[][] {
-        const result = Array.from({ length: array1RowCount }, () => Array(array2ColumnCount).fill(0));
+        const result = Array.from({ length: array1RowCount }, () => new Array(array2ColumnCount).fill(0));
 
         for (let r = 0; r < array1RowCount; r++) {
             for (let c = 0; c < array2ColumnCount; c++) {

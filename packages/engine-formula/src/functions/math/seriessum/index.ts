@@ -16,11 +16,11 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsArrayOrBoolean, checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Seriessum extends BaseFunction {
     override minParams = 4;
@@ -89,6 +89,10 @@ export class Seriessum extends BaseFunction {
 
         for (let i = 0; i < coefficientsArray.length; i++) {
             result += coefficientsArray[i] * (xValue ** (nValue + i * mValue));
+        }
+
+        if (Number.isNaN(result) || !Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         return NumberValueObject.create(result);

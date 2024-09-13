@@ -16,10 +16,10 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { calculateFactorial } from '../../../basics/math';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Factdouble extends BaseFunction {
     override minParams = 1;
@@ -27,11 +27,20 @@ export class Factdouble extends BaseFunction {
     override maxParams = 1;
 
     override calculate(number: BaseValueObject): BaseValueObject {
+        let _number = number;
+
         if (number.isArray()) {
-            return (number as ArrayValueObject).mapValue((numberObject) => this._handleSingleObject(numberObject));
+            const rowCount = (number as ArrayValueObject).getRowCount();
+            const columnCount = (number as ArrayValueObject).getColumnCount();
+
+            if (rowCount > 1 || columnCount > 1) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
+            _number = (number as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        return this._handleSingleObject(number);
+        return this._handleSingleObject(_number);
     }
 
     private _handleSingleObject(number: BaseValueObject): BaseValueObject {

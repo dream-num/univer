@@ -16,13 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Seriessum } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test seriessum function', () => {
     const testFunction = new Seriessum(FUNCTION_NAMES_MATH.SERIESSUM);
@@ -128,6 +128,29 @@ describe('Test seriessum function', () => {
             const coefficients = ArrayValueObject.create('{1, -0.5, 0.041666667, -0.001388889}');
             const result = testFunction.calculate(x, n, m, coefficients);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
+        });
+
+        it('Result is NaN or Infinity', () => {
+            const x = NumberValueObject.create(9000);
+            const n = NumberValueObject.create(-0.5);
+            const m = NumberValueObject.create(90000);
+            const coefficients = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.785398163, 0.785398163],
+                    [9000, 1],
+                    [-0.5, -0.5],
+                    [0.041666667, 0.041666667],
+                    [-0.001388889, -0.001388889],
+                ]),
+                rowCount: 5,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(x, n, m, coefficients);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
         });
     });
 });

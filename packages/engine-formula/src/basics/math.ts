@@ -116,7 +116,7 @@ function minor(matrix: number[][], row: number, col: number): number[][] {
 
 function adjoint(matrix: number[][]): number[][] {
     const n = matrix.length;
-    const adj = Array.from({ length: n }, () => Array(n).fill(0));
+    const adj = Array.from({ length: n }, () => new Array(n).fill(0));
 
     for (let i = 0; i < n; i++) {
         for (let j = 0; j < n; j++) {

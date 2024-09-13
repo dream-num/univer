@@ -296,6 +296,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._updateLayout();
         this._initContextListener();
+        window.sk = this;
         // this.updateDataMerge();
     }
 
@@ -1441,18 +1442,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             dataset_col_st = 0;
             dataset_col_ed = 0;
         } else {
-            if (col_st === -1) {
-                dataset_col_st = 0;
-            } else {
-                dataset_col_st = col_st;
-            }
+            // if (col_st === -1) {
+            //     dataset_col_st = 0;
+            // } else {
+            //     dataset_col_st = col_st;
+            // }
+
+            dataset_col_st = Math.max(0, col_st);
 
             if (col_ed === Number.POSITIVE_INFINITY) {
                 dataset_col_ed = cwaLength - 1;
             } else if (col_ed >= cwaLength) {
                 dataset_col_ed = cwaLength - 1;
             } else {
-                dataset_col_ed = col_ed;
+                dataset_col_ed = Math.max(0, col_ed);
             }
         }
 

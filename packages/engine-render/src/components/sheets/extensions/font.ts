@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
 
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
@@ -72,8 +73,8 @@ export class Font extends SheetExtension {
 
         ctx.save();
         const scale = this._getScale(parentScale);
-        const renderFontByCell = (fontFormat: string) => {
-            const fontObjectArray = fontList[fontFormat];
+        const renderFontCore = (fontFormat: string) => {
+            const fontObjectArray: ObjectMatrix<IFontCacheItem> = fontList[fontFormat];
 
             // Since the overflow can spill out to both the left and right sides,
             // we need to consider the content outside the viewBounds.
@@ -88,13 +89,20 @@ export class Font extends SheetExtension {
 
             // If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
 
-            const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
-            // eslint-disable-next-line complexity
-            fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
-                if (!checkOutOfViewBound) {
-                    if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
-                        return true;
-                    }
+            const { viewRanges = [], checkOutOfViewBound, viewportKey } = moreBoundsInfo;
+
+            const renderFontByCell = (rowIndex: number, columnIndex: number, docsConfig: IFontCacheItem) => {
+                // if (!checkOutOfViewBound) {
+                if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                    return true;
+                }
+                // }
+
+                if (viewportKey === 'viewMain') {
+                    console.log('font', rowIndex, columnIndex);
+                    // if (columnIndex == 4) {
+                    // console.log('viewRanges', viewRanges[0]);
+                    // }
                 }
                 const cellInfo = this.getCellByIndex(
                     rowIndex,
@@ -264,10 +272,12 @@ export class Font extends SheetExtension {
 
                 ctx.closePath();
                 ctx.restore();
-            });
+            };
+
+            fontObjectArray.forValue(renderFontByCell);
         };
 
-        Object.keys(fontList).forEach(renderFontByCell);
+        Object.keys(fontList).forEach(renderFontCore);
         ctx.restore();
     }
 

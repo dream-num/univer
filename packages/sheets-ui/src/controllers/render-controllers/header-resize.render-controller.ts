@@ -15,6 +15,7 @@
  */
 
 /* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
 
 import {
     createInterceptorKey,
@@ -315,7 +316,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     const canvasMaxWidth = engine?.width || 0;
                     const viewPort = scene.getViewport(SHEET_VIEWPORT_KEY.VIEW_MAIN);
 
-                    const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
+                    const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonScrollTrack?.height || 0) + 10;
                     const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalScrollTrack?.width || 0) + 10;
                     const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
                     const { scaleX, scaleY } = scene.getAncestorScale();

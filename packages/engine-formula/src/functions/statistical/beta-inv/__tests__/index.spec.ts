@@ -36,6 +36,9 @@ describe('Test betaInv function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(probability, alpha, beta, A, B);
             expect(getObjectValue(result)).toBe(1.9999999999920839);
+
+            const result2 = testFunction.calculate(probability, alpha, beta);
+            expect(getObjectValue(result2)).toBe(0.49999999999604194);
         });
 
         it('Alpha and beta value test', () => {
@@ -106,6 +109,12 @@ describe('Test betaInv function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(probability, alpha, beta, A, B);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const probability2 = NumberValueObject.create(0.685470581);
+            const A2 = NullValueObject.create();
+            const B2 = NullValueObject.create();
+            const result2 = testFunction.calculate(probability2, alpha, beta, A2, B2);
+            expect(getObjectValue(result2)).toBe(0.49999999999604194);
         });
 
         it('Value is error', () => {

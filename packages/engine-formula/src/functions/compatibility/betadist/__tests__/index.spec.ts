@@ -16,13 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_COMPATIBILITY } from '../../function-names';
 import { Betadist } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
 describe('Test betadist function', () => {
     const testFunction = new Betadist(FUNCTION_NAMES_COMPATIBILITY.BETADIST);
@@ -106,6 +106,12 @@ describe('Test betadist function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, A, B);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const x2 = NumberValueObject.create(2);
+            const A2 = NullValueObject.create();
+            const B2 = NullValueObject.create();
+            const result2 = testFunction.calculate(x2, alpha, beta, A2, B2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {

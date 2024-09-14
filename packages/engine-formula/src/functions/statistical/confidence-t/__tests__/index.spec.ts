@@ -62,6 +62,10 @@ describe('Test confidenceT function', () => {
             const size = NumberValueObject.create(0.9);
             const result = testFunction.calculate(alpha, standardDev, size);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const size2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(alpha, standardDev, size2);
+            expect(getObjectValue(result2)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value is normal string', () => {

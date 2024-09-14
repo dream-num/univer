@@ -54,6 +54,11 @@ describe('Test chisqDist function', () => {
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, degFreedom, cumulative);
             expect(getObjectValue(result)).toBe(0.4393912894677035);
+
+            const x2 = NumberValueObject.create(0);
+            const degFreedom2 = NumberValueObject.create(2);
+            const result2 = testFunction.calculate(x2, degFreedom2, cumulative);
+            expect(getObjectValue(result2)).toBe(0.5);
         });
 
         it('Value is normal string', () => {

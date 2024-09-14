@@ -37,6 +37,9 @@ describe('Test betaDist function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, cumulative, A, B);
             expect(getObjectValue(result)).toBe(0.6854705810117458);
+
+            const result2 = testFunction.calculate(x, alpha, beta, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Alpha and beta value test', () => {
@@ -99,6 +102,21 @@ describe('Test betaDist function', () => {
             const x2 = NumberValueObject.create(3);
             const result3 = testFunction.calculate(x2, alpha2, beta2, cumulative, A, B);
             expect(getObjectValue(result3)).toBe(0);
+
+            const alpha3 = NumberValueObject.create(520);
+            const beta3 = NumberValueObject.create(520);
+            const result4 = testFunction.calculate(x, alpha3, beta3, cumulative, A, B);
+            expect(getObjectValue(result4)).toBe(12.86240966652393);
+
+            const alpha4 = NumberValueObject.create(350);
+            const beta4 = NumberValueObject.create(350);
+            const result5 = testFunction.calculate(x, alpha4, beta4, cumulative, A, B);
+            expect(getObjectValue(result5)).toBe(10.551251636711884);
+
+            const alpha5 = NumberValueObject.create(0.1);
+            const beta5 = NumberValueObject.create(0.1);
+            const result6 = testFunction.calculate(x, alpha5, beta5, cumulative, A, B);
+            expect(getObjectValue(result6)).toBe(0.08831513898907835);
         });
 
         it('Value is normal string', () => {
@@ -132,6 +150,12 @@ describe('Test betaDist function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(x, alpha, beta, cumulative, A, B);
             expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const x2 = NumberValueObject.create(2);
+            const A2 = NullValueObject.create();
+            const B2 = NullValueObject.create();
+            const result2 = testFunction.calculate(x2, alpha, beta, cumulative, A2, B2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
         });
 
         it('Value is error', () => {

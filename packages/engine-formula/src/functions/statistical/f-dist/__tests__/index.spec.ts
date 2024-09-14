@@ -57,6 +57,18 @@ describe('Test fDist function', () => {
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
             expect(getObjectValue(result)).toBe(0.0012237917087831727);
+
+            const x2 = NumberValueObject.create(0);
+            const degFreedom3 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(x2, degFreedom3, degFreedom3, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NUM);
+
+            const degFreedom4 = NumberValueObject.create(2);
+            const result3 = testFunction.calculate(x2, degFreedom4, degFreedom1, cumulative);
+            expect(getObjectValue(result3)).toBe(1);
+
+            const result4 = testFunction.calculate(x, degFreedom4, degFreedom4, cumulative);
+            expect(getObjectValue(result4)).toBe(0.0038071509376540248);
         });
 
         it('Value is normal string', () => {

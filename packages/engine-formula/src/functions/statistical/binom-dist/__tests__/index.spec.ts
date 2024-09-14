@@ -71,6 +71,17 @@ describe('Test binomDist function', () => {
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
             expect(getObjectValue(result)).toBe(0.205078125);
+
+            const numberS2 = NumberValueObject.create(0);
+            const trials2 = NumberValueObject.create(0);
+            const probabilityS2 = NumberValueObject.create(0);
+            const result2 = testFunction.calculate(numberS2, trials2, probabilityS2, cumulative);
+            expect(getObjectValue(result2)).toBe(1);
+
+            const numberS3 = NumberValueObject.create(1);
+            const trials3 = NumberValueObject.create(1);
+            const result3 = testFunction.calculate(numberS3, trials3, probabilityS2, cumulative);
+            expect(getObjectValue(result3)).toBe(0);
         });
 
         it('Value is normal string', () => {

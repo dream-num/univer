@@ -106,6 +106,9 @@ describe('Test binomDistRange function', () => {
             const numberS2 = NumberValueObject.create(50);
             const result = testFunction.calculate(trials, probabilityS, numberS, numberS2);
             expect(getObjectValue(result)).toBe(0.9548325185075196);
+
+            const result2 = testFunction.calculate(trials, probabilityS, numberS2, numberS);
+            expect(getObjectValue(result2)).toBe(0.04071929032886058);
         });
 
         it('Value is error', () => {

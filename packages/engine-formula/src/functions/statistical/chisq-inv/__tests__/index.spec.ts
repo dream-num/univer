@@ -55,6 +55,16 @@ describe('Test chisqInv function', () => {
             const degFreedom2 = NumberValueObject.create(10 ** 10 + 1);
             const result2 = testFunction.calculate(probability, degFreedom2);
             expect(getObjectValue(result2)).toBe(ErrorType.NUM);
+
+            const probability2 = NumberValueObject.create(0.1);
+            const degFreedom3 = NumberValueObject.create(3);
+            const result3 = testFunction.calculate(probability2, degFreedom3);
+            expect(getObjectValue(result3)).toBe(0.5843743741551812);
+
+            const probability3 = NumberValueObject.create(0.9);
+            const degFreedom4 = NumberValueObject.create(1);
+            const result4 = testFunction.calculate(probability3, degFreedom4);
+            expect(getObjectValue(result4)).toBe(2.705543454096032);
         });
 
         it('Value is normal string', () => {

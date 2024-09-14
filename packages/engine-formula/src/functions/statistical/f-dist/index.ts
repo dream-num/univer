@@ -99,6 +99,10 @@ export class FDist extends BaseFunction {
             result = centralFPDF(xValue, degFreedom1Value, degFreedom2Value);
         }
 
+        if (Number.isNaN(result) || !Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
         return NumberValueObject.create(result);
     }
 }

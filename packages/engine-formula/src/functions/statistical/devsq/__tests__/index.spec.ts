@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { NullValueObject } from '../../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
 import { Devsq } from '../index';
@@ -109,8 +109,9 @@ describe('Test devsq function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(number1, number2);
-            expect(getObjectValue(result)).toBe(528.6060666666667);
+            const number3 = NumberValueObject.create(1);
+            const result = testFunction.calculate(number1, number2, number3);
+            expect(getObjectValue(result)).toBe(1021.1506000000002);
         });
 
         it('Value is can not calculate', () => {

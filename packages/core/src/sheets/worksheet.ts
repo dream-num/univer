@@ -280,8 +280,8 @@ export class Worksheet {
 
     /**
      * Get cell info with merge data
-     * @param {number} row
-     * @param {number} column
+     * @param {number} row - The row index of the cell.
+     * @param {number} column - The column index of the cell.
      * @type {selectionCell}
      * @property {number} actualRow - The actual row index of the cell
      * @property {number} actualColumn - The actual column index of the cell
@@ -302,20 +302,26 @@ export class Worksheet {
         let mergeRow = row;
         let mergeColumn = column;
         if (mergeRange) {
-            isMergedMainCell = (mergeRange.startRow === row && mergeRange.startColumn === column);
-            if (isMergedMainCell) {
-                // do not set to true, the code is not equal to the original code from: getCellInfoInMergeData
-                // isMerged = false;
-                newEndRow = mergeRange.endRow;
-                newEndColumn = mergeRange.endColumn;
-                mergeRow = mergeRange.startRow;
-                mergeColumn = mergeRange.startColumn;
-            } else if (row > mergeRange.startRow && row <= mergeRange.endRow && column > mergeRange.startColumn && column <= mergeRange.endColumn) {
+            const {
+                startRow: startRowMarge,
+                endRow: endRowMarge,
+                startColumn: startColumnMarge,
+                endColumn: endColumnMarge,
+            } = mergeRange;
+            if (row === startRowMarge && column === startColumnMarge) {
+                newEndRow = endRowMarge;
+                newEndColumn = endColumnMarge;
+                mergeRow = startRowMarge;
+                mergeColumn = startColumnMarge;
+
+                isMergedMainCell = true;
+            } else if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+                newEndRow = endRowMarge;
+                newEndColumn = endColumnMarge;
+                mergeRow = startRowMarge;
+                mergeColumn = startColumnMarge;
+
                 isMerged = true;
-                newEndRow = mergeRange.endRow;
-                newEndColumn = mergeRange.endColumn;
-                mergeRow = mergeRange.startRow;
-                mergeColumn = mergeRange.startColumn;
             }
         }
 

@@ -167,8 +167,8 @@ export default {
         },
     },
     FDIST: {
-        description: 'Trả về phân phối xác suất F',
-        abstract: 'Trả về phân phối xác suất F',
+        description: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        abstract: 'Trả về phân bố xác suất F (đuôi bên phải)',
         links: [
             {
                 title: 'Giảng dạy',
@@ -176,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
         },
     },
     FINV: {
-        description: 'Trả về hàm nghịch đảo của phân phối xác suất F',
-        abstract: 'Trả về hàm nghịch đảo của phân phối xác suất F',
+        description: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
         links: [
             {
                 title: 'Giảng dạy',
@@ -190,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
         },
     },
     FTEST: {
@@ -204,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
         },
     },
 

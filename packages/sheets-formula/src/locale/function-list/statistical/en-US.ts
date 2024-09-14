@@ -449,13 +449,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which to evaluate the function.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, F.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     F_DIST_RT: {
-        description: 'Returns the F probability distribution',
-        abstract: 'Returns the F probability distribution',
+        description: 'Returns the (right-tailed) F probability distribution',
+        abstract: 'Returns the (right-tailed) F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -463,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which to evaluate the function.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_INV: {
@@ -477,13 +480,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the F cumulative distribution.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_INV_RT: {
-        description: 'Returns the inverse of the F probability distribution',
-        abstract: 'Returns the inverse of the F probability distribution',
+        description: 'Returns the inverse of the (right-tailed) F probability distribution',
+        abstract: 'Returns the inverse of the (right-tailed) F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -491,8 +495,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the F cumulative distribution.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_TEST: {
@@ -505,8 +510,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The first array or range of data.' },
+            array2: { name: 'array2', detail: 'The second array or range of data.' },
         },
     },
     FISHER: {

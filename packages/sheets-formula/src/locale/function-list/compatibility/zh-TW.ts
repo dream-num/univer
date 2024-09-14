@@ -167,8 +167,8 @@ export default {
         },
     },
     FDIST: {
-        description: '返回 F 機率分佈',
-        abstract: '返回 F 機率分佈',
+        description: '返回 F 機率分佈（右尾）',
+        abstract: '返回 F 機率分佈（右尾）',
         links: [
             {
                 title: '教導',
@@ -176,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用於評估函數的值。' },
+            degFreedom1: { name: '分子自由度', detail: '這是分子的自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '這是分母的自由度。' },
         },
     },
     FINV: {
-        description: '傳回 F 機率分佈的反函數',
-        abstract: '傳回 F 機率分佈的反函數',
+        description: '傳回 F 機率分佈（右尾）的反函數',
+        abstract: '傳回 F 機率分佈（右尾）的反函數',
         links: [
             {
                 title: '教導',
@@ -190,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: 'F 累積分佈相關的機率' },
+            degFreedom1: { name: '分子自由度', detail: '這是分子的自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '這是分母的自由度。' },
         },
     },
     FTEST: {
@@ -204,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '這是第一個陣列或資料範圍。' },
+            array2: { name: '陣列2', detail: '這是第一個陣列或資料範圍。' },
         },
     },
     GAMMADIST: {

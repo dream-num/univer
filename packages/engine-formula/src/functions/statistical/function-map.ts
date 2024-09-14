@@ -41,6 +41,11 @@ import { CovarianceP } from './covariance-p';
 import { CovarianceS } from './covariance-s';
 import { Devsq } from './devsq';
 import { ExponDist } from './expon-dist';
+import { FDist } from './f-dist';
+import { FDistRt } from './f-dist-rt';
+import { FInv } from './f-inv';
+import { FInvRt } from './f-inv-rt';
+import { FTest } from './f-test';
 import { Fisher } from './fisher';
 import { Fisherinv } from './fisherinv';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
@@ -89,6 +94,11 @@ export const functionStatistical = [
     [CovarianceS, FUNCTION_NAMES_STATISTICAL.COVARIANCE_S],
     [Devsq, FUNCTION_NAMES_STATISTICAL.DEVSQ],
     [ExponDist, FUNCTION_NAMES_STATISTICAL.EXPON_DIST],
+    [FDist, FUNCTION_NAMES_STATISTICAL.F_DIST],
+    [FDistRt, FUNCTION_NAMES_STATISTICAL.F_DIST_RT],
+    [FInv, FUNCTION_NAMES_STATISTICAL.F_INV],
+    [FInvRt, FUNCTION_NAMES_STATISTICAL.F_INV_RT],
+    [FTest, FUNCTION_NAMES_STATISTICAL.F_TEST],
     [Fisher, FUNCTION_NAMES_STATISTICAL.FISHER],
     [Fisherinv, FUNCTION_NAMES_STATISTICAL.FISHERINV],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],

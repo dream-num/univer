@@ -163,12 +163,12 @@ export default {
         functionParameter: {
             x: { name: '值', detail: '用来计算分布的数值。' },
             lambda: { name: 'lambda', detail: '参数值。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 EXPONDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 EXPONDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     FDIST: {
-        description: '返回 F 概率分布',
-        abstract: '返回 F 概率分布',
+        description: '返回 F 概率分布（右尾）',
+        abstract: '返回 F 概率分布（右尾）',
         links: [
             {
                 title: '教学',
@@ -176,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     FINV: {
-        description: '返回 F 概率分布的反函数',
-        abstract: '返回 F 概率分布的反函数',
+        description: '返回 F 概率分布（右尾）的反函数',
+        abstract: '返回 F 概率分布（右尾）的反函数',
         links: [
             {
                 title: '教学',
@@ -190,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     FTEST: {
@@ -204,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
         },
     },
     GAMMADIST: {

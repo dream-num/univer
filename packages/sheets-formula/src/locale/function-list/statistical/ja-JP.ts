@@ -424,13 +424,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '関数に代入する値を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     F_DIST_RT: {
-        description: 'F 分布の確率関数の値を返します。',
-        abstract: 'F 分布の確率関数の値を返します。',
+        description: 'F 分布の右側確率関数の値を返します。',
+        abstract: 'F 分布の右側確率関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -438,8 +440,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '関数に代入する値を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
         },
     },
     F_INV: {
@@ -452,13 +455,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'F 累積分布における確率を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
         },
     },
     F_INV_RT: {
-        description: 'F 分布の確率関数の逆関数値を返します。',
-        abstract: 'F 分布の確率関数の逆関数値を返します。',
+        description: 'F 分布の右側確率関数の逆関数値を返します。',
+        abstract: 'F 分布の右側確率関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -466,8 +470,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'F 累積分布における確率を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
         },
     },
     F_TEST: {
@@ -480,8 +485,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: '比較対象となる一方のデータを含む配列またはセル範囲を指定します。' },
+            array2: { name: '配列2', detail: '比較対象となるもう一方のデータを含む配列またはセル範囲を指定します。' },
         },
     },
     FISHER: {

@@ -427,6 +427,81 @@ export default {
             cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì EXPON.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
+    F_DIST: {
+        description: 'Trả về phân bố xác suất F.',
+        abstract: 'Trả về phân bố xác suất F.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-dist-%E5%87%BD%E6%95%B0-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì F.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    F_DIST_RT: {
+        description: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        abstract: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-dist-rt-%E5%87%BD%E6%95%B0-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_INV: {
+        description: 'Trả về giá trị đảo của phân bố xác suất F.',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-inv-%E5%87%BD%E6%95%B0-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_INV_RT: {
+        description: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-inv-rt-%E5%87%BD%E6%95%B0-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_TEST: {
+        description: 'Trả về kết quả của kiểm tra F-test',
+        abstract: 'Trả về kết quả của kiểm tra F-test',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-test-%E5%87%BD%E6%95%B0-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+        },
+    },
     FISHER: {
         description: 'Trả về phép biến đổi Fisher tại x.',
         abstract: 'Trả về phép biến đổi Fisher tại x.',

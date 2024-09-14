@@ -114,7 +114,7 @@ export default {
             x: { name: '值', detail: '用来计算其函数的值，介于下限值和上限值之间。' },
             alpha: { name: 'alpha', detail: '分布的第一个参数。' },
             beta: { name: 'beta', detail: '分布的第二个参数。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为 TRUE，则 BETA.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 BETA.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
             A: { name: '下限', detail: '函数的下限，默认值为 0。' },
             B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
@@ -149,7 +149,7 @@ export default {
             numberS: { name: '成功次数', detail: '试验的成功次数。' },
             trials: { name: '试验次数', detail: '独立试验次数。' },
             probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为 TRUE，则 BINOM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 BINOM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     BINOM_DIST_RANGE: {
@@ -195,7 +195,7 @@ export default {
         functionParameter: {
             x: { name: '值', detail: '用来计算分布的数值。' },
             degFreedom: { name: '自由度', detail: '自由度数。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 CHISQ.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 CHISQ.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     CHISQ_DIST_RT: {
@@ -436,7 +436,7 @@ export default {
         functionParameter: {
             x: { name: '值', detail: '用来计算分布的数值。' },
             lambda: { name: 'lambda', detail: '参数值。' },
-            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果 为 TRUE，则 EXPON.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 EXPON.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     F_DIST: {
@@ -449,13 +449,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 F.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     F_DIST_RT: {
-        description: '返回 F 概率分布',
-        abstract: '返回 F 概率分布',
+        description: '返回 F 概率分布（右尾）',
+        abstract: '返回 F 概率分布（右尾）',
         links: [
             {
                 title: '教学',
@@ -463,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_INV: {
@@ -477,13 +480,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_INV_RT: {
-        description: '返回 F 概率分布的反函数',
-        abstract: '返回 F 概率分布的反函数',
+        description: '返回 F 概率分布（右尾）的反函数',
+        abstract: '返回 F 概率分布（右尾）的反函数',
         links: [
             {
                 title: '教学',
@@ -491,8 +495,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_TEST: {
@@ -505,8 +510,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
         },
     },
     FISHER: {

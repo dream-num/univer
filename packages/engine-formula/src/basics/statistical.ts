@@ -523,3 +523,15 @@ export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number)
 
     return result;
 }
+
+export function centralFINV(probability: number, degFreedom1: number, degFreedom2: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
+}

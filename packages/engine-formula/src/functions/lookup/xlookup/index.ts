@@ -17,12 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayBinarySearchType, ArrayOrderSearchType } from '../../../engine/utils/compare';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Xlookup extends BaseFunction {
     override minParams = 3;
@@ -116,6 +116,12 @@ export class Xlookup extends BaseFunction {
             }
 
             return lookupValue.map((value) => {
+                const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
+
+                if (checkErrorCombination) {
+                    return checkErrorCombination;
+                }
+
                 const result = this._handleSingleObject(value, lookupArray, resultArray!, matchModeValue, searchModeValue);
 
                 if (result.isError()) {
@@ -127,6 +133,12 @@ export class Xlookup extends BaseFunction {
         }
 
         if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
+            const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
+
+            if (checkErrorCombination) {
+                return checkErrorCombination;
+            }
+
             const result = this._handleSingleObject(lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
 
             if (result.isError()) {
@@ -163,12 +175,15 @@ export class Xlookup extends BaseFunction {
         axis: number = 0
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
+            const searchType = getSearchModeValue(searchModeValue);
+            const matchType = getMatchModeValue(matchModeValue);
             return this.binarySearchExpand(
                 value,
                 searchArray,
                 resultArray,
                 axis,
-                this._getSearchModeValue(searchModeValue)
+                searchType,
+                matchType
             );
         }
 
@@ -197,12 +212,15 @@ export class Xlookup extends BaseFunction {
         searchModeValue: number
     ) {
         if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
-            return this.binarySearch(value, searchArray, resultArray, this._getSearchModeValue(searchModeValue));
+            const searchType = getSearchModeValue(searchModeValue);
+            const matchType = getMatchModeValue(matchModeValue);
+            return this.binarySearch(value, searchArray, resultArray, searchType, matchType);
         }
 
         if (matchModeValue === 2) {
             return this.fuzzySearch(value, searchArray, resultArray, searchModeValue !== -1);
         }
+
         if (matchModeValue === -1 || matchModeValue === 1) {
             return this.orderSearch(
                 value,
@@ -216,7 +234,17 @@ export class Xlookup extends BaseFunction {
         return this.equalSearch(value, searchArray, resultArray, searchModeValue !== -1);
     }
 
-    private _getSearchModeValue(searchModeValue: number) {
-        return searchModeValue === -2 ? ArrayBinarySearchType.MAX : ArrayBinarySearchType.MIN;
+    /**
+     * Wildcard matching and binary search cannot appear at the same time
+     * @param matchModeValue
+     * @param searchModeValue
+     * @returns
+     */
+    private _checkErrorCombination(matchModeValue: number, searchModeValue: number) {
+        if (matchModeValue === 2 && (searchModeValue === -2 || searchModeValue === 2)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return null;
     }
 }

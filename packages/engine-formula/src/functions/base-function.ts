@@ -252,9 +252,10 @@ export class BaseFunction extends Disposable {
         value: BaseValueObject,
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
-        searchType?: ArrayBinarySearchType
+        searchType?: ArrayBinarySearchType,
+        matchType?: ArrayOrderSearchType
     ) {
-        const rowOrColumn = searchArray.binarySearch(value, searchType);
+        const rowOrColumn = searchArray.binarySearch(value, searchType, matchType);
 
         if (rowOrColumn == null) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -338,9 +339,10 @@ export class BaseFunction extends Disposable {
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
         axis = 0,
-        searchType?: ArrayBinarySearchType
+        searchType?: ArrayBinarySearchType,
+        matchType?: ArrayOrderSearchType
     ) {
-        const rowOrColumn = searchArray.binarySearch(value, searchType);
+        const rowOrColumn = searchArray.binarySearch(value, searchType, matchType);
 
         if (rowOrColumn == null) {
             return ErrorValueObject.create(ErrorType.NA);

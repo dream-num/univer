@@ -169,7 +169,7 @@ describe('Test vlookup', () => {
                 }`),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF); // Excel reports #N/A
         });
 
         it('LookupValue is single cell, colIndexNum is array and gets rangeLookup error', async () => {
@@ -207,7 +207,7 @@ describe('Test vlookup', () => {
                     3, 1
                 }`)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.REF], [ErrorType.REF]]);
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.REF], [ErrorType.REF]]); // Excel reports [[ErrorType.NA], [ErrorType.REF]]
         });
 
         it('LookupValue is array and gets error, colIndexNum is array and gets error,rangeLookup gets error', async () => {
@@ -234,7 +234,7 @@ describe('Test vlookup', () => {
                 ErrorValueObject.create(ErrorType.NAME),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.NAME); // Excel reports [[ErrorType.NA], [ErrorType.NA]]
         });
 
         it('LookupValue is array, colIndexNum is array, rangeLookup is array', async () => {
@@ -294,7 +294,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(getObjectValue(resultObject)).toStrictEqual([['First']]);
+            expect(getObjectValue(resultObject)).toStrictEqual([['Eighth']]);
         });
 
         it('Approximate not order data', async () => {
@@ -314,6 +314,30 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual([['Third']]);
+        });
+
+        it('Approximate order data match', async () => {
+            let resultObject = testFunction.calculate(
+                NumberValueObject.create(100),
+                ArrayValueObject.create(/*ts*/ `{
+                    -1;
+                    0;
+                    2
+            }`),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([[2]]);
+
+            resultObject = testFunction.calculate(
+                NumberValueObject.create(3),
+                ArrayValueObject.create(/*ts*/ `{
+                    -1;
+                    0;
+                    2
+            }`),
+                NumberValueObject.create(1)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([[2]]);
         });
     });
 });

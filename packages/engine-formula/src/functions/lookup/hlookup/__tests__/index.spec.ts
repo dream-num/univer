@@ -132,7 +132,7 @@ describe('Test hlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('First');
+            expect(resultObject.getValue().toString()).toBe('Eighth');
         });
 
         it('Approximate not order data', async () => {

@@ -37,4 +37,8 @@ export abstract class UnitModel<D = object, T extends UnitType = UnitType> exten
 
     /** Get revision of the unit's snapshot. Note that revision should start from 1. */
     abstract getRev(): number;
+    /** Increment the current revision. */
+    abstract incrementRev(): void;
+    /** Set revision of the current snapshot. */
+    abstract setRev(rev: number): void;
 }

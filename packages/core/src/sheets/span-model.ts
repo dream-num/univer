@@ -155,7 +155,7 @@ export class SpanModel extends Disposable {
         if (!Tools.isEmptyObject(this._columnCache)) {
             return true;
         }
-        return this._mergeData.some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
+        return this._mergeData.some((mergedCell) => mergedCell.startRow <= row && row <= mergedCell.endRow);
     }
 
     public isColumnContainsMergedCell(column: number) {
@@ -165,7 +165,7 @@ export class SpanModel extends Disposable {
         if (!Tools.isEmptyObject(this._rowCache)) {
             return true;
         }
-        return this._mergeData.some((mergedCell) => mergedCell.startColumn < column && column <= mergedCell.endColumn);
+        return this._mergeData.some((mergedCell) => mergedCell.startColumn <= column && column <= mergedCell.endColumn);
     }
 
     public getMergedCellRange(startRow: number, startColumn: number, endRow: number, endColumn: number) {

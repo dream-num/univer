@@ -228,5 +228,42 @@ describe('Test LEFTB function', () => {
                 ['이'],
             ]);
         });
+        it('Text is array, numBytes is array', () => {
+            const textArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1, ' ', 1.23, true, false, null, 0, '100', '2.34', 'test', -3, ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 12,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const numCharsArray = new ArrayValueObject({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [' '],
+                    [1.23],
+                    [true],
+                    [false],
+                    [null],
+                    [0],
+                    ['100'],
+                    ['2.34'],
+                    ['test'],
+                    [-3],
+                    [ErrorType.NAME],
+                ]),
+                rowCount: 12,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = leftbFunction.calculate(textArray, numCharsArray);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([['1', ' ', '1', 'T', 'F', '', '0', '1', '2', 't', '-', ErrorType.NAME], [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME], ['1', ' ', '1', 'T', 'F', '', '0', '1', '2', 't', '-', ErrorType.NAME], ['1', ' ', '1', 'T', 'F', '', '0', '1', '2', 't', '-', ErrorType.NAME], ['', '', '', '', '', '', '', '', '', '', '', ErrorType.NAME], ['', '', '', '', '', '', '', '', '', '', '', ErrorType.NAME], ['', '', '', '', '', '', '', '', '', '', '', ErrorType.NAME], ['1', ' ', '1.23', 'TRUE', 'FALSE', '', '0', '100', '2.34', 'test', '-3', ErrorType.NAME], ['1', ' ', '1.', 'TR', 'FA', '', '0', '10', '2.', 'te', '-3', ErrorType.NAME], [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME], [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME], [ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME, ErrorType.NAME]]);
+        });
     });
 });

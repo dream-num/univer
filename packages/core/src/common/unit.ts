@@ -22,6 +22,9 @@ export { UniverType as UniverInstanceType } from '@univerjs/protocol';
 
 export type UnitType = UniverType | number;
 
+/**
+ * The base class for all units.
+ */
 export abstract class UnitModel<D = object, T extends UnitType = UnitType> extends Disposable {
     abstract readonly type: T;
     abstract getUnitId(): string;
@@ -30,4 +33,5 @@ export abstract class UnitModel<D = object, T extends UnitType = UnitType> exten
     abstract setName(name: string): void;
 
     abstract getSnapshot(): D;
+    abstract getRev(): number;
 }

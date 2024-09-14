@@ -400,7 +400,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         }
         const row = selection?.primary?.actualRow ?? 0;
         const col = selection?.primary?.actualColumn ?? 0;
-        const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
+        const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
         if (workbookTypes) {
             const workbookDisable = workbookTypes.some((F) => {
                 const instance = new F(unitId);
@@ -462,7 +462,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             return false;
         }
 
-        const { workbookTypes = [WorkbookEditablePermission], worksheetTypes, rangeTypes } = permissionTypes;
+        const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
         if (workbookTypes) {
             const workbookDisable = workbookTypes.some((F) => {
                 const instance = new F(unitId);

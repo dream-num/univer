@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Text extends BaseFunction {
     override minParams = 2;
@@ -52,7 +53,7 @@ export class Text extends BaseFunction {
         const formatTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, formatText);
 
         return textArray.map((textValue, rowIndex, columnIndex) => {
-            if (textValue.isError() || textValue.isString() || textValue.isBoolean()) {
+            if (textValue.isError()) {
                 return textValue;
             }
 
@@ -66,11 +67,9 @@ export class Text extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            if (formatTextValue.isNull()) {
-                formatTextValue = StringValueObject.create(' ');
+            if (textValue.isBoolean()) {
+                return textValue;
             }
-
-            const formatTextValueString = `${formatTextValue.getValue()}`;
 
             let textValueNumber = textValue.getValue() as number;
 
@@ -78,9 +77,23 @@ export class Text extends BaseFunction {
                 textValueNumber = 0;
             }
 
+            if (textValue.isString()) {
+                if (!isRealNum(textValueNumber)) {
+                    return textValue;
+                }
+
+                textValueNumber = Number(textValueNumber);
+            }
+
+            if (formatTextValue.isNull()) {
+                formatTextValue = StringValueObject.create(' ');
+            }
+
+            const formatTextValueString = `${formatTextValue.getValue()}`;
+
             const previewText = getFormatPreview(formatTextValueString, textValueNumber);
 
-            return StringValueObject.create(previewText);
+            return StringValueObject.create(formatTextValueString === ' ' ? previewText.trimEnd() : previewText);
         });
     }
 }

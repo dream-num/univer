@@ -16,10 +16,10 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Mid extends BaseFunction {
     override minParams = 3;
@@ -39,92 +39,77 @@ export class Mid extends BaseFunction {
             return numChars;
         }
 
-        if (withinText.isArray()) {
-            // get max row length
-            const maxRowLength = Math.max(
-                withinText.isArray() ? (withinText as ArrayValueObject).getRowCount() : 1,
-                startNum.isArray() ? (startNum as ArrayValueObject).getRowCount() : 1,
-                numChars.isArray() ? (numChars as ArrayValueObject).getRowCount() : 1
-            );
+        // get max row length
+        const maxRowLength = Math.max(
+            withinText.isArray() ? (withinText as ArrayValueObject).getRowCount() : 1,
+            startNum.isArray() ? (startNum as ArrayValueObject).getRowCount() : 1,
+            numChars.isArray() ? (numChars as ArrayValueObject).getRowCount() : 1
+        );
 
-            // get max column length
-            const maxColumnLength = Math.max(
-                withinText.isArray() ? (withinText as ArrayValueObject).getColumnCount() : 1,
-                startNum.isArray() ? (startNum as ArrayValueObject).getColumnCount() : 1,
-                numChars.isArray() ? (numChars as ArrayValueObject).getColumnCount() : 1
-            );
+        // get max column length
+        const maxColumnLength = Math.max(
+            withinText.isArray() ? (withinText as ArrayValueObject).getColumnCount() : 1,
+            startNum.isArray() ? (startNum as ArrayValueObject).getColumnCount() : 1,
+            numChars.isArray() ? (numChars as ArrayValueObject).getColumnCount() : 1
+        );
 
-            const withinTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, withinText);
-            const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, startNum);
-            const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, numChars);
+        const withinTextArray = expandArrayValueObject(maxRowLength, maxColumnLength, withinText);
+        const startNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, startNum);
+        const numCharsArray = expandArrayValueObject(maxRowLength, maxColumnLength, numChars);
 
-            return withinTextArray.map((withinTextValue, rowIndex, columnIndex) => {
-                if (withinTextValue.isError() || withinTextValue.isBoolean()) {
-                    return withinTextValue;
-                }
-
-                const startNumValue = startNumArray.get(rowIndex, columnIndex);
-                const numCharsValue = numCharsArray.get(rowIndex, columnIndex);
-
-                if (startNumValue == null || startNumValue.isError() || numCharsValue == null || numCharsValue.isError()) {
-                    return startNumValue || numCharsValue || ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                if (withinTextValue.isBoolean() || startNumValue.isBoolean() || numCharsValue.isBoolean()) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                if (withinTextValue.isNull()) {
-                    withinTextValue = StringValueObject.create('');
-                }
-
-                const withinTextValueString = `${withinTextValue.getValue()}`;
-                const startNumValueNumber = (startNumValue.getValue() as number) - 1;
-                const numCharsValueNumber = numCharsValue.getValue() as number;
-
-                if (startNumValueNumber < 0 || startNumValueNumber >= withinTextValueString.length) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                const graphemes = Array.from(withinTextValueString);
-                const substring = graphemes.slice(startNumValueNumber, startNumValueNumber + numCharsValueNumber).join('');
-
-                return StringValueObject.create(substring);
-            });
-        }
-        return this._handleSingleText(withinText, startNum, numChars);
+        return withinTextArray.map((withinTextValue, rowIndex, columnIndex) => {
+            return this._handleSingleText(withinTextValue, rowIndex, columnIndex, startNumArray, numCharsArray);
+        });
     }
 
-    private _handleSingleText(withinText: BaseValueObject, startNum: BaseValueObject, numChars: BaseValueObject) {
-        if (withinText.isError()) {
-            return withinText;
+    private _handleSingleText(withinTextValue: BaseValueObject, rowIndex: number, columnIndex: number, startNumArray: ArrayValueObject, numCharsArray: ArrayValueObject) {
+        let startNumValue = startNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
+        let numCharsValue = numCharsArray.get(rowIndex, columnIndex) || NullValueObject.create();
+
+        if (startNumValue.isError()) {
+            return startNumValue;
         }
 
-        if (startNum.isError()) {
-            return startNum;
+        if (numCharsValue.isError()) {
+            return numCharsValue;
         }
 
-        if (numChars.isError()) {
-            return numChars;
+        let withinTextValueString = withinTextValue.getValue();
+
+        if (withinTextValue.isNull()) {
+            withinTextValueString = '';
         }
 
-        // Default start number is 1
-        const startNumValue = startNum ? (startNum.getValue() as number) : 1;
-        const startIndex = startNumValue - 1;
-
-        const numCharsValue = numChars ? (numChars.getValue() as number) : 0;
-
-        const withinTextString = withinText.getValue() as string;
-
-        // Ensure startIndex is within bounds
-        if (startIndex < 0 || startIndex >= withinTextString.length) {
-            return ArrayValueObject.createByArray([[ErrorType.VALUE]]);
+        if (withinTextValue.isBoolean()) {
+            withinTextValueString = withinTextValueString ? 'TRUE' : 'FALSE';
         }
 
-        const graphemes = Array.from(withinTextString);
-        const substring = graphemes.slice(startIndex, startIndex + numCharsValue).join('');
+        withinTextValueString = `${withinTextValueString}`;
 
-        return ArrayValueObject.createByArray([[substring]]);
+        if (startNumValue.isString() || startNumValue.isBoolean() || startNumValue.isNull()) {
+            startNumValue = startNumValue.convertToNumberObjectValue();
+        }
+
+        if (startNumValue.isError()) {
+            return startNumValue;
+        }
+
+        if (numCharsValue.isString() || numCharsValue.isBoolean() || numCharsValue.isNull()) {
+            numCharsValue = numCharsValue.convertToNumberObjectValue();
+        }
+
+        if (numCharsValue.isError()) {
+            return numCharsValue;
+        }
+
+        const startNumValueNumber = Math.floor(+startNumValue.getValue()) - 1;
+        const numCharsValueNumber = numCharsValue.getValue() as number;
+
+        if (startNumValueNumber < 0 || numCharsValueNumber < 0) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        return StringValueObject.create(withinTextValueString.substring(startNumValueNumber, startNumValueNumber + numCharsValueNumber));
     }
 }
 

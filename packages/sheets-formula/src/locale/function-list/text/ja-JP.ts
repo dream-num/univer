@@ -284,7 +284,7 @@ export default {
     },
     MID: {
         description: '文字列の任意の位置から指定された文字数の文字を返します。',
-        abstract: '文字列の任意の位置から指定された文字数の文字を返します。',
+        abstract: '文字列の任意の位置から指定された文字数の文字を返します',
         links: [
             {
                 title: '指導',
@@ -292,9 +292,9 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '取り出す文字を含む文字列を指定します。' },
-            startNum: { name: 'start_num', detail: '文字列から取り出す先頭文字の位置を数値で指定します。 文字列の先頭文字の位置が 1 になります。\nstart_numがテキストの長さより大きい場合、MID/MIDB は "" (空のテキスト) を返します。\nstart_numがテキストの長さより小さいが、start_numとnum_charsがテキストの長さを超える場合、MID/MIDB はテキストの末尾まで文字を返します。\nstart_numが 1 未満の場合、MID/MIDB は #VALUE を返します。 エラー値。' },
-            numChars: { name: 'num_chars', detail: '取り出す文字数を指定します。\n文字数に負の数を指定すると、エラー値 #VALUE! が返されます。' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            startNum: { name: '開始位置', detail: '文字列から取り出す先頭文字の位置を数値で指定します。 文字列の先頭文字の位置が 1 になります。\nstart_numがテキストの長さより大きい場合、MID/MIDB は "" (空のテキスト) を返します。\nstart_numがテキストの長さより小さいが、start_numとnum_charsがテキストの長さを超える場合、MID/MIDB はテキストの末尾まで文字を返します。\nstart_numが 1 未満の場合、MID/MIDB は #VALUE を返します。 エラー値。' },
+            numChars: { name: '文字数', detail: '取り出す文字数を指定します。\n文字数に負の数を指定すると、エラー値 #VALUE! が返されます。' },
         },
     },
     MIDB: {

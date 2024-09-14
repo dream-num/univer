@@ -65,6 +65,7 @@ import type {
     IObjectMatrixPrimitiveType,
     IRange,
     IRowData,
+    Nullable,
     Workbook,
     Worksheet,
 } from '@univerjs/core';
@@ -442,6 +443,7 @@ export class SheetClipboardController extends RxDisposable {
 
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
                 const pasteToCols = range.cols;
+                const startColumn = pasteToCols[0];
 
                 if (addingColsCount > 0) {
                     const addColRange = {
@@ -491,14 +493,20 @@ export class SheetClipboardController extends RxDisposable {
                         ...targetSetColPropertyParams,
                         colWidth: colProperties
                             .slice(0, existingColsCount)
-                            .map((property, index) => (property.width ? Math.max(+property.width, currentSheet!.getColumnWidth(pasteToCols[index])) : defaultColumnWidth)),
+                            .reduce((p, c, index) => {
+                                p[index + startColumn] = c.width ? Math.max(+c.width, currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth) : defaultColumnWidth;
+                                return p;
+                            }, {} as IObjectArrayPrimitiveType<number>),
                     };
 
                     const undoSetColPropertyParams: ISetWorksheetColWidthMutationParams = {
                         ...targetSetColPropertyParams,
                         colWidth: colProperties
                             .slice(0, existingColsCount)
-                            .map((_property, index) => currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth),
+                            .reduce((p, c, index) => {
+                                p[index + startColumn] = currentSheet!.getColumnWidth(pasteToCols[index]) ?? defaultColumnWidth;
+                                return p;
+                            }, {} as IObjectArrayPrimitiveType<Nullable<number>>),
                     };
 
                     redoMutations.push({

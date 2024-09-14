@@ -55,7 +55,7 @@ export class Marker extends SheetExtension {
             }
 
             let cellData = worksheet.getCell(row, col);
-            const cellInfo = skeleton.getCellByIndex(row, col);
+            const cellInfo = skeleton.getCellByIndexWithNoHeader(row, col);
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
             let { startY, endY, startX, endX } = cellInfo;
 

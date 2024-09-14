@@ -96,7 +96,7 @@ export class Font extends SheetExtension {
                         return true;
                     }
                 }
-                const cellInfo = spreadsheetSkeleton.getCellByIndex(
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(
                     rowIndex,
                     columnIndex
                 );

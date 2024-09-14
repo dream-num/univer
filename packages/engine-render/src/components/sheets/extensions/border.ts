@@ -66,7 +66,7 @@ export class Border extends SheetExtension {
                 return true;
             }
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndex(rowIndex, columnIndex);
+            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
             const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

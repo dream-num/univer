@@ -52,7 +52,7 @@ export class Custom extends SheetExtension {
                 return;
             }
 
-            let primaryWithCoord = skeleton.getCellByIndex(row, col);
+            let primaryWithCoord = skeleton.getCellByIndexWithNoHeader(row, col);
 
             const { mergeInfo } = primaryWithCoord;
             if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {

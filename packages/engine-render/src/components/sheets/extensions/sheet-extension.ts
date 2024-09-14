@@ -33,7 +33,7 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
     override type = SHEET_EXTENSION_TYPE.GRID;
 
     /**
-     * @deprecated The function maybe cause performance issue, use spreadsheetSkeleton.getCellByIndex instead.
+     * @deprecated The function maybe cause performance issue, use spreadsheetSkeleton.getCellByIndexWithNoHeader instead.
      * Get ISelectionCellWithMergeInfo by cell rowIndex and cell columnIndex.
      * The startXY in return value does not include rowHeader and columnHeader.
      * @param rowIndex

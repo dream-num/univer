@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { Disposable, EventSubject } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 
+import { RENDER_CLASS_TYPE } from './basics/const';
+import { Transform } from './basics/transform';
 import type { BaseObject } from './base-object';
 import type { CURSOR_TYPE } from './basics/const';
-import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
-import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
-import type { ThinEngine } from './thin-engine';
 import type { Scene } from './scene';
+import type { ThinEngine } from './thin-engine';
 
 export abstract class ThinScene extends Disposable {
     onTransformChange$ = new EventSubject<ITransformChangeState>();

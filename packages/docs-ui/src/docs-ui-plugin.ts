@@ -66,7 +66,7 @@ import { DocEditorBridgeController } from './controllers/render-controllers/doc-
 import { DocIMEInputController } from './controllers/render-controllers/doc-ime-input.controller';
 import { DocInputController } from './controllers/render-controllers/doc-input.controller';
 import { DocResizeRenderController } from './controllers/render-controllers/doc-resize.render-controller';
-import { DocTextSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
+import { DocSelectionRenderController } from './controllers/render-controllers/doc-selection-render.controller';
 import { DocZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocAutoFormatService } from './services/doc-auto-format.service';
@@ -283,7 +283,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEventManagerService],
             // Controllers.
             [DocBackScrollRenderController],
-            [DocTextSelectionRenderController],
+            [DocSelectionRenderController],
             [DocHeaderFooterController],
             [DocResizeRenderController],
             [DocContextMenuRenderController],

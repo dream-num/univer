@@ -319,8 +319,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     NORMINV: {
@@ -333,8 +335,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
     NORMSDIST: {

@@ -318,8 +318,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NORMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORMINV: {
@@ -332,8 +334,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
         },
     },
     NORMSDIST: {

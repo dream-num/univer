@@ -15,7 +15,7 @@
  */
 
 import { isRealNum } from '@univerjs/core';
-import { erfcINV } from './engineering';
+import { erf, erfcINV } from './engineering';
 import { calculateCombin } from './math';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
@@ -462,11 +462,6 @@ function lowRegGammaInverse(p: number, a: number): number {
     return x;
 }
 
-export function normalINV(probability: number, mean: number, standardDev: number): number {
-    // eslint-disable-next-line
-    return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
-}
-
 export function studentTINV(probability: number, degFreedom: number): number {
     let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
     x = Math.sqrt(degFreedom * (1 - x) / x);
@@ -569,6 +564,19 @@ export function forecastLinear(x: number, knownYs: number[], knownXs: number[]):
     const a = knownYsMean - b * knownXsMean;
 
     return a + b * x;
+}
+
+export function normalCDF(x: number, mean: number, standardDev: number): number {
+    return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
+}
+
+export function normalPDF(x: number, mean: number, standardDev: number): number {
+    return Math.exp(-0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - (x - mean) ** 2 / (2 * standardDev * standardDev));
+}
+
+export function normalINV(probability: number, mean: number, standardDev: number): number {
+    // eslint-disable-next-line
+    return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
 }
 
 export function getTwoArrayNumberValues(

@@ -26,6 +26,8 @@ import { ExponDist } from '../statistical/expon-dist';
 import { FDistRt } from '../statistical/f-dist-rt';
 import { FInvRt } from '../statistical/f-inv-rt';
 import { FTest } from '../statistical/f-test';
+import { NormDist } from '../statistical/norm-dist';
+import { NormInv } from '../statistical/norm-inv';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
@@ -48,6 +50,8 @@ export const functionCompatibility = [
     [FDistRt, FUNCTION_NAMES_COMPATIBILITY.FDIST],
     [FInvRt, FUNCTION_NAMES_COMPATIBILITY.FINV],
     [FTest, FUNCTION_NAMES_COMPATIBILITY.FTEST],
+    [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
+    [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

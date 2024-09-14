@@ -674,6 +674,37 @@ export default {
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
         },
     },
+    NORM_DIST: {
+        description: 'Trả về hàm phân phối tích lũy chuẩn',
+        abstract: 'Trả về hàm phân phối tích lũy chuẩn',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-dist-%E5%87%BD%E6%95%B0-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORM.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    NORM_INV: {
+        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
+        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-inv-%E5%87%BD%E6%95%B0-54b30935-fee7-493c-bedb-2278a9db7e13',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+        },
+    },
     RANK_AVG: {
         description: 'Trả về thứ hạng của một số trong một danh sách các số',
         abstract: 'Trả về thứ hạng của một số trong một danh sách các số',

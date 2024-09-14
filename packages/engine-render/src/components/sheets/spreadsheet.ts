@@ -126,7 +126,7 @@ export class Spreadsheet extends SheetComponent {
 
         if (viewportInfo.viewportKey === 'viewMainLeft') {
             // viewportInfo.cacheBound.right -= 1;
-            console.log('cacheBound', viewportInfo.cacheBound);
+            // console.log('cacheBound', viewportInfo.cacheBound);
         }
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo.cacheBound)];
         const extensions = this.getExtensionsByOrder();

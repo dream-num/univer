@@ -239,6 +239,7 @@ export class Worksheet {
         return null;
     }
 
+    cellCache: ObjectMatrix<Nullable<ICellDataForSheetInterceptor>> = new ObjectMatrix();
     /**
      * Get cellData, includes cellData, customRender, markers, dataValidate, etc.
      *
@@ -253,8 +254,13 @@ export class Worksheet {
         if (row < 0 || col < 0) {
             return null;
         }
+        // return this._viewModel.getCell(row, col);
+        const cache = this.cellCache.getValue(row, col);
+        if (cache) return cache;
 
-        return this._viewModel.getCell(row, col);
+        const cell = this._viewModel.getCell(row, col);
+        this.cellCache.setValue(row, col, cell);
+        return cell;
     }
 
     getCellRaw(row: number, col: number): Nullable<ICellData> {

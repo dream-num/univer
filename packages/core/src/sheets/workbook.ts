@@ -152,12 +152,16 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._unitId;
     }
 
-    getRev(): number {
+    override getRev(): number {
         return this._snapshot.rev ?? 1; // the revision number should start with one
     }
 
-    incrementRev(): void {
+    override incrementRev(): void {
         this._snapshot.rev = this.getRev() + 1;
+    }
+
+    override setRev(rev: number): void {
+        this._snapshot.rev = rev;
     }
 
     /**

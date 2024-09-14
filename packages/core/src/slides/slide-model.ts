@@ -65,8 +65,16 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         this._unitId = this._snapshot.id ?? generateRandomId(6);
     }
 
-    getRev(): number {
+    override getRev(): number {
         return 0; // TODO@jikkai: slide has not implement collaborative editing yet
+    }
+
+    override incrementRev(): void {
+        // do nothing
+    }
+
+    override setRev(_rev: number): void {
+        // do nothing
     }
 
     getSnapshot() {

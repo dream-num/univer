@@ -64,12 +64,16 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         this._name$.next(this.snapshot.title ?? 'No Title');
     }
 
-    getRev(): number {
+    override getRev(): number {
         return this.snapshot.rev ?? 1;
     }
 
-    incrementRev(): void {
+    override incrementRev(): void {
         this.snapshot.rev = this.getRev() + 1;
+    }
+
+    override setRev(rev: number): void {
+        this.snapshot.rev = rev;
     }
 
     setName(name: string) {

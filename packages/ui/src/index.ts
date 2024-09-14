@@ -30,7 +30,7 @@ export { type INotificationOptions, type NotificationType } from './components/n
 export { ProgressBar } from './components/progress-bar/ProgressBar';
 export { RangeSelector } from './components/range-selector/RangeSelector';
 export { UNI_DISABLE_CHANGING_FOCUS_KEY } from './const';
-export { type IUniverUIConfig } from './controllers/config.schema';
+export { type IUniverUIConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 export { ErrorController } from './controllers/error/error.controller';
 export { menuSchema } from './controllers/menus/menu.schema';
 export {

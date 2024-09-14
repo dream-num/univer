@@ -48,7 +48,9 @@ import { FInvRt } from './f-inv-rt';
 import { FTest } from './f-test';
 import { Fisher } from './fisher';
 import { Fisherinv } from './fisherinv';
+import { Forecast } from './forecast';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
+import { Intercept } from './intercept';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
@@ -101,6 +103,9 @@ export const functionStatistical = [
     [FTest, FUNCTION_NAMES_STATISTICAL.F_TEST],
     [Fisher, FUNCTION_NAMES_STATISTICAL.FISHER],
     [Fisherinv, FUNCTION_NAMES_STATISTICAL.FISHERINV],
+    [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST],
+    [Forecast, FUNCTION_NAMES_STATISTICAL.FORECAST_LINEAR],
+    [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],

@@ -22,14 +22,14 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { NullValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { FTest } from '../index';
+import { Intercept } from '../index';
 
-describe('Test fTest function', () => {
-    const testFunction = new FTest(FUNCTION_NAMES_STATISTICAL.F_TEST);
+describe('Test intercept function', () => {
+    const testFunction = new Intercept(FUNCTION_NAMES_STATISTICAL.INTERCEPT);
 
-    describe('FTest', () => {
+    describe('Intercept', () => {
         it('Value is normal', () => {
-            const array1 = ArrayValueObject.create({
+            const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, 35],
                     [11, 25],
@@ -42,7 +42,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array2 = ArrayValueObject.create({
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35, 47.65],
                     [17.56, 18.44],
@@ -55,12 +55,12 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(0.7283721822078002);
+            const result = testFunction.calculate(knownYs, knownXs);
+            expect(getObjectValue(result)).toBe(0.43168217128107145);
         });
 
         it('Value length is equal to 1', () => {
-            const array1 = ArrayValueObject.create({
+            const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58],
                 ]),
@@ -71,7 +71,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array2 = ArrayValueObject.create({
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35],
                 ]),
@@ -82,12 +82,12 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value length is not equal', () => {
-            const array1 = ArrayValueObject.create({
+            const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, 35],
                     [11, 25],
@@ -99,7 +99,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array2 = ArrayValueObject.create({
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35, 47.65],
                     [17.56, 18.44],
@@ -112,13 +112,13 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.NA);
         });
 
         it('Value is error', () => {
-            const array1 = ErrorValueObject.create(ErrorType.NAME);
-            const array2 = ArrayValueObject.create({
+            const knownYs = ErrorValueObject.create(ErrorType.NAME);
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35, 47.65],
                     [17.56, 18.44],
@@ -131,10 +131,10 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
 
-            const array3 = ArrayValueObject.create({
+            const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, 35],
                     [11, 25],
@@ -147,11 +147,11 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array4 = ErrorValueObject.create(ErrorType.NAME);
-            const result2 = testFunction.calculate(array3, array4);
+            const knownXs2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(knownYs2, knownXs2);
             expect(getObjectValue(result2)).toBe(ErrorType.NAME);
 
-            const array5 = ArrayValueObject.create({
+            const knownYs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [ErrorType.NAME, 35],
                     [11, 25],
@@ -164,7 +164,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array6 = ArrayValueObject.create({
+            const knownXs3 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35, 47.65],
                     [17.56, 18.44],
@@ -177,10 +177,10 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result3 = testFunction.calculate(array5, array6);
+            const result3 = testFunction.calculate(knownYs3, knownXs3);
             expect(getObjectValue(result3)).toBe(ErrorType.NAME);
 
-            const array7 = ArrayValueObject.create({
+            const knownYs4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, 35],
                     [11, 25],
@@ -193,7 +193,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array8 = ArrayValueObject.create({
+            const knownXs4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [ErrorType.NAME, 47.65],
                     [17.56, 18.44],
@@ -206,13 +206,13 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result4 = testFunction.calculate(array7, array8);
+            const result4 = testFunction.calculate(knownYs4, knownXs4);
             expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is null', () => {
-            const array1 = NullValueObject.create();
-            const array2 = ArrayValueObject.create({
+            const knownYs = NullValueObject.create();
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [45.35, 47.65],
                     [17.56, 18.44],
@@ -225,10 +225,10 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
-            const array3 = ArrayValueObject.create({
+            const knownYs2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, 35],
                     [11, 25],
@@ -241,13 +241,13 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array4 = NullValueObject.create();
-            const result2 = testFunction.calculate(array3, array4);
+            const knownXs2 = NullValueObject.create();
+            const result2 = testFunction.calculate(knownYs2, knownXs2);
             expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
 
         it('Value is can not calculate', () => {
-            const array1 = ArrayValueObject.create({
+            const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, null],
                     [11, 'test'],
@@ -260,7 +260,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array2 = ArrayValueObject.create({
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false, 47.65],
                     [null, 18.44],
@@ -273,39 +273,12 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
-        it('Calculate result > 1', () => {
-            const array1 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [6, 7, 9, 15, 21],
-                ]),
-                rowCount: 1,
-                columnCount: 5,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const array2 = ArrayValueObject.create({
-                calculateValueList: transformToValueObject([
-                    [20, 28, 31, 38, 40],
-                ]),
-                rowCount: 1,
-                columnCount: 5,
-                unitId: '',
-                sheetId: '',
-                row: 0,
-                column: 0,
-            });
-            const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(0.6483178467861754);
-        });
-
         it('Array2Variance === 0', () => {
-            const array1 = ArrayValueObject.create({
+            const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -318,7 +291,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const array2 = ArrayValueObject.create({
+            const knownXs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [1],
@@ -331,7 +304,7 @@ describe('Test fTest function', () => {
                 row: 0,
                 column: 0,
             });
-            const result = testFunction.calculate(array1, array2);
+            const result = testFunction.calculate(knownYs, knownXs);
             expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
     });

@@ -550,8 +550,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要进行值预测的数据点。' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     FORECAST_ETS: {
@@ -616,12 +617,13 @@ export default {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82%E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/zh-cn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要进行值预测的数据点。' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     FREQUENCY: {
@@ -788,8 +790,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     KURT: {

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { erfcINV } from './engineering';
 import { calculateCombin } from './math';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -534,4 +537,102 @@ export function centralFINV(probability: number, degFreedom1: number, degFreedom
     }
 
     return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
+}
+
+export function forecastLinear(x: number, knownYs: number[], knownXs: number[]): number {
+    const n = knownYs.length;
+
+    let knownYsSum = 0;
+    let knownXsSum = 0;
+
+    for (let i = 0; i < n; i++) {
+        knownYsSum += knownYs[i];
+        knownXsSum += knownXs[i];
+    }
+
+    const knownYsMean = knownYsSum / n;
+    const knownXsMean = knownXsSum / n;
+
+    let num = 0;
+    let den = 0;
+
+    for (let i = 0; i < n; i++) {
+        num += (knownYs[i] - knownYsMean) * (knownXs[i] - knownXsMean);
+        den += (knownXs[i] - knownXsMean) ** 2;
+    }
+
+    if (den === 0) {
+        return Infinity;
+    }
+
+    const b = num / den;
+    const a = knownYsMean - b * knownXsMean;
+
+    return a + b * x;
+}
+
+export function getTwoArrayNumberValues(
+    array1: ArrayValueObject,
+    array2: ArrayValueObject,
+    count: number,
+    array1ColumnCount: number,
+    array2ColumnCount: number
+) {
+    const array1Values: number[] = [];
+    const array2Values: number[] = [];
+    let noCalculate = true;
+
+    for (let i = 0; i < count; i++) {
+        const array1RowIndex = Math.floor(i / array1ColumnCount);
+        const array1ColumnIndex = i % array1ColumnCount;
+
+        const array2RowIndex = Math.floor(i / array2ColumnCount);
+        const array2ColumnIndex = i % array2ColumnCount;
+
+        const array1Object = array1.get(array1RowIndex, array1ColumnIndex) as BaseValueObject;
+        const array2Object = array2.get(array2RowIndex, array2ColumnIndex) as BaseValueObject;
+
+        if (array1Object.isError()) {
+            return {
+                isError: true,
+                errorObject: array1Object as ErrorValueObject,
+                array1Values,
+                array2Values,
+                noCalculate,
+            };
+        }
+
+        if (array2Object.isError()) {
+            return {
+                isError: true,
+                errorObject: array2Object as ErrorValueObject,
+                array1Values,
+                array2Values,
+                noCalculate,
+            };
+        }
+
+        if (array1Object.isNull() || array2Object.isNull() || array1Object.isBoolean() || array2Object.isBoolean()) {
+            continue;
+        }
+
+        const array1Value = array1Object.getValue();
+        const array2Value = array2Object.getValue();
+
+        if (!isRealNum(array1Value) || !isRealNum(array2Value)) {
+            continue;
+        }
+
+        array1Values.push(+array1Value);
+        array2Values.push(+array2Value);
+        noCalculate = false;
+    }
+
+    return {
+        isError: false,
+        errorObject: null,
+        array1Values,
+        array2Values,
+        noCalculate,
+    };
 }

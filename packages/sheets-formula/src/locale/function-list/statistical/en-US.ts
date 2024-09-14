@@ -550,8 +550,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The data point for which you want to predict a value.' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     FORECAST_ETS: {
@@ -616,12 +617,13 @@ export default {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The data point for which you want to predict a value.' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     FREQUENCY: {
@@ -788,8 +790,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     KURT: {

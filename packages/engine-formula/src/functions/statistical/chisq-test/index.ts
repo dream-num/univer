@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { chisquareCDF } from '../../../basics/statistical';
+import { chisquareCDF, getTwoArrayNumberValues } from '../../../basics/statistical';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -66,7 +65,19 @@ export class ChisqTest extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const { isError, errorObject, sumxmy2, noCalculate } = this._getSumxmy2(actualRange, expectedRange, actualRangeRowCount * actualRangeColumnCount, actualRangeColumnCount, expectedRangeColumnCount);
+        const {
+            isError,
+            errorObject,
+            array1Values,
+            array2Values,
+            noCalculate,
+        } = getTwoArrayNumberValues(
+            actualRange as ArrayValueObject,
+            expectedRange as ArrayValueObject,
+            actualRangeRowCount * actualRangeColumnCount,
+            actualRangeColumnCount,
+            expectedRangeColumnCount
+        );
 
         if (isError) {
             return errorObject as ErrorValueObject;
@@ -76,87 +87,25 @@ export class ChisqTest extends BaseFunction {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
-        const df = this._getDf(actualRangeRowCount, actualRangeColumnCount);
-
-        const result = 1 - chisquareCDF(sumxmy2, df);
-
-        return NumberValueObject.create(result);
+        return this._getResult(array1Values, array2Values, actualRangeRowCount, actualRangeColumnCount);
     }
 
-    private _getSumxmy2(
-        actualRange: BaseValueObject,
-        expectedRange: BaseValueObject,
-        count: number,
-        actualRangeColumnCount: number,
-        expectedRangeColumnCount: number
-    ) {
+    private _getResult(
+        actualRangeValues: number[],
+        expectedRangeValues: number[],
+        actualRangeRowCount: number,
+        actualRangeColumnCount: number
+    ): BaseValueObject {
         let sumxmy2 = 0;
-        let noCalculate = true;
 
-        for (let i = 0; i < count; i++) {
-            const actualRangeRowIndex = Math.floor(i / actualRangeColumnCount);
-            const actualRangeColumnIndex = i % actualRangeColumnCount;
-
-            const expectedRangeRowIndex = Math.floor(i / expectedRangeColumnCount);
-            const expectedRangeColumnIndex = i % expectedRangeColumnCount;
-
-            const actualRangeObject = (actualRange as ArrayValueObject).get(actualRangeRowIndex, actualRangeColumnIndex) as BaseValueObject;
-            const expectedRangeObject = (expectedRange as ArrayValueObject).get(expectedRangeRowIndex, expectedRangeColumnIndex) as BaseValueObject;
-
-            if (actualRangeObject.isError()) {
-                return {
-                    isError: true,
-                    errorObject: actualRangeObject as ErrorValueObject,
-                    sumxmy2,
-                    noCalculate,
-                };
+        for (let i = 0; i < actualRangeValues.length; i++) {
+            if (expectedRangeValues[i] === 0) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            if (expectedRangeObject.isError()) {
-                return {
-                    isError: true,
-                    errorObject: expectedRangeObject as ErrorValueObject,
-                    sumxmy2,
-                    noCalculate,
-                };
-            }
-
-            if (actualRangeObject.isNull() || expectedRangeObject.isNull() || actualRangeObject.isBoolean() || expectedRangeObject.isBoolean()) {
-                continue;
-            }
-
-            let actualRangeValue = actualRangeObject.getValue();
-            let expectedRangeValue = expectedRangeObject.getValue();
-
-            if (!isRealNum(actualRangeValue) || !isRealNum(expectedRangeValue)) {
-                continue;
-            }
-
-            actualRangeValue = +actualRangeValue;
-            expectedRangeValue = +expectedRangeValue;
-
-            if (expectedRangeValue === 0) {
-                return {
-                    isError: true,
-                    errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
-                    sumxmy2,
-                    noCalculate,
-                };
-            }
-
-            sumxmy2 += (actualRangeValue - expectedRangeValue) ** 2 / expectedRangeValue;
-            noCalculate = false;
+            sumxmy2 += (actualRangeValues[i] - expectedRangeValues[i]) ** 2 / expectedRangeValues[i];
         }
 
-        return {
-            isError: false,
-            errorObject: null,
-            sumxmy2,
-            noCalculate,
-        };
-    }
-
-    private _getDf(actualRangeRowCount: number, actualRangeColumnCount: number): number {
         let df = (actualRangeRowCount - 1) * (actualRangeColumnCount - 1);
 
         if (actualRangeRowCount === 1) {
@@ -165,6 +114,8 @@ export class ChisqTest extends BaseFunction {
             df = actualRangeRowCount - 1;
         }
 
-        return df;
+        const result = 1 - chisquareCDF(sumxmy2, df);
+
+        return NumberValueObject.create(result);
     }
 }

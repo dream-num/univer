@@ -521,12 +521,13 @@ export default {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/%E4%BA%88%E6%B8%AC%E3%81%A8%E4%BA%88%E6%B8%AC-linear-%E9%96%A2%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/ja-jp/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '予測する従属変数の値に対する独立変数の値を、数値で示します。' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     FORECAST_ETS: {
@@ -591,12 +592,13 @@ export default {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/forecasting-%E9%96%A2%E6%95%B0-%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/ja-jp/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '予測する従属変数の値に対する独立変数の値を、数値で示します。' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     FREQUENCY: {
@@ -763,8 +765,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     KURT: {

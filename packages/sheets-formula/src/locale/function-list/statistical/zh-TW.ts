@@ -545,12 +545,13 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892 -94e4-7ad38bbeda99',
+                url: 'https://support.microsoft.com/zh-tw/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是要預測值的資料點。' },
+            knownYs: { name: '陣列_y', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            knownXs: { name: '陣列_x', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     FORECAST_ETS: {
@@ -616,12 +617,13 @@ export default {
         links: [
             {
                 title: '教導',
-                url: 'https://support.microsoft.com/zh-tw/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82 %E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/zh-tw/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是要預測值的資料點。' },
+            knownYs: { name: '陣列_y', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            knownXs: { name: '陣列_x', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     FREQUENCY: {
@@ -788,8 +790,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '陣列_y', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            knownXs: { name: '陣列_x', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     KURT: {

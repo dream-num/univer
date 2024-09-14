@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { getTwoArrayNumberValues } from '../../../basics/statistical';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -65,7 +65,19 @@ export class Correl extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const { isError, errorObject, array1Values, array2Values, noCalculate } = this._getValues(array1, array2, array1RowCount * array1ColumnCount, array1ColumnCount, array2ColumnCount);
+        const {
+            isError,
+            errorObject,
+            array1Values,
+            array2Values,
+            noCalculate,
+        } = getTwoArrayNumberValues(
+            array1 as ArrayValueObject,
+            array2 as ArrayValueObject,
+            array1RowCount * array1ColumnCount,
+            array1ColumnCount,
+            array2ColumnCount
+        );
 
         if (isError) {
             return errorObject as ErrorValueObject;
@@ -76,72 +88,6 @@ export class Correl extends BaseFunction {
         }
 
         return this._getResult(array1Values, array2Values);
-    }
-
-    private _getValues(
-        array1: BaseValueObject,
-        array2: BaseValueObject,
-        count: number,
-        array1ColumnCount: number,
-        array2ColumnCount: number
-    ) {
-        const array1Values: number[] = [];
-        const array2Values: number[] = [];
-        let noCalculate = true;
-
-        for (let i = 0; i < count; i++) {
-            const array1RowIndex = Math.floor(i / array1ColumnCount);
-            const array1ColumnIndex = i % array1ColumnCount;
-
-            const array2RowIndex = Math.floor(i / array2ColumnCount);
-            const array2ColumnIndex = i % array2ColumnCount;
-
-            const array1Object = (array1 as ArrayValueObject).get(array1RowIndex, array1ColumnIndex) as BaseValueObject;
-            const array2Object = (array2 as ArrayValueObject).get(array2RowIndex, array2ColumnIndex) as BaseValueObject;
-
-            if (array1Object.isError()) {
-                return {
-                    isError: true,
-                    errorObject: array1Object as ErrorValueObject,
-                    array1Values,
-                    array2Values,
-                    noCalculate,
-                };
-            }
-
-            if (array2Object.isError()) {
-                return {
-                    isError: true,
-                    errorObject: array2Object as ErrorValueObject,
-                    array1Values,
-                    array2Values,
-                    noCalculate,
-                };
-            }
-
-            if (array1Object.isNull() || array2Object.isNull() || array1Object.isBoolean() || array2Object.isBoolean()) {
-                continue;
-            }
-
-            const array1Value = array1Object.getValue();
-            const array2Value = array2Object.getValue();
-
-            if (!isRealNum(array1Value) || !isRealNum(array2Value)) {
-                continue;
-            }
-
-            array1Values.push(+array1Value);
-            array2Values.push(+array2Value);
-            noCalculate = false;
-        }
-
-        return {
-            isError: false,
-            errorObject: null,
-            array1Values,
-            array2Values,
-            noCalculate,
-        };
     }
 
     private _getResult(array1Values: number[], array2Values: number[]): BaseValueObject {

@@ -198,7 +198,7 @@ describe('test ObjectMatrix', () => {
         expect(range).toStrictEqual([{
             endColumn: 1,
             endRow: 0,
-            startColumn: 1,
+            startColumn: 0,
             startRow: 0,
         }]);
     });

@@ -671,12 +671,6 @@ export class ObjectMatrix<T> {
             // Traverse column by column
             Object.keys(row).forEach((col) => {
                 const c = Number(col);
-
-                // Filter out empty objects
-                if (Tools.isEmptyObject(row[c])) {
-                    return; // Skip empty objects
-                }
-
                 let merged = false;
                 // Check if it can be merged with any of the existing ranges
                 for (const range of ranges) {

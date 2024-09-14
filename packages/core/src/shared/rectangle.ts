@@ -55,6 +55,16 @@ export class Rectangle {
         );
     }
 
+    static simpleRangesIntersect(rangeA: IRange, rangeB: IRange) {
+        const { startRow: startRowA, endRow: endRowA, startColumn: startColumnA, endColumn: endColumnA } = rangeA;
+        const { startRow: startRowB, endRow: endRowB, startColumn: startColumnB, endColumn: endColumnB } = rangeB;
+
+        const rowsOverlap = (startRowA <= endRowB) && (endRowA >= startRowB);
+        const columnsOverlap = (startColumnA <= endColumnB) && (endColumnA >= startColumnB);
+
+        return rowsOverlap && columnsOverlap;
+    }
+
     static intersects(src: IRange, target: IRange): boolean {
         if (src.rangeType === RANGE_TYPE.ROW && target.rangeType === RANGE_TYPE.COLUMN) {
             return true;

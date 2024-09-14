@@ -1452,7 +1452,7 @@ export class Viewport {
     }
 
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {
-        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+        const onePixelFix = 0;//FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
             left: value.left - this.bufferEdgeX - onePixelFix,
             right: value.right + this.bufferEdgeX + onePixelFix,

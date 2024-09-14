@@ -53,6 +53,7 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
+        return;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet || !fontList) {
@@ -92,14 +93,14 @@ export class Font extends SheetExtension {
             const { viewRanges = [], checkOutOfViewBound, viewportKey } = moreBoundsInfo;
 
             const renderFontByCell = (rowIndex: number, columnIndex: number, docsConfig: IFontCacheItem) => {
-                // if (!checkOutOfViewBound) {
-                if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
-                    return true;
+                if (!checkOutOfViewBound) {
+                    if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                        return true;
+                    }
                 }
-                // }
 
                 if (viewportKey === 'viewMain') {
-                    console.log('font', rowIndex, columnIndex);
+                    // console.log('font', rowIndex, columnIndex);
                     // if (columnIndex == 4) {
                     // console.log('viewRanges', viewRanges[0]);
                     // }
@@ -114,12 +115,13 @@ export class Font extends SheetExtension {
                 let { startY, endY, startX, endX } = cellInfo;
                 const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                if (isMerged) {
-                    return true;
-                } else {
+                {
                     const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
                     const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
                     if (!visibleRow || !visibleCol) return true;
+                }
+                if (isMerged) {
+                    return true;
                 }
 
                 // If the merged cell area intersects with the current viewRange,
@@ -128,6 +130,7 @@ export class Font extends SheetExtension {
                 // also needs to be drawn once.
                 // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
                 // At this moment, we can only exclude the cells that are not within the current row.
+
                 const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
                 const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
                 if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {

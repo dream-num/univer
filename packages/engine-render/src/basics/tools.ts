@@ -825,13 +825,15 @@ export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) 
     const intersects = [];
     for (const mainRange of mainRanges) {
         for (const range of ranges) {
-            if (Rectangle.intersects(mainRange, range)) {
+            if (Rectangle.simpleRangesIntersect(mainRange, range)) {
                 intersects.push(range);
             }
         }
     }
     // return [...mainRanges, ...intersects];
     return mainRanges.concat(intersects); // concat is slightly faster than spread
+    // mainRanges.push(...intersects);
+    // return mainRanges;
 }
 
 export function clampRanges(range: IRange) {

@@ -26,7 +26,7 @@ import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
-export class DocTextSelectionRenderController extends Disposable implements IRenderModule {
+export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(
@@ -93,7 +93,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                         return;
                     }
 
-                    this._docSelectionManagerService.replaceTextRangesWithNoRefresh(params);
+                    this._docSelectionManagerService.__replaceTextRangesWithNoRefresh(params);
                 })
         );
     }
@@ -150,7 +150,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 }
             }
 
-            this._docSelectionRenderService.onPointDown(evt);
+            this._docSelectionRenderService.__onPointDown(evt);
 
             if (this._editorService.getEditor(unitId)) {
                 /**
@@ -180,7 +180,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 return;
             }
 
-            this._docSelectionRenderService.handleDblClick(evt);
+            this._docSelectionRenderService.__handleDblClick(evt);
         }));
 
         this.disposeWithMe(document.onTripleClick$.subscribeEvent((evt: IPointerEvent | IMouseEvent) => {
@@ -188,7 +188,7 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
                 return;
             }
 
-            this._docSelectionRenderService.handleTripleClick(evt);
+            this._docSelectionRenderService.__handleTripleClick(evt);
         }));
     }
 
@@ -262,12 +262,6 @@ export class DocTextSelectionRenderController extends Disposable implements IRen
             const isInternalEditor = isInternalEditorID(unitId);
 
             if (init || !isInternalEditorID(this._context.unitId)) {
-                this._docSelectionRenderService.attachScrollEvent();
-                this._docSelectionManagerService.setCurrentSelectionNotRefresh({
-                    unitId,
-                    subUnitId: unitId,
-                });
-
                 // The initial cursor is set at the beginning of the document,
                 // and can be set to the previous cursor position in the future.
                 // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.

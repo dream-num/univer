@@ -20,7 +20,7 @@ import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYL
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle, Viewport } from '@univerjs/engine-render';
+import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
@@ -87,7 +87,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _currentSegmentId: string = '';
     private _currentSegmentPage: number = -1;
     private _selectionStyle: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE;
-    private _isSelectionEnabled: boolean = true;
+
     private _viewPortObserverMap = new Map<
         string,
         {
@@ -133,20 +133,8 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         return this._currentSegmentPage;
     }
 
-    setStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
+    private _setRangeStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
         this._selectionStyle = style;
-    }
-
-    resetStyle() {
-        this.setStyle();
-    }
-
-    enableSelection() {
-        this._isSelectionEnabled = true;
-    }
-
-    disableSelection() {
-        this._isSelectionEnabled = false;
     }
 
     addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
@@ -290,11 +278,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     // Handler double click.
-    handleDblClick(evt: IPointerEvent | IMouseEvent) {
-        if (!this._isSelectionEnabled) {
-            return;
-        }
-
+    __handleDblClick(evt: IPointerEvent | IMouseEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
@@ -352,11 +336,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         }
     }
 
-    handleTripleClick(evt: IPointerEvent | IMouseEvent) {
-        if (!this._isSelectionEnabled) {
-            return;
-        }
-
+    __handleTripleClick(evt: IPointerEvent | IMouseEvent) {
         const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
 
         const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY, {
@@ -389,10 +369,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     // Handle pointer down.
     // eslint-disable-next-line max-lines-per-function, complexity
-    onPointDown(evt: IPointerEvent | IMouseEvent) {
-        if (!this._isSelectionEnabled) {
-            return;
-        }
+    __onPointDown(evt: IPointerEvent | IMouseEvent) {
         this._editorFocusing = true;
         const { scene, mainComponent } = this._context;
         const skeleton = this._docSkeletonManagerService.getSkeleton();
@@ -541,7 +518,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             fill: `rgba(${r}, ${g}, ${b}, ${a ?? 0.3})`,
         };
 
-        this.setStyle(style);
+        this._setRangeStyle(style);
     }
 
     private _getAllTextRanges() {
@@ -574,7 +551,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     override dispose() {
         super.dispose();
-
         this._detachEvent();
         this._removeAllRanges();
         this._container.remove();
@@ -924,15 +900,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._context.scene?.getEngine()?.setRemainCapture();
     }
 
-    // TODO: @Jocs make this method as private.
-    attachScrollEvent(viewport: Nullable<Viewport>) {
-        if (viewport == null) {
+    __attachScrollEvent() {
+        const viewport = this.activeViewPort;
+        if (!viewport) {
             return;
         }
-        const { unitId } = this._context;
-        const key = `${unitId}_${viewport.viewportKey}`;
 
-        if (this._viewPortObserverMap.has(key)) {
+        const { unitId } = this._context;
+
+        if (this._viewPortObserverMap.has(unitId)) {
             return;
         }
 
@@ -975,7 +951,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             this._updateInputPosition();
         });
 
-        this._viewPortObserverMap.set(key, {
+        this._viewPortObserverMap.set(unitId, {
             scrollBefore,
             scrollStop,
         });
@@ -1147,5 +1123,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onCompositionupdate$.complete();
         this._onCompositionend$.complete();
         this._onSelectionStart$.complete();
+        this._textSelectionInner$.complete();
+        this._onPaste$.complete();
+        this._onFocus$.complete();
+        this._onBlur$.complete();
+        this._onPointerDown$.complete();
     }
 }

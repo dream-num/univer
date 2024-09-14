@@ -474,7 +474,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return res;
     }
 
-    // eslint-disable-next-line max-lines-per-function
+    // eslint-disable-next-line max-lines-per-function, complexity
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {
         // const target = this._getPastingTarget();
         // const { selection, unitId, subUnitId } = target;
@@ -550,7 +550,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         range.rows.forEach((j) => {
             const row = rowManager.getRowOrCreate(j);
-            rowProperties.push({ height: `${row.ah || row.h || defaultRowHeight}` });
+            const { ah = defaultRowHeight, h = defaultRowHeight } = row;
+            const height = Math.max(ah, h);
+            rowProperties.push({ height: `${height}` });
         });
 
         if (cachedData.copyType === COPY_TYPE.CUT) {

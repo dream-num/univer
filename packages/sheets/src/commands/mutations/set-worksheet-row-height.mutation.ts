@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { BooleanNumber, IMutation, IObjectArrayPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Worksheet } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 const MAXIMUM_ROW_HEIGHT = 2000;
@@ -131,7 +131,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
                 if (typeof rowHeight === 'number') {
                     row.h = rowHeight;
                 } else {
-                    row.h = rowHeight[rowIndex] ?? defaultRowHeight; // Start from startRow
+                    row.h = rowHeight[rowIndex] ?? row.h ?? defaultRowHeight;
                 }
 
                 row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);

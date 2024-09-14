@@ -390,6 +390,9 @@ export class SheetClipboardController extends RxDisposable {
                             if (willSetHeight > nowRowHeight) {
                                 rowHeight[index + range.rows[0]] = willSetHeight;
                                 originRowHeight[index + range.rows[0]] = nowRowHeight;
+                            } else {
+                                rowHeight[index + range.rows[0]] = nowRowHeight;
+                                originRowHeight[index + range.rows[0]] = nowRowHeight;
                             }
                         } else {
                             rowHeight[index + range.rows[0]] = willSetHeight;

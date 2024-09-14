@@ -121,7 +121,6 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
         if (!target) return false;
 
         const { worksheet } = target;
-        const defaultRowHeight = worksheet.getConfig().defaultRowHeight;
         const manager = worksheet.getRowManager();
 
         for (const { startRow, endRow } of ranges) {
@@ -131,7 +130,7 @@ export const SetWorksheetRowHeightMutation: IMutation<ISetWorksheetRowHeightMuta
                 if (typeof rowHeight === 'number') {
                     row.h = rowHeight;
                 } else {
-                    row.h = rowHeight[rowIndex] ?? row.h ?? defaultRowHeight;
+                    row.h = rowHeight[rowIndex] ?? worksheet.getRowHeight(rowIndex);
                 }
 
                 row.h = Math.min(MAXIMUM_ROW_HEIGHT, row.h);

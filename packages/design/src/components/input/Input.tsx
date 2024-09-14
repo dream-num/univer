@@ -16,9 +16,9 @@
 
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import type { InputProps } from 'rc-input';
 import RcInput from 'rc-input';
 import React from 'react';
+import type { InputProps } from 'rc-input';
 
 import styles from './index.module.less';
 
@@ -119,6 +119,7 @@ export function Input(props: IInputProps) {
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',
         [styles.inputAffixWrapperLarge]: size === 'large',
+        [styles.inputNotAllowClear]: !allowClear,
     }, className);
 
     return (

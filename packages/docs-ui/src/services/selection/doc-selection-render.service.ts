@@ -448,6 +448,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._moving(moveOffsetX, moveOffsetY);
 
+            scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                this._moving(moveOffsetX, moveOffsetY);
+            });
+
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
         }));

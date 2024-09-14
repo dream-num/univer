@@ -77,6 +77,13 @@ export function orderSearchArray(arr: number[], pos: number) {
     return cur_index;
 }
 
+/**
+ * return the first index which arr[index] > num
+ * ex: searchArray([1, 3, 5, 7, 9], 7) = 4
+ * @param arr
+ * @param num
+ * @returns {number} index
+ */
 export function searchArray(arr: number[], num: number) {
     let index: number = arr.length - 1;
     if (num < 0) {

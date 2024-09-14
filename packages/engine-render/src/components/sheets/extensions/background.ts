@@ -15,7 +15,7 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-import { expandRangeIfIntersects, fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
@@ -51,8 +51,8 @@ export class Background extends SheetExtension {
         { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
-        const { background, backgroundPositions } = stylesCache;
-        if (!worksheet || !background) return;
+        const { background: backgroundCache, backgroundPositions } = stylesCache;
+        if (!worksheet || !backgroundCache) return;
 
         if (
             !rowHeightAccumulation ||
@@ -65,40 +65,34 @@ export class Background extends SheetExtension {
         ctx.save();
         const { scaleX, scaleY } = ctx.getScale();
 
-        const renderBGByCell = (rgb: string) => {
-            const backgroundCache = background[rgb];
+        const renderBGCore = (rgb: string) => {
+            ctx.beginPath();
+
+            const bgColorMatrix = backgroundCache[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
 
             const backgroundPaths = new Path2D();
-            backgroundCache.forValue((rowIndex, columnIndex) => {
-                if (!checkOutOfViewBound && !inViewRanges(viewRanges, rowIndex, columnIndex)) {
+
+            const renderBGByCell = (row: number, col: number) => {
+                if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
                     return true;
                 }
 
-                const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
+                const cellInfo = backgroundPositions?.getValue(row, col);
                 if (cellInfo == null) {
                     return true;
                 }
+
                 let { startY, endY, startX, endX } = cellInfo;
                 const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                 const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-                const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
+                const combineWithMergeRanges = mergeTo;
+                //expandRangeIfIntersects([...mergeTo], [mergeInfo]);
 
                 // If curr cell is not in the viewrange (viewport + merged cells), exit early.
-                if (!inViewRanges(combineWithMergeRanges!, rowIndex, columnIndex)) {
+                if (!inViewRanges(combineWithMergeRanges!, row, col)) {
                     return true;
                 }
-
-                // For merged cells && cells that are not top-left,
-                // we need to use the background color of the top-left cell.
-                if (isMerged) {
-                    return true;
-                } else {
-                    const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
-                    const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
-                    if (!visibleRow || !visibleCol) return true;
-                }
-
                 // For merged cells, and the current cell is the top-left cell in the merged region.
                 if (isMergedMainCell) {
                     startY = mergeInfo.startY;
@@ -106,17 +100,27 @@ export class Background extends SheetExtension {
                     startX = mergeInfo.startX;
                     endX = mergeInfo.endX;
                 }
+
+                // in merge range , but not top-left cell.
+                if (isMerged) return true;
+
+                // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
+                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+                if (!visibleRow || !visibleCol) return true;
+
                 // precise is a workaround for windows, macOS does not have this issue.
                 const startXPrecise = fixLineWidthByScale(startX, scaleX);
                 const startYPrecise = fixLineWidthByScale(startY, scaleY);
                 const endXPrecise = fixLineWidthByScale(endX, scaleX);
                 const endYPrecise = fixLineWidthByScale(endY, scaleY);
                 backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
-            });
+            };
+            bgColorMatrix.forValue(renderBGByCell);
             ctx.fill(backgroundPaths);
         };
 
-        Object.keys(background).forEach(renderBGByCell);
+        Object.keys(backgroundCache).forEach(renderBGCore);
         ctx.restore();
     }
 }

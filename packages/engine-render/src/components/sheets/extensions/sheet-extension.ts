@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IRange, ObjectMatrix, Rectangle , ISelectionCellWithMergeInfo} from '@univerjs/core';
+import { ObjectMatrix, Rectangle } from '@univerjs/core';
+import type { IRange, ISelectionCellWithMergeInfo } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';

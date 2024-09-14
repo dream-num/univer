@@ -296,7 +296,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._updateLayout();
         this._initContextListener();
-        window.sk = this;
         // this.updateDataMerge();
     }
 
@@ -1145,10 +1144,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * High energy!
+     * This method has significant impact on performance.
      * @param cell
      * @param options
-     * @returns
      */
     // eslint-disable-next-line complexity
     private _getCellDocumentModel(
@@ -1426,18 +1424,14 @@ export class SpreadsheetSkeleton extends Skeleton {
             dataset_row_st = 0;
             dataset_row_ed = 0;
         } else {
-            if (row_st === -1) {
-                dataset_row_st = 0;
-            } else {
-                dataset_row_st = row_st;
-            }
+            dataset_row_st = Math.max(0, row_st);
 
             if (row_ed === Number.POSITIVE_INFINITY) {
                 dataset_row_ed = rhaLength - 1;
             } else if (row_ed >= rhaLength) {
                 dataset_row_ed = rhaLength - 1;
             } else {
-                dataset_row_ed = row_ed;
+                dataset_row_ed = Math.max(0, row_ed);
             }
         }
 
@@ -1448,12 +1442,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             dataset_col_st = 0;
             dataset_col_ed = 0;
         } else {
-            // if (col_st === -1) {
-            //     dataset_col_st = 0;
-            // } else {
-            //     dataset_col_st = col_st;
-            // }
-
             dataset_col_st = Math.max(0, col_st);
 
             if (col_ed === Number.POSITIVE_INFINITY) {
@@ -1713,11 +1701,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
         this._cellBgAndBorderCache = new ObjectMatrix<boolean>();
         this._overflowCache.reset();
-        this.cellCache.reset();
-    }
-
-    resetCache(): void {
-        this._resetCache();
+        // this.cellCache.reset();
+        this.worksheet.cellCache.reset();
     }
 
     private _makeDocumentSkeletonDirty(r: number, c: number): void {
@@ -1732,15 +1717,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return;
             }
         }
-    }
-
-    cellCache: ObjectMatrix<Nullable<ICellDataForSheetInterceptor>> = new ObjectMatrix();
-    getCellWithCache(row: number, col: number) {
-        return this.cellCache.getValue(row, col);
-    }
-
-    setCellCache(row: number, col: number, v: Nullable<ICellDataForSheetInterceptor>) {
-        this.cellCache.setValue(row, col, v);
     }
 
     /**
@@ -1766,13 +1742,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         /**
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
-        // const cell = this.worksheet.getCellRaw(r, c); // getCellRaw would be faster but doesn't contain condition format info.
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        // let cell = this.getCellWithCache(row, col);
-        // if (!cell) {
-        //     cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        //     this.setCellCache(row, col, cell); // {v: 678, t: 2, s: 'QvxKbV'}
-        // }
         if (!cell) return;
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;

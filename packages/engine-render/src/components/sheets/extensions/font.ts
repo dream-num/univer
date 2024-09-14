@@ -53,7 +53,6 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
-        return;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet || !fontList) {
@@ -99,12 +98,6 @@ export class Font extends SheetExtension {
                     }
                 }
 
-                if (viewportKey === 'viewMain') {
-                    // console.log('font', rowIndex, columnIndex);
-                    // if (columnIndex == 4) {
-                    // console.log('viewRanges', viewRanges[0]);
-                    // }
-                }
                 const cellInfo = this.getCellByIndex(
                     rowIndex,
                     columnIndex,

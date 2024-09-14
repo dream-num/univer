@@ -52,10 +52,6 @@ export interface IFontCacheItem {
     // content?: string;
 }
 
-// type backgroundCache = Record<string, ObjectMatrix<string>>;
-
-// type fontCache = Record<string, ObjectMatrix<IFontCacheItem>>;
-
 type colorString = string;
 export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;

@@ -15,7 +15,7 @@
  */
 
 import type { IRange, IScale } from '@univerjs/core';
-import { expandRangeIfIntersects, fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
+import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
 import type { UniverRenderingContext } from '../../../context';
@@ -101,10 +101,10 @@ export class Background extends SheetExtension {
                     endX = mergeInfo.endX;
                 }
 
-                // not top-left,
-                // if (isMerged) return true;
+                // in merge range , but not top-left cell.
+                if (isMerged) return true;
 
-                // getRowVisible can take a lot of time, over 20+ms, this return condition should put in the last.
+                // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
                 const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
                 const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
                 if (!visibleRow || !visibleCol) return true;

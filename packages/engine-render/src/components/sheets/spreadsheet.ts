@@ -124,10 +124,6 @@ export class Spreadsheet extends SheetComponent {
             ? viewportInfo.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : [];
 
-        if (viewportInfo.viewportKey === 'viewMainLeft') {
-            // viewportInfo.cacheBound.right -= 1;
-            // console.log('cacheBound', viewportInfo.cacheBound);
-        }
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo.cacheBound)];
         const extensions = this.getExtensionsByOrder();
         // At this moment, ctx.transform is at topLeft of sheet content, cell(0, 0)

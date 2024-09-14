@@ -831,9 +831,9 @@ export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) 
         }
     }
     // return [...mainRanges, ...intersects];
-    return mainRanges.concat(intersects); // concat is slightly faster than spread
     // mainRanges.push(...intersects);
     // return mainRanges;
+    return mainRanges.concat(intersects); // concat is slightly faster than spread
 }
 
 export function clampRanges(range: IRange) {

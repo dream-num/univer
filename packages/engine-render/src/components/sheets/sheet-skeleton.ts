@@ -1052,6 +1052,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             columnWidthAccumulation,
             this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
         );
+
         const { isMerged, isMergedMainCell } = primary;
         const { startY, endY, startX, endX, mergeInfo } = primary;
 
@@ -2170,20 +2171,26 @@ export class SpreadsheetSkeleton extends Skeleton {
         let mergeRow = row;
         let mergeColumn = column;
         if (mergeRange) {
-            isMergedMainCell = (mergeRange.startRow === row && mergeRange.startColumn === column);
-            if (isMergedMainCell) {
-                // do not set to true, the code is not equal to the original code from: getCellInfoInMergeData
-                // isMerged = false;
-                newEndRow = mergeRange.endRow;
-                newEndColumn = mergeRange.endColumn;
-                mergeRow = mergeRange.startRow;
-                mergeColumn = mergeRange.startColumn;
-            } else if (row > mergeRange.startRow && row <= mergeRange.endRow && column > mergeRange.startColumn && column <= mergeRange.endColumn) {
+            const {
+                startRow: startRowMarge,
+                endRow: endRowMarge,
+                startColumn: startColumnMarge,
+                endColumn: endColumnMarge,
+            } = mergeRange;
+            if (row === startRowMarge && column === startColumnMarge) {
+                newEndRow = endRowMarge;
+                newEndColumn = endColumnMarge;
+                mergeRow = startRowMarge;
+                mergeColumn = startColumnMarge;
+
+                isMergedMainCell = true;
+            } else if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
+                newEndRow = endRowMarge;
+                newEndColumn = endColumnMarge;
+                mergeRow = startRowMarge;
+                mergeColumn = startColumnMarge;
+
                 isMerged = true;
-                newEndRow = mergeRange.endRow;
-                newEndColumn = mergeRange.endColumn;
-                mergeRow = mergeRange.startRow;
-                mergeColumn = mergeRange.startColumn;
             }
         }
 

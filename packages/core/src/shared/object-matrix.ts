@@ -517,7 +517,7 @@ export class ObjectMatrix<T> {
             }
 
             cols.forEach((column) => {
-                array[row][column] = this.getValue(row, column);
+                array[row][column] = this.getValue(row, column)!;
             });
         });
         return array;

@@ -248,13 +248,12 @@ export class Font extends SheetExtension {
         };
 
         fontMatrix.forValue(renderFontByCellMatrix);
-        // const fontMatrix: ObjectMatrix<IFontCacheItem> = fontMap[fontFamily];
-        // Object.keys(fontMap).forEach(renderFontCore);
         ctx.restore();
     }
 
     private _renderDocuments(
         ctx: UniverRenderingContext,
+        // docsConfig.documentSkeleton.getSkeletonData().pages[0].sections[0].columns[0].lines[0].divides[0].glyphGroup[0].fontStyle
         docsConfig: IFontCacheItem,
         startX: number,
         startY: number,

@@ -56,7 +56,14 @@ export class Rectangle {
         );
     }
 
-    static simpleRangesIntersect(rangeA: IRange, rangeB: IRange) {
+    /**
+     * Check intersects of normal range(RANGE_TYPE.NORMAL)
+     * For other types of ranges, please consider using the intersects method.
+     * @param rangeA
+     * @param rangeB
+     * @returns boolean
+     */
+    static simpleRangesIntersect(rangeA: IRange, rangeB: IRange): boolean {
         const { startRow: startRowA, endRow: endRowA, startColumn: startColumnA, endColumn: endColumnA } = rangeA;
         const { startRow: startRowB, endRow: endRowB, startColumn: startColumnB, endColumn: endColumnB } = rangeB;
 

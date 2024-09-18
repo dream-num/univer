@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 import { EventSubject, Tools } from '@univerjs/core';
+import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 
-import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import type { IWheelEvent } from './basics/i-events';
 import { PointerInput } from './basics/i-events';
 import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
+import type { BaseObject } from './base-object';
+import type { IWheelEvent } from './basics/i-events';
+import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';

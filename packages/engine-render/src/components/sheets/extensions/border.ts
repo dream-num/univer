@@ -159,7 +159,7 @@ export class Border extends SheetExtension {
                 return true;
             }
             rowArray.forEach((column) => {
-                const rectangle = overflowCache.getValue(row, column);
+                const rectangle = overflowCache.getValue(row, column)!;
                 const { startColumn, endColumn } = rectangle;
                 if (type === BORDER_TYPE.LEFT && borderColumn > startColumn && borderColumn <= endColumn) {
                     isDraw = true;

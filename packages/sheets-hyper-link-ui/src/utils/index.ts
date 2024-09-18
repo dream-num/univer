@@ -49,7 +49,7 @@ export const getShouldDisableCurrentCellLink = (accessor: IAccessor) => {
     }
     const row = selections[0].range.startRow;
     const col = selections[0].range.startColumn;
-    return _getShouldDisableCellLink(worksheet, row, col);
+    return getShouldDisableCellLink(worksheet, row, col);
 };
 
 export const shouldDisableAddLink = (accessor: IAccessor) => {

@@ -15,10 +15,10 @@
  */
 
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
-import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
-import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
+import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
+import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 
 export interface IAddCommentCommandParams {
     unitId: string;
@@ -34,7 +34,6 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        // const undoRedoService = accessor.get(IUndoRedoService);
         const dataSourceService = accessor.get(IThreadCommentDataSourceService);
         const { comment: originComment } = params;
         const comment = await dataSourceService.addComment(originComment);
@@ -51,20 +50,6 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
 
         if (isRoot) {
             const res = await commandService.executeCommand(redo.id, redo.params);
-            // const undo = {
-            //     id: DeleteCommentMutation.id,
-            //     params: {
-            //         unitId,
-            //         subUnitId,
-            //         commentId: comment.id,
-            //     },
-            // };
-            // res && undoRedoService.pushUndoRedo({
-            //     undoMutations: [undo],
-            //     redoMutations: [redo],
-            //     unitID: unitId,
-            // });
-
             return res;
         }
 

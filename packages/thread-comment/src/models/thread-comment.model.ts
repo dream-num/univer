@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, map, Subject } from 'rxjs';
 import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
-import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
-import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
+import { BehaviorSubject, map, Subject } from 'rxjs';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
+import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
 
 export type CommentUpdate = {
     unitId: string;
@@ -344,7 +344,7 @@ export class ThreadCommentModel extends Disposable {
         if (current.parentId) {
             const root = commentChildrenMap.get(current.parentId);
             if (root && root.children) {
-                const index = root.children.findIndex((comment) => comment.id = commentId);
+                const index = root.children.findIndex((comment) => comment.id === commentId);
                 root.children.splice(index, 1);
             }
             delete commentMap[commentId];

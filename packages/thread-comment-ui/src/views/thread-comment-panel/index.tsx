@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ICommandService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
-import { ThreadCommentModel } from '@univerjs/thread-comment';
-import type { Nullable } from '@univerjs/core';
-import { useObservable } from '@univerjs/ui';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
+import { useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Nullable } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import type { Observable } from 'rxjs';
-import type { IThreadCommentTreeProps } from '../thread-comment-tree';
-import { ThreadCommentTree } from '../thread-comment-tree';
-import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
+import { ThreadCommentTree } from '../thread-comment-tree';
 import styles from './index.module.less';
+import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 
 export interface IThreadCommentPanelProps {
     unitId: string;

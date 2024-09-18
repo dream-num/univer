@@ -18,10 +18,10 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Lookup } from '../index';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";
@@ -62,7 +62,7 @@ const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
     8, 7
 }`);
 
-describe('Test vlookup', () => {
+describe('Test lookup', () => {
     const testFunction = new Lookup(FUNCTION_NAMES_LOOKUP.LOOKUP);
 
     describe('Vector', () => {
@@ -81,7 +81,16 @@ describe('Test vlookup', () => {
                 arrayValueObject2,
                 arrayValueObject3
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('11');
+            expect(resultObject.getValue().toString()).toBe('88');
+        });
+
+        it('Exceeding columns, smaller', async () => {
+            const resultObject = testFunction.calculate(
+                NumberValueObject.create(0),
+                arrayValueObject2,
+                arrayValueObject3
+            ) as BaseValueObject;
+            expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
         });
 
         it('Match string', async () => {

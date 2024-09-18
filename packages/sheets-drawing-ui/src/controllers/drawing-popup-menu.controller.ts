@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
-import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
-import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
-import { takeUntil } from 'rxjs';
 import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
+import { takeUntil } from 'rxjs';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
 
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
@@ -120,16 +120,13 @@ export class DrawingPopupMenuController extends RxDisposable {
                     }
 
                     const { unitId, subUnitId, drawingId, drawingType } = drawingParam;
-                    if (drawingType === DrawingTypeEnum.DRAWING_DOM) {
-                        return;
-                    }
                     singletonPopupDisposer?.dispose();
                     singletonPopupDisposer = this.disposeWithMe(this._canvasPopManagerService.attachPopupToObject(object, {
                         componentKey: COMPONENT_IMAGE_POPUP_MENU,
                         direction: 'horizontal',
                         offset: [2, 0],
                         extraProps: {
-                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId),
+                            menuItems: this._getImageMenuItems(unitId, subUnitId, drawingId, drawingType),
                         },
                     }));
 
@@ -155,14 +152,14 @@ export class DrawingPopupMenuController extends RxDisposable {
         );
     }
 
-    private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string) {
+    private _getImageMenuItems(unitId: string, subUnitId: string, drawingId: string, drawingType: number) {
         return [
             {
                 label: 'image-popup.edit',
                 index: 0,
                 commandId: EditSheetDrawingOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: false,
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'image-popup.delete',
@@ -176,14 +173,14 @@ export class DrawingPopupMenuController extends RxDisposable {
                 index: 2,
                 commandId: OpenImageCropOperation.id,
                 commandParams: { unitId, subUnitId, drawingId },
-                disable: false,
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
             {
                 label: 'image-popup.reset',
                 index: 3,
                 commandId: ImageResetSizeOperation.id,
                 commandParams: [{ unitId, subUnitId, drawingId }],
-                disable: false,
+                disable: drawingType === DrawingTypeEnum.DRAWING_DOM,
             },
         ];
     }

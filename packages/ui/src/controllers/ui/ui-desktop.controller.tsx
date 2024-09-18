@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import type { IDisposable, UnitModel } from '@univerjs/core';
 import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
-import type { RenderUnit } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
+import type { IDisposable, UnitModel } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 
 import { ILayoutService } from '../../services/layout/layout.service';
-import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
-import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
-import { FloatDom } from '../../views/components/dom/FloatDom';
-import { DesktopWorkbench } from '../../views/workbench/Workbench';
-import type { IUniverUIConfig } from '../config.schema';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
+import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
+import { FloatDom } from '../../views/components/dom/FloatDom';
+import { CanvasPopup } from '../../views/components/popup/CanvasPopup';
+import { DesktopWorkbench } from '../../views/workbench/Workbench';
 import { menuSchema } from '../menus/menu.schema';
+import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 
 const STEADY_TIMEOUT = 3000;
@@ -78,7 +78,6 @@ export class DesktopUIController extends Disposable {
                         const render = this._renderManagerService.getRenderById(renderId)!;
                         if (!render.unitId) return;
                         if (isInternalEditorID(render.unitId)) return;
-
                         render.engine.setContainer(contentElement);
                     }
                 });

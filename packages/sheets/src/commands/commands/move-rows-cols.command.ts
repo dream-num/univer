@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IRange } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
@@ -26,22 +25,22 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
+import type { IAccessor, ICommand, IRange, Worksheet } from '@univerjs/core';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
 import {
     MoveColsMutation,
     MoveColsMutationUndoFactory,
     MoveRowsMutation,
     MoveRowsMutationUndoFactory,
 } from '../mutations/move-rows-cols.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
-import type { ISelectionWithStyle } from '../../basics';
-import { columnAcrossMergedCell, rowAcrossMergedCell } from './utils/merged-cell-util';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISelectionWithStyle } from '../../basics';
+import type { IMoveColumnsMutationParams, IMoveRowsMutationParams } from '../mutations/move-rows-cols.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface IMoveRowsCommandParams {
     unitId?: string;
@@ -49,6 +48,14 @@ export interface IMoveRowsCommandParams {
     range?: IRange; // for facade to use, accepting user parameters
     fromRange: IRange;
     toRange: IRange;
+}
+
+function rowAcrossMergedCell(row: number, worksheet: Worksheet): boolean {
+    return worksheet.getMergeData().some((mergedCell) => mergedCell.startRow < row && row <= mergedCell.endRow);
+}
+
+function columnAcrossMergedCell(col: number, worksheet: Worksheet): boolean {
+    return worksheet.getMergeData().some((mergedCell) => mergedCell.startColumn < col && col <= mergedCell.endColumn);
 }
 
 export const MoveRowsCommandId = 'sheet.command.move-rows' as const;

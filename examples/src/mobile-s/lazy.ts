@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
+import type { Plugin, PluginCtor } from '@univerjs/core';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [

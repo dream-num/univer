@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RectPopup, Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import { getPlainTextFormDocument } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -135,7 +134,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 if (!unit) {
                     return;
                 }
-                const text = getPlainTextFormDocument(unit.getSnapshot());
+                const text = BuildTextUtils.transform.getPlainText(unit.getSnapshot().body?.dataStream ?? '');
                 setEditingText(text);
             }
         });
@@ -198,9 +197,6 @@ export function ListDropDown(props: IDropdownComponentProps) {
                         p: null,
                         f: null,
                         si: null,
-                        custom: {
-                            __link_url: '',
-                        },
                     },
                 };
 

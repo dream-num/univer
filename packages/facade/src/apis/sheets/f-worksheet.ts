@@ -838,6 +838,20 @@ export class FWorksheet {
         return snapshot.mergeData.map((merge) => this._injector.createInstance(FRange, this._workbook, this._worksheet, merge));
     }
 
+    /**
+     * Get the merged cell data of the specified row and column.
+     * @param {number} row The row index.
+     * @param {number} column The column index.
+     * @returns {FRange|undefined} The merged cell data, or undefined if the cell is not merged.
+     */
+    getCellMergeData(row: number, column: number): FRange | undefined {
+        const worksheet = this._worksheet;
+        const mergeData = worksheet.getMergedCell(row, column);
+        if (mergeData) {
+            return this._injector.createInstance(FRange, this._workbook, this._worksheet, mergeData);
+        }
+    }
+
     // #endregion
 
     /**

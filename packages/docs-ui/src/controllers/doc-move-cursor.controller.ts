@@ -44,6 +44,7 @@ import { getDocObject } from '../basics/component-tools';
 import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
+import { DocBackScrollRenderController } from './render-controllers/back-scroll.render-controller';
 import type { IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, DocMoveCursorController)
@@ -167,6 +168,8 @@ export class DocMoveCursorController extends Disposable {
                     style,
                 },
             ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), focusOffset);
         } else {
             const focusGlyph = skeleton.findNodeByCharIndex(focusOffset, segmentId, segmentPage);
             const documentOffsetConfig = docObject.document.getOffsetConfig();
@@ -206,6 +209,8 @@ export class DocMoveCursorController extends Disposable {
                     style,
                 },
             ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
         }
     }
 
@@ -298,6 +303,8 @@ export class DocMoveCursorController extends Disposable {
                     style,
                 },
             ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), cursor);
         } else {
             const startNode = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
             const endNode = skeleton.findNodeByCharIndex(endOffset, segmentId, segmentPage);
@@ -331,6 +338,7 @@ export class DocMoveCursorController extends Disposable {
                         style,
                     },
                 ], false);
+
                 return;
             }
 
@@ -346,6 +354,8 @@ export class DocMoveCursorController extends Disposable {
                     style,
                 },
             ], false);
+
+            this._scrollToFocusNodePosition(docDataModel.getUnitId(), newActiveRange.endOffset);
         }
     }
 
@@ -550,6 +560,20 @@ export class DocMoveCursorController extends Disposable {
         if (newLine != null) {
             return newLine;
         }
+    }
+
+    private _scrollToFocusNodePosition(unitId: string, offset: number) {
+        const backScrollController = this._renderManagerService.getRenderById(unitId)?.with(DocBackScrollRenderController);
+        if (backScrollController == null) {
+            return;
+        }
+
+        // Scroll to the offset.
+        backScrollController.scrollToRange({
+            startOffset: offset,
+            endOffset: offset,
+            collapsed: true,
+        });
     }
 
     private _getDocObject() {

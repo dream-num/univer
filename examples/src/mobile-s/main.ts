@@ -18,20 +18,20 @@ import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } 
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
-import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
-import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-import type { FUniver } from '@univerjs/facade';
+import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFilterMobileUIPlugin } from '@univerjs/sheets-filter-ui';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsDataValidationMobilePlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
+import { UniverMobileUIPlugin } from '@univerjs/ui';
+import type { FUniver } from '@univerjs/facade';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS } from '../locales';
 
@@ -50,9 +50,12 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 // core plugins
 univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverMobileUIPlugin, { container: 'app', contextMenu: true });
+univer.registerPlugin(UniverMobileUIPlugin, {
+    container: 'app',
+    contextMenu: true,
+});
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
-    workerURL: './worker.js',
+    workerURL: new Worker(new URL('./worker.js', import.meta.url), { type: 'module' }),
 } as IUniverRPCMainThreadConfig);
 
 univer.registerPlugin(UniverDocsUIPlugin);

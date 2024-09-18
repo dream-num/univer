@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, IMutation } from '@univerjs/core';
 
 import type {
     IAddWorksheetMergeMutationParams,
@@ -60,6 +60,7 @@ export const AddWorksheetMergeMutation: IMutation<IAddWorksheetMergeMutationPara
         for (let i = 0; i < mergeAppendData.length; i++) {
             mergeConfigData.push(mergeAppendData[i]);
         }
+        worksheet.getSpanModel().rebuild(mergeConfigData);
 
         return true;
     },

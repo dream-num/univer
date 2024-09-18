@@ -23,7 +23,6 @@ export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, dele
 export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
-export { getPlainText, getPlainTextFormBody, getPlainTextFormDocument, getSelectionText } from './basics/plain-text';
 export { replaceSelectionFactory } from './basics/replace';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } from './commands/commands/auto-format.command';

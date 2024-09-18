@@ -16,11 +16,11 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import { UnitModel, UniverInstanceType } from '../common/unit';
-import type { Nullable } from '../shared';
 import { generateRandomId, Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
-import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { PageType } from '../types/interfaces';
+import type { Nullable } from '../shared';
+import type { ISlideData, ISlidePage } from '../types/interfaces';
 
 export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNIVER_SLIDE> {
     override type: UniverInstanceType.UNIVER_SLIDE = UniverInstanceType.UNIVER_SLIDE;
@@ -63,6 +63,18 @@ export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNI
         this._snapshot.title = name;
         this._name$.next(name);
         this._unitId = this._snapshot.id ?? generateRandomId(6);
+    }
+
+    override getRev(): number {
+        return 0; // TODO@jikkai: slide has not implement collaborative editing yet
+    }
+
+    override incrementRev(): void {
+        // do nothing
+    }
+
+    override setRev(_rev: number): void {
+        // do nothing
     }
 
     getSnapshot() {

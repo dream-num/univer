@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
 
+import { UnitModel, UniverInstanceType } from '../common/unit';
 import { ILogService } from '../services/log/log.service';
-import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { BooleanNumber } from '../types/enum';
-import { UnitModel, UniverInstanceType } from '../common/unit';
+import { getEmptySnapshot } from './empty-snapshot';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
-import { getEmptySnapshot } from './empty-snapshot';
+import type { Nullable } from '../shared';
 import type { IRangeType, IWorkbookData, IWorksheetData } from './typedef';
 
 export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
@@ -152,12 +152,16 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER
         return this._unitId;
     }
 
-    getRev(): number {
+    override getRev(): number {
         return this._snapshot.rev ?? 1; // the revision number should start with one
     }
 
-    incrementRev(): void {
+    override incrementRev(): void {
         this._snapshot.rev = this.getRev() + 1;
+    }
+
+    override setRev(rev: number): void {
+        this._snapshot.rev = rev;
     }
 
     /**

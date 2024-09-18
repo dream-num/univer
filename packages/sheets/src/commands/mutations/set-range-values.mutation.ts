@@ -26,7 +26,6 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
-import { handleCustom, transformCustom } from '../../basics/cell-custom';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
@@ -89,7 +88,8 @@ export const SetRangeValuesUndoMutationFactory = (
 
         cell.s = transformStyle(oldStyle, newStyle);
 
-        cell.custom = transformCustom(cell.custom, newVal?.custom);
+        // Do not use the transformCustom method, custom will overwrite the original value
+        // cell.custom = transformCustom(cell.custom, newVal?.custom);
 
         undoData.setValue(row, col, setNull(cell));
     });
@@ -162,7 +162,9 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 }
 
                 if (newVal.custom !== undefined) {
-                    handleCustom(oldVal, newVal);
+                    // Custom will overwrite the original value
+                    oldVal.custom = newVal.custom;
+                    // handleCustom(oldVal, newVal);
                 }
 
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));

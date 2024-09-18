@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+import {
+    BorderType,
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Tools,
+} from '@univerjs/core';
 import type {
     BorderStyleTypes,
     IAccessor,
@@ -24,22 +33,12 @@ import type {
     IRange,
     IStyleData,
 } from '@univerjs/core';
-import {
-    BorderType,
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    Rectangle,
-    Tools,
-} from '@univerjs/core';
 
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -147,7 +146,6 @@ export const SetBorderCommand: ICommand = {
 
         const { worksheet, unitId, subUnitId } = target;
         const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-        const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {
             return false;
         }
@@ -242,27 +240,10 @@ export const SetBorderCommand: ICommand = {
             },
         };
 
-        const hasMerge = (row: number, column: number): IRange | null => {
-            let res: IRange | null = null;
-            mergeData.forEach((merge) => {
-                if (
-                    Rectangle.intersects(merge, {
-                        startColumn: column,
-                        endColumn: column,
-                        startRow: row,
-                        endRow: row,
-                    })
-                ) {
-                    res = merge;
-                }
-            });
-            return res;
-        };
-
         function setBorderStyle(range: IRange, defaultStyle: IBorderData, reserve?: boolean) {
             if (range.startRow < 0 || range.startColumn < 0) return;
             forEach(range, (row, column) => {
-                const rectangle = hasMerge(row, column);
+                const rectangle = worksheet.getMergedCell(row, column);
 
                 let bdStyle = defaultStyle;
 
@@ -338,7 +319,7 @@ export const SetBorderCommand: ICommand = {
         // inner vertical border
         if (vertical) {
             forEach(range, (row, column) => {
-                const rectangle = hasMerge(row, column);
+                const rectangle = worksheet.getMergedCell(row, column);
                 if (rectangle) {
                     if (rectangle.endColumn !== range.endColumn) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
@@ -389,7 +370,7 @@ export const SetBorderCommand: ICommand = {
         // inner horizontal border
         if (horizontal) {
             forEach(range, (row, column) => {
-                const rectangle = hasMerge(row, column);
+                const rectangle = worksheet.getMergedCell(row, column);
                 if (rectangle) {
                     if (rectangle.endRow !== range.endRow) {
                         const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
@@ -470,7 +451,7 @@ export const SetBorderCommand: ICommand = {
             setBorderStyle(range, { bc_tr: null }, true);
 
             forEach(range, (row, column) => {
-                const rectangle = hasMerge(row, column);
+                const rectangle = worksheet.getMergedCell(row, column);
                 if (rectangle) {
                     // Clear the right border of all columns except the last column
                     if (rectangle.endColumn !== range.endColumn) {

@@ -18,7 +18,6 @@ import {
     Direction,
     Disposable,
     DisposableCollection,
-    getCellInfoInMergeData,
     ICommandService,
     Inject,
     Injector,
@@ -280,7 +279,7 @@ export class AutoFillController extends Disposable {
         );
     }
 
-  // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _triggerAutoFill(source: IRange, selection: IRange) {
         // if source range === dest range, do nothing;
         if (
@@ -640,15 +639,10 @@ export class AutoFillController extends Disposable {
             throw new Error('No active sheet found');
         }
 
-        const mergeData = worksheet.getMergeData();
         const applyMergeRanges = [];
         for (let i = source.startRow; i <= source.endRow; i++) {
             for (let j = source.startColumn; j <= source.endColumn; j++) {
-                const { isMergedMainCell, startRow, startColumn, endRow, endColumn } = getCellInfoInMergeData(
-                    i,
-                    j,
-                    mergeData
-                );
+                const { isMergedMainCell, startRow, startColumn, endRow, endColumn } = worksheet.getCellInfoInMergeData(i, j);
                 if (isMergedMainCell) {
                     if (direction === Direction.DOWN) {
                         let windowStartRow = startRow + csLen;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, createIdentifier, CustomRangeType, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 
-import type { ICustomRange, IDisposable, IDocumentBody, IDocumentData, IParagraph, Nullable } from '@univerjs/core';
+import type { IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/delete.command';
@@ -135,7 +135,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
         if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             if (text) {
-                const textDocData = this._generateBody(text);
+                const textDocData = BuildTextUtils.transform.fromPlainText(text);
                 return this._paste({ body: textDocData });
             } else {
                 partDocData.body!.textRuns = [];
@@ -416,68 +416,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
         }
     }
 
-    private _generateBody(text: string): IDocumentBody {
-        // Convert all \n to \r, because we use \r to indicate paragraph break.
-        const dataStream = text.replace(/\n/g, '\r').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
-        const paragraphs: IParagraph[] = [];
-        const customRanges: ICustomRange[] = [];
-        let cursor = 0;
-        let newDataStream = '';
-        let linkCount = 0;
-
-        const loopParagraph = (i: number, insertP = true) => {
-            const paragraphText = dataStream.slice(cursor, i);
-            if (Tools.isLegalUrl(paragraphText)) {
-                const id = generateRandomId();
-                const urlText = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${paragraphText}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-                const range: ICustomRange = {
-                    startIndex: cursor + linkCount * 2,
-                    endIndex: cursor + linkCount * 2 + urlText.length - 1,
-                    rangeId: id,
-                    rangeType: CustomRangeType.HYPERLINK,
-                    properties: {
-                        url: text,
-                    },
-                };
-                customRanges.push(range);
-                newDataStream += urlText;
-                cursor = i + 1;
-                linkCount++;
-                if (insertP) {
-                    newDataStream += '\r';
-                    paragraphs.push({ startIndex: i + linkCount * 2 });
-                }
-            } else {
-                newDataStream += dataStream.slice(cursor, i + 1);
-                cursor = i + 1;
-                if (insertP) {
-                    paragraphs.push({ startIndex: i + linkCount * 2 });
-                }
-            }
-        };
-
-        let end = 0;
-        for (let i = 0; i < dataStream.length; i++) {
-            if (dataStream[i] === '\r') {
-                loopParagraph(i);
-                end = i;
-            }
-        }
-
-        if (end !== dataStream.length - 1) {
-            loopParagraph(dataStream.length - 1, false);
-        }
-        return {
-            dataStream: newDataStream,
-            paragraphs,
-            customRanges,
-        };
-    }
-
     private _genDocDataFromHtmlAndText(html?: string, text?: string): Partial<IDocumentData> {
         if (!html) {
             if (text) {
-                const body = this._generateBody(text);
+                const body = BuildTextUtils.transform.fromPlainText(text);
 
                 return { body };
             } else {

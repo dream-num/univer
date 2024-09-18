@@ -15,8 +15,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { Nullable } from '../../shared';
+import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { Tools } from '../../shared/tools';
+import { getEmptySnapshot } from './empty-snapshot';
+import { JSONX } from './json-x/json-x';
+import { PRESET_LIST_TYPE } from './preset-list-type';
+import { getBodySlice, SliceBodyType } from './text-x/utils';
+import type { Nullable } from '../../shared';
 import type {
     IDocumentBody,
     IDocumentData,
@@ -26,12 +31,7 @@ import type {
     IListData,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
-import { UnitModel, UniverInstanceType } from '../../common/unit';
-import { getBodySlice, SliceBodyType } from './text-x/utils';
-import { getEmptySnapshot } from './empty-snapshot';
 import type { JSONXActions } from './json-x/json-x';
-import { JSONX } from './json-x/json-x';
-import { PRESET_LIST_TYPE } from './preset-list-type';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -62,6 +62,18 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
 
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
         this._name$.next(this.snapshot.title ?? 'No Title');
+    }
+
+    override getRev(): number {
+        return this.snapshot.rev ?? 1;
+    }
+
+    override incrementRev(): void {
+        this.snapshot.rev = this.getRev() + 1;
+    }
+
+    override setRev(rev: number): void {
+        this.snapshot.rev = rev;
     }
 
     setName(name: string) {
@@ -255,14 +267,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     getCustomDecorations() {
         return this.snapshot.body?.customDecorations;
-    }
-
-    getRev(): number {
-        return this.snapshot.rev ?? 1;
-    }
-
-    incrementRev(): void {
-        this.snapshot.rev = this.getRev() + 1;
     }
 
     getSettings() {

@@ -53,8 +53,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
         _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton
     ) {
-        const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
-            spreadsheetSkeleton;
+        const { worksheet } = spreadsheetSkeleton;
+
         if (!worksheet) {
             return;
         }
@@ -85,8 +85,8 @@ export abstract class RangeProtectionRenderExtension extends SheetExtension {
                     }
                     this.renderCache.add(config.ruleId);
                     config.ranges!.forEach((range) => {
-                        const start = this.getCellByIndex(range.startRow, range.startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-                        const end = this.getCellByIndex(range.endRow, range.endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                        const start = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+                        const end = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.endRow, range.endColumn);
                         ctx.fillRect(start.startX, start.startY, end.endX - start.startX, end.endY - start.startY);
                     });
                 }

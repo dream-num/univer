@@ -18,10 +18,10 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Hlookup } from '../index';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1,2,3,4,5,6,7,8;
@@ -132,7 +132,7 @@ describe('Test hlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('First');
+            expect(resultObject.getValue().toString()).toBe('Eighth');
         });
 
         it('Approximate not order data', async () => {

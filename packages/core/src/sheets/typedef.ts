@@ -613,6 +613,7 @@ export interface ITextRangeParam extends ITextRange {
 
 /**
  * Determines whether the cell(row, column) is within the range of the merged cells.
+ * @deprecated please use worksheet.getCellInfoInMergeData instead
  */
 export function getCellInfoInMergeData(row: number, column: number, mergeData?: IRange[]): ISelectionCell {
     let isMerged = false; // The upper left cell only renders the content

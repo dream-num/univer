@@ -48,8 +48,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[]
     ) {
-        const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
-        spreadsheetSkeleton;
+        const { worksheet } = spreadsheetSkeleton;
         if (!worksheet) {
             return false;
         }
@@ -69,7 +68,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
                 if (!icon) {
                     return;
                 }
-                const cellInfo = this.getCellByIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

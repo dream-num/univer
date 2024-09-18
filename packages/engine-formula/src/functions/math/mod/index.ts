@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Mod extends BaseFunction {
     override minParams = 2;

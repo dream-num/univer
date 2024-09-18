@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 
-export const getStringFromDataStream = (data: IDocumentData) => {
-    const dataStream = data.body?.dataStream.replace(/\r\n$/, '') || '';
-    return dataStream;
-};
+export const PLUGIN_CONFIG_KEY = 'action-recorder.config';
+
+export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+
+export interface IUniverActionRecorderConfig {
+    menu?: MenuConfig;
+}
+
+export const defaultPluginConfig: IUniverActionRecorderConfig = {};

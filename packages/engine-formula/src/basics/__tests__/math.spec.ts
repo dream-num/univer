@@ -15,16 +15,20 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { getPlainTextFormDocument } from '../plain-text';
+import { calculateCombin, calculateFactorial } from '../math';
 
-describe('Test getPlainTextFormDocument', () => {
-    it('should return plain text without special tags', () => {
-        expect(getPlainTextFormDocument({
-            body: {
-                dataStream: '\x1E123\x1F\r\n',
-            },
-            id: '',
-            documentStyle: {},
-        })).toEqual('123');
+describe('Test math', () => {
+    it('Factorial test', () => {
+        expect(calculateFactorial(0)).toBe(1);
+        expect(calculateFactorial(1)).toBe(1);
+        expect(calculateFactorial(1.9)).toBe(1);
+        expect(calculateFactorial(5)).toBe(120);
+        expect(calculateFactorial(-1)).toBe(Number.NaN);
+        expect(calculateFactorial(171)).toBe(Infinity);
+    });
+
+    it('Combin test', () => {
+        expect(calculateCombin(8, 2)).toBe(28);
+        expect(calculateCombin(1000000, 2000)).toBe(Infinity);
     });
 });

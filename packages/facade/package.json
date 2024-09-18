@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.2.12",
+    "version": "0.2.14",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -73,7 +73,6 @@
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",

@@ -41,7 +41,7 @@ export class Border extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[]
     ) {
-        const { dataMergeCache, stylesCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
+        const { stylesCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
         if (!worksheet) return;
         if (
             !rowHeightAccumulation ||
@@ -61,19 +61,12 @@ export class Border extends SheetExtension {
         const precisionScale = this._getScale(ctx.getScale());
         const { border } = stylesCache;
 
-        // eslint-disable-next-line max-lines-per-function
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
                 return true;
             }
 
-            const cellInfo = this.getCellByIndex(
-                rowIndex,
-                columnIndex,
-                rowHeightAccumulation,
-                columnWidthAccumulation,
-                dataMergeCache
-            );
+            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
             const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;

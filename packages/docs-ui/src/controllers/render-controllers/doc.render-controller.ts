@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FOCUSING_DOC, ICommandService, IConfigService, IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { FOCUSING_DOC, ICommandService, IContextService, Inject, RxDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
@@ -23,14 +23,15 @@ import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@uni
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IConfigService private readonly _configService: IConfigService,
         @IEditorService private readonly _editorService: IEditorService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
@@ -66,15 +67,15 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
     }
 
     private _addNewRender() {
-        const { scene, engine, unit } = this._context;
+        const { scene, engine } = this._context;
 
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: 0,
             top: 0,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
 
@@ -126,6 +127,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         engine.runRenderLoop(() => {
             scene.render();
         });
+
+        // Attach scroll event after main viewport created.
+        this._docSelectionRenderService.__attachScrollEvent();
     }
 
     private _addComponent() {

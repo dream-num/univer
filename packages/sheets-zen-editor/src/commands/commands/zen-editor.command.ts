@@ -29,7 +29,7 @@ function scrollToTop(accessor: IAccessor) {
         endOffset: 0,
     };
     if (backScrollController) {
-        backScrollController.scrollToRange(DOCS_ZEN_EDITOR_UNIT_ID_KEY, textRange as ITextRange);
+        backScrollController.scrollToRange(textRange as ITextRange);
     }
 }
 

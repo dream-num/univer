@@ -280,7 +280,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             const docSelectionRenderManager = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 
             if (docSelectionRenderManager) {
-                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+                docSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION, !document.activeElement || document.activeElement.classList.contains('univer-editor'));
             }
         }));
     }
@@ -834,7 +834,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
         const { keycode } = param;
-
         this._setOpenForCurrent(null, null);
 
         this._cursorChange = CursorChange.InitialState;
@@ -892,7 +891,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             worksheet.getCellRaw(row, column) || {},
             documentLayoutObject,
             this._lexerTreeBuilder,
-            (model) => this._resourceLoaderService.saveUnit(model.getUnitId())!,
+            (model) => model.getSnapshot(),
             this._localService,
             this._functionService
         );

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { Inject, IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { Inject, RxDisposable } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
-import type { INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { getDocObject } from '../../basics/component-tools';
+import type { Documents, INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { getAnchorBounding } from '../../services/selection/text-range';
@@ -33,8 +31,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
 
@@ -49,34 +46,34 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
             const { isEditing, unitId } = params;
 
-            if (isEditing) {
-                this._scrollToSelection(unitId);
+            if (unitId !== this._context.unitId || !isEditing) {
+                return;
             }
+
+            this._scrollToSelection();
         });
     }
 
-    scrollToRange(unitId: string, range: ITextRange) {
-        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-        const skeleton = docSkeletonManagerService?.getSkeleton();
+    scrollToRange(range: ITextRange) {
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
         if (!skeleton) {
             return;
         }
         const { startOffset } = range;
         const anchorNodePosition = skeleton.findNodePositionByCharIndex(startOffset);
-        // const focusNodePosition = startOffset !== endOffset ? skeleton.findNodePositionByCharIndex(endOffset) : null;
-        this.scrollToNode(unitId, anchorNodePosition);
+
+        this.scrollToNode(anchorNodePosition);
     }
 
-    scrollToNode(unitId: string, startNodePosition: Nullable<INodePosition>) {
-        const docObject = this._getDocObject();
-        const docSkeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(DocSkeletonManagerService);
-        const skeleton = docSkeletonManagerService?.getSkeleton();
+    scrollToNode(startNodePosition: Nullable<INodePosition>) {
+        const { unitId, scene, mainComponent } = this._context;
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-        if (docObject == null || skeleton == null) {
+        if (mainComponent == null || skeleton == null) {
             return;
         }
 
-        const documentOffsetConfig = docObject.document.getOffsetConfig();
+        const documentOffsetConfig = (mainComponent as Documents).getOffsetConfig();
         const { docsLeft, docsTop } = documentOffsetConfig;
 
         const convertor = new NodePositionConvertToCursor(documentOffsetConfig, skeleton);
@@ -89,7 +86,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
         const top = aTop + docsTop;
 
-        const viewportMain = docObject.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
         const isEditor = !!this._editorService.getEditor(unitId);
 
@@ -126,7 +123,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
     }
 
     // Let the selection show on the current screen.
-    private _scrollToSelection(unitId: string) {
+    private _scrollToSelection() {
         const activeTextRange = this._textSelectionManagerService.getActiveTextRange();
         if (activeTextRange == null) {
             return;
@@ -138,10 +135,6 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
             return;
         }
 
-        this.scrollToNode(unitId, startNodePosition);
-    }
-
-    private _getDocObject() {
-        return getDocObject(this._univerInstanceService, this._renderManagerService);
+        this.scrollToNode(startNodePosition);
     }
 }

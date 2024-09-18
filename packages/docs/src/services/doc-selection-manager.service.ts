@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { ICommandService, RxDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { BehaviorSubject } from 'rxjs';
-import type { Nullable } from '@univerjs/core';
+import { BehaviorSubject, takeUntil } from 'rxjs';
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type {
     IDocSelectionInnerParam,
     IRectRangeWithStyle,
@@ -58,9 +58,29 @@ export class DocSelectionManagerService extends RxDisposable {
     readonly refreshSelection$ = this._refreshSelection$.asObservable();
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
+        this._listenCurrentUnit();
+    }
+
+    private _listenCurrentUnit() {
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
+                if (documentModel == null) {
+                    return;
+                }
+
+                const unitId = documentModel.getUnitId();
+
+                this._setCurrentSelectionNotRefresh({
+                    unitId,
+                    subUnitId: unitId,
+                });
+            });
     }
 
     getCurrentSelection() {
@@ -88,24 +108,6 @@ export class DocSelectionManagerService extends RxDisposable {
         this._currentSelection = param;
 
         this._refresh(param);
-    }
-
-    setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {
-        const { unitId, subUnitId } = this._currentSelection ?? {};
-        const { unitId: newUnitId, subUnitId: newSubUnitId } = param;
-
-        if (unitId !== newUnitId || subUnitId !== newSubUnitId) {
-            if (unitId && subUnitId) {
-                this._refreshSelection$.next({
-                    unitId,
-                    subUnitId,
-                    docRanges: [],
-                    isEditing: false,
-                });
-            }
-
-            this._currentSelection = param;
-        }
     }
 
     getCurrentTextRanges(): Readonly<Nullable<ITextRangeWithStyle[]>> {
@@ -196,7 +198,8 @@ export class DocSelectionManagerService extends RxDisposable {
         });
     }
 
-    replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam) {
+    // Only use in doc-selection-render.controller.ts
+    __replaceTextRangesWithNoRefresh(textSelectionInfo: IDocSelectionInnerParam) {
         if (this._currentSelection == null) {
             return;
         }
@@ -239,6 +242,24 @@ export class DocSelectionManagerService extends RxDisposable {
 
     override dispose(): void {
         this._textSelection$.complete();
+    }
+
+    private _setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {
+        const { unitId, subUnitId } = this._currentSelection ?? {};
+        const { unitId: newUnitId, subUnitId: newSubUnitId } = param;
+
+        if (unitId !== newUnitId || subUnitId !== newSubUnitId) {
+            if (unitId && subUnitId) {
+                this._refreshSelection$.next({
+                    unitId,
+                    subUnitId,
+                    docRanges: [],
+                    isEditing: false,
+                });
+            }
+
+            this._currentSelection = param;
+        }
     }
 
     private _getTextRanges(param: Nullable<IDocSelectionManagerSearchParam>) {

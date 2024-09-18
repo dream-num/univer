@@ -43,8 +43,8 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
         _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton
     ) {
-        const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache } =
-            spreadsheetSkeleton;
+        const { worksheet } = spreadsheetSkeleton;
+
         if (!worksheet) {
             return false;
         }
@@ -54,8 +54,8 @@ export class WorksheetProtectionRenderExtension extends SheetExtension {
             this._pattern = ctx.createPattern(this._img, 'repeat');
         }
         const { startRow, startColumn, endRow, endColumn } = spreadsheetSkeleton.rowColumnSegment;
-        const start = this.getCellByIndex(startRow, startColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-        const end = this.getCellByIndex(endRow, endColumn, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        const start = spreadsheetSkeleton.getCellByIndexWithNoHeader(startRow, startColumn);
+        const end = spreadsheetSkeleton.getCellByIndexWithNoHeader(endRow, endColumn);
 
         const { hasWorksheetRule = false, selectionProtection = [] } = worksheet.getCell(startRow, startColumn) as IWorksheetProtectionRenderCellData || {};
         if (!this._pattern) {

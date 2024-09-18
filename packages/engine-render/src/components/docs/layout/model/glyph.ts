@@ -22,6 +22,7 @@ import { FontCache } from '../shaping-engine/font-cache';
 import { validationGrid } from '../tools';
 import type {
     IAdjustability,
+    IDocumentSkeletonBoundingBox,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
@@ -279,7 +280,7 @@ export function createSkeletonBulletGlyph(
         }
     }
 
-    const bBox = _getMaxBoundingBox(glyph, bulletSkeleton);
+    const bBox = _getMaxBoundingBox(glyph, boundingBox);
 
     return {
         content,
@@ -337,15 +338,15 @@ export function addGlyphToDivide(
     divide.glyphGroup.push(...glyphGroup);
 }
 
-function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletSkeleton: IDocumentSkeletonBullet) {
+function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletBBox: IDocumentSkeletonBoundingBox) {
     const { ba: spanAscent, bd: spanDescent } = glyph.bBox;
-    const { ba: bulletAscent, bd: bulletDescent } = bulletSkeleton.bBox;
+    const { ba: bulletAscent, bd: bulletDescent } = bulletBBox;
 
     if (spanAscent + spanDescent > bulletAscent + bulletDescent) {
         return glyph.bBox;
     }
 
-    return bulletSkeleton.bBox;
+    return bulletBBox;
 }
 
 export function glyphShrinkRight(glyph: IDocumentSkeletonGlyph, amount: number) {

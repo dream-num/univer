@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Dimension,
@@ -31,7 +30,35 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 
+import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
+import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
+import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
+import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
+import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
+import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
+import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
+import { MoveRangeCommand } from '../commands/commands/move-range.command';
+import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
+import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
+import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
+import {
+    AddMergeUndoMutationFactory,
+    AddWorksheetMergeMutation,
+} from '../commands/mutations/add-worksheet-merge.mutation';
+import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
+import {
+    RemoveMergeUndoMutationFactory,
+    RemoveWorksheetMergeMutation,
+} from '../commands/mutations/remove-worksheet-merge.mutation';
+import { RefRangeService } from '../services/ref-range/ref-range.service';
+import { EffectRefRangId } from '../services/ref-range/type';
+import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
+import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import type {
     IAddWorksheetMergeMutationParams,
     IInsertColMutationParams,
@@ -39,43 +66,16 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
 } from '../basics/interfaces/mutation-interface';
-import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
-import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import type { IDeleteRangeMoveLeftCommandParams } from '../commands/commands/delete-range-move-left.command';
-import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
 import type { IDeleteRangeMoveUpCommandParams } from '../commands/commands/delete-range-move-up.command';
-import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
 import type { InsertRangeMoveDownCommandParams } from '../commands/commands/insert-range-move-down.command';
-import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
 import type { InsertRangeMoveRightCommandParams } from '../commands/commands/insert-range-move-right.command';
-import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
-import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
-import { MoveRangeCommand } from '../commands/commands/move-range.command';
-import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
-import type { ISetWorksheetActivateCommandParams } from '../commands/commands/set-worksheet-activate.command';
-import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
-import {
-    AddMergeUndoMutationFactory,
-    AddWorksheetMergeMutation,
-} from '../commands/mutations/add-worksheet-merge.mutation';
-import {
-    RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-} from '../commands/mutations/remove-worksheet-merge.mutation';
-import { RefRangeService } from '../services/ref-range/ref-range.service';
-import type { EffectRefRangeParams } from '../services/ref-range/type';
-import { EffectRefRangId } from '../services/ref-range/type';
-import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
-import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
-import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
-import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
-import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
-import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
-import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
+import type { ISetWorksheetActivateCommandParams } from '../commands/commands/set-worksheet-activate.command';
+import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
+import type { EffectRefRangeParams } from '../services/ref-range/type';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
@@ -1066,19 +1066,13 @@ export class MergeCellController extends Disposable {
             subUnitId,
             ranges: removeMergeData,
         };
-        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-            this._injector,
-            removeMergeParams
-        );
+        const undoRemoveMergeParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(this._injector, removeMergeParams);
         const addMergeParams: IAddWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
             ranges: addMergeData,
         };
-        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
-            this._injector,
-            addMergeParams
-        );
+        const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(this._injector, addMergeParams);
         return {
             redos: [
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
@@ -1151,7 +1145,7 @@ export class MergeCellController extends Disposable {
                         adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
                     }
                 });
-                worksheet.getConfig().mergeData = adjustedMergedCells;
+                worksheet.setMergeData(adjustedMergedCells);
 
                 this.disposableCollection.dispose();
                 const { unitId, subUnitId } = command.params as IMoveRowsMutationParams;
@@ -1217,7 +1211,7 @@ export class MergeCellController extends Disposable {
                     }
                 });
 
-                worksheet.getConfig().mergeData = adjustedMergedCells;
+                worksheet.setMergeData(adjustedMergedCells);
 
                 this.disposableCollection.dispose();
                 const { unitId, subUnitId } = command.params as IMoveRowsMutationParams;

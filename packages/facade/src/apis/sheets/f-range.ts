@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandService, Inject, Injector, Rectangle, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandService, Inject, Injector, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -945,8 +945,8 @@ export class FRange {
      * @returns {boolean} is overlap with a merged cell
      */
     isPartOfMerge(): boolean {
-        const mergeData = this._worksheet.getMergeData();
-        return mergeData.some((merge) => Rectangle.intersects(this._range, merge));
+        const { startRow, startColumn, endRow, endColumn } = this._range;
+        return this._worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn).length > 0;
     }
 
     /**

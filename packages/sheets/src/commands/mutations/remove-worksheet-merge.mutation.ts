@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import type { IAccessor, IMutation } from '@univerjs/core';
 
 import type {
     IAddWorksheetMergeMutationParams,
@@ -83,6 +83,8 @@ export const RemoveWorksheetMergeMutation: IMutation<IRemoveWorksheetMergeMutati
                 }
             }
         }
+        // update merge data cache
+        worksheet.getSpanModel().rebuild(mergeConfigData);
         return true;
     },
 };

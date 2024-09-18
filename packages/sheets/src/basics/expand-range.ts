@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Worksheet } from '@univerjs/core';
 import { createRowColIter, ObjectMatrix, Rectangle } from '@univerjs/core';
+import type { ICellData, IRange, Worksheet } from '@univerjs/core';
 
 export interface IExpandParams {
     left?: boolean;
@@ -56,10 +56,7 @@ function getMatrixWithSpanInfo(worksheet: Worksheet, startRow: number, startColu
     const matrix = worksheet.getCellMatrix();
 
     // get all merged cells
-    const mergedCellsInRange = worksheet.getSnapshot().mergeData.filter((rect) =>
-        Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
-    );
-
+    const mergedCellsInRange = worksheet.getSpanModel().getMergedCellRange(startRow, startColumn, endRow, endColumn);
     // iterate all cells in the range
     const returnCellMatrix = new ObjectMatrix<IMatrixWithSpanInfo>();
 

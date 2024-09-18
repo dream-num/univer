@@ -79,7 +79,6 @@ import {
     getCellByIndexWithMergeInfo,
     getCellPositionByIndex,
     getFontStyleString,
-    hasUnMergedCellInRow,
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
@@ -259,8 +258,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         endColumn: -1,
     };
 
-    private _dataMergeCache: IRange[] = [];
-    private _dataMergeCacheMap: Map<string, IRange> = new Map();
+    // private _dataMergeCache: IRange[] = [];
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
@@ -330,9 +328,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._rowColumnSegment;
     }
 
-    get dataMergeCache(): IRange[] {
-        return this._dataMergeCache;
-    }
+    // get dataMergeCache(): IRange[] {
+    //     return this._dataMergeCache;
+    // }
 
     get stylesCache(): IStylesCache {
         return this._stylesCache;
@@ -368,7 +366,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowHeaderWidth = 0;
         this._columnHeaderHeight = 0;
         this._rowColumnSegment = null as any;
-        this._dataMergeCache = [];
+        // this._dataMergeCache = [];
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
@@ -468,10 +466,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const { mergeData } = this._worksheetData;
+        // const { mergeData } = this._worksheetData;
 
-        this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
-        this._dataMergeCacheMap = mergeData && this._getMergeCellsCache(mergeData);
+        // // this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
+        // const rowColumnSegment = this._rowColumnSegment;
+        // const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         this._calculateStylesCache();
 
@@ -492,7 +491,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const results: IRowAutoHeightInfo[] = [];
-        const { mergeData, rowData } = this._worksheetData;
+        const { rowData } = this._worksheetData;
         const rowObjectArray = rowData;
         const calculatedRows = new Set<number>();
 
@@ -510,7 +509,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                const hasUnMergedCell = hasUnMergedCellInRow(rowIndex, startColumn, endColumn, mergeData);
+                const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
 
                 if (hasUnMergedCell) {
                     const autoHeight = this._calculateRowAutoHeight(rowIndex);
@@ -526,9 +525,26 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
+    private _hasUnMergedCellInRow(rowIndex: number, startColumn: number, endColumn: number): boolean {
+        const mergeData = this.worksheet.getMergeData();
+        if (!mergeData) {
+            return false;
+        }
+
+        for (let i = startColumn; i <= endColumn; i++) {
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowIndex, i);
+
+            if (!isMerged && !isMergedMainCell) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     // TODO: auto height
     private _calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount, columnData, mergeData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
+        const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
         let height = defaultRowHeight;
 
         const worksheet = this.worksheet;
@@ -539,7 +555,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
             // skip the cell directly, which currently follows the logic of Excel
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowNum, i, mergeData);
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowNum, i);
 
             if (isMerged || isMergedMainCell) {
                 continue;
@@ -941,7 +957,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (closeFirst) {
-             // check if upper row was closer than current
+            // check if upper row was closer than current
             if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
                 row = row + 1;
             }
@@ -1017,7 +1033,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
+            this._getCellMergeInfo(row, column)
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
@@ -1050,7 +1066,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
+            this._getCellMergeInfo(row, column)
         );
 
         const { isMerged, isMergedMainCell } = primary;
@@ -1316,7 +1332,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     column,
                     this.rowHeightAccumulation,
                     this.columnWidthAccumulation,
-                    this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
+                    this._getCellMergeInfo(row, column)
                 );
                 const cellWidth = endX - startX;
                 const cellHeight = endY - startY;
@@ -1354,7 +1370,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 column,
                 this.rowHeightAccumulation,
                 this.columnWidthAccumulation,
-                this._getCellMergeInfo(row, column, this._worksheetData.mergeData)
+                this._getCellMergeInfo(row, column)
             );
 
             const cellHeight = endY - startY;
@@ -1617,29 +1633,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     intersectMergeRange(row: number, column: number): boolean {
-        const dataMergeCache = this.dataMergeCache;
-        for (const dataCache of dataMergeCache) {
-            const {
-                startRow: startRowMargeIndex,
-                endRow: endRowMargeIndex,
-                startColumn: startColumnMargeIndex,
-                endColumn: endColumnMargeIndex,
-            } = dataCache;
-            if (
-                row >= startRowMargeIndex &&
-                row <= endRowMargeIndex &&
-                column >= startColumnMargeIndex &&
-                column <= endColumnMargeIndex
-            ) {
-                return true;
-            }
-        }
-        // dataMergeCache?.forEach((r, dataMergeRow) => {
-        //     dataMergeRow?.forEach((c, dataCache) => {
-
-        //     });
-        // });
-        return false;
+        const mergedData = this.worksheet.getMergedCell(row, column);
+        return Boolean(mergedData);
     }
 
     // private _getMergeRangeCache() {
@@ -1656,15 +1651,36 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return mergeRangeCache;
     // }
 
+    /**
+     * get the current row and column segment visible merge data
+     * @returns {IRange} The visible merge data
+     */
+    public getCurrentRowColumnSegmentMergeData(range?: IRange): IRange[] {
+        const endColumnLast = this.columnWidthAccumulation.length - 1;
+        if (!range) {
+            const endRow = this.rowHeightAccumulation.length - 1;
+            range = { startRow: 0, startColumn: 0, endRow, endColumn: endColumnLast };
+        } else {
+            range = {
+                startRow: range.startRow,
+                endRow: range.endRow,
+                endColumn: endColumnLast,
+                startColumn: 0,
+            };
+        }
+
+        return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
+    }
+
     private _calculateStylesCache(): void {
-        const dataMergeCaches = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         if (endColumn === -1 || endRow === -1) return;
 
-        for (const mergeRange of dataMergeCaches) {
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._rowColumnSegment);
+        for (const mergeRange of mergeRanges) {
             this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
                 mergeRange,
             });
@@ -1755,11 +1771,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
         if (hidden) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(
-                row,
-                col,
-                this._dataMergeCache
-            );
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(row, col);
 
             if (isMerged && !isMergedMainCell) {
                 // If the cell is merged and is not the main cell, the cell is not rendered.
@@ -2145,65 +2157,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         } as ICellOtherConfig;
     }
 
-    private _getMergeCellsCache(mergeData: IRange[]) {
-        const map = new Map<string, IRange>();
-        mergeData.forEach((range) => {
-            for (let r = range.startRow; r <= range.endRow; r++) {
-                for (let c = range.startColumn; c <= range.endColumn; c++) {
-                    map.set(`${r}-${c}`, range);
-                }
-            }
-        });
-        return map;
-    }
-
-    private _getCellMergeInfo(row: number, column: number, mergeData: IRange[]): ISelectionCell {
-        if (!this._dataMergeCacheMap) {
-            this._dataMergeCacheMap = this._getMergeCellsCache(mergeData);
-        }
-        const key = `${row}-${column}`;
-        const mergeRange = this._dataMergeCacheMap.get(key);
-
-        let isMerged = false; // The upper left cell only renders the content
-        let isMergedMainCell = false;
-        let newEndRow = row;
-        let newEndColumn = column;
-        let mergeRow = row;
-        let mergeColumn = column;
-        if (mergeRange) {
-            const {
-                startRow: startRowMarge,
-                endRow: endRowMarge,
-                startColumn: startColumnMarge,
-                endColumn: endColumnMarge,
-            } = mergeRange;
-            if (row === startRowMarge && column === startColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
-
-                isMergedMainCell = true;
-            } else if (row >= startRowMarge && row <= endRowMarge && column >= startColumnMarge && column <= endColumnMarge) {
-                newEndRow = endRowMarge;
-                newEndColumn = endColumnMarge;
-                mergeRow = startRowMarge;
-                mergeColumn = startColumnMarge;
-
-                isMerged = true;
-            }
-        }
-
-        return {
-            actualRow: row,
-            actualColumn: column,
-            isMergedMainCell,
-            isMerged,
-            endRow: newEndRow,
-            endColumn: newEndColumn,
-            startRow: mergeRow,
-            startColumn: mergeColumn,
-        };
+    private _getCellMergeInfo(row: number, column: number): ISelectionCell {
+        return this.worksheet.getCellInfoInMergeData(row, column);
     }
 
     /**

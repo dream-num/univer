@@ -125,10 +125,11 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
 
     const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
-    const mergeCell = skeleton.mergeData.find((range) => {
-        const { startColumn, startRow, endColumn, endRow } = range;
-        return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
-    });
+    // const mergeCell = skeleton.mergeData.find((range) => {
+    //     const { startColumn, startRow, endColumn, endRow } = range;
+    //     return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
+    // });
+    const mergeCell = skeleton.worksheet.getMergedCell(cellPos.row, cellPos.column);
 
     const params = {
         actualRow: mergeCell ? mergeCell.startRow : cellPos.row,

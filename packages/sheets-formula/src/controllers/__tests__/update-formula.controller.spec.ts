@@ -369,7 +369,7 @@ describe('Test insert function operation', () => {
 
             expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
             const values = getValues(5, 2, 5, 2);
-            expect(values).toStrictEqual([[{ f: '=SUM(A1:B2)' }]]);
+            expect(values).toStrictEqual([[{ f: '=SUM(D1:E2)' }]]);
 
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
             const valuesUndo = getValues(5, 2, 5, 2);
@@ -377,7 +377,7 @@ describe('Test insert function operation', () => {
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(5, 2, 5, 2);
-            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B2)' }]]);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(D1:E2)' }]]);
         });
 
         it('Move range, update position', async () => {

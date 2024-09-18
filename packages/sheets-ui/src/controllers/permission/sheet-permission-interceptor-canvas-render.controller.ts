@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-
+import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
+import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
+
+import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from '../render-controllers/header-resize.render-controller';
-import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { getTransformCoord } from '../utils/component-tools';
-import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -109,12 +109,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     if (!target) {
                         return false;
                     }
-                    const { worksheet, unitId, subUnitId } = target;
-
-                    const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
-                    if (!worksheetEditPermission) {
-                        return false;
-                    }
+                    const { unitId, subUnitId } = target;
 
                     if (rangeParams.row) {
                         const setRowStylePermission = this._permissionService.getPermissionPoint(new WorksheetSetRowStylePermission(unitId, subUnitId).id)?.value ?? false;
@@ -128,101 +123,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         }
                     }
 
-                    let selectionRange: Nullable<IRange>;
-
-                    if (rangeParams.row !== undefined) {
-                        selectionRange = {
-                            startRow: rangeParams.row,
-                            endRow: rangeParams.row,
-                            startColumn: 0,
-                            endColumn: worksheet.getColumnCount() - 1,
-                        };
-                    } else if (rangeParams.col !== undefined) {
-                        selectionRange = {
-                            startRow: 0,
-                            endRow: worksheet.getRowCount() - 1,
-                            startColumn: rangeParams.col,
-                            endColumn: rangeParams.col,
-                        };
-                    }
-
-                    if (!selectionRange) {
-                        return true;
-                    }
-
-                    const protectionLapRange = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
-                        return [...p, ...c.ranges];
-                    }, [] as IRange[]).filter((range) => {
-                        return Rectangle.intersects(range, selectionRange);
-                    });
-
-                    let haveNotPermission = protectionLapRange.some((range) => {
-                        const { startRow, startColumn, endRow, endColumn } = range;
-                        for (let row = startRow; row <= endRow; row++) {
-                            for (let col = startColumn; col <= endColumn; col++) {
-                                const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                                if (permission?.[UnitAction.Edit] === false) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    });
-
-                    if (haveNotPermission) {
-                        return false;
-                    }
-
-                    const resizeType = rangeParams.row !== undefined ? RANGE_TYPE.ROW : RANGE_TYPE.COLUMN;
-                    const selectionRowColRanges: IRange[] = [];
-                    const selectionRanges = this._selectionManagerService.getCurrentSelections();
-                    let isResizeTargetInSelectionRanges = false;
-                    if (resizeType === RANGE_TYPE.ROW) {
-                        selectionRanges?.forEach((selection) => {
-                            if (selection?.range?.rangeType === RANGE_TYPE.ROW || selection?.range?.rangeType === RANGE_TYPE.ALL) {
-                                selectionRowColRanges.push(selection.range);
-                                if (selection.range.startRow <= rangeParams.row! && selection.range.endRow >= rangeParams.row!) {
-                                    isResizeTargetInSelectionRanges = true;
-                                }
-                            }
-                        });
-                    } else {
-                        selectionRanges?.forEach((selection) => {
-                            if (selection?.range?.rangeType === RANGE_TYPE.COLUMN || selection?.range?.rangeType === RANGE_TYPE.ALL) {
-                                selectionRowColRanges.push(selection.range);
-                                if (selection.range.startColumn <= rangeParams.col! && selection.range.endColumn >= rangeParams.col!) {
-                                    isResizeTargetInSelectionRanges = true;
-                                }
-                            }
-                        });
-                    }
-
-                    if (!isResizeTargetInSelectionRanges) {
-                        return true;
-                    }
-
-                    const protectionLapWithSelectionRanges = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
-                        return [...p, ...c.ranges];
-                    }, [] as IRange[]).filter((range) => {
-                        return selectionRowColRanges.some((selectionRange) => {
-                            return Rectangle.intersects(range, selectionRange);
-                        });
-                    });
-
-                    haveNotPermission = protectionLapWithSelectionRanges.some((range) => {
-                        const { startRow, startColumn, endRow, endColumn } = range;
-                        for (let row = startRow; row <= endRow; row++) {
-                            for (let col = startColumn; col <= endColumn; col++) {
-                                const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                                if (permission?.[UnitAction.Edit] === false) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    });
-
-                    return !haveNotPermission;
+                    return true;
                 },
             })
         );

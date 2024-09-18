@@ -59,6 +59,7 @@ import { takeUntil } from 'rxjs';
 
 import type {
     ICellData,
+    ICommandInfo,
     IDocumentData,
     IMutationInfo,
     IObjectArrayPrimitiveType,
@@ -75,6 +76,7 @@ import type {
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -123,6 +125,7 @@ export class SheetClipboardController extends RxDisposable {
     ) {
         super();
         this._init();
+        this._initCommandListener();
 
         const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
@@ -815,5 +818,15 @@ export class SheetClipboardController extends RxDisposable {
         }
 
         return worksheet;
+    }
+
+    private _initCommandListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === AddWorksheetMergeCommand.id) {
+                    this._sheetClipboardService.removeMarkSelection();
+                }
+            })
+        );
     }
 }

@@ -103,6 +103,8 @@ export interface ISheetClipboardService {
     copyContentCache(): CopyContentCache; // return the cache content for inner copy/cut/paste.
     addClipboardHook(hook: ISheetClipboardHook): IDisposable; // add a hook to the clipboard service
     getClipboardHooks(): ISheetClipboardHook[]; // get all hooks
+
+    removeMarkSelection(): void;
 }
 
 export const ISheetClipboardService = createIdentifier<ISheetClipboardService>('sheet.clipboard-service');
@@ -1063,6 +1065,13 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         );
 
         return !isRowAcross && !isColAcross;
+    }
+
+    removeMarkSelection() {
+        if (this._copyMarkId) {
+            this._markSelectionService.removeShape(this._copyMarkId);
+            this._copyMarkId = null;
+        }
     }
 }
 

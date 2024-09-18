@@ -975,6 +975,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this.disposeWithMe(
             fromEvent(this._input, 'input').subscribe((e) => {
                 // Prevent input when there is any rect ranges.
+                if ((e as InputEvent).inputType === 'historyUndo' || (e as InputEvent).inputType === 'historyRedo') {
+                    return;
+                }
                 if (this._rectRangeList.length > 0) {
                     e.stopPropagation();
                     return e.preventDefault();

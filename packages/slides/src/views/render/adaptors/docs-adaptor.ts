@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, Injector, IPageElement } from '@univerjs/core';
 import { DocumentDataModel, Inject, LocaleService, PageElementType } from '@univerjs/core';
-import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
 import {
     Documents,
     DocumentSkeleton,
@@ -30,6 +28,8 @@ import {
     ScrollBar,
     Viewport,
 } from '@univerjs/engine-render';
+import type { EventState, Injector, IPageElement } from '@univerjs/core';
+import type { BaseObject, IDocumentSkeletonDrawing, IPageRenderConfig, IWheelEvent } from '@univerjs/engine-render';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
@@ -111,8 +111,8 @@ export class DocsAdaptor extends ObjectAdaptor {
             top: 0,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
 

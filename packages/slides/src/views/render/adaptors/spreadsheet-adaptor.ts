@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type { EventState, ICellData, Injector, IPageElement } from '@univerjs/core';
 import { IContextService, Inject, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
-import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
     getColor,
     Rect,
@@ -29,6 +27,8 @@ import {
     SpreadsheetSkeleton,
     Viewport,
 } from '@univerjs/engine-render';
+import type { EventState, ICellData, Injector, IPageElement } from '@univerjs/core';
+import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
 
@@ -170,8 +170,8 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             top: columnHeaderHeightScale,
             bottom: 0,
             right: 0,
-            isRelativeX: true,
-            isRelativeY: true,
+            explicitViewportWidthSet: false,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
         const viewTop = new Viewport(SHEET_VIEW_KEY.VIEW_TOP + id, scene, {
@@ -179,7 +179,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             height: columnHeaderHeightScale,
             top: 0,
             right: 0,
-            isRelativeX: true,
+            explicitViewportWidthSet: false,
             isWheelPreventDefaultX: true,
         });
         const viewLeft = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT + id, scene, {
@@ -187,7 +187,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             bottom: 0,
             top: columnHeaderHeightScale,
             width: rowHeaderWidthScale,
-            isRelativeY: true,
+            explicitViewportHeightSet: false,
             isWheelPreventDefaultX: true,
         });
 

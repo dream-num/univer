@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
-import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Subscription } from 'rxjs';
-import { debounceTime, map, mergeMap, Observable } from 'rxjs';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISheetLocationBase } from '@univerjs/sheets';
 import {
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
@@ -35,9 +32,12 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
-import { DocEventManagerService } from '@univerjs/docs-ui';
+import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { debounceTime, map, mergeMap, Observable } from 'rxjs';
+import type { Nullable } from '@univerjs/core';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { Subscription } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -271,11 +271,9 @@ export class SheetsHyperLinkPopupController extends Disposable {
     private _initTextSelectionListener() {
         this.disposeWithMe(
             this._textSelectionManagerService.textSelection$.subscribe((selection) => {
-                if (!selection || selection.unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                    return;
+                if (selection && selection.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
                 }
-
-                this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
             })
         );
     }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
 import { createIdentifier } from '@univerjs/core';
+import type { IDisposable } from '@univerjs/core';
 import type { Observable, Subject } from 'rxjs';
 
 export const IZenZoneService = createIdentifier<IZenZoneService>('univer.zen-zone-service');
@@ -26,6 +26,7 @@ export interface IZenZoneService {
     readonly temporaryHidden$: Observable<boolean>;
 
     readonly visible: boolean;
+    readonly temporaryHidden: boolean;
 
     set(key: string, component: any): IDisposable;
 

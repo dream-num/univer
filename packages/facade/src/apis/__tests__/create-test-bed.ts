@@ -45,8 +45,8 @@ import {
 } from '@univerjs/sheets';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
 import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+
 import {
     DescriptionService,
     IDescriptionService,
@@ -61,6 +61,7 @@ import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRend
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
+import type { IRender } from '@univerjs/engine-render';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -120,6 +121,13 @@ export interface ITestBed {
     injector: Injector;
 }
 
+class RenderManagerServiceTestBed extends RenderManagerService {
+    override createRender(unitId: string): IRender {
+        const renderer = this._createRender(unitId, new Engine(100, 100));
+        return renderer;
+    }
+}
+
 export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -150,7 +158,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
-            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
             injector.add([ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }]);
             injector.add([SheetsRenderService]);
             injector.add([IShortcutService, { useClass: ShortcutService }]);

@@ -245,8 +245,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each combination.' },
         },
     },
     COMBINA: {
@@ -259,8 +259,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each combination.' },
         },
     },
     COS: {
@@ -404,8 +404,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The nonnegative number for which you want the factorial. If number is not an integer, it is truncated.' },
         },
     },
     FACTDOUBLE: {
@@ -418,8 +417,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The nonnegative number for which you want the double factorial. If number is not an integer, it is truncated.' },
         },
     },
     FLOOR: {
@@ -475,8 +473,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To find the first number of the greatest common divisor, you can also use a single array or a reference to an array instead of the comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number whose greatest common divisor is to be found. Up to 255 numbers can be specified in this way.' },
         },
     },
     INT: {
@@ -489,8 +487,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The real number you want to round down to an integer.' },
         },
     },
     ISO_CEILING: {
@@ -517,8 +514,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'To find the first number of the least common multiple, you can also use a single array or a reference to an array instead of the comma-separated parameters.' },
+            number2: { name: 'number2', detail: 'The second number whose least common multiple is to be found. Up to 255 numbers can be specified in this way.' },
         },
     },
     LET: {
@@ -585,8 +582,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A numeric array with an equal number of rows and columns.' },
         },
     },
     MINVERSE: {
@@ -599,8 +595,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'A numeric array with an equal number of rows and columns.' },
         },
     },
     MMULT: {
@@ -613,8 +608,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The arrays you want to multiply.' },
+            array2: { name: 'array2', detail: 'The arrays you want to multiply.' },
         },
     },
     MOD: {
@@ -655,8 +650,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first value or range to use in the calculation.' },
+            number2: { name: 'number2', detail: 'Additional values ​​or ranges to use in calculations.' },
         },
     },
     MUNIT: {
@@ -669,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: 'dimension', detail: 'Dimension is an integer specifying the dimension of the unit matrix that you want to return. It returns an array. The dimension has to be greater than zero.' },
         },
     },
     ODD: {
@@ -736,8 +730,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: 'numerator', detail: 'The dividend.' },
+            denominator: { name: 'denominator', detail: 'The divisor.' },
         },
     },
     RADIANS: {
@@ -888,8 +882,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The input value to the power series.' },
+            n: { name: 'n', detail: 'The initial power to which you want to raise x.' },
+            m: { name: 'm', detail: 'The step by which to increase n for each term in the series.' },
+            coefficients: { name: 'coefficients', detail: 'A set of coefficients by which each successive power of x is multiplied.' },
         },
     },
     SEQUENCE: {
@@ -902,8 +898,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: 'rows', detail: 'The number of rows to return.' },
+            columns: { name: 'columns', detail: 'The number of columns to return.' },
+            start: { name: 'start', detail: 'The first number in the sequence.' },
+            step: { name: 'step', detail: 'The amount to increment each subsequent value in the array.' },
         },
     },
     SIGN: {
@@ -916,8 +914,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Any real number.' },
         },
     },
     SIN: {

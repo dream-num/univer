@@ -34,7 +34,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, getDocObject } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, getDocObject } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
@@ -164,6 +164,10 @@ export class ZenEditorController extends RxDisposable {
 
         this._univerInstanceService.focusUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
         this._univerInstanceService.setCurrentUnitForType(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
+        if (docSelectionRenderService) {
+            docSelectionRenderService.focus();
+        }
 
         const visibleState = this._editorBridgeService.isVisible();
         if (visibleState.visible === false) {

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
 import { ActionRecorderController } from './controllers/action-recorder.controller';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ActionRecorderService } from './services/action-recorder.service';
 import { ActionReplayService } from './services/replay.service';
+import type { IUniverActionRecorderConfig } from './controllers/config.schema';
 
 /**
  * This plugin provides a recorder for user's interactions with Univer,
@@ -28,12 +30,21 @@ export class UniverActionRecorderPlugin extends Plugin {
     static override pluginName = 'UNIVER_ACTION_RECORDER_PLUGIN';
 
     constructor(
-        @Inject(Injector) protected readonly _injector: Injector
+        private readonly _config: Partial<IUniverActionRecorderConfig> = defaultPluginConfig,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration.
+        const { menu, ...rest } = this._config;
+        if (menu) {
+            this._configService.setConfig('menu', menu, { merge: true });
+        }
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting(): void {
         ([
             [ActionRecorderService],
             [ActionReplayService],

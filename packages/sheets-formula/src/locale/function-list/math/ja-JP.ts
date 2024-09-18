@@ -245,8 +245,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る組み合わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     COMBINA: {
@@ -259,8 +259,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る組み合わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     COS: {
@@ -404,8 +404,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '階乗を求める正の数値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     FACTDOUBLE: {
@@ -418,8 +417,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '二重階乗を求める正の数値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     FLOOR: {
@@ -475,8 +473,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     INT: {
@@ -489,8 +487,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '切り捨てて整数にする実数を指定します。' },
         },
     },
     ISO_CEILING: {
@@ -517,8 +514,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     LET: {
@@ -585,8 +582,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数と列数が等しい数値配列 (正方行列) を指定します。' },
         },
     },
     MINVERSE: {
@@ -599,8 +595,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数と列数が等しい数値配列 (正方行列) を指定します。' },
         },
     },
     MMULT: {
@@ -613,8 +608,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: '行列積を求める 2 つの配列を指定します。' },
+            array2: { name: '配列2', detail: '行列積を求める 2 つの配列を指定します。' },
         },
     },
     MOD: {
@@ -655,8 +650,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値1', detail: '計算に使用する最初の値または範囲。' },
+            number2: { name: '数値2', detail: '計算に使用する追加の値または範囲。' },
         },
     },
     MUNIT: {
@@ -669,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dimension: { name: 'ディメンション', detail: 'ディメンションは、返す必要がある単位行列の次元を指定する整数です。 配列を返します。 ディメンションを 0 より大きい値にする必要があります。' },
         },
     },
     ODD: {
@@ -736,8 +730,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numerator: { name: '分子', detail: '被除数 (割られる数) を指定します。' },
+            denominator: { name: '分母', detail: '除数 (割る数) を指定します。' },
         },
     },
     RADIANS: {
@@ -888,8 +882,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'べき級数に代入する値を指定します。' },
+            n: { name: 'n', detail: 'x のべき乗の初期値を指定します。' },
+            m: { name: 'm', detail: '級数の各項に対する n の増分を指定します。' },
+            coefficients: { name: '係数', detail: 'x の (n+m) 乗の乗数を指定します。' },
         },
     },
     SEQUENCE: {
@@ -902,8 +898,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            rows: { name: '行の数', detail: '返す行の数。' },
+            columns: { name: '列の数', detail: '返す列の数。' },
+            start: { name: '最初の数値', detail: '数列の最初の数値。' },
+            step: { name: '値の増', detail: '配列内の後続の各値の増分量。' },
         },
     },
     SIGN: {
@@ -916,8 +914,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '実数を指定します。' },
         },
     },
     SIN: {

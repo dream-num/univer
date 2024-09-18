@@ -64,6 +64,18 @@ class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceTyp
         this._name$.next(this.snapshot.title ?? 'No Title');
     }
 
+    override getRev(): number {
+        return this.snapshot.rev ?? 1;
+    }
+
+    override incrementRev(): void {
+        this.snapshot.rev = this.getRev() + 1;
+    }
+
+    override setRev(rev: number): void {
+        this.snapshot.rev = rev;
+    }
+
     setName(name: string) {
         this.snapshot.title = name;
         this._name$.next(name);
@@ -255,14 +267,6 @@ export class DocumentDataModel extends DocumentDataModelSimple {
 
     getCustomDecorations() {
         return this.snapshot.body?.customDecorations;
-    }
-
-    getRev(): number {
-        return this.snapshot.rev ?? 1;
-    }
-
-    incrementRev(): void {
-        this.snapshot.rev = this.getRev() + 1;
     }
 
     getSettings() {

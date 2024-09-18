@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { IOperation } from '@univerjs/core';
 
 export const OpenZenEditorOperation: IOperation = {
     id: 'zen-editor.operation.open-zen-editor',

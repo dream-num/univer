@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '../../common/di';
-
 import { remove } from '../../common/array';
+
 import { toDisposable } from '../lifecycle';
-import { LRUHelper } from './lru-helper';
+import type { IDisposable } from '../../common/di';
 
 const NEWER = Symbol('newer');
 const OLDER = Symbol('older');
@@ -380,5 +379,27 @@ export class LRUMap<K, V> {
             }
         }
         return s;
+    }
+}
+
+export class LRUHelper {
+    static hasLength(array: unknown[], size: number) {
+        return array.length === size;
+    }
+
+    static getValueType(value: any): string {
+        return Object.prototype.toString.apply(value);
+    }
+
+    static isObject<T = object>(value?: any): value is T {
+        return this.getValueType(value) === '[object Object]';
+    }
+
+    static isIterable<T>(value?: any): value is Iterable<T> {
+        return value[Symbol.iterator] != null;
+    }
+
+    static isNumber(value?: any): value is number {
+        return this.getValueType(value) === '[object Number]';
     }
 }

@@ -14,5 +14,14 @@
  * limitations under the License.
  */
 
-export * from './lru-helper';
-export * from './lru-map';
+import type { MenuConfig } from '@univerjs/ui';
+
+export const PLUGIN_CONFIG_KEY = 'action-recorder.config';
+
+export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+
+export interface IUniverActionRecorderConfig {
+    menu?: MenuConfig;
+}
+
+export const defaultPluginConfig: IUniverActionRecorderConfig = {};

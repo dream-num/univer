@@ -17,6 +17,7 @@
 import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { getShouldDisableCellLink } from '../../controllers/menu';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 
@@ -93,6 +94,9 @@ export const InsertHyperLinkToolbarOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'sheet.operation.insert-hyper-link-toolbar',
     handler(accessor) {
+        if (getShouldDisableCellLink(accessor)) {
+            return false;
+        }
         const commandService = accessor.get(ICommandService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
         if (popupService.currentEditing) {

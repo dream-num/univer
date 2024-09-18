@@ -15,14 +15,47 @@
  */
 
 import { BuildTextUtils, CustomRangeType, DataValidationType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import type { DocumentDataModel, IAccessor, ITextRange, Workbook } from '@univerjs/core';
-import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { map, mergeMap, Observable } from 'rxjs';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { map, mergeMap, Observable } from 'rxjs';
+import type { DocumentDataModel, IAccessor, ITextRange, Workbook, Worksheet } from '@univerjs/core';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
+
+const _getShouldDisableCellLink = (worksheet: Worksheet, row: number, col: number) => {
+    const cell = worksheet.getCell(row, col);
+    if (cell?.f || cell?.si) {
+        return true;
+    }
+    const disables = [
+        DataValidationType.CHECKBOX,
+        DataValidationType.LIST,
+        DataValidationType.LIST_MULTIPLE,
+    ];
+
+    if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
+        return true;
+    }
+
+    return false;
+};
+
+export const getShouldDisableCellLink = (accessor: IAccessor) => {
+    const unit = accessor.get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+    if (!unit) {
+        return true;
+    }
+    const worksheet = unit.getActiveSheet();
+    const selections = accessor.get(SheetsSelectionsService).getCurrentSelections();
+    if (!selections.length) {
+        return true;
+    }
+    const row = selections[0].range.startRow;
+    const col = selections[0].range.startColumn;
+    return _getShouldDisableCellLink(worksheet, row, col);
+};
 
 const getLinkDisable$ = (accessor: IAccessor) => {
     const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
@@ -55,21 +88,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
-            const cell = sheet.getCell(row, col);
-            if (cell?.f || cell?.si) {
-                return true;
-            }
-            const disables = [
-                DataValidationType.CHECKBOX,
-                DataValidationType.LIST,
-                DataValidationType.LIST_MULTIPLE,
-            ];
-
-            if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
-                return true;
-            }
-
-            return false;
+            return _getShouldDisableCellLink(sheet, row, col);
         })
     );
 
@@ -124,6 +143,19 @@ const getZenLinkDisable$ = (accessor: IAccessor) => {
         }),
         map((selection) => {
             if (!selection || selection.unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                return true;
+            }
+            const editorBridgeService = accessor.get(IEditorBridgeService);
+            const state = editorBridgeService.getEditCellState();
+            if (!state) {
+                return true;
+            }
+            const target = getSheetCommandTarget(univerInstanceService, { unitId: state.unitId, subUnitId: state.sheetId });
+            if (!target?.worksheet) {
+                return true;
+            }
+
+            if (_getShouldDisableCellLink(target.worksheet, state.row, state.column)) {
                 return true;
             }
 

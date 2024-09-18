@@ -16,12 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textsplit } from '../index';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test textsplit function', () => {
     const testFunction = new Textsplit(FUNCTION_NAMES_TEXT.TEXTSPLIT);
@@ -31,7 +32,7 @@ describe('Test textsplit function', () => {
             const text = StringValueObject.create('Dakota Lennon Sanchez');
             const colDelimiter = StringValueObject.create(' ');
             const result = testFunction.calculate(text, colDelimiter);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['Dakota', 'Lennon', 'Sanchez'],
             ]);
 
@@ -39,7 +40,7 @@ describe('Test textsplit function', () => {
             const colDelimiter2 = StringValueObject.create(',');
             const rowDelimiter2 = StringValueObject.create(';');
             const result2 = testFunction.calculate(text2, colDelimiter2, rowDelimiter2);
-            expect(transformToValue(result2.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result2)).toStrictEqual([
                 [1, 2, 3],
                 [4, 5, 6],
             ]);
@@ -49,12 +50,12 @@ describe('Test textsplit function', () => {
             const text = StringValueObject.create('To be or not to be');
             const colDelimiter = StringValueObject.create('');
             const result = testFunction.calculate(text, colDelimiter);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const colDelimiter2 = StringValueObject.create(' ');
             const rowDelimiter2 = StringValueObject.create('');
             const result2 = testFunction.calculate(text, colDelimiter2, rowDelimiter2);
-            expect(result2.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
         });
 
         it('ignoreEmpty value is true', () => {
@@ -63,7 +64,7 @@ describe('Test textsplit function', () => {
             const rowDelimiter = StringValueObject.create('.');
             const ignoreEmpty = BooleanValueObject.create(true);
             const result = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['Do', ErrorType.NA, ErrorType.NA, ErrorType.NA],
                 ['Or', 'do', 'not', ErrorType.NA],
                 ['There', 'is', 'no', 'try'],
@@ -78,11 +79,11 @@ describe('Test textsplit function', () => {
             const ignoreEmpty = BooleanValueObject.create(true);
             const matchMode = NumberValueObject.create(-1);
             const result = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const matchMode2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode2);
-            expect(transformToValue(result2.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result2)).toStrictEqual([
                 ['D', '.', ErrorType.NA],
                 ['Or', ErrorType.NA, ErrorType.NA],
                 ['d', ErrorType.NA, ErrorType.NA],
@@ -96,7 +97,7 @@ describe('Test textsplit function', () => {
 
             const matchMode3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode3);
-            expect(transformToValue(result3.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result3)).toStrictEqual([
                 ['D', '.', ErrorType.NA],
                 ['r', ErrorType.NA, ErrorType.NA],
                 ['d', ErrorType.NA, ErrorType.NA],
@@ -117,7 +118,7 @@ describe('Test textsplit function', () => {
             const matchMode = NumberValueObject.create(0);
             const padWith = ErrorValueObject.create(ErrorType.NULL);
             const result = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode, padWith);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['D', '.', ErrorType.NULL],
                 ['Or', ErrorType.NULL, ErrorType.NULL],
                 ['d', ErrorType.NULL, ErrorType.NULL],
@@ -145,9 +146,46 @@ describe('Test textsplit function', () => {
             });
             const colDelimiter = StringValueObject.create(' ');
             const result = testFunction.calculate(text, colDelimiter);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['Dakota'],
                 ['To'],
+            ]);
+        });
+
+        it('More test', () => {
+            let text = StringValueObject.create('150克*8袋');
+            let colDelimiter = StringValueObject.create('*');
+            let result = testFunction.calculate(text, colDelimiter);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克', '8袋'],
+            ]);
+
+            text = StringValueObject.create('150克#8袋');
+            colDelimiter = StringValueObject.create('#');
+            result = testFunction.calculate(text, colDelimiter);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克', '8袋'],
+            ]);
+
+            text = StringValueObject.create('150克&8袋');
+            colDelimiter = StringValueObject.create('&');
+            result = testFunction.calculate(text, colDelimiter);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克', '8袋'],
+            ]);
+
+            text = StringValueObject.create('150克@8袋');
+            colDelimiter = StringValueObject.create('@');
+            result = testFunction.calculate(text, colDelimiter);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克', '8袋'],
+            ]);
+
+            text = StringValueObject.create('150克.8袋');
+            colDelimiter = StringValueObject.create('.');
+            result = testFunction.calculate(text, colDelimiter);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克', '8袋'],
             ]);
         });
     });

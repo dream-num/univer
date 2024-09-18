@@ -16,11 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textafter } from '../index';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test textafter function', () => {
     const testFunction = new Textafter(FUNCTION_NAMES_TEXT.TEXTAFTER);
@@ -30,7 +31,7 @@ describe('Test textafter function', () => {
             const text = StringValueObject.create('***TRUETRUEFALSE');
             const delimiter = StringValueObject.create('T');
             const result = testFunction.calculate(text, delimiter);
-            expect(result.getValue()).toBe('RUETRUEFALSE');
+            expect(getObjectValue(result)).toBe('RUETRUEFALSE');
         });
 
         it('delimiter value is empty string', () => {
@@ -38,11 +39,11 @@ describe('Test textafter function', () => {
             const delimiter = StringValueObject.create('');
             const instanceNum = NumberValueObject.create(1);
             const result = testFunction.calculate(text, delimiter, instanceNum);
-            expect(result.getValue()).toBe('***TRUETRUEFALSE');
+            expect(getObjectValue(result)).toBe('***TRUETRUEFALSE');
 
             const instanceNum2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(text, delimiter, instanceNum2);
-            expect(result2.getValue()).toBe('');
+            expect(getObjectValue(result2)).toBe('');
         });
 
         it('instanceNum value test', () => {
@@ -50,19 +51,19 @@ describe('Test textafter function', () => {
             const delimiter = StringValueObject.create('T');
             const instanceNum = NumberValueObject.create(1);
             const result = testFunction.calculate(text, delimiter, instanceNum);
-            expect(result.getValue()).toBe('RUETRUEFALSE');
+            expect(getObjectValue(result)).toBe('RUETRUEFALSE');
 
             const instanceNum2 = NumberValueObject.create(2);
             const result2 = testFunction.calculate(text, delimiter, instanceNum2);
-            expect(result2.getValue()).toBe('RUEFALSE');
+            expect(getObjectValue(result2)).toBe('RUEFALSE');
 
             const instanceNum3 = NumberValueObject.create(3);
             const result3 = testFunction.calculate(text, delimiter, instanceNum3);
-            expect(result3.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result3)).toBe(ErrorType.NA);
 
             const instanceNum4 = NumberValueObject.create(17);
             const result4 = testFunction.calculate(text, delimiter, instanceNum4);
-            expect(result4.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
         });
 
         it('matchMode value 0 or 1', () => {
@@ -71,15 +72,15 @@ describe('Test textafter function', () => {
             const instanceNum = NumberValueObject.create(1);
             const matchMode = NumberValueObject.create(-1);
             const result = testFunction.calculate(text, delimiter, instanceNum, matchMode);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(result)).toBe(ErrorType.VALUE);
 
             const matchMode2 = NumberValueObject.create(0);
             const result2 = testFunction.calculate(text, delimiter, instanceNum, matchMode2);
-            expect(result2.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result2)).toBe(ErrorType.NA);
 
             const matchMode3 = NumberValueObject.create(1);
             const result3 = testFunction.calculate(text, delimiter, instanceNum, matchMode3);
-            expect(result3.getValue()).toBe('RUETRUEFALSE');
+            expect(getObjectValue(result3)).toBe('RUETRUEFALSE');
         });
 
         it('matchEnd value 0 or 1', () => {
@@ -89,15 +90,15 @@ describe('Test textafter function', () => {
             const matchMode = NumberValueObject.create(1);
             const matchEnd = NumberValueObject.create(0);
             const result = testFunction.calculate(text, delimiter, instanceNum, matchMode, matchEnd);
-            expect(result.getValue()).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
 
             const matchEnd2 = NumberValueObject.create(1);
             const result2 = testFunction.calculate(text, delimiter, instanceNum, matchMode, matchEnd2);
-            expect(result2.getValue()).toBe('');
+            expect(getObjectValue(result2)).toBe('');
 
             const instanceNum3 = NumberValueObject.create(-3);
             const result3 = testFunction.calculate(text, delimiter, instanceNum3, matchMode, matchEnd2);
-            expect(result3.getValue()).toBe('***TRUETRUEFALSE');
+            expect(getObjectValue(result3)).toBe('***TRUETRUEFALSE');
         });
 
         it('ifNotFound value test', () => {
@@ -108,7 +109,7 @@ describe('Test textafter function', () => {
             const matchEnd = NumberValueObject.create(0);
             const ifNotFound = StringValueObject.create('not found');
             const result = testFunction.calculate(text, delimiter, instanceNum, matchMode, matchEnd, ifNotFound);
-            expect(result.getValue()).toBe('not found');
+            expect(getObjectValue(result)).toBe('not found');
         });
 
         it('Value is array', () => {
@@ -140,10 +141,37 @@ describe('Test textafter function', () => {
             const matchEnd = NumberValueObject.create(0);
             const ifNotFound = StringValueObject.create('not found');
             const result = testFunction.calculate(text, delimiter, instanceNum, matchMode, matchEnd, ifNotFound);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['not found', 'not found', 'not found', ErrorType.VALUE, 'not found'],
                 ['not found', 'RUE', 'not found', ErrorType.VALUE, 'RUETRUEFALSE'],
             ]);
+        });
+
+        it('More test', () => {
+            let text = StringValueObject.create('150克*8袋');
+            let delimiter = StringValueObject.create('*');
+            let result = testFunction.calculate(text, delimiter);
+            expect(getObjectValue(result)).toBe('8袋');
+
+            text = StringValueObject.create('150克#8袋');
+            delimiter = StringValueObject.create('#');
+            result = testFunction.calculate(text, delimiter);
+            expect(getObjectValue(result)).toBe('8袋');
+
+            text = StringValueObject.create('150克&8袋');
+            delimiter = StringValueObject.create('&');
+            result = testFunction.calculate(text, delimiter);
+            expect(getObjectValue(result)).toBe('8袋');
+
+            text = StringValueObject.create('150克@8袋');
+            delimiter = StringValueObject.create('@');
+            result = testFunction.calculate(text, delimiter);
+            expect(getObjectValue(result)).toBe('8袋');
+
+            text = StringValueObject.create('150克.8袋');
+            delimiter = StringValueObject.create('.');
+            result = testFunction.calculate(text, delimiter);
+            expect(getObjectValue(result)).toBe('8袋');
         });
     });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -28,7 +28,7 @@ import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
-import { getCellValueOrigin, isLegalLink, serializeUrl } from '../../common/util';
+import { isLegalLink, serializeUrl } from '../../common/util';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
@@ -85,7 +85,7 @@ export const CellLinkEdit = () => {
                     const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
                     const cell = worksheet?.getCellRaw(editing.row, editing.col);
                     const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-                    const cellValue = `${getCellValueOrigin(cell) ?? ''}`;
+                    const cellValue = `${getOriginCellValue(cell) ?? ''}`;
                     if (cell && (cell.p || cellValue)) {
                         setShowLabel(false);
                     }

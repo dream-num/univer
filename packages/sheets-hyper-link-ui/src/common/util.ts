@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Tools } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 
 export function isLegalLink(link: string) {
     return Tools.isLegalUrl(link);
@@ -59,24 +58,3 @@ export function serializeUrl(urlStr: string) {
     return urlStr;
 }
 
-export function getCellValueOrigin(cell: Nullable<ICellData>) {
-    if (cell === null) {
-        return '';
-    }
-
-    if (cell?.p) {
-        const body = cell?.p.body;
-
-        if (body == null) {
-            return '';
-        }
-
-        const data = body.dataStream;
-        const lastString = data.substring(data.length - 2, data.length);
-        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
-        return newDataStream;
-    }
-
-    return cell?.v;
-}

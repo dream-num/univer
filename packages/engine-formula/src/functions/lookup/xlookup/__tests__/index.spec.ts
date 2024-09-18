@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import {
     NullValueObject,
     NumberValueObject,
@@ -25,7 +25,7 @@ import {
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xlookup } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
+import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;

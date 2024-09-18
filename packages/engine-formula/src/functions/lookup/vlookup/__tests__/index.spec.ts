@@ -20,9 +20,9 @@ import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vlookup } from '../index';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";

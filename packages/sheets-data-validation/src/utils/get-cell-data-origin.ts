@@ -14,28 +14,10 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, DEFAULT_EMPTY_DOCUMENT_VALUE, type ICellData, type Nullable } from '@univerjs/core';
+import { getOriginCellValue, type ICellData, type Nullable } from '@univerjs/core';
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {
-    if (cell === null) {
-        return '';
-    }
-
-    if (cell?.p) {
-        const body = cell?.p.body;
-
-        if (body == null) {
-            return '';
-        }
-
-        const data = body.dataStream;
-        const lastString = data.substring(data.length - 2, data.length);
-        const newDataStream = lastString === DEFAULT_EMPTY_DOCUMENT_VALUE ? data.substring(0, data.length - 2) : data;
-
-        return newDataStream.replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '').replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
-    }
-
-    return cell?.v;
+    return getOriginCellValue(cell);
 }
 
 export function getStringCellValue(cell: Nullable<ICellData>) {

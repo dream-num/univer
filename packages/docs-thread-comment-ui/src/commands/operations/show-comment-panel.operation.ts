@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService, getSelectionText } from '@univerjs/docs-ui';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getDT, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { ISidebarService } from '@univerjs/ui';
@@ -111,7 +111,8 @@ export const StartAddCommentOperation: ICommand = {
 
         commandService.executeCommand(ShowCommentPanelOperation.id);
         const unitId = doc.getUnitId();
-        const text = getSelectionText(doc.getBody()?.dataStream ?? '', textRange.startOffset, textRange.endOffset);
+        const dataStream = (doc.getBody()?.dataStream ?? '').slice(textRange.startOffset, textRange.endOffset);
+        const text = BuildTextUtils.transform.getPlainText(dataStream);
         const subUnitId = DEFAULT_DOC_SUBUNIT_ID;
         const commentId = '';
         const comment = {

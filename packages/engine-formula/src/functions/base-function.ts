@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
-import type { IFunctionNames } from '../basics/function';
-import { compareToken } from '../basics/token';
-import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
-import type { ArrayBinarySearchType } from '../engine/utils/compare';
-import { ArrayOrderSearchType } from '../engine/utils/compare';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
-import { convertTonNumber } from '../engine/utils/value-object';
-import { createNewArray } from '../engine/utils/array-object';
-import { serializeRangeToRefString } from '../engine/utils/reference';
 import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
+import { compareToken } from '../basics/token';
 import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
-import { RowReferenceObject } from '../engine/reference-object/row-reference-object';
 import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../engine/reference-object/range-reference-object';
+import { RowReferenceObject } from '../engine/reference-object/row-reference-object';
+import { createNewArray } from '../engine/utils/array-object';
+import { ArrayOrderSearchType } from '../engine/utils/compare';
+import { serializeRangeToRefString } from '../engine/utils/reference';
+import { convertTonNumber } from '../engine/utils/value-object';
+import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
+import type { IFunctionNames } from '../basics/function';
+import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 export class BaseFunction extends Disposable {

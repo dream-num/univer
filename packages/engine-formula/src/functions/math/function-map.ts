@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_MATH } from './function-names';
 import { Abs } from './abs';
 import { Acos } from './acos';
 import { Acosh } from './acosh';
@@ -46,6 +45,7 @@ import { Factdouble } from './factdouble';
 import { Floor } from './floor';
 import { FloorMath } from './floor-math';
 import { FloorPrecise } from './floor-precise';
+import { FUNCTION_NAMES_MATH } from './function-names';
 import { Gcd } from './gcd';
 import { Int } from './int';
 import { Lcm } from './lcm';
@@ -73,8 +73,8 @@ import { Rounddown } from './rounddown';
 import { Roundup } from './roundup';
 import { Sec } from './sec';
 import { Sech } from './sech';
-import { Seriessum } from './seriessum';
 import { Sequence } from './sequence';
+import { Seriessum } from './seriessum';
 import { Sign } from './sign';
 import { Sin } from './sin';
 import { Sinh } from './sinh';

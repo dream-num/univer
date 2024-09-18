@@ -16,10 +16,10 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Textbefore extends BaseFunction {
     override minParams = 2;
@@ -197,14 +197,42 @@ export class Textbefore extends BaseFunction {
         ifNotFoundObject: BaseValueObject,
         onlyThreeVariant: boolean
     ): BaseValueObject {
-        const matchNum = textValue.match(new RegExp(delimiterValue, `g${!matchModeValue ? '' : 'i'}`));
+        let substrText = !matchModeValue ? textValue : textValue.toLocaleLowerCase();
+        const _delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.toLocaleLowerCase();
 
-            // only three variant and if instance_num is greater than the number of occurrences of delimiter. returns a #N/A error
-        if (matchNum && matchNum.length < Math.abs(instanceNumValue) && onlyThreeVariant) {
+        let resultIndex = 0;
+        let matchNum = 0;
+
+        for (let i = 0; i < Math.abs(instanceNumValue); i++) {
+            if (instanceNumValue < 0) {
+                const index = substrText.lastIndexOf(_delimiterValue);
+
+                if (index === -1) {
+                    break;
+                }
+
+                resultIndex = index;
+                substrText = substrText.substr(0, index);
+                matchNum++;
+            } else {
+                const index = substrText.indexOf(_delimiterValue);
+
+                if (index === -1) {
+                    break;
+                }
+
+                resultIndex += (index + i * _delimiterValue.length);
+                substrText = substrText.substr(index + _delimiterValue.length);
+                matchNum++;
+            }
+        }
+
+        // only three variant and if instance_num is greater than the number of occurrences of delimiter. returns a #N/A error
+        if (matchNum && matchNum < Math.abs(instanceNumValue) && onlyThreeVariant) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (!matchNum || matchNum.length < Math.abs(instanceNumValue)) {
+        if (!matchNum || matchNum < Math.abs(instanceNumValue)) {
             if (matchEndValue) {
                 if (instanceNumValue > 0) {
                     return StringValueObject.create(textValue);
@@ -214,23 +242,6 @@ export class Textbefore extends BaseFunction {
             }
 
             return ifNotFoundObject;
-        }
-
-        let substrText = !matchModeValue ? textValue : textValue.toLocaleLowerCase();
-        const _delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.toLocaleLowerCase();
-
-        let resultIndex = 0;
-
-        for (let i = 0; i < Math.abs(instanceNumValue); i++) {
-            if (instanceNumValue < 0) {
-                const index = substrText.lastIndexOf(_delimiterValue);
-                resultIndex = index;
-                substrText = substrText.substr(0, index);
-            } else {
-                const index = substrText.indexOf(_delimiterValue);
-                resultIndex += (index + i * _delimiterValue.length);
-                substrText = substrText.substr(index + _delimiterValue.length);
-            }
         }
 
         const result = textValue.substr(0, resultIndex);

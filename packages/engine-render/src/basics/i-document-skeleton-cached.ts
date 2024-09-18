@@ -234,7 +234,7 @@ export interface IDocumentSkeletonBullet {
     ts: ITextStyle; // 文字样式
     fontStyle?: IDocumentSkeletonFontStyle; // fontStyle 从ITextStyle转换为canvas font
     startIndexItem: number; // startIndexItem，列表从第几开始
-    bBox: IDocumentSkeletonBoundingBox; // bBox 文字的位置信息
+    // bBox: IDocumentSkeletonBoundingBox; // bBox 文字的位置信息
     nestingLevel?: INestingLevel;
     bulletAlign?: BulletAlignment;
     bulletType?: boolean; // bulletType false unordered, true ordered;

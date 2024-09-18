@@ -16,17 +16,17 @@
 
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
 import { FontCache } from '../shaping-engine/font-cache';
+import { validationGrid } from '../tools';
 import type {
     IAdjustability,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
-import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
-import { validationGrid } from '../tools';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
 
 export function isSpace(char: string) {
@@ -249,13 +249,17 @@ export function createSkeletonBulletGlyph(
     charSpaceApply: number
 ): IDocumentSkeletonGlyph {
     const {
-        bBox: boundingBox,
+        // bBox: boundingBox,
         symbol: content,
-        ts: textStyle,
-        fontStyle,
+        // ts: textStyle,
+        // fontStyle,
         bulletAlign = BulletAlignment.START,
         bulletType = false,
     } = bulletSkeleton;
+    const { fontStyle } = glyph;
+    // glyph.fontStyle
+    // getFontStyleString(fontStyle, localeService);
+    const boundingBox = FontCache.getTextSize(content, fontStyle!);
     const contentWidth = boundingBox.width;
     // 当文字也需要对齐到网格式，进行处理, LINES默认参照是doc全局字体大小
 
@@ -281,7 +285,7 @@ export function createSkeletonBulletGlyph(
         content,
         ts: {
             ...glyph.ts,
-            ...textStyle,
+            // ...textStyle,
             st: {
                 s: BooleanNumber.FALSE,
             },

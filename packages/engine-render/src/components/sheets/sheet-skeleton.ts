@@ -264,6 +264,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         background: {},
         backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
         font: {},
+        fontMatrix: new ObjectMatrix<any>(),
         border: new ObjectMatrix<BorderCache>(),
     };
 
@@ -371,6 +372,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             background: {},
             backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
             font: {},
+            fontMatrix: new ObjectMatrix<any>(),
             border: new ObjectMatrix<BorderCache>(),
         };
         this._cellBgAndBorderCache = null as unknown as ObjectMatrix<boolean>;
@@ -1160,7 +1162,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * This method has significant impact on performance.
+     * This method generates a document model based on the cell's properties and handles the associated styles and configurations.
+     * If the cell does not exist, it will return null.
+     * PS: This method has significant impact on performance.
      * @param cell
      * @param options
      */
@@ -1713,26 +1717,25 @@ export class SpreadsheetSkeleton extends Skeleton {
             background: {},
             backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
             font: {},
+            fontMatrix: new ObjectMatrix<any>(),
             border: new ObjectMatrix<BorderCache>(),
         };
         this._cellBgAndBorderCache = new ObjectMatrix<boolean>();
         this._overflowCache.reset();
-        // this.cellCache.reset();
         this.worksheet.cellCache.reset();
     }
 
-    private _makeDocumentSkeletonDirty(r: number, c: number): void {
-        if (this._stylesCache.font == null) {
-            return;
-        }
-        const keys = Object.keys(this._stylesCache.font);
-        for (const fontString of keys) {
-            const fontCache = this._stylesCache.font![fontString];
-            if (fontCache != null && fontCache.getValue(r, c)) {
-                fontCache.getValue(r, c).documentSkeleton.makeDirty(true);
-                return;
-            }
-        }
+    private _makeDocumentSkeletonDirty(row: number, col: number): void {
+        if (this._stylesCache.fontMatrix == null) return;
+        this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
+        // const keys = Object.keys(this._stylesCache.font);
+        // for (const fontString of keys) {
+        //     const fontCache = this._stylesCache.font![fontString];
+        //     if (fontCache != null && fontCache.getValue(r, c)) {
+        //         fontCache.getValue(r, c).documentSkeleton.makeDirty(true);
+        //         return;
+        //     }
+        // }
     }
 
     /**
@@ -1826,6 +1829,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         //#region font style
         if (isNullCell(cell)) return;
+        if (this._stylesCache.fontMatrix.getValue(row, col)) return;
+
         const modelObject = this._getCellDocumentModel(cell, {
             displayRawFormula: this._renderRawFormula,
         });
@@ -1839,8 +1844,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             this._stylesCache.font![fontString] = new ObjectMatrix();
         }
 
-        const fontCacheMatrix: ObjectMatrix<IFontCacheItem> = this._stylesCache.font![fontString];
-        if (fontCacheMatrix.getValue(row, col)) return;
+        const fontFamilyMatrix: ObjectMatrix<IFontCacheItem> = this._stylesCache.font![fontString];
+        if (fontFamilyMatrix.getValue(row, col)) return;
 
         const documentViewModel = new DocumentViewModel(documentModel);
         if (documentViewModel) {
@@ -1857,7 +1862,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 horizontalAlign,
                 wrapStrategy,
             };
-            fontCacheMatrix.setValue(row, col, config);
+            this._stylesCache.fontMatrix.setValue(row, col, config);
+            fontFamilyMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
         }
         //#endregion

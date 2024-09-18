@@ -353,8 +353,8 @@ export class Worksheet {
             return null;
         }
         // return this._viewModel.getCell(row, col);
-        const cache = this.cellCache.getValue(row, col);
-        if (cache) return cache;
+        // const cache = this.cellCache.getValue(row, col);
+        // if (cache) return cache;
 
         const cell = this._viewModel.getCell(row, col);
         this.cellCache.setValue(row, col, cell);

@@ -57,6 +57,7 @@ export interface IStylesCache {
     background?: Record<colorString, ObjectMatrix<string>>;
     backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>;
     font?: Record<string, ObjectMatrix<IFontCacheItem>>;
+    fontMatrix: ObjectMatrix<IFontCacheItem>;
     border?: ObjectMatrix<BorderCache>;
 }
 

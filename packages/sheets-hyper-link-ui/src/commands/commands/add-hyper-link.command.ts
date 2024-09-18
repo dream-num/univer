@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -63,7 +63,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         const cellData = worksheet.getCell(row, column);
         const doc = skeleton.getBlankCellDocumentModel(cellData);
         const snapshot = doc.documentModel!.getSnapshot();
-        const body = snapshot.body;
+        const body = Tools.deepClone(snapshot.body);
         if (!body) {
             return false;
         }

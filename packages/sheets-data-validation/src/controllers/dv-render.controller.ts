@@ -164,26 +164,16 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 {
                     // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
-                    // eslint-disable-next-line max-lines-per-function, complexity
+                    // eslint-disable-next-line complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
-
-                        const skeleton = this._renderManagerService.getRenderById(unitId)
-                            ?.with(SheetSkeletonManagerService)
-                            .getWorksheetSkeleton(subUnitId)
-                            ?.skeleton;
-                        if (!skeleton) {
-                            return next(cell);
-                        }
-
-                        const styleMap = pos.workbook.getStyles();
+                        const styleMap = workbook.getStyles();
                         const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                         const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
                         }
                         const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-
                         if (!rule) {
                             return next(cell);
                         }
@@ -191,46 +181,10 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = worksheet.getCellRaw(row, col);
                         const cellValue = getCellValueOrigin(cellOrigin);
-
-                        let extra: ICellDataForSheetInterceptor = {};
-                        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
-                            extra = {
-                                interceptorStyle: {
-                                    ...cell?.interceptorStyle,
-                                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP,
-                                },
-                            };
-                        }
-
-                        if (rule.type === DataValidationType.CHECKBOX) {
-                            extra = {
-                                interceptorStyle: {
-                                    ...cell?.interceptorStyle,
-                                    tb: WrapStrategy.CLIP,
-                                },
-                            };
-                        }
-
-                        if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
-                            const colorMap = (validator as ListValidator).getListWithColorMap(rule);
-                            const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
-                            const color = colorMap[valueStr];
-                            if (color) {
-                                extra = {
-                                    ...extra,
-                                    interceptorStyle: {
-                                        ...extra.interceptorStyle,
-                                        bg: {
-                                            rgb: color,
-                                        },
-                                    },
-                                };
-                            }
-                        }
+                        const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
 
                         return next({
                             ...cell,
-                            ...extra,
                             dataValidation: {
                                 ruleId,
                                 validStatus,
@@ -251,13 +205,16 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,
-                                ...extra.interceptorStyle,
+                                ...validator?.getExtraStyle(rule, valueStr, { style: defaultStyle }),
                             },
                             interceptorAutoHeight: () => {
-                                // const mergeCell = skeleton.mergeData.find((range) => {
-                                //     const { startColumn, startRow, endColumn, endRow } = range;
-                                //     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
-                                // });
+                                const skeleton = this._renderManagerService.getRenderById(unitId)
+                                    ?.with(SheetSkeletonManagerService)
+                                    .getWorksheetSkeleton(subUnitId)
+                                    ?.skeleton;
+                                if (!skeleton) {
+                                    return undefined;
+                                }
                                 const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {

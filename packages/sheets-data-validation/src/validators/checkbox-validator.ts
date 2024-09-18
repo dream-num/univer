@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
@@ -108,6 +108,12 @@ export class CheckboxValidator extends BaseDataValidator {
             formula2: transformCheckboxValue(originFormula2),
             originFormula1,
             originFormula2,
+        };
+    }
+
+    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>) {
+        return {
+            tb: WrapStrategy.CLIP,
         };
     }
 

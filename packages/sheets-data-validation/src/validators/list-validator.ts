@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
-import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
-import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { LIST_DROPDOWN_KEY } from '../views';
-import { DropdownWidget } from '../widgets/dropdown-widget';
-import { ListRenderModeInput } from '../views/render-mode';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { LIST_DROPDOWN_KEY } from '../views';
+import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { ListRenderModeInput } from '../views/render-mode';
+import { DropdownWidget } from '../widgets/dropdown-widget';
 import { deserializeListOptions } from './util';
 
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
@@ -124,6 +124,27 @@ export class ListValidator extends BaseDataValidator {
                         this.localeService.t('dataValidation.validFail.listIntersects') :
                     this.localeService.t('dataValidation.validFail.listInvalid')
                 : this.localeService.t('dataValidation.validFail.list'),
+        };
+    }
+
+    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, { style: defaultStyle }: { style: IStyleData }): Nullable<IStyleData> {
+        const tb = (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP;
+        if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
+            const colorMap = this.getListWithColorMap(rule);
+            const valueStr = `${value ?? ''}`;
+            const color = colorMap[valueStr];
+            if (color) {
+                return {
+                    bg: {
+                        rgb: color,
+                    },
+                    tb,
+                };
+            }
+        }
+
+        return {
+            tb,
         };
     }
 

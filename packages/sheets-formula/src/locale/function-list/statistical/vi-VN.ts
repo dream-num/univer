@@ -705,6 +705,33 @@ export default {
             standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
+    NORM_S_DIST: {
+        description: 'Trả về phân bố chuẩn chuẩn hóa',
+        abstract: 'Trả về phân bố chuẩn chuẩn hóa',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-s-dist-%E5%87%BD%E6%95%B0-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+            },
+        ],
+        functionParameter: {
+            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORM.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    NORM_S_INV: {
+        description: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa.',
+        abstract: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-s-inv-%E5%87%BD%E6%95%B0-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+        },
+    },
     RANK_AVG: {
         description: 'Trả về thứ hạng của một số trong một danh sách các số',
         abstract: 'Trả về thứ hạng của một số trong một danh sách các số',

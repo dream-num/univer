@@ -348,8 +348,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '這是您要找出分佈的數值。' },
         },
     },
     NORMSINV: {
@@ -362,8 +361,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是對應到常態分佈的機率。' },
         },
     },
     PERCENTILE: {

@@ -349,8 +349,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '需要计算其分布的数值。' },
         },
     },
     NORMSINV: {
@@ -363,8 +362,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
         },
     },
     PERCENTILE: {

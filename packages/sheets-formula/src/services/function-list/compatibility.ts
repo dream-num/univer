@@ -620,16 +620,9 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
         abstract: 'formula.functionList.NORMSDIST.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.NORMSDIST.functionParameter.number1.name',
-                detail: 'formula.functionList.NORMSDIST.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.NORMSDIST.functionParameter.number2.name',
-                detail: 'formula.functionList.NORMSDIST.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.NORMSDIST.functionParameter.z.name',
+                detail: 'formula.functionList.NORMSDIST.functionParameter.z.detail',
+                example: '1.333333',
                 require: 1,
                 repeat: 0,
             },
@@ -642,16 +635,9 @@ export const FUNCTION_LIST_COMPATIBILITY: IFunctionInfo[] = [
         abstract: 'formula.functionList.NORMSINV.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.NORMSINV.functionParameter.number1.name',
-                detail: 'formula.functionList.NORMSINV.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.NORMSINV.functionParameter.number2.name',
-                detail: 'formula.functionList.NORMSINV.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.NORMSINV.functionParameter.probability.name',
+                detail: 'formula.functionList.NORMSINV.functionParameter.probability.detail',
+                example: '0.908789',
                 require: 1,
                 repeat: 0,
             },

@@ -349,8 +349,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: 'The value for which you want the distribution.' },
         },
     },
     NORMSINV: {
@@ -363,8 +362,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability corresponding to the normal distribution.' },
         },
     },
     PERCENTILE: {

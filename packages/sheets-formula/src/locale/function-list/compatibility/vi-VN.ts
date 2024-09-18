@@ -350,8 +350,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
         },
     },
 
@@ -365,8 +364,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
         },
     },
     PERCENTILE: {

@@ -1815,16 +1815,16 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.NORM_S_DIST.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.NORM_S_DIST.functionParameter.number1.name',
-                detail: 'formula.functionList.NORM_S_DIST.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.NORM_S_DIST.functionParameter.z.name',
+                detail: 'formula.functionList.NORM_S_DIST.functionParameter.z.detail',
+                example: '1.333333',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.NORM_S_DIST.functionParameter.number2.name',
-                detail: 'formula.functionList.NORM_S_DIST.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.NORM_S_DIST.functionParameter.cumulative.name',
+                detail: 'formula.functionList.NORM_S_DIST.functionParameter.cumulative.detail',
+                example: 'true',
                 require: 1,
                 repeat: 0,
             },
@@ -1837,16 +1837,9 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.NORM_S_INV.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.NORM_S_INV.functionParameter.number1.name',
-                detail: 'formula.functionList.NORM_S_INV.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.NORM_S_INV.functionParameter.number2.name',
-                detail: 'formula.functionList.NORM_S_INV.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.NORM_S_INV.functionParameter.probability.name',
+                detail: 'formula.functionList.NORM_S_INV.functionParameter.probability.detail',
+                example: '0.908789',
                 require: 1,
                 repeat: 0,
             },

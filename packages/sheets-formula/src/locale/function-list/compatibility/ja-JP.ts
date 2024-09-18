@@ -349,8 +349,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '関数に代入する値を指定します。' },
         },
     },
     NORMSINV: {
@@ -363,8 +362,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: '正規分布における確率を指定します。' },
         },
     },
     PERCENTILE: {

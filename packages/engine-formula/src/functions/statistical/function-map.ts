@@ -59,6 +59,8 @@ import { Mina } from './mina';
 import { Minifs } from './minifs';
 import { NormDist } from './norm-dist';
 import { NormInv } from './norm-inv';
+import { NormSDist } from './norm-s-dist';
+import { NormSInv } from './norm-s-inv';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
 import { StdevP } from './stdev-p';
@@ -116,6 +118,8 @@ export const functionStatistical = [
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
     [NormDist, FUNCTION_NAMES_STATISTICAL.NORM_DIST],
     [NormInv, FUNCTION_NAMES_STATISTICAL.NORM_INV],
+    [NormSDist, FUNCTION_NAMES_STATISTICAL.NORM_S_DIST],
+    [NormSInv, FUNCTION_NAMES_STATISTICAL.NORM_S_INV],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],

@@ -545,7 +545,8 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const { rowColumnSegment, dataMergeCache: mergeCellRanges, overflowCache, showGridlines } = spreadsheetSkeleton;
+        const { rowColumnSegment, overflowCache, showGridlines } = spreadsheetSkeleton;
+        const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
         if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;

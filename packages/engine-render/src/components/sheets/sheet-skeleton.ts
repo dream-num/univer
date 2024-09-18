@@ -258,7 +258,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         endColumn: -1,
     };
 
-    private _dataMergeCache: IRange[] = [];
+    // private _dataMergeCache: IRange[] = [];
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
     private _stylesCache: IStylesCache = {
         background: {},
@@ -328,9 +328,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._rowColumnSegment;
     }
 
-    get dataMergeCache(): IRange[] {
-        return this._dataMergeCache;
-    }
+    // get dataMergeCache(): IRange[] {
+    //     return this._dataMergeCache;
+    // }
 
     get stylesCache(): IStylesCache {
         return this._stylesCache;
@@ -366,7 +366,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowHeaderWidth = 0;
         this._columnHeaderHeight = 0;
         this._rowColumnSegment = null as any;
-        this._dataMergeCache = [];
+        // this._dataMergeCache = [];
         this._stylesCache = {
             background: {},
             backgroundPositions: new ObjectMatrix<ISelectionCellWithMergeInfo>(),
@@ -466,9 +466,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const { mergeData } = this._worksheetData;
+        // const { mergeData } = this._worksheetData;
 
-        this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
+        // // this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
+        // const rowColumnSegment = this._rowColumnSegment;
+        // const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         this._calculateStylesCache();
 
@@ -1649,15 +1651,36 @@ export class SpreadsheetSkeleton extends Skeleton {
     //     return mergeRangeCache;
     // }
 
+    /**
+     * get the current row and column segment visible merge data
+     * @returns {IRange} The visible merge data
+     */
+    public getCurrentRowColumnSegmentMergeData(range?: IRange): IRange[] {
+        const endColumnLast = this.columnWidthAccumulation.length - 1;
+        if (!range) {
+            const endRow = this.rowHeightAccumulation.length - 1;
+            range = { startRow: 0, startColumn: 0, endRow, endColumn: endColumnLast };
+        } else {
+            range = {
+                startRow: range.startRow,
+                endRow: range.endRow,
+                endColumn: endColumnLast,
+                startColumn: 0,
+            };
+        }
+
+        return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
+    }
+
     private _calculateStylesCache(): void {
-        const dataMergeCaches = this._dataMergeCache;
         const rowColumnSegment = this._rowColumnSegment;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         if (endColumn === -1 || endRow === -1) return;
 
-        for (const mergeRange of dataMergeCaches) {
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._rowColumnSegment);
+        for (const mergeRange of mergeRanges) {
             this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
                 mergeRange,
             });

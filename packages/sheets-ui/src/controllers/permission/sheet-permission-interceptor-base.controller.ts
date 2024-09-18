@@ -194,9 +194,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             case DeltaColumnWidthCommand.id:
             case SetColWidthCommand.id:
                 permission = this.permissionCheckWithoutRange({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
+                    worksheetTypes: [WorksheetSetColumnStylePermission],
                 });
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;
@@ -205,9 +203,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             case SetRowHeightCommand.id:
             case SetWorksheetRowIsAutoHeightCommand.id:
                 permission = this.permissionCheckWithoutRange({
-                    workbookTypes: [WorkbookEditablePermission],
-                    rangeTypes: [RangeProtectionPermissionEditPoint],
-                    worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission],
+                    worksheetTypes: [WorksheetSetRowStylePermission],
                 });
                 errorMsg = this._localeService.t('permission.dialog.setRowColStyleErr');
                 break;

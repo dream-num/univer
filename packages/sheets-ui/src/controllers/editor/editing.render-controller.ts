@@ -859,6 +859,13 @@ export class EditingRenderController extends Disposable implements IRenderModule
         let worksheet = workbook.getActiveSheet();
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
+
+        // If the target cell does not exist, there is no need to execute setRangeValue
+        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
+        if (!setRangeValueTargetSheet) {
+            return;
+        }
+
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
             const selections = this._workbookSelections.getCurrentSelections();

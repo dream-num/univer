@@ -40,6 +40,7 @@ import type {
     ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
 
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import {
     Direction,
     Disposable,
@@ -53,6 +54,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -65,11 +67,8 @@ import { deserializeRangeWithSheet,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
-
 import {
     ClearSelectionFormatCommand,
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
     EffectRefRangId,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveUp,
@@ -82,59 +81,23 @@ import {
     handleMoveCols,
     handleMoveRange,
     handleMoveRows,
-    InsertColCommand,
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveRightCommand,
-    InsertRowCommand,
     InsertSheetMutation,
-    MoveColsCommand,
-    MoveRangeCommand,
-    MoveRowsCommand,
-    RemoveColCommand,
-    RemoveRowCommand,
-    RemoveSheetCommand,
     RemoveSheetMutation,
     runRefRangeMutations,
     SetBorderCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
-    SetWorksheetNameCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
 import { map } from 'rxjs';
 import { removeFormulaData } from './utils/offset-formula-data';
-import { formulaDataToCellData, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
+import { formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
+import { getReferenceMoveParams } from './utils/ref-range-move';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
     refOffsetY: number;
     sheetName: string;
-}
-
-enum FormulaReferenceMoveType {
-    MoveRange, // range
-    MoveRows, // move rows
-    MoveCols, // move columns
-    InsertRow, // row
-    InsertColumn, // column
-    RemoveRow, // row
-    RemoveColumn, // column
-    DeleteMoveLeft, // range
-    DeleteMoveUp, // range
-    InsertMoveDown, // range
-    InsertMoveRight, // range
-    SetName,
-    RemoveSheet,
-}
-
-interface IFormulaReferenceMoveParam {
-    type: FormulaReferenceMoveType;
-    unitId: string;
-    sheetId: string;
-    range?: IRange;
-    from?: IRange;
-    to?: IRange;
-    sheetName?: string;
 }
 
 enum OriginRangeEdgeType {
@@ -337,50 +300,8 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
-        const { id } = command;
-        let result: Nullable<IFormulaReferenceMoveParam> = null;
-
-        switch (id) {
-            case MoveRangeCommand.id:
-                result = this._handleMoveRange(command as ICommandInfo<IMoveRangeCommandParams>);
-                break;
-            case MoveRowsCommand.id:
-                result = this._handleMoveRows(command as ICommandInfo<IMoveRowsCommandParams>);
-                break;
-            case MoveColsCommand.id:
-                result = this._handleMoveCols(command as ICommandInfo<IMoveColsCommandParams>);
-                break;
-            case InsertRowCommand.id:
-                result = this._handleInsertRow(command as ICommandInfo<IInsertRowCommandParams>);
-                break;
-            case InsertColCommand.id:
-                result = this._handleInsertCol(command as ICommandInfo<IInsertColCommandParams>);
-                break;
-            case InsertRangeMoveRightCommand.id:
-                result = this._handleInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>);
-                break;
-            case InsertRangeMoveDownCommand.id:
-                result = this._handleInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>);
-                break;
-            case RemoveRowCommand.id:
-                result = this._handleRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>);
-                break;
-            case RemoveColCommand.id:
-                result = this._handleRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>);
-                break;
-            case DeleteRangeMoveUpCommand.id:
-                result = this._handleDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>);
-                break;
-            case DeleteRangeMoveLeftCommand.id:
-                result = this._handleDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>);
-                break;
-            case SetWorksheetNameCommand.id:
-                result = this._handleSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>);
-                break;
-            case RemoveSheetCommand.id:
-                result = this._handleRemoveWorksheet(command as ICommandInfo<IRemoveSheetCommandParams>);
-                break;
-        }
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const result = getReferenceMoveParams(workbook, command);
 
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
@@ -404,251 +325,6 @@ export class UpdateFormulaController extends Disposable {
         return {
             undos: [],
             redos: [],
-        };
-    }
-
-    private _handleMoveRange(command: ICommandInfo<IMoveRangeCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { fromRange, toRange } = params;
-        if (!fromRange || !toRange) return null;
-
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.MoveRange,
-            from: fromRange,
-            to: toRange,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleMoveRows(command: ICommandInfo<IMoveRowsCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const {
-            fromRange: { startRow: fromStartRow, endRow: fromEndRow },
-            toRange: { startRow: toStartRow, endRow: toEndRow },
-        } = params;
-
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return null;
-
-        const sheetId = worksheet.getSheetId();
-
-        const from = {
-            startRow: fromStartRow,
-            startColumn: 0,
-            endRow: fromEndRow,
-            endColumn: worksheet.getColumnCount() - 1,
-            rangeType: RANGE_TYPE.ROW,
-        };
-        const to = {
-            startRow: toStartRow,
-            startColumn: 0,
-            endRow: toEndRow,
-            endColumn: worksheet.getColumnCount() - 1,
-            rangeType: RANGE_TYPE.ROW,
-        };
-
-        return {
-            type: FormulaReferenceMoveType.MoveRows,
-            from,
-            to,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleMoveCols(command: ICommandInfo<IMoveColsCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const {
-            fromRange: { startColumn: fromStartCol, endColumn: fromEndCol },
-            toRange: { startColumn: toStartCol, endColumn: toEndCol },
-        } = params;
-
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) return null;
-
-        const sheetId = worksheet.getSheetId();
-
-        const from = {
-            startRow: 0,
-            startColumn: fromStartCol,
-            endRow: worksheet.getRowCount() - 1,
-            endColumn: fromEndCol,
-            rangeType: RANGE_TYPE.COLUMN,
-        };
-        const to = {
-            startRow: 0,
-            startColumn: toStartCol,
-            endRow: worksheet.getRowCount() - 1,
-            endColumn: toEndCol,
-            rangeType: RANGE_TYPE.COLUMN,
-        };
-
-        return {
-            type: FormulaReferenceMoveType.MoveCols,
-            from,
-            to,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleInsertRow(command: ICommandInfo<IInsertRowCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range, unitId, subUnitId } = params;
-        return {
-            type: FormulaReferenceMoveType.InsertRow,
-            range,
-            unitId,
-            sheetId: subUnitId,
-        };
-    }
-
-    private _handleInsertCol(command: ICommandInfo<IInsertColCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range, unitId, subUnitId } = params;
-        return {
-            type: FormulaReferenceMoveType.InsertColumn,
-            range,
-            unitId,
-            sheetId: subUnitId,
-        };
-    }
-
-    private _handleInsertRangeMoveRight(command: ICommandInfo<InsertRangeMoveRightCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.InsertMoveRight,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleInsertRangeMoveDown(command: ICommandInfo<InsertRangeMoveDownCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.InsertMoveDown,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.RemoveRow,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.RemoveColumn,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleDeleteRangeMoveUp(command: ICommandInfo<IDeleteRangeMoveUpCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.DeleteMoveUp,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleDeleteRangeMoveLeft(command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { range } = params;
-        const { unitId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.DeleteMoveLeft,
-            range,
-            unitId,
-            sheetId,
-        };
-    }
-
-    private _handleSetWorksheetName(command: ICommandInfo<ISetWorksheetNameCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { unitId, subUnitId, name } = params;
-
-        const { unitId: workbookId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.SetName,
-            unitId: unitId || workbookId,
-            sheetId: subUnitId || sheetId,
-            sheetName: name,
-        };
-    }
-
-    private _handleRemoveWorksheet(command: ICommandInfo<IRemoveSheetCommandParams>) {
-        const { params } = command;
-        if (!params) return null;
-
-        const { unitId, subUnitId } = params;
-
-        const { unitId: workbookId, sheetId } = this._getCurrentSheetInfo();
-
-        return {
-            type: FormulaReferenceMoveType.RemoveSheet,
-            unitId: unitId || workbookId,
-            sheetId: subUnitId || sheetId,
         };
     }
 

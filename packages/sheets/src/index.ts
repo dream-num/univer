@@ -302,6 +302,7 @@ export {
     type ISetWorksheetRowIsAutoHeightCommandParams,
 } from './commands/commands/set-worksheet-row-height.command';
 export { SetWorksheetShowCommand } from './commands/commands/set-worksheet-show.command';
+export type { ISetWorksheetShowCommandParams } from './commands/commands/set-worksheet-show.command';
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { AddWorksheetMergeMutation, AddMergeUndoMutationFactory } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';

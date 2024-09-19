@@ -83,7 +83,21 @@ describe('Test covarianceP function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(0);
+
+            const array3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['test'],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(array1, array3);
+            expect(getObjectValue(result2)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value length is not equal', () => {

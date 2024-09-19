@@ -105,7 +105,7 @@ export class BetaInv extends BaseFunction {
         const AValue = +_AObject.getValue();
         const BValue = +_BObject.getValue();
 
-        if (alphaValue <= 0 || betaValue <= 0 || probabilityValue <= 0 || probabilityValue >= 1) {
+        if (alphaValue <= 0 || betaValue <= 0 || probabilityValue <= 0 || probabilityValue >= 1 || AValue >= BValue) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

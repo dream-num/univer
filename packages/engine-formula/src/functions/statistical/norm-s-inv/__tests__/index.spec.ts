@@ -76,6 +76,20 @@ describe('Test normSInv function', () => {
                 [ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+
+            const probability2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(probability2);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
         });
     });
 });

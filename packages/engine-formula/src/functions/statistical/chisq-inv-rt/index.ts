@@ -73,7 +73,7 @@ export class ChisqInvRt extends BaseFunction {
         const probabilityValue = +_probabilityObject.getValue();
         const degFreedomValue = Math.floor(+_degFreedomObject.getValue());
 
-        if (probabilityValue < 0 || probabilityValue > 1 || degFreedomValue < 1 || degFreedomValue > 10 ** 10) {
+        if (probabilityValue < 0 || probabilityValue > 1 || degFreedomValue < 1) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

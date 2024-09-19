@@ -57,8 +57,6 @@ export class CovarianceS extends BaseFunction {
             if (_array1.isNull() || _array2.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
-
-            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (array1RowCount * array1ColumnCount !== array2RowCount * array2ColumnCount) {
@@ -91,6 +89,10 @@ export class CovarianceS extends BaseFunction {
     }
 
     private _getResult(array1Values: number[], array2Values: number[]): BaseValueObject {
+        if (array1Values.length <= 1) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
         const n = array1Values.length;
 
         let array1Sum = 0;

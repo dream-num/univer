@@ -448,7 +448,11 @@ function lowRegGammaInverse(p: number, a: number): number {
             t = Math.exp(-x + (a - 1) * Math.log(x) - aln);
         }
 
-        x -= (t = (err / t) / (1 - 0.5 * Math.min(1, (err / t) * ((a - 1) / x - 1))));
+        if (t !== 0) {
+            t = (err / t) / (1 - 0.5 * Math.min(1, (err / t) * ((a - 1) / x - 1)));
+        }
+
+        x -= t;
 
         if (x <= 0) {
             x = 0.5 * (x + t);
@@ -597,8 +601,8 @@ export function getTwoArrayNumberValues(
         const array2RowIndex = Math.floor(i / array2ColumnCount);
         const array2ColumnIndex = i % array2ColumnCount;
 
-        const array1Object = array1.get(array1RowIndex, array1ColumnIndex) as BaseValueObject;
-        const array2Object = array2.get(array2RowIndex, array2ColumnIndex) as BaseValueObject;
+        const array1Object = array1.isArray() ? array1.get(array1RowIndex, array1ColumnIndex) as BaseValueObject : array1;
+        const array2Object = array2.isArray() ? array2.get(array2RowIndex, array2ColumnIndex) as BaseValueObject : array2;
 
         if (array1Object.isError()) {
             return {

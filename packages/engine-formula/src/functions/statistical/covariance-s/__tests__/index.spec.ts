@@ -83,7 +83,7 @@ describe('Test covarianceS function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Value length is not equal', () => {

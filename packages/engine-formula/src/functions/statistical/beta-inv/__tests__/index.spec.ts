@@ -81,6 +81,21 @@ describe('Test betaInv function', () => {
             expect(getObjectValue(result3)).toBe(ErrorType.NUM);
         });
 
+        it('A and B value test', () => {
+            const probability = NumberValueObject.create(0.685470581);
+            const alpha = NumberValueObject.create(8);
+            const beta = NumberValueObject.create(10);
+            const A = NumberValueObject.create(1);
+            const B = NumberValueObject.create(1);
+            const result = testFunction.calculate(probability, alpha, beta, A, B);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+
+            const A2 = NumberValueObject.create(-1);
+            const B2 = NumberValueObject.create(-0.1);
+            const result2 = testFunction.calculate(probability, alpha, beta, A2, B2);
+            expect(getObjectValue(result2)).toBe(-0.5500000000035623);
+        });
+
         it('Value is normal string', () => {
             const probability = StringValueObject.create('test');
             const alpha = NumberValueObject.create(8);

@@ -76,6 +76,20 @@ describe('Test normsdist function', () => {
                 [0.8413447460685429, ErrorType.VALUE, 0.8906514475743081, 0.8413447460685429, 0.5, 0.5],
                 [0.5, 1, 0.9903581300546417, ErrorType.VALUE, 0.0013498980316301035, ErrorType.NAME],
             ]);
+
+            const z2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(z2);
+            expect(getObjectValue(result2)).toStrictEqual(0.8413447460685429);
         });
     });
 });

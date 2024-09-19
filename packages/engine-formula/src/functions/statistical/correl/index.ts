@@ -58,7 +58,7 @@ export class Correl extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            return ErrorValueObject.create(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         if (array1RowCount * array1ColumnCount !== array2RowCount * array2ColumnCount) {

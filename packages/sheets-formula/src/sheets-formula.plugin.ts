@@ -23,6 +23,7 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
+
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
@@ -34,6 +35,7 @@ import {
     PLUGIN_CONFIG_KEY_REMOTE,
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
+import { DefinedNameUpdateController } from './controllers/defined-name-update.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
@@ -99,6 +101,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [ActiveDirtyController],
             [DefinedNameController],
+            [DefinedNameUpdateController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.

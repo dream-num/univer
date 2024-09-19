@@ -20,6 +20,9 @@ import { Concatenate } from './concatenate';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Lower } from './lower';
+import { Regexextract } from './regexextract';
+import { Regexmatch } from './regexmatch';
+import { Regexreplace } from './regexreplace';
 import { Rept } from './rept';
 import { Text } from './text';
 import { Textafter } from './textafter';
@@ -32,6 +35,9 @@ export const functionText = [
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
+    [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
+    [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
+    [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],

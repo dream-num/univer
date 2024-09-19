@@ -295,46 +295,46 @@ export default {
         },
     },
     REGEXEXTRACT: {
-        description: 'Trích xuất văn bản phù hợp với biểu thức chính quy (REGEX)',
-        abstract: 'Trích xuất văn bản phù hợp với biểu thức chính quy (REGEX)',
+        description: 'Trích xuất chuỗi con khớp đầu tiên theo một biểu thức chính quy.',
+        abstract: 'Trích xuất chuỗi con khớp đầu tiên theo một biểu thức chính quy.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/regexextract-%E5%87%BD%E6%95%B0-917b74b6-0d5c-4c7b-883e-24b39a7a20e2',
+                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=vi',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn tìm kiếm biểu thức chính quy (REGEX).' },
-            regex: { name: 'regex', detail: 'Biểu thức chính quy (REGEX) bạn muốn khớp.' },
+            text: { name: 'văn bản', detail: 'Văn bản nhập vào.' },
+            regularExpression: { name: 'biểu thức chính quy', detail: 'Phần đầu tiên văn_bản khớp với biểu thức này sẽ được trả về.' },
         },
     },
     REGEXMATCH: {
-        description: 'Trả về giá trị đúng hoặc sai để chỉ ra xem văn bản có khớp với một biểu thức chính quy (REGEX) hay không',
-        abstract: 'Trả về giá trị đúng hoặc sai để chỉ ra xem văn bản có khớp với một biểu thức chính quy (REGEX) hay không',
+        description: 'Xem một đoạn văn bản có khớp với một biểu thức chính quy hay không.',
+        abstract: 'Xem một đoạn văn bản có khớp với một biểu thức chính quy hay không.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/regexmatch-%E5%87%BD%E6%95%B0-69e4f84a-0f8c-4ff0-92a4-41e6d3ad960d',
+                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=vi',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn tìm kiếm biểu thức chính quy (REGEX).' },
-            regex: { name: 'regex', detail: 'Biểu thức chính quy (REGEX) bạn muốn khớp.' },
+            text: { name: 'văn bản', detail: 'Văn bản cần thử nghiệm theo biểu thức chính quy.' },
+            regularExpression: { name: 'biểu thức chính quy', detail: 'Biểu thức chính quy dùng để thử nghiệm văn bản.' },
         },
     },
     REGEXREPLACE: {
-        description: 'Thay thế một phần văn bản khớp với biểu thức chính quy (REGEX)',
-        abstract: 'Thay thế một phần văn bản khớp với biểu thức chính quy (REGEX)',
+        description: 'Thay thế một phần của một chuỗi văn bản bằng một chuỗi văn bản khác bằng cách sử dụng các biểu thức chính quy.',
+        abstract: 'Thay thế một phần của một chuỗi văn bản bằng một chuỗi văn bản khác bằng cách sử dụng các biểu thức chính quy.',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/regexreplace-%E5%87%BD%E6%95%B0-e6108146-9ba1-4b3d-a5f2-f3b9a8618f8d',
+                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=vi',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn thay thế biểu thức chính quy (REGEX).' },
-            regex: { name: 'regex', detail: 'Biểu thức chính quy (REGEX) bạn muốn thay thế.' },
-            replacement: { name: 'replacement', detail: 'Văn bản thay thế.' },
+            text: { name: 'văn bản', detail: 'Văn bản, một phần của văn bản này sẽ được thay thế.' },
+            regularExpression: { name: 'biểu thức chính quy', detail: 'Biểu thức chính quy. Tất cả trường hợp phù hợp trong văn_bản sẽ được thay thế.' },
+            replacement: { name: 'thay thế', detail: 'Văn bản sẽ được chèn vào văn bản gốc.' },
         },
     },
     REPLACE: {

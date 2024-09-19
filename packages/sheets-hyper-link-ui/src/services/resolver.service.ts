@@ -126,7 +126,14 @@ export class SheetsHyperLinkResolverService {
         }
         const unitId = workbook.getUnitId();
         if (rangeid) {
-            this.navigateToDefineName(unitId, rangeid);
+            const canNavigate = this.navigateToDefineName(unitId, rangeid);
+            if (!canNavigate) {
+                this._messageService.show({
+                    content: this._localeService.t('hyperLink.message.hiddenRange'),
+                    type: MessageType.Error,
+                });
+                return;
+            }
         }
 
         if (!gid) {
@@ -273,8 +280,7 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToDefineName(unitId: string, rangeid: string) {
-        this._definedNamesService.focusRange(unitId, rangeid);
-        return true;
+        return this._definedNamesService.focusRange(unitId, rangeid);
     }
 
     async navigateToOtherWebsite(url: string) {

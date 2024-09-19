@@ -204,14 +204,17 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
     }
 
+    /** @deprecated */
     setFocusId(id: Nullable<string>) {
         this._focusEditorUnitId = id;
     }
 
+    /** @deprecated */
     getFocusId() {
         return this._focusEditorUnitId;
     }
 
+    /** @deprecated */
     getFocusEditor() {
         if (this._focusEditorUnitId) {
             return this.getEditor(this._focusEditorUnitId);
@@ -247,10 +250,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.blur();
     }
 
+    /** @deprecated */
     changeSpreadsheetFocusState(state: boolean) {
         this._spreadsheetFocusState = state;
     }
 
+    /** @deprecated */
     getSpreadsheetFocusState() {
         return this._spreadsheetFocusState;
     }
@@ -305,6 +310,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return !this.getSpreadsheetFocusState();
     }
 
+    /** @deprecated */
     blur() {
         if (!this._spreadsheetFocusState) {
             this._closeRangePrompt$.next(null);
@@ -323,6 +329,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._blur$.next(null);
     }
 
+    /** @deprecated */
     focus(editorUnitId: string | undefined = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId()) {
         if (editorUnitId == null) {
             return;
@@ -345,15 +352,18 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         });
     }
 
+    /** @deprecated */
     setFormula(formulaString: string, editorUnitId = this._getCurrentEditorUnitId()) {
         this._inputFormula$.next({ formulaString, editorUnitId });
     }
 
+    /** @deprecated */
     setValue(val: string, editorUnitId: string = this._getCurrentEditorUnitId()) {
         this.setValueNoRefresh(val, editorUnitId);
         this._refreshValueChange(editorUnitId);
     }
 
+    /** @deprecated */
     setValueNoRefresh(val: string, editorUnitId: string) {
         this._setValue$.next({
             body: {
@@ -365,6 +375,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.resize(editorUnitId);
     }
 
+    /** @deprecated */
     getValue(id: string) {
         const editor = this.getEditor(id);
         if (editor == null) {
@@ -373,11 +384,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return editor.getValue();
     }
 
+    /** @deprecated */
     setRichValue(body: IDocumentBody, editorUnitId: string = this._getCurrentEditorUnitId()) {
         this._setValue$.next({ body, editorUnitId });
         this._refreshValueChange(editorUnitId);
     }
 
+    /** @deprecated */
     getRichValue(id: string) {
         const editor = this.getEditor(id);
         if (editor == null) {
@@ -396,10 +409,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors.get(id);
     }
 
+    /** @deprecated */
     getAllEditor() {
         return this._editors;
     }
 
+    /** @deprecated */
     getFirstEditor() {
         return [...this.getAllEditor().values()][0];
     }
@@ -419,18 +434,22 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this.getEditor(id)?.isVisible();
     }
 
+    /** @deprecated */
     setOperationSheetUnitId(unitId: Nullable<string>) {
         this._currentSheetUnitId = unitId;
     }
 
+    /** @deprecated */
     getOperationSheetUnitId() {
         return this._currentSheetUnitId;
     }
 
+    /** @deprecated */
     setOperationSheetSubUnitId(sheetId: Nullable<string>) {
         this._currentSheetSubUnitId = sheetId;
     }
 
+    /** @deprecated */
     getOperationSheetSubUnitId() {
         return this._currentSheetSubUnitId;
     }

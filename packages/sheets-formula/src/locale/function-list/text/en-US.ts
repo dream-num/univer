@@ -282,7 +282,7 @@ export default {
         },
     },
     MID: {
-        description: 'Returns a specific number of characters from a text string starting at the position you specify',
+        description: 'Returns a specific number of characters from a text string starting at the position you specify.',
         abstract: 'Returns a specific number of characters from a text string starting at the position you specify',
         links: [
             {
@@ -291,8 +291,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            startNum: { name: 'start_num', detail: 'The position of the first character you want to extract in text. The first character in text has start_num 1, and so on.\nIf start_num is greater than the length of text, MID/MIDB returns "" (empty text).\nIf start_num is less than the length of text, but start_num plus num_chars exceeds the length of text, MID/MIDB returns the characters up to the end of text.\nIf start_num is less than 1, MID/MIDB returns the #VALUE! error value.' },
+            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want MID to return from text.\nIf num_chars is negative, MID returns the #VALUE! error value.' },
         },
     },
     MIDB: {

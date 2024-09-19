@@ -258,13 +258,13 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-%E5%87%BD%E6%95%B0-52757e16-38f2-4729-872c-657e3a4a7a73',
+                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-ha%CC%80m-mid-midb-d5f9e25c-d7d6-472e-b568-4ecb12433028',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự mà bạn muốn trích xuất.' },
-            start_num: { name: 'start_num', detail: 'Vị trí của ký tự đầu tiên bạn muốn trích xuất từ ​​chuỗi văn bản.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự bạn muốn trích xuất từ ​​chuỗi văn bản.' },
+            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự mà bạn muốn trích xuất.' },
+            start_num: { name: 'start_num', detail: 'Ví trí của ký tự thứ nhất mà bạn muốn trích xuất trong văn bản. Ký tự thứ nhất trong chuỗi văn bản có số bắt đầu là 1, và v.v.\nNếu start_num văn bản lớn hơn, thì hàm MID/MIDB trả về "" (văn bản trống).\nNếu start_num độ dài văn bản nhỏ hơn nhưng start_num cộng num_chars vượt quá độ dài văn bản, thì hàm MID/MIDB trả về các ký tự đến cuối văn bản.\nNếu start_num nhỏ hơn 1, thì hàm MID/MIDB trả về giá #VALUE! .' },
+            num_chars: { name: 'num_chars', detail: 'Bắt buộc đối với hàm MID. Chỉ rõ số ký tự mà bạn muốn hàm MID trả về từ văn bản.\nNếu số ký tự là số âm, thì hàm MID trả về giá trị lỗi #VALUE! .' },
         },
     },
     PHONETIC: {

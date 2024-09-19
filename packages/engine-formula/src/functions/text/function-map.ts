@@ -21,6 +21,7 @@ import { Leftb } from './leftb';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Lower } from './lower';
+import { Mid } from './mid';
 import { Rept } from './rept';
 import { Text } from './text';
 import { Textafter } from './textafter';
@@ -33,6 +34,7 @@ export const functionText = [
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
+    [Mid, FUNCTION_NAMES_TEXT.MID],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],

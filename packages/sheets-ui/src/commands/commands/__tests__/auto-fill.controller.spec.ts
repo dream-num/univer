@@ -24,6 +24,7 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
@@ -33,8 +34,8 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
@@ -285,6 +286,7 @@ describe('Test auto fill rules in controller', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
+            [DocSelectionManagerService],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],

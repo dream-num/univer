@@ -16,10 +16,62 @@
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { RecordSingle } from '@univerjs/icons';
-import { CopySheetCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, InsertColAfterCommand, InsertColBeforeCommand, InsertRowAfterCommand, InsertRowBeforeCommand, InsertSheetCommand, RemoveSheetCommand, SetFrozenCancelCommand, SetFrozenCommand, SetHorizontalTextAlignCommand, SetOverlineCommand, SetRangeProtectionCommand, SetRangeValuesCommand, SetSelectionsOperation, SetStrikeThroughCommand, SetStyleCommand, SetTextColorCommand, SetTextRotationCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetActivateCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { AddWorksheetMergeAllCommand,
+    AddWorksheetMergeCommand,
+    AddWorksheetMergeHorizontalCommand,
+    AddWorksheetMergeVerticalCommand,
+    CopySheetCommand,
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    DeltaColumnWidthCommand,
+    DeltaRowHeightCommand,
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertSheetCommand,
+    RemoveSheetCommand,
+    SetFrozenCancelCommand,
+    SetFrozenCommand,
+    SetHorizontalTextAlignCommand,
+    SetOverlineCommand,
+    SetRangeProtectionCommand,
+    SetRangeValuesCommand,
+    SetSelectionsOperation,
+    SetStrikeThroughCommand,
+    SetStyleCommand,
+    SetTextColorCommand,
+    SetTextRotationCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+    SetWorksheetActivateCommand,
+    SetWorksheetActiveOperation,
+} from '@univerjs/sheets';
 import { RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
-import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeSubscriptCommand, SetRangeSuperscriptCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetCopyCommand, SheetCutCommand, SheetPasteBesidesBorderCommand, SheetPasteColWidthCommand, SheetPasteCommand, SheetPasteFormatCommand, SheetPasteShortKeyCommand, SheetPasteValueCommand } from '@univerjs/sheets-ui';
-import { BuiltInUIPart, ComponentManager, IMenuManagerService, IUIPartsService } from '@univerjs/ui';
+import { SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeSubscriptCommand,
+    SetRangeSuperscriptCommand,
+    SetRangeTextColorCommand,
+    SetRangeUnderlineCommand,
+    SheetCopyCommand,
+    SheetCutCommand,
+    SheetPasteBesidesBorderCommand,
+    SheetPasteColWidthCommand,
+    SheetPasteCommand,
+    SheetPasteFormatCommand,
+    SheetPasteShortKeyCommand,
+    SheetPasteValueCommand,
+} from '@univerjs/sheets-ui';
+import {
+    BuiltInUIPart,
+    ComponentManager,
+    IMenuManagerService,
+    IUIPartsService,
+} from '@univerjs/ui';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
 import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
@@ -78,6 +130,10 @@ export class ActionRecorderController extends Disposable {
             InsertRowBeforeCommand,
             RemoveSheetCommand,
             SetStyleCommand,
+            AddWorksheetMergeCommand,
+            AddWorksheetMergeAllCommand,
+            AddWorksheetMergeVerticalCommand,
+            AddWorksheetMergeHorizontalCommand,
             // ResetBackgroundColorCommand,
             // ResetTextColorCommand,
             // SetBackgroundColorCommand,

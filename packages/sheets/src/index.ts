@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable perfectionist/sort-named-exports */
+/* eslint-disable perfectionist/sort-exports */
+
 export { UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services

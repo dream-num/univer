@@ -236,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            numBytes: { name: 'バイト数', detail: 'LEFTB で取り出す文字数をバイト数で指定します。' },
         },
     },
     LEN: {

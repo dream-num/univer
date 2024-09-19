@@ -235,8 +235,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string that contains the characters you want to extract.' },
+            numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want LEFTB to extract, based on bytes.' },
         },
     },
     LEN: {

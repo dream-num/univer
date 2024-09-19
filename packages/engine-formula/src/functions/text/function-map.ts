@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_TEXT } from './function-names';
 import { Concat } from './concat';
 import { Concatenate } from './concatenate';
+import { FUNCTION_NAMES_TEXT } from './function-names';
+import { Leftb } from './leftb';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Lower } from './lower';
@@ -37,4 +38,5 @@ export const functionText = [
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
     [Textsplit, FUNCTION_NAMES_TEXT.TEXTSPLIT],
+    [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
 ];

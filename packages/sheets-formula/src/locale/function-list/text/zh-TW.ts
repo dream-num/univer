@@ -235,8 +235,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '內含所要擷取字元的文字字串。' },
+            numBytes: { name: '字元數', detail: '指定 LEFTB 所要擷取的字元數，以位元組為單位。' },
         },
     },
     LEN: {

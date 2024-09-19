@@ -235,8 +235,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            text: { name: 'Текст', detail: 'Текстовая строка, содержащая символы, которые требуется извлечь.' },
+            numBytes: { name: 'Количество_байт', detail: 'Количество символов, извлекаемых функцией ЛЕВБ.' },
         },
     },
     LEN: {

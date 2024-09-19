@@ -216,3 +216,10 @@ export function mergeRanges(ranges: IRange[]): IRange[] {
     // return horizontalMerged;
 }
 
+export function multiSubtractSingleRange(ranges: IRange[], toDelete: IRange) {
+    const res: IRange[] = [];
+    ranges.forEach((range) => {
+        res.push(...Rectangle.subtract(range, toDelete));
+    });
+    return Rectangle.mergeRanges(res);
+};

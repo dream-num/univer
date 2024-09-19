@@ -15,7 +15,7 @@
  */
 
 import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
-import { mergeRanges } from './range';
+import { mergeRanges, multiSubtractSingleRange } from './range';
 import type { Nullable } from './types';
 
 /**
@@ -323,22 +323,14 @@ export class Rectangle {
         return mergeRanges(ranges);
     }
 
-    static multiSubtractSingle(ranges: IRange[], toDelete: IRange) {
-        const res: IRange[] = [];
-        ranges.forEach((range) => {
-            res.push(...Rectangle.subtract(range, toDelete));
-        });
-        return Rectangle.mergeRanges(res);
-    };
-
-    static multiSubtractMulti(ranges1: IRange[], ranges2: IRange[]): IRange[] {
+    static subtractMulti(ranges1: IRange[], ranges2: IRange[]): IRange[] {
         if (!ranges2.length) {
             return ranges1;
         }
 
         let res: IRange[] = ranges1;
         ranges2.forEach((range) => {
-            res = Rectangle.multiSubtractSingle(res, range);
+            res = multiSubtractSingleRange(res, range);
         });
 
         return Rectangle.mergeRanges(res);

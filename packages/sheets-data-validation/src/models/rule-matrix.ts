@@ -46,7 +46,7 @@ export class RuleMatrix {
         const ranges = rule.ranges.map((range) => Range.transformRange(range, this._worksheet));
 
         this._map.forEach((value, key) => {
-            const newRanges = Rectangle.multiSubtractMulti(value, ranges);
+            const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
                 this._map.delete(key);
             } else {
@@ -60,7 +60,7 @@ export class RuleMatrix {
     removeRange(_ranges: IRange[]) {
         const ranges = _ranges.map((range) => Range.transformRange(range, this._worksheet));
         this._map.forEach((value, key) => {
-            const newRanges = Rectangle.multiSubtractMulti(value, ranges);
+            const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
                 this._map.delete(key);
             } else {
@@ -77,7 +77,7 @@ export class RuleMatrix {
         this._map.delete(ruleId);
         const ranges = _newRanges.map((range) => Range.transformRange(range, this._worksheet));
         this._map.forEach((value, key) => {
-            const newRanges = Rectangle.multiSubtractMulti(value, ranges);
+            const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
                 this._map.delete(key);
             } else {
@@ -190,7 +190,7 @@ export class RuleMatrix {
                 if (key === ruleId) {
                     return;
                 }
-                const newRanges = Rectangle.multiSubtractMulti(value, ranges);
+                const newRanges = Rectangle.subtractMulti(value, ranges);
                 if (newRanges.length === 0) {
                     this._map.delete(key);
                 } else {

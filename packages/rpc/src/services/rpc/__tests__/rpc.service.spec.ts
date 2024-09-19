@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
+import { awaitTime } from '@univerjs/core';
 import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { IMessageProtocol } from '../rpc.service';
+import type { Observable } from 'rxjs';
 import { ChannelClient, ChannelServer, fromModule, toModule } from '../rpc.service';
+import type { IMessageProtocol } from '../rpc.service';
 
 describe('Test ChannelClient & ChannelServer', () => {
     let clientProtocol: TestMessageProtocolForClient;
@@ -88,20 +89,14 @@ describe('Test ChannelClient & ChannelServer', () => {
             // Should not emit any value when the returned observable is not subscribe.
             const values: number[] = [];
             const observable = clientService.getCount$();
-            await timer(300);
+            await awaitTime(300);
             expect(values).toEqual([]);
 
             // Should send request only after the observable is subscribed.
             const subscription = observable.subscribe((value) => values.push(value));
-            await timer(300);
+            await awaitTime(300);
             expect(values).toEqual([1, 2, 3]);
             expect(subscription.closed).toBe(true);
         });
     });
 });
-
-function timer(ms: number): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}

@@ -25,5 +25,5 @@ import { numfmt } from '@univerjs/core';
  * @returns
  */
 export const getFormatPreview = (pattern: string, value: number) => {
-    return numfmt.format(pattern, value);
+    return numfmt.format(pattern, value, { throws: false });
 };

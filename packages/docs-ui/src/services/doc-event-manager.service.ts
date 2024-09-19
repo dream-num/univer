@@ -359,7 +359,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         }
         this._bulletDirty = false;
 
-        // console.time('===bullet');
         this._bulletBounds = [];
         this._bulletBounds.push(...this._buildBulletBoundsBySegment());
 
@@ -372,7 +371,6 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
                 this._bulletBounds.push(...this._buildBulletBoundsBySegment(page.footerId, pageIndex));
             }
         });
-        // console.timeEnd('===bullet');
     }
 
     private _calcActiveBullet(evt: IPointerEvent | IMouseEvent) {

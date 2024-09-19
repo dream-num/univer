@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import { awaitTime } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Injector } from '@univerjs/core';
-import { HTTPService } from '../../http.service';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
+import { HTTPHeaders } from '../../headers';
+import { HTTPService } from '../../http.service';
 import { IHTTPImplementation } from '../../implementations/implementation';
 import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
-import { ThresholdInterceptorFactory } from '../threshold-interceptor';
-import { HTTPHeaders } from '../../headers';
 import { HTTPResponse, HTTPResponseError } from '../../response';
+import { ThresholdInterceptorFactory } from '../threshold-interceptor';
 
 describe('test "HTTPThresholdInterceptor"', () => {
     let httpService: HTTPService;
@@ -125,14 +126,10 @@ describe('test "HTTPThresholdInterceptor"', () => {
         expect(handler1).toBeDefined();
 
         emitError(0);
-        await timer();
+        await awaitTime(20);
         expect(errored).toBe(true);
 
         emitSuccess(1);
         expect(await request1).toBeDefined();
     });
 });
-
-function timer() {
-    return new Promise((resolve) => setTimeout(resolve, 200));
-}

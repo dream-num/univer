@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
+import { awaitTime, Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import type { ICommandInfo } from '@univerjs/core';
@@ -81,8 +81,42 @@ export class ActionReplayService extends Disposable {
 
         return true;
     }
+
+    /**
+     * Replay a list of commands with a random delay between each command.
+     * @param commands - The commands to replay.
+     */
+    async replayCommandsWithDelay(commands: ICommandInfo[]): Promise<boolean> {
+        const focusedUnitId = this._instanceService.getFocusedUnit()?.getUnitId();
+        if (!focusedUnitId) {
+            this._logService.error('[ReplayService]', 'no focused unit to replay commands');
+        }
+
+        for (const command of commands) {
+            await awaitTime(randomBetween200And1k());
+
+            const { id, params } = command;
+            if (params) {
+                if (typeof (params as ISharedCommandParams).unitId !== 'undefined') {
+                    (params as ISharedCommandParams).unitId = focusedUnitId;
+                }
+
+                const result = await this._commandService.executeCommand(id, params);
+                if (!result) return false;
+            } else {
+                const result = await this._commandService.executeCommand(id);
+                if (!result) return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 interface ISharedCommandParams {
     unitId?: string;
+}
+
+function randomBetween200And1k() {
+    return Math.floor(Math.random() * 800) + 200;
 }

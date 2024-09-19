@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { awaitTime, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -74,20 +74,20 @@ export class E2EMemoryController extends Disposable {
         snapshot.id = unitId;
 
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, snapshot);
-        await timer(loadingTimeout);
+        await awaitTime(loadingTimeout);
 
         this._univerInstanceService.disposeUnit(unitId);
-        await timer(disposingTimeout);
+        await awaitTime(disposingTimeout);
     }
 
     private async _loadDefaultSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, getDefaultWorkbookData());
-        await timer(loadingTimeout);
+        await awaitTime(loadingTimeout);
     }
 
     private async _loadDefaultDoc(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, getDefaultDocData());
-        await timer(loadingTimeout);
+        await awaitTime(loadingTimeout);
     }
 
     private async _disposeUniver(): Promise<void> {
@@ -98,12 +98,6 @@ export class E2EMemoryController extends Disposable {
         const unit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
         const unitId = unit?.getUnitId();
         await this._univerInstanceService.disposeUnit(unitId || '');
-        await timer(disposingTimeout);
+        await awaitTime(disposingTimeout);
     }
-}
-
-function timer(timeout: number): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(resolve, timeout);
-    });
 }

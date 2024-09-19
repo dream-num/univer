@@ -16,7 +16,7 @@
 
 import { ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type {
     IDocSelectionInnerParam,
@@ -51,7 +51,7 @@ export class DocSelectionManagerService extends RxDisposable {
 
     private readonly _textSelectionInfo: ITextSelectionInfo = new Map();
 
-    private readonly _textSelection$ = new BehaviorSubject<Nullable<ITextSelectionManagerInsertParam>>(null);
+    private readonly _textSelection$ = new Subject<ITextSelectionManagerInsertParam>();
     readonly textSelection$ = this._textSelection$.asObservable();
 
     private readonly _refreshSelection$ = new BehaviorSubject<Nullable<IRefreshSelectionParam>>(null);

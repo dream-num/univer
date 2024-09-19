@@ -40,7 +40,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
     readonly onKeydown$ = this._onKeydown$.asObservable();
 
-    private readonly _onInput$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onInput$ = new Subject<IEditorInputConfig>();
     readonly onInput$ = this._onInput$.asObservable();
 
     private readonly _onCompositionstart$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
@@ -55,16 +55,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
 
-    private readonly _onPaste$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onPaste$ = new Subject<IEditorInputConfig>();
     readonly onPaste$ = this._onPaste$.asObservable();
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<IDocSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
 
-    private readonly _onFocus$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onFocus$ = new Subject<IEditorInputConfig>();
     readonly onFocus$ = this._onFocus$.asObservable();
 
-    private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onBlur$ = new Subject<IEditorInputConfig>();
     readonly onBlur$ = this._onBlur$.asObservable();
 
     private readonly _onPointerDown$ = new Subject<void>();
@@ -1058,13 +1058,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             })
         );
 
-        this.disposeWithMe(
-            fromEvent(this._input, 'pointerdown').subscribe((e) => {
-                this._eventHandle(e, () => {
-                    this._onBlur$.next();
-                });
-            })
-        );
+        // this.disposeWithMe(
+        //     fromEvent(this._input, 'pointerdown').subscribe((e) => {
+        //         this._eventHandle(e, () => {
+        //             this._onBlur$.next();
+        //         });
+        //     })
+        // );
 
         this.disposeWithMe(
             fromEvent(this._input, 'blur').subscribe((e) => {

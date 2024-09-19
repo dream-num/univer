@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFAULT_STYLES, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
 import { type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
@@ -138,7 +138,7 @@ export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams 
     editorDom: HTMLDivElement;
 }
 
-export class Editor implements IEditor {
+export class Editor extends Disposable implements IEditor {
     // Emit change event when editor lose focus.
     private readonly _change$ = new Subject<IEditorEvent>();
     change$: Observable<IEditorEvent> = this._change$.asObservable();
@@ -177,8 +177,65 @@ export class Editor implements IEditor {
         private _commandService: ICommandService,
         private _undoRedoService: IUndoRedoService
     ) {
+        super();
         this._openForSheetUnitId = this._param.openForSheetUnitId;
         this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
+
+        this._listenSelection();
+    }
+
+    private _listenSelection() {
+        const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
+
+        this.disposeWithMe(
+            docSelectionRenderService.onBlur$.subscribe((e) => {
+                this._blur$.next(e);
+
+                const data = this.getDocumentData();
+
+                this._change$.next({
+                    target: this,
+                    data,
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            docSelectionRenderService.onFocus$.subscribe((e) => {
+                this._focus$.next(e);
+            })
+        );
+
+        this.disposeWithMe(
+            docSelectionRenderService.onPaste$.subscribe((e) => {
+                this._paste$.next(e);
+            })
+        );
+
+        this.disposeWithMe(
+            docSelectionRenderService.onInput$.subscribe((e) => {
+                const { content = '' } = e;
+                const data = this.getDocumentData();
+
+                this._input$.next({
+                    target: this,
+                    content,
+                    data,
+                    isComposing: false,
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            this._docSelectionManagerService.textSelection$.subscribe((e) => {
+                const { unitId, subUnitId, ...params } = e;
+                const editorId = this.getEditorId();
+
+                if (unitId === editorId) {
+                    this._selectionChange$.next(params);
+                }
+            })
+        );
     }
 
     focus() {

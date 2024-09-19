@@ -27,6 +27,8 @@ import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import type { ICommandInfo, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
+import { getReferenceMoveParams } from './utils/ref-range-move';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 
 @OnLifecycle(LifecycleStages.Rendered, DefinedNameUpdateController)
 export class DefinedNameUpdateController extends Disposable {
@@ -55,6 +57,9 @@ export class DefinedNameUpdateController extends Disposable {
     }
 
     private _getUpdateDefinedName(command: ICommandInfo) {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const result = getReferenceMoveParams(workbook, command);
+
         const { id } = command;
 
         if (id === RemoveSheetCommand.id) {
@@ -117,5 +122,10 @@ export class DefinedNameUpdateController extends Disposable {
             redos: [],
             undos: [],
         };
+    }
+
+    private _getReferenceMoveInfo(moveParams: IFormulaReferenceMoveParam) {
+        const { unitId, sheetId } = moveParams;
+        const denifedNames = this._definedNamesService.getDefinedNameMap(moveParams.unitId);
     }
 }

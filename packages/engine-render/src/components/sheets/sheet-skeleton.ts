@@ -269,7 +269,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     /** A matrix to store if a (row, column) position has render cache. */
-    private _cellBgAndBorderCache = new ObjectMatrix<boolean>();
+    private _cellBgCacheMatrix = new ObjectMatrix<boolean>();
+    private _cellBorderCacheMatrix = new ObjectMatrix<boolean>();
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
 
@@ -380,7 +381,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._cellBgAndBorderCache = null as unknown as ObjectMatrix<boolean>;
+        this._cellBgCacheMatrix = null as unknown as ObjectMatrix<boolean>;
+        this._cellBorderCacheMatrix = null as unknown as ObjectMatrix<boolean>;
         this._overflowCache = null as unknown as ObjectMatrix<IRange>;
 
         this._worksheetData = null as unknown as IWorksheetData;
@@ -1725,7 +1727,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<any>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._cellBgAndBorderCache = new ObjectMatrix<boolean>();
+        this._cellBgCacheMatrix = new ObjectMatrix<boolean>();
+        this._cellBorderCacheMatrix = new ObjectMatrix<boolean>();
         this._overflowCache.reset();
     }
 
@@ -1734,96 +1737,67 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
     }
 
-    /**
-     * Set border background and font to this._stylesCache { border font background }
-     * @param row {number}
-     * @param col {number}
-     * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
-     */
-    // eslint-disable-next-line complexity
-    private _setStylesCache(row: number, col: number, options?: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
-        if (row === -1 || col === -1) {
-            return;
-        }
-
-        // In most cases, this._cellBgAndBorderCache(row, col) has value means this._styles.font has value.
-        // So we can return in advance by cellBgAndBorderCache(row, col)
-        const hasStyleCache = this._cellBgAndBorderCache.getValue(row, col);
-        if (hasStyleCache === true) {
-            this._makeDocumentSkeletonDirty(row, col);
-            return;
-        }
-
-        /**
-         * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
-         */
-        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        if (!cell) return;
-
-        const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
-        if (hidden) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(row, col);
-
-            if (isMerged && !isMergedMainCell) {
-                // If the cell is merged and is not the main cell, the cell is not rendered.
-                return;
-            } else if (!isMergedMainCell) {
-                // If the cell no merged, the cell is not rendered.
-                return;
-            }
-        }
-
+    _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
+        mergeRange?: IRange;
+        cacheItem?: ICacheItem;
+    } | undefined) {
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
+        if (cacheItem.border) {
+            const handledThisCell = Tools.isDefine(this._cellBorderCacheMatrix.getValue(row, col));
+            if (!handledThisCell) {
+                this._cellBorderCacheMatrix.setValue(row, col, true);
+                if (style && style.bd) {
+                    const mergeRange = options?.mergeRange;
+                    if (mergeRange) {
+                        this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
+                        this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
+                        this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
+                        this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
+                    } else if (!this.intersectMergeRange(row, col)) {
+                        this._setBorderProps(row, col, BORDER_TYPE.TOP, style, this._stylesCache);
+                        this._setBorderProps(row, col, BORDER_TYPE.BOTTOM, style, this._stylesCache);
+                        this._setBorderProps(row, col, BORDER_TYPE.LEFT, style, this._stylesCache);
+                        this._setBorderProps(row, col, BORDER_TYPE.RIGHT, style, this._stylesCache);
+                    }
 
-        const style = this._styles.getStyleByCell(cell);
-        //#region cache for background
-        if (cacheItem.bg && style && style.bg && style.bg.rgb) {
-            const rgb = style.bg.rgb;
-            if (!this._stylesCache.background![rgb]) {
-                this._stylesCache.background![rgb] = new ObjectMatrix();
+                    this._setBorderProps(row, col, BORDER_TYPE.TL_BR, style, this._stylesCache);
+                    this._setBorderProps(row, col, BORDER_TYPE.TL_BC, style, this._stylesCache);
+                    this._setBorderProps(row, col, BORDER_TYPE.TL_MR, style, this._stylesCache);
+                    this._setBorderProps(row, col, BORDER_TYPE.BL_TR, style, this._stylesCache);
+                    this._setBorderProps(row, col, BORDER_TYPE.ML_TR, style, this._stylesCache);
+                    this._setBorderProps(row, col, BORDER_TYPE.BC_TR, style, this._stylesCache);
+                }
             }
-
-            const bgCache = this._stylesCache.background![rgb];
-            bgCache.setValue(row, col, rgb);
-            const cellInfo = this.getCellByIndexWithNoHeader(row, col);
-            this._stylesCache.backgroundPositions?.setValue(row, col, cellInfo);
         }
-        //#endregion
+    }
 
-        //#region cache for border
-        if (cacheItem.border && style && style.bd) {
-            const mergeRange = options?.mergeRange;
-            if (mergeRange) {
-                this._setMergeBorderProps(BORDER_TYPE.TOP, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.LEFT, this._stylesCache, mergeRange);
-                this._setMergeBorderProps(BORDER_TYPE.RIGHT, this._stylesCache, mergeRange);
-            } else if (!this.intersectMergeRange(row, col)) {
-                this._setBorderProps(row, col, BORDER_TYPE.TOP, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.BOTTOM, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.LEFT, style, this._stylesCache);
-                this._setBorderProps(row, col, BORDER_TYPE.RIGHT, style, this._stylesCache);
+    _setBgStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
+        mergeRange?: IRange;
+        cacheItem?: ICacheItem;
+    } | undefined) {
+        // by default, style cache should includes border and background info.
+        const cacheItem = options?.cacheItem || { bg: true, border: true };
+        if (cacheItem.bg) {
+            const handledThisCell = Tools.isDefine(this._cellBgCacheMatrix.getValue(row, col));
+            if (!handledThisCell) {
+                this._cellBgCacheMatrix.setValue(row, col, true);
+                if (style && style.bg && style.bg.rgb) {
+                    const rgb = style.bg.rgb;
+                    if (!this._stylesCache.background![rgb]) {
+                        this._stylesCache.background![rgb] = new ObjectMatrix();
+                    }
+
+                    const bgCache = this._stylesCache.background![rgb];
+                    bgCache.setValue(row, col, rgb);
+                    const cellInfo = this.getCellByIndexWithNoHeader(row, col);
+                    this._stylesCache.backgroundPositions?.setValue(row, col, cellInfo);
+                }
             }
-
-            this._setBorderProps(row, col, BORDER_TYPE.TL_BR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_TYPE.TL_BC, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_TYPE.TL_MR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_TYPE.BL_TR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_TYPE.ML_TR, style, this._stylesCache);
-            this._setBorderProps(row, col, BORDER_TYPE.BC_TR, style, this._stylesCache);
         }
+    }
 
-        // same as: if (!skipBackgroundAndBorder) {...}
-        if (cacheItem.bg || cacheItem.border) {
-            this._cellBgAndBorderCache.setValue(row, col, true);
-        } else {
-            this._cellBgAndBorderCache.setValue(row, col, false);
-        }
-
-        // When execution reaches here, it indicates that this is a new cell, and the _stylesCache.font does not yet record the data for this cell.
-
-        //#region font style
+    _setFontStylesCache(cell: Nullable<ICellData>, row: number, col: number) {
         if (isNullCell(cell)) return;
         if (this._stylesCache.fontMatrix.getValue(row, col)) return;
 
@@ -1862,6 +1836,48 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontFamilyMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
         }
+    }
+
+    /**
+     * Set border background and font to this._stylesCache
+     * @param row {number}
+     * @param col {number}
+     * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
+     */
+    private _setStylesCache(row: number, col: number, options?: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+        if (row === -1 || col === -1) {
+            return;
+        }
+
+        /**
+         * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
+         */
+        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
+        if (!cell) return;
+
+        const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
+        if (hidden) {
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(row, col);
+
+            if (isMerged && !isMergedMainCell) {
+                // If the cell is merged and is not the main cell, the cell is not rendered.
+                return;
+            } else if (!isMergedMainCell) {
+                // If the cell no merged, the cell is not rendered.
+                return;
+            }
+        }
+
+        const style = this._styles.getStyleByCell(cell);
+        //#region cache for background
+        this._setBgStylesCache(row, col, style, options);
+        //#endregion
+
+        //#region cache for border
+        this._setBorderStylesCache(row, col, style, options);
+
+        //#region font style
+        this._setFontStylesCache(cell, row, col);
         //#endregion
     }
 

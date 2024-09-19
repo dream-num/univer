@@ -1660,6 +1660,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     // }
 
     /**
+     * @deprecated use _getCellMergeInfo instead.
      * get the current row and column segment visible merge data
      * @returns {IRange} The visible merge data
      */
@@ -1687,18 +1688,21 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         if (endColumn === -1 || endRow === -1) return;
 
-        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._rowColumnSegment);
-        for (const mergeRange of mergeRanges) {
-            this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
-                mergeRange,
-            });
-        }
+        // const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._rowColumnSegment);
+        // for (const mergeRange of mergeRanges) {
+        //     this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
+        //         mergeRange,
+        //     });
+        // }
 
+        // const mergeRange = mergeRanges.length ? mergeRanges[0] : undefined;
         for (let r = startRow; r <= endRow; r++) {
             if (this.worksheet.getRowVisible(r) === false) continue;
 
             for (let c = startColumn; c <= endColumn; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: true, border: true } });
+                this._setStylesCache(r, c, {
+                    cacheItem: { bg: true, border: true },
+                });
             }
 
             // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
@@ -1852,15 +1856,24 @@ export class SpreadsheetSkeleton extends Skeleton {
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         if (!cell) return;
 
-        const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
-        if (hidden) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(row, col);
+        if (!options) {
+            options = { cacheItem: { bg: true, border: true } };
+        }
 
+        const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this._getCellMergeInfo(row, col);
+        if (options) {
+            options.mergeRange = { startRow, startColumn, endRow, endColumn };
+        }
+
+        const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
+
+        // hiddene and not in mergeRange return.
+        if (hidden) {
+            // If the cell is merged and is not the main cell, the cell is not rendered.
             if (isMerged && !isMergedMainCell) {
-                // If the cell is merged and is not the main cell, the cell is not rendered.
                 return;
+            // If the cell no merged, the cell is not rendered.
             } else if (!isMergedMainCell) {
-                // If the cell no merged, the cell is not rendered.
                 return;
             }
         }

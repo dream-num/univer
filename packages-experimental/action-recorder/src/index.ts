@@ -15,3 +15,5 @@
  */
 
 export { UniverActionRecorderPlugin } from './plugin';
+export { ActionRecorderService } from './services/action-recorder.service';
+export { ActionReplayService } from './services/replay.service';

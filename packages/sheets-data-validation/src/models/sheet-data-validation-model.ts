@@ -136,7 +136,7 @@ export class SheetDataValidationModel extends Disposable {
     private _updateRule(unitId: string, subUnitId: string, ruleId: string, oldRule: ISheetDataValidationRule, payload: IUpdateRulePayload) {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         if (payload.type === UpdateRuleType.RANGE) {
-            ruleMatrix.updateRange(ruleId, oldRule.ranges, payload.payload);
+            ruleMatrix.updateRange(ruleId, payload.payload);
             this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
             this._dataValidationCustomFormulaService.updateRuleRanges(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload);
         } else if (payload.type === UpdateRuleType.SETTING) {

@@ -73,7 +73,7 @@ export class RuleMatrix {
         this._map.delete(rule.uid);
     }
 
-    updateRange(ruleId: string, _oldRanges: IRange[], _newRanges: IRange[]) {
+    updateRange(ruleId: string, _newRanges: IRange[]) {
         this._map.delete(ruleId);
         const ranges = _newRanges.map((range) => Range.transformRange(range, this._worksheet));
         this._map.forEach((value, key) => {
@@ -85,7 +85,7 @@ export class RuleMatrix {
             }
         });
 
-        this._map.set(ruleId, _newRanges);
+        this._map.set(ruleId, ranges);
     }
 
     diff(rules: ISheetDataValidationRule[]) {

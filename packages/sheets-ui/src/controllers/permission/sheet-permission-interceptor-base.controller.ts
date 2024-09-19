@@ -24,7 +24,7 @@ import { UnitAction } from '@univerjs/protocol';
 import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
 import type { ICellData, ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
-import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams } from '@univerjs/sheets';
+import type { IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, ISetRangeValuesCommandParams, ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISetWorksheetNameMutationParams, ISetWorksheetShowCommandParams } from '@univerjs/sheets';
 import { AutoFillCommand } from '../../commands/commands/auto-fill.command';
 import { SheetCopyCommand, SheetCutCommand, SheetPasteColWidthCommand, SheetPasteShortKeyCommand } from '../../commands/commands/clipboard.command';
 import { SetRangeBoldCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
@@ -238,10 +238,13 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                 }
                 break;
             case SetWorksheetShowCommand.id:
-                permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookHideSheetPermission]);
-                errorMsg = this._localeService.t('permission.dialog.operatorSheetErr');
-                if (permission === false) {
-                    this._worksheetProtectionRuleModel.resetOrder();
+                {
+                    const { unitId, subUnitId } = params as ISetWorksheetShowCommandParams;
+                    permission = this._permissionCheckByWorksheetCommand([WorkbookEditablePermission, WorkbookHideSheetPermission], unitId, subUnitId);
+                    errorMsg = this._localeService.t('permission.dialog.operatorSheetErr');
+                    if (permission === false) {
+                        this._worksheetProtectionRuleModel.resetOrder();
+                    }
                 }
                 break;
 
@@ -369,8 +372,8 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         return true;
     }
 
-    private _permissionCheckByWorksheetCommand(types: WorkbookPermissionPointConstructor[]) {
-        const target = getSheetCommandTarget(this._univerInstanceService);
+    private _permissionCheckByWorksheetCommand(types: WorkbookPermissionPointConstructor[], targetUnitId?: string, targetSubUnitId?: string) {
+        const target = getSheetCommandTarget(this._univerInstanceService, { unitId: targetUnitId, subUnitId: targetSubUnitId });
         if (!target) {
             return false;
         }

@@ -139,6 +139,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { nameCharacterCheck } from './shared/name';
 export { fromCallback, takeAfter } from './shared/rxjs';
+export { awaitTime } from './shared/timer';
 export { Range } from './sheets/range';
 export {
     DEFAULT_WORKSHEET_COLUMN_COUNT,

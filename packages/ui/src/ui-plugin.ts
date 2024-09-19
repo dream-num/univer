@@ -38,8 +38,8 @@ import { EditorService, IEditorService } from './services/editor/editor.service'
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
-import { DesktopLocalFileService } from './services/local-file/desktop-file-opener.service';
-import { ILocalFileService } from './services/local-file/file-opener.service';
+import { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
+import { ILocalFileService } from './services/local-file/local-file.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { IMenuService, MenuService } from './services/menu/menu.service';
 import { IMenuManagerService, MenuManagerService } from './services/menu/menu-manager.service';

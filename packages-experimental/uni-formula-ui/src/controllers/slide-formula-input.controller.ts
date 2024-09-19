@@ -16,9 +16,8 @@
 
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { InsertCommand } from '@univerjs/docs-ui';
+import { IEditorService, InsertCommand } from '@univerjs/docs-ui';
 import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
-import { IEditorService } from '@univerjs/ui';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';

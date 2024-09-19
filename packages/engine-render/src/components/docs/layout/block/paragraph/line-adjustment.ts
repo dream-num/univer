@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle } from '@univerjs/core';
 import { HorizontalAlign } from '@univerjs/core';
-import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
-import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
-import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
+import type { IParagraphStyle } from '@univerjs/core';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 import { BreakPointType } from '../../line-breaker/break';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { ISectionBreakConfig } from '../../../../../basics';
 import { isLetter } from '../../line-breaker/enhancers/utils';
+import { createHyphenDashGlyph, glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
+import { getFontConfigFromLastGlyph, getGlyphGroupWidth, lineIterator } from '../../tools';
+import type { ISectionBreakConfig } from '../../../../../basics';
+import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:

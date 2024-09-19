@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ContextService, IDisposable, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { fromEvent } from 'rxjs';
-import { IEditorService } from '../editor/editor.service';
+import type { ContextService, IDisposable, Nullable } from '@univerjs/core';
 
 type FocusHandlerFn = (unitId: string) => void;
 
@@ -30,17 +29,6 @@ const givingBackFocusElements = [
     'univer-sheet-bar-btn',
     'univer-render-canvas',
     'univer-workbench-layout',
-];
-
-/**
- * Not these elements will be considered as editor blur.
- */
-const editorFocusInElements = [
-    'univer-editor',
-    'univer-range-selector',
-    'univer-range-selector-editor',
-    'univer-render-canvas',
-    'univer-text-editor-container-placeholder',
 ];
 
 export interface ILayoutService {
@@ -87,8 +75,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
     constructor(
         @IContextService private readonly _contextService: ContextService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -178,8 +165,6 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
 
-                this._blurSheetEditor(target);
-
                 if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
                     queueMicrotask(() => this.focus());
                     return;
@@ -199,18 +184,6 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
     private _initEditorStatus(): void {
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
-    }
-
-    private _blurSheetEditor(target: HTMLElement) {
-        if (editorFocusInElements.some((item) => target.classList.contains(item))) {
-            return;
-        }
-
-        // NOTE: Note that the focus editor will not be docs' editor but calling `this._editorService.blur()` will blur doc's editor.
-        const focusEditor = this._editorService.getFocusEditor();
-        if (focusEditor && focusEditor.isSheetEditor() !== true) {
-            this._editorService.blur();
-        }
     }
 }
 

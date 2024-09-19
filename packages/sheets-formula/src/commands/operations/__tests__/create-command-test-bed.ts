@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Dependency, IWorkbookData } from '@univerjs/core';
 import { AuthzIoLocalService, IAuthzIoService, ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { EditorService, IEditorService } from '@univerjs/ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, ISheetSelectionRenderService, SheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { Dependency, IWorkbookData } from '@univerjs/core';
 import { FormulaPromptService, IFormulaPromptService } from '../../../services/prompt.service';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({

@@ -18,14 +18,14 @@ import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import clsx from 'clsx';
+import { useEvent } from '@univerjs/ui';
 
+import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
 import { TextEditor } from '../editor/TextEditor';
-import { useEvent } from '../hooks/event';
 import styles from './index.module.less';
 
 export interface IRangeSelectorProps {

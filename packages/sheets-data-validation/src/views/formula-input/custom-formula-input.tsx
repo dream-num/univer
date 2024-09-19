@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { FormLayout } from '@univerjs/design';
-import React from 'react';
-
-import { TextEditor } from '@univerjs/ui';
-import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { createInternalEditorID } from '@univerjs/core';
+import { FormLayout } from '@univerjs/design';
+
+import { TextEditor } from '@univerjs/docs-ui';
+import React from 'react';
+import type { IFormulaInputProps } from '@univerjs/data-validation';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;

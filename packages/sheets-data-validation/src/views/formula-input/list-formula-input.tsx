@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import { TextEditor, useEvent, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
+import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { TextEditor } from '@univerjs/docs-ui';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
+import { useEvent, useObservable } from '@univerjs/ui';
 import cs from 'clsx';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
-import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
-import type { ListValidator } from '../../validators';
 import { DataValidationFormulaController } from '../../controllers/dv-formula.controller';
+import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import styles from './index.module.less';
+import type { ListValidator } from '../../validators';
 
 const DEFAULT_COLOR_PRESET = [
     '#FFFFFF',

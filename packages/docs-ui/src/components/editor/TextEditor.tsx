@@ -17,8 +17,8 @@
 import { debounce, isInternalEditorID, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import type { IDocumentData, Nullable } from '@univerjs/core';
+import { isElementVisible } from '../../basics/editor';
 import { IEditorService } from '../../services/editor/editor.service';
-import { isElementVisible } from '../../utils/util';
 import styles from './index.module.less';
 import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 
@@ -88,6 +88,7 @@ export interface ITextEditorProps {
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
+ * @deprecated The business side encapsulates its own Editor component.
  */
 export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onActive'>): JSX.Element | null {
     const {
@@ -157,7 +158,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             isSheetEditor,
             canvasStyle,
             isSingle,
-            isReadonly,
+            readonly: isReadonly,
             isSingleChoice,
             onlyInputFormula,
             onlyInputRange,
@@ -257,7 +258,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         }
 
         editor.update({
-            isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
+            readonly: isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
         });
     }, [isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId]);
 

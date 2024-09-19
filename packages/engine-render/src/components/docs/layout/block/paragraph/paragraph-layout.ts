@@ -15,16 +15,16 @@
  */
 
 import { DataStreamTreeNodeType } from '@univerjs/core';
+import { clearFontCreateConfigCache } from '../../tools';
+import { createTableSkeleton } from '../table';
+import { lineAdjustment } from './line-adjustment';
+import { lineBreaking } from './linebreaking';
+import { shaping } from './shaping';
 import type { IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import type { ILayoutContext } from '../../tools';
-import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import { createTableSkeleton } from '../table';
-import { shaping } from './shaping';
-import { lineBreaking } from './linebreaking';
-import { lineAdjustment } from './line-adjustment';
+import type { ILayoutContext } from '../../tools';
 
 export function dealWidthParagraph(
     ctx: ILayoutContext,

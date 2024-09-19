@@ -16,8 +16,8 @@
 
 import { Direction, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import { IEditorService } from '@univerjs/ui';
 
+import { IEditorService } from '@univerjs/docs-ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';

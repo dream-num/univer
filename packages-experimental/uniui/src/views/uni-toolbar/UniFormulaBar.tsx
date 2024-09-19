@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
-import type { Nullable, Workbook } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { IEditorBridgeService, IFormulaEditorManagerService, useActiveWorkbook } from '@univerjs/sheets-ui';
-import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { EMPTY, merge, switchMap } from 'rxjs';
+import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
+import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
+import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { IEditorBridgeService, IFormulaEditorManagerService, useActiveWorkbook } from '@univerjs/sheets-ui';
+import { KeyCode, ProgressBar } from '@univerjs/ui';
 import clsx from 'clsx';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { EMPTY, merge, switchMap } from 'rxjs';
+import type { Nullable, Workbook } from '@univerjs/core';
 import styles from './index.module.less';
 
 export const UniFormulaBar = () => {

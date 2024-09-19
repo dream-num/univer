@@ -17,13 +17,14 @@
 import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
-import { ComponentManager, IEditorService } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 
 import type { DocumentDataModel } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import type { Nullable } from 'vitest';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
+import { IEditorService } from '../services/editor/editor.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';

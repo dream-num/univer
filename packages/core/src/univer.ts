@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { Dependency } from './common/di';
 import { Injector } from './common/di';
+import { UniverInstanceType } from './common/unit';
 
 import { DocumentDataModel } from './docs/data-model/document-data-model';
+import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
+import { IAuthzIoService } from './services/authz-io/type';
 import { CommandService, ICommandService } from './services/command/command.service';
 import { ConfigService, IConfigService } from './services/config/config.service';
 import { ContextService, IContextService } from './services/context/context.service';
@@ -26,33 +28,31 @@ import { IUniverInstanceService, UniverInstanceService } from './services/instan
 import { LifecycleStages } from './services/lifecycle/lifecycle';
 import { LifecycleInitializerService, LifecycleService } from './services/lifecycle/lifecycle.service';
 import { LocaleService } from './services/locale/locale.service';
-import type { LogLevel } from './services/log/log.service';
 import { DesktopLogService, ILogService } from './services/log/log.service';
 import { PermissionService } from './services/permission/permission.service';
-import { IPermissionService } from './services/permission/type';
 
-import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
-import { IResourceManagerService } from './services/resource-manager/type';
+import { IPermissionService } from './services/permission/type';
+import { PluginService } from './services/plugin/plugin.service';
+import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 import { ResourceLoaderService } from './services/resource-loader/resource-loader.service';
 import { IResourceLoaderService } from './services/resource-loader/type';
-import type { IStyleSheet } from './services/theme/theme.service';
+import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
+import { IResourceManagerService } from './services/resource-manager/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
+import { UserManagerService } from './services/user-manager/user-manager.service';
 import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
-import type { LocaleType } from './types/enum/locale-type';
-import type { IDocumentData, ISlideData } from './types/interfaces';
+import type { Dependency } from './common/di';
 import type { UnitModel, UnitType } from './common/unit';
-import { UniverInstanceType } from './common/unit';
-import { PluginService } from './services/plugin/plugin.service';
+import type { LogLevel } from './services/log/log.service';
 import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
-import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
-import { UserManagerService } from './services/user-manager/user-manager.service';
-import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
-import { IAuthzIoService } from './services/authz-io/type';
+import type { IStyleSheet } from './services/theme/theme.service';
 import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
+import type { LocaleType } from './types/enum/locale-type';
+import type { IDocumentData, ISlideData } from './types/interfaces';
 
 export interface IUniverConfig {
     theme: IStyleSheet;

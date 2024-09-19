@@ -98,12 +98,14 @@ export { MoveCursorOperation } from './commands/operations/doc-cursor.operation'
 export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
+export { TextEditor } from './components/editor/TextEditor';
+export { RangeSelector } from './components/range-selector/RangeSelector';
 export { DocUIController } from './controllers/doc-ui.controller';
 export { menuSchema } from './controllers/menu.schema';
 export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
+
 export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
 export * from './docs-ui-plugin';
-
 export * from './services';
 export { IDocClipboardService } from './services/clipboard/clipboard.service';
 export { DocEventManagerService } from './services/doc-event-manager.service';
@@ -111,7 +113,10 @@ export { DocIMEInputManagerService } from './services/doc-ime-input-manager.serv
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 export { DocsRenderService } from './services/docs-render.service';
+export { Editor, EditorService, IEditorService } from './services/editor/editor.service';
+export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
+
 export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
 export { getOneTextSelectionRange } from './services/selection/convert-text-range';
 export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';

@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-
+import { IEditorService, TextEditor } from '@univerjs/docs-ui';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
-import { DISABLE_AUTO_FOCUS_KEY, IEditorService, TextEditor, useObservable } from '@univerjs/ui';
+
+import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
+import React, { useEffect, useState } from 'react';
+import type { IDocumentData } from '@univerjs/core';
+import { SLIDE_EDITOR_ID } from '../../const';
 // import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { ISlideEditorManagerService } from '../../services/slide-editor-manager.service';
-import { SLIDE_EDITOR_ID } from '../../const';
 import styles from './index.module.less';
 
 interface ICellIEditorProps { }

@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
+import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Button, Select } from '@univerjs/design';
+import { RangeSelector } from '@univerjs/docs-ui';
+import { serializeRange } from '@univerjs/engine-formula';
+import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+
+import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IRange, IUnitRange, Workbook } from '@univerjs/core';
-import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { serializeRange } from '@univerjs/engine-formula';
-import { Button, Select } from '@univerjs/design';
-
-import { RangeSelector } from '@univerjs/ui';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
-import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
 import { SetCfCommand } from '../../../commands/commands/set-cf.command';
-
 import styleBase from '../index.module.less';
-import type { IStyleEditorProps } from './type';
-import { beforeSubmit, submit } from './type';
 import { ColorScaleStyleEditor } from './colorScale';
+
 import { DataBarStyleEditor } from './dataBar';
-import { RankStyleEditor } from './rank';
-import { HighlightCellStyleEditor } from './highlightCell';
 import { FormulaStyleEditor } from './formula';
-import styles from './index.module.less';
+import { HighlightCellStyleEditor } from './highlightCell';
 import { IconSet } from './iconSet';
+import styles from './index.module.less';
+import { RankStyleEditor } from './rank';
+import { beforeSubmit, submit } from './type';
+import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
+import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
+import type { IStyleEditorProps } from './type';
 
 interface IRuleEditProps {
     rule?: IConditionFormattingRule;

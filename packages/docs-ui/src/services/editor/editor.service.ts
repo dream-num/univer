@@ -17,12 +17,12 @@
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { Subject } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
 import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
 
-export interface IEditorStateParam extends Partial<IPosition> {
+export interface IEditorStateParams extends Partial<IPosition> {
     visible?: boolean;
 }
 
@@ -30,34 +30,62 @@ export interface IEditorCanvasStyle {
     fontSize?: number;
 }
 
-export interface IEditorConfigParam {
-    editorUnitId: string;
-
+export interface IEditorConfigParams {
     initialSnapshot?: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
+    // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
+    // No more than one editor in the document may have the autofocus attribute.
+    // If put on more than one editor, the first one with the attribute receives focus.
+    autofocus?: boolean; // default false.
+    // Boolean. The value is not editable
+    readonly?: boolean;
 
+    /**
+     * @deprecated already in initialSnapshot or create by editor.
+     */
+    editorUnitId: string;
+
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     isSheetEditor: boolean;
     /**
      * If the editor is for formula editing.
      * @deprecated this is a temp fix before refactoring editor.
      */
     isFormulaEditor: boolean;
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     isSingle: boolean;
-    isReadonly: boolean;
-
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     onlyInputFormula: boolean;
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     onlyInputRange: boolean;
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     onlyInputContent: boolean;
-
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     isSingleChoice: boolean;
-
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     openForSheetUnitId: Nullable<string>;
+    /**
+     * @deprecated The implementer makes its own judgment.
+     */
     openForSheetSubUnitId: Nullable<string>;
-
 }
 
-export interface IEditorSetParam extends IEditorConfigParam, IEditorStateParam {
+export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
     render: IRender;
     documentDataModel: DocumentDataModel;
     editorDom: HTMLDivElement;
@@ -82,7 +110,7 @@ export class Editor {
 
     private _openForSheetSubUnitId: Nullable<string>;
 
-    constructor(private _param: IEditorSetParam) {
+    constructor(private _param: IEditorOptions) {
         this._openForSheetUnitId = this._param.openForSheetUnitId;
         this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
     }
@@ -144,7 +172,7 @@ export class Editor {
     }
 
     isReadOnly() {
-        return this._param.isReadonly === true;
+        return this._param.readonly === true;
     }
 
     onlyInputContent() {
@@ -185,7 +213,7 @@ export class Editor {
         return this._param.documentDataModel.getBody();
     }
 
-    update(param: Partial<IEditorSetParam>) {
+    update(param: Partial<IEditorOptions>) {
         this._param = {
             ...this._param,
             ...param,
@@ -248,7 +276,7 @@ export class Editor {
 export interface IEditorService {
     getEditor(id?: string): Readonly<Nullable<Editor>>;
 
-    register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable;
+    register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable;
 
     isVisible(id: string): Nullable<boolean>;
 
@@ -324,12 +352,23 @@ export interface IEditorService {
     getFocusEditor(): Readonly<Nullable<Editor>>;
 }
 
+/**
+ * Not these elements will be considered as editor blur.
+ */
+const editorFocusInElements = [
+    'univer-editor',
+    'univer-range-selector',
+    'univer-range-selector-editor',
+    'univer-render-canvas',
+    'univer-text-editor-container-placeholder',
+];
+
 export class EditorService extends Disposable implements IEditorService, IDisposable {
     private _editors = new Map<string, Editor>();
 
     private _focusEditorUnitId: Nullable<string>;
 
-    private readonly _state$ = new Subject<Nullable<IEditorStateParam>>();
+    private readonly _state$ = new Subject<Nullable<IEditorStateParams>>();
     readonly state$ = this._state$.asObservable();
 
     private _currentSheetUnitId: Nullable<string>;
@@ -372,6 +411,32 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
+
+        this._initUniverFocusListener();
+    }
+
+    // REFACTOR: @Ggg The specific business processing should not be placed here,
+    // I moved from the layout service. https://github.com/dream-num/univer-pro/issues/1708
+    private _initUniverFocusListener() {
+        this.disposeWithMe(
+            fromEvent(window, 'focusin').subscribe((event) => {
+                const target = event.target as HTMLElement;
+
+                this._blurSheetEditor(target);
+            })
+        );
+    }
+
+    private _blurSheetEditor(target: HTMLElement) {
+        if (editorFocusInElements.some((item) => target.classList.contains(item))) {
+            return;
+        }
+
+        // NOTE: Note that the focus editor will not be docs' editor but calling `this._editorService.blur()` will blur doc's editor.
+        const focusEditor = this.getFocusEditor();
+        if (focusEditor && focusEditor.isSheetEditor() !== true) {
+            this.blur();
+        }
     }
 
     setFocusId(id: Nullable<string>) {
@@ -605,7 +670,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._currentSheetSubUnitId;
     }
 
-    register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
+    register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
         const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)

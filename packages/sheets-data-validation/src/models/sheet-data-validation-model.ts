@@ -125,7 +125,7 @@ export class SheetDataValidationModel extends Disposable {
         this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
     }
 
-    private _addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule | ISheetDataValidationRule[], index?: number): void {
+    private _addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule | ISheetDataValidationRule[]): void {
         const rules = Array.isArray(rule) ? rule : [rule];
 
         rules.forEach((item) => {

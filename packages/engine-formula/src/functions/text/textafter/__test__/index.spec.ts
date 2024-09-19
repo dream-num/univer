@@ -172,6 +172,35 @@ describe('Test textafter function', () => {
             delimiter = StringValueObject.create('.');
             result = testFunction.calculate(text, delimiter);
             expect(getObjectValue(result)).toBe('8袋');
+
+            const text2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['150克*@*8袋'],
+                    ['150克@*8袋'],
+                    ['150克#8袋'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const delimiter2 = ArrayValueObject.create('{"*","@","#"}');
+            result = testFunction.calculate(text2, delimiter2);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['@*8袋'],
+                ['*8袋'],
+                ['8袋'],
+            ]);
+
+            const instanceNum = NumberValueObject.create(-1);
+            result = testFunction.calculate(text2, delimiter2, instanceNum);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['8袋'],
+                ['8袋'],
+                ['8袋'],
+            ]);
         });
     });
 });

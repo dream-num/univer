@@ -172,6 +172,35 @@ describe('Test textbefore function', () => {
             delimiter = StringValueObject.create('.');
             result = testFunction.calculate(text, delimiter);
             expect(getObjectValue(result)).toBe('150克');
+
+            const text2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['150克*8袋粒袋'],
+                    ['150克*8粒袋'],
+                    ['150克*8瓶'],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const delimiter2 = ArrayValueObject.create('{"袋","粒","瓶"}');
+            result = testFunction.calculate(text2, delimiter2);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克*8'],
+                ['150克*8'],
+                ['150克*8'],
+            ]);
+
+            const instanceNum = NumberValueObject.create(-1);
+            result = testFunction.calculate(text2, delimiter2, instanceNum);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['150克*8袋粒'],
+                ['150克*8粒'],
+                ['150克*8'],
+            ]);
         });
     });
 });

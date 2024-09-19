@@ -27,12 +27,6 @@ export class Textafter extends BaseFunction {
     override maxParams = 6;
 
     override calculate(text: BaseValueObject, delimiter: BaseValueObject, instanceNum?: BaseValueObject, matchMode?: BaseValueObject, matchEnd?: BaseValueObject, ifNotFound?: BaseValueObject) {
-        let _delimiter = delimiter;
-
-        if (_delimiter.isArray()) {
-            _delimiter = (_delimiter as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
         let instanceNumIsNull = false; // special handle
         let _instanceNum = instanceNum ?? NumberValueObject.create(1);
 
@@ -68,7 +62,7 @@ export class Textafter extends BaseFunction {
         const matchEndArray = expandArrayValueObject(maxRowLength, maxColumnLength, _matchEnd, ErrorValueObject.create(ErrorType.NA));
         const ifNotFoundArray = expandArrayValueObject(maxRowLength, maxColumnLength, _ifNotFound, ErrorValueObject.create(ErrorType.NA));
 
-        const resultArray = this._getResultArray(textArray, _delimiter, instanceNumArray, matchModeArray, matchEndArray, ifNotFoundArray, instanceNumIsNull, onlyThreeVariant);
+        const resultArray = this._getResultArray(textArray, delimiter, instanceNumArray, matchModeArray, matchEndArray, ifNotFoundArray, instanceNumIsNull, onlyThreeVariant);
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
             return (resultArray as ArrayValueObject).get(0, 0) as StringValueObject;
@@ -79,7 +73,7 @@ export class Textafter extends BaseFunction {
 
     private _getResultArray(
         textArray: ArrayValueObject,
-        delimiterObject: BaseValueObject,
+        delimiter: BaseValueObject,
         instanceNumArray: ArrayValueObject,
         matchModeArray: ArrayValueObject,
         matchEndArray: ArrayValueObject,
@@ -94,14 +88,19 @@ export class Textafter extends BaseFunction {
             const ifNotFoundObject = ifNotFoundArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             // variant error order (text > instanceNum > matchMode > matchEnd > delimiter)
-            const _variantsError = this._checkVariantsError(textObject, instanceNumObject, matchModeObject, matchEndObject, delimiterObject);
+            const _variantsError = this._checkVariantsError(textObject, instanceNumObject, matchModeObject, matchEndObject);
 
             if (_variantsError.isError()) {
                 return _variantsError;
             }
 
             const textValue = this._getStringValue(textObject);
-            const delimiterValue = this._getStringValue(delimiterObject);
+
+            const delimiterValue = this._getDelimiterValue(delimiter);
+
+            if (delimiterValue instanceof ErrorValueObject) {
+                return delimiterValue;
+            }
 
             const _variantsNumberFloorValue = this._getVariantsNumberFloorValue(instanceNumObject, matchModeObject, matchEndObject);
 
@@ -117,7 +116,7 @@ export class Textafter extends BaseFunction {
 
             // When searching with an empty delimiter value, TEXTAFTER matches immediately.
             // It returns the entire text when searching from the front (if instance_num is positive) and empty text when searching from the end (if instance_num is negative).
-            if (delimiterValue === '') {
+            if (delimiterValue.includes('')) {
                 if (instanceNumValue > 0) {
                     return StringValueObject.create(textValue);
                 } else {
@@ -130,7 +129,7 @@ export class Textafter extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            if (delimiterValue.length > textValue.length) {
+            if (delimiterValue.every((item) => item.length > textValue.length)) {
                 return ErrorValueObject.create(ErrorType.NA);
             }
 
@@ -166,6 +165,39 @@ export class Textafter extends BaseFunction {
         return value;
     }
 
+    private _getDelimiterValue(delimiter: BaseValueObject): string[] | ErrorValueObject {
+        const delimiterValue: string[] = [];
+
+        if (delimiter.isArray()) {
+            let isError = false;
+            let errorObject = ErrorValueObject.create(ErrorType.VALUE);
+
+            (delimiter as ArrayValueObject).iterator((delimiterObject) => {
+                const _delimiterObject = delimiterObject as BaseValueObject;
+
+                if (_delimiterObject.isError()) {
+                    isError = true;
+                    errorObject = _delimiterObject as ErrorValueObject;
+                    return false;
+                }
+
+                delimiterValue.push(this._getStringValue(_delimiterObject));
+            });
+
+            if (isError) {
+                return errorObject;
+            }
+        } else {
+            if (delimiter.isError()) {
+                return delimiter as ErrorValueObject;
+            }
+
+            delimiterValue.push(this._getStringValue(delimiter));
+        }
+
+        return delimiterValue;
+    }
+
     private _getVariantsNumberFloorValue(...variants: BaseValueObject[]) {
         const values: number[] = [];
 
@@ -190,7 +222,7 @@ export class Textafter extends BaseFunction {
 
     private _getResult(
         textValue: string,
-        delimiterValue: string,
+        delimiterValue: string[],
         instanceNumValue: number,
         matchModeValue: number,
         matchEndValue: number,
@@ -198,31 +230,44 @@ export class Textafter extends BaseFunction {
         onlyThreeVariant: boolean
     ): BaseValueObject {
         let substrText = !matchModeValue ? textValue : textValue.toLocaleLowerCase();
-        const _delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.toLocaleLowerCase();
+        const _delimiterValue = !matchModeValue ? delimiterValue : delimiterValue.map((item) => item.toLocaleLowerCase());
 
         let resultIndex = 0;
         let matchNum = 0;
+        let preDelimiterLength = 0;
 
         for (let i = 0; i < Math.abs(instanceNumValue); i++) {
             if (instanceNumValue < 0) {
-                const index = substrText.lastIndexOf(_delimiterValue);
+                const delimiterItem = _delimiterValue.map((item) => {
+                    return {
+                        index: substrText.lastIndexOf(item),
+                        length: item.length,
+                    };
+                }).filter((item) => item.index !== -1).sort((a, b) => b.index - a.index)[0];
 
-                if (index === -1) {
+                if (!delimiterItem) {
                     break;
                 }
 
-                resultIndex = index;
-                substrText = substrText.substr(0, index);
+                resultIndex = delimiterItem.index;
+                substrText = substrText.substr(0, delimiterItem.index);
+                preDelimiterLength = delimiterItem.length;
                 matchNum++;
             } else {
-                const index = substrText.indexOf(_delimiterValue);
+                const delimiterItem = _delimiterValue.map((item) => {
+                    return {
+                        index: substrText.indexOf(item),
+                        length: item.length,
+                    };
+                }).filter((item) => item.index !== -1).sort((a, b) => a.index - b.index)[0];
 
-                if (index === -1) {
+                if (!delimiterItem) {
                     break;
                 }
 
-                resultIndex += (index + i * _delimiterValue.length);
-                substrText = substrText.substr(index + _delimiterValue.length);
+                resultIndex += delimiterItem.index + preDelimiterLength;
+                substrText = substrText.substr(delimiterItem.index + delimiterItem.length);
+                preDelimiterLength = delimiterItem.length;
                 matchNum++;
             }
         }
@@ -244,7 +289,7 @@ export class Textafter extends BaseFunction {
             return ifNotFoundObject;
         }
 
-        const result = textValue.substr(resultIndex + _delimiterValue.length);
+        const result = textValue.substr(resultIndex + preDelimiterLength);
 
         return StringValueObject.create(result);
     }

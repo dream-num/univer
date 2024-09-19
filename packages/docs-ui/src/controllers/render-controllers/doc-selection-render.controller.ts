@@ -165,6 +165,9 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const { offsetX, offsetY } = evt;
 
                 setTimeout(() => {
+                    if (unitId === this._editorService.getFocusId()) {
+                        return;
+                    }
                     this._setEditorFocus(unitId);
                     this._docSelectionRenderService.setCursorManually(offsetX, offsetY);
                 }, 0);

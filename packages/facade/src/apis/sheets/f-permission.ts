@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 
 export class FPermission {
     constructor(
@@ -68,6 +68,8 @@ export class FPermission {
      *
      * @param {string} unitId - The unique identifier of the workbook for which the permission is being set.
      * @param {string} subUnitId - The unique identifier of the worksheet for which the permission is being set.
+     *
+     * @returns {Promise<string | undefined>} - Returns the `permissionId` if the permission is successfully added. If the operation fails or no result is returned, it resolves to `undefined`.
      */
     async addWorksheetBasePermission(unitId: string, subUnitId: string): Promise<string | undefined> {
         const hasRangeProtection = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).length > 0;
@@ -118,6 +120,8 @@ export class FPermission {
      * @param {WorkSheetPermissionPointConstructor} FPointClass - The constructor for the permission point class.
      *    See the [permission-point documentation](https://github.com/dream-num/univer/tree/dev/packages/sheets/src/services/permission/permission-point) for more details.
      * @param {boolean} value - The new permission value to be set for the worksheet.
+     *
+     * @returns {Promise<string | undefined>} - Returns the `permissionId` if the permission point is successfully set or created. If no permission is set, it resolves to `undefined`.
      */
     async setWorksheetPermissionPoint(unitId: string, subUnitId: string, FPointClass: WorkSheetPermissionPointConstructor, value: boolean): Promise<string | undefined> {
         const hasBasePermission = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
@@ -159,6 +163,8 @@ export class FPermission {
      * @param {string} unitId - The unique identifier of the workbook.
      * @param {string} subUnitId - The unique identifier of the worksheet.
      * @param {IRange[]} ranges - The ranges to be protected.
+     *
+     * @returns {Promise<{ permissionId: string, ruleId: string } | undefined>} - Returns an object containing the `permissionId` and `ruleId` if the range protection is successfully added. If the operation fails or no result is returned, it resolves to `undefined`. permissionId is used to stitch permission point ID，ruleId is used to store permission rules
      */
     async addRangeBaseProtection(unitId: string, subUnitId: string, ranges: IRange[]): Promise<{
         permissionId: string;

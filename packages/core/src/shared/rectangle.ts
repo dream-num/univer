@@ -15,6 +15,7 @@
  */
 
 import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
+import { mergeRanges } from './range';
 import type { Nullable } from './types';
 
 /**
@@ -319,36 +320,7 @@ export class Rectangle {
      * @returns
      */
     static mergeRanges(ranges: IRange[]): IRange[] {
-        // Sort ranges by starting row and column
-        ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
-
-        const mergedRanges: IRange[] = [];
-
-        for (const range of ranges) {
-            if (mergedRanges.length === 0) {
-                mergedRanges.push(range);
-            } else {
-                const last = mergedRanges[mergedRanges.length - 1];
-
-                if (
-                    range.startRow <= last.endRow + 1 &&
-              range.endRow >= last.startRow &&
-              range.startColumn <= last.endColumn + 1 &&
-              range.endColumn >= last.startColumn
-                ) {
-              // Merge ranges
-                    last.startRow = Math.min(last.startRow, range.startRow);
-                    last.endRow = Math.max(last.endRow, range.endRow);
-                    last.startColumn = Math.min(last.startColumn, range.startColumn);
-                    last.endColumn = Math.max(last.endColumn, range.endColumn);
-                } else {
-              // No overlap, push new range
-                    mergedRanges.push(range);
-                }
-            }
-        }
-
-        return mergedRanges;
+        return mergeRanges(ranges);
     }
 
     static multiSubtractSingle(ranges: IRange[], toDelete: IRange) {

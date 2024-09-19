@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ITextRange } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
-import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DocBackScrollRenderController } from '@univerjs/docs-ui';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import type { DocumentDataModel, ITextRange } from '@univerjs/core';
+import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../common/const';
 import { DocThreadCommentService } from '../services/doc-thread-comment.service';
-import { ShowCommentPanelOperation } from '../commands/operations/show-comment-panel.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, DocThreadCommentSelectionController)
 export class DocThreadCommentSelectionController extends Disposable {
@@ -99,7 +99,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                     const backScrollController = this._renderManagerService.getRenderById(activeComment.unitId)?.with(DocBackScrollRenderController);
                     const customRange = doc.getCustomRanges()?.find((range) => range.rangeId === activeComment.commentId);
                     if (customRange && backScrollController) {
-                        backScrollController.scrollToRange(activeComment.unitId, {
+                        backScrollController.scrollToRange({
                             startOffset: customRange.startIndex,
                             endOffset: customRange.endIndex,
                             collapsed: false,

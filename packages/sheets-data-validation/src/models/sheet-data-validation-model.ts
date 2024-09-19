@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { isReferenceString } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
@@ -104,7 +104,7 @@ export class SheetDataValidationModel extends Disposable {
         }
         let matrix = unitMap.get(subUnitId);
         if (!matrix) {
-            matrix = new RuleMatrix(new ObjectMatrix(), worksheet);
+            matrix = new RuleMatrix(new Map(), worksheet);
             unitMap.set(subUnitId, matrix);
         }
 

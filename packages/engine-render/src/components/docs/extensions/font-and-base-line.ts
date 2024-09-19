@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IScale } from '@univerjs/core';
 import { BaselineOffset, getColorStyle } from '@univerjs/core';
+import type { IScale } from '@univerjs/core';
 
 import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverRenderingContext } from '../../../context';
+import { Checkbox } from '../../../shape';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
-import { Checkbox } from '../../../shape';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '../../../context';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
@@ -110,9 +110,11 @@ export class FontAndBaseLine extends docExtension {
             const UNCHECKED_GLYPH = '\u2610';
             if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
                 ctx.save();
-                const size = glyph.ts?.fs ?? 16;
-                const MAGIC_OFFSET = 3;
-                ctx.translate(spanPointWithFont.x, spanPointWithFont.y - (bBox.aba + bBox.abd) - MAGIC_OFFSET);
+                const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
+                // const MAGIC_OFFSET = 3;
+                // const lineHeight = glyph.parent?.parent?.lineHeight ?? 0;
+                // console.log('===lineHeight', lineHeight, spanPointWithFont);
+                ctx.translate(spanPointWithFont.x, spanPointWithFont.y - size);
                 Checkbox.drawWith(ctx, {
                     width: size,
                     height: size,

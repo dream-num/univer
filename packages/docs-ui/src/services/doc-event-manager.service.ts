@@ -291,46 +291,47 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         );
     }
 
-    private _buildBulletBoundsBySegment(segmentId?: string, segmentPage = -1) {
+    private _buildBulletBoundsBySegment(segmentId?: string, segmentPage = -1): IBulletBound[] {
         const body = this._context.unit.getSelfOrHeaderFooterModel(segmentId)?.getBody();
         const paragraphs = body?.paragraphs ?? [];
         const bounds: IBulletBound[] = [];
+        const skeletonData = this._skeleton.getSkeletonData();
+        if (!skeletonData) {
+            return bounds;
+        }
 
-        paragraphs.forEach((paragraph) => {
-            if (paragraph.bullet && paragraph.bullet.listType.indexOf('CHECK_LIST') === 0) {
-                const calcRect = (pageIndex: number) => {
-                    const node = this._skeleton.findNodeByCharIndex(paragraph.startIndex, segmentId, pageIndex);
-                    const divide = node?.parent;
-                    const line = divide?.parent;
-                    const column = line?.parent;
-                    const targetLine = column?.lines.find((l) => l.paragraphStart && l.paragraphIndex === paragraph.startIndex);
-                    const bulletNode = targetLine?.divides?.[0]?.glyphGroup?.[0];
+        for (const page of skeletonData.pages) {
+            for (const selection of page.sections) {
+                for (const column of selection.columns) {
+                    for (const line of column.lines) {
+                        if (line.paragraphStart) {
+                            const paragraph: Nullable<IParagraph> = paragraphs.find((p) => p.startIndex === line.paragraphIndex && p.bullet && p.bullet.listType.indexOf('CHECK_LIST') === 0);
+                            if (paragraph) {
+                                const targetLine = line;
+                                const bulletNode = targetLine?.divides?.[0]?.glyphGroup?.[0];
 
-                    if (!bulletNode) {
-                        return;
+                                if (!bulletNode) {
+                                    continue;
+                                }
+
+                                const rect = calcDocGlyphPosition(bulletNode, this._documents, this._skeleton, segmentPage);
+
+                                if (!rect) {
+                                    continue;
+                                }
+
+                                bounds.push({
+                                    rect,
+                                    segmentId,
+                                    segmentPageIndex: segmentPage,
+                                    paragraph,
+                                });
+                            }
+                        }
                     }
-
-                    if (!bulletNode) {
-                        return;
-                    }
-
-                    const rect = calcDocGlyphPosition(bulletNode, this._documents, this._skeleton, pageIndex);
-
-                    if (!rect) {
-                        return;
-                    }
-
-                    bounds.push({
-                        rect,
-                        segmentId,
-                        segmentPageIndex: pageIndex,
-                        paragraph,
-                    });
-                };
-
-                calcRect(segmentPage);
+                }
             }
-        });
+        }
 
         return bounds;
     }

@@ -14,82 +14,27 @@
  * limitations under the License.
  */
 
-import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
-import type { IRender, ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable, Workbook } from '@univerjs/core';
+import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
 import type { Observable } from 'rxjs';
+import { Editor } from './editor';
+import type { IEditorConfigParams, IEditorStateParams } from './editor';
 
-export interface IEditorStateParams extends Partial<IPosition> {
-    visible?: boolean;
-}
-
-export interface IEditorCanvasStyle {
-    fontSize?: number;
-}
-
-export interface IEditorConfigParams {
-    initialSnapshot?: IDocumentData;
-    cancelDefaultResizeListener?: boolean;
-    canvasStyle?: IEditorCanvasStyle;
-    // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
-    // No more than one editor in the document may have the autofocus attribute.
-    // If put on more than one editor, the first one with the attribute receives focus.
-    autofocus?: boolean; // default false.
-    // Boolean. The value is not editable
-    readonly?: boolean;
-
-    /**
-     * @deprecated already in initialSnapshot or create by editor.
-     */
-    editorUnitId: string;
-
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSheetEditor: boolean;
-    /**
-     * If the editor is for formula editing.
-     * @deprecated this is a temp fix before refactoring editor.
-     */
-    isFormulaEditor: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingle: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputFormula: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputRange: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    onlyInputContent: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    isSingleChoice: boolean;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetUnitId: Nullable<string>;
-    /**
-     * @deprecated The implementer makes its own judgment.
-     */
-    openForSheetSubUnitId: Nullable<string>;
-}
-
-export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
-    render: IRender;
-    documentDataModel: DocumentDataModel;
-    editorDom: HTMLDivElement;
-}
+/**
+ * Not these elements will be considered as editor blur.
+ */
+const editorFocusInElements = [
+    'univer-editor',
+    'univer-range-selector',
+    'univer-range-selector-editor',
+    'univer-render-canvas',
+    'univer-text-editor-container-placeholder',
+];
 
 export interface IEditorSetValueParam {
     editorUnitId: string;
@@ -99,178 +44,6 @@ export interface IEditorSetValueParam {
 export interface IEditorInputFormulaParam {
     editorUnitId: string;
     formulaString: string;
-}
-
-export class Editor {
-    private _focus = false;
-
-    private _valueLegality = true;
-
-    private _openForSheetUnitId: Nullable<string>;
-
-    private _openForSheetSubUnitId: Nullable<string>;
-
-    constructor(private _param: IEditorOptions) {
-        this._openForSheetUnitId = this._param.openForSheetUnitId;
-        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
-    }
-
-    get documentDataModel() {
-        return this._param.documentDataModel;
-    }
-
-    get editorUnitId() {
-        return this._param.editorUnitId;
-    }
-
-    get cancelDefaultResizeListener() {
-        return this._param.cancelDefaultResizeListener;
-    }
-
-    get render() {
-        return this._param.render;
-    }
-
-    isSingleChoice() {
-        return this._param.isSingleChoice;
-    }
-
-    setOpenForSheetUnitId(unitId: Nullable<string>) {
-        this._openForSheetUnitId = unitId;
-    }
-
-    getOpenForSheetUnitId() {
-        return this._openForSheetUnitId;
-    }
-
-    setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
-        this._openForSheetSubUnitId = subUnitId;
-    }
-
-    getOpenForSheetSubUnitId() {
-        return this._openForSheetSubUnitId;
-    }
-
-    isValueLegality() {
-        return this._valueLegality === true;
-    }
-
-    setValueLegality(state = true) {
-        this._valueLegality = state;
-    }
-
-    isFocus() {
-        return this._focus;
-    }
-
-    setFocus(state = false) {
-        this._focus = state;
-    }
-
-    isSingle() {
-        return this._param.isSingle === true || this.onlyInputRange();
-    }
-
-    isReadOnly() {
-        return this._param.readonly === true;
-    }
-
-    onlyInputContent() {
-        return this._param.onlyInputContent === true;
-    }
-
-    onlyInputFormula() {
-        return this._param.onlyInputFormula === true;
-    }
-
-    onlyInputRange() {
-        return this._param.onlyInputRange === true;
-    }
-
-    getBoundingClientRect() {
-        return this._param.editorDom.getBoundingClientRect();
-    }
-
-    isVisible() {
-        return this._param.visible;
-    }
-
-    isSheetEditor() {
-        return this._param.isSheetEditor === true;
-    }
-
-    /** @deprecated */
-    isFormulaEditor() {
-        return this._param.isFormulaEditor === true;
-    }
-
-    getValue() {
-        const value = this._param.documentDataModel.getBody()?.dataStream || '';
-        return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
-    }
-
-    getBody() {
-        return this._param.documentDataModel.getBody();
-    }
-
-    update(param: Partial<IEditorOptions>) {
-        this._param = {
-            ...this._param,
-            ...param,
-        };
-    }
-
-    verticalAlign() {
-        const documentDataModel = this._param?.documentDataModel;
-
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const { width, height } = this._param.editorDom.getBoundingClientRect();
-
-        if (height === 0 || width === 0) {
-            return;
-        }
-
-        if (!this.isSingle()) {
-            documentDataModel.updateDocumentDataPageSize(width, undefined);
-            return;
-        }
-
-        let fontSize = DEFAULT_STYLES.fs;
-
-        if (this._param.canvasStyle?.fontSize) {
-            fontSize = this._param.canvasStyle.fontSize;
-        }
-
-        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
-
-        documentDataModel.updateDocumentDataMargin({
-            t: top < 0 ? 0 : top,
-        });
-
-        documentDataModel.updateDocumentDataPageSize(undefined, undefined);
-    }
-
-    updateCanvasStyle() {
-        const documentDataModel = this._param.documentDataModel;
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const documentStyle: IDocumentStyle = {};
-
-        if (this._param.canvasStyle?.fontSize) {
-            if (documentStyle.textStyle == null) {
-                documentStyle.textStyle = {};
-            }
-
-            documentStyle.textStyle.fs = this._param.canvasStyle.fontSize;
-        }
-
-        documentDataModel.updateDocumentStyle(documentStyle);
-    }
 }
 
 export interface IEditorService {
@@ -352,17 +125,6 @@ export interface IEditorService {
     getFocusEditor(): Readonly<Nullable<Editor>>;
 }
 
-/**
- * Not these elements will be considered as editor blur.
- */
-const editorFocusInElements = [
-    'univer-editor',
-    'univer-range-selector',
-    'univer-range-selector-editor',
-    'univer-render-canvas',
-    'univer-text-editor-container-placeholder',
-];
-
 export class EditorService extends Disposable implements IEditorService, IDisposable {
     private _editors = new Map<string, Editor>();
 
@@ -408,14 +170,17 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IContextService private readonly _contextService: IContextService
+        @Inject(DocSelectionManagerService) private readonly _docSelectionManagerService: DocSelectionManagerService,
+        @IContextService private readonly _contextService: IContextService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @IUndoRedoService private readonly _undoRedoService: IUndoRedoService
     ) {
         super();
 
         this._initUniverFocusListener();
     }
 
-    // REFACTOR: @Ggg The specific business processing should not be placed here,
+    // REFACTOR: @Gggpound The specific business processing should not be placed here,
     // I moved from the layout service. https://github.com/dream-num/univer-pro/issues/1708
     private _initUniverFocusListener() {
         this.disposeWithMe(
@@ -689,12 +454,18 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         if (render) {
             render.engine.setContainer(container);
 
-            const editor = new Editor({ ...config, render, documentDataModel, editorDom: container, canvasStyle });
+            const editor = new Editor(
+                { ...config, render, documentDataModel, editorDom: container, canvasStyle },
+                this._univerInstanceService,
+                this._docSelectionManagerService,
+                this._commandService,
+                this._undoRedoService
+            );
 
             this._editors.set(editorUnitId, editor);
 
-        // Delete scroll bar
-        // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
+            // Delete scroll bar
+            // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
             (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
             if (!editor.isSheetEditor()) {

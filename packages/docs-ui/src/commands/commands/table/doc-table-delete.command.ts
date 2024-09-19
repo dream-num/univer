@@ -33,7 +33,7 @@ export const DocTableDeleteRowsCommand: ICommand<IDocTableDeleteRowsCommandParam
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
         const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
@@ -139,7 +139,7 @@ export const DocTableDeleteColumnsCommand: ICommand<IDocTableDeleteColumnsComman
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
         const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
@@ -256,7 +256,7 @@ export const DocTableDeleteTableCommand: ICommand<IDocTableDeleteTableCommandPar
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
         const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);

@@ -24,7 +24,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { CoverContentCommand } from '../../commands/commands/replace-content.command';
-import { IEditorService } from '../../services/editor/editor.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocEditorBridgeController extends Disposable implements IRenderModule {
@@ -55,7 +55,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
         );
 
         this._editorService.getAllEditor().forEach((editor) => {
-            const unitId = editor.editorUnitId;
+            const unitId = editor.getEditorId();
 
             if (unitId !== this._context.unitId) {
                 return;
@@ -190,7 +190,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
 
                 const focusEditor = this._editorService.getFocusEditor();
 
-                if (editor == null || editor.isSheetEditor() || (focusEditor && focusEditor.editorUnitId === unitId)) {
+                if (editor == null || editor.isSheetEditor() || (focusEditor && focusEditor.getEditorId() === unitId)) {
                     return;
                 }
 
@@ -202,7 +202,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialFocus() {
         this.disposeWithMe(
             this._editorService.focus$.subscribe((textRange) => {
-                if (this._editorService.getFocusEditor()?.editorUnitId !== this._context.unitId) {
+                if (this._editorService.getFocusEditor()?.getEditorId() !== this._context.unitId) {
                     return;
                 }
 

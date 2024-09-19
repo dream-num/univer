@@ -22,7 +22,7 @@ import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
-import { IEditorService } from '../../services/editor/editor.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
@@ -242,7 +242,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const params = command.params as ISetDocZoomRatioOperationParams;
                 const { unitId: documentId } = params;
 
-                const unitId = this._docSelectionManagerService.getCurrentSelection()?.unitId;
+                const unitId = this._docSelectionManagerService.__getCurrentSelection()?.unitId;
 
                 if (documentId !== unitId) {
                     return;

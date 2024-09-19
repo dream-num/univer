@@ -235,6 +235,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._updateInputPosition();
     }
 
+    /**
+     * @deprecated
+     */
     activate(x: number, y: number, force = false) {
         const isFocusing = this._input === document.activeElement;
         this._container.style.left = `${x}px`;
@@ -261,17 +264,26 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.blur();
     }
 
+    /**
+     * @deprecated
+     */
     focusEditor(): void {
         this._editorFocusing = true;
         this.focus();
     }
 
+    /**
+     * @deprecated
+     */
     blurEditor(): void {
         this._editorFocusing = false;
         this.blur();
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
+    /**
+     * @deprecated
+     */
     deactivate() {
         this._container.style.left = '0px';
         this._container.style.top = '0px';

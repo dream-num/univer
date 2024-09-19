@@ -113,7 +113,8 @@ export { DocIMEInputManagerService } from './services/doc-ime-input-manager.serv
 export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 export { DocsRenderService } from './services/docs-render.service';
-export { Editor, EditorService, IEditorService } from './services/editor/editor.service';
+export { Editor } from './services/editor/editor';
+export { EditorService, IEditorService } from './services/editor/editor-manager.service';
 export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
 

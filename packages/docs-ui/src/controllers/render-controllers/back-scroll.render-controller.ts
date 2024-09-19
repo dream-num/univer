@@ -20,7 +20,7 @@ import { takeUntil } from 'rxjs';
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
 import type { Documents, INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
-import { IEditorService } from '../../services/editor/editor.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { NodePositionConvertToCursor } from '../../services/selection/convert-text-range';
 import { getAnchorBounding } from '../../services/selection/text-range';
 

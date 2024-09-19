@@ -24,7 +24,7 @@ import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPat
 import type { Nullable } from 'vitest';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
-import { IEditorService } from '../services/editor/editor.service';
+import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
 import { DocHeaderFooterPanel } from '../views/header-footer/panel/DocHeaderFooterPanel';

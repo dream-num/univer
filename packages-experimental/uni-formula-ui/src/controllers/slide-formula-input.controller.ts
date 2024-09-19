@@ -57,7 +57,7 @@ export class SlideUniFormulaInputController extends Disposable {
             const { id } = commandInfo;
 
             if (
-                currentEditor?.editorUnitId === UNI_FORMULA_EDITOR_ID ||
+                currentEditor?.getEditorId() === UNI_FORMULA_EDITOR_ID ||
                 focusedUnit?.type !== UniverInstanceType.UNIVER_SLIDE
             ) {
                 return;

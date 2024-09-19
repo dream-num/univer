@@ -18,9 +18,9 @@ import { debounce, isInternalEditorID, LocaleService, useDependency } from '@uni
 import React, { useEffect, useRef, useState } from 'react';
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import { isElementVisible } from '../../basics/editor';
-import { IEditorService } from '../../services/editor/editor.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import styles from './index.module.less';
-import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
@@ -229,13 +229,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             }
 
             // WTF: should not use editorService to sync values. All editors instance would be notified!
-            if (editor.editorUnitId !== id) {
+            if (editor.getEditorId() !== id) {
                 return;
             }
 
             const focusEditor = editorService.getFocusEditor();
 
-            if (focusEditor && focusEditor.editorUnitId !== id) {
+            if (focusEditor && focusEditor.getEditorId() !== id) {
                 return;
             }
 

@@ -23,7 +23,7 @@ import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import { IEditorService } from '../../services/editor/editor.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
 import { TextEditor } from '../editor/TextEditor';
 import styles from './index.module.less';

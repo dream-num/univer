@@ -76,7 +76,7 @@ import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
-import { EditorService, IEditorService } from './services/editor/editor.service';
+import { EditorService, IEditorService } from './services/editor/editor-manager.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';

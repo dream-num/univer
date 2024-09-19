@@ -69,7 +69,7 @@ export const BreakLineCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
 
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
-        const rectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const rectRanges = docSelectionManagerService.getRectRanges();
         if (activeTextRange == null) {
             return false;
         }

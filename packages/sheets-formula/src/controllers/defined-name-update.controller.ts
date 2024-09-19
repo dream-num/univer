@@ -23,12 +23,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { handleRefStringInfo, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
-import type { ICommandInfo, IMutationInfo, Workbook } from '@univerjs/core';
-import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
+import { SheetInterceptorService } from '@univerjs/sheets';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
+import type { IDefinedNameMapItem, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import { getReferenceMoveParams } from './utils/ref-range-move';
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 
 @OnLifecycle(LifecycleStages.Rendered, DefinedNameUpdateController)
 export class DefinedNameUpdateController extends Disposable {
@@ -51,71 +50,42 @@ export class DefinedNameUpdateController extends Disposable {
         // remove defined name when sheet is removed
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
-                getMutations: (command) => this._getUpdateDefinedName(command),
+                getMutations: (command) => {
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const result = getReferenceMoveParams(workbook, command);
+
+                    if (!result) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
+                    return this._getUpdateDefinedNameMutations(result);
+                },
             })
         );
     }
 
-    private _getUpdateDefinedName(command: ICommandInfo) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const result = getReferenceMoveParams(workbook, command);
+    private _getUpdateDefinedNameMutations(moveParams: IFormulaReferenceMoveParam) {
+        const { type, unitId, sheetId } = moveParams;
+        const definedNames = this._definedNamesService.getDefinedNameMap(moveParams.unitId);
 
-        const { id } = command;
-
-        if (id === RemoveSheetCommand.id) {
-            const { unitId, subUnitId } = command.params as IRemoveSheetCommandParams;
-
-            if (!unitId || !subUnitId) {
-                return {
-                    redos: [],
-                    undos: [],
-                };
-            }
-
-            const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
-            if (!definedNames) {
-                return {
-                    redos: [],
-                    undos: [],
-                };
-            }
-
-            const redoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
-            const undoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
-            Array.from(Object.values(definedNames)).forEach((value) => {
-                const { formulaOrRefString } = value;
-
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                if (workbook == null) {
-                    return;
-                }
-
-                // Do not use localSheetId. localSheetId may be SCOPE_WORKBOOK_VALUE, which cannot indicate the sheet where the current defined name is located.
-                const { sheetName } = handleRefStringInfo(formulaOrRefString);
-                const sheetId = workbook.getSheetBySheetName(sheetName)?.getSheetId();
-
-                if (sheetId === subUnitId) {
-                    redoMutations.push({
-                        id: RemoveDefinedNameMutation.id,
-                        params: {
-                            unitId,
-                            ...value,
-                        },
-                    });
-
-                    undoMutations.push({
-                        id: SetDefinedNameMutation.id,
-                        params: {
-                            unitId,
-                            ...value,
-                        },
-                    });
-                }
-            });
+        if (!definedNames) {
             return {
-                redos: redoMutations,
-                undos: undoMutations,
+                redos: [],
+                undos: [],
             };
+        }
+
+        // const
+
+        // Object.values(denifedNames).forEach((item) => {
+        //     const formulaOrRefString = item.formulaOrRefString;
+        // })
+
+        if (type === FormulaReferenceMoveType.RemoveSheet) {
+            return this._removeSheet(definedNames, unitId, sheetId);
         }
 
         return {
@@ -124,8 +94,43 @@ export class DefinedNameUpdateController extends Disposable {
         };
     }
 
-    private _getReferenceMoveInfo(moveParams: IFormulaReferenceMoveParam) {
-        const { unitId, sheetId } = moveParams;
-        const denifedNames = this._definedNamesService.getDefinedNameMap(moveParams.unitId);
+    private _removeSheet(definedNames: IDefinedNameMapItem, unitId: string, subUnitId: string) {
+        const redoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
+        const undoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
+        Array.from(Object.values(definedNames)).forEach((value) => {
+            const { formulaOrRefString } = value;
+
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            if (workbook == null) {
+                return;
+            }
+
+                // Do not use localSheetId. localSheetId may be SCOPE_WORKBOOK_VALUE, which cannot indicate the sheet where the current defined name is located.
+            const { sheetName } = handleRefStringInfo(formulaOrRefString);
+            const sheetId = workbook.getSheetBySheetName(sheetName)?.getSheetId();
+
+            if (sheetId === subUnitId) {
+                redoMutations.push({
+                    id: RemoveDefinedNameMutation.id,
+                    params: {
+                        unitId,
+                        ...value,
+                    },
+                });
+
+                undoMutations.push({
+                    id: SetDefinedNameMutation.id,
+                    params: {
+                        unitId,
+                        ...value,
+                    },
+                });
+            }
+        });
+
+        return {
+            redos: redoMutations,
+            undos: undoMutations,
+        };
     }
 }

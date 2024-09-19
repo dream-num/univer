@@ -21,13 +21,11 @@ export interface IOpenFileOptions {
     multiple?: boolean;
 }
 
-export interface ILocalFileService {
-    openFile(options?: IOpenFileOptions): Promise<File[]>;
-    downloadFile(data: Blob, fileName: string): void;
-}
-
 /**
  * This service is used to upload files.
  */
 export const ILocalFileService = createIdentifier<ILocalFileService>('univer-ui.local-file.service');
-
+export interface ILocalFileService {
+    openFile(options?: IOpenFileOptions): Promise<File[]>;
+    downloadFile(data: Blob, fileName: string): void;
+}

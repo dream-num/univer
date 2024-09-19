@@ -16,7 +16,7 @@
 
 import { Disposable } from '@univerjs/core';
 
-import type { ILocalFileService, IOpenFileOptions } from './file-opener.service';
+import type { ILocalFileService, IOpenFileOptions } from './local-file.service';
 
 export class DesktopLocalFileService extends Disposable implements ILocalFileService {
     openFile(options?: IOpenFileOptions): Promise<File[]> {

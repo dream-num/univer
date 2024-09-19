@@ -66,7 +66,8 @@ export { Editor, EditorService, IEditorService } from './services/editor/editor.
 export { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 export { IGlobalZoneService } from './services/global-zone/global-zone.service';
 export { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
-export { ILocalFileService, type IOpenFileOptions } from './services/local-file/file-opener.service';
+export { DesktopLocalFileService } from './services/local-file/desktop-local-file.service';
+export { ILocalFileService, type IOpenFileOptions } from './services/local-file/local-file.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export {
     type ICustomComponentProps,

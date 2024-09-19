@@ -15,8 +15,9 @@
  */
 
 import { Range } from '../sheets/range';
+import { ObjectMatrix } from './object-matrix';
+import { Rectangle } from './rectangle';
 import type { IRange } from '../sheets/typedef';
-import type { ObjectMatrix } from './object-matrix';
 import type { Nullable } from './types';
 
 function maximalRectangle<T>(matrix: T[][], match: (val: T) => boolean) {
@@ -98,4 +99,22 @@ export function queryObjectMatrix<T>(matrix: ObjectMatrix<T>, match: (value: T) 
     }
 
     return results;
+}
+
+export function multiSubtractMultiRanges(ranges1: IRange[], ranges2: IRange[]): IRange[] {
+    const matrix = new ObjectMatrix<number>();
+
+    ranges1.forEach((range) => {
+        Range.foreach(range, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
+    });
+
+    ranges2.forEach((range) => {
+        Range.foreach(range, (row, col) => {
+            matrix.setValue(row, col, 0);
+        });
+    });
+
+    return Rectangle.mergeRanges(queryObjectMatrix(matrix, (value) => value === 1));
 }

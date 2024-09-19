@@ -15,6 +15,7 @@
  */
 
 import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
+import { mergeRanges, multiSubtractSingleRange } from './range';
 import type { Nullable } from './types';
 
 /**
@@ -311,6 +312,28 @@ export class Rectangle {
         const result = ranges.filter((range) => range.startRow <= range.endRow && range.startColumn <= range.endColumn);
 
         return result;
+    }
+
+    /**
+     * Combine smaller rectangles into larger ones
+     * @param ranges
+     * @returns
+     */
+    static mergeRanges(ranges: IRange[]): IRange[] {
+        return mergeRanges(ranges);
+    }
+
+    static subtractMulti(ranges1: IRange[], ranges2: IRange[]): IRange[] {
+        if (!ranges2.length) {
+            return ranges1;
+        }
+
+        let res: IRange[] = ranges1;
+        ranges2.forEach((range) => {
+            res = multiSubtractSingleRange(res, range);
+        });
+
+        return Rectangle.mergeRanges(res);
     }
 
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {

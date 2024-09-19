@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, queryObjectMatrix, Rectangle } from '@univerjs/core';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets-ui';
@@ -139,7 +139,7 @@ export class DataValidationCopyPasteController extends Disposable {
                     }
 
                     const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
-                    ruleMatrix.setValue(startRow, startColumn, transformedRuleId);
+                    // ruleMatrix.setValue(startRow, startColumn, transformedRuleId);
                 });
             });
 
@@ -157,6 +157,8 @@ export class DataValidationCopyPasteController extends Disposable {
             };
         } else {
             const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
+            const additionMatrix = new ObjectMatrix();
+            const additionRules = new Set<string>();
 
             const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
 
@@ -174,10 +176,13 @@ export class DataValidationCopyPasteController extends Disposable {
                         startRange
                     );
                     const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
-                    ruleMatrix.setValue(startRow, startColumn, ruleId);
+                    additionMatrix.setValue(startRow, startColumn, ruleId);
+                    additionRules.add(ruleId);
                 });
             });
 
+            const additions = Array.from(additionRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
+            ruleMatrix.addRangeRules(additions);
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 unitId,
                 subUnitId,

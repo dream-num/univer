@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
@@ -48,6 +48,8 @@ export class DataValidationAutoFillController extends Disposable {
                 col: vSourceRange.startColumn,
             };
             const repeats = getAutoFillRepeatRange(vSourceRange, vTargetRange);
+            const additionMatrix = new ObjectMatrix();
+            const additionRules = new Set<string>();
             repeats.forEach((repeat) => {
                 const targetStartCell = repeat.repeatStartCell;
                 const relativeRange = repeat.relativeRange;
@@ -87,11 +89,13 @@ export class DataValidationAutoFillController extends Disposable {
                         );
                         const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
 
-                        ruleMatrixCopy.setValue(targetRow, targetCol, ruleId);
+                        additionMatrix.setValue(targetRow, targetCol, ruleId);
+                        additionRules.add(ruleId);
                     }
                 });
             });
-
+            const additions = Array.from(additionRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
+            ruleMatrixCopy.addRangeRules(additions);
             const diffs = ruleMatrixCopy.diff(this._dataValidationModel.getRules(unitId, subUnitId));
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, this._injector, 'patched', applyType === APPLY_TYPE.ONLY_FORMAT);
             return {

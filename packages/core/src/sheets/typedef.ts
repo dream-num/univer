@@ -67,6 +67,11 @@ export interface IWorkbookData {
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 
     /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Workbook.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
+
+    /**
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
      */
     resources?: IResources;
@@ -117,6 +122,11 @@ export interface IWorksheetData {
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
 
+    /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Worksheet.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
+
     rowHeader: {
         width: number;
         hidden?: BooleanNumber;
@@ -154,6 +164,10 @@ export interface IRowData {
      * hidden
      */
     hd?: BooleanNumber;
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 export interface IRowAutoHeightInfo {
@@ -174,6 +188,10 @@ export interface IColumnData {
      * hidden
      */
     hd?: BooleanNumber;
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 /**

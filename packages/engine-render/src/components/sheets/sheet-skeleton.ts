@@ -20,6 +20,7 @@ import {
     BooleanNumber,
     BuildTextUtils,
     CellValueType,
+    composeStyles,
     CustomRangeType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
@@ -27,8 +28,10 @@ import {
     extractPureTextFromCell,
     getColorStyle,
     HorizontalAlign,
+    IConfigService,
     IContextService,
     Inject,
+    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     isCellCoverable,
     isNullCell,
     isWhiteColor,
@@ -277,6 +280,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     private _renderRawFormula = false;
 
+    private _isRowStylePrecedeColumnStyle = false;
+
     constructor(
         readonly worksheet: Worksheet,
 
@@ -288,12 +293,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         private _cellData: ObjectMatrix<Nullable<ICellData>>,
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super(_localeService);
 
         this._updateLayout();
         this._initContextListener();
+
+        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
         // this.updateDataMerge();
     }
 
@@ -1782,10 +1790,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
+        // style supports inline styles
+        // const style = styles && styles.get(cell.s);
+        // const style = getStyle(styles, cell);
+        const cellStyle = this._styles.getStyleByCell(cell);
+        const columnStyle = this.worksheet.getColumnStyleInternal(col);
+        const rowStyle = this.worksheet.getRowStyleInternal(row);
+        const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
+
+        const style = composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle);
+
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
 
-        const style = this._styles.getStyleByCell(cell);
+        // const style = this._styles.getStyleByCell(cell);
         //#region cache for background
         if (cacheItem.bg && style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;

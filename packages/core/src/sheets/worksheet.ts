@@ -25,6 +25,7 @@ import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
 import { SheetViewModel } from './view-model';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { IStyleData } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 
@@ -87,8 +88,94 @@ export class Worksheet {
     }
 
     /**
+     * Get the style of the column.
+     * @param {number} column The column index
+     * @returns {Nullable<IStyleData>|string} The style of the column
+     */
+    getColumnStyle(column: number): Nullable<IStyleData> | string {
+        return this._styles.get(this._snapshot.columnData[column]?.s);
+    }
+
+    getColumnStyleInternal(column: number): Nullable<IStyleData> {
+        const style = this._snapshot.columnData[column]?.s;
+        if (typeof style === 'string') {
+            return this._styles.get(style);
+        }
+        return style;
+    }
+
+    /**
+     * Set the style of the column.
+     * @param {number} column The column index
+     * @param {string|Nullable<IStyleData>} style The style to be set
+     */
+    setColumnStyle(column: number, style: string | Nullable<IStyleData>): void {
+        const columnData = this._snapshot.columnData[column];
+        if (!columnData) {
+            this._snapshot.columnData[column] = { s: style };
+        } else {
+            columnData.s = style;
+        }
+    }
+
+    /**
+     * Get the style of the row.
+     * @param {number} row The row index
+     * @returns {Nullable<IStyleData>} The style of the row
+     */
+    getRowStyle(row: number): Nullable<IStyleData> {
+        return this._styles.get(this._snapshot.rowData[row]?.s);
+    }
+
+    getRowStyleInternal(row: number): Nullable<IStyleData> {
+        const style = this._snapshot.rowData[row]?.s;
+        if (typeof style === 'string') {
+            return this._styles.get(style);
+        }
+        return style;
+    }
+
+    /**
+     * Set the style of the row.
+     * @param {number} row
+     * @param {string|Nullable<IStyleData>} style The style to be set
+     */
+    setRowStyle(row: number, style: string | Nullable<IStyleData>): void {
+        const rowData = this._snapshot.rowData[row];
+        if (!rowData) {
+            this._snapshot.rowData[row] = { s: style };
+        } else {
+            rowData.s = style;
+        }
+    }
+
+    /**
+     * Get the default style of the worksheet.
+     * @returns {Nullable<IStyleData>} Default Style
+     */
+    getDefaultCellStyle(): Nullable<IStyleData> | string {
+        return this._snapshot.defaultStyle;
+    }
+
+    getDefaultCellStyleInternal(): Nullable<IStyleData> {
+        const style = this._snapshot.defaultStyle;
+        if (typeof style === 'string') {
+            return this._styles.get(style);
+        }
+        return style;
+    }
+
+    /**
+     * Set Default Style, if the style has been set, all cells style will be base on this style.
+     * @param {Nullable<IStyleData>} style The style to be set as default style
+     */
+    setDefaultCellStyle(style: Nullable<IStyleData> | string): void {
+        this._snapshot.defaultStyle = style;
+    }
+
+    /**
      * Returns WorkSheet Cell Data Matrix
-     * @returns
+     * @returns {ObjectMatrix<Nullable<ICellData>>} Cell Data Matrix
      */
     getCellMatrix(): ObjectMatrix<Nullable<ICellData>> {
         return this._cellData;

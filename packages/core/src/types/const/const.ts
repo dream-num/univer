@@ -163,4 +163,3 @@ export const DEFAULT_SLIDE = {
         height: 300,
     },
 };
-

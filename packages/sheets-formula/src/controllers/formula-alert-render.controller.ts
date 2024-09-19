@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, isICellData, LocaleService } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
+import { IZenZoneService } from '@univerjs/ui';
+import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { extractFormulaError } from './utils/utils';
 
@@ -43,7 +44,8 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
         private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
     ) {
         super();
         this._init();
@@ -51,6 +53,7 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
 
     private _init() {
         this._initCellAlertPopup();
+        this._initZenService();
     }
 
     private _initCellAlertPopup() {
@@ -97,6 +100,14 @@ export class FormulaAlertRenderController extends Disposable implements IRenderM
             }
 
             this._cellAlertManagerService.removeAlert(ALERT_KEY);
+        }));
+    }
+
+    private _initZenService() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            if (visible) {
+                this._cellAlertManagerService.removeAlert(ALERT_KEY);
+            }
         }));
     }
 }

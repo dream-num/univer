@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { CellValueType, Direction, IUniverInstanceService, numfmt } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 
 import {
     chineseToNumber,
@@ -33,13 +33,17 @@ import {
     isLoopSeries,
     matchExtendNumber,
 } from './tools';
-import type { IAutoFillRule } from './type';
 import { APPLY_TYPE, DATA_TYPE } from './type';
+import type { IAutoFillRule } from './type';
 
 export const dateRule: IAutoFillRule = {
     type: DATA_TYPE.DATE,
     priority: 1100,
     match: (cellData, accessor) => {
+        if (cellData?.f || cellData?.si) {
+            return false;
+        }
+
         if ((typeof cellData?.v === 'number' || cellData?.t === CellValueType.NUMBER)
             && cellData.s) {
             if (typeof cellData.s === 'string') {

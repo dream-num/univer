@@ -57,6 +57,7 @@ import {
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveCols,
+    handleMoveRange,
     handleMoveRows,
     InsertColCommand,
     InsertRangeMoveDownCommand,
@@ -887,6 +888,7 @@ export class UpdateFormulaController extends Disposable {
         return { newFormulaData };
     }
 
+    // eslint-disable-next-line
     private _getNewRangeByMoveParam(
         unitRangeWidthOffset: IUnitRangeWithOffset,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam,
@@ -920,31 +922,31 @@ export class UpdateFormulaController extends Disposable {
         const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
         let newRange: Nullable<IRange> = null;
 
-        if (type === FormulaReferenceMoveType.MoveRange) { // array move range not need handle
-            // if (from == null || to == null) {
-            //     return;
-            // }
+        if (type === FormulaReferenceMoveType.MoveRange) {
+            if (from == null || to == null) {
+                return;
+            }
 
-            // const moveEdge = this._checkMoveEdge(sequenceRange, from);
+            const moveEdge = this._checkMoveEdge(sequenceRange, from);
 
-            // const remainRange = Rectangle.getIntersects(sequenceRange, from);
+            const remainRange = Rectangle.getIntersects(sequenceRange, from);
 
-            // if (remainRange == null) {
-            //     return;
-            // }
+            if (remainRange == null || moveEdge !== OriginRangeEdgeType.ALL) {
+                return;
+            }
 
-            // const operators = handleMoveRange(
-            //     { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
-            //     remainRange
-            // );
+            const operators = handleMoveRange(
+                { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
+                remainRange
+            );
 
-            // const result = runRefRangeMutations(operators, remainRange);
+            const result = runRefRangeMutations(operators, remainRange);
 
-            // if (result == null) {
-            //     return ErrorType.REF;
-            // }
+            if (result == null) {
+                return ErrorType.REF;
+            }
 
-            // newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
         } else if (type === FormulaReferenceMoveType.MoveRows) {
             if (from == null || to == null) {
                 return;
@@ -1259,6 +1261,7 @@ export class UpdateFormulaController extends Disposable {
      * @param originRange
      * @param fromRange
      */
+    // eslint-disable-next-line
     private _checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
         const { startRow, startColumn, endRow, endColumn } = originRange;
 
@@ -1329,6 +1332,7 @@ export class UpdateFormulaController extends Disposable {
      * @param remain "The range subtracted from the initial range by 'from'.
      * @returns
      */
+    // eslint-disable-next-line
     private _getMoveNewRange(
         moveEdge: Nullable<OriginRangeEdgeType>,
         result: IRange,

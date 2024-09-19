@@ -16,10 +16,10 @@
 
 import { LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
-import type { IFunctionNames } from '@univerjs/engine-formula';
 import { FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT } from '@univerjs/engine-formula';
 import { IClipboardInterfaceService, IMessageService } from '@univerjs/ui';
 import React from 'react';
+import type { IFunctionNames } from '@univerjs/engine-formula';
 
 import styles from './index.module.less';
 
@@ -89,7 +89,7 @@ export function formatNumber(item: IStatisticItem) {
     }
 
     if (pattern && allowPatternFunctions.includes(item.name)) {
-        return numfmt.format(pattern, num);
+        return numfmt.format(pattern, num, { throws: false });
     }
 
     return num.toLocaleString();

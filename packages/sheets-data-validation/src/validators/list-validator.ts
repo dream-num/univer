@@ -38,7 +38,7 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
                 const value = getCellValueOrigin(cell);
                 if (value !== null && value !== undefined) {
                     if (typeof value !== 'string' && typeof cell?.s === 'object' && cell.s?.n?.pattern) {
-                        resultSet.add(numfmt.format(cell.s.n.pattern, value));
+                        resultSet.add(numfmt.format(cell.s.n.pattern, value, { throws: false }));
                         return;
                     }
                     resultSet.add(value.toString());

@@ -22,7 +22,7 @@ export const getPatternPreview = (pattern: string, value: number, _locale?: Loca
     const info = numfmt.getInfo(pattern);
     const locale = _locale === LocaleType.ZH_CN ? 'zh-CN' : 'en';
     const negInfo = info._partitions[1];
-    const result = numfmt.format(pattern, value, { locale });
+    const result = numfmt.format(pattern, value, { locale, throws: false });
     if (value < 0) {
         return {
             result,

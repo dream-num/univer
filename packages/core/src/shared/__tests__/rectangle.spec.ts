@@ -15,10 +15,22 @@
  */
 
 import { describe, expect, it } from 'vitest';
-
+import { AbsoluteRefType } from '../../sheets/typedef';
+import { multiSubtractMultiRanges } from '../object-matrix-query';
 import { Rectangle } from '../rectangle';
 import type { IRange } from '../../sheets/typedef';
-import { AbsoluteRefType } from '../../sheets/typedef';
+
+function rangesToMatrix(ranges: IRange[]) {
+    return ranges;
+    // const matrix = new ObjectMatrix<number>();
+    // ranges.forEach((range) => {
+    //     Range.foreach(range, (row, col) => {
+    //         matrix.setValue(row, col, 1);
+    //     });
+    // });
+
+    // return matrix.getMatrix();
+}
 
 const cellToRange = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col } as IRange);
 describe('test "Rectangle"', () => {
@@ -109,5 +121,135 @@ describe('test "Rectangle"', () => {
         expect(positionRangeWithAbsoluteEndRow).toEqual({ ...originRange, endColumn: 7, startRow: 6, startColumn: 6, endAbsoluteRefType: AbsoluteRefType.ROW });
         expect(positionRangeWithAbsoluteEndCol).toEqual({ ...originRange, endRow: 7, startRow: 6, startColumn: 6, endAbsoluteRefType: AbsoluteRefType.COLUMN });
         expect(positionRangeWithALl).toEqual({ ...originRange, endAbsoluteRefType: AbsoluteRefType.ALL, startAbsoluteRefType: AbsoluteRefType.ALL });
+    });
+});
+
+const mergeRanges = Rectangle.mergeRanges; // Adjust the import path according to your project structure
+
+describe('mergeRange', () => {
+    it('should merge adjacent ranges into one larger range', () => {
+        const input = [
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+            { startColumn: 2, endColumn: 4, startRow: 2, endRow: 3 },
+        ];
+        const expected = [
+            { startColumn: 1, endColumn: 4, startRow: 1, endRow: 3 },
+        ];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+
+    it('should merge overlapping ranges into one larger range', () => {
+        const input = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 3 },
+            { startColumn: 4, endColumn: 6, startRow: 2, endRow: 4 },
+        ];
+        const expected = [
+            { startColumn: 1, endColumn: 6, startRow: 1, endRow: 4 },
+        ];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+
+    it('should handle non-overlapping ranges', () => {
+        const input = [
+            { startColumn: 1, endColumn: 2, startRow: 1, endRow: 2 },
+            { startColumn: 4, endColumn: 5, startRow: 3, endRow: 4 },
+        ];
+        const expected = [
+            { startColumn: 1, endColumn: 2, startRow: 1, endRow: 2 },
+            { startColumn: 4, endColumn: 5, startRow: 3, endRow: 4 },
+        ];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+
+    it('should handle a single range', () => {
+        const input = [
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+        ];
+        const expected = [
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+        ];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+
+    it('should handle merge multi to one', () => {
+        const input = [{ startColumn: 1, startRow: 1, endColumn: 5, endRow: 1 }, { startColumn: 1, startRow: 5, endColumn: 5, endRow: 5 }, { startColumn: 1, startRow: 2, endColumn: 1, endRow: 4 }, { startColumn: 5, startRow: 2, endColumn: 5, endRow: 4 }];
+        const expected = [{
+            startColumn: 1,
+            startRow: 1,
+            endColumn: 5,
+            endRow: 5,
+        }];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+
+    it('should handle empty input', () => {
+        const input: IRange[] = [];
+        const expected: IRange[] = [];
+        expect(mergeRanges(input)).toEqual(expected);
+    });
+});
+
+describe('multiSubtractMulti', () => {
+    it('should subtract a single range from another range', () => {
+        const ranges1: IRange[] = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
+        ];
+        const ranges2: IRange[] = [
+            { startColumn: 2, endColumn: 4, startRow: 2, endRow: 4 },
+        ];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+    });
+
+    it('should handle subtracting multiple ranges from a single range', () => {
+        const ranges1: IRange[] = [
+            { startColumn: 1, endColumn: 10, startRow: 1, endRow: 10 },
+        ];
+        const ranges2: IRange[] = [
+            { startColumn: 2, endColumn: 5, startRow: 2, endRow: 5 },
+            { startColumn: 6, endColumn: 8, startRow: 6, endRow: 8 },
+        ];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+    });
+
+    it('should handle non-overlapping subtraction ranges', () => {
+        const ranges1: IRange[] = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
+        ];
+        const ranges2: IRange[] = [
+            { startColumn: 6, endColumn: 8, startRow: 6, endRow: 8 },
+        ];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+    });
+
+    it('should handle subtraction ranges that completely overlap', () => {
+        const ranges1: IRange[] = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
+        ];
+        const ranges2: IRange[] = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
+        ];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+    });
+
+    it('should handle empty ranges', () => {
+        const ranges1: IRange[] = [];
+        const ranges2: IRange[] = [
+            { startColumn: 2, endColumn: 4, startRow: 2, endRow: 4 },
+        ];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
+    });
+
+    it('should handle empty subtraction ranges', () => {
+        const ranges1: IRange[] = [
+            { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
+        ];
+        const ranges2: IRange[] = [];
+        const expected: IRange[] = multiSubtractMultiRanges(ranges1, ranges2);
+        expect(rangesToMatrix(Rectangle.multiSubtractMulti(ranges1, ranges2))).toEqual(rangesToMatrix(expected));
     });
 });

@@ -313,6 +313,65 @@ export class Rectangle {
         return result;
     }
 
+    /**
+     * Combine smaller rectangles into larger ones
+     * @param ranges
+     * @returns
+     */
+    static mergeRanges(ranges: IRange[]): IRange[] {
+        // Sort ranges by starting row and column
+        ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+
+        const mergedRanges: IRange[] = [];
+
+        for (const range of ranges) {
+            if (mergedRanges.length === 0) {
+                mergedRanges.push(range);
+            } else {
+                const last = mergedRanges[mergedRanges.length - 1];
+
+                if (
+                    range.startRow <= last.endRow + 1 &&
+              range.endRow >= last.startRow &&
+              range.startColumn <= last.endColumn + 1 &&
+              range.endColumn >= last.startColumn
+                ) {
+              // Merge ranges
+                    last.startRow = Math.min(last.startRow, range.startRow);
+                    last.endRow = Math.max(last.endRow, range.endRow);
+                    last.startColumn = Math.min(last.startColumn, range.startColumn);
+                    last.endColumn = Math.max(last.endColumn, range.endColumn);
+                } else {
+              // No overlap, push new range
+                    mergedRanges.push(range);
+                }
+            }
+        }
+
+        return mergedRanges;
+    }
+
+    static multiSubtractSingle(ranges: IRange[], toDelete: IRange) {
+        const res: IRange[] = [];
+        ranges.forEach((range) => {
+            res.push(...Rectangle.subtract(range, toDelete));
+        });
+        return Rectangle.mergeRanges(res);
+    };
+
+    static multiSubtractMulti(ranges1: IRange[], ranges2: IRange[]): IRange[] {
+        if (!ranges2.length) {
+            return ranges1;
+        }
+
+        let res: IRange[] = ranges1;
+        ranges2.forEach((range) => {
+            res = Rectangle.multiSubtractSingle(res, range);
+        });
+
+        return Rectangle.mergeRanges(res);
+    }
+
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {
         if (
             rect1.left > rect2.right || // rect1 在 rect2 右侧

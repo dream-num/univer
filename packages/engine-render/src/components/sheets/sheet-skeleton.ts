@@ -1798,7 +1798,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const rowStyle = this.worksheet.getRowStyleInternal(row);
         const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
 
-        const style = composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle);
+        const style = this._isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
 
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };

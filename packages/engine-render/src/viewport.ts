@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 import { EventSubject, Tools } from '@univerjs/core';
+import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 
-import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
-import type { IWheelEvent } from './basics/i-events';
 import { PointerInput } from './basics/i-events';
 import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
+import type { BaseObject } from './base-object';
+import type { IWheelEvent } from './basics/i-events';
+import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
@@ -92,6 +92,9 @@ interface IViewportScrollPosition {
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
 
 export class Viewport {
+    private _clipViewport = true;
+    private _active = true;
+
     /**
      * scrollX means scroll x value for scrollbar in viewMain
      * use getBarScroll to get scrolling value(scrollX, scrollY) for scrollbar
@@ -125,73 +128,52 @@ export class Viewport {
     private _sceneHeightAfterScale: number;
 
     onMouseWheel$ = new EventSubject<IWheelEvent>();
-
     onScrollAfter$ = new EventSubject<IScrollObserverParam>();
-
     onScrollBefore$ = new EventSubject<IScrollObserverParam>();
-
     onScrollEnd$ = new EventSubject<IScrollObserverParam>();
-
     onScrollByBar$ = new EventSubject<IScrollObserverParam>();
 
     private _viewportKey: string = '';
 
     /**
-     * viewport top origin value in logic, scale does not affect it.
+     * The logical top origin value of the viewport, which is not affected by scaling.
      */
     private _topOrigin: number = 0;
-
     /**
-     * viewport left origin value in logic, scale does not affect it.
+     * The logical left origin value of the viewport, which is not affected by scaling.
      */
     private _leftOrigin: number = 0;
-
     private _bottomOrigin: number = 0;
-
     private _rightOrigin: number = 0;
-
     private _widthOrigin: Nullable<number>;
-
     private _heightOrigin: Nullable<number>;
 
     private _top: number = 0;
-
     private _left: number = 0;
-
     private _bottom: number = 0;
-
     private _right: number = 0;
-
     private _width: Nullable<number>;
-
     private _height: Nullable<number>;
 
     private _scene!: ThinScene;
 
     private _scrollBar?: Nullable<BaseScrollBar>;
-
     private _isWheelPreventDefaultX: boolean = false;
-
     private _isWheelPreventDefaultY: boolean = false;
-
     private _scrollStopNum: NodeJS.Timeout | number = 0;
-
-    private _clipViewport = true;
-
-    private _active = true;
-
-    private _paddingStartX: number = 0;
 
     /**
      * after create a freeze column, there is a "padding distace" from row header to curr viewport.
      */
+    private _paddingStartX: number = 0;
+    /**
+     * after create a freeze column, there is a "padding distace" from row header to curr viewport.
+     */
     private _paddingEndX: number = 0;
-
     /**
      * after create a freeze row, there is a "padding distace" from column header to curr viewport.
      */
     private _paddingStartY: number = 0;
-
     private _paddingEndY: number = 0;
 
     /**
@@ -494,10 +476,10 @@ export class Viewport {
      * Note that the 'position' parameter may not always have 'height' and 'width' properties. For the 'viewMain' element, it only has 'left', 'top', 'bottom', and 'right' properties.
      * Additionally, 'this.width' and 'this.height' may also be 'undefined'.
      * Therefore, you should use the '_getViewPortSize' method to retrieve the width and height.
-     * @param position
+     * @param sizeAndPos
      */
-    resizeWhenFreezeChange(position: IViewPosition) {
-        const positionKeys = Object.keys(position);
+    resizeWhenFreezeChange(sizeAndPos: IViewPosition) {
+        const positionKeys = Object.keys(sizeAndPos);
         if (positionKeys.length === 0) {
             return;
         }
@@ -508,7 +490,7 @@ export class Viewport {
         //         (this as IKeyValue)[pKey] = position[pKey as keyof IViewPosition];
         //     }
         // });
-        this._setViewportSize(position);
+        this._setViewportSize(sizeAndPos);
         this.resetCanvasSizeAndUpdateScroll();
     }
 
@@ -1298,7 +1280,7 @@ export class Viewport {
         this._left = left;
         this._top = top;
 
-        if (this._explicitViewportWidthSet) {
+        if (Tools.isDefine(this._widthOrigin)) {
             // viewMainLeft viewMainLeftTop ---> width is specific by freezeline
             width = (this._widthOrigin || 0) * scaleX;
         } else {
@@ -1306,7 +1288,7 @@ export class Viewport {
             width = parentWidth - (this._left + this._right);
         }
 
-        if (this._explicitViewportHeightSet) {
+        if (Tools.isDefine(this._heightOrigin)) {
             //viewMainLeftTop viewMainTop ---> height is specific by freezeline
             height = (this._heightOrigin || 0) * scaleY;
         } else {
@@ -1613,7 +1595,7 @@ export class Viewport {
 
         if (Tools.isDefine(props?.width) && this._explicitViewportWidthSet) {
             this.width = props?.width;
-            this._widthOrigin = this.width;
+            this._widthOrigin = props?.width;
         } else {
             this.width = null;
             this._widthOrigin = null;
@@ -1621,7 +1603,7 @@ export class Viewport {
 
         if (Tools.isDefine(props?.height) && this._explicitViewportHeightSet) {
             this.height = props?.height;
-            this._heightOrigin = this.height;
+            this._heightOrigin = props?.height;
         } else {
             this.height = null;
             this._heightOrigin = null;

@@ -864,11 +864,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderM
         viewRowTop.disable();
         viewColumnLeft.disable();
 
-        viewMainLeftTop.resetPadding();
-        viewMainTop.resetPadding();
-        viewMainLeft.resetPadding();
-        viewRowTop.resetPadding();
-        viewColumnLeft.resetPadding();
+        // why reset twice?
+        // viewMainLeftTop.resetPadding();
+        // viewMainTop.resetPadding();
+        // viewMainLeft.resetPadding();
+        // viewRowTop.resetPadding();
+        // viewColumnLeft.resetPadding();
 
         // cancel freeze
         if (isTopView === false && isLeftView === false) {

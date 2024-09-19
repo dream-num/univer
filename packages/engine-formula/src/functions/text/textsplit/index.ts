@@ -34,7 +34,7 @@ export class Textsplit extends BaseFunction {
 
         const { _variant: _colDelimiter, values: colDelimiterValue } = this._getStringValues(colDelimiter);
 
-        const { _variant, values: rowDelimiterValue } = this._getStringValues(_rowDelimiter);
+        const { _variant, values: rowDelimiterValue } = this._getStringValues(_rowDelimiter, false);
         _rowDelimiter = _variant;
 
         const maxRowLength = Math.max(
@@ -71,7 +71,7 @@ export class Textsplit extends BaseFunction {
         }
     }
 
-    private _getStringValues(variant: BaseValueObject) {
+    private _getStringValues(variant: BaseValueObject, isNotNull = true) {
         let _variant = variant;
         const values: string[] = [];
 
@@ -82,7 +82,7 @@ export class Textsplit extends BaseFunction {
                     return false;
                 }
 
-                if (variantObject?.isNull()) {
+                if (variantObject?.isNull() && isNotNull) {
                     _variant = ErrorValueObject.create(ErrorType.VALUE);
                     return false;
                 }
@@ -97,6 +97,10 @@ export class Textsplit extends BaseFunction {
                 values.push(value);
             });
         } else {
+            if (_variant.isNull() && isNotNull) {
+                _variant = ErrorValueObject.create(ErrorType.VALUE);
+            }
+
             const value = this._getRegExpStringValue(_variant);
 
             if (value === '') {

@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textsplit } from '../index';
@@ -46,7 +46,7 @@ describe('Test textsplit function', () => {
             ]);
         });
 
-        it('delimiter value is empty string', () => {
+        it('delimiter value test', () => {
             const text = StringValueObject.create('To be or not to be');
             const colDelimiter = StringValueObject.create('');
             const result = testFunction.calculate(text, colDelimiter);
@@ -56,6 +56,59 @@ describe('Test textsplit function', () => {
             const rowDelimiter2 = StringValueObject.create('');
             const result2 = testFunction.calculate(text, colDelimiter2, rowDelimiter2);
             expect(getObjectValue(result2)).toBe(ErrorType.VALUE);
+
+            const colDelimiter3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, 'or', ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(text, colDelimiter3);
+            expect(getObjectValue(result3)).toBe(ErrorType.VALUE);
+
+            const colDelimiter4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['or', true, ErrorType.NAME, null],
+                ]),
+                rowCount: 1,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(text, colDelimiter4);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
+
+            const colDelimiter5 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['', ErrorType.NAME, null],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result5 = testFunction.calculate(text, colDelimiter5);
+            expect(getObjectValue(result5)).toBe(ErrorType.VALUE);
+
+            const colDelimiter6 = NullValueObject.create();
+            const result6 = testFunction.calculate(text, colDelimiter6);
+            expect(getObjectValue(result6)).toBe(ErrorType.VALUE);
+
+            const colDelimiter7 = StringValueObject.create('or');
+            const rowDelimiter7 = NullValueObject.create();
+            const result7 = testFunction.calculate(text, colDelimiter7, rowDelimiter7);
+            expect(getObjectValue(result7)).toStrictEqual([
+                ['To be ', ' not to be'],
+            ]);
         });
 
         it('ignoreEmpty value is true', () => {
@@ -70,6 +123,10 @@ describe('Test textsplit function', () => {
                 ['There', 'is', 'no', 'try'],
                 ['-Anonymous', ErrorType.NA, ErrorType.NA, ErrorType.NA],
             ]);
+
+            const ignoreEmpty2 = StringValueObject.create('test');
+            const result2 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty2);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('matchMode value 0 or 1', () => {
@@ -108,6 +165,10 @@ describe('Test textsplit function', () => {
                 ['ry.', ErrorType.NA, ErrorType.NA],
                 ['-An', 'nym', 'us'],
             ]);
+
+            const matchMode4 = StringValueObject.create('test');
+            const result4 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode4);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('padWith value test', () => {
@@ -129,16 +190,68 @@ describe('Test textsplit function', () => {
                 ['ry.', ErrorType.NULL, ErrorType.NULL],
                 ['-An', 'nym', 'us'],
             ]);
+
+            const padWith2 = BooleanValueObject.create(false);
+            const result2 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode, padWith2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                ['D', '.', false],
+                ['Or', false, false],
+                ['d', false, false],
+                ['n', '.', false],
+                ['There', false, false],
+                ['is', false, false],
+                ['n', false, false],
+                ['ry.', false, false],
+                ['-An', 'nym', 'us'],
+            ]);
+
+            const padWith3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['D', '.', false],
+                ]),
+                rowCount: 1,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode, padWith3);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+
+            const padWith4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [ErrorType.NULL],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(text, colDelimiter, rowDelimiter, ignoreEmpty, matchMode, padWith4);
+            expect(getObjectValue(result4)).toStrictEqual([
+                ['D', '.', ErrorType.NULL],
+                ['Or', ErrorType.NULL, ErrorType.NULL],
+                ['d', ErrorType.NULL, ErrorType.NULL],
+                ['n', '.', ErrorType.NULL],
+                ['There', ErrorType.NULL, ErrorType.NULL],
+                ['is', ErrorType.NULL, ErrorType.NULL],
+                ['n', ErrorType.NULL, ErrorType.NULL],
+                ['ry.', ErrorType.NULL, ErrorType.NULL],
+                ['-An', 'nym', 'us'],
+            ]);
         });
 
         it('Value is array', () => {
             const text = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
-                    ['Dakota Lennon Sanchez 0'],
-                    ['To be or not to be'],
+                    ['Dakota Lennon Sanchez 0', null, true],
+                    ['To be or not to be', false, ErrorType.NAME],
                 ]),
                 rowCount: 2,
-                columnCount: 1,
+                columnCount: 3,
                 unitId: '',
                 sheetId: '',
                 row: 0,
@@ -147,8 +260,8 @@ describe('Test textsplit function', () => {
             const colDelimiter = StringValueObject.create(' ');
             const result = testFunction.calculate(text, colDelimiter);
             expect(getObjectValue(result)).toStrictEqual([
-                ['Dakota'],
-                ['To'],
+                ['Dakota', ErrorType.VALUE, true],
+                ['To', false, ErrorType.NAME],
             ]);
         });
 

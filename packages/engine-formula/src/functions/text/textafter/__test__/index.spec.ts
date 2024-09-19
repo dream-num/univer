@@ -18,7 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Textafter } from '../index';
@@ -44,6 +45,14 @@ describe('Test textafter function', () => {
             const instanceNum2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(text, delimiter, instanceNum2);
             expect(getObjectValue(result2)).toBe('');
+
+            const delimiter2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(text, delimiter2, instanceNum);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const delimiter3 = StringValueObject.create('TTTTTTTTTTTTTTTTTTTTT');
+            const result4 = testFunction.calculate(text, delimiter3, instanceNum);
+            expect(getObjectValue(result4)).toBe(ErrorType.NA);
         });
 
         it('instanceNum value test', () => {
@@ -64,6 +73,18 @@ describe('Test textafter function', () => {
             const instanceNum4 = NumberValueObject.create(17);
             const result4 = testFunction.calculate(text, delimiter, instanceNum4);
             expect(getObjectValue(result4)).toBe(ErrorType.VALUE);
+
+            const instanceNum5 = ErrorValueObject.create(ErrorType.NAME);
+            const result5 = testFunction.calculate(text, delimiter, instanceNum5);
+            expect(getObjectValue(result5)).toBe(ErrorType.NAME);
+
+            const instanceNum6 = StringValueObject.create('test');
+            const result6 = testFunction.calculate(text, delimiter, instanceNum6);
+            expect(getObjectValue(result6)).toBe(ErrorType.VALUE);
+
+            const instanceNum7 = NullValueObject.create();
+            const result7 = testFunction.calculate(text, delimiter, instanceNum7);
+            expect(getObjectValue(result7)).toBe('RUETRUEFALSE');
         });
 
         it('matchMode value 0 or 1', () => {
@@ -200,6 +221,24 @@ describe('Test textafter function', () => {
                 ['8袋'],
                 ['8袋'],
                 ['8袋'],
+            ]);
+
+            const delimiter3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [null, '袋', '粒', '瓶', ErrorType.NAME],
+                ]),
+                rowCount: 1,
+                columnCount: 5,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            result = testFunction.calculate(text2, delimiter3);
+            expect(getObjectValue(result)).toStrictEqual([
+                [ErrorType.NAME],
+                [ErrorType.NAME],
+                [ErrorType.NAME],
             ]);
         });
     });

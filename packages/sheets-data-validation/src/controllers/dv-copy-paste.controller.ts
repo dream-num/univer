@@ -114,6 +114,8 @@ export class DataValidationCopyPasteController extends Disposable {
 
         if (copyInfo.unitId !== unitId || subUnitId !== copyInfo.subUnitId) {
             const ruleMatrix = this._sheetDataValidationModel.getRuleObjectMatrix(copyInfo.unitId, copyInfo.subUnitId).clone();
+            const additionMatrix = new ObjectMatrix();
+            const addRules = new Set<string>();
 
             const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
 
@@ -139,9 +141,13 @@ export class DataValidationCopyPasteController extends Disposable {
                     }
 
                     const { row: startRow, col: startColumn } = mapFunc(range.startRow, range.startColumn);
-                    // ruleMatrix.setValue(startRow, startColumn, transformedRuleId);
+                    addRules.add(transformedRuleId);
+                    additionMatrix.setValue(startRow, startColumn, transformedRuleId);
                 });
             });
+
+            const additions = Array.from(addRules).map((id) => ({ id, ranges: queryObjectMatrix(additionMatrix, (value) => value === id) }));
+            ruleMatrix.addRangeRules(additions);
 
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 copyInfo.unitId,

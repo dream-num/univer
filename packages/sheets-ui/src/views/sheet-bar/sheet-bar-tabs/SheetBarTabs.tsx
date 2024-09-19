@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
+import { ICommandService, IConfigService, IPermissionService, LocaleService, nameCharacterCheck, Quantity, useDependency } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
+import { LockSingle } from '@univerjs/icons';
 import {
     InsertSheetMutation,
     RangeProtectionRuleModel,
@@ -32,19 +32,20 @@ import {
     WorkbookRenameSheetPermission,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import { ContextMenuPosition, IConfirmService, Menu, useObservable } from '@univerjs/ui';
+import { ContextMenuPosition, IConfirmService, Menu, PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY, useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { LockSingle } from '@univerjs/icons';
 import { merge } from 'rxjs';
-import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
-import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
 import { useActiveWorkbook } from '../../../components/hook';
+import { IEditorBridgeService } from '../../../services/editor-bridge.service';
+import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import styles from './index.module.less';
-import type { IBaseSheetBarProps } from './SheetBarItem';
 import { SheetBarItem } from './SheetBarItem';
-import type { IScrollState } from './utils/slide-tab-bar';
 import { SlideTabBar } from './utils/slide-tab-bar';
+import type { IBaseSheetBarProps } from './SheetBarItem';
+import type { IScrollState } from './utils/slide-tab-bar';
 
 export function SheetBarTabs() {
     const [sheetList, setSheetList] = useState<IBaseSheetBarProps[]>([]);
@@ -59,6 +60,7 @@ export function SheetBarTabs() {
     const sheetBarService = useDependency(ISheetBarService);
     const localeService = useDependency(LocaleService);
     const confirmService = useDependency(IConfirmService);
+    const configService = useDependency(IConfigService);
     const editorBridgeService = useDependency(IEditorBridgeService, Quantity.OPTIONAL);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
@@ -201,6 +203,9 @@ export function SheetBarTabs() {
 
         return slideTabBar;
     };
+
+    const config = configService.getConfig<IUniverUIConfig>(UI_PLUGIN_CONFIG_KEY);
+    const showContextMenu = config?.contextMenu ?? true;
 
     // TODO@Dushusir: the following callback functions should be wrapped by `useCallback`.
 
@@ -383,6 +388,8 @@ export function SheetBarTabs() {
     };
 
     const onVisibleChange = (visible: boolean) => {
+        if (!showContextMenu) return;
+
         if (editorBridgeService?.isForceKeepVisible()) {
             return;
         }

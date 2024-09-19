@@ -15,13 +15,14 @@
  */
 
 import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
+import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
@@ -30,7 +31,7 @@ export class DataValidationRefRangeController extends Disposable {
     private _disposableMap: Map<string, Set<() => void>> = new Map();
 
     constructor(
-        @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationModel) private _dataValidationModel: SheetDataValidationModel,
         @Inject(Injector) private _injector: Injector,
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
         @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,

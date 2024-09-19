@@ -15,344 +15,573 @@
  */
 
 import {
+    Direction,
     RANGE_TYPE,
+    Rectangle,
 } from '@univerjs/core';
+import { ErrorType, serializeRangeToRefString } from '@univerjs/engine-formula';
+
 import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    InsertColCommand,
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveRightCommand,
-    InsertRowCommand,
-    MoveColsCommand,
-    MoveRangeCommand,
-    MoveRowsCommand,
-    RemoveColCommand,
-    RemoveRowCommand,
-    RemoveSheetCommand,
-    SetWorksheetNameCommand,
+    EffectRefRangId,
+    handleDeleteRangeMoveLeft,
+    handleDeleteRangeMoveUp,
+    handleInsertCol,
+    handleInsertRangeMoveDown,
+    handleInsertRangeMoveRight,
+    handleInsertRow,
+    handleIRemoveCol,
+    handleIRemoveRow,
+    handleMoveCols,
+    handleMoveRange,
+    handleMoveRows,
+    runRefRangeMutations,
 } from '@univerjs/sheets';
 
 import type {
-    ICommandInfo,
+    IRange,
+    IUnitRange,
     Nullable,
-    Workbook,
 } from '@univerjs/core';
+import { checkIsSameUnitAndSheet, FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
 
-import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
-    IRemoveRowColCommandParams,
-    IRemoveSheetCommandParams,
-    ISetWorksheetNameCommandParams,
-} from '@univerjs/sheets';
-import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
+export interface IUnitRangeWithOffset extends IUnitRange {
+    refOffsetX: number;
+    refOffsetY: number;
+    sheetName: string;
+}
 
-export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo) {
-    const { id } = command;
-    let result: Nullable<IFormulaReferenceMoveParam> = null;
+enum OriginRangeEdgeType {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    ALL,
+}
 
-    switch (id) {
-        case MoveRangeCommand.id:
-            result = handleRefMoveRange(command as ICommandInfo<IMoveRangeCommandParams>, workbook);
-            break;
-        case MoveRowsCommand.id:
-            result = handleRefMoveRows(command as ICommandInfo<IMoveRowsCommandParams>, workbook);
-            break;
-        case MoveColsCommand.id:
-            result = handleRefMoveCols(command as ICommandInfo<IMoveColsCommandParams>, workbook);
-            break;
-        case InsertRowCommand.id:
-            result = handleRefInsertRow(command as ICommandInfo<IInsertRowCommandParams>);
-            break;
-        case InsertColCommand.id:
-            result = handleRefInsertCol(command as ICommandInfo<IInsertColCommandParams>);
-            break;
-        case InsertRangeMoveRightCommand.id:
-            result = handleRefInsertRangeMoveRight(command as ICommandInfo<InsertRangeMoveRightCommandParams>, workbook);
-            break;
-        case InsertRangeMoveDownCommand.id:
-            result = handleRefInsertRangeMoveDown(command as ICommandInfo<InsertRangeMoveDownCommandParams>, workbook);
-            break;
-        case RemoveRowCommand.id:
-            result = handleRefRemoveRow(command as ICommandInfo<IRemoveRowColCommandParams>, workbook);
-            break;
-        case RemoveColCommand.id:
-            result = handleRefRemoveCol(command as ICommandInfo<IRemoveRowColCommandParams>, workbook);
-            break;
-        case DeleteRangeMoveUpCommand.id:
-            result = handleRefDeleteRangeMoveUp(command as ICommandInfo<IDeleteRangeMoveUpCommandParams>, workbook);
-            break;
-        case DeleteRangeMoveLeftCommand.id:
-            result = handleRefDeleteRangeMoveLeft(command as ICommandInfo<IDeleteRangeMoveLeftCommandParams>, workbook);
-            break;
-        case SetWorksheetNameCommand.id:
-            result = handleRefSetWorksheetName(command as ICommandInfo<ISetWorksheetNameCommandParams>, workbook);
-            break;
-        case RemoveSheetCommand.id:
-            result = handleRefRemoveWorksheet(command as ICommandInfo<IRemoveSheetCommandParams>, workbook);
-            break;
+// eslint-disable-next-line max-lines-per-function, complexity
+export function getNewRangeByMoveParam(
+    unitRangeWidthOffset: IUnitRangeWithOffset,
+    formulaReferenceMoveParam: IFormulaReferenceMoveParam,
+    currentFormulaUnitId: string,
+    currentFormulaSheetId: string
+) {
+    const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
+
+    const {
+        range: unitRange,
+        sheetId: sequenceRangeSheetId,
+        unitId: sequenceRangeUnitId,
+        sheetName: sequenceRangeSheetName,
+        refOffsetX,
+        refOffsetY,
+    } = unitRangeWidthOffset;
+
+    if (
+        !checkIsSameUnitAndSheet(
+            userUnitId,
+            userSheetId,
+            currentFormulaUnitId,
+            currentFormulaSheetId,
+            sequenceRangeUnitId,
+            sequenceRangeSheetId
+        )
+    ) {
+        return;
     }
 
-    return result;
+    const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
+    let newRange: Nullable<IRange> = null;
+
+    if (type === FormulaReferenceMoveType.MoveRange) {
+        if (from == null || to == null) {
+            return;
+        }
+
+        const moveEdge = checkMoveEdge(sequenceRange, from);
+
+        const remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+        if (remainRange == null || moveEdge !== OriginRangeEdgeType.ALL) {
+            return;
+        }
+
+        const operators = handleMoveRange(
+            { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
+            remainRange
+        );
+
+        const result = runRefRangeMutations(operators, remainRange);
+
+        if (result == null) {
+            return ErrorType.REF;
+        }
+
+        newRange = getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+    } else if (type === FormulaReferenceMoveType.MoveRows) {
+        if (from == null || to == null) {
+            return;
+        }
+
+        const moveEdge = checkMoveEdge(sequenceRange, from);
+
+        let remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+        if (
+            remainRange == null &&
+            ((from.endRow < sequenceRange.startRow && to.endRow < sequenceRange.startRow) || (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow))
+        ) {
+            return;
+        }
+
+        if (remainRange == null) {
+            remainRange = {
+                startRow: sequenceRange.startRow,
+                endRow: sequenceRange.endRow,
+                startColumn: sequenceRange.startColumn,
+                endColumn: sequenceRange.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+            };
+        }
+
+        const operators = handleMoveRows(
+            { id: EffectRefRangId.MoveRowsCommandId, params: { toRange: to, fromRange: from } },
+            remainRange
+        );
+
+        const result = runRefRangeMutations(operators, remainRange);
+
+        if (result == null) {
+            return ErrorType.REF;
+        }
+
+        newRange = getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+    } else if (type === FormulaReferenceMoveType.MoveCols) {
+        if (from == null || to == null) {
+            return;
+        }
+
+        const moveEdge = checkMoveEdge(sequenceRange, from);
+
+        let remainRange = Rectangle.getIntersects(sequenceRange, from);
+
+        if (
+            remainRange == null &&
+            ((from.endColumn < sequenceRange.startColumn && to.endColumn < sequenceRange.startColumn) || (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn))
+        ) {
+            return;
+        }
+
+        if (remainRange == null) {
+            remainRange = {
+                startRow: sequenceRange.startRow,
+                endRow: sequenceRange.endRow,
+                startColumn: sequenceRange.startColumn,
+                endColumn: sequenceRange.endColumn,
+                rangeType: RANGE_TYPE.NORMAL,
+            };
+        }
+
+        const operators = handleMoveCols(
+            { id: EffectRefRangId.MoveColsCommandId, params: { toRange: to, fromRange: from } },
+            remainRange
+        );
+
+        const result = runRefRangeMutations(operators, remainRange);
+
+        if (result == null) {
+            return ErrorType.REF;
+        }
+
+        newRange = getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
+    }
+
+    if (range != null) {
+        if (type === FormulaReferenceMoveType.InsertRow) {
+            const operators = handleInsertRow(
+                {
+                    id: EffectRefRangId.InsertRowCommandId,
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.DOWN },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.InsertColumn) {
+            const operators = handleInsertCol(
+                {
+                    id: EffectRefRangId.InsertColCommandId,
+                    params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.RemoveRow) {
+            const operators = handleIRemoveRow(
+                {
+                    id: EffectRefRangId.RemoveRowCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.RemoveColumn) {
+            const operators = handleIRemoveCol(
+                {
+                    id: EffectRefRangId.RemoveColCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.DeleteMoveLeft) {
+            const operators = handleDeleteRangeMoveLeft(
+                {
+                    id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.DeleteMoveUp) {
+            const operators = handleDeleteRangeMoveUp(
+                {
+                    id: EffectRefRangId.DeleteRangeMoveUpCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return ErrorType.REF;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.InsertMoveDown) {
+            const operators = handleInsertRangeMoveDown(
+                {
+                    id: EffectRefRangId.InsertRangeMoveDownCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
+            const operators = handleInsertRangeMoveRight(
+                {
+                    id: EffectRefRangId.InsertRangeMoveRightCommandId,
+                    params: { range },
+                },
+                sequenceRange
+            );
+
+            const result = runRefRangeMutations(operators, sequenceRange);
+
+            if (result == null) {
+                return;
+            }
+
+            newRange = {
+                ...sequenceRange,
+                ...result,
+            };
+        }
+    }
+
+    if (newRange == null) {
+        return;
+    }
+
+    return serializeRangeToRefString({
+        range: newRange,
+        sheetName: sequenceRangeSheetName,
+        unitId: sequenceRangeUnitId,
+    });
 }
 
-function getCurrentSheetInfo(workbook: Workbook) {
-    const unitId = workbook.getUnitId();
-    const sheetId = workbook.getActiveSheet()?.getSheetId() || '';
-
-    return {
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefMoveRange(command: ICommandInfo<IMoveRangeCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { fromRange, toRange } = params;
-    if (!fromRange || !toRange) return null;
-
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.MoveRange,
-        from: fromRange,
-        to: toRange,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefMoveRows(command: ICommandInfo<IMoveRowsCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
+/**
+ *  Calculate the new ref information for the moving selection.
+ * @param moveEdge  the 'from' range lie on the edge of the original range, or does it completely cover the original range
+ * @param result The original range is divided by 'from' and moved to a new position range.
+ * @param from The initial range of the moving selection.
+ * @param to The result range after moving the initial range.
+ * @param origin The original target range.
+ * @param remain "The range subtracted from the initial range by 'from'.
+ * @returns
+ */
+// eslint-disable-next-line
+function getMoveNewRange(
+    moveEdge: Nullable<OriginRangeEdgeType>,
+    result: IRange,
+    from: IRange,
+    to: IRange,
+    origin: IRange,
+    remain: IRange
+) {
+    const { startRow, endRow, startColumn, endColumn } = result;
 
     const {
-        fromRange: { startRow: fromStartRow, endRow: fromEndRow },
-        toRange: { startRow: toStartRow, endRow: toEndRow },
-    } = params;
-
-    const unitId = workbook.getUnitId();
-    const worksheet = workbook.getActiveSheet();
-    if (!worksheet) return null;
-
-    const sheetId = worksheet.getSheetId();
-
-    const from = {
         startRow: fromStartRow,
-        startColumn: 0,
+        startColumn: fromStartColumn,
         endRow: fromEndRow,
-        endColumn: worksheet.getColumnCount() - 1,
-        rangeType: RANGE_TYPE.ROW,
-    };
-    const to = {
-        startRow: toStartRow,
-        startColumn: 0,
-        endRow: toEndRow,
-        endColumn: worksheet.getColumnCount() - 1,
-        rangeType: RANGE_TYPE.ROW,
-    };
+        endColumn: fromEndColumn,
+        rangeType: fromRangeType = RANGE_TYPE.NORMAL,
+    } = from;
 
-    return {
-        type: FormulaReferenceMoveType.MoveRows,
-        from,
-        to,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefMoveCols(command: ICommandInfo<IMoveColsCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
+    const { startRow: toStartRow, startColumn: toStartColumn, endRow: toEndRow, endColumn: toEndColumn } = to;
 
     const {
-        fromRange: { startColumn: fromStartCol, endColumn: fromEndCol },
-        toRange: { startColumn: toStartCol, endColumn: toEndCol },
-    } = params;
+        startRow: remainStartRow,
+        endRow: remainEndRow,
+        startColumn: remainStartColumn,
+        endColumn: remainEndColumn,
+    } = remain;
 
-    const unitId = workbook.getUnitId();
-    const worksheet = workbook.getActiveSheet();
-    if (!worksheet) return null;
+    const {
+        startRow: originStartRow,
+        endRow: originEndRow,
+        startColumn: originStartColumn,
+        endColumn: originEndColumn,
+    } = origin;
 
-    const sheetId = worksheet.getSheetId();
+    const newRange = { ...origin };
 
-    const from = {
-        startRow: 0,
-        startColumn: fromStartCol,
-        endRow: worksheet.getRowCount() - 1,
-        endColumn: fromEndCol,
-        rangeType: RANGE_TYPE.COLUMN,
-    };
-    const to = {
-        startRow: 0,
-        startColumn: toStartCol,
-        endRow: worksheet.getRowCount() - 1,
-        endColumn: toEndCol,
-        rangeType: RANGE_TYPE.COLUMN,
-    };
+    if (moveEdge === OriginRangeEdgeType.UP) {
+        if (startColumn === originStartColumn && endColumn === originEndColumn) {
+            if (startRow < originStartRow) {
+                newRange.startRow = startRow;
+            } else if (startRow >= originEndRow) {
+                newRange.endRow -= fromEndRow + 1 - originStartRow;
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else if (moveEdge === OriginRangeEdgeType.DOWN) {
+        if (startColumn === originStartColumn && endColumn === originEndColumn) {
+            if (endRow > originEndRow) {
+                newRange.endRow = endRow;
+            } else if (endRow <= originStartRow) {
+                newRange.startRow += originEndRow - fromStartRow + 1;
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else if (moveEdge === OriginRangeEdgeType.LEFT) {
+        if (startRow === originStartRow && endRow === originEndRow) {
+            if (startColumn < originStartColumn) {
+                newRange.startColumn = startColumn;
+            } else if (startColumn >= originEndColumn) {
+                newRange.endColumn -= fromEndColumn + 1 - originStartColumn;
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else if (moveEdge === OriginRangeEdgeType.RIGHT) {
+        if (startRow === originStartRow && endRow === originEndRow) {
+            if (endColumn > originEndColumn) {
+                newRange.endColumn = endColumn;
+            } else if (endColumn <= originStartColumn) {
+                newRange.startColumn += originEndColumn - fromStartColumn + 1;
+            } else {
+                return;
+            }
+        } else {
+            return;
+        }
+    } else if (moveEdge === OriginRangeEdgeType.ALL) {
+        newRange.startRow = startRow;
+        newRange.startColumn = startColumn;
+        newRange.endRow = endRow;
+        newRange.endColumn = endColumn;
+    } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
+        if (from.endRow < originStartRow) {
+            if (toStartRow >= originStartRow) {
+                newRange.startRow -= fromEndRow - fromStartRow + 1;
+            }
+            if (toStartRow >= originEndRow) {
+                newRange.endRow -= fromEndRow - fromStartRow + 1;
+            }
+        } else if (from.startRow > originEndRow) {
+            if (toEndRow <= originEndRow) {
+                newRange.endRow += fromEndRow - fromStartRow + 1;
+            }
+            if (toEndRow <= originStartRow) {
+                newRange.startRow += fromEndRow - fromStartRow + 1;
+            }
+        }
+    } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
+        if (from.endColumn < originStartColumn) {
+            if (toStartColumn >= originStartColumn) {
+                newRange.startColumn -= fromEndColumn - fromStartColumn + 1;
+            }
+            if (toStartColumn >= originEndColumn) {
+                newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
+            }
+        } else if (from.startColumn > originEndColumn) {
+            if (toEndColumn <= originEndColumn) {
+                newRange.endColumn += fromEndColumn - fromStartColumn + 1;
+            }
+            if (toEndColumn <= originStartColumn) {
+                newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+            }
+        }
+    } else if (
+        ((toStartColumn <= remainEndColumn + 1 && toEndColumn >= originEndColumn) ||
+           (toStartColumn <= originStartColumn && toEndColumn >= remainStartColumn - 1)) &&
+       toStartRow <= originStartRow &&
+       toEndRow >= originEndRow
+    ) {
+        newRange.startRow = startRow;
+        newRange.startColumn = startColumn;
+        newRange.endRow = endRow;
+        newRange.endColumn = endColumn;
+    } else if (
+        ((toStartRow <= remainEndRow + 1 && toEndRow >= originEndRow) ||
+           (toStartRow <= originStartRow && toEndRow >= remainStartRow - 1)) &&
+       toStartColumn <= originStartColumn &&
+       toEndColumn >= originEndColumn
+    ) {
+        newRange.startRow = startRow;
+        newRange.startColumn = startColumn;
+        newRange.endRow = endRow;
+        newRange.endColumn = endColumn;
+    }
 
-    return {
-        type: FormulaReferenceMoveType.MoveCols,
-        from,
-        to,
-        unitId,
-        sheetId,
-    };
+    return newRange;
 }
 
-function handleRefInsertRow(command: ICommandInfo<IInsertRowCommandParams>) {
-    const { params } = command;
-    if (!params) return null;
+/**
+ * Determine the range of the moving selection,
+ * and check if it is at the edge of the reference range of the formula.
+ * @param originRange
+ * @param fromRange
+ */
+// eslint-disable-next-line
+function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
+    const { startRow, startColumn, endRow, endColumn } = originRange;
 
-    const { range, unitId, subUnitId } = params;
-    return {
-        type: FormulaReferenceMoveType.InsertRow,
-        range,
-        unitId,
-        sheetId: subUnitId,
-    };
-}
+    const {
+        startRow: fromStartRow,
+        startColumn: fromStartColumn,
+        endRow: fromEndRow,
+        endColumn: fromEndColumn,
+    } = fromRange;
 
-function handleRefInsertCol(command: ICommandInfo<IInsertColCommandParams>) {
-    const { params } = command;
-    if (!params) return null;
+    if (
+        startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn
+    ) {
+        return OriginRangeEdgeType.ALL;
+    }
 
-    const { range, unitId, subUnitId } = params;
-    return {
-        type: FormulaReferenceMoveType.InsertColumn,
-        range,
-        unitId,
-        sheetId: subUnitId,
-    };
-}
+    if (
+        startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            startRow >= fromStartRow &&
+            startRow <= fromEndRow &&
+            endRow > fromEndRow
+    ) {
+        return OriginRangeEdgeType.UP;
+    }
 
-function handleRefInsertRangeMoveRight(command: ICommandInfo<InsertRangeMoveRightCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
+    if (
+        startColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            endRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startRow < fromStartRow
+    ) {
+        return OriginRangeEdgeType.DOWN;
+    }
 
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
+    if (
+        startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            startColumn >= fromStartColumn &&
+            startColumn <= fromEndColumn &&
+            endColumn > fromEndColumn
+    ) {
+        return OriginRangeEdgeType.LEFT;
+    }
 
-    return {
-        type: FormulaReferenceMoveType.InsertMoveRight,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefInsertRangeMoveDown(command: ICommandInfo<InsertRangeMoveDownCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.InsertMoveDown,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefRemoveRow(command: ICommandInfo<IRemoveRowColCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.RemoveRow,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefRemoveCol(command: ICommandInfo<IRemoveRowColCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.RemoveColumn,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefDeleteRangeMoveUp(command: ICommandInfo<IDeleteRangeMoveUpCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.DeleteMoveUp,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefDeleteRangeMoveLeft(command: ICommandInfo<IDeleteRangeMoveLeftCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { range } = params;
-    const { unitId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.DeleteMoveLeft,
-        range,
-        unitId,
-        sheetId,
-    };
-}
-
-function handleRefSetWorksheetName(command: ICommandInfo<ISetWorksheetNameCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { unitId, subUnitId, name } = params;
-
-    const { unitId: workbookId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.SetName,
-        unitId: unitId || workbookId,
-        sheetId: subUnitId || sheetId,
-        sheetName: name,
-    };
-}
-
-function handleRefRemoveWorksheet(command: ICommandInfo<IRemoveSheetCommandParams>, workbook: Workbook) {
-    const { params } = command;
-    if (!params) return null;
-
-    const { unitId, subUnitId } = params;
-
-    const { unitId: workbookId, sheetId } = getCurrentSheetInfo(workbook);
-
-    return {
-        type: FormulaReferenceMoveType.RemoveSheet,
-        unitId: unitId || workbookId,
-        sheetId: subUnitId || sheetId,
-    };
+    if (
+        startRow >= fromStartRow &&
+            endRow <= fromEndRow &&
+            endColumn >= fromStartColumn &&
+            endColumn <= fromEndColumn &&
+            startColumn < fromStartColumn
+    ) {
+        return OriginRangeEdgeType.RIGHT;
+    }
 }

@@ -22,19 +22,22 @@ import {
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { handleRefStringInfo, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, RemoveDefinedNameMutation, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { SheetInterceptorService } from '@univerjs/sheets';
-import type { IMutationInfo, Workbook } from '@univerjs/core';
-import type { IDefinedNameMapItem, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './utils/ref-range-formula';
-import { getReferenceMoveParams } from './utils/ref-range-move';
+import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
+import { getNewRangeByMoveParam } from './utils/ref-range-move';
+import { getReferenceMoveParams } from './utils/ref-range-param';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 
 @OnLifecycle(LifecycleStages.Rendered, DefinedNameUpdateController)
 export class DefinedNameUpdateController extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
 
     ) {
         super();
@@ -51,7 +54,15 @@ export class DefinedNameUpdateController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
                 getMutations: (command) => {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+                    if (workbook == null) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
                     const result = getReferenceMoveParams(workbook, command);
 
                     if (!result) {
@@ -61,15 +72,16 @@ export class DefinedNameUpdateController extends Disposable {
                         };
                     }
 
-                    return this._getUpdateDefinedNameMutations(result);
+                    return this._getUpdateDefinedNameMutations(workbook, result);
                 },
             })
         );
     }
 
-    private _getUpdateDefinedNameMutations(moveParams: IFormulaReferenceMoveParam) {
+    // eslint-disable-next-line max-lines-per-function
+    private _getUpdateDefinedNameMutations(workbook: Workbook, moveParams: IFormulaReferenceMoveParam) {
         const { type, unitId, sheetId } = moveParams;
-        const definedNames = this._definedNamesService.getDefinedNameMap(moveParams.unitId);
+        const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
 
         if (!definedNames) {
             return {
@@ -78,59 +90,150 @@ export class DefinedNameUpdateController extends Disposable {
             };
         }
 
-        // const
-
-        // Object.values(denifedNames).forEach((item) => {
-        //     const formulaOrRefString = item.formulaOrRefString;
-        // })
-
-        if (type === FormulaReferenceMoveType.RemoveSheet) {
-            return this._removeSheet(definedNames, unitId, sheetId);
-        }
-
-        return {
-            redos: [],
-            undos: [],
-        };
-    }
-
-    private _removeSheet(definedNames: IDefinedNameMapItem, unitId: string, subUnitId: string) {
         const redoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
         const undoMutations: IMutationInfo<ISetDefinedNameMutationParam>[] = [];
-        Array.from(Object.values(definedNames)).forEach((value) => {
-            const { formulaOrRefString } = value;
 
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (workbook == null) {
-                return;
+        // eslint-disable-next-line max-lines-per-function
+        Object.values(definedNames).forEach((item) => {
+            const { formulaOrRefString } = item;
+            const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaOrRefString);
+            if (sequenceNodes == null) {
+                return true;
             }
 
-                // Do not use localSheetId. localSheetId may be SCOPE_WORKBOOK_VALUE, which cannot indicate the sheet where the current defined name is located.
-            const { sheetName } = handleRefStringInfo(formulaOrRefString);
-            const sheetId = workbook.getSheetBySheetName(sheetName)?.getSheetId();
+            let shouldModify = false;
+            const refChangeIds: number[] = [];
+            for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+                const node = sequenceNodes[i];
+                if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+                    continue;
+                }
+                const { token } = node;
 
-            if (sheetId === subUnitId) {
-                redoMutations.push({
-                    id: RemoveDefinedNameMutation.id,
-                    params: {
-                        unitId,
-                        ...value,
-                    },
-                });
+                const sequenceGrid = deserializeRangeWithSheet(token);
 
-                undoMutations.push({
-                    id: SetDefinedNameMutation.id,
-                    params: {
+                const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+                const sequenceSheetId = workbook.getSheetBySheetName(sheetName)?.getSheetId() || '';
+
+                const sequenceUnitRangeWidthOffset: IUnitRangeWithOffset = {
+                    range,
+                    sheetId: sequenceSheetId,
+                    unitId: sequenceUnitId,
+                    sheetName,
+                    refOffsetX: 0,
+                    refOffsetY: 0,
+                };
+
+                let newRefString: Nullable<string> = null;
+
+                if (type === FormulaReferenceMoveType.RemoveSheet) {
+                    const { redoMutation, undoMutation } = this._removeSheet(workbook, item, unitId, sheetId);
+                    if (redoMutation && undoMutation) {
+                        redoMutations.push(redoMutation);
+                        undoMutations.push(undoMutation);
+                    }
+                } else if (type === FormulaReferenceMoveType.SetName) {
+                    const {
+                        sheetId: userSheetId,
+                        sheetName: newSheetName,
+                    } = moveParams;
+                    if (newSheetName == null) {
+                        continue;
+                    }
+
+                    if (sequenceSheetId == null || sequenceSheetId.length === 0) {
+                        continue;
+                    }
+
+                    if (userSheetId !== sequenceSheetId) {
+                        continue;
+                    }
+
+                    newRefString = serializeRangeToRefString({
+                        range,
+                        sheetName: newSheetName,
+                        unitId: sequenceUnitId,
+                    });
+                } else {
+                    newRefString = getNewRangeByMoveParam(
+                        sequenceUnitRangeWidthOffset,
+                        moveParams,
                         unitId,
-                        ...value,
-                    },
-                });
+                        sheetId
+                    );
+                }
+
+                if (newRefString != null) {
+                    sequenceNodes[i] = {
+                        ...node,
+                        token: newRefString,
+                    };
+                    shouldModify = true;
+                    refChangeIds.push(i);
+                }
             }
+
+            if (!shouldModify) {
+                return true;
+            }
+
+            const newSequenceString = generateStringWithSequence(updateRefOffset(sequenceNodes, refChangeIds));
+
+            const redoMutation = {
+                id: SetDefinedNameMutation.id,
+                params: {
+                    unitId,
+                    ...item,
+                    formulaOrRefString: newSequenceString,
+                },
+            };
+            redoMutations.push(redoMutation);
+
+            const undoMutation = {
+                id: SetDefinedNameMutation.id,
+                params: {
+                    unitId,
+                    ...item,
+                },
+            };
+
+            undoMutations.push(undoMutation);
         });
 
         return {
             redos: redoMutations,
             undos: undoMutations,
+        };
+    }
+
+    private _removeSheet(workbook: Workbook, item: IDefinedNamesServiceParam, unitId: string, subUnitId: string) {
+        const { formulaOrRefString } = item;
+        const sheetId = this._definedNamesService.getWorksheetByRef(unitId, formulaOrRefString)?.getSheetId();
+
+        let redoMutation: IMutationInfo<ISetDefinedNameMutationParam> | null = null;
+        let undoMutation: IMutationInfo<ISetDefinedNameMutationParam> | null = null;
+
+        if (sheetId === subUnitId) {
+            redoMutation = {
+                id: RemoveDefinedNameMutation.id,
+                params: {
+                    unitId,
+                    ...item,
+                },
+            };
+
+            undoMutation = {
+                id: SetDefinedNameMutation.id,
+                params: {
+                    unitId,
+                    ...item,
+                },
+            };
+        }
+
+        return {
+            redoMutation,
+            undoMutation,
         };
     }
 }

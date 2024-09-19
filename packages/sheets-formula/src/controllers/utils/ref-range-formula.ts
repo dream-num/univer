@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle } from '@univerjs/core';
+import { deserializeRangeWithSheet, type IFormulaData, type IFormulaDataItem, type IRangeChange, type ISequenceNode, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import type { IFormulaData, IFormulaDataItem, IRangeChange } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
@@ -581,3 +581,62 @@ export function isFormulaDataItem(cell: IFormulaDataItem) {
     return false;
 }
 
+export function checkIsSameUnitAndSheet(
+    userUnitId: string,
+    userSheetId: string,
+    currentFormulaUnitId: string,
+    currentFormulaSheetId: string,
+    sequenceRangeUnitId: string,
+    sequenceRangeSheetId: string
+) {
+    if (
+        (sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
+        (sequenceRangeSheetId == null || sequenceRangeSheetId.length === 0)
+    ) {
+        if (userUnitId === currentFormulaUnitId && userSheetId === currentFormulaSheetId) {
+            return true;
+        }
+    } else if (
+        (userUnitId === sequenceRangeUnitId || sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
+        userSheetId === sequenceRangeSheetId
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
+export function updateRefOffset(
+    sequenceNodes: Array<string | ISequenceNode>,
+    refChangeIds: number[],
+    refOffsetX: number = 0,
+    refOffsetY: number = 0
+) {
+    const newSequenceNodes: Array<string | ISequenceNode> = [];
+    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
+        const node = sequenceNodes[i];
+        if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE || refChangeIds.includes(i)) {
+            newSequenceNodes.push(node);
+            continue;
+        }
+
+        const { token } = node;
+
+        const sequenceGrid = deserializeRangeWithSheet(token);
+
+        const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+
+        const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
+
+        newSequenceNodes.push({
+            ...node,
+            token: serializeRangeToRefString({
+                range: newRange,
+                unitId: sequenceUnitId,
+                sheetName,
+            }),
+        });
+    }
+
+    return newSequenceNodes;
+}

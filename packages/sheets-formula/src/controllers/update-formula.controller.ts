@@ -23,24 +23,11 @@ import type {
     Workbook } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
     IInsertSheetMutationParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
-    IRemoveRowColCommandParams,
-    IRemoveSheetCommandParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
-    ISetWorksheetNameCommandParams,
 } from '@univerjs/sheets';
 
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 import {
     Direction,
     Disposable,
@@ -54,7 +41,6 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -67,6 +53,7 @@ import { deserializeRangeWithSheet,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import {
     ClearSelectionFormatCommand,
     EffectRefRangId,
@@ -89,10 +76,15 @@ import {
     SetStyleCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+
 import { map } from 'rxjs';
+
+
 import { removeFormulaData } from './utils/offset-formula-data';
 import { formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
-import { getReferenceMoveParams } from './utils/ref-range-move';
+
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import { getReferenceMoveParams } from './utils/ref-range-param';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;

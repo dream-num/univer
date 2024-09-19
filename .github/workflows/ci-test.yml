@@ -24,7 +24,6 @@ jobs:
             - name: 🩺 Run test
               run: pnpm coverage
 
-            # TODO: cross fork PR will not trigger this action
             - name: 🧬 Report coverage
               uses: codecov/codecov-action@v3
               env:
@@ -32,10 +31,6 @@ jobs:
 
     eslint:
         runs-on: ubuntu-latest
-
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout
@@ -49,10 +44,6 @@ jobs:
 
     typecheck:
         runs-on: ubuntu-latest
-
-        env:
-            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
         steps:
             - name: Checkout

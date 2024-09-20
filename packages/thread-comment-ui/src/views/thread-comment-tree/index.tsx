@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import React, { useEffect, useRef, useState } from 'react';
-import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
-import { ICommandService, type IUser, LocaleService, Tools, type UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { useObservable } from '@univerjs/ui';
+import { generateRandomId, useDependency } from '@univerjs/core';
+import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Dropdown, Menu, MenuItem } from '@univerjs/design';
+import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { useObservable } from '@univerjs/ui';
 import cs from 'clsx';
-import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
+import React, { useEffect, useRef, useState } from 'react';
+import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
+import { getDT } from '../../common/utils';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
-import { getDT } from '../../common/utils';
-import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import styles from './index.module.less';
+import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 
 export interface IThreadCommentTreeProps {
     id?: string;
@@ -229,6 +229,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             }],
         ...(comments?.children ?? []) as IThreadComment[],
     ];
+    const scroller = useRef<HTMLDivElement>(null);
     const handleResolve: React.MouseEventHandler<HTMLDivElement> = (e) => {
         e.stopPropagation();
         if (!resolved) {
@@ -322,7 +323,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     )
                     : null}
             </div>
-            <div className={styles.threadCommentContent}>
+            <div className={styles.threadCommentContent} ref={scroller}>
                 {renderComments.map(
                     (item) => (
                         <ThreadCommentItem
@@ -369,12 +370,12 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                             ref={editorRef}
                             unitId={unitId}
                             subUnitId={subUnitId}
-                            onSave={({ text, attachments }) => {
+                            onSave={async ({ text, attachments }) => {
                                 const comment: IThreadComment = {
                                     text,
                                     attachments,
                                     dT: getDT(),
-                                    id: Tools.generateRandomId(),
+                                    id: generateRandomId(),
                                     ref: refStr!,
                                     personId: currentUser?.userID!,
                                     parentId: comments?.root.id,
@@ -387,7 +388,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                     return;
                                 }
 
-                                commandService.executeCommand(
+                                await commandService.executeCommand(
                                     AddCommentCommand.id,
                                     {
                                         unitId,
@@ -395,6 +396,9 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                         comment,
                                     } as IAddCommentCommandParams
                                 );
+                                if (scroller.current) {
+                                    scroller.current.scrollTop = scroller.current.scrollHeight;
+                                }
                             }}
                             autoFocus={autoFocus || (!comments)}
                             onCancel={() => {

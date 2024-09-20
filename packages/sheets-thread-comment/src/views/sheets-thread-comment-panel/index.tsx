@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { singleReferenceToGrid } from '@univerjs/engine-formula';
+import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
+import type { Workbook } from '@univerjs/core';
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { singleReferenceToGrid } from '@univerjs/engine-formula';
-import { IMarkSelectionService } from '@univerjs/sheets-ui';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 

@@ -44,6 +44,7 @@ export { isReferenceString } from './basics/regex';
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export { type ISetArrayFormulaDataMutationParams, SetArrayFormulaDataMutation } from './commands/mutations/set-array-formula-data.mutation';
 export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
+export { SetDefinedNameMutationFactory } from './commands/mutations/set-defined-name.mutation';
 export { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from './commands/mutations/set-feature-calculation.mutation';
 export {
     type ISetFormulaCalculationNotificationMutation,
@@ -117,8 +118,10 @@ export { FUNCTION_NAMES_ENGINEERING } from './functions/engineering/function-nam
 export { functionFinancial } from './functions/financial/function-map';
 export { FUNCTION_NAMES_FINANCIAL } from './functions/financial/function-names';
 export { functionInformation } from './functions/information/function-map';
+
 export { FUNCTION_NAMES_INFORMATION } from './functions/information/function-names';
 export { functionLogical } from './functions/logical/function-map';
+
 export { FUNCTION_NAMES_LOGICAL } from './functions/logical/function-names';
 export { functionLookup } from './functions/lookup/function-map';
 export { FUNCTION_NAMES_LOOKUP } from './functions/lookup/function-names';

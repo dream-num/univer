@@ -35,6 +35,7 @@ export enum FormulaReferenceMoveType {
     InsertMoveRight, // range
     SetName,
     RemoveSheet,
+    SetDefinedName, // update defined name
 }
 
 export interface IFormulaReferenceMoveParam {
@@ -45,6 +46,8 @@ export interface IFormulaReferenceMoveParam {
     from?: IRange;
     to?: IRange;
     sheetName?: string;
+    definedNameId?: string; // defined name id
+    definedName?: string; // new defined name
 }
 
 export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,

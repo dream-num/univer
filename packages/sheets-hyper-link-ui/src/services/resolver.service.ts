@@ -126,14 +126,34 @@ export class SheetsHyperLinkResolverService {
         }
         const unitId = workbook.getUnitId();
         if (rangeid) {
-            const canNavigate = this.navigateToDefineName(unitId, rangeid);
-            if (!canNavigate) {
+            const item = this._definedNamesService.getValueById(unitId, rangeid);
+            if (!item) {
+                return;
+            }
+
+            const { formulaOrRefString } = item;
+            const worksheet = this._definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);
+
+            if (!worksheet) {
                 this._messageService.show({
-                    content: this._localeService.t('hyperLink.message.hiddenRange'),
+                    content: this._localeService.t('hyperLink.message.noSheet'),
                     type: MessageType.Error,
                 });
                 return;
             }
+
+            const isHidden = worksheet.isSheetHidden();
+
+            // The worksheet may be hidden
+            if (isHidden) {
+                this._messageService.show({
+                    content: this._localeService.t('hyperLink.message.hiddenSheet'),
+                    type: MessageType.Error,
+                });
+                return;
+            }
+
+            this.navigateToDefineName(unitId, rangeid);
         }
 
         if (!gid) {
@@ -280,7 +300,8 @@ export class SheetsHyperLinkResolverService {
     }
 
     async navigateToDefineName(unitId: string, rangeid: string) {
-        return this._definedNamesService.focusRange(unitId, rangeid);
+        this._definedNamesService.focusRange(unitId, rangeid);
+        return true;
     }
 
     async navigateToOtherWebsite(url: string) {

@@ -28,7 +28,6 @@ import type {
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
     IReorderRangeMutationParams,
-    ISetDefinedNameCommandParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
@@ -262,17 +261,6 @@ export class ActiveDirtyController extends Disposable {
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as ISetDefinedNameMutationParam;
                 return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
-            },
-        });
-
-        this._activeDirtyManagerService.register(SetDefinedNameCommand.id, {
-            commandId: SetDefinedNameCommand.id,
-            getDirtyData: (command: ICommandInfo) => {
-                const params = command.params as ISetDefinedNameCommandParams;
-                const { oldDefinedName, newDefinedName } = params;
-                return { dirtyDefinedNameMap: this._getDefinedNameMutation({ ...newDefinedName, name: oldDefinedName.name }) };
-
-                // return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
             },
         });
     }

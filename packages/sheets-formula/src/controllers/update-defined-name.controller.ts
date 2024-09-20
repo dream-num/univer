@@ -22,8 +22,8 @@ import {
     OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheet, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, RemoveDefinedNameMutation, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { SheetInterceptorService } from '@univerjs/sheets';
+import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
@@ -54,6 +54,14 @@ export class DefinedNameUpdateController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
                 getMutations: (command) => {
+                    // Exclude processing in getReferenceMoveParams
+                    if (command.id === SetDefinedNameCommand.id) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
                     const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
                     if (workbook == null) {
@@ -127,11 +135,7 @@ export class DefinedNameUpdateController extends Disposable {
                 let newRefString: Nullable<string> = null;
 
                 if (type === FormulaReferenceMoveType.RemoveSheet) {
-                    const { redoMutation, undoMutation } = this._removeSheet(workbook, item, unitId, sheetId);
-                    if (redoMutation && undoMutation) {
-                        redoMutations.push(redoMutation);
-                        undoMutations.push(undoMutation);
-                    }
+                    newRefString = this._removeSheet(item, unitId, sheetId);
                 } else if (type === FormulaReferenceMoveType.SetName) {
                     const {
                         sheetId: userSheetId,
@@ -196,7 +200,6 @@ export class DefinedNameUpdateController extends Disposable {
                     ...item,
                 },
             };
-
             undoMutations.push(undoMutation);
         });
 
@@ -206,34 +209,14 @@ export class DefinedNameUpdateController extends Disposable {
         };
     }
 
-    private _removeSheet(workbook: Workbook, item: IDefinedNamesServiceParam, unitId: string, subUnitId: string) {
+    private _removeSheet(item: IDefinedNamesServiceParam, unitId: string, subUnitId: string) {
         const { formulaOrRefString } = item;
         const sheetId = this._definedNamesService.getWorksheetByRef(unitId, formulaOrRefString)?.getSheetId();
 
-        let redoMutation: IMutationInfo<ISetDefinedNameMutationParam> | null = null;
-        let undoMutation: IMutationInfo<ISetDefinedNameMutationParam> | null = null;
-
         if (sheetId === subUnitId) {
-            redoMutation = {
-                id: RemoveDefinedNameMutation.id,
-                params: {
-                    unitId,
-                    ...item,
-                },
-            };
-
-            undoMutation = {
-                id: SetDefinedNameMutation.id,
-                params: {
-                    unitId,
-                    ...item,
-                },
-            };
+            return ErrorType.REF;
         }
 
-        return {
-            redoMutation,
-            undoMutation,
-        };
+        return null;
     }
 }

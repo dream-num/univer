@@ -35,9 +35,9 @@ import {
     PLUGIN_CONFIG_KEY_REMOTE,
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
-import { DefinedNameUpdateController } from './controllers/defined-name-update.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+import { DefinedNameUpdateController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';

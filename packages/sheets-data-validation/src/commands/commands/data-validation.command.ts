@@ -216,9 +216,8 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
         if (!currentRule) {
             return false;
         }
-        const oldRanges = currentRule.ranges;
         const matrix = sheetDataValidationModel.getRuleObjectMatrix(unitId, subUnitId).clone();
-        matrix.updateRange(ruleId, oldRanges, ranges);
+        matrix.updateRange(ruleId, ranges);
         const diffs = matrix.diff(sheetDataValidationModel.getRules(unitId, subUnitId));
 
         const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs, accessor);

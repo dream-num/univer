@@ -394,7 +394,7 @@ describe('mergeRanges', () => {
                 endRow: 10,
             },
             {
-                startColumn: 6,
+                startColumn: 4,
                 startRow: 8,
                 endColumn: 7,
                 endRow: 8,

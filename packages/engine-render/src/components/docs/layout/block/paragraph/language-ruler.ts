@@ -16,10 +16,10 @@
 
 import type { IParagraph } from '@univerjs/core';
 
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
 import { getFontCreateConfig } from '../../tools';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 
@@ -35,19 +35,27 @@ export function otherHandler(
 ) {
     const glyphGroup = [];
     let step = 0;
+    let src = charArray;
 
-    for (let i = 0; i < charArray.length; i++) {
-        const newChar = charArray[i];
+    while (src.length) {
+        const char = src.match(/^[\s\S]/gu)?.[0];
 
-        if (hasSpace(newChar) || startWithEmoji(charArray.substring(i))) {
+        if (char == null) {
             break;
         }
 
-        const config = getFontCreateConfig(index + i, viewModel, paragraphNode, sectionBreakConfig, paragraph);
-        const glyph = createSkeletonLetterGlyph(newChar, config);
+        if (hasSpace(char) || startWithEmoji(charArray.substring(step))) {
+            break;
+        }
+
+        const config = getFontCreateConfig(index + step, viewModel, paragraphNode, sectionBreakConfig, paragraph);
+        const glyph = createSkeletonLetterGlyph(char, config);
 
         glyphGroup.push(glyph);
-        step++;
+
+        src = src.substring(char.length);
+
+        step += char.length;
     }
 
     return {

@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
-import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { Lang } from '../../hyphenation/lang';
 import { LineBreaker } from '../../line-breaker';
+import { BreakPointType } from '../../line-breaker/break';
+import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
+import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
+import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
 import { tabLineBreakExtension } from '../../line-breaker/extensions/tab-linebreak-extension';
 import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
-import type { ILayoutContext } from '../../tools';
+import { getBoundingBox } from '../../model/line';
+import { fontLibrary } from '../../shaping-engine/font-library';
+import { textShape } from '../../shaping-engine/text-shaping';
+import { prepareParagraphBody } from '../../shaping-engine/utils';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
+import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
-import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
-import { textShape } from '../../shaping-engine/text-shaping';
-import { fontLibrary } from '../../shaping-engine/font-library';
-import { prepareParagraphBody } from '../../shaping-engine/utils';
-import { LineBreakerHyphenEnhancer } from '../../line-breaker/enhancers/hyphen-enhancer';
-import { Lang } from '../../hyphenation/lang';
-import { BreakPointType } from '../../line-breaker/break';
-import { getBoundingBox } from '../../model/line';
-import { customBlockLineBreakExtension } from '../../line-breaker/extensions/custom-block-linebreak-extension';
-import { LineBreakerLinkEnhancer } from '../../line-breaker/enhancers/link-enhancer';
-import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
+import type { ILayoutContext } from '../../tools';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
 // Requirements, section 3.1.6.1 Punctuation Adjustment Space, and Japanese Layout
@@ -292,7 +292,6 @@ export function shaping(
 
                     src = src.substring(step);
                 } else {
-                    // TODO: 处理一个单词超过 page width 情况
                     const { step, glyphGroup } = otherHandler(
                         i,
                         src,

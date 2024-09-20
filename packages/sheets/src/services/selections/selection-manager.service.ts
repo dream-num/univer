@@ -129,7 +129,7 @@ export class SheetsSelectionsService extends RxDisposable {
         }
 
         const { unitId, sheetId } = current;
-        this._ensureWorkbookSelection(unitId).setSelections(sheetId, unitIdOrSelections, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
+        this._ensureWorkbookSelection(unitId).setSelections(sheetId, unitIdOrSelections || selectionDatas, worksheetIdOrType as SelectionMoveType ?? SelectionMoveType.MOVE_END);
     }
 
     clearCurrentSelections(): void {

@@ -169,7 +169,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${cell.v}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
                             customRanges: [{
                                 startIndex: 0,
-                                endIndex: cell.v.length,
+                                endIndex: cell.v.length + 1,
                                 rangeId: generateRandomId(),
                                 rangeType: CustomRangeType.HYPERLINK,
                                 properties: {

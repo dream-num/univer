@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
-import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
+import type { ICommand } from '@univerjs/core';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const ShowAddSheetCommentModalOperation: ICommand = {

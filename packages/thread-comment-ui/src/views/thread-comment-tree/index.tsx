@@ -16,7 +16,7 @@
 
 import { generateRandomId, useDependency } from '@univerjs/core';
 import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { Dropdown, Menu, MenuItem } from '@univerjs/design';
+import { Dropdown, Menu, MenuItem, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
@@ -298,9 +298,11 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    <div className={styles.threadCommentTitlePositionText}>
-                        {title}
-                    </div>
+                    <Tooltip showIfEllipsis title={title}>
+                        <div className={styles.threadCommentTitlePositionText}>
+                            {title}
+                        </div>
+                    </Tooltip>
                 </div>
                 {comments
                     ? (

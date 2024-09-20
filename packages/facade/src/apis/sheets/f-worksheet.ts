@@ -15,9 +15,10 @@
  */
 
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 
+import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
@@ -86,17 +87,82 @@ export class FWorksheet {
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
     }
 
-    getRange(row: number, col: number, height?: number, width?: number): FRange {
-        const range: IRange = {
-            startRow: row,
-            endRow: row + (height ?? 1) - 1,
-            startColumn: col,
-            endColumn: col + (width ?? 1) - 1,
-            unitId: this._workbook.getUnitId(),
-            sheetId: this._worksheet.getSheetId(),
-        };
+    /**
+     * Returns a Range object representing a single cell at the specified row and column.
+     * @param row The row index of the cell.
+     * @param column The column index of the cell.
+     * @returns A Range object representing the specified cell.
+     */
+    getRange(row: number, column: number): FRange;
 
-        return this._injector.createInstance(FRange, this._workbook, this._worksheet, range);
+    /**
+     * Returns a Range object representing a range starting at the specified row and column, with the specified number of rows.
+     * @param row The starting row index of the range.
+     * @param column The starting column index of the range.
+     * @param numRows The number of rows in the range.
+     * @returns A Range object representing the specified range.
+     */
+    getRange(row: number, column: number, numRows: number): FRange;
+
+    /**
+     * Returns a Range object representing a range starting at the specified row and column, with the specified number of rows and columns.
+     * @param row The starting row index of the range.
+     * @param column The starting column index of the range.
+     * @param numRows The number of rows in the range.
+     * @param numColumns The number of columns in the range.
+     * @returns A Range object representing the specified range.
+     */
+    getRange(row: number, column: number, numRows: number, numColumns: number): FRange;
+
+    /**
+     * Returns a Range object specified by A1 notation.
+     * @param a1Notation A string representing a range in A1 notation.
+     * @returns A Range object representing the specified range.
+     */
+    getRange(a1Notation: string): FRange;
+
+    getRange(rowOrA1Notation: number | string, column?: number, numRows?: number, numColumns?: number): FRange {
+        let range: IRange;
+        let sheet: Worksheet;
+
+        if (typeof rowOrA1Notation === 'string') {
+            // A1 notation
+            const { range: parsedRange, sheetName } = deserializeRangeWithSheet(rowOrA1Notation);
+
+            const rangeSheet = sheetName ? this._workbook.getSheetBySheetName(sheetName) : this._worksheet;
+            if (!rangeSheet) {
+                throw new Error('Range not found');
+            }
+            sheet = rangeSheet;
+
+            range = {
+                ...parsedRange,
+                unitId: this._workbook.getUnitId(),
+                sheetId: sheet.getSheetId(),
+                // Use the current range instead of the future actual range to match Apps Script behavior.
+                // Users can create the latest range in real time when needed.
+                rangeType: RANGE_TYPE.NORMAL,
+                startRow: parsedRange.rangeType === RANGE_TYPE.COLUMN ? 0 : parsedRange.startRow,
+                endRow: parsedRange.rangeType === RANGE_TYPE.COLUMN ? sheet.getMaxRows() - 1 : parsedRange.endRow,
+                startColumn: parsedRange.rangeType === RANGE_TYPE.ROW ? 0 : parsedRange.startColumn,
+                endColumn: parsedRange.rangeType === RANGE_TYPE.ROW ? sheet.getMaxColumns() - 1 : parsedRange.endColumn,
+            };
+        } else if (typeof rowOrA1Notation === 'number' && column !== undefined) {
+            sheet = this._worksheet;
+            // Range
+            range = {
+                startRow: rowOrA1Notation,
+                endRow: rowOrA1Notation + (numRows ?? 1) - 1,
+                startColumn: column,
+                endColumn: column + (numColumns ?? 1) - 1,
+                unitId: this._workbook.getUnitId(),
+                sheetId: this._worksheet.getSheetId(),
+            };
+        } else {
+            throw new Error('Invalid range specification');
+        }
+
+        return this._injector.createInstance(FRange, this._workbook, sheet, range);
     }
 
     /**

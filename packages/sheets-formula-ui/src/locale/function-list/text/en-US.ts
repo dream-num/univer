@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or a reference to a cell that contains the text you want to change. If text does not contain any full-width letters, text is not changed.' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array to return as text.' },
+            format: { name: 'format', detail: 'The format of the returned data. It can be one of two values: \n0 Default. Concise format that is easy to read. \n1 Strict format that includes escape characters and row delimiters. Generates a string that can be parsed when entered into the formula bar. Encapsulates returned strings in quotes except for Booleans, Numbers and Errors.' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number you want to convert to text, or a reference to a cell containing a number, or a formula that evaluates to a number.' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number between 1 and 255 specifying which character you want. The character is from the character set used by your computer.' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Any worksheet information from which you want to remove nonprintable characters.' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text for which you want the code of the first character.' },
         },
     },
     CONCAT: {
@@ -137,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or a reference to a cell that contains the text you want to change. If text does not contain any half-width English letters or katakana, text is not changed.' },
         },
     },
     DOLLAR: {

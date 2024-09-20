@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu tới một ô có chứa văn bản mà bạn muốn thay đổi. Nếu văn bản không chứa chữ nào có độ rộng toàn phần, thì văn bản không thay đổi.' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'mảng', detail: 'Mảng cần trả về dưới dạng văn bản.' },
+            format: { name: 'Định dạng của dữ', detail: 'Định dạng của dữ liệu trả về. Nó có thể là một trong hai giá trị: \n0 Mặc định. Định dạng ngắn gọn dễ đọc.\n1 Định dạng nghiêm ngặt bao gồm ký tự thoát và dấu tách hàng. Tạo một chuỗi có thể được phân tích khi nhập vào thanh công thức. Đóng gói các chuỗi trả về trong dấu ngoặc kép, ngoại trừ Booleans, Numbers và Errors.' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Là số mà bạn muốn chuyển sang văn bản hoặc tham chiếu đến ô có chứa số, hay công thức định trị thành số.' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Số từ 1 đến 255 xác định bạn muốn ký tự nào. Ký tự này nằm trong bộ ký tự mà máy tính của bạn dùng.' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Bất kỳ thông tin trang tính nào bạn muốn loại bỏ ký tự không in được khỏi đó.' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn mã của ký tự đầu tiên cho văn bản đó.' },
         },
     },
     CONCAT: {
@@ -137,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu tới một ô có chứa văn bản mà bạn muốn thay đổi. Nếu văn bản không chứa chữ Tiếng Anh có độ rộng bán phần hay katakana nào, thì văn bản không đổi.' },
         },
     },
     DOLLAR: {

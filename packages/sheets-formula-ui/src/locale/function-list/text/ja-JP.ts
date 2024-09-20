@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字列または変換する文字列を含むセルの参照を指定します。 文字列に全角文字が含まれない場合は、文字列は変換されません。' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '文字列として返す配列。' },
+            format: { name: '書式', detail: '返されるデータの形式。次の 2 つの値のいずれかを指定できます。\n0 既定。 読みやすい簡潔な形式。 \n1 エスケープ文字と行の区切り文字を含む厳格なフォーマット。 数式バーに入力したときに解析できる文字列を生成します。 返された文字列は、ブーリアン、数値、エラーを除き、引用符でカプセル化されます。' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '文字列に変換する数値、数値を含むセルの参照、または戻り値が数値となる数式を指定します。' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '変換する文字を表す 1 ～ 255 の範囲内の数値を指定します。 文字は、コンピューターで使用されている文字セットから返されます。' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '印刷できない文字を削除するワークシートの文字データを指定します。' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '先頭文字のコード番号を調べる文字列を指定します。' },
         },
     },
     CONCAT: {
@@ -137,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字列または変換する文字列を含むセルの参照を指定します。 文字列に半角の英数カナ文字が含まれない場合は、文字列は変更されません。' },
         },
     },
     DOLLAR: {

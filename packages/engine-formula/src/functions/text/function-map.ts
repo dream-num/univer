@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
+import { Arraytotext } from './arraytotext';
+import { Asc } from './asc';
+import { Bahttext } from './bahttext';
+import { Char } from './char';
+import { Clean } from './clean';
+import { Code } from './code';
 import { Concat } from './concat';
 import { Concatenate } from './concatenate';
+import { Dbcs } from './dbcs';
 import { FUNCTION_NAMES_TEXT } from './function-names';
 import { Leftb } from './leftb';
 import { Len } from './len';
@@ -32,8 +39,15 @@ import { Textbefore } from './textbefore';
 import { Textsplit } from './textsplit';
 
 export const functionText = [
+    [Asc, FUNCTION_NAMES_TEXT.ASC],
+    [Arraytotext, FUNCTION_NAMES_TEXT.ARRAYTOTEXT],
+    [Bahttext, FUNCTION_NAMES_TEXT.BAHTTEXT],
+    [Char, FUNCTION_NAMES_TEXT.CHAR],
+    [Clean, FUNCTION_NAMES_TEXT.CLEAN],
+    [Code, FUNCTION_NAMES_TEXT.CODE],
     [Concat, FUNCTION_NAMES_TEXT.CONCAT],
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
+    [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],

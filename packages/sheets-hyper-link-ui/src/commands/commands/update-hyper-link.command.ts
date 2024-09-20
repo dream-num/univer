@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -104,7 +104,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!replaceSelection) {
             return false;
         }
-        const newBody = TextX.apply(snapshot.body!, replaceSelection.textX.serialize());
+        const newBody = TextX.apply(Tools.deepClone(snapshot.body!), replaceSelection.textX.serialize());
 
         const redo = {
             id: SetRangeValuesMutation.id,

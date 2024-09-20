@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CustomRangeType, DataValidationType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import type { DocumentDataModel, IAccessor, ITextRange, Workbook } from '@univerjs/core';
-import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
-import { RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { map, mergeMap, Observable } from 'rxjs';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
+import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
+import { map, mergeMap, Observable } from 'rxjs';
+import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
+import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
 const getLinkDisable$ = (accessor: IAccessor) => {
     const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
@@ -55,61 +56,11 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
-            const cell = sheet.getCell(row, col);
-            if (cell?.f || cell?.si) {
-                return true;
-            }
-            const disables = [
-                DataValidationType.CHECKBOX,
-                DataValidationType.LIST,
-                DataValidationType.LIST_MULTIPLE,
-            ];
-
-            if (cell?.dataValidation && disables.includes(cell.dataValidation.rule.type)) {
-                return true;
-            }
-
-            return false;
+            return getShouldDisableCellLink(sheet, row, col);
         })
     );
 
     return disableRange$.pipe(mergeMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
-};
-
-export const shouldDisableAddLink = (accessor: IAccessor) => {
-    const textSelectionService = accessor.get(DocSelectionManagerService);
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    const textRanges = textSelectionService.getDocRanges();
-    if (!textRanges.length || textRanges.length > 1) {
-        return true;
-    }
-
-    const activeRange = textRanges[0];
-    const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-    if (!doc || !activeRange || activeRange.collapsed) {
-        return true;
-    }
-
-    const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
-    const paragraphs = body?.paragraphs;
-    if (!paragraphs) {
-        return true;
-    }
-
-    for (let i = 0, len = paragraphs.length; i < len; i++) {
-        const p = paragraphs[i];
-        if (activeRange.startOffset! <= p.startIndex && activeRange.endOffset! > p.startIndex) {
-            return true;
-        }
-
-        if (p.startIndex > activeRange.endOffset!) {
-            break;
-        }
-    }
-
-    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
-    // can't insert hyperlink in range contains other custom ranges
-    return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };
 
 const getZenLinkDisable$ = (accessor: IAccessor) => {
@@ -124,6 +75,19 @@ const getZenLinkDisable$ = (accessor: IAccessor) => {
         }),
         map((selection) => {
             if (!selection || selection.unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
+                return true;
+            }
+            const editorBridgeService = accessor.get(IEditorBridgeService);
+            const state = editorBridgeService.getEditCellState();
+            if (!state) {
+                return true;
+            }
+            const target = getSheetCommandTarget(univerInstanceService, { unitId: state.unitId, subUnitId: state.sheetId });
+            if (!target?.worksheet) {
+                return true;
+            }
+
+            if (getShouldDisableCellLink(target.worksheet, state.row, state.column)) {
                 return true;
             }
 

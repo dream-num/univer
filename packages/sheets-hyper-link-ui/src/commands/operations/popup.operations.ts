@@ -19,6 +19,7 @@ import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelections
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { getShouldDisableCurrentCellLink } from '../../utils';
 
 export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {
     row: number;
@@ -93,6 +94,9 @@ export const InsertHyperLinkToolbarOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'sheet.operation.insert-hyper-link-toolbar',
     handler(accessor) {
+        if (getShouldDisableCurrentCellLink(accessor)) {
+            return false;
+        }
         const commandService = accessor.get(ICommandService);
         const popupService = accessor.get(SheetsHyperLinkPopupService);
         if (popupService.currentEditing) {

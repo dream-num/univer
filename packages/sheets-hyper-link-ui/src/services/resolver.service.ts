@@ -145,7 +145,7 @@ export class SheetsHyperLinkResolverService {
     }
 
     buildHyperLink(unitId: string, sheetId: string, range?: string | IRange): string {
-        return `#${SheetHyperLinkType.SHEET}=${sheetId}}${range ? `${typeof range === 'string' ? SheetHyperLinkType.DEFINE_NAME : SheetHyperLinkType.RANGE}=${typeof range === 'string' ? range : serializeRange(range)}` : ''}`;
+        return `#${SheetHyperLinkType.SHEET}=${sheetId}${range ? `&${typeof range === 'string' ? SheetHyperLinkType.DEFINE_NAME : SheetHyperLinkType.RANGE}=${typeof range === 'string' ? range : serializeRange(range)}` : ''}`;
     }
 
     parseHyperLink(urlStr: string): ISheetHyperLinkInfo {

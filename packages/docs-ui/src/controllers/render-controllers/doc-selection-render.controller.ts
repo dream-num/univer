@@ -255,8 +255,6 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     }
 
     private _skeletonListener() {
-        let init = false;
-
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
             if (!skeleton) return;
@@ -264,21 +262,22 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             const { unitId } = this._context;
             const isInternalEditor = isInternalEditorID(unitId);
 
-            if (init || !isInternalEditorID(this._context.unitId)) {
-                // The initial cursor is set at the beginning of the document,
-                // and can be set to the previous cursor position in the future.
-                // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
-                if (!isInternalEditor) {
-                    this._docSelectionManagerService.replaceTextRanges([
-                        {
-                            startOffset: 0,
-                            endOffset: 0,
-                        },
-                    ], false);
-                }
+            // The initial cursor is set at the beginning of the document,
+            // and can be set to the previous cursor position in the future.
+            // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
+            if (!isInternalEditor) {
+                //TODO: @JOCS Only for docs. move to docs in the future.
+                this._docSelectionRenderService.focus();
+                this._docSelectionManagerService.replaceDocRanges([
+                    {
+                        startOffset: 0,
+                        endOffset: 0,
+                    },
+                ], {
+                    unitId,
+                    subUnitId: unitId,
+                }, false);
             }
-
-            init = true;
         }));
     }
 }

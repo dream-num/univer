@@ -100,7 +100,7 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    setCurrentSelection(param: IDocSelectionManagerSearchParam) {
+    __TEST_ONLY_setCurrentSelection(param: IDocSelectionManagerSearchParam) {
         this._currentSelection = param;
 
         this._refresh(param);
@@ -165,7 +165,7 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    add(textRanges: ITextRangeWithStyle[], isEditing = true) {
+    __TEST_ONLY_add(textRanges: ITextRangeWithStyle[], isEditing = true) {
         if (this._currentSelection == null) {
             return;
         }
@@ -269,21 +269,7 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     private _setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {
-        const { unitId, subUnitId } = this._currentSelection ?? {};
-        const { unitId: newUnitId, subUnitId: newSubUnitId } = param;
-
-        if (unitId !== newUnitId || subUnitId !== newSubUnitId) {
-            if (unitId && subUnitId) {
-                this._refreshSelection$.next({
-                    unitId,
-                    subUnitId,
-                    docRanges: [],
-                    isEditing: false,
-                });
-            }
-
-            this._currentSelection = param;
-        }
+        this._currentSelection = param;
     }
 
     private _getTextRanges(param: Nullable<IDocSelectionManagerSearchParam>) {

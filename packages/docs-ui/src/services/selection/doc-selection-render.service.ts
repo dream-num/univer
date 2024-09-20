@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, RxDisposable } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
@@ -100,17 +100,37 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
     private _editorFocusing = true;
+    // When the user switches editors, whether to clear the doc ranges.
+    private _reserveRanges = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
         this._initDOM();
         this._registerContainer();
         this._setSystemHighlightColorToStyle();
+        this._listenCurrentUnitChange();
+    }
+
+    private _listenCurrentUnitChange() {
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
+                if (documentModel == null) {
+                    return;
+                }
+
+                const unitId = documentModel.getUnitId();
+
+                if (unitId !== this._context.unitId && !this._reserveRanges) {
+                    this.removeAllRanges();
+                }
+            });
     }
 
     get activeViewPort() {
@@ -131,6 +151,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getSegmentPage() {
         return this._currentSegmentPage;
+    }
+
+    setReserveRangesStatus(status: boolean) {
+        this._reserveRanges = status;
     }
 
     private _setRangeStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
@@ -682,6 +706,20 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rectRangeList = newRanges;
     }
 
+    private _removeCollapsedTextRange() {
+        const oldTextRanges = this._rangeList;
+
+        this._rangeList = [];
+
+        for (const textRange of oldTextRanges) {
+            if (textRange.collapsed) {
+                textRange.dispose();
+            } else {
+                this._rangeList.push(textRange);
+            }
+        }
+    }
+
     private _removeAllRanges() {
         this._removeAllTextRanges();
         this._removeAllRectRanges();
@@ -1146,3 +1184,4 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onPointerDown$.complete();
     }
 }
+

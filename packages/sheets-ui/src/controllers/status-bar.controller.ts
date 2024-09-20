@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     debounce,
@@ -29,24 +28,25 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { ArrayValueObject, BaseValueObject, ISheetData } from '@univerjs/engine-formula';
 import {
     convertUnitDataToRuntime,
     FormulaDataModel,
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
 import {
     INumfmtService,
     SetRangeValuesMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import type { ICommandInfo, IRange, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { ArrayValueObject, BaseValueObject, ISheetData } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
 
-import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
+import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 
 export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
 
@@ -149,6 +149,15 @@ export class StatusBarController extends Disposable {
             });
 
         if (selections?.length) {
+            if (selections.length === 1) {
+                const selection = selections[0];
+                const { startRow: start, endRow: end, startColumn: startCol, endColumn: endCol } = selection;
+                const rowCount = end - start + 1;
+                const columnCount = endCol - startCol + 1;
+                if (rowCount * columnCount > 1000000) {
+                    return this._clearResult();
+                }
+            }
             const realSelections: IRange[] = [];
             selections.forEach((selection) => {
                 const { startRow: start, endRow: end } = selection;

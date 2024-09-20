@@ -15,10 +15,10 @@
  */
 
 import { UniverInstanceType } from '@univerjs/core';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
+import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, type IMenuItem, MenuItemType } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
-import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSortPermission } from '@univerjs/sheets';
 import { SortRangeAscCommand, SortRangeAscExtCommand, SortRangeAscExtInCtxMenuCommand, SortRangeAscInCtxMenuCommand, SortRangeCustomCommand, SortRangeCustomInCtxMenuCommand, SortRangeDescCommand, SortRangeDescExtCommand, SortRangeDescExtInCtxMenuCommand, SortRangeDescInCtxMenuCommand } from '../commands/commands/sheets-sort.command';
 
 export const SHEETS_SORT_MENU_ID = 'sheet.menu.sheets-sort';
@@ -47,6 +47,7 @@ export function sortRangeAscMenuFactory(_accessor: IAccessor): IMenuItem {
         icon: SHEETS_SORT_ASC_ICON,
         title: 'sheets-sort.general.sort-asc-cur',
         type: MenuItemType.BUTTON,
+        hidden$: getCurrentExclusiveRangeInterest$(_accessor),
     };
 }
 

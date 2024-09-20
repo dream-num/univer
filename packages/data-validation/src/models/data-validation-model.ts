@@ -145,12 +145,14 @@ export class DataValidationModel extends Disposable {
         if (oldRule) {
             return;
         }
-        this._ruleChange$.next({
-            rule,
-            type: 'add',
-            unitId,
-            subUnitId,
-            source,
+        setTimeout(() => {
+            this._ruleChange$.next({
+                rule,
+                type: 'add',
+                unitId,
+                subUnitId,
+                source,
+            });
         });
     }
 

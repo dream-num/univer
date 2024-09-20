@@ -381,9 +381,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._cellBgCacheMatrix = null as unknown as ObjectMatrix<boolean>;
-        this._cellBorderCacheMatrix = null as unknown as ObjectMatrix<boolean>;
-        this._overflowCache = null as unknown as ObjectMatrix<IRange>;
+        this._cellBgCacheMatrix.reset();
+        this._cellBorderCacheMatrix.reset();
+        this._overflowCache.reset();
 
         this._worksheetData = null as unknown as IWorksheetData;
         this._cellData = null as unknown as ObjectMatrix<Nullable<ICellData>>;
@@ -431,19 +431,14 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getFont(rowIndex: number, columnIndex: number): Nullable<IFontCacheItem> {
-        const fontCache = this.stylesCache.font;
+        const fontCache = this.stylesCache.fontMatrix;
         if (!fontCache) {
             return null;
         }
-
-        for (const font in fontCache) {
-            const fontMatrix = fontCache[font];
-            const fontItem = fontMatrix.getValue(rowIndex, columnIndex);
-            if (fontItem) {
-                return fontItem;
-            }
+        const fontItem = fontCache.getValue(rowIndex, columnIndex);
+        if (fontItem) {
+            return fontItem;
         }
-
         return null;
     }
 
@@ -1810,14 +1805,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         const { documentModel } = modelObject;
         if (documentModel == null) return;
 
-        const { fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
+        const { fontString: _fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
 
-        if (!this._stylesCache.font![fontString]) {
-            this._stylesCache.font![fontString] = new ObjectMatrix();
-        }
+        // if (!this._stylesCache.font![fontString]) {
+        //     this._stylesCache.font![fontString] = new ObjectMatrix();
+        // }
 
-        const fontFamilyMatrix: ObjectMatrix<IFontCacheItem> = this._stylesCache.font![fontString];
-        if (fontFamilyMatrix.getValue(row, col)) return;
+        // const fontFamilyMatrix: ObjectMatrix<IFontCacheItem> = this._stylesCache.font![fontString];
+        // if (fontFamilyMatrix.getValue(row, col)) return;
 
         const documentViewModel = new DocumentViewModel(documentModel);
         if (documentViewModel) {
@@ -1834,7 +1829,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 wrapStrategy,
             };
             this._stylesCache.fontMatrix.setValue(row, col, config);
-            fontFamilyMatrix.setValue(row, col, config);
+            // fontFamilyMatrix.setValue(row, col, config);
             this._calculateOverflowCell(row, col, config);
         }
     }

@@ -54,8 +54,8 @@ export class Font extends SheetExtension {
         moreBoundsInfo: IDrawInfo
     ) {
         const { stylesCache, overflowCache, worksheet } = spreadsheetSkeleton;
-        const { font: fontMap, fontMatrix } = stylesCache;
-        if (!spreadsheetSkeleton || !worksheet || !fontMap) return;
+        const { fontMatrix } = stylesCache;
+        if (!spreadsheetSkeleton || !worksheet || !fontMatrix) return;
 
         const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
             spreadsheetSkeleton;

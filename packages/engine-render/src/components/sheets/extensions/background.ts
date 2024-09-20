@@ -70,9 +70,7 @@ export class Background extends SheetExtension {
 
             const bgColorMatrix = backgroundCache[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
-
             const backgroundPaths = new Path2D();
-
             const renderBGByCell = (row: number, col: number) => {
                 if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
                     return true;
@@ -118,6 +116,7 @@ export class Background extends SheetExtension {
             };
             bgColorMatrix.forValue(renderBGByCell);
             ctx.fill(backgroundPaths);
+            ctx.closePath();
         };
 
         Object.keys(backgroundCache).forEach(renderBGCore);

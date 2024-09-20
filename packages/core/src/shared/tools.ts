@@ -744,7 +744,7 @@ interface IStyleDataObject {
 /**
  * compose styles by priority, the latter will overwrite the former
  * @param { Nullable<IStyleData>[]} styles the styles to be composed
- * @returns  { Nullable<IStyleData>[]}
+ * @returns  { Nullable<IStyleData>[]} Returns the composed style
  */
 export function composeStyles(...styles: Nullable<IStyleData>[]): IStyleData {
     const result: IStyleData = {};

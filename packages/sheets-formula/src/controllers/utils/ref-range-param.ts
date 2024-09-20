@@ -31,6 +31,7 @@ import {
     RemoveColCommand,
     RemoveRowCommand,
     RemoveSheetCommand,
+    SetDefinedNameCommand,
     SetWorksheetNameCommand,
 } from '@univerjs/sheets';
 
@@ -39,6 +40,7 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -99,6 +101,8 @@ export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo
         case RemoveSheetCommand.id:
             result = handleRefRemoveWorksheet(command as ICommandInfo<IRemoveSheetCommandParams>, workbook);
             break;
+        case SetDefinedNameCommand.id:
+            result = handleRefSetDefinedName(command as ICommandInfo<ISetDefinedNameMutationParam>, workbook);
     }
 
     return result;
@@ -354,5 +358,22 @@ function handleRefRemoveWorksheet(command: ICommandInfo<IRemoveSheetCommandParam
         type: FormulaReferenceMoveType.RemoveSheet,
         unitId: unitId || workbookId,
         sheetId: subUnitId || sheetId,
+    };
+}
+
+function handleRefSetDefinedName(command: ICommandInfo<ISetDefinedNameMutationParam>, workbook: Workbook): Nullable<IFormulaReferenceMoveParam> {
+    const { params } = command;
+    if (!params) return null;
+
+    const { unitId, name, id } = params;
+
+    const { sheetId } = getCurrentSheetInfo(workbook);
+
+    return {
+        type: FormulaReferenceMoveType.SetDefinedName,
+        unitId,
+        sheetId,
+        definedName: name,
+        definedNameId: id,
     };
 }

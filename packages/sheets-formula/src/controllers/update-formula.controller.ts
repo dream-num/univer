@@ -45,6 +45,7 @@ import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
+    IDefinedNamesService,
     initSheetFormulaData,
     LexerTreeBuilder,
     sequenceNodeType,
@@ -292,6 +293,14 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
+        const { id } = command;
+
+        // The impact of defined name changes on formula calculation
+        // 1. ref range only changes formulaOrRefString to trigger recalculation
+        // 2. set defined name command, change name to trigger formula update, otherwise trigger recalculation
+        // 3. remove defined name command, recalculate
+        // 4. insert defined name No processing required
+
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const result = getReferenceMoveParams(workbook, command);
 

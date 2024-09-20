@@ -71,7 +71,7 @@ export interface IDefinedNamesService {
 
     focusRange$: Observable<IDefinedNamesServiceFocusParam>;
 
-    focusRange(unitId: string, id: string): boolean;
+    focusRange(unitId: string, id: string): void;
 
     getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
 
@@ -116,28 +116,10 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     focusRange(unitId: string, id: string) {
         const item = this.getValueById(unitId, id);
         if (item == null) {
-            return false;
-        }
-
-        // If sheet hidden, return false
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
-        if (workbook == null) {
-            return false;
-        }
-
-        const { formulaOrRefString } = item;
-        const worksheet = this.getWorksheetByRef(unitId, formulaOrRefString);
-
-        if (worksheet == null) {
-            return false;
-        }
-
-        if (worksheet.isSheetHidden()) {
-            return false;
+            return;
         }
 
         this._focusRange$.next({ ...item, unitId });
-        return true;
     }
 
     setCurrentRange(range: IUnitRange) {

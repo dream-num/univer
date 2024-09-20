@@ -16,7 +16,6 @@
 
 import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
 import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
@@ -24,8 +23,9 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+
 import { IDescriptionService } from '../services/description.service';
 
 export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
@@ -84,16 +84,14 @@ export class DefinedNameController extends Disposable {
                 if (command.id === SetWorksheetActiveOperation.id) {
                     this._unregisterDescriptionsForNotInSheetId();
                     this._registerDescriptions();
-                } else if (command.id === InsertDefinedNameCommand.id) {
+                }
+                // SetDefinedNameMutation and RemoveDefinedNameMutation already cover all possible Defined Name updates
+                else if (command.id === SetDefinedNameMutation.id) {
                     const param = command.params as ISetDefinedNameMutationParam;
                     this._registerDescription(param);
-                } else if (command.id === RemoveDefinedNameCommand.id) {
+                } else if (command.id === RemoveDefinedNameMutation.id) {
                     const param = command.params as ISetDefinedNameMutationParam;
                     this._unregisterDescription(param);
-                } else if (command.id === SetDefinedNameCommand.id) {
-                    const param = command.params as ISetDefinedNameCommandParams;
-                    this._unregisterDescription(param.oldDefinedName);
-                    this._registerDescription(param.newDefinedName);
                 }
             })
         );

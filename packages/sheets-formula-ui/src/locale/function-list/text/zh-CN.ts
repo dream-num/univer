@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '文本或对包含要更改文本的单元格的引用。 如果文本不包含任何全角字母，则不会对文本进行转换。' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要返回为文本的数组。' },
+            format: { name: '数据格式', detail: '返回的数据的格式。它可以是两个值之一：\n0 默认。 易于阅读的简明格式。\n1 包含转义字符和行定界符的严格格式。 生成一条可在输入编辑栏时被解析的字符串。 将返回的字符串（布尔值、数字和错误除外）封装在引号中。' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要转换成文本的数字、对包含数字的单元格的引用或结果为数字的公式。' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '介于 1 到 255 之间的数字，指定所需的字符。 使用的是当前计算机字符集中的字符。' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要从中删除非打印字符的任何工作表信息。' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要为其获取第一个字符的代码的文本。' },
         },
     },
     CONCAT: {
@@ -137,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '文本或包含要转换的文本的单元格的引用。 如果文本中不包含任何半角英文字母或片假名，则不会对文本进行转换。' },
         },
     },
     DOLLAR: {

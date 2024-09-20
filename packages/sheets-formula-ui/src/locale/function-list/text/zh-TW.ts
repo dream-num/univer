@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何全形字母，則文字不會變更。' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要傳回做為文字的陣列。' },
+            format: { name: '資料格式', detail: '傳回資料的格式。它可以是兩個值的其中之一：\n0 預設。 易於閱讀的精簡格式。\n1 包含逸出字元和列分隔符號的限定格式。 產生可在輸入至資料編輯列時進行剖析的字串。 封裝會以引號傳回字串，除了布林值、數字和錯誤以外。' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '為要轉換成文字的數字，或包含數字的儲存格參照，或結果為數字的公式。' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是介於 1 和 255 之間的數字，用以指定您所需的字元。 此字元來自您電腦所使用的字元集。' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是要從中移除無法列印之字元的任何工作表資訊。' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是欲求其第一個字元代碼的文字。' },
         },
     },
     CONCAT: {
@@ -137,8 +132,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何半形英文字母或片假名，文字就不會變更。' },
         },
     },
     DOLLAR: {

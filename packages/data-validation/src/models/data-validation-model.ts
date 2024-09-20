@@ -145,24 +145,28 @@ export class DataValidationModel extends Disposable {
         if (oldRule) {
             return;
         }
-        this._ruleChange$.next({
+
+        return {
             rule,
             type: 'add',
             unitId,
             subUnitId,
             source,
-        });
+        } as const;
     }
 
     addRule(unitId: string, subUnitId: string, rule: IDataValidationRule | IDataValidationRule[], source: DataValidationChangeSource, index?: number) {
         try {
             const subUnitMap = this._ensureMap(unitId, subUnitId);
             const rules = Array.isArray(rule) ? rule : [rule];
-            rules.forEach((item) => {
-                this._addRuleSideEffect(unitId, subUnitId, item, source);
-            });
+            const effects = rules.map((item) => this._addRuleSideEffect(unitId, subUnitId, item, source));
 
             this._addSubUnitRule(subUnitMap, rule, index);
+            effects.forEach((effect) => {
+                if (effect) {
+                    this._ruleChange$.next(effect);
+                }
+            });
         } catch (error) {
             this._logService.error(error);
         }

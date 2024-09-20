@@ -97,7 +97,7 @@ export class DocThreadCommentSelectionController extends Disposable {
                 const doc = this._univerInstanceService.getUnit<DocumentDataModel>(activeComment.unitId);
                 if (doc) {
                     const backScrollController = this._renderManagerService.getRenderById(activeComment.unitId)?.with(DocBackScrollRenderController);
-                    const customRange = doc.getCustomRanges()?.find((range) => range.rangeId === activeComment.commentId);
+                    const customRange = doc.getBody()?.customDecorations?.find((range) => range.id === activeComment.commentId);
                     if (customRange && backScrollController) {
                         backScrollController.scrollToRange({
                             startOffset: customRange.startIndex,

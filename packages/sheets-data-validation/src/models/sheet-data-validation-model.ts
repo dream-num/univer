@@ -98,12 +98,13 @@ export class SheetDataValidationModel extends Disposable {
             unitMap = new Map();
             this._ruleMatrixMap.set(unitId, unitMap);
         }
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) {
-            throw new Error(`worksheet not found, unitId: ${unitId}, subUnitId: ${subUnitId}`);
-        }
+
         let matrix = unitMap.get(subUnitId);
         if (!matrix) {
+            const worksheet = workbook.getSheetBySheetId(subUnitId);
+            if (!worksheet) {
+                throw new Error(`worksheet not found, unitId: ${unitId}, subUnitId: ${subUnitId}`);
+            }
             matrix = new RuleMatrix(new Map(), worksheet);
             unitMap.set(subUnitId, matrix);
         }

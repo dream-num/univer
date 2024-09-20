@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
+import { CellValueType, IConfigService, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -91,6 +91,7 @@ describe('Test EndEditController', () => {
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
     let resourceLoaderService: IResourceLoaderService;
+    let configService: IConfigService;
     let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
     let normalizeStringByLexer: (str: string) => string;
 
@@ -107,6 +108,7 @@ describe('Test EndEditController', () => {
         contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
         resourceLoaderService = get(IResourceLoaderService);
+        configService = get(IConfigService);
 
         const worksheet = workbook.getActiveSheet()!;
         const config = worksheet.getConfig();
@@ -116,7 +118,8 @@ describe('Test EndEditController', () => {
             worksheet.getCellMatrix(),
             workbook.getStyles(),
             localeService,
-            contextService
+            contextService,
+            configService
         );
 
         getCellDataByInputCell = (cell: ICellData, inputCell: ICellData) => {

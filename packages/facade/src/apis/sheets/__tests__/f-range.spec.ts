@@ -16,16 +16,16 @@
 
 /* eslint-disable ts/no-non-null-asserted-optional-chain */
 
-import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { beforeEach, describe, expect, it } from 'vitest';
-
 import { FormulaDataModel } from '@univerjs/engine-formula';
+import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
+
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
-import { FUniver } from '../../facade';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerjs/core';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
+import { FUniver } from '../../facade';
 
 describe('Test FRange', () => {
     let get: Injector['get'];
@@ -715,4 +715,103 @@ describe('Test FRange', () => {
         expect(hasError).toBeTruthy();
     });
     //#endregion
+
+    // Add these new test cases
+    it('Range getRow, getColumn, getWidth, getHeight with A1 notation', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // Test range with A1 notation
+        const rangeA1D5 = activeSheet?.getRange('A1:D5');
+        expect(rangeA1D5?.getRow()).toBe(0);
+        expect(rangeA1D5?.getColumn()).toBe(0);
+        expect(rangeA1D5?.getWidth()).toBe(4);
+        expect(rangeA1D5?.getHeight()).toBe(5);
+
+        // Test single cell with A1 notation
+        const rangeB3 = activeSheet?.getRange('B3');
+        expect(rangeB3?.getRow()).toBe(2);
+        expect(rangeB3?.getColumn()).toBe(1);
+        expect(rangeB3?.getWidth()).toBe(1);
+        expect(rangeB3?.getHeight()).toBe(1);
+
+        // Test range with only column letters
+        const rangeAD = activeSheet?.getRange('A:D');
+        expect(rangeAD?.getRow()).toBe(0);
+        expect(rangeAD?.getColumn()).toBe(0);
+        expect(rangeAD?.getWidth()).toBe(4);
+        expect(rangeAD?.getHeight()).toBe(100);
+
+        // Test range with only row numbers
+        const range15 = activeSheet?.getRange('1:5');
+        expect(range15?.getRow()).toBe(0);
+        expect(range15?.getColumn()).toBe(0);
+        // Width should be the maximum number of columns in the sheet
+        expect(range15?.getWidth()).toBeGreaterThan(0);
+        expect(range15?.getHeight()).toBe(5);
+
+        // Test with sheet name
+        const rangeWithSheet = activeSheet?.getRange('sheet1!E6:G8');
+        expect(rangeWithSheet?.getRow()).toBe(5);
+        expect(rangeWithSheet?.getColumn()).toBe(4);
+        expect(rangeWithSheet?.getWidth()).toBe(3);
+        expect(rangeWithSheet?.getHeight()).toBe(3);
+
+        // Test case insensitivity
+        const rangeCaseInsensitive = activeSheet?.getRange('h10:J12');
+        expect(rangeCaseInsensitive?.getRow()).toBe(9);
+        expect(rangeCaseInsensitive?.getColumn()).toBe(7);
+        expect(rangeCaseInsensitive?.getWidth()).toBe(3);
+        expect(rangeCaseInsensitive?.getHeight()).toBe(3);
+
+        // Test invalid range
+        expect(() => activeSheet?.getRange('sheet_not_exist!A1:D5').getValues()).toThrow();
+    });
+
+    it('Range getValues with A1 notation', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        // Set up some test data
+        activeSheet?.getRange(0, 0, 5, 4)?.setValues([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+            [17, 18, 19, 20],
+        ]);
+
+        // Test single cell
+        expect(activeSheet?.getRange('A1').getValues()).toEqual([[1]]);
+
+        // Test range
+        expect(activeSheet?.getRange('A1:D5').getValues()).toEqual([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+            [17, 18, 19, 20],
+        ]);
+
+        // Test case insensitivity
+        expect(activeSheet?.getRange('a1:d5').getValues()).toEqual([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+            [17, 18, 19, 20],
+        ]);
+
+        // Test with sheet name
+        expect(activeSheet?.getRange('sheet1!A1:D5').getValues()).toEqual([
+            [1, 2, 3, 4],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14, 15, 16],
+            [17, 18, 19, 20],
+        ]);
+
+        // Test out of bounds range
+        expect(activeSheet?.getRange('A1:Z100').getValues()).toEqual(expect.arrayContaining([
+            expect.arrayContaining([1, 2, 3, 4, null, null, null, null, null, null]),
+        ]));
+    });
 });

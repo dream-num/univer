@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, IParagraphStyle, Nullable } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule, TableTextWrapType } from '@univerjs/core';
-import type {
-    IDocumentSkeletonColumn,
-    IDocumentSkeletonDivide,
-    IDocumentSkeletonDrawing,
-    IDocumentSkeletonGlyph,
-    IDocumentSkeletonLine,
-    IDocumentSkeletonPage,
-    IDocumentSkeletonSection,
-    IDocumentSkeletonTable,
-} from '../../../../../basics/i-document-skeleton-cached';
+import type { INumberUnit, IParagraphProperties, IParagraphStyle, Nullable } from '@univerjs/core';
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import { BreakPointType } from '../../line-breaker/break';
+import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
     calculateLineTopByDrawings,
     collisionDetection,
@@ -38,10 +29,6 @@ import {
 } from '../../model/line';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
-import type {
-    ILayoutContext,
-} from '../../tools';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -58,8 +45,21 @@ import {
     lineIterator,
     mergeByV,
 } from '../../tools';
-import { BreakPointType } from '../../line-breaker/break';
 import { getNullTableSkeleton, getTableIdAndSliceIndex, getTableSliceId } from '../table';
+import type {
+    IDocumentSkeletonColumn,
+    IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
+    IDocumentSkeletonLine,
+    IDocumentSkeletonPage,
+    IDocumentSkeletonSection,
+    IDocumentSkeletonTable,
+} from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, IParagraphTableCache, ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type {
+    ILayoutContext,
+} from '../../tools';
 
 export function layoutParagraph(
     ctx: ILayoutContext,
@@ -77,15 +77,14 @@ export function layoutParagraph(
             // 如果是一个段落的开头，需要加入bullet
             const { gridType = GridType.LINES, charSpace = 0, defaultTabStop = 10.5 } = sectionBreakConfig;
 
-            const paragraphProperties = bulletSkeleton.paragraphProperties || {};
-
-            paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, paragraphProperties, 'max');
-
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
+            const paragraphProperties = bulletSkeleton.paragraphProperties || {};
+
+            paragraphConfig.paragraphStyle = mergeByV<IParagraphStyle>(paragraphConfig.paragraphStyle, { ...paragraphProperties, hanging: { v: bulletGlyph.width } } as IParagraphProperties, 'max');
+
             _lineOperator(ctx, [bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);
         } else {
             _lineOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, isParagraphFirstShapedText, breakPointType);

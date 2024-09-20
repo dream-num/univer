@@ -16,10 +16,9 @@
 
 import type { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 
-import { FontCache } from '../../shaping-engine/font-cache';
-import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
 import { getFontStyleString } from '../../../../../basics/tools';
 import { getBulletOrderedSymbol } from './bullet-ruler';
+import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
 
 export function dealWithBullet(
     bullet?: IBullet,
@@ -66,18 +65,18 @@ export function getDefaultBulletSke(listId: string, startIndex: number = 1): IDo
             fs: 9,
         }, // 文字样式
         startIndexItem: startIndex,
-        bBox: {
-            width: 8.4560546875,
-            ba: 7,
-            bd: -1,
-            aba: 7,
-            abd: -1,
-            sp: -2,
-            sbr: 0.5,
-            sbo: 0,
-            spr: 0.5,
-            spo: 0,
-        },
+        // bBox: {
+        //     width: 8.4560546875,
+        //     ba: 7,
+        //     bd: -1,
+        //     aba: 7,
+        //     abd: -1,
+        //     sp: -2,
+        //     sbr: 0.5,
+        //     sbo: 0,
+        //     spr: 0.5,
+        //     spo: 0,
+        // },
         paragraphProperties: {
             indentFirstLine: { v: 0 },
             hanging: { v: 21 },
@@ -99,7 +98,7 @@ function _getBulletSke(
         bulletAlignment,
         glyphFormat,
         textStyle: textStyleFirst = {},
-        startNumber,
+        // startNumber,
         glyphType,
         glyphSymbol,
     } = nesting;
@@ -117,7 +116,7 @@ function _getBulletSke(
         symbolContent = __generateOrderedListSymbol(glyphFormat, nestingLevel, nestings, listLevelAncestors); // 有序列表的处理
     }
 
-    const bBox = FontCache.getTextSize(symbolContent, fontStyle);
+    // const bBox = FontCache.getTextSize(symbolContent, fontStyle);
     const startIndex = listLevelAncestors?.[nestingLevel]?.startIndexItem ?? 1;
 
     return {
@@ -126,7 +125,7 @@ function _getBulletSke(
         ts: textStyle, // 文字样式
         fontStyle, //
         startIndexItem: startIndex + 1,
-        bBox,
+        // bBox,
         nestingLevel: nesting,
         bulletAlign: bulletAlignment,
         bulletType: glyphSymbol ? false : !!glyphType, // 默认是无序列表，假如glyphSymbol为空且glyphType不为空才是有序列表

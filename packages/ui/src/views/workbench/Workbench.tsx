@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
-import type { ILocale } from '@univerjs/design';
+import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+import clsx from 'clsx';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createPortal } from 'react-dom';
-import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
+import type { ILocale } from '@univerjs/design';
 import { IMessageService } from '../../services/message/message.service';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
@@ -31,6 +31,7 @@ import { ZenZone } from '../components/zen-zone/ZenZone';
 import { builtInGlobalComponents } from '../parts';
 
 import styles from './workbench.module.less';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -51,6 +52,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
+    const instanceService = useDependency(IUniverInstanceService);
     const contentRef = useRef<HTMLDivElement>(null);
 
     const footerComponents = useComponentsOfPart(BuiltInUIPart.FOOTER);
@@ -59,6 +61,24 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const contentComponents = useComponentsOfPart(BuiltInUIPart.CONTENT);
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
+
+    const [focusUnitType, setFocusUnitType] = useState<UniverInstanceType>(UniverInstanceType.UNIVER_UNKNOWN);
+
+    useEffect(() => {
+        const sub = instanceService.focused$.subscribe((id) => {
+            if (id == null) {
+                return;
+            }
+            const instanceType = instanceService.getUnitType(id);
+
+            setFocusUnitType(instanceType);
+        });
+
+        return () => {
+            sub.unsubscribe();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -88,7 +108,9 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
             }),
             themeService.currentTheme$.subscribe((theme) => {
                 themeInstance.setTheme(mountContainer, theme);
-                portalContainer && themeInstance.setTheme(portalContainer, theme);
+                if (portalContainer) {
+                    themeInstance.setTheme(portalContainer, theme);
+                }
             }),
         ];
 
@@ -123,7 +145,13 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                             <ComponentContainer key="left-sidebar" components={leftSidebarComponents} />
                         </aside>
 
-                        <section className={styles.workbenchContainerContent}>
+                        <section className={clsx(
+                            styles.workbenchContainerContent,
+                            {
+                                [styles.workbenchContainerDocContent]: focusUnitType === UniverInstanceType.UNIVER_DOC,
+                            }
+                        )}
+                        >
                             <header>
                                 {header && <ComponentContainer key="header" components={headerComponents} />}
                             </header>

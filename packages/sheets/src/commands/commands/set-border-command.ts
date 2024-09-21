@@ -56,26 +56,6 @@ export interface ISetBorderBasicCommandParams {
 
     value: IBorderInfo;
 }
-export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
-    id: 'sheet.command.set-border-basic',
-    type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetBorderBasicCommandParams) => {
-        const { unitId, subUnitId, value } = params;
-        const { type, color, style } = value;
-
-        const commandService = accessor.get(ICommandService);
-        const borderManager = accessor.get(BorderStyleManagerService);
-
-        borderManager.setType(type);
-        if (color) borderManager.setColor(color);
-        borderManager.setStyle(style);
-
-        return commandService.executeCommand(SetBorderCommand.id, {
-            unitId,
-            subUnitId,
-        });
-    },
-};
 
 export interface ISetBorderPositionCommandParams {
     value: BorderType;
@@ -655,7 +635,7 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
         const borderManager = accessor.get(BorderStyleManagerService);
 
         borderManager.setType(type);
-        borderManager.setColor(color);
+        if (color) borderManager.setColor(color);
         borderManager.setStyle(style);
 
         return commandService.executeCommand(SetBorderCommand.id, {

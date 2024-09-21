@@ -15,11 +15,12 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import { calculateNpv } from '../../../basics/financial';
+import { getCurrencyPattern } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { calculateNpv } from '../../../basics/financial';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 interface IValuesType {
     isError: boolean;
@@ -31,6 +32,8 @@ export class Npv extends BaseFunction {
     override minParams = 2;
 
     override maxParams = 255;
+
+    override needsLocale = true;
 
     override calculate(rate: BaseValueObject, ...variants: BaseValueObject[]): BaseValueObject {
         if (rate.isError()) {
@@ -77,7 +80,7 @@ export class Npv extends BaseFunction {
         }
 
         if (rowIndex === 0 && columnIndex === 0) {
-            return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+            return NumberValueObject.create(result, getCurrencyPattern(this.getLocale()));
         }
 
         return NumberValueObject.create(result);

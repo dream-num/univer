@@ -60,6 +60,7 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
         const observable = docSelectionManagerService.textSelection$.subscribe(() => {
             const rectRanges = docSelectionManagerService.getRectRanges();
             const activeRange = docSelectionManagerService.getActiveTextRange();
+
             if (rectRanges && rectRanges.length && inSameTable(rectRanges)) {
                 subscriber.next(false);
                 return;

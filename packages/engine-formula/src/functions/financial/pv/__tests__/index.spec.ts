@@ -16,12 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
-import { Pv } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { FUNCTION_NAMES_FINANCIAL } from '../../function-names';
+import { Pv } from '../index';
 
 describe('Test pv function', () => {
     const testFunction = new Pv(FUNCTION_NAMES_FINANCIAL.NPER);

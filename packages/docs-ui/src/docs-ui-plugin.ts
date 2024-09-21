@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService,
+import { DependentOn, ICommandService,
     IConfigService,
     ILogService,
     Inject,
@@ -24,7 +24,7 @@ import { ICommandService,
     Plugin, UniverInstanceType,
 } from '@univerjs/core';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@univerjs/core';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
@@ -94,6 +94,7 @@ import {
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 import type { IUniverDocsUIConfig } from './controllers/config.schema';
 
+@DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
     // static override type = UniverInstanceType.UNIVER_DOC;

@@ -25,30 +25,92 @@ import {
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
+    RANGE_TYPE,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
-    convertUnitDataToRuntime,
     FormulaDataModel,
+    FUNCTION_NAMES_MATH,
+    FUNCTION_NAMES_STATISTICAL,
     IFunctionService,
-    RangeReferenceObject,
 } from '@univerjs/engine-formula';
 import {
     INumfmtService,
     SetRangeValuesMutation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { ICommandInfo, IRange, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import type { ArrayValueObject, BaseValueObject, ISheetData } from '@univerjs/engine-formula';
+import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
 
 import { IStatusBarService } from '../services/status-bar.service';
+import { getNoDuplicateRanges } from './utils/range-tools';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 
 export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
+
+class CalculateValueSet {
+    private _sum: number = 0;
+    private _count: number = 0;
+    private _countN: number = 0;
+    private _min: number = Number.POSITIVE_INFINITY;
+    private _max: number = Number.NEGATIVE_INFINITY;
+
+    add(value: Nullable<ICellData>) {
+        const v = value?.v;
+        if (v !== undefined && v !== null) {
+            if (typeof v === 'number') {
+                this._sum += v;
+                this._countN++;
+                this._min = Math.min(this._min, v);
+                this._max = Math.max(this._max, v);
+            }
+            this._count++;
+        }
+    }
+
+    getResults() {
+        return {
+            sum: this._sum,
+            count: this._count,
+            countN: this._countN,
+            min: this._min,
+            max: this._max,
+        };
+    }
+}
+function calculateValues(valueSet: CalculateValueSet) {
+    const { sum, count, countN, min, max } = valueSet.getResults();
+    return [
+        {
+            func: FUNCTION_NAMES_STATISTICAL.MAX,
+            value: max,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.MIN,
+            value: min,
+        },
+        {
+            func: FUNCTION_NAMES_MATH.SUM,
+            value: sum,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.COUNTA,
+            value: countN,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.COUNT,
+            value: count,
+        },
+        {
+            func: FUNCTION_NAMES_STATISTICAL.AVERAGE,
+            value: sum / countN,
+        },
+    ];
+}
 
 @OnLifecycle(LifecycleStages.Ready, StatusBarController)
 export class StatusBarController extends Disposable {
@@ -119,6 +181,41 @@ export class StatusBarController extends Disposable {
         this._statusBarService.setState(null);
     }
 
+    getRangeStartEndInfo(range: IRange, sheet: Worksheet): IRange {
+        if (range.rangeType === RANGE_TYPE.ALL) {
+            return {
+                startRow: 0,
+                startColumn: 0,
+                endRow: sheet.getRowCount() - 1,
+                endColumn: sheet.getColumnCount() - 1,
+            };
+        }
+        if (range.rangeType === RANGE_TYPE.COLUMN) {
+            return {
+                startRow: 0,
+                startColumn: range.startColumn,
+                endRow: sheet.getRowCount() - 1,
+                endColumn: range.endColumn,
+
+            };
+        }
+        if (range.rangeType === RANGE_TYPE.ROW) {
+            return {
+                startRow: range.startRow,
+                startColumn: 0,
+                endRow: range.endRow,
+                endColumn: sheet.getColumnCount() - 1,
+            };
+        }
+        return {
+            startRow: range.startRow,
+            startColumn: range.startColumn,
+            endRow: range.endRow,
+            endColumn: range.endColumn,
+        };
+    }
+
+    // eslint-disable-next-line max-lines-per-function
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
         const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
@@ -149,15 +246,6 @@ export class StatusBarController extends Disposable {
             });
 
         if (selections?.length) {
-            if (selections.length === 1) {
-                const selection = selections[0];
-                const { startRow: start, endRow: end, startColumn: startCol, endColumn: endCol } = selection;
-                const rowCount = end - start + 1;
-                const columnCount = endCol - startCol + 1;
-                if (rowCount * columnCount > 1000000) {
-                    return this._clearResult();
-                }
-            }
             const realSelections: IRange[] = [];
             selections.forEach((selection) => {
                 const { startRow: start, endRow: end } = selection;
@@ -178,41 +266,20 @@ export class StatusBarController extends Disposable {
                     realSelections.push({ ...selection, startRow: prev, endRow: end });
                 }
             });
-            const refs = realSelections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
-            refs.forEach((ref) => {
-                ref.setUnitData({
-                    [unitId]: sheetData,
-                });
-
-                arrayFormulaMatrixCell && ref.setArrayFormulaCellData(convertUnitDataToRuntime(arrayFormulaMatrixCell));
-            });
-
-            const functions = this._statusBarService.getFunctions();
-
-            let arrayValue = refs.map((ref) => {
-                return ref.toArrayValueObject(false);
-            });
-            const correctArrayValue = this.interceptor.fetchThroughInterceptors(STATUS_BAR_PERMISSION_CORRECT)(arrayValue, arrayValue);
-            if (correctArrayValue) {
-                arrayValue = correctArrayValue;
+            const noDuplicate = getNoDuplicateRanges(realSelections);
+            const matrix = sheet.getCellMatrix();
+            const calculateValueSet = new CalculateValueSet();
+            for (const range of noDuplicate) {
+                const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
+                for (let r = startRow; r <= endRow; r++) {
+                    for (let c = startColumn; c <= endColumn; c++) {
+                        const value = matrix.getValue(r, c);
+                        calculateValueSet.add(value);
+                    }
+                }
             }
 
-            const calcResult = functions.map((f) => {
-                const executor = this._functionService.getExecutor(f.func);
-                if (!executor) {
-                    return undefined;
-                }
-
-                const res = executor?.calculate(...arrayValue) as BaseValueObject;
-                const value = res?.getValue();
-                if (!value) {
-                    return undefined;
-                }
-                return {
-                    func: f.func,
-                    value,
-                };
-            });
+            const calcResult = calculateValues(calculateValueSet);
             if (calcResult.every((r) => r === undefined)) {
                 return;
             }
@@ -232,3 +299,4 @@ export class StatusBarController extends Disposable {
         }
     }
 }
+

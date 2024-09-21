@@ -56,7 +56,7 @@ export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObje
 class CalculateValueSet {
     private _sum: number = 0;
     private _count: number = 0;
-    private _countN: number = 0;
+    private _countNumber: number = 0;
     private _min: number = Number.POSITIVE_INFINITY;
     private _max: number = Number.NEGATIVE_INFINITY;
 
@@ -66,7 +66,7 @@ class CalculateValueSet {
         if (v !== undefined && v !== null) {
             if (typeof v === 'number' && t !== CellValueType.STRING) {
                 this._sum += v;
-                this._countN++;
+                this._countNumber++;
                 this._min = Math.min(this._min, v);
                 this._max = Math.max(this._max, v);
             }
@@ -77,15 +77,16 @@ class CalculateValueSet {
     getResults() {
         return {
             sum: this._sum,
-            count: this._count,
-            countN: this._countN,
+            count: this._countNumber,
+            // the countA in formula is the count of all values
+            countA: this._count,
             min: this._min,
             max: this._max,
         };
     }
 }
 function calculateValues(valueSet: CalculateValueSet) {
-    const { sum, count, countN, min, max } = valueSet.getResults();
+    const { sum, count, countA, min, max } = valueSet.getResults();
     return [
         {
             func: FUNCTION_NAMES_STATISTICAL.MAX,
@@ -101,7 +102,7 @@ function calculateValues(valueSet: CalculateValueSet) {
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.COUNTA,
-            value: countN,
+            value: countA,
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.COUNT,
@@ -109,7 +110,7 @@ function calculateValues(valueSet: CalculateValueSet) {
         },
         {
             func: FUNCTION_NAMES_STATISTICAL.AVERAGE,
-            value: sum / countN,
+            value: sum / count,
         },
     ];
 }
@@ -268,13 +269,13 @@ export class StatusBarController extends Disposable {
                 }
             });
             const noDuplicate = getNoDuplicateRanges(realSelections);
-            const matrix = sheet.getCellMatrix();
+            // const matrix = sheet.getCellMatrix();
             const calculateValueSet = new CalculateValueSet();
             for (const range of noDuplicate) {
                 const { startRow, startColumn, endColumn, endRow } = this.getRangeStartEndInfo(range, sheet);
                 for (let r = startRow; r <= endRow; r++) {
                     for (let c = startColumn; c <= endColumn; c++) {
-                        const value = matrix.getValue(r, c);
+                        const value = sheet.getCell(r, c);
                         calculateValueSet.add(value);
                     }
                 }

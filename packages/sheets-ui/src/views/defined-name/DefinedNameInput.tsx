@@ -17,10 +17,10 @@
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { RangeSelector, TextEditor } from '@univerjs/docs-ui';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
-import { RangeSelector, TextEditor } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';

@@ -151,8 +151,8 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
             endOffset: activeEndOffset,
             style,
         } = this._docSelectionManagerService.getActiveTextRange() ?? {};
-        const textRanges = this._docSelectionManagerService.getCurrentTextRanges() ?? [];
-        const rectRanges = this._docSelectionManagerService.getCurrentRectRanges() ?? [];
+        const textRanges = this._docSelectionManagerService.getTextRanges() ?? [];
+        const rectRanges = this._docSelectionManagerService.getRectRanges() ?? [];
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId is not existed');
@@ -226,7 +226,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
         const activeRange = this._docSelectionManagerService.getActiveTextRange();
         const { segmentId, endOffset: activeEndOffset, style } = activeRange || {};
-        const ranges = this._docSelectionManagerService.getCurrentTextRanges();
+        const ranges = this._docSelectionManagerService.getTextRanges();
 
         if (segmentId == null) {
             this._logService.error('[DocClipboardController] segmentId does not exist!');

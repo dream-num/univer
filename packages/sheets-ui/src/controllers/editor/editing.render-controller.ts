@@ -45,7 +45,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
@@ -57,7 +57,7 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';

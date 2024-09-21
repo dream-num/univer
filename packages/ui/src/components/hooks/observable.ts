@@ -16,8 +16,8 @@
 
 /* eslint-disable ts/no-explicit-any */
 
-import type { Nullable } from '@univerjs/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { Nullable } from '@univerjs/core';
 import type { Observable, Subscription } from 'rxjs';
 
 type ObservableOrFn<T> = Observable<T> | (() => Observable<T>);

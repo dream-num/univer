@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import type { Workbook } from '@univerjs/core';
-import { TextEditor } from '@univerjs/ui';
+import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import { TextEditor } from '@univerjs/docs-ui';
 import { CFRuleType, CFValueType, createDefaultValueByValueType, defaultDataBarNativeColor, defaultDataBarPositiveColor, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Workbook } from '@univerjs/core';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
 import { ColorPicker } from '../../color-picker';
-import stylesBase from '../index.module.less';
 import { Preview } from '../../preview';
+import stylesBase from '../index.module.less';
 import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 

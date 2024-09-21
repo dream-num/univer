@@ -53,7 +53,7 @@ export class DocHyperLinkEventRenderController extends Disposable implements IRe
         this.disposeWithMe(
             this._docEventManagerService.hoverCustomRanges$.subscribe((ranges) => {
                 const link = ranges.find((range) => range.range.rangeType === CustomRangeType.HYPERLINK);
-                const activeRanges = this._docSelectionManagerService.getCurrentTextRanges();
+                const activeRanges = this._docSelectionManagerService.getTextRanges();
                 const currentSegmentId = activeRanges?.[0].segmentId;
                 if ((link?.segmentId ?? '') !== currentSegmentId) {
                     this._hideInfoPopup();

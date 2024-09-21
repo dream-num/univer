@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
-import set from 'lodash.set';
-import get from 'lodash.get';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { TextEditor } from '@univerjs/docs-ui';
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 
-import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-
-import type { Workbook } from '@univerjs/core';
-import { ILayoutService, TextEditor, useScrollYOverContainer } from '@univerjs/ui';
-import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { ILayoutService, useScrollYOverContainer } from '@univerjs/ui';
+
+import get from 'lodash.get';
+import set from 'lodash.set';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+import type { Workbook } from '@univerjs/core';
+import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import stylesBase from '../index.module.less';
-import type { IStyleEditorProps } from './type';
 
 import styles from './index.module.less';
+import type { IStyleEditorProps } from './type';
 
 const getIcon = (iconType: string, iconId: string | number) => {
     const arr = iconMap[iconType] || [];

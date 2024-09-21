@@ -17,10 +17,10 @@
 import { debounce, isInternalEditorID, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
 import type { IDocumentData, Nullable } from '@univerjs/core';
-import { IEditorService } from '../../services/editor/editor.service';
-import { isElementVisible } from '../../utils/util';
+import { isElementVisible } from '../../basics/editor';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import styles from './index.module.less';
-import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
@@ -88,6 +88,7 @@ export interface ITextEditorProps {
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
+ * @deprecated The business side encapsulates its own Editor component.
  */
 export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onActive'>): JSX.Element | null {
     const {
@@ -157,7 +158,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             isSheetEditor,
             canvasStyle,
             isSingle,
-            isReadonly,
+            readonly: isReadonly,
             isSingleChoice,
             onlyInputFormula,
             onlyInputRange,
@@ -228,13 +229,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             }
 
             // WTF: should not use editorService to sync values. All editors instance would be notified!
-            if (editor.editorUnitId !== id) {
+            if (editor.getEditorId() !== id) {
                 return;
             }
 
             const focusEditor = editorService.getFocusEditor();
 
-            if (focusEditor && focusEditor.editorUnitId !== id) {
+            if (focusEditor && focusEditor.getEditorId() !== id) {
                 return;
             }
 
@@ -257,7 +258,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         }
 
         editor.update({
-            isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
+            readonly: isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
         });
     }, [isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId]);
 

@@ -15,9 +15,8 @@
  */
 
 import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
+import { EditorService, IEditorService, IRangeSelectorService, RangeSelectorService } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import type { Dependency } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import {
     BrowserClipboardService,
     CanvasFloatDomService,
@@ -35,7 +34,6 @@ import {
     DesktopSidebarService,
     DesktopZenZoneService,
     DISABLE_AUTO_FOCUS_KEY,
-    EditorService,
     ErrorController,
     IBeforeCloseService,
     ICanvasPopupService,
@@ -43,7 +41,6 @@ import {
     IConfirmService,
     IContextMenuService,
     IDialogService,
-    IEditorService,
     IGlobalZoneService,
     ILayoutService,
     ILeftSidebarService,
@@ -53,7 +50,6 @@ import {
     INotificationService,
     IPlatformService,
     IProgressService,
-    IRangeSelectorService,
     IShortcutService,
     ISidebarService,
     IUIController,
@@ -63,7 +59,6 @@ import {
     MenuService,
     PlatformService,
     ProgressService,
-    RangeSelectorService,
     SharedController,
     ShortcutPanelController,
     ShortcutPanelService,
@@ -72,13 +67,15 @@ import {
     UNIVER_UI_PLUGIN_NAME,
     ZIndexManager,
 } from '@univerjs/ui';
-import { FlowManagerService } from './services/flow/flow-manager.service';
+import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
-import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
+import { UniuiFlowController } from './controllers/uniui-flow.controller';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
 import { UniuiToolbarController } from './controllers/uniui-toolbar.controller';
-import { UniuiFlowController } from './controllers/uniui-flow.controller';
+import { FlowManagerService } from './services/flow/flow-manager.service';
 import { UniToolbarService } from './services/toolbar/uni-toolbar-service';
+import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
 
 const UI_BOOTSTRAP_DELAY = 16;
 

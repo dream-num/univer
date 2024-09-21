@@ -124,12 +124,12 @@ describe('test cases in clipboard', () => {
 
         const selectionManager = get(DocSelectionManagerService);
 
-        selectionManager.setCurrentSelection({
+        selectionManager.__TEST_ONLY_setCurrentSelection({
             unitId: 'test-doc',
             subUnitId: '',
         });
 
-        selectionManager.add([
+        selectionManager.__TEST_ONLY_add([
             {
                 startOffset: 0,
                 endOffset: 5,
@@ -137,7 +137,7 @@ describe('test cases in clipboard', () => {
             },
         ]);
 
-        selectionManager.add([
+        selectionManager.__TEST_ONLY_add([
             {
                 startOffset: 10,
                 endOffset: 15,

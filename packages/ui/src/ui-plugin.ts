@@ -34,7 +34,6 @@ import { ContextMenuService, IContextMenuService } from './services/contextmenu/
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
 import { CanvasFloatDomService } from './services/dom/canvas-dom-layer.service';
-import { EditorService, IEditorService } from './services/editor/editor.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
@@ -51,7 +50,6 @@ import { IUIPartsService, UIPartsService } from './services/parts/parts.service'
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
 import { IProgressService, ProgressService } from './services/progress/progress.service';
-import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -114,8 +112,6 @@ export class UniverUIPlugin extends Plugin {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
-            [IEditorService, { useClass: EditorService }],
-            [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],

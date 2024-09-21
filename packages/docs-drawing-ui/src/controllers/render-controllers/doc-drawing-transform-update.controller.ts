@@ -26,10 +26,9 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { SetDocZoomRatioOperation } from '@univerjs/docs-ui';
+import { IEditorService, SetDocZoomRatioOperation } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { Liquid, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { IEditorService } from '@univerjs/ui';
 import { debounceTime, filter } from 'rxjs';
 import type { DocumentDataModel, ICommandInfo, IDrawingParam, ITransformState } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';

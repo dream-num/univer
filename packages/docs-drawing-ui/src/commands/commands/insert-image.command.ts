@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Nullable } from '@univerjs/core';
 import { CommandType, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ICommand, Nullable } from '@univerjs/core';
 import { DocDrawingUpdateRenderController } from '../../controllers/render-controllers/doc-drawing-update.render-controller';
 
 export interface IInsertDocImageCommandParams {
@@ -29,6 +29,7 @@ export const InsertDocImageCommand: ICommand<IInsertDocImageCommandParams> = {
     handler: (accessor) => {
         const renderManagerService = accessor.get(IRenderManagerService);
         return renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)
-            ?.with(DocDrawingUpdateRenderController).insertDocImage() ?? false;
+            ?.with(DocDrawingUpdateRenderController)
+            .insertDocImage() ?? false;
     },
 };

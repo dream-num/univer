@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Avatar, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { createInternalEditorID, IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
-import type { IRange, Workbook } from '@univerjs/core';
-import { IDialogService, ISidebarService, RangeSelector, useObservable } from '@univerjs/ui';
-import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { Avatar, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { RangeSelector } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
-import type { ICollaborator, IUser } from '@univerjs/protocol';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
-import { UserEmptyBase64 } from '../user-dialog/constant';
-import Spin from '../spin';
+import React, { useEffect, useState } from 'react';
+import type { IRange, Workbook } from '@univerjs/core';
+import type { ICollaborator, IUser } from '@univerjs/protocol';
+import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
-import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
+import Spin from '../spin';
+import { UserEmptyBase64 } from '../user-dialog/constant';
 import styles from './index.module.less';
 
 export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boolean }) => {

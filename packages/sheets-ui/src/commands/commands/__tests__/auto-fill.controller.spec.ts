@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ICommandService,
@@ -25,6 +24,9 @@ import {
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { EditorService, IEditorService } from '@univerjs/docs-ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeMutation,
     RemoveWorksheetMergeMutation,
@@ -32,20 +34,20 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { EditorService, IEditorService, IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { beforeEach, describe, expect, it } from 'vitest';
 
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { ICellData, Injector, IStyleData, Nullable, Univer, Workbook } from '@univerjs/core';
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../../services/auto-fill/type';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
-import { RefillCommand } from '../refill.command';
-import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
-import { SheetsRenderService } from '../../../services/sheets-render.service';
 import { ISheetSelectionRenderService } from '../../../services/selection/base-selection-render.service';
 import { SheetSelectionRenderService } from '../../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
+import { SheetsRenderService } from '../../../services/sheets-render.service';
+import { AutoClearContentCommand, AutoFillCommand } from '../auto-fill.command';
+import { RefillCommand } from '../refill.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const theme = {
@@ -284,6 +286,7 @@ describe('Test auto fill rules in controller', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
+            [DocSelectionManagerService],
             [ISheetSelectionRenderService, { useClass: SheetSelectionRenderService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [IShortcutService, { useClass: ShortcutService }],

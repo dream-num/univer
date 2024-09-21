@@ -65,12 +65,12 @@ describe('Test inline format commands', () => {
 
         const selectionManager = get(DocSelectionManagerService);
 
-        selectionManager.setCurrentSelection({
+        selectionManager.__TEST_ONLY_setCurrentSelection({
             unitId: 'test-doc',
             subUnitId: 'test-doc',
         });
 
-        selectionManager.add([
+        selectionManager.__TEST_ONLY_add([
             {
                 startOffset: 0,
                 endOffset: 5,
@@ -78,7 +78,7 @@ describe('Test inline format commands', () => {
             },
         ]);
 
-        selectionManager.add([
+        selectionManager.__TEST_ONLY_add([
             {
                 startOffset: 20,
                 endOffset: 30,

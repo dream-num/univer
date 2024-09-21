@@ -31,6 +31,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -79,7 +80,6 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { IEditorService } from '@univerjs/ui';
 
 import { filter, map, merge } from 'rxjs';
 import type {
@@ -178,7 +178,6 @@ export class UpdateFormulaController extends Disposable {
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();
-
         this._initialize();
     }
 

@@ -50,9 +50,9 @@ export class Scene extends ThinScene {
 
     readonly addObject$ = this._addObject$.asObservable();
 
-    private _renderCompleted$ = new BehaviorSubject<Nullable<Canvas>>(null);
+    private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
 
-    readonly renderCompleted$ = this._renderCompleted$.asObservable();
+    readonly beforeRender$ = this._beforeRender$.asObservable();
     /**
      * Transformer constructor.  Transformer is a special type of group that allow you transform
      * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -600,7 +600,7 @@ export class Scene extends ThinScene {
         !parentCtx && this.getEngine()?.clearCanvas();
 
         const layers = this._layers.sort(sortRules);
-        this._renderCompleted$.next(this.getEngine()?.getCanvas());
+        this._beforeRender$.next(this.getEngine()?.getCanvas());
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }

@@ -228,6 +228,10 @@ export class Editor extends Disposable implements IEditor {
 
         this.disposeWithMe(
             this._docSelectionManagerService.textSelection$.subscribe((e) => {
+                if (e == null) {
+                    return;
+                }
+
                 const { unitId, subUnitId, ...params } = e;
                 const editorId = this.getEditorId();
 

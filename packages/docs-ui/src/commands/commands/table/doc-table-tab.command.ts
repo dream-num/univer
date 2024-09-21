@@ -70,7 +70,7 @@ export const DocTableTabCommand: ICommand<IDocTableTabCommandParams> = {
                 endOffset,
             }];
 
-            textSelectionManager.replaceTextRanges(textRanges);
+            textSelectionManager.replaceDocRanges(textRanges);
 
             return true;
         }

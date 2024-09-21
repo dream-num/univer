@@ -250,7 +250,7 @@ export class HtmlToUDMService {
 
                 body.tables.push({
                     startIndex,
-                    endIndex: body.dataStream.length - 1,
+                    endIndex: body.dataStream.length,
                     tableId: table.tableId,
                 });
 

@@ -136,8 +136,8 @@ export default {
         },
     },
     DOLLAR: {
-        description: 'Chuyển đổi số thành văn bản bằng định dạng tiền tệ Nhân dân tệ (RMB)',
-        abstract: 'Chuyển đổi số thành văn bản bằng định dạng tiền tệ Nhân dân tệ (RMB)',
+        description: 'Chuyển đổi một số thành văn bản bằng cách dùng định dạng tiền tệ',
+        abstract: 'Chuyển đổi một số thành văn bản bằng cách dùng định dạng tiền tệ',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -145,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Số, tham chiếu đến ô chứa số hoặc công thức sẽ trả về số.' },
+            decimals: { name: 'số chữ thập phân', detail: 'Số chữ số nằm bên phải dấu thập phân. Nếu đây là số âm, thì số được làm tròn sang bên trái dấu thập phân. Nếu bạn bỏ qua đối số decimals, nó được giả định là bằng 2.' },
         },
     },
     EXACT: {
@@ -159,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: 'bản văn 1', detail: 'Chuỗi văn bản đầu tiên' },
-            text2: { name: 'bản văn 2', detail: 'Chuỗi văn bản thứ hai' },
+            text1: { name: 'bản văn 1', detail: 'Chuỗi văn bản đầu tiên.' },
+            text2: { name: 'bản văn 2', detail: 'Chuỗi văn bản thứ hai.' },
         },
     },
     FIND: {
@@ -188,9 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Số mà bạn muốn làm tròn và chuyển đổi thành văn bản.' },
-            decimals: { name: 'decimals', detail: 'Số lượng chữ số ở bên phải của dấu thập phân.' },
-            no_commas: { name: 'no_commas', detail: 'Giá trị logic chỉ định liệu trả về văn bản có bao gồm dấu phẩy hay không.' },
+            number: { name: 'số', detail: 'Số bạn muốn làm tròn và chuyển đổi thành văn bản.' },
+            decimals: { name: 'số chữ thập phân', detail: 'Số chữ số nằm bên phải dấu thập phân. Nếu đây là số âm, thì số được làm tròn sang bên trái dấu thập phân. Nếu bạn bỏ qua đối số decimals, nó được giả định là bằng 2.' },
+            noCommas: { name: 'tắt dấu phân cách', detail: 'Giá trị logic, nếu ĐÚNG, sẽ ngăn FIXED đưa dấu phẩy vào văn bản trả về.' },
         },
     },
     LEFT: {
@@ -261,6 +261,21 @@ export default {
             num_chars: { name: 'num_chars', detail: 'Bắt buộc đối với hàm MID. Chỉ rõ số ký tự mà bạn muốn hàm MID trả về từ văn bản.\nNếu số ký tự là số âm, thì hàm MID trả về giá trị lỗi #VALUE! .' },
         },
     },
+    NUMBERVALUE: {
+        description: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',
+        abstract: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/numbervalue-%E5%87%BD%E6%95%B0-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản chuyển sang số.' },
+            decimalSeparator: { name: 'dấu phân cách thập phân', detail: 'Ký tự dùng để tách số nguyên và phần phân số của kết quả.' },
+            groupSeparator: { name: 'dấu phân cách nhóm', detail: 'Ký tự dùng để tách các nhóm số.' },
+        },
+    },
     PHONETIC: {
         description: 'Trả về chuỗi Furigana từ chuỗi văn bản',
         abstract: 'Trả về chuỗi Furigana từ chuỗi văn bản',
@@ -285,7 +300,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn chuyển đổi chữ cái đầu tiên của mỗi từ thành chữ hoa và tất cả các chữ cái khác thành chữ thường.' },
+            text: { name: 'bản văn', detail: 'Văn bản được đặt trong dấu ngoặc kép, công thức trả về văn bản hoặc tham chiếu đến ô chứa văn bản mà bạn muốn viết hoa một phần.' },
         },
     },
     REGEXEXTRACT: {
@@ -371,8 +386,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự bạn muốn trích xuất.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự mà bạn muốn trích xuất.' },
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn RIGHT trích xuất.' },
         },
     },
     SEARCH: {

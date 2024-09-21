@@ -16,7 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { calculateNpv } from '../../../basics/financial';
-import { getCurrencyPattern } from '../../../engine/utils/numfmt-kit';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -80,7 +80,7 @@ export class Npv extends BaseFunction {
         }
 
         if (rowIndex === 0 && columnIndex === 0) {
-            return NumberValueObject.create(result, getCurrencyPattern(this.getLocale()));
+            return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
         }
 
         return NumberValueObject.create(result);

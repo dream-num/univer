@@ -17,8 +17,9 @@
 import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
+import { RangeSelector } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
-import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
+import { ComponentManager, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '../../commands/commands/data-validation.command';

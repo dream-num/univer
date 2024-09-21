@@ -101,7 +101,7 @@ export const DocTableInsertRowCommand: ICommand<IDocTableInsertRowCommandParams>
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
         const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);
@@ -212,7 +212,7 @@ export const DocTableInsertColumnCommand: ICommand<IDocTableInsertColumnCommandP
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const activeRectRanges = docSelectionManagerService.getCurrentRectRanges();
+        const activeRectRanges = docSelectionManagerService.getRectRanges();
         const activeTextRange = docSelectionManagerService.getActiveTextRange();
 
         const rangeInfo = getRangeInfoFromRanges(activeTextRange, activeRectRanges);

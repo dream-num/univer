@@ -42,7 +42,7 @@ import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
 } from '@univerjs/docs';
-import { DocSelectionRenderService, MoveCursorOperation, ReplaceContentCommand } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, IEditorService, MoveCursorOperation, ReplaceContentCommand } from '@univerjs/docs-ui';
 import {
     compareToken,
     deserializeRangeWithSheet,
@@ -77,7 +77,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, IEditorService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
+import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
 import type {
     DocumentDataModel,
@@ -89,13 +89,13 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
 import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
 
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
-import type { Editor } from '@univerjs/ui';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';

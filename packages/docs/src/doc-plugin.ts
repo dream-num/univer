@@ -20,7 +20,6 @@ import {
     Inject,
     Injector,
     Plugin,
-    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency, ICommand } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
@@ -36,7 +35,7 @@ const PLUGIN_NAME = 'DOCS_PLUGIN';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER_DOC;
+    // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
         private readonly _config: Partial<IUniverDocsConfig> = defaultPluginConfig,

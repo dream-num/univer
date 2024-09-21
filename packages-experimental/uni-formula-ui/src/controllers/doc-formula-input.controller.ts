@@ -16,9 +16,8 @@
 
 import { CustomRangeType, Disposable, ICommandService, ILogService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DeleteLeftCommand, DocEventManagerService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
+import { DeleteLeftCommand, DocEventManagerService, IEditorService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IEditorService } from '@univerjs/ui';
 import { filter, map, mergeMap } from 'rxjs';
 
 import type { DocumentDataModel } from '@univerjs/core';
@@ -67,7 +66,7 @@ export class DocUniFormulaInputController extends Disposable {
             const { id } = commandInfo;
 
             if (
-                currentEditor?.editorUnitId === UNI_FORMULA_EDITOR_ID ||
+                currentEditor?.getEditorId() === UNI_FORMULA_EDITOR_ID ||
                 focusedUnit?.type !== UniverInstanceType.UNIVER_DOC
             ) {
                 return;

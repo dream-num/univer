@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, RxDisposable } from '@univerjs/core';
+import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
@@ -40,7 +40,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
     readonly onKeydown$ = this._onKeydown$.asObservable();
 
-    private readonly _onInput$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onInput$ = new Subject<IEditorInputConfig>();
     readonly onInput$ = this._onInput$.asObservable();
 
     private readonly _onCompositionstart$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
@@ -55,16 +55,16 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onSelectionStart$ = new BehaviorSubject<Nullable<INodePosition>>(null);
     readonly onSelectionStart$ = this._onSelectionStart$.asObservable();
 
-    private readonly _onPaste$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onPaste$ = new Subject<IEditorInputConfig>();
     readonly onPaste$ = this._onPaste$.asObservable();
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<IDocSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
 
-    private readonly _onFocus$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onFocus$ = new Subject<IEditorInputConfig>();
     readonly onFocus$ = this._onFocus$.asObservable();
 
-    private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
+    private readonly _onBlur$ = new Subject<IEditorInputConfig>();
     readonly onBlur$ = this._onBlur$.asObservable();
 
     private readonly _onPointerDown$ = new Subject<void>();
@@ -100,17 +100,37 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private _scenePointerMoveSubs: Array<Subscription> = [];
     private _scenePointerUpSubs: Array<Subscription> = [];
     private _editorFocusing = true;
+    // When the user switches editors, whether to clear the doc ranges.
+    private _reserveRanges = false;
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ILogService private readonly _logService: ILogService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService
     ) {
         super();
         this._initDOM();
         this._registerContainer();
         this._setSystemHighlightColorToStyle();
+        this._listenCurrentUnitChange();
+    }
+
+    private _listenCurrentUnitChange() {
+        this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((documentModel) => {
+                if (documentModel == null) {
+                    return;
+                }
+
+                const unitId = documentModel.getUnitId();
+
+                if (unitId !== this._context.unitId && !this._reserveRanges) {
+                    this.removeAllRanges();
+                }
+            });
     }
 
     get activeViewPort() {
@@ -131,6 +151,10 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getSegmentPage() {
         return this._currentSegmentPage;
+    }
+
+    setReserveRangesStatus(status: boolean) {
+        this._reserveRanges = status;
     }
 
     private _setRangeStyle(style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE) {
@@ -235,6 +259,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._updateInputPosition();
     }
 
+    /**
+     * @deprecated
+     */
     activate(x: number, y: number, force = false) {
         const isFocusing = this._input === document.activeElement;
         this._container.style.left = `${x}px`;
@@ -261,17 +288,26 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._input.blur();
     }
 
+    /**
+     * @deprecated
+     */
     focusEditor(): void {
         this._editorFocusing = true;
         this.focus();
     }
 
+    /**
+     * @deprecated
+     */
     blurEditor(): void {
         this._editorFocusing = false;
         this.blur();
     }
 
     // FIXME: for editor cell editor we don't need to blur the input element
+    /**
+     * @deprecated
+     */
     deactivate() {
         this._container.style.left = '0px';
         this._container.style.top = '0px';
@@ -670,6 +706,20 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._rectRangeList = newRanges;
     }
 
+    private _removeCollapsedTextRange() {
+        const oldTextRanges = this._rangeList;
+
+        this._rangeList = [];
+
+        for (const textRange of oldTextRanges) {
+            if (textRange.collapsed) {
+                textRange.dispose();
+            } else {
+                this._rangeList.push(textRange);
+            }
+        }
+    }
+
     private _removeAllRanges() {
         this._removeAllTextRanges();
         this._removeAllRectRanges();
@@ -1049,13 +1099,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             })
         );
 
-        this.disposeWithMe(
-            fromEvent(this._input, 'pointerdown').subscribe((e) => {
-                this._eventHandle(e, () => {
-                    this._onBlur$.next();
-                });
-            })
-        );
+        // this.disposeWithMe(
+        //     fromEvent(this._input, 'pointerdown').subscribe((e) => {
+        //         this._eventHandle(e, () => {
+        //             this._onBlur$.next();
+        //         });
+        //     })
+        // );
 
         this.disposeWithMe(
             fromEvent(this._input, 'blur').subscribe((e) => {
@@ -1137,3 +1187,4 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._onPointerDown$.complete();
     }
 }
+

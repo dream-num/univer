@@ -15,13 +15,12 @@
  */
 
 import { ColorKit, LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
-import type { Observable } from 'rxjs';
+import React, { useEffect, useState } from 'react';
 import { isObservable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { ComponentManager } from '../../common/component-manager';
 import type { IMenuSelectorItem } from '../../services/menu/menu';
-import { useObservable } from '../hooks/observable';
 
 export type ICustomLabelProps<T = undefined> = {
     value?: string | number | undefined;
@@ -42,21 +41,38 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     const { title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
+    const [realValue, setRealValue] = useState(value);
+    const [realIcon, setRealIcon] = useState('');
 
     const nodes = [];
     let index = 0;
 
-    let realValue = value;
-    if (value$) {
-        realValue = useObservable(value$, undefined, true);
-    }
+    useEffect(() => {
+        if (value$) {
+            const subscription = value$.subscribe((v) => {
+                setRealValue(v);
+            });
 
-    let realIcon;
-    if (isObservable(icon)) {
-        realIcon = useObservable(icon, undefined, true);
-    } else {
-        realIcon = icon;
-    }
+            return () => {
+                subscription.unsubscribe();
+            };
+        }
+    }, []);
+
+    useEffect(() => {
+        let subscription = null;
+        if (isObservable(icon)) {
+            subscription = icon.subscribe((v) => {
+                setRealIcon(v);
+            });
+        } else {
+            setRealIcon(icon ?? '');
+        }
+
+        return () => {
+            subscription?.unsubscribe();
+        };
+    }, []);
 
     // if value is not valid, use primary color
     let isValid = false;

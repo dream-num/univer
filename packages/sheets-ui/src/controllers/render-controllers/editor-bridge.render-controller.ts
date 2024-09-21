@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
 import { DisposableCollection, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { IRangeSelectorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { merge } from 'rxjs';
-import { IRangeSelectorService } from '@univerjs/ui';
+import type { ICommandInfo, IDisposable, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { getSheetObject } from '../utils/component-tools';
+import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
 // TODO: wzhudev: this should be merged with Edit EditingRenderController.
 

@@ -43,7 +43,7 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
 
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const prevBody = docDataModel?.getSnapshot().body;
-        const selections = docSelectionManagerService.getCurrentTextRanges();
+        const selections = docSelectionManagerService.getTextRanges();
 
         if (docDataModel == null || prevBody == null) {
             return false;

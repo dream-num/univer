@@ -17,7 +17,7 @@
 import { createInternalEditorID, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 
 import { Input } from '@univerjs/design';
-import { RangeSelector, TextEditor } from '@univerjs/ui';
+import { RangeSelector, TextEditor } from '@univerjs/docs-ui';
 import React, { useState } from 'react';
 import type { Workbook } from '@univerjs/core';
 

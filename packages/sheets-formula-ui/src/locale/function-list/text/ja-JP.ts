@@ -137,8 +137,8 @@ export default {
     },
     DOLLAR: {
         aliasFunctionName: 'YEN',
-        description: '数値を四捨五入し、通貨書式を設定した文字列に変換します。DOLLARでは、ドル ($) 通貨書式が設定されます。YENでは、円 (\\) 通貨書式が設定されます。',
-        abstract: '数値を四捨五入し、通貨書式を設定した文字列に変換します。DOLLARでは、ドル ($) 通貨書式が設定されます。YENでは、円 (\\) 通貨書式が設定されます。',
+        description: '通貨形式を使用して数値をテキストに変換します',
+        abstract: '通貨形式を使用して数値をテキストに変換します',
         links: [
             {
                 title: '指導',
@@ -146,8 +146,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '数値、数値を含むセルの参照、または結果が数値になる数式を指定します。' },
+            decimals: { name: '桁数', detail: '小数点以下の桁数を指定します。 負の値の場合、数値は小数点の左側に丸められます。 桁数を省略すると、2 を指定したと見なされます。' },
         },
     },
     EXACT: {
@@ -160,8 +160,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: '文字列1', detail: '一方の文字列を指定します。' },
+            text2: { name: '文字列2', detail: 'もう一方の文字列を指定します。' },
         },
     },
     FIND: {
@@ -202,8 +202,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '四捨五入して文字列に変換する数値を指定します。' },
+            decimals: { name: '桁数', detail: '小数点以下の桁数を指定します。 負の値の場合、数値は小数点の左側に丸められます。 桁数を省略すると、2 を指定したと見なされます。' },
+            noCommas: { name: '桁区切り', detail: '返される文字列をカンマ (,) で桁区切りするかどうかを論理値で指定します。TRUE を指定すると、桁区切りは行われません。' },
         },
     },
     LEFT: {
@@ -315,8 +316,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '数値に変換するテキスト。' },
+            decimalSeparator: { name: '小数点区切り文字', detail: '結果の整数部分と小数部を区切るために使用される文字。' },
+            groupSeparator: { name: 'グループ区切り文字', detail: 'の数値のグループを区切るために使用される文字。' },
         },
     },
     PHONETIC: {
@@ -343,8 +345,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '引用符で囲まれたテキスト、テキストを返す数式、または部分的に大文字にするテキストを含むセルへの参照。' },
         },
     },
     REGEXEXTRACT: {
@@ -442,8 +443,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            numChars: { name: '文字数', detail: '取り出す文字数 (文字列の末尾からの文字数) を指定します。' },
         },
     },
     RIGHTB: {

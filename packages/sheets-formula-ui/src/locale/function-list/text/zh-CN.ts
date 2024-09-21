@@ -136,8 +136,8 @@ export default {
         },
     },
     DOLLAR: {
-        description: '使用 ￥（人民币）货币格式将数字转换为文本',
-        abstract: '使用 ￥（人民币）货币格式将数字转换为文本',
+        description: '使用货币格式将数字转换为文本',
+        abstract: '使用货币格式将数字转换为文本',
         links: [
             {
                 title: '教学',
@@ -145,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '数字、对包含数字的单元格的引用或是计算结果为数字的公式。' },
+            decimals: { name: '小数位数', detail: '小数点右边的位数。 如果这是负数，则数字将舍入到小数点的左侧。 如果省略 decimals，则假设其值为 2。' },
         },
     },
     EXACT: {
@@ -159,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: '文本1', detail: '第一个文本字符串。' },
+            text2: { name: '文本2', detail: '第二个文本字符串。' },
         },
     },
     FIND: {
@@ -201,8 +201,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要进行舍入并转换为文本的数字。' },
+            decimals: { name: '小数位数', detail: '小数点右边的位数。 如果这是负数，则数字将舍入到小数点的左侧。 如果省略 decimals，则假设其值为 2。' },
+            noCommas: { name: '禁用分隔符', detail: '一个逻辑值，如果为 TRUE，则会禁止 FIXED 在返回的文本中包含逗号。' },
         },
     },
     LEFT: {
@@ -314,8 +315,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要转换为数字的文本。' },
+            decimalSeparator: { name: '小数分隔符', detail: '用于分隔结果的整数和小数部分的字符。' },
+            groupSeparator: { name: '分组分隔符', detail: '用于分隔数字分组的字符。' },
         },
     },
     PHONETIC: {
@@ -342,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '用引号括起来的文本、返回文本值的公式，或者对包含要进行部分大写转换文本的单元格的引用。' },
         },
     },
     REGEXEXTRACT: {
@@ -441,8 +442,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
+            numChars: { name: '字符数', detail: '指定希望 RIGHT 提取的字符数。' },
         },
     },
     RIGHTB: {

@@ -330,7 +330,12 @@ export class Editor extends Disposable implements IEditor {
 
         this._commandService.executeCommand(ReplaceContentCommand.id, {
             unitId: id,
-            body,
+            body: {
+                ...body,
+                dataStream: body?.dataStream.endsWith('\r\n')
+                    ? body.dataStream.substring(0, body.dataStream.length - 2)
+                    : body!.dataStream,
+            },
             textRanges,
         });
     }

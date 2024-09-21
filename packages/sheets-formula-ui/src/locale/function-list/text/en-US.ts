@@ -136,8 +136,8 @@ export default {
         },
     },
     DOLLAR: {
-        description: 'Converts a number to text, using the $ (dollar) currency format',
-        abstract: 'Converts a number to text, using the $ (dollar) currency format',
+        description: 'Converts a number to text using currency format',
+        abstract: 'Converts a number to text using currency format',
         links: [
             {
                 title: 'Instruction',
@@ -145,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number, a reference to a cell containing a number, or a formula that evaluates to a number.' },
+            decimals: { name: 'decimals', detail: 'The number of digits to the right of the decimal point. If this is negative, the number is rounded to the left of the decimal point. If you omit decimals, it is assumed to be 2.' },
         },
     },
     EXACT: {
@@ -159,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'text1', detail: 'The first text string.' },
+            text2: { name: 'text2', detail: 'The second text string.' },
         },
     },
     FIND: {
@@ -201,8 +201,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number you want to round and convert to text.' },
+            decimals: { name: 'decimals', detail: 'The number of digits to the right of the decimal point. If this is negative, the number is rounded to the left of the decimal point. If you omit decimals, it is assumed to be 2.' },
+            noCommas: { name: 'no_commas', detail: 'A logical value that, if TRUE, prevents FIXED from including commas in the returned text.' },
         },
     },
     LEFT: {
@@ -314,8 +315,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text to convert to a number.' },
+            decimalSeparator: { name: 'decimal_separator', detail: 'The character used to separate the integer and fractional part of the result.' },
+            groupSeparator: { name: 'group_separator', detail: 'The character used to separate groupings of numbers.' },
         },
     },
     PHONETIC: {
@@ -342,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Text enclosed in quotation marks, a formula that returns text, or a reference to a cell containing the text you want to partially capitalize.' },
         },
     },
     REGEXEXTRACT: {
@@ -441,8 +442,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want RIGHT to extract.' },
         },
     },
     RIGHTB: {

@@ -23,6 +23,9 @@ import { Code } from './code';
 import { Concat } from './concat';
 import { Concatenate } from './concatenate';
 import { Dbcs } from './dbcs';
+import { Dollar } from './dollar';
+import { Exact } from './exact';
+import { Fixed } from './fixed';
 import { FUNCTION_NAMES_TEXT } from './function-names';
 import { Leftb } from './leftb';
 import { Len } from './len';
@@ -32,7 +35,10 @@ import { Mid } from './mid';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
 import { Regexreplace } from './regexreplace';
+import { Numbervalue } from './numbervalue';
+import { Proper } from './proper';
 import { Rept } from './rept';
+import { Right } from './right';
 import { Text } from './text';
 import { Textafter } from './textafter';
 import { Textbefore } from './textbefore';
@@ -48,6 +54,9 @@ export const functionText = [
     [Concat, FUNCTION_NAMES_TEXT.CONCAT],
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
     [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
+    [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
+    [Exact, FUNCTION_NAMES_TEXT.EXACT],
+    [Fixed, FUNCTION_NAMES_TEXT.FIXED],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
@@ -55,7 +64,10 @@ export const functionText = [
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
+    [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
+    [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
+    [Right, FUNCTION_NAMES_TEXT.RIGHT],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],

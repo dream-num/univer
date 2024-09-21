@@ -136,8 +136,8 @@ export default {
         },
     },
     DOLLAR: {
-        description: '使用 ￥（人民幣）貨幣格式將數字轉換為文本',
-        abstract: '使用 ￥（人民幣）貨幣格式將數字轉換為文本',
+        description: '使用貨幣格式將數字轉換為文本',
+        abstract: '使用貨幣格式將數字轉換為文本',
         links: [
             {
                 title: '教導',
@@ -145,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是一個數字、一個含有數字之儲存格的參照，或一個評估為數字的公式。' },
+            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
         },
     },
     EXACT: {
@@ -159,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: '文字1', detail: '這是第一個文字字串。' },
+            text2: { name: '文字2', detail: '這是第二個文字字串。' },
         },
     },
     FIND: {
@@ -201,8 +201,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要四捨五入並轉換為文字的數字。' },
+            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
+            noCommas: { name: '禁用分隔符', detail: '這是邏輯值，如果為 TRUE，會阻止 FIXED 在傳回的文字中包含逗號。' },
         },
     },
     LEFT: {
@@ -313,8 +314,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要轉換成數位的文字。' },
+            decimalSeparator: { name: '小數分隔符', detail: '用來分隔結果整數和小數部分的字元。' },
+            groupSeparator: { name: '群組分隔符', detail: '用來分隔數位群組的字元。' },
         },
     },
     PHONETIC: {
@@ -341,8 +343,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是以引號括住的文字、傳回文字的公式，或包含要將部分變為大寫之文字的儲存格參照。' },
         },
     },
     REGEXEXTRACT: {
@@ -440,8 +441,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
+            numChars: { name: '字元數', detail: '這會指定您要 RIGHT 擷取的字元數目。' },
         },
     },
     RIGHTB: {

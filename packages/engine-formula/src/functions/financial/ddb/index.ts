@@ -18,7 +18,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { calculateDDB } from '../../../basics/financial';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { getCurrencyPattern } from '../../../engine/utils/numfmt-kit';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -98,7 +98,7 @@ export class Ddb extends BaseFunction {
             }
 
             if (rowIndex === 0 && columnIndex === 0) {
-                return NumberValueObject.create(result, getCurrencyPattern(this.getLocale()));
+                return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
             }
 
             return NumberValueObject.create(result);

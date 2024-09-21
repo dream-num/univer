@@ -297,11 +297,11 @@ const countryCurrencySymbolMap = new Map<LocaleType, string>([
     [LocaleType.ZH_TW, 'NT$'],
 ]);
 
-function getCurrencySymbol(locale: LocaleType) {
+function getCurrencySymbol(locale: LocaleType): string {
     return countryCurrencySymbolMap.get(locale) || '$';
 }
 
-export function getCurrencyPattern(locale: LocaleType, numberDigits: number = 2) {
+export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
     let _numberDigits = numberDigits;
 
     if (numberDigits > 127) {
@@ -317,3 +317,6 @@ export function getCurrencyPattern(locale: LocaleType, numberDigits: number = 2)
     return `"${getCurrencySymbol(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbol(locale)}"#,##0${decimal})`;
 }
 
+export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {
+    return numfmt.format(getCurrencyFormat(locale, numberDigits), number);
+}

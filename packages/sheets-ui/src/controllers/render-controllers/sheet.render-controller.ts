@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
+import { CommandType, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import {
-    PointerInput,
     Rect,
-    RENDER_CLASS_TYPE,
     ScrollBar,
     SHEET_EXTENSION_PREFIX,
     SHEET_VIEWPORT_KEY,
@@ -31,8 +29,7 @@ import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRa
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, IWheelEvent, Scene } from '@univerjs/engine-render';
-import { SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
@@ -364,7 +361,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const { rowHeader, columnHeader } = worksheet.getConfig();
         const { viewMain } = this._initViewports(scene, rowHeader, columnHeader);
 
-        this._initMouseWheel(scene, viewMain);
+        // this._initMouseWheel(scene, viewMain);
         const _scrollBar = new ScrollBar(viewMain);
 
         scene.attachControl();
@@ -546,87 +543,5 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _spreadsheetViewports(scene: Scene) {
         return scene.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
-    }
-
-    // mouse scroll
-    private _initMouseWheel(scene: Scene, viewMain: Viewport) {
-        this.disposeWithMe(
-            // eslint-disable-next-line complexity
-            scene.onMouseWheel$.subscribeEvent((evt: IWheelEvent, state) => {
-                if (evt.ctrlKey || !this._contextService.getContextValue(FOCUSING_SHEET)) {
-                    return;
-                }
-
-                let offsetX = 0;
-                let offsetY = 0;
-
-                const isLimitedStore = viewMain.limitedScroll();
-                if (evt.inputIndex === PointerInput.MouseWheelX) {
-                    const deltaFactor = Math.abs(evt.deltaX);
-                    // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                    const scrollNum = deltaFactor;
-                    // show more content on the right，evt.deltaX > 0
-                    // show more content on the left, evt.deltaX < 0
-                    if (evt.deltaX > 0) {
-                        offsetX = scrollNum;
-                    } else {
-                        offsetX = -scrollNum;
-                    }
-                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedX) {
-                            state.stopPropagation();
-                        }
-                    } else if (viewMain.isWheelPreventDefaultX) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedX) {
-                        evt.preventDefault();
-                    }
-                }
-                if (evt.inputIndex === PointerInput.MouseWheelY) {
-                    const deltaFactor = Math.abs(evt.deltaY);
-                    let scrollNum = deltaFactor;
-                    if (evt.shiftKey) {
-                        scrollNum *= 3;
-                        if (evt.deltaY > 0) {
-                            offsetX = scrollNum;
-                        } else {
-                            offsetX = -scrollNum;
-                        }
-                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                            if (!isLimitedStore?.isLimitedX) {
-                                state.stopPropagation();
-                            }
-                        } else if (viewMain.isWheelPreventDefaultX) {
-                            evt.preventDefault();
-                        } else if (!isLimitedStore?.isLimitedX) {
-                            evt.preventDefault();
-                        }
-                    } else {
-                        if (evt.deltaY > 0) {
-                            offsetY = scrollNum;
-                        } else {
-                            offsetY = -scrollNum;
-                        }
-                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
-
-                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                            if (!isLimitedStore?.isLimitedY) {
-                                state.stopPropagation();
-                            }
-                        } else if (viewMain.isWheelPreventDefaultY) {
-                            evt.preventDefault();
-                        } else if (!isLimitedStore?.isLimitedY) {
-                            evt.preventDefault();
-                        }
-                    }
-                }
-
-                this._context.scene.makeDirty(true);
-            })
-        );
     }
 }

@@ -128,7 +128,7 @@ export class Viewport {
 
     onScrollAfter$ = new EventSubject<IScrollObserverParam>();
 
-    onScrollBefore$ = new EventSubject<IScrollObserverParam>();
+    // onScrollBefore$ = new EventSubject<IScrollObserverParam>();
 
     onScrollEnd$ = new EventSubject<IScrollObserverParam>();
 
@@ -373,8 +373,8 @@ export class Viewport {
 
     set height(height: Nullable<number>) {
         const maxHeight = this.scene.getParent().height;
-        if (height !== null && height !== undefined) {
-            this._height = Tools.clamp(height, 0, maxHeight);
+        if (Tools.isDefine(height)) {
+            this._height = Tools.clamp(height!, 0, maxHeight);
         } else {
             this._height = height;
         }
@@ -541,7 +541,7 @@ export class Viewport {
     // 2. changing curr skeleton
     // 3. changing selection which cross viewport
     // 4. changing the viewport size (also include change window size)
-    // 5. changing the scroll bar position
+    // 5. changing the scroll bar position(click at certain pos of scrolltrack)
     // Debug
     // window.scene.getViewports()[0].scrollTo({x: 14.2, y: 1.8}, true)
     scrollToBarPos(pos: Partial<IScrollBarPosition>) {
@@ -549,7 +549,7 @@ export class Viewport {
     }
 
     /**
-     * scrolling by current position plus offset
+     * Srolling by current position plus delta.
      * the most common case is triggered by scroll-timer(in sheet)
      * @param delta
      * @returns isLimited
@@ -558,23 +558,6 @@ export class Viewport {
         const x = this.scrollX + (delta.x || 0);
         const y = this.scrollY + (delta.y || 0);
         return this._scrollToBarPosCore({ x, y }, isTrigger);
-    }
-
-    scrollByBar(delta: Partial<IScrollBarPosition>, isTrigger = true) {
-        this.scrollByBarDeltaValue(delta, isTrigger);
-        const { x, y } = delta;
-        this.onScrollByBar$.emitEvent({
-            viewport: this,
-            scrollX: this.scrollX,
-            scrollY: this.scrollY,
-            rawScrollX: x,
-            rawScrollY: y,
-            viewportScrollX: this.viewportScrollX,
-            viewportScrollY: this.viewportScrollY,
-            limitX: this._scrollBar?.limitX,
-            limitY: this._scrollBar?.limitY,
-            isTrigger,
-        });
     }
 
     /**
@@ -605,23 +588,6 @@ export class Viewport {
         const viewportScrollX = this.viewportScrollX + (delta.viewportScrollX || 0);
         const viewportScrollY = this.viewportScrollY + (delta.viewportScrollY || 0);
         return this._scrollToViewportPosCore({ viewportScrollX, viewportScrollY }, isTrigger);
-    }
-
-    /**
-     * current position plus offset relatively
-     * the caller no need to deal with the padding when frozen
-     * @param offsetX
-     * @param offsetY
-     * @param isTrigger
-     */
-    scrollByOffset(offsetX = 0, offsetY = 0, isTrigger = true) {
-        if (!this._scrollBar || this.isActive === false) {
-            return;
-        }
-        const x = offsetX + this._paddingStartX;
-        const y = offsetY + this._paddingStartY;
-        const param = this.transViewportScroll2ScrollValue(x, y);
-        return this.scrollByBarDeltaValue(param, isTrigger);
     }
 
     transViewportScroll2ScrollValue(viewportScrollX: number, viewportScrollY: number) {
@@ -1135,7 +1101,7 @@ export class Viewport {
     dispose() {
         this.onMouseWheel$.complete();
         this.onScrollAfter$.complete();
-        this.onScrollBefore$.complete();
+        // this.onScrollBefore$.complete();
         this.onScrollEnd$.complete();
         this._scrollBar?.dispose();
         this._cacheCanvas?.dispose();
@@ -1331,6 +1297,10 @@ export class Viewport {
         // this._preScrollY = this.scrollY;
     }
 
+    /**
+     * mock scrollend.
+     * @param scrollSubParam
+     */
     private _emitScrollEnd$(scrollSubParam: IScrollObserverParam) {
         clearTimeout(this._scrollStopNum);
         this._scrollStopNum = setTimeout(() => {
@@ -1385,11 +1355,20 @@ export class Viewport {
             isTrigger,
         };
         this._scrollBar?.makeDirty(true);
-
-        this.onScrollBefore$.emitEvent(scrollSubParam);
         this.onScrollAfter$.emitEvent(scrollSubParam);
         this._emitScrollEnd$(scrollSubParam);
 
+        // exec sheet.command.scroll-view
+        this.onScrollByBar$.emitEvent({
+            viewport: this,
+            scrollX: this.scrollX,
+            scrollY: this.scrollY,
+            viewportScrollX: this.viewportScrollX,
+            viewportScrollY: this.viewportScrollY,
+            limitX: this._scrollBar?.limitX,
+            limitY: this._scrollBar?.limitY,
+            isTrigger,
+        });
         return afterLimit;
     }
 
@@ -1444,7 +1423,7 @@ export class Viewport {
 
         this._scrollBar?.makeDirty(true);
 
-        this.onScrollBefore$.emitEvent(scrollSubParam);
+        // set valid scrollInfo
         this.onScrollAfter$.emitEvent(scrollSubParam);
         this._emitScrollEnd$(scrollSubParam);
 

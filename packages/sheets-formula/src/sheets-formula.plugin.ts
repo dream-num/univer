@@ -37,7 +37,7 @@ import {
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
-import { DefinedNameUpdateController } from './controllers/update-defined-name.controller';
+import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
@@ -101,7 +101,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [ActiveDirtyController],
             [DefinedNameController],
-            [DefinedNameUpdateController],
+            [UpdateDefinedNameController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.

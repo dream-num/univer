@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
     cellToRange,
     CommandType,
@@ -29,14 +28,15 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
-import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 
 export interface IMoveRangeCommandParams {
     toRange: IRange;

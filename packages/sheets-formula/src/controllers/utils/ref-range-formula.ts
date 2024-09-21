@@ -55,7 +55,7 @@ export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { type } = formulaReferenceMoveParam;
 
-    if (type === FormulaReferenceMoveType.SetName || type === FormulaReferenceMoveType.RemoveSheet) {
+    if (type === FormulaReferenceMoveType.SetName || type === FormulaReferenceMoveType.RemoveSheet || type === FormulaReferenceMoveType.SetDefinedName) {
         return getFormulaReferenceSheet(oldFormulaData, newFormulaData);
     } else {
         return getFormulaReferenceRange(oldFormulaData, newFormulaData, formulaReferenceMoveParam);

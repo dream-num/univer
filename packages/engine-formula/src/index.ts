@@ -59,6 +59,7 @@ export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './co
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
 export { RemoveSuperTableMutation, SetSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
 export { CalculateController } from './controller/calculate.controller';
+export { SetDefinedNameController } from './controller/set-defined-name.controller';
 export { Lexer } from './engine/analysis/lexer';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
@@ -117,11 +118,11 @@ export { functionEngineering } from './functions/engineering/function-map';
 export { FUNCTION_NAMES_ENGINEERING } from './functions/engineering/function-names';
 export { functionFinancial } from './functions/financial/function-map';
 export { FUNCTION_NAMES_FINANCIAL } from './functions/financial/function-names';
+
 export { functionInformation } from './functions/information/function-map';
-
 export { FUNCTION_NAMES_INFORMATION } from './functions/information/function-names';
-export { functionLogical } from './functions/logical/function-map';
 
+export { functionLogical } from './functions/logical/function-map';
 export { FUNCTION_NAMES_LOGICAL } from './functions/logical/function-names';
 export { functionLookup } from './functions/lookup/function-map';
 export { FUNCTION_NAMES_LOOKUP } from './functions/lookup/function-names';

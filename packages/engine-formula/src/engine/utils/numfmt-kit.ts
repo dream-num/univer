@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import { LocaleType, numfmt } from '@univerjs/core';
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-import { numfmt } from '@univerjs/core';
 import { operatorToken } from '../../basics/token';
 
 const currencySymbols = [
@@ -279,3 +279,41 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
 
     return previousPattern || nextPattern;
 }
+
+/**
+ * Get the currency symbol based on the locale
+ * Now define it here
+ * TODO: import from sheet-numfmt currencySymbolMap later
+ *
+ * @param locale
+ * @returns
+ */
+const countryCurrencySymbolMap = new Map<LocaleType, string>([
+    [LocaleType.EN_US, '$'],
+    // [LocaleType.JA_JP, '¥'],
+    [LocaleType.RU_RU, '₽'],
+    [LocaleType.VI_VN, '₫'],
+    [LocaleType.ZH_CN, '¥'],
+    [LocaleType.ZH_TW, 'NT$'],
+]);
+
+function getCurrencySymbol(locale: LocaleType) {
+    return countryCurrencySymbolMap.get(locale) || '$';
+}
+
+export function getCurrencyPattern(locale: LocaleType, numberDigits: number = 2) {
+    let _numberDigits = numberDigits;
+
+    if (numberDigits > 127) {
+        _numberDigits = 127;
+    }
+
+    let decimal = '';
+
+    if (_numberDigits > 0) {
+        decimal = `.${'0'.repeat(_numberDigits)}`;
+    }
+
+    return `"${getCurrencySymbol(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbol(locale)}"#,##0${decimal})`;
+}
+

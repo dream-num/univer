@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, LocaleType, Nullable } from '@univerjs/core';
 import type { IFunctionNames } from '../basics/function';
 
 import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
@@ -42,6 +42,7 @@ export class BaseFunction {
     private _row: number = -1;
     private _column: number = -1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
+    private _locale: LocaleType;
 
     /**
      * Whether the function needs to expand the parameters
@@ -52,6 +53,11 @@ export class BaseFunction {
      * Whether the function needs to pass in reference object
      */
     needsReferenceObject: boolean = false;
+
+    /**
+     * Whether the function needs handle locale
+     */
+    needsLocale: boolean = false;
 
     /**
      * Minimum number of parameters
@@ -109,6 +115,14 @@ export class BaseFunction {
 
     setDefinedNames(definedNames: IDefinedNameMapItem) {
         this._definedNames = definedNames;
+    }
+
+    getLocale() {
+        return this._locale;
+    }
+
+    setLocale(locale: LocaleType) {
+        this._locale = locale;
     }
 
     isAsync() {

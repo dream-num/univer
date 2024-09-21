@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
 import {
     BorderType,
     CommandType,
@@ -23,6 +25,7 @@ import {
     ObjectMatrix,
     Tools,
 } from '@univerjs/core';
+
 import type {
     BorderStyleTypes,
     IAccessor,
@@ -33,7 +36,6 @@ import type {
     IRange,
     IStyleData,
 } from '@univerjs/core';
-
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
@@ -233,7 +235,7 @@ export const SetBorderCommand: ICommand = {
 
         const mr = new ObjectMatrix<ICellData>();
 
-        const border: IBorderStyleData = {
+        const borderStyle: IBorderStyleData = {
             s: style,
             cl: {
                 rgb: color,
@@ -269,76 +271,18 @@ export const SetBorderCommand: ICommand = {
             });
         }
 
-        if (top) {
-            /**
-             * pro/issues/344
-             * Compatible with Excel's border rendering.
-             * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
-             * if the top border of cell r is white, then the rendering is ignored.
-             */
-            setBorderStyle(topRangeOut, { b: null });
-            setBorderStyle(topRange, { t: Tools.deepClone(border) }, true);
-        }
-        if (bottom) {
-            setBorderStyle(bottomRangeOut, { t: null });
-            setBorderStyle(bottomRange, { b: Tools.deepClone(border) }, true);
-        }
-        if (left) {
-            setBorderStyle(leftRangeOut, { r: null });
-            setBorderStyle(leftRange, { l: Tools.deepClone(border) }, true);
-        }
-        if (right) {
-            setBorderStyle(rightRangeOut, { l: null });
-            setBorderStyle(rightRange, { r: Tools.deepClone(border) }, true);
-        }
-
-        if (tl_br) {
-            setBorderStyle(range, { tl_br: Tools.deepClone(border) }, true);
-        }
-
-        if (tl_bc) {
-            setBorderStyle(range, { tl_bc: Tools.deepClone(border) }, true);
-        }
-
-        if (tl_mr) {
-            setBorderStyle(range, { tl_mr: Tools.deepClone(border) }, true);
-        }
-
-        if (bl_tr) {
-            setBorderStyle(range, { bl_tr: Tools.deepClone(border) }, true);
-        }
-
-        if (ml_tr) {
-            setBorderStyle(range, { ml_tr: Tools.deepClone(border) }, true);
-        }
-
-        if (bc_tr) {
-            setBorderStyle(range, { bc_tr: Tools.deepClone(border) }, true);
-        }
-
-        // inner vertical border
+        //#region inner vertical border
         if (vertical) {
             forEach(range, (row, column) => {
-                const rectangle = worksheet.getMergedCell(row, column);
-                if (rectangle) {
-                    if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
+                const mergedRange = worksheet.getMergedCell(row, column);
+                if (mergedRange) {
+                    const topLeftStyle = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
+                    if (mergedRange.startColumn !== range.startColumn) {
                         mr.setValue(row, column, {
                             s: {
-                                bd: style?.bd
-                                    ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                                    : { r: Tools.deepClone(border) },
-                            },
-                        });
-                    }
-
-                    if (rectangle.startColumn !== range.startColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd
-                                    ? Object.assign(style.bd, { l: Tools.deepClone(border) })
-                                    : { l: Tools.deepClone(border) },
+                                bd: topLeftStyle?.bd
+                                    ? Object.assign(topLeftStyle.bd, { l: Tools.deepClone(borderStyle) })
+                                    : { l: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
@@ -348,8 +292,8 @@ export const SetBorderCommand: ICommand = {
                         mr.setValue(row, column, {
                             s: {
                                 bd: style?.bd
-                                    ? Object.assign(style.bd, { r: Tools.deepClone(border) })
-                                    : { r: Tools.deepClone(border) },
+                                    ? Object.assign(style.bd, { r: Tools.deepClone(borderStyle) })
+                                    : { r: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
@@ -359,37 +303,29 @@ export const SetBorderCommand: ICommand = {
                         mr.setValue(row, column, {
                             s: {
                                 bd: style?.bd
-                                    ? Object.assign(style.bd, { l: Tools.deepClone(border) })
-                                    : { l: Tools.deepClone(border) },
+                                    ? Object.assign(style.bd, { l: Tools.deepClone(borderStyle) })
+                                    : { l: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
                 }
             });
         }
-        // inner horizontal border
+        //#endregion
+
+        //#region inner horizontal border
         if (horizontal) {
             forEach(range, (row, column) => {
-                const rectangle = worksheet.getMergedCell(row, column);
-                if (rectangle) {
-                    if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd
-                                    ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                                    : { b: Tools.deepClone(border) },
-                            },
-                        });
-                    }
+                const mergedRange = worksheet.getMergedCell(row, column);
+                if (mergedRange) {
+                    const topLeftStyle = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
 
-                    if (rectangle.startRow !== range.startRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
+                    if (mergedRange.startRow !== range.startRow) {
                         mr.setValue(row, column, {
                             s: {
-                                bd: style?.bd
-                                    ? Object.assign(style.bd, { t: Tools.deepClone(border) })
-                                    : { t: Tools.deepClone(border) },
+                                bd: topLeftStyle?.bd
+                                    ? Object.assign(topLeftStyle.bd, { t: Tools.deepClone(borderStyle) })
+                                    : { t: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
@@ -399,8 +335,8 @@ export const SetBorderCommand: ICommand = {
                         mr.setValue(row, column, {
                             s: {
                                 bd: style?.bd
-                                    ? Object.assign(style.bd, { b: Tools.deepClone(border) })
-                                    : { b: Tools.deepClone(border) },
+                                    ? Object.assign(style.bd, { b: Tools.deepClone(borderStyle) })
+                                    : { b: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
@@ -410,16 +346,73 @@ export const SetBorderCommand: ICommand = {
                         mr.setValue(row, column, {
                             s: {
                                 bd: style?.bd
-                                    ? Object.assign(style.bd, { t: Tools.deepClone(border) })
-                                    : { t: Tools.deepClone(border) },
+                                    ? Object.assign(style.bd, { t: Tools.deepClone(borderStyle) })
+                                    : { t: Tools.deepClone(borderStyle) },
                             },
                         });
                     }
                 }
             });
         }
+        //#endregion
 
-        // clear
+        //#region outline border
+        if (top) {
+            /**
+             * pro/issues/344
+             * Compatible with Excel's border rendering.
+             * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
+             * if the top border of cell r is white, then the rendering is ignored.
+             */
+            setBorderStyle(topRangeOut, { b: null });
+            setBorderStyle(topRange, { t: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (bottom) {
+            //see univer-pro/issues/2561
+            // add bottom line for merged cell
+            // must put below inner horizontal border, horizontal border would clear right border when using topleftBorderStyle
+            setBorderStyle(bottomRangeOut, { t: null });
+            setBorderStyle(bottomRange, { b: Tools.deepClone(borderStyle) }, true);
+        }
+        if (left) {
+            setBorderStyle(leftRangeOut, { r: null });
+            setBorderStyle(leftRange, { l: Tools.deepClone(borderStyle) }, true);
+        }
+        if (right) {
+            //see univer-pro/issues/2561
+            // add bottom line for merged cell
+            // must put below inner vertical border, vertical border would clear right border when using topleftBorderStyle
+            setBorderStyle(rightRangeOut, { l: null });
+            setBorderStyle(rightRange, { r: Tools.deepClone(borderStyle) }, true);
+        }
+        //#endregion
+
+        if (tl_br) {
+            setBorderStyle(range, { tl_br: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (tl_bc) {
+            setBorderStyle(range, { tl_bc: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (tl_mr) {
+            setBorderStyle(range, { tl_mr: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (bl_tr) {
+            setBorderStyle(range, { bl_tr: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (ml_tr) {
+            setBorderStyle(range, { ml_tr: Tools.deepClone(borderStyle) }, true);
+        }
+
+        if (bc_tr) {
+            setBorderStyle(range, { bc_tr: Tools.deepClone(borderStyle) }, true);
+        }
+
+        //#region clear border
         if (
             !top &&
             !bottom &&
@@ -434,6 +427,89 @@ export const SetBorderCommand: ICommand = {
             !ml_tr &&
             !bc_tr
         ) {
+            forEach(range, (row, column) => {
+                const mergedRange = worksheet.getMergedCell(row, column);
+                if (mergedRange) {
+                    // Clear the right border of all columns except the last column
+                    if (mergedRange.endColumn !== range.endColumn) {
+                        const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            },
+                        });
+                    }
+                    // Clear the left border of all columns except the first column
+                    if (mergedRange.startColumn !== range.startColumn) {
+                        const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            },
+                        });
+                    }
+                    // Clear all the bottom border except the last line
+                    // see https://github.com/dream-num/univer/pull/3506
+                    // this is not right!! why set not last row to topleft cell border? why?
+                    // topleft border doesn't have { right: null }
+                    // after exec this, the endColumn lost { right: null } when clear border.
+                    if (mergedRange.endRow !== range.endRow) {
+                        const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            },
+                        });
+                    }
+                    // Clear the top border of all lines except the first line
+                    if (mergedRange.startRow !== range.startRow) {
+                        const style = mr.getValue(mergedRange.startRow, mergedRange.startColumn)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            },
+                        });
+                    }
+                } else {
+                    // Clear the right border of all columns except the last column
+                    if (column !== range.endColumn) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
+                            },
+                        });
+                    }
+                    // Clear the left border of all columns except the first column
+                    if (column !== range.startColumn) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
+                            },
+                        });
+                    }
+                    // Clear all the bottom border except the last line
+                    if (row !== range.endRow) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
+                            },
+                        });
+                    }
+                    // Clear the top border of all lines except the first line
+                    if (row !== range.startRow) {
+                        const style = mr.getValue(row, column)?.s as IStyleData;
+                        mr.setValue(row, column, {
+                            s: {
+                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
+                            },
+                        });
+                    }
+                }
+            });
+
             setBorderStyle(topRangeOut, { b: null });
             setBorderStyle(topRange, { t: null }, true);
             setBorderStyle(bottomRangeOut, { t: null });
@@ -449,86 +525,8 @@ export const SetBorderCommand: ICommand = {
             setBorderStyle(range, { bl_tr: null }, true);
             setBorderStyle(range, { ml_tr: null }, true);
             setBorderStyle(range, { bc_tr: null }, true);
-
-            forEach(range, (row, column) => {
-                const rectangle = worksheet.getMergedCell(row, column);
-                if (rectangle) {
-                    // Clear the right border of all columns except the last column
-                    if (rectangle.endColumn !== range.endColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
-                            },
-                        });
-                    }
-                    // Clear the left border of all columns except the first column
-                    if (rectangle.startColumn !== range.startColumn) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
-                            },
-                        });
-                    }
-                    // Clear all the bottom border except the last line
-                    if (rectangle.endRow !== range.endRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
-                            },
-                        });
-                    }
-                    // Clear the top border of all lines except the first line
-                    if (rectangle.startRow !== range.startRow) {
-                        const style = mr.getValue(rectangle.startRow, rectangle.startColumn)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
-                            },
-                        });
-                    }
-                } else {
-                    // Clear the right border of all columns except the last column
-                    if (column !== range.endColumn) {
-                        const style = mr.getValue(row, column)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { r: null }) : { r: null },
-                            },
-                        });
-                    }
-                    // Clear the left border of all columns except the first column
-                    if (column !== range.startColumn) {
-                        const style = mr.getValue(row, column)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { l: null }) : { l: null },
-                            },
-                        });
-                    }
-                    // Clear all the bottom border except the last line
-                    if (row !== range.endRow) {
-                        const style = mr.getValue(row, column)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { b: null }) : { b: null },
-                            },
-                        });
-                    }
-                    // Clear the top border of all lines except the first line
-                    if (row !== range.startRow) {
-                        const style = mr.getValue(row, column)?.s as IStyleData;
-                        mr.setValue(row, column, {
-                            s: {
-                                bd: style?.bd ? Object.assign(style.bd, { t: null }) : { t: null },
-                            },
-                        });
-                    }
-                }
-            });
         }
+        //#endregion
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             unitId,

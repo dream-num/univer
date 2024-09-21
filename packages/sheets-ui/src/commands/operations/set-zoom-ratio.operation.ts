@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IOperation } from '@univerjs/core';
 import { SheetsZoomRenderController } from '../../controllers/render-controllers/zoom.render-controller';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export interface ISetZoomRatioOperationParams {
     zoomRatio: number;
@@ -31,8 +32,11 @@ export const SetZoomRatioOperation: IOperation<ISetZoomRatioOperationParams> = {
     handler: (accessor, params: ISetZoomRatioOperationParams) => {
         const renderManagerService = accessor.get(IRenderManagerService);
         const renderUnit = renderManagerService.getRenderById(params.unitId);
-
+        const editorBridgeService = accessor.get(IEditorBridgeService);
         if (!renderUnit) return false;
+        const state = editorBridgeService.isVisible();
+        if (state.unitId === params.unitId && state.visible) return false;
+
         return renderUnit.with(SheetsZoomRenderController).updateZoom(params.subUnitId, params.zoomRatio);
     },
 };

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -43,16 +41,8 @@ import {
     SetVerticalTextAlignCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
-import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import {
-    SetRangeBoldCommand,
-    SetRangeFontFamilyCommand,
-    SetRangeFontSizeCommand,
-    SetRangeItalicCommand,
-    SetRangeStrickThroughCommand,
-    SetRangeTextColorCommand,
-    SetRangeUnderlineCommand,
-} from '../commands/commands/inline-format.command';
+import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
+import type { MenuSchemaType } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     // SheetCutCommand,
@@ -62,12 +52,20 @@ import {
     SheetPasteFormatCommand,
     SheetPasteValueCommand,
 } from '../commands/commands/clipboard.command';
-import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
-import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
-import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
-import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
+import {
+    SetRangeBoldCommand,
+    SetRangeFontFamilyCommand,
+    SetRangeFontSizeCommand,
+    SetRangeItalicCommand,
+    SetRangeStrickThroughCommand,
+    SetRangeTextColorCommand,
+    SetRangeUnderlineCommand,
+} from '../commands/commands/inline-format.command';
+import { InsertRangeMoveDownConfirmCommand } from '../commands/commands/insert-range-move-down-confirm.command';
+import { InsertRangeMoveRightConfirmCommand } from '../commands/commands/insert-range-move-right-confirm.command';
 import {
     AddRangeProtectionFromContextMenuCommand,
     AddRangeProtectionFromSheetBarCommand,
@@ -77,14 +75,32 @@ import {
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,
 } from '../commands/commands/range-protection.command';
-import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
+import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
-import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
+import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
+import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
     ChangeSheetProtectionFromSheetBarCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
 } from '../commands/commands/worksheet-protection.command';
+import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
+import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
+import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
+import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
+import {
+    CELL_INSERT_MENU_ID,
+    CellInsertMenuItemFactory,
+    COL_INSERT_MENU_ID,
+    ColInsertMenuItemFactory,
+    InsertColAfterMenuItemFactory,
+    InsertColBeforeMenuItemFactory,
+    InsertRangeMoveDownMenuItemFactory,
+    InsertRangeMoveRightMenuItemFactory,
+    InsertRowAfterMenuItemFactory,
+    InsertRowBeforeMenuItemFactory,
+    ROW_INSERT_MENU_ID, RowInsertMenuItemFactory,
+} from './menu/insert.menu';
 import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
@@ -128,22 +144,6 @@ import {
     WrapTextMenuItemFactory,
 } from './menu/menu';
 import { CellMergeAllMenuItemFactory, CellMergeCancelMenuItemFactory, CellMergeHorizontalMenuItemFactory, CellMergeMenuItemFactory, CellMergeVerticalMenuItemFactory } from './menu/merge.menu';
-import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
-import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
-import {
-    CELL_INSERT_MENU_ID,
-    CellInsertMenuItemFactory,
-    COL_INSERT_MENU_ID,
-    ColInsertMenuItemFactory,
-    InsertColAfterMenuItemFactory,
-    InsertColBeforeMenuItemFactory,
-    InsertRangeMoveDownMenuItemFactory,
-    InsertRangeMoveRightMenuItemFactory,
-    InsertRowAfterMenuItemFactory,
-    InsertRowBeforeMenuItemFactory,
-    ROW_INSERT_MENU_ID, RowInsertMenuItemFactory,
-} from './menu/insert.menu';
-import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
 import {
     SHEET_PERMISSION_CONTEXT_MENU_ID,
     sheetPermissionAddProtectContextMenuFactory,

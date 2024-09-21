@@ -48,6 +48,8 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     let index = 0;
 
     useEffect(() => {
+        setRealValue(value);
+
         if (value$) {
             const subscription = value$.subscribe((v) => {
                 setRealValue(v);
@@ -57,7 +59,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
                 subscription.unsubscribe();
             };
         }
-    }, []);
+    }, [value, value$]);
 
     useEffect(() => {
         let subscription = null;
@@ -72,7 +74,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         return () => {
             subscription?.unsubscribe();
         };
-    }, []);
+    }, [icon]);
 
     // if value is not valid, use primary color
     let isValid = false;

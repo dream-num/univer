@@ -89,9 +89,9 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selections = docSelectionManagerService.getTextRanges();
+        const originSelections = docSelectionManagerService.getTextRanges();
         const { body, tableSource, drawings } = doc;
-        if (!Array.isArray(selections) || selections.length === 0 || body == null) {
+        if (!Array.isArray(originSelections) || originSelections.length === 0 || body == null) {
             return false;
         }
 
@@ -100,7 +100,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         if (docDataModel == null || originBody == null) {
             return false;
         }
-
+        const selections = originSelections.map((range) => BuildTextUtils.selection.getInsertSelection(range, originBody));
         const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {

@@ -1096,13 +1096,6 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.NUMBER;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';
@@ -1115,6 +1108,13 @@ export function getCellDataByInput(
             cellData.f = null;
             cellData.si = null;
         }
+    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
+        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.NUMBER;
     } else {
         // If the data is empty, the data is set to null.
         if ((newDataStream === cellData.v || (newDataStream === '' && cellData.v == null)) && cellData.p == null) {

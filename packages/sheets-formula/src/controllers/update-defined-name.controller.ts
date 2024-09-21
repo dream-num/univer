@@ -31,8 +31,8 @@ import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 
-@OnLifecycle(LifecycleStages.Rendered, DefinedNameUpdateController)
-export class DefinedNameUpdateController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, UpdateDefinedNameController)
+export class UpdateDefinedNameController extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -54,7 +54,7 @@ export class DefinedNameUpdateController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
                 getMutations: (command) => {
-                    // Exclude processing in getReferenceMoveParams
+                    // Exclude processing in getReferenceMoveParams, SetDefinedNameCommand is only handled in UpdateFormulaController
                     if (command.id === SetDefinedNameCommand.id) {
                         return {
                             redos: [],

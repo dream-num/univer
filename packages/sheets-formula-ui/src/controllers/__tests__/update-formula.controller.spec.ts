@@ -17,11 +17,13 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
@@ -260,6 +262,11 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
         sheet2: {
             id: 'sheet2',
             cellData: {
+                2: {
+                    0: {
+                        f: '=SUM(DefinedName1)',
+                    },
+                },
             },
             name: 'Sheet2',
         },
@@ -268,9 +275,15 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
     name: '',
     sheetOrder: ['sheet1', 'sheet2'],
     styles: {},
+    resources: [
+        {
+            name: 'SHEET_DEFINED_NAME_PLUGIN',
+            data: '{"soAI3OK4sq":{"id":"soAI3OK4sq","name":"DefinedName1","formulaOrRefString":"Sheet2!$A$1:$B$2","comment":"","localSheetId":"AllDefaultWorkbook"}}',
+        },
+    ],
 });
 
-describe('Test insert function operation', () => {
+describe('Test update formula ', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -278,7 +291,8 @@ describe('Test insert function operation', () => {
         startRow: number,
         startColumn: number,
         endRow: number,
-        endColumn: number
+        endColumn: number,
+        sheetId?: string
     ) => Array<Array<Nullable<ICellData>>> | undefined;
 
     beforeEach(() => {
@@ -327,11 +341,17 @@ describe('Test insert function operation', () => {
         commandService.registerCommand(SetFormulaDataMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
 
+        // set defined name
+        commandService.registerCommand(SetDefinedNameCommand);
+        commandService.registerCommand(SetDefinedNameMutation);
+        commandService.registerCommand(RemoveDefinedNameMutation);
+
         getValues = (
             startRow: number,
             startColumn: number,
             endRow: number,
-            endColumn: number
+            endColumn: number,
+            sheetId: string = 'sheet1'
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
                 .getUnit<Workbook>('test')
@@ -1298,7 +1318,7 @@ describe('Test insert function operation', () => {
             expect(valuesRedo).toStrictEqual([[{ f: '=A1:C2' }]]);
         });
 
-        it('set name', async () => {
+        it('set worksheet name', async () => {
             const params: ISetWorksheetNameCommandParams = {
                 subUnitId: 'sheet2',
                 name: 'Sheet2Rename',
@@ -1309,7 +1329,22 @@ describe('Test insert function operation', () => {
             expect(values).toStrictEqual([[{ f: '=Sheet2Rename!A1:B2' }]]);
         });
 
-        it('remove sheet', async () => {
+        it('set defined name', async () => {
+            const params: ISetDefinedNameMutationParam = {
+                unitId: 'test',
+                id: 'soAI3OK4sq',
+                name: 'DefinedName2',
+                formulaOrRefString: 'Sheet2!$A$1:$B$2',
+                comment: '',
+                localSheetId: 'AllDefaultWorkbook',
+            };
+
+            expect(await commandService.executeCommand(SetDefinedNameCommand.id, params)).toBeTruthy();
+            const values = getValues(2, 0, 2, 0, 'sheet2');
+            expect(values).toStrictEqual([[{ f: '=SUM(DefinedName2)' }]]);
+        });
+
+        it('remove worksheet', async () => {
             const params: IRemoveSheetCommandParams = {
                 unitId: 'test',
                 subUnitId: 'sheet2',

@@ -15,6 +15,7 @@
  */
 
 import {
+    CellValueType,
     createInterceptorKey,
     debounce,
     Disposable,
@@ -61,8 +62,9 @@ class CalculateValueSet {
 
     add(value: Nullable<ICellData>) {
         const v = value?.v;
+        const t = value?.t;
         if (v !== undefined && v !== null) {
-            if (typeof v === 'number') {
+            if (typeof v === 'number' && t !== CellValueType.STRING) {
                 this._sum += v;
                 this._countN++;
                 this._min = Math.min(this._min, v);
@@ -229,7 +231,6 @@ export class StatusBarController extends Disposable {
         }
 
         const sheetData: ISheetData = {};
-        const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
 
         this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!

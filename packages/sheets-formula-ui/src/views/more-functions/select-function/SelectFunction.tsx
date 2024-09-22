@@ -18,15 +18,14 @@ import { LocaleService, useDependency } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import React, { useEffect, useState } from 'react';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-
-import { IDescriptionService } from '../../../../../sheets-formula/src/services/description.service';
+import type { ISearchItem } from '@univerjs/sheets-formula';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';
 import styles from './index.module.less';
-import type { ISearchItem } from '../../../../../sheets-formula/src/services/description.service';
 
 export interface ISelectFunctionProps {
     onChange: (functionInfo: IFunctionInfo) => void;

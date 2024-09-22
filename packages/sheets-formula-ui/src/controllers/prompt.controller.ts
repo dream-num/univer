@@ -69,6 +69,7 @@ import {
     setEndForRange,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import {
     ExpandSelectionCommand,
     getEditorObject,
@@ -91,12 +92,11 @@ import type {
 } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
-
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
-import { IDescriptionService } from '../../../sheets-formula/src/services/description.service';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';

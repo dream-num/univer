@@ -16,8 +16,8 @@
 
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
+import { IEditorService } from '@univerjs/docs-ui';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
-import { IEditorService } from '@univerjs/ui';
 import React, { useState } from 'react';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import styles from './index.module.less';

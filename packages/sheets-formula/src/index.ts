@@ -19,6 +19,7 @@ export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 
 // #region - all commands
 
+export { UpdateFormulaController } from './controllers/update-formula.controller';
 export { DescriptionService, IDescriptionService, type ISearchItem } from './services/description.service';
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';

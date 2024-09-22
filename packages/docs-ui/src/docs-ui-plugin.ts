@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService,
+import { DependentOn, ICommandService,
     IConfigService,
     ILogService,
     Inject,
@@ -24,8 +24,8 @@ import { ICommandService,
     Plugin, UniverInstanceType,
 } from '@univerjs/core';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { IEditorService, IShortcutService } from '@univerjs/ui';
+import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { IShortcutService } from '@univerjs/ui';
 import type { Dependency } from '@univerjs/core';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
@@ -76,6 +76,8 @@ import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 import { DocsRenderService } from './services/docs-render.service';
+import { EditorService, IEditorService } from './services/editor/editor-manager.service';
+import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 import { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import {
@@ -92,9 +94,10 @@ import {
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
 import type { IUniverDocsUIConfig } from './controllers/config.schema';
 
+@DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER_DOC;
+    // static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
         private readonly _config: Partial<IUniverDocsUIConfig> = defaultPluginConfig,
@@ -112,7 +115,6 @@ export class UniverDocsUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
-
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
@@ -229,6 +231,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocParagraphSettingController],
 
             // Services
+            [IEditorService, { useClass: EditorService }],
+            [IRangeSelectorService, { useClass: RangeSelectorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
             [DocCanvasPopManagerService],
             [DocsRenderService],

@@ -16,10 +16,11 @@
 
 import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
+import { IEditorService } from '@univerjs/docs-ui';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { IEditorService, ILayoutService, ISidebarService } from '@univerjs/ui';
-import React, { useEffect, useState } from 'react';
+import { ILayoutService, ISidebarService } from '@univerjs/ui';
 
+import React, { useEffect, useState } from 'react';
 import { throttleTime } from 'rxjs';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { IFormulaPromptService } from '../../../services/prompt.service';

@@ -15,15 +15,15 @@
  */
 
 import { Inject, IPermissionService, LifecycleStages, LRUMap, OnLifecycle, Range } from '@univerjs/core';
-import { filter, map } from 'rxjs/operators';
-import type { UnitAction } from '@univerjs/protocol';
 import { UnitObject } from '@univerjs/protocol';
-
+import { filter, map } from 'rxjs/operators';
 import type { IRange } from '@univerjs/core';
-import type { getDefaultRangePermission, IRangePermissionPoint } from '../services/permission/range-permission/util';
-import { getAllRangePermissionPoint } from '../services/permission/range-permission/util';
 
+import type { UnitAction } from '@univerjs/protocol';
+import { getAllRangePermissionPoint } from '../services/permission/range-permission/util';
 import { RangeProtectionRuleModel } from './range-protection-rule.model';
+
+import type { getDefaultRangePermission, IRangePermissionPoint } from '../services/permission/range-permission/util';
 
 export type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
@@ -80,15 +80,15 @@ export class RangeProtectionRenderModel {
     }
 
     public getCellInfo(unitId: string, subUnitId: string, row: number, col: number) {
-        const key = this._createKey(unitId, subUnitId, row, col);
-        const cacheValue = this._cache.get(key);
-        if (cacheValue) {
-            return cacheValue;
-        }
         const ruleMap = this._selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
         const defaultV: ICellPermission[] = [];
         if (!ruleMap || !ruleMap.length) {
             return defaultV;
+        }
+        const key = this._createKey(unitId, subUnitId, row, col);
+        const cacheValue = this._cache.get(key);
+        if (cacheValue) {
+            return cacheValue;
         }
         const result: ICellPermission[] = [];
         for (const rule of ruleMap) {

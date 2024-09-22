@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { IEditorService, ISidebarService } from '@univerjs/ui';
+import { IEditorService } from '@univerjs/docs-ui';
 import { getSheetCommandTarget } from '@univerjs/sheets';
+import { ISidebarService } from '@univerjs/ui';
+import type { IAccessor, ICommand } from '@univerjs/core';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 
 export interface IUIComponentCommandParams {

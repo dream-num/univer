@@ -32,10 +32,9 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { getCanvasOffsetByEngine } from '@univerjs/docs-ui';
+import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
-import { IEditorService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
 import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';

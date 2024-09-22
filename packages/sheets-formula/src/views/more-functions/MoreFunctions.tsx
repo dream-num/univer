@@ -16,10 +16,10 @@
 
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { IEditorService } from '@univerjs/ui';
-import React, { useState } from 'react';
+import { IEditorService } from '@univerjs/docs-ui';
 import { useActiveWorkbook } from '@univerjs/sheets-ui';
+import React, { useState } from 'react';
+import type { IFunctionInfo } from '@univerjs/engine-formula';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';

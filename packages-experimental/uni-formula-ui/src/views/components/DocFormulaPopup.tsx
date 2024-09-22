@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import clsx from 'clsx';
-import { TextEditor, useObservable } from '@univerjs/ui';
-import type { IDocumentData, Nullable } from '@univerjs/core';
 import { BooleanNumber, createInternalEditorID, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentFlavor, HorizontalAlign, ICommandService, LocaleService, useDependency, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { TextEditor } from '@univerjs/docs-ui';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
-import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
-import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
-
+import { useObservable } from '@univerjs/ui';
+import clsx from 'clsx';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { IDocumentData, Nullable } from '@univerjs/core';
 import { CloseFormulaPopupOperation, ConfirmFormulaPopupCommand } from '../../commands/operations/operation';
+
+import { DOC_FORMULA_POPUP_KEY, UniFormulaPopupService } from '../../services/formula-popup.service';
 import styles from './index.module.less';
+import type { IUniFormulaPopupInfo } from '../../services/formula-popup.service';
 
 export const UNI_FORMULA_EDITOR_ID = createInternalEditorID('UNI_FORMULA');
 

@@ -17,12 +17,12 @@
 import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
-import { IEditorService } from '@univerjs/ui';
 
 import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
@@ -242,7 +242,7 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 const params = command.params as ISetDocZoomRatioOperationParams;
                 const { unitId: documentId } = params;
 
-                const unitId = this._docSelectionManagerService.getCurrentSelection()?.unitId;
+                const unitId = this._docSelectionManagerService.__getCurrentSelection()?.unitId;
 
                 if (documentId !== unitId) {
                     return;
@@ -255,8 +255,6 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
     }
 
     private _skeletonListener() {
-        let init = false;
-
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
         this.disposeWithMe(this._docSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
             if (!skeleton) return;
@@ -264,21 +262,22 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
             const { unitId } = this._context;
             const isInternalEditor = isInternalEditorID(unitId);
 
-            if (init || !isInternalEditorID(this._context.unitId)) {
-                // The initial cursor is set at the beginning of the document,
-                // and can be set to the previous cursor position in the future.
-                // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
-                if (!isInternalEditor) {
-                    this._docSelectionManagerService.replaceTextRanges([
-                        {
-                            startOffset: 0,
-                            endOffset: 0,
-                        },
-                    ], false);
-                }
+            // The initial cursor is set at the beginning of the document,
+            // and can be set to the previous cursor position in the future.
+            // The skeleton of the editor has not been calculated at this moment, and it is determined whether it is an editor by its ID.
+            if (!isInternalEditor) {
+                //TODO: @JOCS Only for docs. move to docs in the future.
+                this._docSelectionRenderService.focus();
+                this._docSelectionManagerService.replaceDocRanges([
+                    {
+                        startOffset: 0,
+                        endOffset: 0,
+                    },
+                ], {
+                    unitId,
+                    subUnitId: unitId,
+                }, false);
             }
-
-            init = true;
         }));
     }
 }

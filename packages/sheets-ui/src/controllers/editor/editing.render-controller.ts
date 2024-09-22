@@ -45,7 +45,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
@@ -57,7 +57,7 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
-import { IEditorService, ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
+import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
@@ -1096,13 +1096,6 @@ export function getCellDataByInput(
         cellData.si = null;
         cellData.p = null;
         cellData.t = CellValueType.FORCE_STRING;
-    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
-        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.NUMBER;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';
@@ -1115,6 +1108,13 @@ export function getCellDataByInput(
             cellData.f = null;
             cellData.si = null;
         }
+    } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
+        // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.NUMBER;
     } else {
         // If the data is empty, the data is set to null.
         if ((newDataStream === cellData.v || (newDataStream === '' && cellData.v == null)) && cellData.p == null) {

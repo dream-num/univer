@@ -57,6 +57,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
@@ -66,6 +67,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/sheets": "workspace:*",

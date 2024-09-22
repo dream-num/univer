@@ -17,9 +17,9 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
+import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 
 /**
  * This service provides i18n and timezone / location features to other modules.

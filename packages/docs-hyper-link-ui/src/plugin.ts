@@ -15,17 +15,17 @@
  */
 
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverDocsHyperLinkPlugin } from '@univerjs/docs-hyper-link';
-import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { Dependency } from '@univerjs/core';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
+import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
+import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
 import { DocHyperLinkUIController } from './controllers/ui.controller';
 import { DocHyperLinkPopupService } from './services/hyper-link-popup.service';
-import { DocHyperLinkSelectionController } from './controllers/doc-hyper-link-selection.controller';
-import { DocHyperLinkRenderController } from './controllers/render-controllers/render.controller';
-import { DocHyperLinkEventRenderController } from './controllers/render-controllers/hyper-link-event.render-controller';
+import { DOC_HYPER_LINK_UI_PLUGIN } from './types/const';
 import type { IUniverDocsHyperLinkUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverDocsHyperLinkPlugin)
 export class UniverDocsHyperLinkUIPlugin extends Plugin {

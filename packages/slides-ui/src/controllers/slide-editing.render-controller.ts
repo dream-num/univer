@@ -40,7 +40,7 @@ import {
     DocSkeletonManagerService,
     RichTextEditingMutation,
 } from '@univerjs/docs';
-import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
+import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -50,7 +50,7 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { IEditorService, ILayoutService, KeyCode } from '@univerjs/ui';
+import { ILayoutService, KeyCode } from '@univerjs/ui';
 import { filter } from 'rxjs';
 import type {
     ICommandInfo,

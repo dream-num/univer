@@ -39,7 +39,7 @@ export interface IRefreshSelectionParam extends IDocSelectionManagerSearchParam 
     };
 }
 
-interface ITextSelectionManagerInsertParam extends IDocSelectionManagerSearchParam, IDocSelectionInnerParam {}
+export interface ITextSelectionManagerInsertParam extends IDocSelectionManagerSearchParam, IDocSelectionInnerParam {}
 
 type ITextSelectionInfo = Map<string, Map<string, IDocSelectionInnerParam>>;
 
@@ -83,44 +83,46 @@ export class DocSelectionManagerService extends RxDisposable {
             });
     }
 
-    getCurrentSelection() {
+    __getCurrentSelection() {
         return this._currentSelection;
     }
 
-    // Get textRanges, style, segmentId
-    /**
-     * @deprecated
-     */
-    getCurrentSelectionInfo() {
-        return this._getTextRanges(this._currentSelection);
+    getSelectionInfo(params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection) {
+        return this._getTextRanges(params);
     }
 
-    refreshSelection() {
-        if (this._currentSelection == null) {
+    refreshSelection(params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection) {
+        if (params == null) {
             return;
         }
 
-        this._refresh(this._currentSelection);
+        this._refresh(params);
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    setCurrentSelection(param: IDocSelectionManagerSearchParam) {
+    __TEST_ONLY_setCurrentSelection(param: IDocSelectionManagerSearchParam) {
         this._currentSelection = param;
 
         this._refresh(param);
     }
 
-    getCurrentTextRanges(): Readonly<Nullable<ITextRangeWithStyle[]>> {
-        return this._getTextRanges(this._currentSelection)?.textRanges;
+    getTextRanges(
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection
+    ): Readonly<Nullable<ITextRangeWithStyle[]>> {
+        return this._getTextRanges(params)?.textRanges;
     }
 
-    getCurrentRectRanges(): Readonly<Nullable<IRectRangeWithStyle[]>> {
-        return this._getTextRanges(this._currentSelection)?.rectRanges;
+    getRectRanges(
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection
+    ): Readonly<Nullable<IRectRangeWithStyle[]>> {
+        return this._getTextRanges(params)?.rectRanges;
     }
 
-    getDocRanges() {
-        const textRanges = this.getCurrentTextRanges() ?? [];
-        const rectRanges = this.getCurrentRectRanges() ?? [];
+    getDocRanges(
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection
+    ) {
+        const textRanges = this.getTextRanges(params) ?? [];
+        const rectRanges = this.getRectRanges(params) ?? [];
         // Sort ranges by startOffset in ascending order.
         const allRanges = [...textRanges, ...rectRanges]
             .filter((range) => range.startOffset != null && range.endOffset != null)
@@ -163,7 +165,7 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     // **Only used in test case** because this does not go through the render layer.
-    add(textRanges: ITextRangeWithStyle[], isEditing = true) {
+    __TEST_ONLY_add(textRanges: ITextRangeWithStyle[], isEditing = true) {
         if (this._currentSelection == null) {
             return;
         }
@@ -179,15 +181,37 @@ export class DocSelectionManagerService extends RxDisposable {
         });
     }
 
-    replaceTextRanges(docRanges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
-        if (this._currentSelection == null) {
+    // Use to replace the current editor selection.
+    /**
+     * @deprecated pls use replaceDocRanges.
+     */
+    replaceTextRanges(
+        docRanges: ISuccinctDocRangeParam[],
+        isEditing = true,
+        options?: { [key: string]: boolean }
+    ) {
+        return this.replaceDocRanges(
+            docRanges,
+            this._currentSelection,
+            isEditing,
+            options
+        );
+    }
+
+    replaceDocRanges(
+        docRanges: ISuccinctDocRangeParam[],
+        params: Nullable<IDocSelectionManagerSearchParam> = this._currentSelection,
+        isEditing = true,
+        options?: { [key: string]: boolean }
+    ) {
+        if (params == null) {
             return;
         }
 
         // Remove all textRanges.
         // Add new textRanges.
 
-        const { unitId, subUnitId } = this._currentSelection;
+        const { unitId, subUnitId } = params;
 
         this._refreshSelection$.next({
             unitId,
@@ -245,21 +269,7 @@ export class DocSelectionManagerService extends RxDisposable {
     }
 
     private _setCurrentSelectionNotRefresh(param: IDocSelectionManagerSearchParam) {
-        const { unitId, subUnitId } = this._currentSelection ?? {};
-        const { unitId: newUnitId, subUnitId: newSubUnitId } = param;
-
-        if (unitId !== newUnitId || subUnitId !== newSubUnitId) {
-            if (unitId && subUnitId) {
-                this._refreshSelection$.next({
-                    unitId,
-                    subUnitId,
-                    docRanges: [],
-                    isEditing: false,
-                });
-            }
-
-            this._currentSelection = param;
-        }
+        this._currentSelection = param;
     }
 
     private _getTextRanges(param: Nullable<IDocSelectionManagerSearchParam>) {

@@ -28,7 +28,8 @@ import {
     Rectangle,
 
     Tools,
-    UniverInstanceType } from '@univerjs/core';
+    UniverInstanceType,
+} from '@univerjs/core';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,

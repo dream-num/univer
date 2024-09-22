@@ -15,7 +15,8 @@
  */
 
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { IEditorService, ISidebarService } from '@univerjs/ui';
+import { IEditorService } from '@univerjs/docs-ui';
+import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
 

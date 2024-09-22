@@ -88,7 +88,7 @@ export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selections = docSelectionManagerService.getCurrentTextRanges();
+    const selections = docSelectionManagerService.getTextRanges();
     if (!selections) {
         return false;
     }

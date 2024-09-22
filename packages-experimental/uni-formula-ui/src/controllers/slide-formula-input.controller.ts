@@ -16,9 +16,8 @@
 
 import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { InsertCommand } from '@univerjs/docs-ui';
+import { IEditorService, InsertCommand } from '@univerjs/docs-ui';
 import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
-import { IEditorService } from '@univerjs/ui';
 import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
@@ -58,7 +57,7 @@ export class SlideUniFormulaInputController extends Disposable {
             const { id } = commandInfo;
 
             if (
-                currentEditor?.editorUnitId === UNI_FORMULA_EDITOR_ID ||
+                currentEditor?.getEditorId() === UNI_FORMULA_EDITOR_ID ||
                 focusedUnit?.type !== UniverInstanceType.UNIVER_SLIDE
             ) {
                 return;

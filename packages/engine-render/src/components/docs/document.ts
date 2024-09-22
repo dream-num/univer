@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import './extensions';
-
 import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+
 import { Subject } from 'rxjs';
+import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
+import { BORDER_TYPE, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import { LineType } from '../../basics/i-document-skeleton-cached';
+import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import { degToRad } from '../../basics/tools';
+import { Vector2 } from '../../basics/vector2';
+import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
+import { DocComponent } from './doc-component';
+import { DOCS_EXTENSION_TYPE } from './doc-extension';
+import { Liquid } from './liquid';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
 import type { Transform } from '../../basics/transform';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import { Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { ComponentExtension, IExtensionConfig } from '../extension';
-import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
-import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import { BORDER_TYPE, drawLineByBorderType } from '../../basics';
-import { Liquid } from './liquid';
 import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
-import { DocComponent } from './doc-component';
-import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import type { DocumentSkeleton } from './layout/doc-skeleton';
+import './extensions';
 
 export interface IPageRenderConfig {
     page: IDocumentSkeletonPage;

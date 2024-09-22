@@ -70,12 +70,12 @@ describe('replace or cover content of document', () => {
 
         const selectionManager = get(DocSelectionManagerService);
 
-        selectionManager.setCurrentSelection({
+        selectionManager.__TEST_ONLY_setCurrentSelection({
             unitId: 'test-doc',
             subUnitId: '',
         });
 
-        selectionManager.add([
+        selectionManager.__TEST_ONLY_add([
             {
                 startOffset: 5,
                 endOffset: 5,

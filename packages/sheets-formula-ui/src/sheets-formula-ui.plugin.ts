@@ -18,8 +18,8 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService } from '@univerjs/sheets';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import type { Dependency } from '@univerjs/core';
-
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginBaseConfig,
@@ -39,7 +39,7 @@ import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema
 /**
  * The configuration of the formula UI plugin.
  */
-@DependentOn(UniverFormulaEnginePlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsFormulaPlugin)
 export class UniverSheetsFormulaUIPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

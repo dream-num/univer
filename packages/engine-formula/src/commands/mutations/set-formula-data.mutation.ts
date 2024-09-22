@@ -24,7 +24,10 @@ export interface ISetFormulaDataMutationParams {
 }
 
 /**
- * There is no need to process data here, it is used as the main thread to send data to the worker. The main thread has already updated the data in advance, and there is no need to update it again here.
+ * There is no need to process data here, it is used as the main thread to send data to the worker.
+ * The main thread has already updated the data in advance, and there is no need to update it again here.
+ *
+ * @deprecated Do not use command system as rpc calling method.
  */
 export const SetFormulaDataMutation: IMutation<ISetFormulaDataMutationParams> = {
     id: 'formula.mutation.set-formula-data',

@@ -15,7 +15,6 @@
  */
 
 import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
-import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import {
     functionArray,
     functionCompatibility,
@@ -38,11 +37,12 @@ import {
     isReferenceStrings,
 } from '@univerjs/engine-formula';
 import type { IDisposable } from '@univerjs/core';
+import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 
-import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
-import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
-import { FUNCTION_LIST } from './function-list/function-list';
-import { getFunctionName } from './utils';
+import { PLUGIN_CONFIG_KEY_BASE } from '../../../sheets-formula-ui/src/controllers/config.schema';
+import { FUNCTION_LIST } from '../../../sheets-formula-ui/src/services/function-list/function-list';
+import { getFunctionName } from '../../../sheets-formula-ui/src/services/utils';
+import type { IUniverSheetsFormulaBaseConfig } from '../../../sheets-formula-ui/src/controllers/config.schema';
 
 export interface ISearchItem {
     name: string;

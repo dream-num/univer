@@ -454,6 +454,8 @@ export class HtmlToUSMService {
             } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
                 continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as HTMLElement;
+                const linkStart = this._processBeforeLink(element, { body: doc });
                 const currentNodeStyle = this._getStyle(node as HTMLElement, styleStr);
                 const parentStyles = parent ? styleCache.get(parent) : {};
                 const predefinedStyles = turnToStyleObject(currentNodeStyle);
@@ -462,6 +464,7 @@ export class HtmlToUSMService {
                 styleCache.set(node, { ...parentStyles, ...nodeStyles });
                 const { childNodes } = node;
                 this._parseCellHtml(node, childNodes, doc, styleCache, currentNodeStyle);
+                this._processAfterLink(element, { body: doc }, linkStart);
             }
         }
     }
@@ -476,7 +479,8 @@ export class HtmlToUSMService {
                 textRuns: [],
             };
             // Rich text parsing method, refer to the doc
-            this.process(null, cell.childNodes!, newDocBody, []);
+            // this.process(null, cell.childNodes!, newDocBody, []);
+            this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
             const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
             const p = documentModel?.getSnapshot();
             const cellCustomRanges: ICustomRange[] = [];

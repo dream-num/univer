@@ -201,6 +201,15 @@ export class DataValidationRefRangeController extends Disposable {
     };
 
     private _initRefRange() {
+        const allRules = this._dataValidationModel.getAll();
+        for (const [unitId, subUnitMap] of allRules) {
+            for (const [subUnitId, rules] of subUnitMap) {
+                for (const rule of rules) {
+                    this.registerRule(unitId, subUnitId, rule);
+                }
+            }
+        }
+
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((option) => {
                 const { unitId, subUnitId, rule } = option;

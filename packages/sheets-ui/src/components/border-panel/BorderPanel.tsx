@@ -125,7 +125,7 @@ export function BorderPanel(props: IBorderPanelProps) {
                         )}
                     >
                         <a className={styles.uiPluginSheetsBorderPanelButton} onClick={stopPropagation}>
-                            <PaintBucket extend={{ colorChannel1: value.color ?? 'rgb(var(--primary-color))' }} />
+                            <PaintBucket extend={{ colorChannel1: value?.color ?? 'rgb(var(--primary-color))' }} />
                             <span className={styles.uiPluginSheetsBorderPanelMoreIcon}>
                                 <MoreDownSingle />
                             </span>

@@ -66,7 +66,7 @@ export const SetBorderBasicCommand: ICommand<ISetBorderBasicCommandParams> = {
         const borderManager = accessor.get(BorderStyleManagerService);
 
         borderManager.setType(type);
-        borderManager.setColor(color);
+        if (color) borderManager.setColor(color);
         borderManager.setStyle(style);
 
         return commandService.executeCommand(SetBorderCommand.id, {

@@ -17,7 +17,6 @@
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IRefSelectionsService, RefSelectionsService } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import type { Dependency } from '@univerjs/core';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
@@ -64,7 +63,6 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         const j = this._injector;
         const dependencies: Dependency[] = [
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [IRefSelectionsService, { useClass: RefSelectionsService }],
             [FormulaUIController],
             [FormulaAutoFillController],
             [FormulaClipboardController],

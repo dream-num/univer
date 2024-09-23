@@ -16,7 +16,7 @@
 
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 
 import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
@@ -119,6 +119,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ICellEditorManagerService, { useClass: CellEditorManagerService }],
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
             [IStatusBarService, { useClass: StatusBarService }],

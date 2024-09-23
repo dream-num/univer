@@ -480,6 +480,7 @@ export const CheckListCommand: ICommand<IBulletListCommandParams> = {
 export interface IToggleCheckListCommandParams {
     index: number;
     segmentId?: string;
+    textRanges?: ITextRangeWithStyle[];
 }
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
@@ -493,7 +494,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const { index, segmentId } = params;
+        const { index, segmentId, textRanges } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {
@@ -515,7 +516,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: [],
+                textRanges: textRanges ?? [],
                 segmentId,
             },
         };

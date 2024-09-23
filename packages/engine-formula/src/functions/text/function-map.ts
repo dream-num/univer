@@ -39,10 +39,17 @@ import { Numbervalue } from './numbervalue';
 import { Proper } from './proper';
 import { Rept } from './rept';
 import { Right } from './right';
+import { Rightb } from './rightb';
+import { Substitute } from './substitute';
+import { T } from './t';
 import { Text } from './text';
 import { Textafter } from './textafter';
 import { Textbefore } from './textbefore';
 import { Textsplit } from './textsplit';
+import { Unichar } from './unichar';
+import { Unicode } from './unicode';
+import { Value } from './value';
+import { Valuetotext } from './valuetotext';
 
 export const functionText = [
     [Asc, FUNCTION_NAMES_TEXT.ASC],
@@ -57,6 +64,7 @@ export const functionText = [
     [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
     [Exact, FUNCTION_NAMES_TEXT.EXACT],
     [Fixed, FUNCTION_NAMES_TEXT.FIXED],
+    [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
@@ -68,9 +76,15 @@ export const functionText = [
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
     [Right, FUNCTION_NAMES_TEXT.RIGHT],
+    [Rightb, FUNCTION_NAMES_TEXT.RIGHTB],
+    [Substitute, FUNCTION_NAMES_TEXT.SUBSTITUTE],
+    [T, FUNCTION_NAMES_TEXT.T],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
     [Textsplit, FUNCTION_NAMES_TEXT.TEXTSPLIT],
-    [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
+    [Unichar, FUNCTION_NAMES_TEXT.UNICHAR],
+    [Unicode, FUNCTION_NAMES_TEXT.UNICODE],
+    [Value, FUNCTION_NAMES_TEXT.VALUE],
+    [Valuetotext, FUNCTION_NAMES_TEXT.VALUETOTEXT],
 ];

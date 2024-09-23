@@ -456,8 +456,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want RIGHTB to extract, based on bytes.' },
         },
     },
     SEARCH: {
@@ -498,8 +498,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or the reference to a cell containing text for which you want to substitute characters.' },
+            oldText: { name: 'old_text', detail: 'The text you want to replace.' },
+            newText: { name: 'new_text', detail: 'The text you want to replace old_text with.' },
+            instanceNum: { name: 'instance_num', detail: 'Specifies which occurrence of old_text you want to replace with new_text. If you specify instance_num, only that instance of old_text is replaced. Otherwise, every occurrence of old_text in text is changed to new_text.' },
         },
     },
     T: {
@@ -512,8 +514,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value you want to test.' },
         },
     },
     TEXT: {
@@ -622,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the Unicode number that represents the character.' },
         },
     },
     UNICODE: {
@@ -636,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Text is the character for which you want the Unicode value.' },
         },
     },
     UPPER: {
@@ -664,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text enclosed in quotation marks or a reference to a cell containing the text you want to convert.' },
         },
     },
     VALUETOTEXT: {
@@ -678,8 +676,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value to return as text.' },
+            format: { name: 'format', detail: 'The format of the returned data. It can be one of two values: \n0 Default. Concise format that is easy to read. \n1 Strict format that includes escape characters and row delimiters. Generates a string that can be parsed when entered into the formula bar. Encapsulates returned strings in quotes except for Booleans, Numbers and Errors.' },
         },
     },
     CALL: {

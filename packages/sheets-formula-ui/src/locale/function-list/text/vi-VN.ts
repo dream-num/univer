@@ -390,6 +390,20 @@ export default {
             numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn RIGHT trích xuất.' },
         },
     },
+    RIGHTB: {
+        description: 'Trả về một số ký tự cụ thể từ cuối của chuỗi văn bản',
+        abstract: 'Trả về một số ký tự cụ thể từ cuối của chuỗi văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/right-rightb-%E5%87%BD%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm RIGHTB trích xuất, dựa trên byte.' },
+        },
+    },
     SEARCH: {
         description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
         abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
@@ -431,10 +445,23 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản ban đầu.' },
-            old_text: { name: 'old_text', detail: 'Văn bản bạn muốn thay thế.' },
-            new_text: { name: 'new_text', detail: 'Văn bản thay thế.' },
-            instance_num: { name: 'instance_num', detail: 'Số lần xuất hiện của old_text mà bạn muốn thay thế.' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu đến ô chứa văn bản mà bạn muốn thay thế bằng ký tự.' },
+            oldText: { name: 'tìm kiếm văn bản', detail: 'Văn bản bạn muốn thay thế.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản bạn muốn thay thế old_text.' },
+            instanceNum: { name: 'chỉ định đối tượng thay thế', detail: 'Chỉ định trường hợp nào của old_text bạn muốn thay thế bằng new_text. Nếu bạn chỉ định instance_num, chỉ trường hợp đó của old_text được thay thế. Nếu không, mọi trường hợp của old_text trong text sẽ được thay đổi thành new_text.' },
+        },
+    },
+    T: {
+        description: 'Chuyển đổi tham số thành văn bản',
+        abstract: 'Chuyển đổi tham số thành văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-%E5%87%BD%E6%95%B0-fb83aeec-45e7-4924-af95-53e073541228',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị mà bạn muốn kiểm tra.' },
         },
     },
     TEXT: {
@@ -544,7 +571,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Số Unicode đại diện cho ký tự.' },
+            number: { name: 'số', detail: 'Số là số Unicode biểu diễn ký tự.' },
         },
     },
     UNICODE: {
@@ -557,7 +584,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản đại diện cho ký tự Unicode.' },
+            text: { name: 'bản văn', detail: 'Văn bản là ký tự mà bạn muốn có giá trị Unicode.' },
         },
     },
     UPPER: {
@@ -583,7 +610,21 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn chuyển đổi thành số.' },
+            text: { name: 'bản văn', detail: 'Văn bản được đặt trong dấu ngoặc kép hoặc tham chiếu đến ô chứa văn bản bạn muốn chuyển đổi.' },
+        },
+    },
+    VALUETOTEXT: {
+        description: 'Trả về văn bản từ bất kỳ giá trị nào được chỉ định.',
+        abstract: 'Trả về văn bản từ bất kỳ giá trị nào được chỉ định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/valuetotext-%E5%87%BD%E6%95%B0-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị cần trả về dưới dạng văn bản.' },
+            format: { name: 'Định dạng của dữ', detail: 'Định dạng của dữ liệu trả về. Nó có thể là một trong hai giá trị: \n0 Mặc định. Định dạng ngắn gọn dễ đọc.\n1 Định dạng nghiêm ngặt bao gồm ký tự thoát và dấu tách hàng. Tạo một chuỗi có thể được phân tích khi nhập vào thanh công thức. Đóng gói các chuỗi trả về trong dấu ngoặc kép, ngoại trừ Booleans, Numbers và Errors.' },
         },
     },
 };

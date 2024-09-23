@@ -455,8 +455,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
+            numBytes: { name: '字節數', detail: '這會指定要 RIGHTB 擷取的字元數目，以位元組為單位。' },
         },
     },
     SEARCH: {
@@ -497,8 +497,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含要以字元取代文字的文字或參照。' },
+            oldText: { name: '搜尋文字', detail: '這是要取代的文字。' },
+            newText: { name: '取代文字', detail: '這是要用來取代 old_text 的文字。' },
+            instanceNum: { name: '指定取代對象', detail: '指定要將第幾個 old_text 取代為 new_text。 如果您指定 instance_num，則只會取代該 old_text。 否則，text 中的每一個 old_text 都會變更為 new_text。' },
         },
     },
     T: {
@@ -511,8 +513,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '這是要檢定的值。' },
         },
     },
     TEXT: {
@@ -621,8 +622,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '是代表字元的 Unicode 數位。' },
         },
     },
     UNICODE: {
@@ -635,8 +635,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '是您要使用 Unicode 值的字元。' },
         },
     },
     UPPER: {
@@ -663,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '以引號括住的文字或包含要轉換之文字的儲存格參照。' },
         },
     },
     VALUETOTEXT: {
@@ -677,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '要以文字格式返回的值。' },
+            format: { name: '資料格式', detail: '傳回資料的格式。它可以是兩個值的其中之一：\n0 預設。 易於閱讀的精簡格式。\n1 包含逸出字元和列分隔符號的限定格式。 產生可在輸入至資料編輯列時進行剖析的字串。 封裝會以引號傳回字串，除了布林值、數字和錯誤以外。' },
         },
     },
     CALL: {

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
-import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
+import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
-import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
-import { convertRuntimeToUnitData } from '../basics/runtime';
+import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
+import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import type { IAllRuntimeData } from '../services/runtime.service';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -139,7 +139,7 @@ export class CalculateController extends Disposable {
                 case FormulaExecutedStateType.STOP_EXECUTION:
                     break;
                 case FormulaExecutedStateType.SUCCESS:
-                    this._applyFormula(data);
+                    this._applyResult(data);
                     break;
                 case FormulaExecutedStateType.INITIAL:
                     break;
@@ -174,7 +174,7 @@ export class CalculateController extends Disposable {
         });
     }
 
-    private async _applyFormula(data: IAllRuntimeData) {
+    private async _applyResult(data: IAllRuntimeData) {
         const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
@@ -182,16 +182,11 @@ export class CalculateController extends Disposable {
             return;
         }
 
-        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(arrayFormulaRange);
-
         if (arrayFormulaRange) {
             this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
-            // Synchronous to the main thread
             this._commandService.executeCommand(
                 SetArrayFormulaDataMutation.id,
                 {

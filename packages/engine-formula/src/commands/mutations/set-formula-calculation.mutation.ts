@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { IExecutionOptions, IMutation, Nullable } from '@univerjs/core';
 
 import type {
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
-import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
+import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;

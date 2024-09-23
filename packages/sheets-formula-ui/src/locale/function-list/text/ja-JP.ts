@@ -457,8 +457,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            numBytes: { name: 'バイト数', detail: '取り出す文字数をバイト数で指定します。' },
         },
     },
     SEARCH: {
@@ -499,8 +499,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字を置き換えるテキストを含むセルへのテキストまたは参照。' },
+            oldText: { name: '検索文字列', detail: '置換する文字列を指定します。' },
+            newText: { name: '置換文字列', detail: '検索文字列を検索して置き換える文字列を指定します。' },
+            instanceNum: { name: '置換対象を指定', detail: '検索文字列に含まれるどの文字列を置換文字列と置き換えるかを指定します。 置換対象を指定した場合、検索文字列中の置換対象文字列だけが置き換えられます。 指定しない場合、検索文字列中のすべての文字列が置換文字列に置き換えられます。' },
         },
     },
     T: {
@@ -513,8 +515,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テストする値を指定します。' },
         },
     },
     TEXT: {
@@ -623,8 +624,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '文字に対応する Unicode 番号を指定します。' },
         },
     },
     UNICODE: {
@@ -637,8 +637,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: 'Unicode 値を求める文字を指定します。' },
         },
     },
     UPPER: {
@@ -665,8 +664,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '文字列を半角の二重引用符 (") で囲んで指定するか、または変換する文字列を含むセル参照を指定します。' },
         },
     },
     VALUETOTEXT: {
@@ -679,8 +677,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: '文字列として返す値。' },
+            format: { name: '書式', detail: '返されるデータの形式。次の 2 つの値のいずれかを指定できます。\n0 既定。 読みやすい簡潔な形式。 \n1 エスケープ文字と行の区切り文字を含む厳格なフォーマット。 数式バーに入力したときに解析できる文字列を生成します。 返された文字列は、ブーリアン、数値、エラーを除き、引用符でカプセル化されます。' },
         },
     },
     CALL: {

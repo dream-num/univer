@@ -456,8 +456,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '包含要提取字符的文本字符串。' },
+            numBytes: { name: '字节数', detail: '按字节指定要由 RIGHTB 提取的字符的数量。' },
         },
     },
     SEARCH: {
@@ -498,8 +498,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '需要替换其中字符的文本，或对含有文本（需要替换其中字符）的单元格的引用。' },
+            oldText: { name: '搜索文本', detail: '需要替换的文本。' },
+            newText: { name: '替换文本', detail: '用于替换 old_text 的文本。' },
+            instanceNum: { name: '指定替换对象', detail: '指定要将第几个 old_text 替换为 new_text。 如果指定了 instance_num，则只有满足要求的 old_text 被替换。 否则，文本中出现的所有 old_text 都会更改为 new_text。' },
         },
     },
     T: {
@@ -512,8 +514,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '要测试的值。' },
         },
     },
     TEXT: {
@@ -622,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '是表示字符的 Unicode 编号。' },
         },
     },
     UNICODE: {
@@ -636,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '是需要 Unicode 值的字符。' },
         },
     },
     UPPER: {
@@ -664,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '用引号括起来的文本或包含要转换文本的单元格的引用。' },
         },
     },
     VALUETOTEXT: {
@@ -678,8 +676,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '以文本形式返回的值。' },
+            format: { name: '数据格式', detail: '返回的数据的格式。它可以是两个值之一：\n0 默认。 易于阅读的简明格式。\n1 包含转义字符和行定界符的严格格式。 生成一条可在输入编辑栏时被解析的字符串。 将返回的字符串（布尔值、数字和错误除外）封装在引号中。' },
         },
     },
     CALL: {

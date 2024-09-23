@@ -22,12 +22,12 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Right } from '../index';
+import { Rightb } from '../index';
 
-describe('Test right function', () => {
-    const testFunction = new Right(FUNCTION_NAMES_TEXT.RIGHT);
+describe('Test rightb function', () => {
+    const testFunction = new Rightb(FUNCTION_NAMES_TEXT.RIGHTB);
 
-    describe('Right', () => {
+    describe('Rightb', () => {
         it('Value is normal', () => {
             const text = StringValueObject.create('Univer');
             const result = testFunction.calculate(text);
@@ -73,8 +73,15 @@ describe('Test right function', () => {
             const numChars = NumberValueObject.create(2);
             const result = testFunction.calculate(text, numChars);
             expect(getObjectValue(result)).toStrictEqual([
-                ['1', ' ', '测试', 'UE', 'SE', ''],
+                ['1', ' ', '试', 'UE', 'SE', ''],
                 ['0', '00', '34', 'et', '-3', ErrorType.NAME],
+            ]);
+
+            const numChars2 = NumberValueObject.create(3);
+            const result2 = testFunction.calculate(text, numChars2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                ['1', ' ', ' 试', 'RUE', 'LSE', ''],
+                ['0', '100', '.34', 'eet', '-3', ErrorType.NAME],
             ]);
         });
     });

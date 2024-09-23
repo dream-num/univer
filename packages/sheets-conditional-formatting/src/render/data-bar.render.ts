@@ -55,7 +55,7 @@ export class DataBar extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
-                const cellInfo = spreadsheetSkeleton.getCellByIndex(row, col);
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;
                 if (isMerged) {
                     return;

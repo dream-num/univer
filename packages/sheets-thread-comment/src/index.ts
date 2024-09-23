@@ -18,8 +18,12 @@ export { ShowAddSheetCommentModalOperation } from './commands/operations/comment
 export { UniverSheetsThreadCommentPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { SHEETS_THREAD_COMMENT } from './types/const';
+
 export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+
+// #region - all commands
+
 export {
     AddCommentCommand,
     DeleteCommentCommand,
@@ -27,9 +31,6 @@ export {
     ResolveCommentCommand,
     UpdateCommentCommand,
 } from '@univerjs/thread-comment';
-
-// #region - all commands
-
 export type {
     IAddCommentCommandParams,
     IDeleteCommentCommandParams,

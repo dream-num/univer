@@ -15,7 +15,8 @@
  */
 
 export { UniverSheetsDrawingUIPlugin } from './plugin';
-export { SheetCanvasFloatDomManagerService, type ICanvasFloatDom } from './services/canvas-float-dom-manager.service';
+export { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
+export { IMAGE_MENU_ID } from './views/menu/image.menu';
 
 // #region - all commands
 
@@ -30,8 +31,7 @@ export { UngroupSheetDrawingCommand } from './commands/commands/ungroup-sheet-dr
 
 export { ClearSheetDrawingTransformerOperation } from './commands/operations/clear-drawing-transformer.operation';
 export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-drawing.operation';
-export { InsertFloatImageCommand, type IInsertImageCommandParams } from './commands/commands/insert-image.command';
+export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
-export { IMAGE_MENU_ID } from './views/menu/image.menu';
 // #endregion

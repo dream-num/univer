@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin } from './formula-ui-plugin';
+export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin, UniverSheetsFormulaPlugin } from './formula-ui-plugin';
 export { IDescriptionService } from './services/description.service';
 export { DescriptionService } from './services/description.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';

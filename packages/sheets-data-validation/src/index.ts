@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
+export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
+export { SheetDataValidationModel } from './models/sheet-data-validation-model';
+export { UniverSheetsDataValidationPlugin } from './plugin';
+export { DataValidationCacheService } from './services/dv-cache.service';
+export type { IDataValidationResCache } from './services/dv-cache.service';
+export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+export { DataValidationFormulaService } from './services/dv-formula.service';
+export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
+
+export { DATE_DROPDOWN_KEY, LIST_DROPDOWN_KEY } from './views';
+
+// TODO: @jikkai: I think this is a mistake, it should be exported from here. @weird94
+export { DataValidationModel } from '@univerjs/data-validation';
+
 // #region - all commands
 export {
     AddSheetDataValidationAndOpenCommand,
@@ -39,18 +54,5 @@ export {
     ShowDataValidationDropdown,
     ToggleValidationPanelOperation,
 } from './commands/operations/data-validation.operation';
-export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export { UniverSheetsDataValidationMobilePlugin } from './mobile-plugin';
-export { SheetDataValidationModel } from './models/sheet-data-validation-model';
-export { UniverSheetsDataValidationPlugin } from './plugin';
-export { DataValidationCacheService } from './services/dv-cache.service';
-export type { IDataValidationResCache } from './services/dv-cache.service';
-export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-export { DataValidationFormulaService } from './services/dv-formula.service';
-export { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-
-export { DATE_DROPDOWN_KEY, LIST_DROPDOWN_KEY } from './views';
-
-export { DataValidationModel } from '@univerjs/data-validation';
 
 // #endregion

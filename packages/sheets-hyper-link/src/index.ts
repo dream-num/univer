@@ -24,8 +24,13 @@ export { ERROR_RANGE } from './types/const';
 // #region - all commands
 
 export { AddHyperLinkMutation, type IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
-export { RemoveHyperLinkMutation, type IRemoveHyperLinkMutationParams } from './commands/mutations/remove-hyper-link.mutation';
-export { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation, type IUpdateHyperLinkMutationParams, type IUpdateHyperLinkRefMutationParams } from './commands/mutations/update-hyper-link.mutation';
+export { type IRemoveHyperLinkMutationParams, RemoveHyperLinkMutation } from './commands/mutations/remove-hyper-link.mutation';
+export {
+    type IUpdateHyperLinkMutationParams,
+    type IUpdateHyperLinkRefMutationParams,
+    UpdateHyperLinkMutation,
+    UpdateHyperLinkRefMutation,
+} from './commands/mutations/update-hyper-link.mutation';
 
 // #endregion
 

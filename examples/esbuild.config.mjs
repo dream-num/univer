@@ -2,6 +2,7 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import process from 'node:process';
 
+import detect from 'detect-port';
 import esbuild from 'esbuild';
 import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
@@ -124,9 +125,11 @@ if (args.watch) {
     await monacoBuildTask();
     await ctx.watch();
 
-    const { port } = await ctx.serve({
+    const port = isE2E ? 3000 : await detect(3002);
+
+    await ctx.serve({
         servedir: './local',
-        port: isE2E ? 3000 : 3002,
+        port,
     });
 
     const url = `http://localhost:${port}`;

@@ -15,7 +15,7 @@
  */
 
 import { ColorKit, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { isObservable } from 'rxjs';
 import type { Observable } from 'rxjs';
 
@@ -35,31 +35,31 @@ export type ICustomLabelProps<T = undefined> = {
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
- * @returns
  */
-export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
+export function CustomLabel(props: ICustomLabelProps): JSX.Element {
     const { title, icon, label, value, value$ } = props;
     const localeService = useDependency(LocaleService);
     const componentManager = useDependency(ComponentManager);
-    const [realValue, setRealValue] = useState(value);
+    const [subscribedValue, setSubscribedValue] = useState(value);
     const [realIcon, setRealIcon] = useState('');
 
     const nodes = [];
     let index = 0;
 
     useEffect(() => {
-        setRealValue(value);
-
         if (value$) {
             const subscription = value$.subscribe((v) => {
-                setRealValue(v);
+                setSubscribedValue(v);
             });
 
             return () => {
                 subscription.unsubscribe();
             };
         }
-    }, [value, value$]);
+    }, [value$]);
+    const realValue = useMemo(() => {
+        return value ?? subscribedValue;
+    }, [subscribedValue, value]);
 
     useEffect(() => {
         let subscription = null;
@@ -77,10 +77,16 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
     }, [icon]);
 
     // if value is not valid, use primary color
-    let isValid = false;
-    if (realValue && typeof realValue === 'string') {
-        isValid = new ColorKit(realValue).isValid;
-    }
+    // let isValid = false;
+    // if (realValue && typeof realValue === 'string') {
+    //     isValid = new ColorKit(realValue).isValid;
+    // }
+    const isValid = useMemo(() => {
+        if (realValue && typeof realValue === 'string') {
+            return new ColorKit(realValue).isValid;
+        }
+        return false;
+    }, [realValue]);
 
     if (icon) {
         const Icon = componentManager.get(realIcon ?? '');

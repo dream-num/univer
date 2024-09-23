@@ -26,6 +26,7 @@ export {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     isInternalEditorID,
 } from './common/const';
 export * from './common/di';

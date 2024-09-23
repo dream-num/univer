@@ -26,8 +26,6 @@ import {
     Injector,
     InterceptorManager,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     Rectangle,
     Tools,
     UniverInstanceType,
@@ -128,7 +126,6 @@ export function getAddMergeMutationRangeByType(selection: IRange[], type?: Dimen
 
 export const MERGE_CELL_INTERCEPTOR_CHECK = createInterceptorKey<boolean, IRange[]>('mergeCellPermissionCheck');
 
-@OnLifecycle(LifecycleStages.Starting, MergeCellController)
 export class MergeCellController extends Disposable {
     disposableCollection = new DisposableCollection();
 

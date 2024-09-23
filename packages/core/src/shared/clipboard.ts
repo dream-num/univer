@@ -15,10 +15,40 @@
  */
 
 import { BaselineOffset, BooleanNumber } from '../types/enum';
-import type { IDocumentBody, ITextRun } from '../types/interfaces';
+import { CustomRangeType, type IDocumentBody, type ITextRun } from '../types/interfaces';
 import { Tools } from './tools';
 
 export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
+    const { customRanges = [] } = body;
+    const customRangesInRange = customRanges.filter((range) => range.startIndex >= startIndex && range.endIndex <= endIndex);
+
+    let cursorIndex = startIndex;
+    let html = '';
+    customRangesInRange.forEach((range) => {
+        const { startIndex, endIndex, rangeType, rangeId } = range;
+        const preHtml = getBodyInlineSlice(body, cursorIndex, startIndex);
+        html += preHtml;
+        const sliceHtml = getBodyInlineSlice(body, startIndex + 1, endIndex);
+        switch (rangeType) {
+            case CustomRangeType.HYPERLINK: {
+                html += `<a data-rangeid="${rangeId}" href="${range.properties?.url ?? ''}">${sliceHtml}</a>`;
+                break;
+            }
+
+            default: {
+                html += sliceHtml;
+                break;
+            }
+        }
+        cursorIndex = endIndex + 1;
+    });
+    const endHtml = getBodyInlineSlice(body, cursorIndex, endIndex);
+    html += endHtml;
+    return html;
+}
+
+// TODO @ybzky Both sheet and doc need to use the same rich text parsing logic.
+function getBodyInlineSlice(body: IDocumentBody, startIndex: number, endIndex: number): string {
     const { dataStream, textRuns = [] } = body;
     let cursorIndex = startIndex;
     const spanList: string[] = [];

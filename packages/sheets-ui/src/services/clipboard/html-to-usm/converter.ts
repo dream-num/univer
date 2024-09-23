@@ -476,9 +476,17 @@ export class HtmlToUSMService {
                 textRuns: [],
             };
             // Rich text parsing method, refer to the doc
-            this._parseCellHtml(null, cell.childNodes, newDocBody, undefined, styleStr);
+            this.process(null, cell.childNodes!, newDocBody, []);
             const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
             const p = documentModel?.getSnapshot();
+            const cellCustomRanges: ICustomRange[] = [];
+            newDocBody?.customRanges?.forEach((c) => {
+                cellCustomRanges.push({
+                    ...c,
+                    startIndex: c.startIndex,
+                    endIndex: c.endIndex,
+                });
+            });
             const singleDataStream = `${newDocBody.dataStream}\r\n`;
             const documentData = {
                 ...p, ...{
@@ -486,6 +494,7 @@ export class HtmlToUSMService {
                         dataStream: singleDataStream,
                         textRuns: newDocBody.textRuns,
                         paragraphs: generateParagraphs(singleDataStream),
+                        customRanges: cellCustomRanges,
                     },
                 },
             };

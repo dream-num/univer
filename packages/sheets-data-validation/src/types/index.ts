@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './interface';
 export * from './const';
+export * from './interface';

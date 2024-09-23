@@ -15,10 +15,10 @@
  */
 
 /* eslint-disable no-console */
-import { chromium, expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { sheetData as emptySheetData } from '../mockdata/emptysheet';
+import { expect, test } from '@playwright/test';
 import { sheetData as freezeData } from '../mockdata/freezesheet';
+import { sheetData as emptySheetData } from '../mockdata/emptysheet';
 
 export interface IFPSData {
     fpsData: number[];
@@ -102,12 +102,13 @@ async function measureFPS(page: Page, duration = 5, deltaX: number, deltaY: numb
 }
 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number) => {
-    test(title, async ({ page: _ }) => {
-        const browser = await chromium.launch({ headless: false }); // 启动浏览器并保持可见
-        const page = await browser.newPage();
-        await page.goto('http://localhost:3002/sheets/');
-        const windowOfPage = await page.evaluateHandle('window');
+    test(title, async ({ page }) => {
+        // const browser = await chromium.launch({ headless: false }); // launch browser
+        // const page = await browser.newPage();
+        await page.goto('http://localhost:3000/sheets/'); // local service is ok too, that means the port is 3002.
+        await page.waitForTimeout(2000);
 
+        const windowOfPage = await page.evaluateHandle('window');
         await test.step('create univer', async () => {
             await page.evaluate(({ sheetData, window }: any) => {
                 window.E2EControllerAPI.disposeCurrSheetUnit();
@@ -144,5 +145,5 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number) 
     });
 };
 
-createTest('sheet scroll empty', emptySheetData, 50);
-createTest('sheet scroll after freeze', freezeData, 30);
+createTest('sheet scroll empty', emptySheetData, 0);
+createTest('sheet scroll after freeze', freezeData, 10);

@@ -15,12 +15,12 @@
  */
 
 import { BorderStyleTypes, BorderType } from '@univerjs/core';
-import type { IDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
+import type { IDisposable } from '@univerjs/core';
 
 export interface IBorderInfo {
     type: BorderType;
-    color: string;
+    color: string | undefined;
     style: BorderStyleTypes;
     activeBorderType: boolean; // When you click on the border type, then click on the color and style, it should take effect immediately.
 }

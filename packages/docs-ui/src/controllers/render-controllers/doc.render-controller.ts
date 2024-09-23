@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FOCUSING_DOC, ICommandService, IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, RxDisposable } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -82,7 +82,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.attachControl();
 
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
-            if (!this._contextService.getContextValue(FOCUSING_DOC)) {
+            const focusEditor = this._editorService.getFocusEditor();
+            if (focusEditor?.getEditorId() !== this._context.unitId) {
                 return;
             }
 

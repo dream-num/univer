@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
 import { cellToRange, CustomRangeType, DataStreamTreeTokenType, DEFAULT_STYLES, generateRandomId, IUniverInstanceService, numfmt, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IMoveRangeMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetSelectionsOperationParams,
-} from '@univerjs/sheets';
+import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
@@ -36,11 +29,18 @@ import {
     SetSelectionsOperation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import type { IAccessor, ICellData, ICustomRange, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
 
-import { DEFAULT_PADDING_DATA } from '@univerjs/engine-render';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IMoveRangeMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
+} from '@univerjs/sheets';
 import { COPY_TYPE } from '../../services/clipboard/type';
 import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 export function getDefaultOnPasteCellMutations(
@@ -71,6 +71,11 @@ export function getDefaultOnPasteCellMutations(
         const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor, true);
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
+
+        // set custom
+        const { undos: setCustomUndos, redos: setCustomRedos } = getSetCellCustomMutations(pasteTo, pasteFrom, data, accessor);
+        redoMutationsInfo.push(...setCustomRedos);
+        undoMutationsInfo.push(...setCustomUndos);
 
         // clear and add merge
         const { undos: clearMergeUndos, redos: clearMergeRedos } = getClearAndSetMergeMutations(
@@ -325,6 +330,53 @@ export function getSetCellValueMutations(
     const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
         accessor,
         setValuesMutation
+    );
+
+    undoMutationsInfo.push({
+        id: SetRangeValuesMutation.id,
+        params: undoSetValuesMutation,
+    });
+    return {
+        undos: undoMutationsInfo,
+        redos: redoMutationsInfo,
+    };
+}
+
+export function getSetCellCustomMutations(
+    pasteTo: ISheetDiscreteRangeLocation,
+    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    accessor: IAccessor
+) {
+    const { unitId, subUnitId, range } = pasteTo;
+    const redoMutationsInfo: IMutationInfo[] = [];
+    const undoMutationsInfo: IMutationInfo[] = [];
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
+    const valueMatrix = new ObjectMatrix<ICellData>();
+
+    matrix.forValue((row, col, value) => {
+        const { row: realRow, col: realCol } = mapFunc(row, col);
+
+        if (value.custom) {
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ custom: value.custom }));
+        }
+    });
+
+    const setCustomMutation: ISetRangeValuesMutationParams = {
+        unitId,
+        subUnitId,
+        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
+    };
+
+    redoMutationsInfo.push({
+        id: SetRangeValuesMutation.id,
+        params: setCustomMutation,
+    });
+
+    // undo
+    const undoSetValuesMutation: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
+        accessor,
+        setCustomMutation
     );
 
     undoMutationsInfo.push({

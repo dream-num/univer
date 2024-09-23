@@ -88,6 +88,11 @@ export default antfu({
     rules: {
         'penetrating/no-penetrating-import': 2,
     },
+}, {
+    files: ['**/*/src/index.ts'],
+    rules: {
+        'perfectionist/sort-exports': 'off',
+    },
 },
 typescriptPreset(),
 facadePreset(),

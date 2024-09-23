@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-// #region - all commands
-export {
-    AddDataValidationMutation,
-    type IAddDataValidationMutationParams,
-    type IRemoveDataValidationMutationParams,
-    type IUpdateDataValidationMutationParams,
-    RemoveDataValidationMutation,
-    UpdateDataValidationMutation,
-} from './commands/mutations/data-validation.mutation';
 export {
     getRuleOptions,
     getRuleSetting,
@@ -46,5 +37,14 @@ export type { IFormulaValidResult } from './validators/base-data-validator';
 
 export type { IBaseDataValidationWidget } from './validators/base-widget';
 
-// #endregion
+// #region - all commands
+export {
+    AddDataValidationMutation,
+    type IAddDataValidationMutationParams,
+    type IRemoveDataValidationMutationParams,
+    type IUpdateDataValidationMutationParams,
+    RemoveDataValidationMutation,
+    UpdateDataValidationMutation,
+} from './commands/mutations/data-validation.mutation';
 
+// #endregion

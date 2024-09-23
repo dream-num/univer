@@ -21,23 +21,25 @@ export { SlideSideBar } from './components/slide-bar/SlideBar';
 export { ISlideEditorBridgeService } from './services/slide-editor-bridge.service';
 export { SlideCanvasPopMangerService } from './services/slide-popup-manager.service';
 
+export { SlideEditorContainer } from './views/editor-container/EditorContainer';
+export { SLIDE_EDITOR_ID } from './const';
+
+export { CanvasView } from './controllers/canvas-view';
+
 export { IMAGE_MENU_ID } from './controllers/image.menu';
 export { SHAPE_MENU_ID } from './controllers/shape.menu';
 
 export { menuSchema } from './controllers/menu.schema';
 
 // #region - all commands
+
 export { ActivateSlidePageOperation } from './commands/operations/activate.operation';
 export { DeleteSlideElementOperation } from './commands/operations/delete-element.operation';
 export { InsertSlideFloatImageCommand } from './commands/operations/insert-image.operation';
-export { InsertSlideShapeRectangleOperation, InsertSlideShapeRectangleCommand } from './commands/operations/insert-shape.operation';
+export { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation } from './commands/operations/insert-shape.operation';
 export { SetSlidePageThumbOperation } from './commands/operations/set-thumb.operation';
 export { AppendSlideOperation } from './commands/operations/append-slide.operation';
-export { SlideAddTextOperation, SlideAddTextCommand } from './commands/operations/insert-text.operation';
+export { SlideAddTextCommand, SlideAddTextOperation } from './commands/operations/insert-text.operation';
 export { UpdateSlideElementOperation } from './commands/operations/update-element.operation';
+
 // #endregion
-
-export { SlideEditorContainer } from './views/editor-container/EditorContainer';
-export { SLIDE_EDITOR_ID } from './const';
-
-export { CanvasView } from './controllers/canvas-view';

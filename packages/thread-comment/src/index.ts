@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-export { ThreadCommentModel, type CommentUpdate } from './models/thread-comment.model';
+export { type CommentUpdate, ThreadCommentModel } from './models/thread-comment.model';
 export { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 export { TC_PLUGIN_NAME } from './types/const';
-export type { IThreadComment, IThreadCommentMention, IBaseComment } from './types/interfaces/i-thread-comment';
+export type { IBaseComment, IThreadComment, IThreadCommentMention } from './types/interfaces/i-thread-comment';
 export { UniverThreadCommentPlugin } from './plugin';
 
 export {
+    type IThreadCommentDataSource,
     IThreadCommentDataSourceService,
     ThreadCommentDataSourceService,
-    type IThreadCommentDataSource,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';
 
@@ -48,16 +48,16 @@ export type {
 export {
     AddCommentCommand,
     DeleteCommentCommand,
+    DeleteCommentTreeCommand,
     ResolveCommentCommand,
     UpdateCommentCommand,
-    DeleteCommentTreeCommand,
 } from './commands/commands/comment.command';
 export type {
     IAddCommentCommandParams,
     IDeleteCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
     IResolveCommentCommandParams,
     IUpdateCommentCommandParams,
-    IDeleteCommentTreeCommandParams,
 } from './commands/commands/comment.command';
 
 // #endregion

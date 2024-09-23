@@ -20,6 +20,6 @@ export type { IFloatDomData, ISheetDrawing, ISheetDrawingPosition, ISheetFloatDo
 
 // #region - all commands
 
-export { SetDrawingApplyMutation, DrawingApplyType, type ISetDrawingApplyMutationParams } from './commands/mutations/set-drawing-apply.mutation';
+export { DrawingApplyType, type ISetDrawingApplyMutationParams, SetDrawingApplyMutation } from './commands/mutations/set-drawing-apply.mutation';
 
 // #endregion

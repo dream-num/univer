@@ -462,50 +462,28 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         }
 
         const { workbookTypes, worksheetTypes, rangeTypes } = permissionTypes;
+        const permissionIds = [];
         if (workbookTypes) {
-            const workbookDisable = workbookTypes.some((F) => {
-                const instance = new F(unitId);
-                const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
-                return permission === false;
-            });
-            if (workbookDisable === true) {
-                return false;
-            }
+            permissionIds.push(...workbookTypes.map((F) => new F(unitId).id));
         }
         if (worksheetTypes) {
-            const worksheetDisable = worksheetTypes.some((F) => {
-                const instance = new F(unitId, subUnitId);
-                const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
-                return permission === false;
-            });
-            if (worksheetDisable === true) {
-                return false;
-            }
+            permissionIds.push(...worksheetTypes.map((F) => new F(unitId, subUnitId).id));
         }
         if (rangeTypes) {
-            const hasPermission = ranges?.every((range) => {
-                return rangeTypes.every((F) => {
-                    for (let row = range.startRow; row <= range.endRow; row++) {
-                        for (let col = range.startColumn; col <= range.endColumn; col++) {
-                            const cellInfo = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                            if (!cellInfo?.ruleId) {
-                                continue;
-                            }
-                            const permissionId = this._rangeProtectionRuleModel.getRule(unitId, subUnitId, cellInfo.ruleId)?.permissionId;
-                            if (!permissionId) {
-                                continue;
-                            }
-                            const instance = new F(unitId, subUnitId, permissionId);
-                            const permission = this._permissionService.getPermissionPoint(instance.id)?.value ?? false;
-                            if (permission === false) {
-                                return false;
-                            }
-                        }
-                    }
-                    return true;
+            this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
+                const overlap = ranges.some((range) => {
+                    return rule.ranges.some((r) => {
+                        return Rectangle.intersects(r, range);
+                    });
                 });
+                if (overlap) {
+                    permissionIds.push(...rangeTypes.map((F) => new F(unitId, subUnitId, rule.permissionId).id));
+                }
             });
-            return hasPermission;
+        }
+
+        if (permissionIds.length) {
+            return this._permissionService.composePermission(permissionIds).every((permission) => permission.value);
         }
 
         return true;

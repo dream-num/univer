@@ -17,9 +17,9 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
+import { HorizontalAlign, Range, WrapStrategy } from '@univerjs/core';
+import { clampRange } from '@univerjs/engine-render';
 import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
-
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { expandRangeIfIntersects, inRowViewRanges, inViewRanges } from '../../../basics/tools';
@@ -97,13 +97,25 @@ export class Font extends SheetExtension {
             spreadsheetSkeleton,
         };
         ctx.save();
-        fontMatrix.forValue((row: number, col: number, fontsConfig: IFontCacheItem) => {
-            this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
+        // fontMatrix.forValue((row: number, col: number, fontsConfig: IFontCacheItem) => {
+        //     this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
+        // });
+        viewRanges.forEach((range) => {
+            range.startColumn -= 20;
+            range.endColumn += 20;
+            range = clampRange(range);
+            Range.foreach(range, (row, col) => {
+                const fontsConfig = fontMatrix.getValue(row, col);
+                if (fontsConfig) {
+                    this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
+                }
+            });
         });
+
         ctx.restore();
     }
 
-    renderFontByCellMatrix = (renderFontContext: IRenderFontContext, rowIndex: number, columnIndex: number, fontsConfig: IFontCacheItem) => {
+    renderFontByCellMatrix(renderFontContext: IRenderFontContext, rowIndex: number, columnIndex: number, fontsConfig: IFontCacheItem) {
         const { ctx, scale, rowHeightAccumulation, columnWidthAccumulation, viewRanges, checkOutOfViewBound, diffRanges, spreadsheetSkeleton } = renderFontContext;
         if (!checkOutOfViewBound) {
             if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {

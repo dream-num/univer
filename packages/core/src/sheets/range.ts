@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import { ObjectMatrix, Tools } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
-import type { HorizontalAlign, VerticalAlign } from '../types/enum';
 import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
+import { RANGE_TYPE } from './typedef';
+import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { HorizontalAlign, VerticalAlign } from '../types/enum';
 import type {
     IBorderData,
     IDocumentBody,
@@ -30,7 +31,6 @@ import type {
 } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, IRange } from './typedef';
-import { RANGE_TYPE } from './typedef';
 import type { Worksheet } from './worksheet';
 
 /**

@@ -43,6 +43,7 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
+    /* eslint-disable-next-line max-lines-per-function */
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
@@ -51,9 +52,8 @@ export class Background extends SheetExtension {
         { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
-        const { background: backgroundCache, backgroundPositions } = stylesCache;
-        if (!worksheet || !backgroundCache) return;
-
+        const { background: bgMatrixCacheByColor, backgroundPositions } = stylesCache;
+        if (!worksheet || !bgMatrixCacheByColor) return;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -64,11 +64,8 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         const { scaleX, scaleY } = ctx.getScale();
-
         const renderBGCore = (rgb: string) => {
-            ctx.beginPath();
-
-            const bgColorMatrix = backgroundCache[rgb];
+            const bgColorMatrix = bgMatrixCacheByColor[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
             const backgroundPaths = new Path2D();
             const renderBGByCell = (row: number, col: number) => {
@@ -114,12 +111,22 @@ export class Background extends SheetExtension {
                 const endYPrecise = fixLineWidthByScale(endY, scaleY);
                 backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
             };
+
+            ctx.beginPath();
             bgColorMatrix.forValue(renderBGByCell);
+            // viewRanges.forEach((range) => {
+            //     Range.foreach(range, (row, col) => {
+            //         const bgConfig = bgColorMatrix.getValue(row, col);
+            //         if (bgConfig) {
+            //             renderBGByCell(row, col);
+            //         }
+            //     });
+            // });
             ctx.fill(backgroundPaths);
             ctx.closePath();
         };
 
-        Object.keys(backgroundCache).forEach(renderBGCore);
+        Object.keys(bgMatrixCacheByColor).forEach(renderBGCore);
         ctx.restore();
     }
 }

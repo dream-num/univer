@@ -355,7 +355,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
 
         cacheCtx.save();
-        // 所以 cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
+        // cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
         const m = mainCtx.getTransform();
         // cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
         cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);

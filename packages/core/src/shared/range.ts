@@ -72,39 +72,36 @@ export function splitIntoGrid(ranges: IRange[]): IRange[] {
     const sortedColumns = Array.from(columns).sort((a, b) => a - b);
     const sortedRows = Array.from(rows).sort((a, b) => a - b);
 
-    // Create grid cells based on unique boundaries
-    const gridCells: IRange[] = [];
+     // Sort ranges by startRow and startColumn
+    ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+
+     // Assign original ranges to the grid cells
+    const result: IRange[] = [];
     for (let i = 0; i < sortedRows.length - 1; i++) {
         for (let j = 0; j < sortedColumns.length - 1; j++) {
-            gridCells.push({
+            const gridCell = {
                 startColumn: sortedColumns[j],
                 endColumn: sortedColumns[j + 1] - 1,
                 startRow: sortedRows[i],
                 endRow: sortedRows[i + 1] - 1,
-            });
-        }
-    }
+            };
 
-    // Sort ranges by startRow and startColumn
-    ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+            for (const range of ranges) {
+                if (range.startRow > gridCell.endRow) {
+                    // Since ranges are sorted, we can break early
+                    break;
+                }
 
-    // Assign original ranges to the grid cells
-    const result: IRange[] = [];
-    for (const gridCell of gridCells) {
-        for (const range of ranges) {
-            if (range.startRow > gridCell.endRow) {
-                // Since ranges are sorted, we can break early
-                break;
-            }
-            if (range.startRow <= gridCell.endRow && range.endRow >= gridCell.startRow &&
-                range.startColumn <= gridCell.endColumn && range.endColumn >= gridCell.startColumn) {
-                result.push({
-                    startColumn: Math.max(gridCell.startColumn, range.startColumn),
-                    endColumn: Math.min(gridCell.endColumn, range.endColumn),
-                    startRow: Math.max(gridCell.startRow, range.startRow),
-                    endRow: Math.min(gridCell.endRow, range.endRow),
-                });
-                break; // No need to check other ranges for this grid cell
+                if (range.startRow <= gridCell.endRow && range.endRow >= gridCell.startRow &&
+                    range.startColumn <= gridCell.endColumn && range.endColumn >= gridCell.startColumn) {
+                    result.push({
+                        startColumn: Math.max(gridCell.startColumn, range.startColumn),
+                        endColumn: Math.min(gridCell.endColumn, range.endColumn),
+                        startRow: Math.max(gridCell.startRow, range.startRow),
+                        endRow: Math.min(gridCell.endRow, range.endRow),
+                    });
+                    break; // No need to check other ranges for this grid cell
+                }
             }
         }
     }

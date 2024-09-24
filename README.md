@@ -104,6 +104,7 @@ Univer supports multiple languages, including:
 - `en-US`
 - `ru-RU`
 - `vi-VN`
+- `fa-IR`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed by the community.
 

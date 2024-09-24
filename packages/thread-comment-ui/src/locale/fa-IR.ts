@@ -16,7 +16,7 @@
 
 import type zhCN from './zh-CN';
 
-const faIR: typeof zhCN = {
+const locale: typeof zhCN = {
     threadCommentUI: {
         panel: {
             title: 'مدیریت نظرات',
@@ -50,4 +50,4 @@ const faIR: typeof zhCN = {
     },
 };
 
-export default faIR;
+export default locale;

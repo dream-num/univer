@@ -16,7 +16,7 @@
 
 import type zhCN from './zh-CN';
 
-const faIR: typeof zhCN = {
+const locale: typeof zhCN = {
     hyperLink: {
         form: {
             editTitle: 'ویرایش لینک',
@@ -52,4 +52,4 @@ const faIR: typeof zhCN = {
     },
 };
 
-export default faIR;
+export default locale;

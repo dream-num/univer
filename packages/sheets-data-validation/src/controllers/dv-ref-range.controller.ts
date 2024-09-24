@@ -18,7 +18,7 @@ import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, Lifecy
 import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { ISheetDataValidationRule } from '@univerjs/core';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';

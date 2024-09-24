@@ -46,7 +46,7 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
     resources: [
         {
             name: 'SHEET_DEFINED_NAME_PLUGIN',
-            data: '{"soAI3OK4sq":{"id":"soAI3OK4sq","name":"DefinedName1","formulaOrRefString":"Sheet1!$A$1:$B$2","comment":"","localSheetId":"AllDefaultWorkbook"}}',
+            data: '{"soAI3OK4sq":{"id":"soAI3OK4sq","name":"DefinedName1","formulaOrRefString":"Sheet1!$A$1:$B$2","comment":"","localSheetId":"AllDefaultWorkbook"},"qwert12345":{"id":"qwert12345","name":"DefinedName2","formulaOrRefString":"Sheet1!$1:$3","comment":"","localSheetId":"AllDefaultWorkbook"},"asdfg67890":{"id":"asdfg67890","name":"DefinedName3","formulaOrRefString":"Sheet1!$A:$C","comment":"","localSheetId":"AllDefaultWorkbook"}}',
         },
     ],
 });
@@ -209,6 +209,162 @@ describe('Test update defined name', () => {
             expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$B$4');
         });
 
+        it('Move rows to range start', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveRowsCommandParams = {
+                fromRange: {
+                    startRow: 1,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRowsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$2:$3');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$3');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$2:$3');
+        });
+
+        it('Move rows to range end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveRowsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+                toRange: {
+                    startRow: 3,
+                    startColumn: 0,
+                    endRow: 3,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRowsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$2');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$3');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$2');
+        });
+
+        it('Move first row beyond the end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveRowsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+                toRange: {
+                    startRow: 9,
+                    startColumn: 0,
+                    endRow: 9,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRowsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$2');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$3');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$2');
+        });
+
+        it('Move last row beyond the end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 2, startColumn: 0, endRow: 2, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveRowsCommandParams = {
+                fromRange: {
+                    startRow: 2,
+                    startColumn: 0,
+                    endRow: 2,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+                toRange: {
+                    startRow: 9,
+                    startColumn: 0,
+                    endRow: 9,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRowsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$9');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$3');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName2')).toBe('Sheet1!$1:$9');
+        });
+
         it('Move columns, update reference', async () => {
             const selectionManager = get(SheetsSelectionsService);
 
@@ -246,6 +402,162 @@ describe('Test update defined name', () => {
 
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             expect(getDefinedNameRef()).toBe('Sheet1!$A$1:$A$2');
+        });
+
+        it('Move columns to range start', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveColsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 1,
+                    endRow: 999,
+                    endColumn: 1,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 999,
+                    endColumn: 0,
+                    rangeType: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveColsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$B:$C');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$C');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$B:$C');
+        });
+
+        it('Move columns to range end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveColsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 999,
+                    endColumn: 0,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 3,
+                    endRow: 999,
+                    endColumn: 3,
+                    rangeType: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveColsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$B');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$C');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$B');
+        });
+
+        it('Move first column beyond the end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveColsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 999,
+                    endColumn: 0,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 9,
+                    endRow: 999,
+                    endColumn: 9,
+                    rangeType: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveColsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$B');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$C');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$B');
+        });
+
+        it('Move last column beyond the end', async () => {
+            const selectionManager = get(SheetsSelectionsService);
+
+            // A1
+            selectionManager.addSelections([
+                {
+                    range: { startRow: 0, startColumn: 2, endRow: 0, endColumn: 2, rangeType: RANGE_TYPE.COLUMN },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveColsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 2,
+                    endRow: 999,
+                    endColumn: 2,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 9,
+                    endRow: 999,
+                    endColumn: 9,
+                    rangeType: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveColsCommand.id, params)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$I');
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$C');
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getDefinedNameRef('DefinedName3')).toBe('Sheet1!$A:$I');
         });
 
         it('Insert row, update reference', async () => {

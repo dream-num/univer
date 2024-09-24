@@ -25,10 +25,6 @@ const monacoEditorEntryPoints = [
     'vs/editor/editor.worker.js',
 ];
 
-// Get git commit hash and ref name
-const gitCommitHash = isE2E ? 'E2E' : execSync('git rev-parse --short HEAD').toString().trim();
-const gitRefName = isE2E ? 'E2E' : execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
-
 function monacoBuildTask() {
     return esbuild.build({
         entryPoints: monacoEditorEntryPoints.map((entry) => `./node_modules/monaco-editor/esm/${entry}`),
@@ -44,6 +40,20 @@ function monacoBuildTask() {
             }),
         ],
     });
+}
+
+const define = {
+    'process.env.NODE_ENV': args.watch ? '"development"' : '"production"',
+    'process.env.IS_E2E': isE2E ? 'true' : 'false',
+};
+
+if (!args.watch && !isE2E) {
+    const gitCommitHash = isE2E ? 'E2E' : execSync('git rev-parse --short HEAD').toString().trim();
+    const gitRefName = isE2E ? 'E2E' : execSync('git symbolic-ref -q --short HEAD || git describe --tags --exact-match').toString().trim();
+
+    define['process.env.GIT_COMMIT_HASH'] = `"${gitCommitHash}"`;
+    define['process.env.GIT_REF_NAME'] = `"${gitRefName}"`;
+    define['process.env.BUILD_TIME'] = `"${new Date().toISOString()}"`;
 }
 
 const ctx = await esbuild[args.watch ? 'context' : 'build']({
@@ -111,13 +121,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
 
     outdir: './local',
 
-    define: {
-        'process.env.NODE_ENV': args.watch ? '"development"' : '"production"',
-        'process.env.GIT_COMMIT_HASH': `"${gitCommitHash}"`,
-        'process.env.GIT_REF_NAME': `"${gitRefName}"`,
-        'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,
-        'process.env.IS_E2E': isE2E ? 'true' : 'false',
-    },
+    define,
 
 });
 

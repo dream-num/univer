@@ -2157,6 +2157,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         } as ICellOtherConfig;
     }
 
+    /**
+     * New version to get merge data.
+     * @param row
+     * @param column
+     * @returns {ISelectionCell} The cell info with merge data
+     */
     private _getCellMergeInfo(row: number, column: number): ISelectionCell {
         return this.worksheet.getCellInfoInMergeData(row, column);
     }

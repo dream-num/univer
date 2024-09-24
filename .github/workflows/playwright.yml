@@ -42,18 +42,18 @@ jobs:
                   report-file: playwright-report.json
                   custom-info: 'For more information, [see full report](${{ steps.vercel-e2e-report.outputs.preview-url }})'
 
-            - name: Set Label
-              uses: actions/github-script@v6
-              if: failure()
-              with:
-                  script: |
-                      const { owner, repo } = context.repo;
-                      const prNumber = context.payload.pull_request.number;
-                      const labelsToAdd = ['qa:rejected'];
+              # - name: Set Label
+              #   uses: actions/github-script@v6
+              #   if: failure()
+              #   with:
+              #       script: |
+              #           const { owner, repo } = context.repo;
+              #           const prNumber = context.payload.pull_request.number;
+              #           const labelsToAdd = ['qa:rejected'];
 
-                      await github.rest.issues.addLabels({
-                          owner,
-                          repo,
-                          issue_number: prNumber,
-                          labels: labelsToAdd,
-                      });
+              #           await github.rest.issues.addLabels({
+              #               owner,
+              #               repo,
+              #               issue_number: prNumber,
+              #               labels: labelsToAdd,
+              #           });

@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    sheets: {
+        tabs: {
+            sheetCopy: '(Copie{0})',
+            sheet: 'Feuille',
+        },
+        info: {
+            overlappingSelections: 'Impossible d\'utiliser cette commande sur des sélections qui se chevauchent',
+            acrossMergedCell: 'À travers une cellule fusionnée',
+            partOfCell: 'Seule une partie d\'une cellule fusionnée est sélectionnée',
+            hideSheet: 'Aucune feuille visible après avoir masqué celle-ci',
+        },
+    },
+};
+
+export default locale;

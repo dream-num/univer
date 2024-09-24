@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import dajsFrFR from 'dayjs/locale/fr';
+import PickerFrFR from 'rc-picker/lib/locale/fr_FR';
+import type { ILocale } from './interface';
+
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: 'annuler',
+            confirm: 'ok',
+        },
+        Slider: {
+            resetTo: 'Réinitialiser à',
+        },
+        Picker: {
+            ...dajsFrFR,
+            ...PickerFrFR,
+        },
+        CascaderList: {
+            empty: 'Aucun',
+        },
+    },
+};
+
+export default locale;

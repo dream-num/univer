@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 async function generateLocales() {
     const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8'));
     const output = path.resolve(__dirname, '../src/locales.ts');
-    const locales = ['en-US', 'ru-RU', 'zh-CN', 'zh-TW', 'vi-VN', 'fa-IR'];
+    const locales = ['en-US', 'fr-FR', 'ru-RU', 'zh-CN', 'zh-TW', 'vi-VN', 'fa-IR'];
 
     const header = `/**
  * Copyright 2023-present DreamNum Inc.

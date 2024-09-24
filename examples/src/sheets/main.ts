@@ -41,7 +41,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { enUS, faIR, frFR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
@@ -76,6 +76,7 @@ const univer = new Univer({
     locales: {
         [LocaleType.ZH_CN]: zhCN,
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FR_FR]: frFR,
         [LocaleType.RU_RU]: ruRU,
         [LocaleType.ZH_TW]: zhTW,
         [LocaleType.VI_VN]: viVN,

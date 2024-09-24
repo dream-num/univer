@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    FR_FR = 'frFR',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type enUS from './en-US';
+
+const locale: typeof enUS = {
+    crosshair: {
+        button: {
+            tooltip: 'Surlignage du réticule',
+        },
+    },
+};
+
+export default locale;

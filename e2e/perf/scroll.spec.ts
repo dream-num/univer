@@ -31,26 +31,32 @@ interface IJsonObject {
     [key: string]: any;
 }
 
-interface IMeasureFPSParam { duration: number; deltaX: number; deltaY: number }
+interface IMeasureFPSParam { testDuration: number; deltaX: number; deltaY: number }
+
+interface IFPSResult {
+    fps: number;
+    medianFrameTime: number;
+    maxFrameTimes: number[];
+}
 
 const isCI = !!process.env.CI;
 /**
  * measure FPS of scrolling time.
  * @param page Page from playwright
- * @param duration fps test duration
+ * @param testDuration fps test duration
  * @param deltaX scroll step of X
  * @param deltaY scroll step of Y
- * @returns {Promise<number>} avg FPS value of test time.
+ * @returns {Promise<IFPSResult>} avg FPS value of test time.
  */
-async function measureFPS(page: Page, duration = 5, deltaX: number, deltaY: number) {
-    const fps = await page.evaluate(({ duration, deltaX, deltaY }: IMeasureFPSParam) => {
+async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: number) {
+    const fpsCounterPromise = await page.evaluate(({ testDuration, deltaX, deltaY }: IMeasureFPSParam) => {
         let intervalID;
         // dispatch wheel event
         const dispathWheelEvent = () => {
             const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
             const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
 
-            const interval = 60;
+            const interval = 30;
             const dispatchSimulateWheelEvent = (element) => {
                 const event = new WheelEvent('wheel', {
                     bubbles: true,
@@ -74,29 +80,52 @@ async function measureFPS(page: Page, duration = 5, deltaX: number, deltaY: numb
             continuousWheelSimulation(filteredCanvasElements[0], interval);
         };
 
+        const getMaxFrameTimes = (arr, n) => {
+            return arr.slice().sort((a, b) => b - a).slice(0, n);
+        };
+
+        const calculateMedian = (arr) => {
+            if (arr.length === 0) return 0;
+            const sorted = arr.slice().sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        };
+
         dispathWheelEvent();
 
-        return new Promise((resolve) => {
-            let frameCount = 0;
-            const startTime = performance.now();
+        let frameCount = 0;
+        const frameTimes = [];
+        const startTime = performance.now();
+        let lastFrameTime = performance.now();
 
+        return new Promise((resolve) => {
             function countFrames(_timestamp) {
                 frameCount++;
-                if (performance.now() - startTime < duration * 1000) {
+                const currentFrameTime = performance.now();
+                const deltaTime = currentFrameTime - lastFrameTime;
+                lastFrameTime = currentFrameTime;
+                if (deltaTime >= 1) {
+                    frameTimes.push(Math.round(deltaTime * 100) / 100);
+                }
+
+                if (performance.now() - startTime < testDuration * 1000) {
                     requestAnimationFrame(countFrames);
                 } else {
                     clearInterval(intervalID);
+
                     const elapsedTime = (performance.now() - startTime) / 1000;
-                    const fps = frameCount / elapsedTime;
-                    resolve(fps);
+                    const fps = Math.round(frameCount / elapsedTime * 100) / 100;
+                    const maxFrameTimes = getMaxFrameTimes(frameTimes, 10);
+                    const medianFrameTime = calculateMedian(frameTimes);
+                    resolve({ fps, maxFrameTimes, medianFrameTime });
                 }
             }
 
             requestAnimationFrame(countFrames);
         });
-    }, { duration, deltaX, deltaY });
+    }, { testDuration, deltaX, deltaY });
 
-    return fps;
+    return fpsCounterPromise as Promise<IFPSResult>;
 }
 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
@@ -129,10 +158,12 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
         });
 
         try {
-            const fps = await measureFPS(page, 10, deltaX, deltaY);
+            const resultOfFPS = await measureFPS(page, 5, deltaX, deltaY);
             await test.step('fps', async () => {
-                console.log('fps', fps);
-                expect(fps).toBeGreaterThan(minFpsValue);
+                console.log('FPS', resultOfFPS.fps);
+                console.log('medianFrameTime', resultOfFPS.medianFrameTime);
+                console.log('max10FrameTimes', resultOfFPS.maxFrameTimes);
+                expect(resultOfFPS.fps).toBeGreaterThan(minFpsValue);
             });
         } catch (error) {
             console.error('error when exec scrolling test', error);

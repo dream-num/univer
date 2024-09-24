@@ -163,6 +163,12 @@ describe('splitIntoGrid', () => {
         expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 
+    it('should handle small range', () => {
+        const input = [{ startColumn: 1, endColumn: 1, startRow: 1, endRow: 1 }, { startColumn: 1, endColumn: 1, startRow: 2, endRow: 2 }, { startColumn: 2, endColumn: 2, startRow: 1, endRow: 1 }, { startColumn: 2, endColumn: 2, startRow: 2, endRow: 2 }, { startColumn: 1, endColumn: 1, startRow: 2, endRow: 2 }];
+        const expected = [{ startColumn: 1, endColumn: 1, startRow: 1, endRow: 1 }, { startColumn: 1, endColumn: 1, startRow: 2, endRow: 2 }, { startColumn: 2, endColumn: 2, startRow: 1, endRow: 1 }, { startColumn: 2, endColumn: 2, startRow: 2, endRow: 2 }];
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
+    });
+
     it('should handle overlapping ranges correctly', () => {
         const input = [
             {

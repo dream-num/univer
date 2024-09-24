@@ -250,8 +250,8 @@ describe('Test fTest function', () => {
             const array1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [58, null],
-                    [11, 'test'],
-                    [10, true],
+                    [false, 'test'],
+                    [null, true],
                 ]),
                 rowCount: 3,
                 columnCount: 2,
@@ -274,7 +274,7 @@ describe('Test fTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(0.5702776173096873);
+            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('Calculate result > 1', () => {

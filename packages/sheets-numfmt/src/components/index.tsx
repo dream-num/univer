@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-// FIXME: DO NOT USE GLOBAL STYLES
-import './index.less';
-
 import { LocaleService, useDependency } from '@univerjs/core';
-import type { ISelectProps } from '@univerjs/design';
-import { Button, Select } from '@univerjs/design';
-import type { FC } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { IBusinessComponentProps } from '../base/types';
+import { Button, Select } from '@univerjs/design';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { ISelectProps } from '@univerjs/design';
+import type { FC } from 'react';
 import { UserHabitCurrencyContext } from '../context/user-habit';
+
 import { useCurrencyOptions } from '../hooks/useCurrencyOptions';
 import { useNextTick } from '../hooks/useNextTick';
 import { getCurrencyType } from '../utils/currency';
 import { AccountingPanel, isAccountingPanel } from './accounting';
 import { CurrencyPanel, isCurrencyPanel } from './currency';
+import { CustomFormat } from './custom-format';
 import { DatePanel, isDatePanel } from './date';
 import { GeneralPanel, isGeneralPanel } from './general';
 import { isThousandthPercentilePanel, ThousandthPercentilePanel } from './thousandth-percentile';
-import { CustomFormat } from './custom-format';
+import type { IBusinessComponentProps } from '../base/types';
+// FIXME: DO NOT USE GLOBAL STYLES
+import './index.less';
 
 export interface ISheetNumfmtPanelProps {
     value: { defaultValue: number; defaultPattern: string; row: number; col: number };

@@ -16,7 +16,7 @@
 
 export { getDT } from './common/utils';
 export { UniverThreadCommentUIPlugin } from './plugin';
-export { ThreadCommentPanelService, type ActiveCommentInfo } from './services/thread-comment-panel.service';
+export { type ActiveCommentInfo, ThreadCommentPanelService } from './services/thread-comment-panel.service';
 export { ThreadCommentPanel } from './views/thread-comment-panel';
 export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
 export { ThreadCommentTree } from './views/thread-comment-tree';
@@ -26,6 +26,10 @@ export { IThreadCommentMentionDataService, type IThreadCommentMentionDataSource 
 
 // #region - all commands
 
-export { ToggleSheetCommentPanelOperation, SetActiveCommentOperation, type ISetActiveCommentOperationParams } from './commands/operations/comment.operations';
+export {
+    type ISetActiveCommentOperationParams,
+    SetActiveCommentOperation,
+    ToggleSheetCommentPanelOperation,
+} from './commands/operations/comment.operations';
 
 // #endregion

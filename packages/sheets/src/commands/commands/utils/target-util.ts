@@ -33,7 +33,7 @@ export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInst
     };
 }
 
-interface IResult {
+export interface IResult {
     workbook: Workbook;
     worksheet: Worksheet;
     unitId: string;

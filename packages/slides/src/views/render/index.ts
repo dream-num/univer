@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-export { SLIDE_VIEW_KEY } from './adaptors';
-
 // export * from '../../../../slides-ui/src/controllers/canvas-view';
 export * from './adaptor';
+
+export { SLIDE_VIEW_KEY } from './adaptors';
 export * from './object-provider';
 
 export enum SLIDE_KEY {

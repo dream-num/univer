@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+
 import {
     CommandType,
     Dimension,
@@ -23,9 +24,9 @@ import {
     IUniverInstanceService,
     LocaleService,
     sequenceExecute,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
     AddMergeRedoSelectionsOperationFactory,
     AddMergeUndoMutationFactory,
@@ -36,6 +37,8 @@ import {
     RemoveWorksheetMergeMutation, SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';
@@ -88,12 +91,12 @@ export const AddWorksheetMergeCommand: ICommand = {
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
-            ranges,
+            ranges: Tools.deepClone(ranges),
         };
         const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
-            ranges,
+            ranges: Tools.deepClone(ranges),
         };
 
         // prepare undo mutations

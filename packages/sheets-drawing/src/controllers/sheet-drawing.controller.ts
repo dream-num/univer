@@ -37,8 +37,8 @@ export class SheetsDrawingLoadController extends Disposable {
     }
 
     private _initSnapshot() {
-        const toJson = (unitId: string) => {
-            const map = this._sheetDrawingService.getDrawingDataForUnit(unitId);
+        const toJson = (unitId: string, model?: IDrawingSubunitMap<ISheetDrawing>) => {
+            const map = model || this._sheetDrawingService.getDrawingDataForUnit(unitId);
             if (map) {
                 return JSON.stringify(map);
             }
@@ -58,7 +58,7 @@ export class SheetsDrawingLoadController extends Disposable {
             this._resourceManagerService.registerPluginResource<IDrawingSubunitMap<ISheetDrawing>>({
                 pluginName: SHEET_DRAWING_PLUGIN,
                 businesses: [UniverInstanceType.UNIVER_SHEET],
-                toJson: (unitId) => toJson(unitId),
+                toJson: (unitId, model) => toJson(unitId, model),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitId) => {
                     this._sheetDrawingService.removeDrawingDataForUnit(unitId);

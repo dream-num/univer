@@ -191,8 +191,8 @@ export class SpanModel extends Disposable {
                     ...range,
                 });
                 indexes.push(index);
-                index++;
             }
+            index++;
         }
         this._rangeMap.set(key, indexes);
         return ranges;

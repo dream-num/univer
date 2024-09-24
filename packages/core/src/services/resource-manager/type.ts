@@ -28,7 +28,8 @@ export interface IResourceHook<T = any> {
     businesses: UniverInstanceType[];
     onLoad: (unitID: string, resource: T) => void;
     onUnLoad: (unitID: string) => void;
-    toJson: (unitID: string) => string;
+    toJson: (unitID: string, model?: T) => string;
+
     parseJson: (bytes: string) => T;
 }
 

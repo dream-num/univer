@@ -75,6 +75,7 @@
         "@types/react": "^18.3.5",
         "@types/react-dom": "^18.3.0",
         "@univerjs-infra/shared": "workspace:*",
+        "detect-port": "^1.6.1",
         "esbuild": "^0.23.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",

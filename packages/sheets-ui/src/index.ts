@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable perfectionist/sort-exports */
-
 export { SheetsUIPart } from './consts/ui-name';
 export { SHEET_UI_PLUGIN_NAME } from './consts/plugin-name';
 export { getEditorObject } from './basics/editor/get-editor-object';
@@ -101,6 +99,11 @@ export { SheetPermissionInitController } from './controllers/permission/sheet-pe
 
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';
+export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
+export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
+export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
+export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
+export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 
 export { menuSchema } from './controllers/menu.schema';
 
@@ -164,7 +167,13 @@ export {
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, MoveSelectionEnterAndTabCommand, SelectAllCommand } from './commands/commands/set-selection.command';
 export { ChangeZoomRatioCommand, SetZoomRatioCommand } from './commands/commands/set-zoom-ratio.command';
 export { ShowMenuListCommand } from './commands/commands/unhide.command';
-export { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from './commands/commands/worksheet-protection.command';
+export {
+    AddWorksheetProtectionCommand,
+    ChangeSheetProtectionFromSheetBarCommand,
+    DeleteWorksheetProtectionCommand,
+    DeleteWorksheetProtectionFormSheetBarCommand,
+    SetWorksheetProtectionCommand,
+} from './commands/commands/worksheet-protection.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';
@@ -176,9 +185,5 @@ export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.oper
 export { SheetPermissionOpenDialogOperation } from './commands/operations/sheet-permission-open-dialog.operation';
 export { SheetPermissionOpenPanelOperation } from './commands/operations/sheet-permission-open-panel.operation';
 export { SidebarDefinedNameOperation } from './commands/operations/sidebar-defined-name.operation';
-export { type IBaseSheetBarProps } from './views/sheet-bar/sheet-bar-tabs/SheetBarItem';
-export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/font-family/interface';
-export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
-export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
-export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
+
 // #endregion

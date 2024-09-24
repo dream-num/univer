@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-// #region - all commands
-export {
-    type IRichTextEditingMutationParams,
-    RichTextEditingMutation,
-} from './commands/mutations/core-editing.mutation';
-
-export {
-    type ISetTextSelectionsOperationParams,
-    SetTextSelectionsOperation,
-} from './commands/operations/text-selection.operation';
 export type { IUniverDocsConfig } from './controllers/config.schema';
 export { UniverDocsPlugin } from './doc-plugin';
 export { DocInterceptorService } from './services/doc-interceptor/doc-interceptor.service';
@@ -33,4 +23,17 @@ export { DocSkeletonManagerService } from './services/doc-skeleton-manager.servi
 
 export type { IDocStateChangeInfo, IDocStateChangeParams } from './services/doc-state-emit.service';
 export { DocStateEmitService } from './services/doc-state-emit.service';
+
+// #region - all commands
+
+export {
+    type IRichTextEditingMutationParams,
+    RichTextEditingMutation,
+} from './commands/mutations/core-editing.mutation';
+
+export {
+    type ISetTextSelectionsOperationParams,
+    SetTextSelectionsOperation,
+} from './commands/operations/text-selection.operation';
+
 // #endregion

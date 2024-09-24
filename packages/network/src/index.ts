@@ -21,16 +21,24 @@ export { FetchHTTPImplementation } from './services/http/implementations/fetch';
 export { XHRHTTPImplementation } from './services/http/implementations/xhr';
 export { HTTPRequest, type HTTPRequestMethod } from './services/http/request';
 export { type HTTPResponseType, HTTPStatusCode } from './services/http/http';
-export { HTTPResponse, type HTTPEvent, HTTPResponseError, HTTPEventType, HTTPProgress, ResponseHeader, type HTTPResponseBody } from './services/http/response';
+export {
+    type HTTPEvent,
+    HTTPEventType,
+    HTTPProgress,
+    HTTPResponse,
+    type HTTPResponseBody,
+    HTTPResponseError,
+    ResponseHeader,
+} from './services/http/response';
 export {
     type ISocket,
     ISocketService,
     type SocketBodyType,
     WebSocketService,
 } from './services/web-socket/web-socket.service';
-export type { IRequestParams, IPostRequestParams } from './services/http/http.service';
+export type { IPostRequestParams, IRequestParams } from './services/http/http.service';
 export type { HTTPHandlerFn, HTTPInterceptorFn, HTTPInterceptorFnFactory } from './services/http/interceptor';
-export { RetryInterceptorFactory, type IRetryInterceptorFactoryParams } from './services/http/interceptors/retry-interceptor';
+export { type IRetryInterceptorFactoryParams, RetryInterceptorFactory } from './services/http/interceptors/retry-interceptor';
 export { ThresholdInterceptorFactory } from './services/http/interceptors/threshold-interceptor';
 export { AuthInterceptorFactory, type IAuthInterceptorParams } from './services/http/interceptors/auth-interceptor';
 export { MergeInterceptorFactory } from './services/http/interceptors/merge-interceptor';

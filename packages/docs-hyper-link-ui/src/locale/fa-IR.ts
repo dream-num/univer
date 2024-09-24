@@ -16,7 +16,7 @@
 
 import type zhCN from './zh-CN';
 
-const enUS: typeof zhCN = {
+const locale: typeof zhCN = {
     docLink: {
         edit: {
             confirm: 'تایید',
@@ -40,4 +40,4 @@ const enUS: typeof zhCN = {
     },
 };
 
-export default enUS;
+export default locale;

@@ -20,11 +20,11 @@ export { CROSSHAIR_HIGHLIGHT_COLORS } from './services/crosshair.service';
 // #region commands
 
 export {
-    ToggleCrosshairHighlightOperation,
     DisableCrosshairHighlightOperation,
     EnableCrosshairHighlightOperation,
-    SetCrosshairHighlightColorOperation,
     type ISetCrosshairHighlightColorOperationParams,
+    SetCrosshairHighlightColorOperation,
+    ToggleCrosshairHighlightOperation,
 } from './commands/operations/operation';
 
 // #endregion

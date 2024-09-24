@@ -111,8 +111,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value between A and B at which to evaluate the function.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, BETA.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BETA_INV: {
@@ -125,8 +129,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the beta distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            A: { name: 'A', detail: 'A lower bound to the interval of x.' },
+            B: { name: 'B', detail: 'An upper bound to the interval of x.' },
         },
     },
     BINOM_DIST: {
@@ -139,8 +146,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: 'number_s', detail: 'The number of successes in trials.' },
+            trials: { name: 'trials', detail: 'The number of independent trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, BINOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     BINOM_DIST_RANGE: {
@@ -153,8 +162,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: 'trials', detail: 'The number of independent trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            numberS: { name: 'number_s', detail: 'The number of successes in trials.' },
+            numberS2: { name: 'number_s2', detail: 'If provided, returns the probability that the number of successful trials will fall between number_s and number_s2.' },
         },
     },
     BINOM_INV: {
@@ -167,13 +178,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: 'trials', detail: 'The number of Bernoulli trials.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of success on each trial.' },
+            alpha: { name: 'alpha', detail: 'The criterion value.' },
         },
     },
     CHISQ_DIST: {
-        description: 'Returns the cumulative beta probability density function',
-        abstract: 'Returns the cumulative beta probability density function',
+        description: 'Returns the left-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the left-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -181,13 +193,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, CHISQ.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     CHISQ_DIST_RT: {
-        description: 'Returns the one-tailed probability of the chi-squared distribution',
-        abstract: 'Returns the one-tailed probability of the chi-squared distribution',
+        description: 'Returns the right-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the right-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -195,13 +208,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_INV: {
-        description: 'Returns the cumulative beta probability density function',
-        abstract: 'Returns the cumulative beta probability density function',
+        description: 'Returns the inverse of the left-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the inverse of the left-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -209,13 +222,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the chi-squared distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_INV_RT: {
-        description: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
-        abstract: 'Returns the inverse of the one-tailed probability of the chi-squared distribution',
+        description: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
+        abstract: 'Returns the inverse of the right-tailed probability of the chi-squared distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -223,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the chi-squared distribution.' },
+            degFreedom: { name: 'deg_freedom', detail: 'The number of degrees of freedom.' },
         },
     },
     CHISQ_TEST: {
@@ -237,13 +250,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: 'actual_range', detail: 'The range of data that contains observations to test against expected values.' },
+            expectedRange: { name: 'expected_range', detail: 'The range of data that contains the ratio of the product of row totals and column totals to the grand total.' },
         },
     },
     CONFIDENCE_NORM: {
-        description: 'Returns the confidence interval for a population mean',
-        abstract: 'Returns the confidence interval for a population mean',
+        description: 'Returns the confidence interval for a population mean, using a normal distribution.',
+        abstract: 'Returns the confidence interval for a population mean, using a normal distribution.',
         links: [
             {
                 title: 'Instruction',
@@ -251,8 +264,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: 'The significance level used to compute the confidence level. The confidence level equals 100*(1 - alpha)%, or in other words, an alpha of 0.05 indicates a 95 percent confidence level.' },
+            standardDev: { name: 'standard_dev', detail: 'The population standard deviation for the data range and is assumed to be known.' },
+            size: { name: 'size', detail: 'The sample size.' },
         },
     },
     CONFIDENCE_T: {
@@ -265,8 +279,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: 'The significance level used to compute the confidence level. The confidence level equals 100*(1 - alpha)%, or in other words, an alpha of 0.05 indicates a 95 percent confidence level.' },
+            standardDev: { name: 'standard_dev', detail: 'The population standard deviation for the data range and is assumed to be known.' },
+            size: { name: 'size', detail: 'The sample size.' },
         },
     },
     CORREL: {
@@ -279,8 +294,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     COUNT: {
@@ -368,8 +383,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: 'Returns covariance, the average of the products of paired deviations',
-        abstract: 'Returns covariance, the average of the products of paired deviations',
+        description: 'Returns population covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns population covariance',
         links: [
             {
                 title: 'Instruction',
@@ -377,13 +392,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     COVARIANCE_S: {
-        description: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
-        abstract: 'Returns the sample covariance, the average of the products deviations for each data point pair in two data sets',
+        description: 'Returns the sample covariance, the average of the products of deviations for each data point pair in two data sets.',
+        abstract: 'Returns the sample covariance',
         links: [
             {
                 title: 'Instruction',
@@ -391,8 +406,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'A first range of cell values.' },
+            array2: { name: 'array2', detail: 'A second range of cell values.' },
         },
     },
     DEVSQ: {
@@ -405,8 +420,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The fist argument for which you want to calculate the sum of squared deviations.' },
+            number2: { name: 'number2', detail: 'The 2 to 255 arguments for which you want to calculate the sum of squared deviations.' },
         },
     },
     EXPON_DIST: {
@@ -419,8 +434,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which you want to evaluate the distribution.' },
+            lambda: { name: 'lambda', detail: 'The parameter value.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, EXPON.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     F_DIST: {
@@ -433,13 +449,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which to evaluate the function.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, F.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     F_DIST_RT: {
-        description: 'Returns the F probability distribution',
-        abstract: 'Returns the F probability distribution',
+        description: 'Returns the (right-tailed) F probability distribution',
+        abstract: 'Returns the (right-tailed) F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -447,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value at which to evaluate the function.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_INV: {
@@ -461,13 +480,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the F cumulative distribution.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_INV_RT: {
-        description: 'Returns the inverse of the F probability distribution',
-        abstract: 'Returns the inverse of the F probability distribution',
+        description: 'Returns the inverse of the (right-tailed) F probability distribution',
+        abstract: 'Returns the inverse of the (right-tailed) F probability distribution',
         links: [
             {
                 title: 'Instruction',
@@ -475,8 +495,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the F cumulative distribution.' },
+            degFreedom1: { name: 'deg_freedom1', detail: 'The numerator degrees of freedom.' },
+            degFreedom2: { name: 'deg_freedom2', detail: 'The denominator degrees of freedom.' },
         },
     },
     F_TEST: {
@@ -489,8 +510,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The first array or range of data.' },
+            array2: { name: 'array2', detail: 'The second array or range of data.' },
         },
     },
     FISHER: {
@@ -503,8 +524,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'A numeric value for which you want the transformation.' },
         },
     },
     FISHERINV: {
@@ -517,8 +537,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: 'y', detail: 'The value for which you want to perform the inverse of the transformation.' },
         },
     },
     FORECAST: {
@@ -531,8 +550,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The data point for which you want to predict a value.' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     FORECAST_ETS: {
@@ -597,12 +617,13 @@ export default {
         links: [
             {
                 title: 'Instruction',
-                url: 'https://support.microsoft.com/en-us/office/forecasting-functions-reference-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/en-us/office/forecast-and-forecast-linear-functions-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The data point for which you want to predict a value.' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     FREQUENCY: {
@@ -769,8 +790,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     KURT: {
@@ -1025,8 +1046,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     NORM_INV: {
@@ -1039,8 +1062,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability corresponding to the normal distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
         },
     },
     NORM_S_DIST: {
@@ -1053,8 +1077,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: 'The value for which you want the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     NORM_S_INV: {
@@ -1067,8 +1091,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability corresponding to the normal distribution.' },
         },
     },
     PEARSON: {

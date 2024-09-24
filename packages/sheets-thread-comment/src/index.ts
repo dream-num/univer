@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-export type { Dependency } from '@univerjs/core';
-export { Inject, Injector } from '@univerjs/core';
-export { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
-export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
+export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 export { UniverSheetsThreadCommentPlugin } from './plugin';
+export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { SHEETS_THREAD_COMMENT } from './types/const';
-export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
-export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+
 export { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 
 // #region - all commands
 
-export { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 export {
     AddCommentCommand,
     DeleteCommentCommand,
-    UpdateCommentCommand,
-    ResolveCommentCommand,
     DeleteCommentTreeCommand,
+    ResolveCommentCommand,
+    UpdateCommentCommand,
 } from '@univerjs/thread-comment';
 export type {
     IAddCommentCommandParams,
     IDeleteCommentCommandParams,
+    IDeleteCommentTreeCommandParams,
     IResolveCommentCommandParams,
     IUpdateCommentCommandParams,
-    IDeleteCommentTreeCommandParams,
 } from '@univerjs/thread-comment';
+export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
 
 // #endregion

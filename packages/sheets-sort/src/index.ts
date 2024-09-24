@@ -17,7 +17,7 @@
 export { UniverSheetsSortPlugin } from './plugin';
 
 export { SheetsSortService } from './services/sheets-sort.service';
-export { type ISortOption, SortType, type IOrderRule } from './services/interface';
+export { type IOrderRule, type ISortOption, SortType } from './services/interface';
 
 // #region - all commands
 

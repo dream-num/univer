@@ -22,13 +22,13 @@ export { DataSyncReplicaController } from './controllers/data-sync/data-sync-rep
 export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export {
     IRemoteInstanceService,
-    WebWorkerRemoteInstanceService,
     RemoteInstanceServiceName,
     RemoteSyncPrimaryService,
     RemoteSyncServiceName,
+    WebWorkerRemoteInstanceService,
 } from './services/remote-instance/remote-instance.service';
 export { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
-export { ChannelClient, ChannelServer, type IMessageProtocol, fromModule, toModule } from './services/rpc/rpc.service';
+export { ChannelClient, ChannelServer, fromModule, type IMessageProtocol, toModule } from './services/rpc/rpc.service';
 export { IRemoteSyncService } from './services/remote-instance/remote-instance.service';
 
 export type { IUniverRPCMainThreadConfig, IUniverRPCWorkerThreadConfig } from './controllers/config.schema';

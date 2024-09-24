@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用來計算其函數的值，介於下限值和上限值之間。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是 beta 分佈的相關機率。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            A: { name: '下限', detail: '函數的下限，預設值為 0。' },
+            B: { name: '上限', detail: '函數的上限，預設值為 1。' },
         },
     },
     BINOMDIST: {
@@ -53,13 +59,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功次數', detail: '為實驗的成功次數。' },
+            trials: { name: '實驗次數', detail: '為獨立實驗的次數。' },
+            probabilityS: { name: '成功機率', detail: '每一次實驗的成功機率。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 BINOMDIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     CHIDIST: {
-        description: '傳回 χ2 分佈的單尾機率',
-        abstract: '傳回 χ2 分佈的單尾機率',
+        description: '傳回 χ2 分佈的右尾機率',
+        abstract: '傳回 χ2 分佈的右尾機率',
         links: [
             {
                 title: '教導',
@@ -67,13 +75,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHIINV: {
-        description: '傳回 χ2 分佈的單尾機率的反函數',
-        abstract: '傳回 χ2 分佈的單尾機率的反函數',
+        description: '傳回 χ2 分佈的右尾機率的反函數值。',
+        abstract: '傳回 χ2 分佈的右尾機率的反函數值。',
         links: [
             {
                 title: '教導',
@@ -81,8 +89,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與 χ2 分佈相關聯的機率。' },
+            degFreedom: { name: '自由度', detail: '這是自由度。' },
         },
     },
     CHITEST: {
@@ -95,13 +103,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '觀察範圍', detail: '這是觀察值範圍，用來檢定預期值。' },
+            expectedRange: { name: '預期範圍', detail: '這是資料範圍，其內容為各欄總和乘各列總和後的值，再除以全部值總和的比率。' },
         },
     },
     CONFIDENCE: {
-        description: '傳回總體平均值的置信區間',
-        abstract: '傳回總體平均值的置信區間',
+        description: '使用常態分佈傳回總體平均值的置信區間。',
+        abstract: '使用常態分佈傳回總體平均值的置信區間。',
         links: [
             {
                 title: '教導',
@@ -109,13 +117,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用於計算置信水準的顯著水準。置信水準等於 100*(1 - alpha)%，換句話說，alpha 0.05 表示信賴水準為 95%。' },
+            standardDev: { name: '總體標準差', detail: '假設資料範圍的總體標準差已知。' },
+            size: { name: '樣本大小', detail: '這是樣本大小。' },
         },
     },
     COVAR: {
-        description: '傳回協方差（成對偏差乘積的平均值）',
-        abstract: '傳回協方差（成對偏差乘積的平均值）',
+        description: '傳回總體協方差，即兩個資料集中每對資料點的偏差乘積的平均值。',
+        abstract: '傳回總體協方差',
         links: [
             {
                 title: '教導',
@@ -123,8 +132,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '第一個儲存格值範圍。' },
+            array2: { name: '陣列2', detail: '第二個儲存格值範圍。' },
         },
     },
     CRITBINOM: {
@@ -137,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '實驗次數', detail: '伯努利實驗的次數。' },
+            probabilityS: { name: '成功機率', detail: '每一次實驗的成功機率。' },
+            alpha: { name: '目標機率', detail: '這是臨界值。' },
         },
     },
     EXPONDIST: {
@@ -151,13 +161,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用來評估分佈的值。' },
+            lambda: { name: 'lambda', detail: '這是參數值。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，EXPONDIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     FDIST: {
-        description: '返回 F 機率分佈',
-        abstract: '返回 F 機率分佈',
+        description: '返回 F 機率分佈（右尾）',
+        abstract: '返回 F 機率分佈（右尾）',
         links: [
             {
                 title: '教導',
@@ -165,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '這是用於評估函數的值。' },
+            degFreedom1: { name: '分子自由度', detail: '這是分子的自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '這是分母的自由度。' },
         },
     },
     FINV: {
-        description: '傳回 F 機率分佈的反函數',
-        abstract: '傳回 F 機率分佈的反函數',
+        description: '傳回 F 機率分佈（右尾）的反函數',
+        abstract: '傳回 F 機率分佈（右尾）的反函數',
         links: [
             {
                 title: '教導',
@@ -179,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: 'F 累積分佈相關的機率' },
+            degFreedom1: { name: '分子自由度', detail: '這是分子的自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '這是分母的自由度。' },
         },
     },
     FTEST: {
@@ -193,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '這是第一個陣列或資料範圍。' },
+            array2: { name: '陣列2', detail: '這是第一個陣列或資料範圍。' },
         },
     },
     GAMMADIST: {
@@ -305,8 +318,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出分佈的數值。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            standardDev: { name: '標準差', detail: '這是分佈的標準差。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，NORMDIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     NORMINV: {
@@ -318,8 +333,9 @@ export default {
         },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是對應到常態分佈的機率。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            standardDev: { name: '標準差', detail: '這是分佈的標準差。' },
         },
     },
     NORMSDIST: {
@@ -332,8 +348,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '這是您要找出分佈的數值。' },
         },
     },
     NORMSINV: {
@@ -346,8 +361,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是對應到常態分佈的機率。' },
         },
     },
     PERCENTILE: {

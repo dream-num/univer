@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// #endregion
 export { DocAutoFormatService } from '../../docs-ui/src/services/doc-auto-format.service';
 export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
@@ -25,6 +24,42 @@ export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
 export { replaceSelectionFactory } from './basics/replace';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
+
+export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
+export { TextEditor } from './components/editor/TextEditor';
+export { RangeSelector } from './components/range-selector/RangeSelector';
+export { DocUIController } from './controllers/doc-ui.controller';
+export { menuSchema } from './controllers/menu.schema';
+export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
+
+export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
+export * from './docs-ui-plugin';
+export * from './services';
+export { IDocClipboardService } from './services/clipboard/clipboard.service';
+export { DocEventManagerService } from './services/doc-event-manager.service';
+export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
+export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
+export { DocsRenderService } from './services/docs-render.service';
+export { Editor } from './services/editor/editor';
+export { EditorService, IEditorService } from './services/editor/editor-manager.service';
+export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
+export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
+
+export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
+export { getOneTextSelectionRange } from './services/selection/convert-text-range';
+export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';
+export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
+
+export type { IDocRange } from './services/selection/range-interface';
+export { convertPositionsToRectRanges, RectRange } from './services/selection/rect-range';
+export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
+export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
+export { whenDocAndEditorFocused } from './shortcuts/utils';
+export { DOC_VERTICAL_PADDING } from './types/const/padding';
+
+// #region - all commands
+
 export { AfterSpaceCommand, EnterCommand, type ITabCommandParams, TabCommand } from './commands/commands/auto-format.command';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export { generateParagraphs } from './commands/commands/break-line.command';
@@ -45,7 +80,6 @@ export {
 export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 export { getCursorWhenDelete } from './commands/commands/delete.command';
 
-// #region - all commands
 export { IMEInputCommand } from './commands/commands/ime-input.command';
 export {
     ResetInlineFormatTextBackgroundColorCommand,
@@ -85,9 +119,27 @@ export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.c
 export { CreateDocTableCommand, type ICreateDocTableCommandParams } from './commands/commands/table/doc-table-create.command';
 export { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 
-export type { IDocTableDeleteColumnsCommandParams, IDocTableDeleteRowsCommandParams, IDocTableDeleteTableCommandParams } from './commands/commands/table/doc-table-delete.command';
-export type { IDocTableInsertColumnCommandParams, IDocTableInsertColumnLeftCommandParams, IDocTableInsertColumnRightCommandParams, IDocTableInsertRowAboveCommandParams, IDocTableInsertRowBellowCommandParams, IDocTableInsertRowCommandParams } from './commands/commands/table/doc-table-insert.command';
-export { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
+export type {
+    IDocTableDeleteColumnsCommandParams,
+    IDocTableDeleteRowsCommandParams,
+    IDocTableDeleteTableCommandParams,
+} from './commands/commands/table/doc-table-delete.command';
+export type {
+    IDocTableInsertColumnCommandParams,
+    IDocTableInsertColumnLeftCommandParams,
+    IDocTableInsertColumnRightCommandParams,
+    IDocTableInsertRowAboveCommandParams,
+    IDocTableInsertRowBellowCommandParams,
+    IDocTableInsertRowCommandParams,
+} from './commands/commands/table/doc-table-insert.command';
+export {
+    DocTableInsertColumnCommand,
+    DocTableInsertColumnLeftCommand,
+    DocTableInsertColumnRightCommand,
+    DocTableInsertRowAboveCommand,
+    DocTableInsertRowBellowCommand,
+    DocTableInsertRowCommand,
+} from './commands/commands/table/doc-table-insert.command';
 
 export type { IDocTableTabCommandParams } from './commands/commands/table/doc-table-tab.command';
 export { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
@@ -97,37 +149,5 @@ export { MoveSelectionOperation } from './commands/operations/doc-cursor.operati
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
 export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
-export { getCommandSkeleton, getRichTextEditPath } from './commands/util';
-export { TextEditor } from './components/editor/TextEditor';
-export { RangeSelector } from './components/range-selector/RangeSelector';
-export { DocUIController } from './controllers/doc-ui.controller';
-export { menuSchema } from './controllers/menu.schema';
-export { DocBackScrollRenderController } from './controllers/render-controllers/back-scroll.render-controller';
 
-export { DocRenderController } from './controllers/render-controllers/doc.render-controller';
-export * from './docs-ui-plugin';
-export * from './services';
-export { IDocClipboardService } from './services/clipboard/clipboard.service';
-export { DocEventManagerService } from './services/doc-event-manager.service';
-export { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
-export { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
-export { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
-export { DocsRenderService } from './services/docs-render.service';
-export { Editor } from './services/editor/editor';
-export { EditorService, IEditorService } from './services/editor/editor-manager.service';
-export { type IRangeSelectorRange, IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
-export { isInSameTableCell, isValidRectRange, NodePositionConvertToRectRange } from './services/selection/convert-rect-range';
-
-export { NodePositionConvertToCursor } from './services/selection/convert-text-range';
-export { getOneTextSelectionRange } from './services/selection/convert-text-range';
-export type { IEditorInputConfig } from './services/selection/doc-selection-render.service';
-export { DocSelectionRenderService } from './services/selection/doc-selection-render.service';
-
-export type { IDocRange } from './services/selection/range-interface';
-// #region - all commands
-export { convertPositionsToRectRanges, RectRange } from './services/selection/rect-range';
-export { getCanvasOffsetByEngine } from './services/selection/selection-utils';
-export { getAnchorBounding, getLineBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './services/selection/text-range';
-export { whenDocAndEditorFocused } from './shortcuts/utils';
-export { DOC_VERTICAL_PADDING } from './types/const/padding';
 // #endregion

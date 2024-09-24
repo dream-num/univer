@@ -21,14 +21,14 @@ export { UniverSheetsSortUIPlugin } from './plugin';
 export {
     SortRangeAscCommand,
     SortRangeAscExtCommand,
+    SortRangeAscExtInCtxMenuCommand,
+    SortRangeAscInCtxMenuCommand,
+    SortRangeCustomCommand,
+    SortRangeCustomInCtxMenuCommand,
     SortRangeDescCommand,
     SortRangeDescExtCommand,
-    SortRangeCustomCommand,
-    SortRangeAscInCtxMenuCommand,
-    SortRangeAscExtInCtxMenuCommand,
-    SortRangeDescInCtxMenuCommand,
     SortRangeDescExtInCtxMenuCommand,
-    SortRangeCustomInCtxMenuCommand,
+    SortRangeDescInCtxMenuCommand,
 } from './commands/commands/sheets-sort.command';
 
 // #endregion

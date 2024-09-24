@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-export { CheckboxValidator, CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from './checkbox-validator';
+export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from './checkbox-validator';
 export { DateValidator } from './date-validator';
-export { ListValidator } from './list-validator';
 export { DecimalValidator } from './decimal-validator';
+export { ListValidator } from './list-validator';
 export { TextLengthValidator } from './text-length-validator';

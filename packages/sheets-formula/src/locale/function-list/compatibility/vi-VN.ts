@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giá trị được sử dụng để tính toán hàm của nó, giữa giá trị giới hạn dưới và giá trị giới hạn trên.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố beta.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BINOMDIST: {
@@ -53,14 +59,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            numberS: { name: 'số lần thành công', detail: 'Số lần thành công trong các phép thử.' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử độc lập.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
-
     CHIDIST: {
-        description: 'Trả về xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về xác suất bên phải của phân bố χ2',
+        abstract: 'Trả về xác suất bên phải của phân bố χ2',
         links: [
             {
                 title: 'Giảng dạy',
@@ -68,13 +75,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHIINV: {
-        description: 'Trả về hàm nghịch đảo của xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về hàm nghịch đảo của xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -82,8 +89,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHITEST: {
@@ -96,13 +103,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            actualRange: { name: 'phạm vi quan sát', detail: 'Phạm vi dữ liệu chứa các quan sát để kiểm thử đối với các giá trị dự kiến.' },
+            expectedRange: { name: 'phạm vi dự kiến', detail: 'Phạm vi dữ liệu chứa tỷ lệ của phép nhân tổng hàng và tổng cột với tổng cộng.' },
         },
     },
     CONFIDENCE: {
-        description: 'Trả về khoảng tin cậy cho giá trị trung bình của tổng thể',
-        abstract: 'Trả về khoảng tin cậy cho giá trị trung bình của tổng thể',
+        description: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
+        abstract: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -110,13 +117,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
         },
     },
     COVAR: {
-        description: 'Trả về hiệp phương sai (trung bình của tích các độ lệch cặp)',
-        abstract: 'Trả về hiệp phương sai (trung bình của tích các độ lệch cặp)',
+        description: 'Trả về hiệp phương sai của tập hợp, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai của tập hợp',
         links: [
             {
                 title: 'Giảng dạy',
@@ -124,8 +132,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     CRITBINOM: {
@@ -138,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử Bernoulli.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            alpha: { name: 'xác suất mục tiêu', detail: 'Giá trị tiêu chí.' },
         },
     },
     EXPONDIST: {
@@ -152,13 +161,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì EXPONDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     FDIST: {
-        description: 'Trả về phân phối xác suất F',
-        abstract: 'Trả về phân phối xác suất F',
+        description: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        abstract: 'Trả về phân bố xác suất F (đuôi bên phải)',
         links: [
             {
                 title: 'Giảng dạy',
@@ -166,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
         },
     },
     FINV: {
-        description: 'Trả về hàm nghịch đảo của phân phối xác suất F',
-        abstract: 'Trả về hàm nghịch đảo của phân phối xác suất F',
+        description: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
         links: [
             {
                 title: 'Giảng dạy',
@@ -180,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
         },
     },
     FTEST: {
@@ -194,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
         },
     },
 
@@ -307,8 +319,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     NORMINV: {
@@ -321,8 +335,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
     NORMSDIST: {
@@ -335,8 +350,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
         },
     },
 
@@ -350,8 +364,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
         },
     },
     PERCENTILE: {

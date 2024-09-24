@@ -111,8 +111,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算其函数的值，介于下限值和上限值之间。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 BETA.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BETA_INV: {
@@ -125,8 +129,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 beta 分布相关的概率。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BINOM_DIST: {
@@ -139,8 +146,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功次数', detail: '试验的成功次数。' },
+            trials: { name: '试验次数', detail: '独立试验次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 BINOM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     BINOM_DIST_RANGE: {
@@ -153,8 +162,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '试验次数', detail: '独立试验次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            numberS: { name: '成功次数', detail: '试验的成功次数。' },
+            numberS2: { name: '最大成功次数', detail: '如果提供，则返回成功试验数介于 成功次数 和 最大成功次数 之间的概率。' },
         },
     },
     BINOM_INV: {
@@ -167,13 +178,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '试验次数', detail: '伯努利试验的次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            alpha: { name: '目标概率', detail: '临界值。' },
         },
     },
     CHISQ_DIST: {
-        description: '返回累积 beta 概率密度函数',
-        abstract: '返回累积 beta 概率密度函数',
+        description: '返回 χ2 分布的左尾概率。',
+        abstract: '返回 χ2 分布的左尾概率。',
         links: [
             {
                 title: '教学',
@@ -181,13 +193,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 CHISQ.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     CHISQ_DIST_RT: {
-        description: '返回 χ2 分布的单尾概率',
-        abstract: '返回 χ2 分布的单尾概率',
+        description: '返回 χ2 分布的右尾概率。',
+        abstract: '返回 χ2 分布的右尾概率。',
         links: [
             {
                 title: '教学',
@@ -195,13 +208,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_INV: {
-        description: '返回累积 beta 概率密度函数',
-        abstract: '返回累积 beta 概率密度函数',
+        description: '返回 χ2 分布的左尾概率的反函数。',
+        abstract: '返回 χ2 分布的左尾概率的反函数。',
         links: [
             {
                 title: '教学',
@@ -209,13 +222,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 χ2 分布相关联的概率。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_INV_RT: {
-        description: '返回 χ2 分布的单尾概率的反函数',
-        abstract: '返回 χ2 分布的单尾概率的反函数',
+        description: '返回 χ2 分布的右尾概率的反函数。',
+        abstract: '返回 χ2 分布的右尾概率的反函数。',
         links: [
             {
                 title: '教学',
@@ -223,8 +236,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 χ2 分布相关联的概率。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHISQ_TEST: {
@@ -237,13 +250,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '观察范围', detail: '包含观察值的数据区域，用于检验预期值。' },
+            expectedRange: { name: '预期范围', detail: '包含行列汇总的乘积与总计值之比率的数据区域。' },
         },
     },
     CONFIDENCE_NORM: {
-        description: '返回总体平均值的置信区间',
-        abstract: '返回总体平均值的置信区间',
+        description: '使用正态分布返回总体平均值的置信区间。',
+        abstract: '使用正态分布返回总体平均值的置信区间。',
         links: [
             {
                 title: '教学',
@@ -251,8 +264,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用来计算置信水平的显著性水平。 置信水平等于 100*(1 - alpha)%，亦即，如果 alpha 为 0.05，则置信水平为 95%。' },
+            standardDev: { name: '总体标准偏差', detail: '数据区域的总体标准偏差，假定为已知。' },
+            size: { name: '样本大小', detail: '样本大小。' },
         },
     },
     CONFIDENCE_T: {
@@ -265,8 +279,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用来计算置信水平的显著性水平。 置信水平等于 100*(1 - alpha)%，亦即，如果 alpha 为 0.05，则置信水平为 95%。' },
+            standardDev: { name: '总体标准偏差', detail: '数据区域的总体标准偏差，假定为已知。' },
+            size: { name: '样本大小', detail: '样本大小。' },
         },
     },
     CORREL: {
@@ -279,8 +294,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     COUNT: {
@@ -368,8 +383,8 @@ export default {
         },
     },
     COVARIANCE_P: {
-        description: '返回协方差（成对偏差乘积的平均值）',
-        abstract: '返回协方差（成对偏差乘积的平均值）',
+        description: '返回总体协方差，即两个数据集中每对数据点的偏差乘积的平均值。',
+        abstract: '返回总体协方差',
         links: [
             {
                 title: '教学',
@@ -377,13 +392,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     COVARIANCE_S: {
-        description: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值',
-        abstract: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值',
+        description: '返回样本协方差，即两个数据集中每对数据点的偏差乘积的平均值。',
+        abstract: '返回样本协方差',
         links: [
             {
                 title: '教学',
@@ -391,8 +406,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     DEVSQ: {
@@ -405,8 +420,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值1', detail: '用于计算偏差平方和的第 1 个参数。' },
+            number2: { name: '数值2', detail: '用于计算偏差平方和的第 2 到 255 个参数。' },
         },
     },
     EXPON_DIST: {
@@ -419,8 +434,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            lambda: { name: 'lambda', detail: '参数值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 EXPON.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     F_DIST: {
@@ -433,13 +449,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 F.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     F_DIST_RT: {
-        description: '返回 F 概率分布',
-        abstract: '返回 F 概率分布',
+        description: '返回 F 概率分布（右尾）',
+        abstract: '返回 F 概率分布（右尾）',
         links: [
             {
                 title: '教学',
@@ -447,8 +465,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_INV: {
@@ -461,13 +480,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_INV_RT: {
-        description: '返回 F 概率分布的反函数',
-        abstract: '返回 F 概率分布的反函数',
+        description: '返回 F 概率分布（右尾）的反函数',
+        abstract: '返回 F 概率分布（右尾）的反函数',
         links: [
             {
                 title: '教学',
@@ -475,8 +495,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     F_TEST: {
@@ -489,8 +510,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
         },
     },
     FISHER: {
@@ -503,8 +524,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '数值', detail: '要对其进行变换的数值。' },
         },
     },
     FISHERINV: {
@@ -517,8 +537,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            y: { name: '数值', detail: '要对其进行逆变换的数值。' },
         },
     },
     FORECAST: {
@@ -531,8 +550,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要进行值预测的数据点。' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     FORECAST_ETS: {
@@ -597,12 +617,13 @@ export default {
         links: [
             {
                 title: '教学',
-                url: 'https://support.microsoft.com/zh-cn/office/%E9%A2%84%E6%B5%8B%E5%87%BD%E6%95%B0-%E5%8F%82%E8%80%83-897a2fe9-6595-4680-a0b0-93e0308d5f6e#_FORECAST.LINEAR',
+                url: 'https://support.microsoft.com/zh-cn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要进行值预测的数据点。' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     FREQUENCY: {
@@ -769,8 +790,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     KURT: {
@@ -1025,8 +1046,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NORM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORM_INV: {
@@ -1039,8 +1062,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
         },
     },
     NORM_S_DIST: {
@@ -1053,8 +1077,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '需要计算其分布的数值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NORM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORM_S_INV: {
@@ -1067,8 +1091,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
         },
     },
     PEARSON: {

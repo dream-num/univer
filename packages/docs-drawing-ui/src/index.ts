@@ -15,6 +15,7 @@
  */
 
 export { UniverDocsDrawingUIPlugin } from './plugin';
+export { IMAGE_MENU_ID } from './views/menu/image.menu';
 
 // #region - all commands
 
@@ -31,5 +32,4 @@ export { EditDocDrawingOperation } from './commands/operations/edit-doc-drawing.
 export { InsertDocImageCommand } from './commands/commands/insert-image.command';
 export { SidebarDocDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
-export { IMAGE_MENU_ID } from './views/menu/image.menu';
 // #endregion

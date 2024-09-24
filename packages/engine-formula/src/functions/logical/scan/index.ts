@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import type { IRange, Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
 export class Scan extends BaseFunction {
@@ -26,13 +28,35 @@ export class Scan extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(initialValue: BaseValueObject, array: BaseValueObject, lambda: BaseValueObject): BaseValueObject {
-        if (initialValue.isError()) {
-            return initialValue;
+    override needsReferenceObject = true;
+
+    override calculate(initialValue: FunctionVariantType, array: FunctionVariantType, lambda: BaseValueObject): BaseValueObject {
+        let _initialValue = initialValue;
+        let _initialValue_reference: Nullable<BaseReferenceObject> = null;
+
+        if (initialValue.isReferenceObject()) {
+            _initialValue = (initialValue as BaseReferenceObject).toArrayValueObject();
+            _initialValue_reference = initialValue as BaseReferenceObject;
         }
 
-        if (array.isError()) {
-            return array;
+        _initialValue = _initialValue as BaseValueObject;
+
+        let _array = array;
+        let _array_reference: Nullable<BaseReferenceObject> = null;
+
+        if (array.isReferenceObject()) {
+            _array = (array as BaseReferenceObject).toArrayValueObject();
+            _array_reference = array as BaseReferenceObject;
+        }
+
+        _array = _array as BaseValueObject;
+
+        if (_initialValue.isError()) {
+            return _initialValue;
+        }
+
+        if (_array.isError()) {
+            return _array;
         }
 
         if (lambda.isError()) {
@@ -43,39 +67,49 @@ export class Scan extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let _initialValue = initialValue;
-
-        if (initialValue.isArray()) {
-            const rowCount = (initialValue as ArrayValueObject).getRowCount();
-            const columnCount = (initialValue as ArrayValueObject).getColumnCount();
+        if (_initialValue.isArray()) {
+            const rowCount = (_initialValue as ArrayValueObject).getRowCount();
+            const columnCount = (_initialValue as ArrayValueObject).getColumnCount();
 
             if (rowCount > 1 || columnCount > 1) {
                 return ErrorValueObject.create(ErrorType.CALC);
             }
 
-            _initialValue = (initialValue as ArrayValueObject).get(0, 0) as BaseValueObject;
+            _initialValue = (_initialValue as ArrayValueObject).get(0, 0) as BaseValueObject;
         }
 
-        return this._getResult(_initialValue, array, lambda as LambdaValueObjectObject);
+        return this._getResult(_initialValue, _array, lambda as LambdaValueObjectObject, _initialValue_reference, _array_reference);
     }
 
-    private _getResult(initialValue: BaseValueObject, array: BaseValueObject, lambda: LambdaValueObjectObject): BaseValueObject {
+    // eslint-disable-next-line
+    private _getResult(
+        initialValue: BaseValueObject,
+        array: BaseValueObject,
+        lambda: LambdaValueObjectObject,
+        _initialValue_reference: Nullable<BaseReferenceObject>,
+        _array_reference: Nullable<BaseReferenceObject>
+    ): BaseValueObject {
+        const resultArray: BaseValueObject[][] = [];
         const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
-        let accumulator = initialValue;
-        const resultArray: BaseValueObject[][] = [];
+        // let accumulator = initialValue;
+        let accumulator: FunctionVariantType = initialValue;
+
+        if (_initialValue_reference) {
+            accumulator = _initialValue_reference;
+        }
 
         for (let r = 0; r < rowCount; r++) {
             const row: BaseValueObject[] = [];
 
             for (let c = 0; c < columnCount; c++) {
                 if (accumulator.isError()) {
-                    row.push(accumulator);
+                    row.push(accumulator as BaseValueObject);
                     continue;
                 }
 
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+                let valueObject: FunctionVariantType = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
 
                 if (valueObject.isError()) {
                     accumulator = valueObject;
@@ -83,9 +117,28 @@ export class Scan extends BaseFunction {
                     continue;
                 }
 
+                if (_array_reference) {
+                    const { startRow, startColumn } = _array_reference.getRangePosition();
+                    const range: IRange = {
+                        startRow: startRow + r,
+                        startColumn: startColumn + c,
+                        endRow: startRow + r,
+                        endColumn: startColumn + c,
+                    };
+
+                    valueObject = this.createReferenceObject(_array_reference, range);
+                }
+
                 let value = lambda.execute(accumulator, valueObject) as BaseValueObject;
 
                 if (value.isArray()) {
+                    const rowCount = (value as ArrayValueObject).getRowCount();
+                    const columnCount = (value as ArrayValueObject).getColumnCount();
+
+                    if (rowCount > 1 || columnCount > 1) {
+                        return ErrorValueObject.create(ErrorType.CALC);
+                    }
+
                     value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
                 }
 

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
-export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 export * from './common';
 export { getHeaderFooterMenuHiddenObservable, getMenuHiddenObservable } from './common/menu-hidden-observable';
 export { mergeMenuConfigs } from './common/menu-merge-configs';
@@ -116,6 +114,8 @@ export { DISABLE_AUTO_FOCUS_KEY, UniverUIPlugin } from './ui-plugin';
 export { UNIVER_UI_PLUGIN_NAME } from './ui-plugin';
 export * from './utils';
 export { ComponentContainer, type IComponentContainerProps, useComponentsOfPart } from './views/components/ComponentContainer';
+export { ZenZone } from './views/components/zen-zone/ZenZone';
+export { builtInGlobalComponents } from './views/parts';
 
 // #region - workbench components
 
@@ -136,7 +136,7 @@ export { Sidebar } from './views/components/sidebar/Sidebar';
 
 // #region - all commands
 
-export { ZenZone } from './views/components/zen-zone/ZenZone';
-export { builtInGlobalComponents } from './views/parts';
+export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+export { ToggleShortcutPanelOperation } from './commands/operations/toggle-shortcut-panel.operation';
 
 // #endregion

@@ -18,17 +18,17 @@ export { UniverFindReplacePlugin } from './plugin';
 export { FindReplaceController } from './controllers/find-replace.controller';
 export type {
     IFindComplete,
-    IFindMoveParams,
     IFindMatch,
+    IFindMoveParams,
     IFindQuery,
     IFindReplaceProvider,
     IReplaceAllResult,
 } from './services/find-replace.service';
-export { FindModel, IFindReplaceService, FindBy, FindScope, FindDirection } from './services/find-replace.service';
+export { FindBy, FindDirection, FindModel, FindScope, IFindReplaceService } from './services/find-replace.service';
 
 // #region - all commands
 
-export { ReplaceCurrentMatchCommand, ReplaceAllMatchesCommand } from './commands/commands/replace.command';
-export { OpenFindDialogOperation, OpenReplaceDialogOperation, GoToNextMatchOperation, GoToPreviousMatchOperation } from './commands/operations/find-replace.operation';
+export { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from './commands/commands/replace.command';
+export { GoToNextMatchOperation, GoToPreviousMatchOperation, OpenFindDialogOperation, OpenReplaceDialogOperation } from './commands/operations/find-replace.operation';
 
 // #endregion

@@ -72,8 +72,8 @@ export class Intercept extends BaseFunction {
             array2Values,
             noCalculate,
         } = getTwoArrayNumberValues(
-            knownYs as ArrayValueObject,
-            knownXs as ArrayValueObject,
+            knownYs,
+            knownXs,
             knownYsRowCount * knownYsColumnCount,
             knownYsColumnCount,
             knownXsColumnCount

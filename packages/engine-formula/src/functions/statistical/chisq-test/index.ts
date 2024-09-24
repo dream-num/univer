@@ -72,8 +72,8 @@ export class ChisqTest extends BaseFunction {
             array2Values,
             noCalculate,
         } = getTwoArrayNumberValues(
-            actualRange as ArrayValueObject,
-            expectedRange as ArrayValueObject,
+            actualRange,
+            expectedRange,
             actualRangeRowCount * actualRangeColumnCount,
             actualRangeColumnCount,
             expectedRangeColumnCount

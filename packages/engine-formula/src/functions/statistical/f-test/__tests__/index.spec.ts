@@ -113,7 +113,7 @@ describe('Test fTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(ErrorType.NA);
+            expect(getObjectValue(result)).toBe(0.5601137808756675);
         });
 
         it('Value is error', () => {
@@ -274,7 +274,7 @@ describe('Test fTest function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(array1, array2);
-            expect(getObjectValue(result)).toBe(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result)).toBe(0.5702776173096873);
         });
 
         it('Calculate result > 1', () => {

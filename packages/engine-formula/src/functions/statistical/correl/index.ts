@@ -72,8 +72,8 @@ export class Correl extends BaseFunction {
             array2Values,
             noCalculate,
         } = getTwoArrayNumberValues(
-            array1 as ArrayValueObject,
-            array2 as ArrayValueObject,
+            array1,
+            array2,
             array1RowCount * array1ColumnCount,
             array1ColumnCount,
             array2ColumnCount

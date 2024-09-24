@@ -502,26 +502,18 @@ export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number)
         return 0;
     }
 
-    if (degFreedom1 <= 2) {
-        if (x === 0 && degFreedom1 < 2) {
-            return Infinity;
-        }
-
-        if (x === 0 && degFreedom1 === 2) {
-            return 1;
-        }
-
-        let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
-        result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
-        result *= x ** ((degFreedom1 / 2) - 1);
-        result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
-
-        return result;
+    if (x === 0 && degFreedom1 < 2) {
+        return Infinity;
     }
 
-    let result = binomialPDF((degFreedom1 - 2) / 2, (degFreedom1 + degFreedom2 - 2) / 2, degFreedom1 * x / (degFreedom1 * x + degFreedom2));
-    result *= degFreedom2 / (degFreedom2 + degFreedom1 * x);
-    result *= degFreedom1 / 2;
+    if (x === 0 && degFreedom1 === 2) {
+        return 1;
+    }
+
+    let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
+    result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
+    result *= x ** ((degFreedom1 / 2) - 1);
+    result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
 
     return result;
 }
@@ -584,8 +576,8 @@ export function normalINV(probability: number, mean: number, standardDev: number
 }
 
 export function getTwoArrayNumberValues(
-    array1: ArrayValueObject,
-    array2: ArrayValueObject,
+    array1: BaseValueObject,
+    array2: BaseValueObject,
     count: number,
     array1ColumnCount: number,
     array2ColumnCount: number
@@ -601,8 +593,8 @@ export function getTwoArrayNumberValues(
         const array2RowIndex = Math.floor(i / array2ColumnCount);
         const array2ColumnIndex = i % array2ColumnCount;
 
-        const array1Object = array1.isArray() ? array1.get(array1RowIndex, array1ColumnIndex) as BaseValueObject : array1;
-        const array2Object = array2.isArray() ? array2.get(array2RowIndex, array2ColumnIndex) as BaseValueObject : array2;
+        const array1Object = array1.isArray() ? (array1 as ArrayValueObject).get(array1RowIndex, array1ColumnIndex) as BaseValueObject : array1;
+        const array2Object = array2.isArray() ? (array2 as ArrayValueObject).get(array2RowIndex, array2ColumnIndex) as BaseValueObject : array2;
 
         if (array1Object.isError()) {
             return {

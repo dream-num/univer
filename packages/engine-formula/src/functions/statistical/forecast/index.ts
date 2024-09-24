@@ -91,8 +91,6 @@ export class Forecast extends BaseFunction {
             if (knownYs.isNull() || knownXs.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
-
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         if (knownYsRowCount * knownYsColumnCount !== knownXsRowCount * knownXsColumnCount) {
@@ -106,8 +104,8 @@ export class Forecast extends BaseFunction {
             array2Values,
             noCalculate,
         } = getTwoArrayNumberValues(
-            knownYs as ArrayValueObject,
-            knownXs as ArrayValueObject,
+            knownYs,
+            knownXs,
             knownYsRowCount * knownYsColumnCount,
             knownYsColumnCount,
             knownXsColumnCount

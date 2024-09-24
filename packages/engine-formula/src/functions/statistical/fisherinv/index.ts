@@ -42,10 +42,15 @@ export class Fisherinv extends BaseFunction {
 
         const [yObject] = variants as BaseValueObject[];
 
-        const yValue = (yObject as NumberValueObject).getValue();
+        const yValue = +yObject.getValue();
 
-        const result = (Math.exp(2 * yValue) - 1) / (Math.exp(2 * yValue) + 1);
+        const num = Math.exp(2 * yValue) - 1;
+        const den = Math.exp(2 * yValue) + 1;
 
-        return NumberValueObject.create(result);
+        if (!Number.isFinite(num) && num > 0 && !Number.isFinite(den) && den > 0) {
+            return NumberValueObject.create(1);
+        }
+
+        return NumberValueObject.create(num / den);
     }
 }

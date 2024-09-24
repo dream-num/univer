@@ -34,6 +34,12 @@ describe('Test fisherinv function', () => {
             expect(getObjectValue(result)).toBe(0.6351489523872873);
         });
 
+        it('Value is big number', () => {
+            const x = NumberValueObject.create(9999999.23658);
+            const result = testFunction.calculate(x);
+            expect(getObjectValue(result)).toBe(1);
+        });
+
         it('Value is number string', () => {
             const x = StringValueObject.create('0.5');
             const result = testFunction.calculate(x);

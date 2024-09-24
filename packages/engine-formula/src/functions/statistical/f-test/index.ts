@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { centralFCDF, getTwoArrayNumberValues } from '../../../basics/statistical';
+import { centralFCDF } from '../../../basics/statistical';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -27,104 +28,139 @@ export class FTest extends BaseFunction {
     override maxParams = 2;
 
     override calculate(array1: BaseValueObject, array2: BaseValueObject): BaseValueObject {
-        const array1RowCount = array1.isArray() ? (array1 as ArrayValueObject).getRowCount() : 1;
-        const array1ColumnCount = array1.isArray() ? (array1 as ArrayValueObject).getColumnCount() : 1;
+        const {
+            isError: isError_array1,
+            errorObject: errorObject_array1,
+            variance: variance_array1,
+            ns1: ns1_array1,
+        } = this._getValues(array1);
 
-        const array2RowCount = array2.isArray() ? (array2 as ArrayValueObject).getRowCount() : 1;
-        const array2ColumnCount = array2.isArray() ? (array2 as ArrayValueObject).getColumnCount() : 1;
-
-        let _array1 = array1;
-
-        if (array1.isArray() && array1RowCount === 1 && array1ColumnCount === 1) {
-            _array1 = (array1 as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_array1.isError()) {
-            return _array1;
-        }
-
-        let _array2 = array2;
-
-        if (array2.isArray() && array2RowCount === 1 && array2ColumnCount === 1) {
-            _array2 = (array2 as ArrayValueObject).get(0, 0) as BaseValueObject;
-        }
-
-        if (_array2.isError()) {
-            return _array2;
-        }
-
-        if (array1RowCount * array1ColumnCount === 1 || array2RowCount * array2ColumnCount === 1) {
-            if (_array1.isNull() || _array2.isNull()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        if (array1RowCount * array1ColumnCount !== array2RowCount * array2ColumnCount) {
-            return ErrorValueObject.create(ErrorType.NA);
+        if (isError_array1) {
+            return errorObject_array1 as ErrorValueObject;
         }
 
         const {
-            isError,
-            errorObject,
-            array1Values,
-            array2Values,
-            noCalculate,
-        } = getTwoArrayNumberValues(
-            array1 as ArrayValueObject,
-            array2 as ArrayValueObject,
-            array1RowCount * array1ColumnCount,
-            array1ColumnCount,
-            array2ColumnCount
-        );
+            isError: isError_array2,
+            errorObject: errorObject_array2,
+            variance: variance_array2,
+            ns1: ns1_array2,
+        } = this._getValues(array2);
 
-        if (isError) {
-            return errorObject as ErrorValueObject;
+        if (isError_array2) {
+            return errorObject_array2 as ErrorValueObject;
         }
 
-        if (noCalculate) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        return this._getResult(array1Values, array2Values);
-    }
-
-    private _getResult(array1Values: number[], array2Values: number[]): BaseValueObject {
-        const n = array1Values.length;
-
-        let array1Sum = 0;
-        let array2Sum = 0;
-
-        for (let i = 0; i < n; i++) {
-            array1Sum += array1Values[i];
-            array2Sum += array2Values[i];
-        }
-
-        const array1Mean = array1Sum / n;
-        const array2Mean = array2Sum / n;
-
-        let array1SumSquares = 0;
-        let array2SumSquares = 0;
-
-        for (let i = 0; i < n; i++) {
-            array1SumSquares += (array1Values[i] - array1Mean) ** 2;
-            array2SumSquares += (array2Values[i] - array2Mean) ** 2;
-        }
-
-        const array1Variance = array1SumSquares / (n - 1);
-        const array2Variance = array2SumSquares / (n - 1);
-
-        if (array2Variance === 0) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        let result = 2 * (1 - centralFCDF(array1Variance / array2Variance, n - 1, n - 1));
+        let result = 2 * (1 - centralFCDF(variance_array1 / variance_array2, ns1_array1, ns1_array2));
 
         if (result > 1) {
             result = 2 - result;
         }
 
         return NumberValueObject.create(result);
+    }
+
+    // eslint-disable-next-line
+    private _getValues(array: BaseValueObject) {
+        let variance = 0;
+        let ns1 = 0;
+
+        const arrayRowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
+        const arrayColumnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+
+        if (arrayRowCount === 1 && arrayColumnCount === 1) {
+            const _array = array.isArray() ? (array as ArrayValueObject).get(0, 0) as BaseValueObject : array;
+
+            if (_array.isError()) {
+                return {
+                    isError: true,
+                    errorObject: _array,
+                    variance,
+                    ns1,
+                };
+            }
+
+            if (_array.isNull()) {
+                return {
+                    isError: true,
+                    errorObject: ErrorValueObject.create(ErrorType.VALUE),
+                    variance,
+                    ns1,
+                };
+            }
+
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
+                variance,
+                ns1,
+            };
+        }
+
+        const values = [];
+        let sum = 0;
+
+        for (let r = 0; r < arrayRowCount; r++) {
+            for (let c = 0; c < arrayColumnCount; c++) {
+                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+
+                if (valueObject.isError()) {
+                    return {
+                        isError: true,
+                        errorObject: valueObject,
+                        variance,
+                        ns1,
+                    };
+                }
+
+                if (valueObject.isNull() || valueObject.isBoolean()) {
+                    continue;
+                }
+
+                const value = valueObject.getValue();
+
+                if (!isRealNum(value)) {
+                    continue;
+                }
+
+                values.push(+value);
+                sum += +value;
+            }
+        }
+
+        if (values.length <= 1) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
+                variance,
+                ns1,
+            };
+        }
+
+        const mean = sum / values.length;
+
+        let sumSquares = 0;
+
+        for (let i = 0; i < values.length; i++) {
+            sumSquares += (values[i] - mean) ** 2;
+        }
+
+        ns1 = values.length - 1;
+        variance = sumSquares / ns1;
+
+        if (variance === 0) {
+            return {
+                isError: true,
+                errorObject: ErrorValueObject.create(ErrorType.DIV_BY_ZERO),
+                variance,
+                ns1,
+            };
+        }
+
+        return {
+            isError: false,
+            errorObject: null,
+            variance,
+            ns1,
+        };
     }
 }

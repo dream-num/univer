@@ -56,7 +56,7 @@ describe('Test fDist function', () => {
             const degFreedom2 = NumberValueObject.create(4);
             const cumulative = BooleanValueObject.create(false);
             const result = testFunction.calculate(x, degFreedom1, degFreedom2, cumulative);
-            expect(getObjectValue(result)).toBe(0.0012237917087831727);
+            expect(getObjectValue(result)).toBe(0.0012237917087831733);
 
             const x2 = NumberValueObject.create(0);
             const degFreedom3 = NumberValueObject.create(1);

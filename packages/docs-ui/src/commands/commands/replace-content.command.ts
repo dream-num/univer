@@ -39,17 +39,11 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const { unitId, body, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
         const prevBody = docDataModel?.getSnapshot().body;
-        const selections = docSelectionManagerService.getTextRanges();
 
         if (docDataModel == null || prevBody == null) {
-            return false;
-        }
-
-        if (!Array.isArray(selections) || selections.length === 0) {
             return false;
         }
 

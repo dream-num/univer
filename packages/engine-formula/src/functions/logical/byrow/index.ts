@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import type { IRange, Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
 export class Byrow extends BaseFunction {
@@ -27,9 +29,20 @@ export class Byrow extends BaseFunction {
 
     override maxParams = 2;
 
-    override calculate(array: BaseValueObject, lambda: BaseValueObject): BaseValueObject {
-        if (array.isError()) {
-            return array;
+    override needsReferenceObject = true;
+
+    // eslint-disable-next-line
+    override calculate(array: FunctionVariantType, lambda: BaseValueObject): BaseValueObject {
+        let _array = array;
+        let _array_reference: Nullable<BaseReferenceObject> = null;
+
+        if (array.isReferenceObject()) {
+            _array = (array as BaseReferenceObject).toArrayValueObject();
+            _array_reference = array as BaseReferenceObject;
+        }
+
+        if (_array.isError()) {
+            return _array as ErrorValueObject;
         }
 
         if (lambda.isError()) {
@@ -44,7 +57,7 @@ export class Byrow extends BaseFunction {
 
         const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
-        const _array = expandArrayValueObject(rowCount, columnCount, array);
+        _array = expandArrayValueObject(rowCount, columnCount, _array as BaseValueObject);
 
         const result: BaseValueObject[][] = [];
 
@@ -56,7 +69,7 @@ export class Byrow extends BaseFunction {
                 rows[0].push(col);
             }
 
-            const lambdaVariant = ArrayValueObject.create({
+            let lambdaVariant: FunctionVariantType = ArrayValueObject.create({
                 calculateValueList: rows,
                 rowCount: 1,
                 columnCount,
@@ -65,6 +78,18 @@ export class Byrow extends BaseFunction {
                 row: 0,
                 column: 0,
             });
+
+            if (_array_reference) {
+                const { startRow, startColumn } = _array_reference.getRangePosition();
+                const range: IRange = {
+                    startRow: startRow + r,
+                    startColumn,
+                    endRow: startRow + r,
+                    endColumn: startColumn + columnCount - 1,
+                };
+
+                lambdaVariant = this.createReferenceObject(_array_reference, range);
+            }
 
             let value = _lambda.execute(lambdaVariant) as BaseValueObject;
 

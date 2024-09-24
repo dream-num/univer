@@ -85,10 +85,17 @@ export function splitIntoGrid(ranges: IRange[]): IRange[] {
         }
     }
 
+    // Sort ranges by startRow and startColumn
+    ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+
     // Assign original ranges to the grid cells
     const result: IRange[] = [];
     for (const gridCell of gridCells) {
         for (const range of ranges) {
+            if (range.startRow > gridCell.endRow) {
+                // Since ranges are sorted, we can break early
+                break;
+            }
             if (range.startRow <= gridCell.endRow && range.endRow >= gridCell.startRow &&
                 range.startColumn <= gridCell.endColumn && range.endColumn >= gridCell.startColumn) {
                 result.push({
@@ -213,7 +220,6 @@ export function mergeRanges(ranges: IRange[]): IRange[] {
     const split = splitIntoGrid(ranges);
     const horizontalMerged = mergeHorizontalRanges(split);
     return mergeVerticalRanges(horizontalMerged);
-    // return horizontalMerged;
 }
 
 export function multiSubtractSingleRange(ranges: IRange[], toDelete: IRange) {

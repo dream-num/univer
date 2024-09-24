@@ -20,6 +20,10 @@ import { AbsoluteRefType } from '../../sheets/typedef';
 import { mergeHorizontalRanges, mergeRanges, mergeVerticalRanges, moveRangeByOffset, splitIntoGrid } from '../range';
 import type { IRange } from '../../sheets/typedef';
 
+const stringifyRanges = (ranges: IRange[]) => {
+    return ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn).map((range) => `${range.startRow},${range.startColumn},${range.endRow},${range.endColumn}`);
+};
+
 describe('test moveRangeByOffset', () => {
     it('test normal', () => {
         const range = {
@@ -92,13 +96,13 @@ describe('splitIntoGrid', () => {
             { startColumn: 6, endColumn: 8, startRow: 2, endRow: 2 },
         ];
 
-        expect(splitIntoGrid(input)).toEqual(expected);
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle no ranges', () => {
         const input: IRange[] = [];
         const expected: IRange[] = [];
-        expect(splitIntoGrid(input)).toEqual(expected);
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle single range', () => {
@@ -108,7 +112,18 @@ describe('splitIntoGrid', () => {
         const expected: IRange[] = [
             { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
         ];
-        expect(splitIntoGrid(input)).toEqual(expected);
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
+    });
+
+    it('should handle full overlap range', () => {
+        const input: IRange[] = [
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+        ];
+        const expected: IRange[] = [
+            { startColumn: 1, endColumn: 3, startRow: 1, endRow: 2 },
+        ];
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle simple case', () => {
@@ -119,7 +134,7 @@ describe('splitIntoGrid', () => {
             { startColumn: 6, endColumn: 8, startRow: 2, endRow: 2 },
         ];
 
-        expect(splitIntoGrid(input)).toEqual(expected);
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle this case', () => {
@@ -144,7 +159,42 @@ describe('splitIntoGrid', () => {
             { startColumn: 6, endColumn: 7, startRow: 8, endRow: 8 },
             { startColumn: 0, endColumn: 5, startRow: 9, endRow: 10 },
         ];
-        expect(JSON.stringify(splitIntoGrid(input))).toEqual(JSON.stringify(expected));
+
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
+    });
+
+    it('should handle overlapping ranges correctly', () => {
+        const input = [
+            {
+                startColumn: 1,
+                endColumn: 4,
+                startRow: 1,
+                endRow: 4,
+            },
+            {
+                startColumn: 1,
+                startRow: 1,
+                endColumn: 5,
+                endRow: 4,
+            },
+        ];
+
+        const expected: IRange[] = [
+            {
+                startColumn: 1,
+                endColumn: 4,
+                startRow: 1,
+                endRow: 4,
+            },
+            {
+                startColumn: 5,
+                startRow: 1,
+                endColumn: 5,
+                endRow: 4,
+            },
+        ];
+
+        expect(stringifyRanges(splitIntoGrid(input))).toEqual(stringifyRanges(expected));
     });
 });
 
@@ -159,7 +209,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 1, endColumn: 8, startRow: 1, endRow: 1 },
         ];
 
-        expect(mergeHorizontalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle ranges with gaps', () => {
@@ -173,7 +223,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 5, endColumn: 7, startRow: 1, endRow: 1 },
         ];
 
-        expect(mergeHorizontalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle overlapping ranges', () => {
@@ -186,7 +236,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 1, endColumn: 8, startRow: 1, endRow: 1 },
         ];
 
-        expect(mergeHorizontalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle multiple rows independently', () => {
@@ -202,7 +252,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 1, endColumn: 7, startRow: 2, endRow: 2 },
         ];
 
-        expect(mergeHorizontalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle single range', () => {
@@ -214,7 +264,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 1, endColumn: 3, startRow: 1, endRow: 1 },
         ];
 
-        expect(mergeHorizontalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle no ranges', () => {
@@ -234,7 +284,7 @@ describe('mergeHorizontalRanges', () => {
             { startColumn: 7, endColumn: 7, startRow: 1, endRow: 2 },
         ];
         const expected = [{ startColumn: 1, endColumn: 7, startRow: 1, endRow: 2 }];
-        expect(JSON.stringify(mergeHorizontalRanges(input))).toEqual(JSON.stringify(expected));
+        expect(stringifyRanges(mergeHorizontalRanges(input))).toEqual(stringifyRanges(expected));
     });
 });
 
@@ -264,7 +314,7 @@ describe('mergeVerticalRanges', () => {
             { startColumn: 1, endColumn: 1, startRow: 5, endRow: 7 },
         ];
 
-        expect(mergeVerticalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeVerticalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle overlapping ranges', () => {
@@ -277,7 +327,7 @@ describe('mergeVerticalRanges', () => {
             { startColumn: 1, endColumn: 1, startRow: 1, endRow: 8 },
         ];
 
-        expect(mergeVerticalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeVerticalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle multiple columns independently', () => {
@@ -293,7 +343,7 @@ describe('mergeVerticalRanges', () => {
             { startColumn: 2, endColumn: 2, startRow: 1, endRow: 8 },
         ];
 
-        expect(mergeVerticalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeVerticalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle single range', () => {
@@ -305,7 +355,7 @@ describe('mergeVerticalRanges', () => {
             { startColumn: 1, endColumn: 8, startRow: 1, endRow: 2 },
         ];
 
-        expect(mergeVerticalRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeVerticalRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle no ranges', () => {
@@ -321,7 +371,7 @@ describe('mergeVerticalRanges', () => {
             { startColumn: 0, endColumn: 5, startRow: 9, endRow: 10 },
         ];
 
-        expect(JSON.stringify(mergeVerticalRanges(input))).toEqual(JSON.stringify(input));
+        expect(stringifyRanges(mergeVerticalRanges(input))).toEqual(stringifyRanges(input));
     });
 });
 
@@ -336,13 +386,13 @@ describe('mergeRanges', () => {
             { startColumn: 1, endColumn: 8, startRow: 1, endRow: 2 },
         ];
 
-        expect(JSON.stringify(mergeRanges(input))).toEqual(JSON.stringify(expected));
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle no ranges', () => {
         const input: IRange[] = [];
         const expected: IRange[] = [];
-        expect(mergeRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle single range', () => {
@@ -354,7 +404,7 @@ describe('mergeRanges', () => {
             { startColumn: 1, endColumn: 3, startRow: 1, endRow: 3 },
         ];
 
-        expect(mergeRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle ranges with gaps', () => {
@@ -368,7 +418,7 @@ describe('mergeRanges', () => {
             { startColumn: 5, endColumn: 7, startRow: 1, endRow: 2 },
         ];
 
-        expect(mergeRanges(input)).toEqual(expected);
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle multiple ranges in multiple rows and columns', () => {
@@ -382,7 +432,7 @@ describe('mergeRanges', () => {
             { startColumn: 1, endColumn: 5, startRow: 1, endRow: 5 },
         ];
 
-        expect(JSON.stringify(mergeRanges(input))).toEqual(JSON.stringify(expected));
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 
     it('should handle this case', () => {
@@ -406,6 +456,6 @@ describe('mergeRanges', () => {
             { startColumn: 0, endColumn: 7, startRow: 8, endRow: 8 },
             { startColumn: 0, endColumn: 5, startRow: 9, endRow: 10 },
         ];
-        expect(JSON.stringify(mergeRanges(input))).toEqual(JSON.stringify(expected));
+        expect(stringifyRanges(mergeRanges(input))).toEqual(stringifyRanges(expected));
     });
 });

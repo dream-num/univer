@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IAccessor, IMutation } from '@univerjs/core';
 
 import type {
@@ -36,7 +36,7 @@ export const AddMergeUndoMutationFactory = (
     return {
         unitId: params.unitId,
         subUnitId: params.subUnitId,
-        ranges: params.ranges,
+        ranges: Tools.deepClone(params.ranges),
     };
 };
 

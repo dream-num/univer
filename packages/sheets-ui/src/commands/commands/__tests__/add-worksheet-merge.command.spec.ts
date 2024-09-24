@@ -268,6 +268,59 @@ describe('Test add worksheet merge commands', () => {
                 expect(result).toBeFalsy();
             });
         });
+
+        describe('horizontal with other merge cell', () => {
+            it('test only the upper left conner has a value', async () => {
+                const selectionManager = get(SheetsSelectionsService);
+                selectionManager.addSelections([
+                    {
+                        range: { startRow: 10, startColumn: 2, endColumn: 2, endRow: 12, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+
+                function getMerge(): IRange[] | undefined {
+                    return get(IUniverInstanceService)
+                        .getUniverSheetInstance('test')
+                        ?.getSheetBySheetId('sheet1')
+                        ?.getConfig()
+                        .mergeData;
+                }
+
+                expect(getMerge()?.length).toBe(0);
+                expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
+                expect(getMerge()?.length).toBe(1);
+                commandService.executeCommand(SetRangeValuesMutation.id, {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    cellValue: {
+                        10: {
+                            2: {
+                                v: 1234,
+                            },
+                        },
+                    },
+                });
+
+                selectionManager.clear();
+                selectionManager.addSelections([
+                    {
+                        range: { startRow: 10, startColumn: 1, endColumn: 2, endRow: 12, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+                expect(await commandService.executeCommand(AddWorksheetMergeHorizontalCommand.id)).toBeTruthy();
+                expect(getMerge()?.length).toBe(3);
+
+                const worksheet = get(IUniverInstanceService).getUnit<Workbook>('test')?.getSheetBySheetId('sheet1');
+                if (worksheet) {
+                    expect(worksheet.getCellMatrix().getValue(10, 1)?.v).toBe(1234);
+                    expect(worksheet.getCellMatrix().getValue(10, 2)?.v).toBeUndefined();
+                }
+            });
+        });
     });
 
     describe('cancel merge', () => {

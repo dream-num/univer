@@ -256,6 +256,24 @@ export class FRange {
     }
 
     /**
+     * Returns the cell data for the cells in the range.
+     * @returns A two-dimensional array of cell data.
+     */
+    getCellDatas(): Nullable<ICellData>[][] {
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const range: Nullable<ICellData>[][] = [];
+
+        for (let r = startRow; r <= endRow; r++) {
+            const row: Nullable<ICellData>[] = [];
+            for (let c = startColumn; c <= endColumn; c++) {
+                row.push(this._worksheet.getCellRaw(r, c));
+            }
+            range.push(row);
+        }
+        return range;
+    }
+
+    /**
      * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.
      * @returns A two-dimensional array of formulas in string format.
      */

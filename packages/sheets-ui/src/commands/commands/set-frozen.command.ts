@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
-import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { getSheetCommandTarget, SetFrozenMutation, SetFrozenMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import type { ICommand } from '@univerjs/core';
+
+import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 
 export enum SetSelectionFrozenType {
@@ -132,14 +132,19 @@ export const SetColumnFrozenCommand: ICommand = {
     },
 };
 
-export const CancelFrozenCommand: ICommand = {
+export interface ICancelFrozenCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+}
+
+export const CancelFrozenCommand: ICommand<ICancelFrozenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.cancel-frozen',
-    handler: async (accessor) => {
+    handler: async (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, { unitId: params?.unitId, subUnitId: params?.subUnitId });
         if (!target) return false;
 
         const { unitId, subUnitId } = target;

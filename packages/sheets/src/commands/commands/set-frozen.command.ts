@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 
-import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 
 interface ISetFrozenCommandParams {
     startRow: number;
     startColumn: number;
     ySplit: number;
     xSplit: number;
+    unitId?: string;
+    subUnitId?: string;
 }
 
 export const SetFrozenCommand: ICommand = {
@@ -36,7 +38,7 @@ export const SetFrozenCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;

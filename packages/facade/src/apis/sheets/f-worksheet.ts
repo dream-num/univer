@@ -16,14 +16,15 @@
 
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { CancelFrozenCommand } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
-import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FDataValidation } from './f-data-validation';
@@ -947,4 +948,28 @@ export class FWorksheet {
      * @param range The range to set as the active selection.
      */
     setActiveSelection = this.setActiveRange;
+
+    /**
+     * Sets the frozen state of the current sheet.
+     * @param {IFreeze} freeze - The freeze object containing the parameters for freezing the sheet.
+     * @returns {boolean} True if the command was successful, false otherwise.
+     */
+    setFreeze(freeze: IFreeze): boolean {
+        return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+            ...freeze,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
+
+    /**
+     * Cancels the frozen state of the current sheet.
+     * @returns {boolean} True if the command was successful, false otherwise.
+     */
+    cancelFreeze(): boolean {
+        return this._commandService.syncExecuteCommand(CancelFrozenCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
 }

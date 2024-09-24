@@ -263,7 +263,13 @@ export class FWorkbook {
      */
     openDialog(dialog: IDialogPartMethodOptions): IDisposable {
         const dialogService = this._injector.get(IDialogService);
-        return dialogService.open(dialog);
+        const disposable = dialogService.open({
+            ...dialog,
+            onClose: () => {
+                disposable.dispose();
+            },
+        });
+        return disposable;
     }
     // #region callbacks
 

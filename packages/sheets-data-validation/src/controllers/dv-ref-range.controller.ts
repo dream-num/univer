@@ -145,7 +145,7 @@ export class DataValidationRefRangeController extends Disposable {
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
             const resultRangesOrigin = oldRanges.map((range) => {
-                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
+                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
             }).filter((range) => !!range);
             const resultRanges = resultRangesOrigin.flat();
 

@@ -79,26 +79,27 @@ export function splitIntoGrid(ranges: IRange[]): IRange[] {
     const result: IRange[] = [];
     for (let i = 0; i < sortedRows.length - 1; i++) {
         for (let j = 0; j < sortedColumns.length - 1; j++) {
-            const gridCell = {
-                startColumn: sortedColumns[j],
-                endColumn: sortedColumns[j + 1] - 1,
-                startRow: sortedRows[i],
-                endRow: sortedRows[i + 1] - 1,
-            };
+            // grid cell
+            const startColumn = sortedColumns[j];
+            const endColumn = sortedColumns[j + 1] - 1;
+            const startRow = sortedRows[i];
+            const endRow = sortedRows[i + 1] - 1;
 
             for (const range of ranges) {
-                if (range.startRow > gridCell.endRow) {
+                if (range.startRow > endRow) {
                     // Since ranges are sorted, we can break early
                     break;
                 }
 
-                if (range.startRow <= gridCell.endRow && range.endRow >= gridCell.startRow &&
-                    range.startColumn <= gridCell.endColumn && range.endColumn >= gridCell.startColumn) {
+                // grid cell must be in some range
+                // just need to check range is contain grid cell
+                if (range.startRow <= startRow && range.endRow >= endRow &&
+                    range.startColumn <= startColumn && range.endColumn >= endColumn) {
                     result.push({
-                        startColumn: Math.max(gridCell.startColumn, range.startColumn),
-                        endColumn: Math.min(gridCell.endColumn, range.endColumn),
-                        startRow: Math.max(gridCell.startRow, range.startRow),
-                        endRow: Math.min(gridCell.endRow, range.endRow),
+                        startColumn,
+                        endColumn,
+                        startRow,
+                        endRow,
                     });
                     break; // No need to check other ranges for this grid cell
                 }

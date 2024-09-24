@@ -268,6 +268,7 @@ export class StatusBarController extends Disposable {
                     realSelections.push({ ...selection, startRow: prev, endRow: end });
                 }
             });
+
             const noDuplicate = getNoDuplicateRanges(realSelections);
             // const matrix = sheet.getCellMatrix();
             const calculateValueSet = new CalculateValueSet();

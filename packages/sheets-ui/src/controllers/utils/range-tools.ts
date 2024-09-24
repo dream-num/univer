@@ -120,17 +120,32 @@ class NoDuplicateRangeCollection {
 
     public addRange(range: IRange) {
         const splitRanges = this._getSplitRanges(range);
-        this._ranges.push(...splitRanges, range);
+        this._ranges.push(...splitRanges);
     }
 
     private _getSplitRanges(addRange: IRange) {
-        const subtractRanges = [];
-        for (const range of this._ranges) {
-            const intersect = Rectangle.subtract(range, addRange);
-            if (intersect) {
-                subtractRanges.push(...intersect);
+        const subtractRanges: IRange[] = [];
+        if (this._ranges.length === 0) {
+            return [addRange];
+        }
+        const intersects = [addRange];
+        while (intersects.length > 0) {
+            const currentRange = intersects.shift();
+            let isIntersect = false;
+            for (let i = 0; i < this._ranges.length; i++) {
+                const range = this._ranges[i];
+                const intersect = Rectangle.intersects(currentRange!, range);
+                if (intersect) {
+                    isIntersect = true;
+                    const subtractRanges = Rectangle.subtract(currentRange!, range);
+                    intersects.push(...subtractRanges);
+                }
+            }
+            if (!isIntersect) {
+                subtractRanges.push(currentRange!);
             }
         }
+
         return subtractRanges;
     }
 

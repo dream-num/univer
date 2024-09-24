@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, ObjectMatrix, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor, ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 
 export interface IDiscreteRange {
@@ -113,67 +113,4 @@ export function generateNullCellValueRowCol(range: IDiscreteRange[]): IObjectMat
     });
 
     return cellValue.getData();
-}
-
-class NoDuplicateRangeCollection {
-    private _ranges: IRange[] = [];
-
-    public addRange(range: IRange) {
-        const splitRanges = this._getSplitRanges(range);
-        this._ranges.push(...splitRanges);
-    }
-
-    private _getSplitRanges(addRange: IRange) {
-        const subtractRanges: IRange[] = [];
-        if (this._ranges.length === 0) {
-            return [addRange];
-        }
-        const intersects = [addRange];
-        while (intersects.length > 0) {
-            const currentRange = intersects.shift();
-            let isIntersect = false;
-            let isContained = false;
-            for (const range of this._ranges) {
-                if (Rectangle.contains(range, currentRange!)) {
-                    isContained = true;
-                    break;
-                }
-            }
-            if (isContained) {
-                continue;
-            }
-
-            for (let i = 0; i < this._ranges.length; i++) {
-                const range = this._ranges[i];
-                const intersect = Rectangle.intersects(currentRange!, range);
-                if (intersect) {
-                    isIntersect = true;
-                    const subtractRanges = Rectangle.subtract(currentRange!, range);
-                    intersects.push(...subtractRanges);
-                }
-            }
-            if (!isIntersect) {
-                subtractRanges.push(currentRange!);
-            }
-        }
-
-        return subtractRanges;
-    }
-
-    public getRanges() {
-        return this._ranges;
-    }
-}
-
-/**
- * @description Get no duplicate ranges list
- * @param {IRange[]} ranges provided ranges
- * @returns {IRange[]} no duplicate ranges
- */
-export function getNoDuplicateRanges(ranges: IRange[]): IRange[] {
-    const noDuplicateRangeCollection = new NoDuplicateRangeCollection();
-    ranges.forEach((range) => {
-        noDuplicateRangeCollection.addRange(range);
-    });
-    return noDuplicateRangeCollection.getRanges();
 }

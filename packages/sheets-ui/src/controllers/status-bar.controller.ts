@@ -27,6 +27,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     RANGE_TYPE,
+    splitIntoGrid,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -43,12 +44,11 @@ import {
 } from '@univerjs/sheets';
 import type { ICellData, ICommandInfo, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ArrayValueObject, ISheetData } from '@univerjs/engine-formula';
+
 import type {
     ISelectionWithStyle,
 } from '@univerjs/sheets';
-
 import { IStatusBarService } from '../services/status-bar.service';
-import { getNoDuplicateRanges } from './utils/range-tools';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 
 export const STATUS_BAR_PERMISSION_CORRECT = createInterceptorKey<ArrayValueObject[], ArrayValueObject[]>('statusBarPermissionCorrect');
@@ -269,7 +269,7 @@ export class StatusBarController extends Disposable {
                 }
             });
 
-            const noDuplicate = getNoDuplicateRanges(realSelections);
+            const noDuplicate = splitIntoGrid(realSelections);
             // const matrix = sheet.getCellMatrix();
             const calculateValueSet = new CalculateValueSet();
             for (const range of noDuplicate) {

@@ -514,6 +514,12 @@ function getMoveNewRange(
         newRange.startColumn = startColumn;
         newRange.endRow = endRow;
         newRange.endColumn = endColumn;
+    } else {
+        // By default, the offset of result is taken
+        newRange.startRow = startRow;
+        newRange.startColumn = startColumn;
+        newRange.endRow = endRow;
+        newRange.endColumn = endColumn;
     }
 
     return newRange;

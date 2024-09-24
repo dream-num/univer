@@ -148,7 +148,262 @@ userManagerService.setCurrentUser(mockUser);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        6: {
+                            f: '=A1:B2',
+                        },
+                    },
+                    1: {
+                        2: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    2: {
+                        1: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            f: '=A1:B2',
+                        },
+                    },
+                    5: {
+                        2: {
+                            f: '=SUM(A1:B2)',
+                        },
+                        3: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    6: {
+                        2: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                    7: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            f: '=SUM(A8)',
+                        },
+                        4: {
+                            f: '=SUM(B8)',
+                        },
+                        5: {
+                            f: '=SUM(C8)',
+                        },
+                        7: {
+                            f: '=SUM(A8:C10)',
+                        },
+                        8: {
+                            f: '=SUM(B8:D10)',
+                            si: 'CarNau',
+                        },
+                        9: {
+                            si: 'CarNau',
+                        },
+                    },
+                    8: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            f: '=SUM(A9)',
+                        },
+                        4: {
+                            f: '=SUM(B9)',
+                        },
+                        5: {
+                            f: '=SUM(C9)',
+                        },
+                        7: {
+                            f: '=SUM(A9:C11)',
+                            si: 'y0gLJX',
+                        },
+                        8: {
+                            si: 'y0gLJX',
+                        },
+                        9: {
+                            si: 'y0gLJX',
+                        },
+                    },
+                    9: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            f: '=SUM(A10)',
+                        },
+                        4: {
+                            f: '=SUM(B10)',
+                        },
+                        5: {
+                            f: '=SUM(C10)',
+                        },
+                        7: {
+                            si: 'y0gLJX',
+                        },
+                        8: {
+                            si: 'y0gLJX',
+                        },
+                        9: {
+                            si: 'y0gLJX',
+                        },
+                    },
+                    10: {
+                        0: {
+                            f: '=SUM(A8)',
+                        },
+                        1: {
+                            f: '=SUM(B8)',
+                        },
+                        2: {
+                            f: '=SUM(C8)',
+                        },
+                    },
+                    11: {
+                        0: {
+                            f: '=SUM(A9)',
+                        },
+                        1: {
+                            f: '=SUM(B9)',
+                        },
+                        2: {
+                            f: '=SUM(C9)',
+                        },
+                    },
+                    12: {
+                        0: {
+                            f: '=SUM(A10)',
+                        },
+                        1: {
+                            f: '=SUM(B10)',
+                        },
+                        2: {
+                            f: '=SUM(C10)',
+                        },
+                    },
+                    14: {
+                        0: {
+                            f: '=A1:B2',
+                        },
+                        2: {
+                            f: '=Sheet2!A1:B2',
+                        },
+                    },
+                    18: {
+                        0: {
+                            v: 1,
+                        },
+                        1: {
+                            f: '=SUM(A19)',
+                            t: 2,
+                            v: 1,
+                        },
+                    },
+                    19: {
+                        0: {
+                            v: 2,
+                        },
+                        1: {
+                            f: '=SUM(A20)',
+                            si: 'id1',
+                            t: 2,
+                            v: 2,
+                        },
+                    },
+                    20: {
+                        0: {
+                            v: 3,
+                        },
+                        1: {
+                            si: 'id1',
+                            t: 2,
+                            v: 3,
+                        },
+                    },
+                    21: {
+                        2: {
+                            f: '=OFFSET(A1,1,1)',
+                            v: 0,
+                            t: 2,
+                        },
+                        3: {
+                            f: '=OFFSET(B1,1,1)',
+                            si: 'id2',
+                            v: 1,
+                            t: 2,
+                        },
+                        4: {
+                            si: 'id2',
+                            v: 1,
+                            t: 2,
+                        },
+                    },
+                },
+                name: 'Sheet1',
+            },
+            sheet2: {
+                id: 'sheet2',
+                cellData: {
+                    2: {
+                        0: {
+                            f: '=SUM(DefinedName1)',
+                        },
+                    },
+                },
+                name: 'Sheet2',
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: ['sheet1', 'sheet2'],
+        styles: {},
+        resources: [
+            {
+                name: 'SHEET_DEFINED_NAME_PLUGIN',
+                data: '{"soAI3OK4sq":{"id":"soAI3OK4sq","name":"DefinedName1","formulaOrRefString":"Sheet2!$A$1:$B$2","comment":"","localSheetId":"AllDefaultWorkbook"}}',
+            },
+        ],
+    });
 }
 
 setTimeout(() => {

@@ -107,8 +107,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '半角の二重引用符で囲んだ文字列、空の文字列 ("")、または文字列を含むセルへの参照を指定します。' },
         },
     },
     ASIN: {
@@ -800,8 +799,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '変換するアラビア数字を指定します。' },
+            form: { name: '書式', detail: 'ローマ数字の書式を数値で指定します。 ローマ数字の書式には正式な形式から簡略化した形式まであり、書式の値が大きくなるほど、簡略化した形式で表示されます。' },
         },
     },
     ROUND: {

@@ -106,8 +106,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '以引弧括住的字串、空字串 (“) ，或包含文字的單元格參照。' },
         },
     },
     ASIN: {
@@ -798,8 +797,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要轉換的阿拉伯數字。' },
+            form: { name: '形式', detail: '這是指定所需羅馬數字類型的數字。羅馬數位風格從經典到簡化，隨著形式值的增加而變得更加簡潔。' },
         },
     },
     ROUND: {

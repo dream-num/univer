@@ -43,7 +43,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -60,6 +60,7 @@ const univer = new Univer({
         [LocaleType.RU_RU]: ruRU,
         [LocaleType.ZH_TW]: zhTW,
         [LocaleType.VI_VN]: viVN,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

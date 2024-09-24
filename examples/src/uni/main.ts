@@ -46,7 +46,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
-import { enUS } from '../locales';
+import { enUS, faIR } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -59,6 +59,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

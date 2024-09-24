@@ -14,14 +14,27 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import dajsEnUS from 'dayjs/locale/en';
+import PickerEnUs from 'rc-picker/lib/locale/en_US';
+import type { ILocale } from './interface';
+
+const locale: ILocale = {
+    design: {
+        Confirm: {
+            cancel: 'لغو',
+            confirm: 'باشه',
+        },
+        Slider: {
+            resetTo: 'بازنشانی به',
+        },
+        Picker: {
+            ...dajsEnUS,
+            ...PickerEnUs,
+        },
+        CascaderList: {
+            empty: 'هیچ کدام',
+        },
+    },
+};
+
+export default locale;

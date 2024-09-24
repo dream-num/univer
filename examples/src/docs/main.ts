@@ -31,7 +31,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
-import { enUS, ruRU, zhCN } from '../locales';
+import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
@@ -51,6 +51,7 @@ const univer = new Univer({
         [LocaleType.ZH_CN]: zhCN,
         [LocaleType.EN_US]: enUS,
         [LocaleType.RU_RU]: ruRU,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

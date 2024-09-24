@@ -132,6 +132,17 @@ class NoDuplicateRangeCollection {
         while (intersects.length > 0) {
             const currentRange = intersects.shift();
             let isIntersect = false;
+            let isContained = false;
+            for (const range of this._ranges) {
+                if (Rectangle.contains(range, currentRange!)) {
+                    isContained = true;
+                    break;
+                }
+            }
+            if (isContained) {
+                continue;
+            }
+
             for (let i = 0; i < this._ranges.length; i++) {
                 const range = this._ranges[i];
                 const intersect = Rectangle.intersects(currentRange!, range);

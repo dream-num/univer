@@ -24,8 +24,8 @@ import {
 } from '@univerjs/design';
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useState } from 'react';
-import { isObservable } from 'rxjs';
+import React, { useMemo, useState } from 'react';
+import { combineLatest, isObservable, map } from 'rxjs';
 
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
@@ -69,7 +69,29 @@ function MenuWrapper(props: IBaseMenuProps) {
     };
     const menuItems = menuManagerService.getMenuByPositionKey(menuType);
 
-    return menuItems && menuItems.map((item) => item.item
+    const filteredMenuItems = useMemo(() => {
+        return menuItems.filter((item) => {
+            if (!item.children) return item;
+
+            let hasChildren = false;
+            const hiddenObservables = item.children?.map((item) => item.item?.hidden$).filter((item) => !!item);
+
+            combineLatest(hiddenObservables)
+                .pipe(
+                    map((hiddenValues) => hiddenValues.every((hidden) => hidden === true))
+                )
+                .subscribe((allHidden) => {
+                    if (!allHidden) {
+                        hasChildren = true;
+                    }
+                })
+                .unsubscribe();
+
+            return hasChildren;
+        });
+    }, [menuItems]);
+
+    return filteredMenuItems && filteredMenuItems.map((item) => item.item
         ? (
             <MenuItem
                 key={item.key}

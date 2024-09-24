@@ -31,31 +31,32 @@ export class Reduce extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(initialValue: FunctionVariantType, array: FunctionVariantType, lambda: BaseValueObject): BaseValueObject {
-        let _initialValue = initialValue;
-        let _initialValue_reference: Nullable<BaseReferenceObject> = null;
-
+        let _initialValue: BaseValueObject;
+        let _initialValueReference: Nullable<BaseReferenceObject>;
         if (initialValue.isReferenceObject()) {
             _initialValue = (initialValue as BaseReferenceObject).toArrayValueObject();
-            _initialValue_reference = initialValue as BaseReferenceObject;
+            _initialValueReference = initialValue as BaseReferenceObject;
+        } else {
+            _initialValue = initialValue as BaseValueObject;
+            _initialValueReference = null;
         }
 
-        _initialValue = _initialValue as BaseValueObject;
-
-        let _array = array;
-        let _array_reference: Nullable<BaseReferenceObject> = null;
-
+        let _array: BaseValueObject;
+        let _arrayReference: Nullable<BaseReferenceObject>;
         if (array.isReferenceObject()) {
             _array = (array as BaseReferenceObject).toArrayValueObject();
-            _array_reference = array as BaseReferenceObject;
+            _arrayReference = array as BaseReferenceObject;
+        } else {
+            _array = array as BaseValueObject;
+            _arrayReference = null;
         }
-
-        _array = _array as BaseValueObject;
 
         if (_initialValue.isArray()) {
-            return _initialValue.mapValue((initialValueObject) => this._handleSingleValueObject(initialValueObject, _array, lambda, _initialValue_reference, _array_reference));
+            return _initialValue.mapValue((initialValueObject) =>
+                this._handleSingleValueObject(initialValueObject, _array, lambda, _initialValueReference, _arrayReference));
         }
 
-        return this._handleSingleValueObject(_initialValue, _array, lambda, _initialValue_reference, _array_reference);
+        return this._handleSingleValueObject(_initialValue, _array, lambda, _initialValueReference, _arrayReference);
     }
 
     private _handleSingleValueObject(

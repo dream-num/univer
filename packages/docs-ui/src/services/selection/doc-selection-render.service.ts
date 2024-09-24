@@ -127,7 +127,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
                 const unitId = documentModel.getUnitId();
 
-                if (unitId !== this._context.unitId && !this._reserveRanges) {
+                if (unitId !== this._context.unitId) {
                     this.removeAllRanges();
                 }
             });

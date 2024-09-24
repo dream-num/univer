@@ -721,7 +721,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _removeAllRanges() {
-        this._removeAllTextRanges();
+        if (!this._reserveRanges) {
+            this._removeAllTextRanges();
+        }
         this._removeAllRectRanges();
     }
 

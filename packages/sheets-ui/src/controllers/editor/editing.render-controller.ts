@@ -28,7 +28,6 @@ import {
     ICommandService,
     IContextService,
     Inject,
-    IResourceLoaderService,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
@@ -122,8 +121,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IResourceLoaderService private readonly _resourceLoaderService: IResourceLoaderService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 

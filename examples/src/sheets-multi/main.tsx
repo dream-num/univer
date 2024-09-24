@@ -29,7 +29,7 @@ import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
-import { enUS, ruRU, zhCN } from '../locales';
+import { enUS, frFR, ruRU, zhCN } from '../locales';
 
 import 'react-mosaic-component/react-mosaic-component.css';
 import './index.css';
@@ -42,6 +42,7 @@ function factory(id: string) {
             locales: {
                 [LocaleType.ZH_CN]: zhCN,
                 [LocaleType.EN_US]: enUS,
+                [LocaleType.FR_FR]: frFR,
                 [LocaleType.RU_RU]: ruRU,
             },
             logLevel: LogLevel.VERBOSE,

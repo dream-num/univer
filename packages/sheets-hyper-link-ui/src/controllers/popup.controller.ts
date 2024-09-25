@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocEventManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -35,7 +35,7 @@ import {
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime, map, mergeMap, Observable } from 'rxjs';
-import type { Nullable } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { Subscription } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
@@ -66,6 +66,16 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
     private _getLinkPermission(location: ISheetLocationBase) {
         const { unitId, subUnitId, row: currentRow, col: currentCol } = location;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return {
+                viewPermission: false,
+                editPermission: false,
+                copyPermission: false,
+            };
+        }
+
         const viewPermission = this._sheetPermissionInterceptorBaseController.permissionCheckWithRanges({
             workbookTypes: [WorkbookViewPermission],
             worksheetTypes: [WorksheetViewPermission],

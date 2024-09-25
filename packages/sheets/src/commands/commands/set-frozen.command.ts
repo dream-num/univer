@@ -33,7 +33,7 @@ interface ISetFrozenCommandParams {
 export const SetFrozenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-frozen',
-    handler: async (accessor: IAccessor, params: ISetFrozenCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetFrozenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

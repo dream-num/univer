@@ -140,7 +140,7 @@ export interface ICancelFrozenCommandParams {
 export const CancelFrozenCommand: ICommand<ICancelFrozenCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.cancel-frozen',
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);

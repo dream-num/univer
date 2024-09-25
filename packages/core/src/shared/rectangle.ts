@@ -56,6 +56,23 @@ export class Rectangle {
         );
     }
 
+    /**
+     * Check intersects of normal range(RANGE_TYPE.NORMAL)
+     * For other types of ranges, please consider using the intersects method.
+     * @param rangeA
+     * @param rangeB
+     * @returns boolean
+     */
+    static simpleRangesIntersect(rangeA: IRange, rangeB: IRange): boolean {
+        const { startRow: startRowA, endRow: endRowA, startColumn: startColumnA, endColumn: endColumnA } = rangeA;
+        const { startRow: startRowB, endRow: endRowB, startColumn: startColumnB, endColumn: endColumnB } = rangeB;
+
+        const rowsOverlap = (startRowA <= endRowB) && (endRowA >= startRowB);
+        const columnsOverlap = (startColumnA <= endColumnB) && (endColumnA >= startColumnB);
+
+        return rowsOverlap && columnsOverlap;
+    }
+
     static intersects(src: IRange, target: IRange): boolean {
         if (src.rangeType === RANGE_TYPE.ROW && target.rangeType === RANGE_TYPE.COLUMN) {
             return true;
@@ -333,7 +350,7 @@ export class Rectangle {
             res = multiSubtractSingleRange(res, range);
         });
 
-        return Rectangle.mergeRanges(res);
+        return res;
     }
 
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {

@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 
-import { type IMoveColumnsMutationParams, type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
-import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
-import { type IMoveRangeMutationParams, MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
-import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
-import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
-import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
-import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
-import type { SheetsSelectionsService } from '../selections/selection-manager.service';
 import { DeleteRangeMoveLeftCommand } from '../../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../../commands/commands/delete-range-move-up.command';
-import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
 import { InsertRangeMoveDownCommand } from '../../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommandId } from '../../commands/commands/insert-range-move-right.command';
+import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
+import { type IMoveRangeMutationParams, MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
+import { type IMoveColumnsMutationParams, type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
+import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
+import { EffectRefRangId, OperatorType } from './type';
+import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
+import type { IRemoveRowColCommandInterceptParams } from '../../commands/commands/remove-row-col.command';
+import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
+import type { SheetsSelectionsService } from '../selections/selection-manager.service';
 import type {
     EffectRefRangeParams,
     IDeleteRangeMoveLeftCommand,
@@ -45,7 +46,6 @@ import type {
     IRemoveRowColCommand,
     IReorderRangeCommand,
 } from './type';
-import { EffectRefRangId, OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleRangeTypeInput = (range: IRange) => {
@@ -275,6 +275,7 @@ export const handleMoveRowsCommon = (params: IMoveRowsCommand, targetRange: IRan
 
     matrix.moveRows(fromRow, count, toRow);
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     const res = queryObjectMatrix(matrix, (value) => value === 1);
     return res;
 };
@@ -301,6 +302,7 @@ export const handleReorderRangeCommon = (param: IReorderRangeCommand, targetRang
     cacheMatrix.forValue((row, col, cellData) => {
         matrix.setValue(row, col, cellData);
     });
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     const res = queryObjectMatrix(matrix, (value) => value === 1);
     return res;
 };
@@ -351,7 +353,7 @@ export const handleMoveColsCommon = (params: IMoveColsCommand, targetRange: IRan
     });
 
     matrix.moveColumns(fromCol, count, toCol);
-
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (value) => value === 1);
 };
 
@@ -435,6 +437,7 @@ export const handleMoveRangeCommon = (param: IMoveRangeCommand, targetRange: IRa
         matrix.setValue(targetRow, targetCol, fromMatrix.getValue(row, col) ?? 0);
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     const res = queryObjectMatrix(matrix, (value) => value === 1);
     return res;
 };
@@ -694,6 +697,7 @@ export const handleInsertRangeMoveDownCommon = (param: IInsertRangeMoveDownComma
         matrix.setValue(row + moveCount, col, 1);
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
@@ -744,6 +748,7 @@ export const handleInsertRangeMoveRightCommon = (param: IInsertRangeMoveRightCom
         matrix.setValue(row, col + moveCount, 1);
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
@@ -810,6 +815,7 @@ export const handleDeleteRangeMoveLeftCommon = (param: IDeleteRangeMoveLeftComma
         });
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
@@ -872,6 +878,7 @@ export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, 
         });
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
@@ -890,6 +897,7 @@ export const handleRemoveRowCommon = (param: IRemoveRowColCommandInterceptParams
         matrix.removeRows(startRow, count);
     });
 
+    // TODO@zhangw try to remove queryObjectMatrix, this could case memory out of use in large range.
     return queryObjectMatrix(matrix, (value) => value === 1);
 };
 
@@ -1013,7 +1021,7 @@ type MutationsAffectRange =
     | IInsertRowMutationParams
     | IMoveRangeMutationParams;
 
-export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo): IRange[] => {
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
         case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
@@ -1057,7 +1065,7 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
         }
     }
     const resultRange = runRefRangeMutations(operator, range);
-    return resultRange;
+    return resultRange ? [resultRange] : [];
 };
 
 export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {

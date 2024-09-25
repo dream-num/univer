@@ -16,14 +16,15 @@
 
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { CancelFrozenCommand } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
-import type { IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import { FDataValidation } from './f-data-validation';
@@ -947,4 +948,90 @@ export class FWorksheet {
      * @param range The range to set as the active selection.
      */
     setActiveSelection = this.setActiveRange;
+
+    /**
+     * Sets the frozen state of the current sheet.
+     * @param freeze - The freeze object containing the parameters for freezing the sheet.
+     * @returns True if the command was successful, false otherwise.
+     */
+    setFreeze(freeze: IFreeze): boolean {
+        return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
+            ...freeze,
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
+
+    /**
+     * Cancels the frozen state of the current sheet.
+     * @returns True if the command was successful, false otherwise.
+     */
+    cancelFreeze(): boolean {
+        return this._commandService.syncExecuteCommand(CancelFrozenCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this.getSheetId(),
+        });
+    }
+
+    /**
+     * Get the freeze state of the current sheet.
+     * @returns The freeze state of the current sheet.
+     */
+    getFreeze(): IFreeze {
+        return this._worksheet.getFreeze();
+    }
+
+    /**
+     * Set the number of frozen columns.
+     * @param columns The number of columns to freeze.
+     * To unfreeze all columns, set this value to 0.
+     */
+    setFrozenColumns(columns: number): void {
+        const currentFreeze = this.getFreeze();
+        this.setFreeze({
+            ...currentFreeze,
+            startColumn: columns > 0 ? columns : -1,
+            xSplit: columns,
+        });
+    }
+
+    /**
+     * Set the number of frozen rows.
+     * @param rows The number of rows to freeze.
+     * To unfreeze all rows, set this value to 0.
+     */
+    setFrozenRows(rows: number): void {
+        const currentFreeze = this.getFreeze();
+        this.setFreeze({
+            ...currentFreeze,
+            startRow: rows > 0 ? rows : -1,
+            ySplit: rows,
+        });
+    }
+
+    /**
+     * Get the number of frozen columns.
+     * @returns The number of frozen columns.
+     * Returns 0 if no columns are frozen.
+     */
+    getFrozenColumns(): number {
+        const freeze = this.getFreeze();
+        if (freeze.startColumn === -1) {
+            return 0;
+        }
+        return freeze.startColumn;
+    }
+
+    /**
+     * Get the number of frozen rows.
+     * @returns The number of frozen rows.
+     * Returns 0 if no rows are frozen.
+     */
+    getFrozenRows(): number {
+        const freeze = this.getFreeze();
+        if (freeze.startRow === -1) {
+            return 0;
+        }
+        return freeze.startRow;
+    }
 }

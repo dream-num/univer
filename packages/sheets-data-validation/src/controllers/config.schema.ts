@@ -22,6 +22,8 @@ export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsDataValidationConfig {
     menu?: MenuConfig;
+
+    showEditOnDropdown?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsDataValidationConfig = {};

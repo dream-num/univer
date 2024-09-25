@@ -138,6 +138,7 @@ export { type IUser, UserManagerService } from './services/user-manager/user-man
 export * from './shared';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
+export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
 export { fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime } from './shared/timer';

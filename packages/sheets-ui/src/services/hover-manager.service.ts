@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
-import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
-import type { IBoundRectNoAngle, IFontCacheItem } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
+import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IBoundRectNoAngle, IFontCacheItem, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { getHoverCellPosition } from '../common/utils';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { SheetScrollManagerService } from './scroll-manager.service';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
 export interface IHoverCellPosition {
@@ -165,10 +165,13 @@ export class HoverManagerService extends Disposable {
         }
 
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-        const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
-        const scrollManagerService = currentRender?.with(SheetScrollManagerService);
+        if (!currentRender) return null;
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+        if (!skeletonParam) return null;
+
+        const scrollManagerService = currentRender.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService?.getCurrentScrollState();
-        const skeleton = skeletonParam?.skeleton;
+        const skeleton = skeletonParam?.skeleton as SpreadsheetSkeleton;
 
         if (!skeleton || !scrollInfo || !currentRender) return;
 

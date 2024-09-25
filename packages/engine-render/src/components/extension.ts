@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IDocumentRenderConfig, IRange, IScale, Nullable } from '@univerjs/core';
 import { Registry } from '@univerjs/core';
+import type { IDocumentRenderConfig, IRange, IScale, Nullable } from '@univerjs/core';
 
-import type { BaseObject } from '../base-object';
 import { getScale } from '../basics/tools';
+import type { BaseObject } from '../base-object';
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 

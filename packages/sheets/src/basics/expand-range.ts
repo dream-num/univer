@@ -48,7 +48,7 @@ function cellHasValue(cell: ICellData | undefined): boolean {
 
 function hasValueFromMatrixWithSpanInfo(cell: IMatrixWithSpanInfo | undefined, matrix: ObjectMatrix<IMatrixWithSpanInfo>): boolean {
     if (cell && cell.spanAnchor) {
-        return cellHasValue(matrix.getValue(cell.spanAnchor.startRow, cell.spanAnchor.startColumn));
+        return cellHasValue(matrix.getValue(cell.spanAnchor.startRow, cell.spanAnchor.startColumn)!);
     }
     return cellHasValue(cell);
 }
@@ -161,7 +161,7 @@ function getExpandedRangeLeft(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
     let spanAnchor: IRange | null = null;
     let hasValue = false;
     for (let i = startRow; i <= endRow; i++) {
-        const cell = allMatrixWithSpan.getValue(i, startColumn - leftOffset);
+        const cell = allMatrixWithSpan.getValue(i, startColumn - leftOffset)!;
         hasValue = hasValue || hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan);
         if (!isWorksheetHasSpan && hasValue) {
             break;
@@ -205,7 +205,7 @@ function getExpandedRangeRight(range: IRange, allMatrixWithSpan: ObjectMatrix<IM
     let hasValue = false;
 
     for (let i = startRow; i <= endRow; i++) {
-        const cell = allMatrixWithSpan.getValue(i, endColumn + rightOffset);
+        const cell = allMatrixWithSpan.getValue(i, endColumn + rightOffset)!;
         hasValue = hasValue || hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan);
         if (!isWorksheetHasSpan && hasValue) {
             break;
@@ -250,7 +250,7 @@ function getExpandedRangeUp(range: IRange, allMatrixWithSpan: ObjectMatrix<IMatr
     let spanAnchor: IRange | null = null;
     let hasValue = false;
     for (let i = startColumn; i <= endColumn; i++) {
-        const cell = allMatrixWithSpan.getValue(startRow - upOffset, i);
+        const cell = allMatrixWithSpan.getValue(startRow - upOffset, i)!;
         hasValue = hasValue || hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan);
         if (!isWorksheetHasSpan && hasValue) {
             break;
@@ -294,7 +294,7 @@ function getExpandedRangeDown(range: IRange, allMatrixWithSpan: ObjectMatrix<IMa
     let spanAnchor: IRange | null = null;
     let hasValue = false;
     for (let i = startColumn; i <= endColumn; i++) {
-        const cell = allMatrixWithSpan.getValue(endRow + downOffset, i);
+        const cell = allMatrixWithSpan.getValue(endRow + downOffset, i)!;
         hasValue = hasValue || hasValueFromMatrixWithSpanInfo(cell, allMatrixWithSpan);
         if (!isWorksheetHasSpan && hasValue) {
             break;

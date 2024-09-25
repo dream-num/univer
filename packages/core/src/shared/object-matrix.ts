@@ -342,7 +342,7 @@ export class ObjectMatrix<T> {
         return false;
     }
 
-    getValue(row: number, column: number): T {
+    getValue(row: number, column: number): Nullable<T> {
         return this._matrix?.[row]?.[column];
     }
 
@@ -517,7 +517,7 @@ export class ObjectMatrix<T> {
             }
 
             cols.forEach((column) => {
-                array[row][column] = this.getValue(row, column);
+                array[row][column] = this.getValue(row, column)!;
             });
         });
         return array;

@@ -198,6 +198,13 @@ export class SpanModel extends Disposable {
         return ranges;
     }
 
+    /**
+     * @deprecated sigificant performance impact, use _getCellMergeInfo instead.
+     * @param startRow
+     * @param startColumn
+     * @param endRow
+     * @param endColumn
+     */
     public getMergedCellRangeForSkeleton(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         // copy from packages\engine-render\src\components\sheets\sheet-skeleton.ts  _getMergeCells
         const cacheDataMerge: IRange[] = [];

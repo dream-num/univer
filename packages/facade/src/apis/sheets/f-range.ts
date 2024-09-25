@@ -259,7 +259,7 @@ export class FRange {
      * Returns the cell data for the cells in the range.
      * @returns A two-dimensional array of cell data.
      */
-    getCellDatas(): Nullable<ICellData>[][] {
+    getCellDataGrid(): Nullable<ICellData>[][] {
         const { startRow, endRow, startColumn, endColumn } = this._range;
         const range: Nullable<ICellData>[][] = [];
 

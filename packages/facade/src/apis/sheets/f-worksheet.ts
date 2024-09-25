@@ -972,4 +972,12 @@ export class FWorksheet {
             subUnitId: this.getSheetId(),
         });
     }
+
+    /**
+     * Get the freeze state of the current sheet.
+     * @returns {IFreeze} The freeze state of the current sheet.
+     */
+    getFreeze(): IFreeze {
+        return this._worksheet.getFreeze();
+    }
 }

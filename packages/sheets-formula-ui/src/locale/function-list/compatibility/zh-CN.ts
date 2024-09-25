@@ -220,8 +220,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 GAMMADIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     GAMMAINV: {
@@ -234,8 +236,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与伽玛分布相关的概率。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
         },
     },
     HYPGEOMDIST: {

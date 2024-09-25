@@ -220,8 +220,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出分佈的數值。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 GAMMADIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     GAMMAINV: {
@@ -234,8 +236,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與伽瑪分佈的相關機率。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
         },
     },
     HYPGEOMDIST: {

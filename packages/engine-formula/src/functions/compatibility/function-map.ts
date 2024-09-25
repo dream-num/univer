@@ -26,6 +26,8 @@ import { ExponDist } from '../statistical/expon-dist';
 import { FDistRt } from '../statistical/f-dist-rt';
 import { FInvRt } from '../statistical/f-inv-rt';
 import { FTest } from '../statistical/f-test';
+import { GammaDist } from '../statistical/gamma-dist';
+import { GammaInv } from '../statistical/gamma-inv';
 import { NormDist } from '../statistical/norm-dist';
 import { NormInv } from '../statistical/norm-inv';
 import { NormSInv } from '../statistical/norm-s-inv';
@@ -52,6 +54,8 @@ export const functionCompatibility = [
     [FDistRt, FUNCTION_NAMES_COMPATIBILITY.FDIST],
     [FInvRt, FUNCTION_NAMES_COMPATIBILITY.FINV],
     [FTest, FUNCTION_NAMES_COMPATIBILITY.FTEST],
+    [GammaDist, FUNCTION_NAMES_COMPATIBILITY.GAMMADIST],
+    [GammaInv, FUNCTION_NAMES_COMPATIBILITY.GAMMAINV],
     [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
     [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Normsdist, FUNCTION_NAMES_COMPATIBILITY.NORMSDIST],

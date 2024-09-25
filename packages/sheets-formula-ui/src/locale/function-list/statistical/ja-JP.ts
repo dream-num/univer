@@ -611,8 +611,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataArray: { name: 'データ配列', detail: '頻度分布の計算対象となる値セットの配列、またはこのセットへの参照を指定します。 データ配列に値が含まれていない場合は、0 の配列が返されます。' },
+            binsArray: { name: '区間配列', detail: '区間配列の値をグループ化する間隔の配列、またはこの間隔への参照を指定します。 区間配列に値が含まれていない場合は、データ配列に指定した要素の数が返されます。' },
         },
     },
     GAMMA: {
@@ -625,8 +625,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: 'ガンマ関数の入力値。' },
         },
     },
     GAMMA_DIST: {
@@ -639,8 +638,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     GAMMA_INV: {
@@ -653,8 +654,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'ガンマ分布における確率を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
         },
     },
     GAMMALN: {

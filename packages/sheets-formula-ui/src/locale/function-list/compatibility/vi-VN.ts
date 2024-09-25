@@ -210,7 +210,6 @@ export default {
             array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
         },
     },
-
     GAMMADIST: {
         description: 'Trả về phân phối γ',
         abstract: 'Trả về phân phối γ',
@@ -221,8 +220,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm GAMMADIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     GAMMAINV: {
@@ -235,8 +236,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố gamma.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
         },
     },
     HYPGEOMDIST: {

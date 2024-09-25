@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -27,12 +26,8 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 
-import type {
-    IInsertColMutationParams,
-    IInsertRangeMutationParams,
-    IRemoveColMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/insert-row-col.mutation';
@@ -40,6 +35,11 @@ import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
+import type {
+    IInsertColMutationParams,
+    IInsertRangeMutationParams,
+    IRemoveColMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 
 export interface InsertRangeMoveRightCommandParams {
     range: IRange;

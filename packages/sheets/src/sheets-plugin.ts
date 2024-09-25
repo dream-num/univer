@@ -78,7 +78,7 @@ export class UniverSheetsPlugin extends Plugin {
             [MergeCellController],
         ];
         mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            _injector?.add(d);
+            this._injector?.add(d);
         });
     }
 

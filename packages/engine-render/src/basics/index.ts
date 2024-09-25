@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+export * from '../components/docs/layout/shaping-engine/font-cache';
 export * from './cell-data';
 export * from './const';
 export * from './document-node-tools';
 export * from './draw';
-export * from '../components/docs/layout/shaping-engine/font-cache';
+export * from './group-transform';
 export * from './i-document-skeleton-cached';
 export * from './i-events';
 export * from './interfaces';
@@ -26,8 +27,7 @@ export * from './path2';
 export * from './performance-monitor';
 export * from './range';
 export * from './scroll-xy';
+export * from './text-rotation';
 export * from './tools';
 export * from './transform';
 export * from './vector2';
-export * from './text-rotation';
-export * from './group-transform';

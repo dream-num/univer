@@ -25,7 +25,7 @@ export { ImageCropperObject } from './views/crop/image-cropper-object';
 // #region - all commands
 
 export { SetDrawingAlignOperation } from './commands/operations/drawing-align.operation';
-export { OpenImageCropOperation, CloseImageCropOperation, AutoImageCropOperation } from './commands/operations/image-crop.operation';
+export { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
 export { ImageResetSizeOperation } from './commands/operations/image-reset-size.operation';
 
 // #endregion

@@ -114,7 +114,7 @@ export { DependentOn, PluginService } from './services/plugin/plugin.service';
 export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export { IResourceLoaderService } from './services/resource-loader/type';
 export { ResourceManagerService } from './services/resource-manager/resource-manager.service';
-export type { IResourceHook } from './services/resource-manager/type';
+export type { IResourceHook, IResources } from './services/resource-manager/type';
 export { IResourceManagerService } from './services/resource-manager/type';
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 

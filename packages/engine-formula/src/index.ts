@@ -18,7 +18,10 @@ export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
     IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetDefinedNameMap,
     IDirtyUnitSheetNameMap,
+    IFeatureDirtyRangeType,
     IFormulaData,
     IFormulaDataItem,
     IFormulaDatasetConfig,
@@ -26,17 +29,14 @@ export type {
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
-    IDirtyUnitOtherFormulaMap,
-    IDirtyUnitSheetDefinedNameMap,
-    IFeatureDirtyRangeType,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
-export { ErrorType, ERROR_TYPE_SET } from './basics/error-type';
+export { ERROR_TYPE_SET, ErrorType } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { convertUnitDataToRuntime } from './basics/runtime';
-export { matchToken, compareToken, operatorToken } from './basics/token';
+export { compareToken, matchToken, operatorToken } from './basics/token';
 
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
@@ -47,14 +47,14 @@ export {
     deserializeRangeWithSheet,
     getAbsoluteRefTypeWithSingleString,
     getAbsoluteRefTypeWitString,
+    getRangeWithRefsString,
     type IAbsoluteRefTypeForRange,
+    isReferenceStrings,
+    isReferenceStringWithEffectiveColumn,
     serializeRange,
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
-    isReferenceStringWithEffectiveColumn,
-    getRangeWithRefsString,
-    isReferenceStrings,
     singleReferenceToGrid,
 } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
@@ -64,7 +64,7 @@ export { BooleanValue } from './basics/common';
 export type { PrimitiveValueType } from './engine/value-object/primitive-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
-export { StringValueObject, NullValueObject } from './engine/value-object/primitive-object';
+export { NullValueObject, StringValueObject } from './engine/value-object/primitive-object';
 export { functionArray } from './functions/array/function-map';
 export { FUNCTION_NAMES_ARRAY } from './functions/array/function-names';
 export { BaseFunction } from './functions/base-function';
@@ -113,9 +113,9 @@ export { FormulaExecuteStageType, type IExecutionInProgressParams } from './serv
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export { isReferenceString } from './basics/regex';
 export { matchRefDrawToken } from './basics/match-token';
-export { IDefinedNamesService, DefinedNamesService, type IDefinedNamesServiceParam, type IDefinedNameMapItem } from './services/defined-names.service';
-export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
-export { IFormulaCurrentConfigService, FormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
+export { DefinedNamesService, type IDefinedNameMapItem, IDefinedNamesService, type IDefinedNamesServiceParam } from './services/defined-names.service';
+export { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
+export { FormulaCurrentConfigService, IFormulaCurrentConfigService, type IFormulaDirtyData } from './services/current-data.service';
 
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 export { ActiveDirtyManagerService } from './services/active-dirty-manager.service';
@@ -144,23 +144,39 @@ export { ValueNodeFactory } from './engine/ast-node/value-node';
 export { IDependencyManagerService } from './services/dependency-manager.service';
 export { DependencyManagerService } from './services/dependency-manager.service';
 export { CalculateController } from './controller/calculate.controller';
+
 // #region - all commands
 
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export { type ISetArrayFormulaDataMutationParams, SetArrayFormulaDataMutation } from './commands/mutations/set-array-formula-data.mutation';
-export { RemoveDefinedNameMutation, SetDefinedNameMutation, type ISetDefinedNameMutationSearchParam, type ISetDefinedNameMutationParam } from './commands/mutations/set-defined-name.mutation';
+export {
+    type ISetDefinedNameMutationParam,
+    type ISetDefinedNameMutationSearchParam,
+    RemoveDefinedNameMutation,
+    SetDefinedNameMutation,
+} from './commands/mutations/set-defined-name.mutation';
 export { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from './commands/mutations/set-feature-calculation.mutation';
 
 export {
-    SetFormulaCalculationStartMutation,
-    SetFormulaCalculationStopMutation,
-    SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationResultMutation,
-    type ISetFormulaCalculationStartMutation,
     type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
+    type ISetFormulaCalculationStartMutation,
+    SetFormulaCalculationNotificationMutation,
+    SetFormulaCalculationResultMutation,
+    SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
-export { SetFormulaDataMutation, type ISetFormulaDataMutationParams } from './commands/mutations/set-formula-data.mutation';
-export { SetOtherFormulaMutation, RemoveOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';
-export { SetSuperTableMutation, RemoveSuperTableMutation, SetSuperTableOptionMutation } from './commands/mutations/set-super-table.mutation';
+export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
+export {
+    type IRemoveOtherFormulaMutationParams,
+    type ISetOtherFormulaMutationParams,
+    RemoveOtherFormulaMutation,
+    SetOtherFormulaMutation,
+} from './commands/mutations/set-other-formula.mutation';
+export {
+    RemoveSuperTableMutation,
+    SetSuperTableMutation,
+    SetSuperTableOptionMutation,
+} from './commands/mutations/set-super-table.mutation';
+
 // #endregion

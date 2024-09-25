@@ -99,8 +99,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giá trị được sử dụng để tính toán hàm của nó, giữa giá trị giới hạn dưới và giá trị giới hạn trên.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BETA.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BETA_INV: {
@@ -113,8 +117,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố beta.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            A: { name: 'giới hạn dưới', detail: 'Giới hạn dưới của hàm, giá trị mặc định là 0.' },
+            B: { name: 'giới hạn trên', detail: 'Giới hạn trên của hàm, giá trị mặc định là 1.' },
         },
     },
     BINOM_DIST: {
@@ -127,8 +134,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            numberS: { name: 'số lần thành công', detail: 'Số lần thành công trong các phép thử.' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử độc lập.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm BINOM.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     BINOM_DIST_RANGE: {
@@ -141,8 +150,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử độc lập.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            numberS: { name: 'số lần thành công', detail: 'Số lần thành công trong các phép thử.' },
+            numberS2: { name: 'Số lần thành công tối đa', detail: 'Nếu được cung cấp, trả về xác suất số lần thử thành công nằm trong khoảng từ số lần thành công đến số lần thành công tối đa.' },
         },
     },
     BINOM_INV: {
@@ -155,13 +166,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            trials: { name: 'số phép thử', detail: 'Số phép thử Bernoulli.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            alpha: { name: 'xác suất mục tiêu', detail: 'Giá trị tiêu chí.' },
         },
     },
     CHISQ_DIST: {
-        description: 'Trả về hàm mật độ xác suất tích lũy beta',
-        abstract: 'Trả về hàm mật độ xác suất tích lũy beta',
+        description: 'Trả về xác suất của vế trái của phân bố χ2.',
+        abstract: 'Trả về xác suất của vế trái của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -169,13 +181,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì CHISQ.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     CHISQ_DIST_RT: {
-        description: 'Trả về xác suất đuôi đơn của phân phối χ2',
-        abstract: 'Trả về xác suất đuôi đơn của phân phối χ2',
+        description: 'Trả về xác suất bên phải của phân bố χ2.',
+        abstract: 'Trả về xác suất bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -183,13 +196,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_INV: {
-        description: 'Trả về hàm mật độ xác suất tích lũy beta',
-        abstract: 'Trả về hàm mật độ xác suất tích lũy beta',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi trái của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi trái của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -197,13 +210,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_INV_RT: {
-        description: 'Trả về hàm nghịch đảo xác suất đuôi của phân phối χ2',
-        abstract: 'Trả về hàm nghịch đảo xác suất đuôi của phân phối χ2',
+        description: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
+        abstract: 'Trả về hàm nghịch đảo của xác suất ở đuôi bên phải của phân bố χ2.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -211,8 +224,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối χ2.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Số bậc tự do.' },
         },
     },
     CHISQ_TEST: {
@@ -225,13 +238,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            actualRange: { name: 'phạm vi quan sát', detail: 'Phạm vi dữ liệu chứa các quan sát để kiểm thử đối với các giá trị dự kiến.' },
+            expectedRange: { name: 'phạm vi dự kiến', detail: 'Phạm vi dữ liệu chứa tỷ lệ của phép nhân tổng hàng và tổng cột với tổng cộng.' },
         },
     },
     CONFIDENCE_NORM: {
-        description: 'Trả về khoảng tin cậy của giá trị trung bình tổng thể',
-        abstract: 'Trả về khoảng tin cậy của giá trị trung bình tổng thể',
+        description: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
+        abstract: 'Trả về khoảng tin cậy của trung bình tổng thể, bằng cách dùng phân bố chuẩn hóa.',
         links: [
             {
                 title: 'Dạy học',
@@ -239,8 +252,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
         },
     },
     CONFIDENCE_T: {
@@ -253,8 +267,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            alpha: { name: 'alpha', detail: 'Mức quan trọng được dùng để tính toán mức tin cậy. Mức tin cậy bằng 100*(1 - alpha)%, hay nói cách khác, alpha 0,05 cho biết mức tin cậy 95 phần trăm.' },
+            standardDev: { name: 'Độ lệch chuẩn tổng', detail: 'Độ lệch chuẩn tổng thể cho phạm vi dữ liệu và được giả định là đã được xác định.' },
+            size: { name: 'cỡ mẫu', detail: 'Cỡ mẫu.' },
         },
     },
     CORREL: {
@@ -267,8 +282,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'số thứ nhất', detail: '' },
-            number2: { name: 'số thứ hai', detail: '' },
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
         },
     },
     COUNT: {
@@ -353,6 +368,208 @@ export default {
             criteria1: { name: 'tiêu chí 1', detail: 'Tiêu chí dưới dạng một số, biểu thức, tham chiếu ô hoặc văn bản để xác định những ô nào cần đếm. Ví dụ: tiêu chí có thể được biểu thị là 32, ">32", B4, "táo" hoặc "32".' },
             criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    COVARIANCE_P: {
+        description: 'Trả về hiệp phương sai của tập hợp, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai của tập hợp',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/covariance-p-%E5%87%BD%E6%95%B0-6f0e1e6d-956d-4e4b-9943-cfef0bf9edfc',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
+        },
+    },
+    COVARIANCE_S: {
+        description: 'Trả về hiệp phương sai mẫu, trung bình tích của các độ lệnh cho mỗi cặp điểm dữ liệu trong hai tập dữ liệu.',
+        abstract: 'Trả về hiệp phương sai mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/covariance-s-%E5%87%BD%E6%95%B0-0a539b74-7371-42aa-a18f-1f5320314977',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Phạm vi giá trị ô đầu tiên.' },
+            array2: { name: 'mảng 2', detail: 'Phạm vi giá trị ô thứ hai.' },
+        },
+    },
+    DEVSQ: {
+        description: 'Trả về tổng độ lệch bình phương',
+        abstract: 'Trả về tổng độ lệch bình phương',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/devsq-%E5%87%BD%E6%95%B0-8b739616-8376-4df5-8bd0-cfe0a6caf444',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Tham số thứ nhất mà bạn muốn tính tổng bình phương độ lệch.' },
+            number2: { name: 'số 2', detail: 'Tham số từ 2 đến 255 mà bạn muốn tính tổng bình phương độ lệch.' },
+        },
+    },
+    EXPON_DIST: {
+        description: 'Trả về phân bố hàm mũ.',
+        abstract: 'Trả về phân bố hàm mũ.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/expon-dist-%E5%87%BD%E6%95%B0-4c12ae24-e563-4155-bf3e-8b78b6ae140e',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giái trị bạn muốn đánh giá phân phối.' },
+            lambda: { name: 'lambda', detail: 'Giá trị tham số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì EXPON.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    F_DIST: {
+        description: 'Trả về phân bố xác suất F.',
+        abstract: 'Trả về phân bố xác suất F.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-dist-%E5%87%BD%E6%95%B0-a887efdc-7c8e-46cb-a74a-f884cd29b25d',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì F.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    F_DIST_RT: {
+        description: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        abstract: 'Trả về phân bố xác suất F (đuôi bên phải)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-dist-rt-%E5%87%BD%E6%95%B0-d74cbb00-6017-4ac9-b7d7-6049badc0520',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị để đánh giá hàm.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_INV: {
+        description: 'Trả về giá trị đảo của phân bố xác suất F.',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-inv-%E5%87%BD%E6%95%B0-0dda0cf9-4ea0-42fd-8c3c-417a1ff30dbe',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_INV_RT: {
+        description: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        abstract: 'Trả về giá trị đảo của phân bố xác suất F (đuôi bên phải).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-inv-rt-%E5%87%BD%E6%95%B0-d371aa8f-b0b1-40ef-9cc2-496f0693ac00',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố lũy tích F.' },
+            degFreedom1: { name: 'bậc tự do ở tử số', detail: 'Bậc tự do ở tử số.' },
+            degFreedom2: { name: 'bậc tự do ở mẫu số.', detail: 'Bậc tự do ở mẫu số.' },
+        },
+    },
+    F_TEST: {
+        description: 'Trả về kết quả của kiểm tra F-test',
+        abstract: 'Trả về kết quả của kiểm tra F-test',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/f-test-%E5%87%BD%E6%95%B0-100a59e7-4108-46f8-8443-78ffacb6c0a7',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+        },
+    },
+    FISHER: {
+        description: 'Trả về phép biến đổi Fisher tại x.',
+        abstract: 'Trả về phép biến đổi Fisher tại x.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/fisher-%E5%87%BD%E6%95%B0-d656523c-5076-4f95-b87b-7741bf236c69',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'số', detail: 'Giá trị số mà bạn muốn biến đổi.' },
+        },
+    },
+    FISHERINV: {
+        description: 'Trả về nghịch đảo của phép biến đổi Fisher. ',
+        abstract: 'Trả về nghịch đảo của phép biến đổi Fisher. ',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/fisherinv-%E5%87%BD%E6%95%B0-62504b39-415a-4284-a285-19c8e82f86bb',
+            },
+        ],
+        functionParameter: {
+            y: { name: 'số', detail: 'Giá trị mà bạn muốn thực hiện nghịch đảo của phép biến đổi.' },
+        },
+    },
+    FORECAST: {
+        description: 'Trả về giá trị xu hướng tuyến tính',
+        abstract: 'Trả về giá trị xu hướng tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Điểm dữ liệu mà bạn muốn dự đoán một giá trị cho nó.' },
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    FORECAST_LINEAR: {
+        description: 'Trả về giá trị tương lai dựa trên giá trị hiện tại',
+        abstract: 'Trả về giá trị tương lai dựa trên giá trị hiện tại',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/forecast-%E5%92%8C-forecast-linear-%E5%87%BD%E6%95%B0-50ca49c9-7b40-4892-94e4-7ad38bbeda99',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Điểm dữ liệu mà bạn muốn dự đoán một giá trị cho nó.' },
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    INTERCEPT: {
+        description: 'Trả về điểm chặn của đường hồi quy tuyến tính',
+        abstract: 'Trả về điểm chặn của đường hồi quy tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/intercept-%E5%87%BD%E6%95%B0-2a9b74e2-9d47-4772-b663-3bca70bf63ef',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
         },
     },
     MAX: {
@@ -455,6 +672,64 @@ export default {
             criteria1: { name: 'tiêu chí 1', detail: 'Là tiêu chí ở dạng số, biểu thức hoặc văn bản xác định ô nào sẽ được đánh giá là nhỏ nhất.' },
             criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    NORM_DIST: {
+        description: 'Trả về hàm phân phối tích lũy chuẩn',
+        abstract: 'Trả về hàm phân phối tích lũy chuẩn',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-dist-%E5%87%BD%E6%95%B0-edb1cc14-a21c-4e53-839d-8082074c9f8d',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORM.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    NORM_INV: {
+        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
+        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy chuẩn',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-inv-%E5%87%BD%E6%95%B0-54b30935-fee7-493c-bedb-2278a9db7e13',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+        },
+    },
+    NORM_S_DIST: {
+        description: 'Trả về phân bố chuẩn chuẩn hóa',
+        abstract: 'Trả về phân bố chuẩn chuẩn hóa',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-s-dist-%E5%87%BD%E6%95%B0-1e787282-3832-4520-a9ae-bd2a8d99ba88',
+            },
+        ],
+        functionParameter: {
+            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì NORM.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    NORM_S_INV: {
+        description: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa.',
+        abstract: 'Trả về giá trị đảo của phân bố lũy tích chuẩn chuẩn hóa.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/norm-s-inv-%E5%87%BD%E6%95%B0-d6d556b4-ab7f-49cd-b526-5a20918452b1',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
         },
     },
     RANK_AVG: {

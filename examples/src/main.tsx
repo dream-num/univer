@@ -21,17 +21,20 @@ import pkg from '../../package.json';
 import styles from './styles.module.less';
 
 // package info
-// eslint-disable-next-line no-console
-console.table({
-    // eslint-disable-next-line node/prefer-global/process
-    NODE_ENV: process.env.NODE_ENV,
-    // eslint-disable-next-line node/prefer-global/process
-    GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
-    // eslint-disable-next-line node/prefer-global/process
-    GIT_REF_NAME: process.env.GIT_REF_NAME,
-    // eslint-disable-next-line node/prefer-global/process
-    BUILD_TIME: process.env.BUILD_TIME,
-});
+// eslint-disable-next-line node/prefer-global/process
+if (process.env.NODE_ENV === 'production') {
+    // eslint-disable-next-line no-console
+    console.table({
+        // eslint-disable-next-line node/prefer-global/process
+        NODE_ENV: process.env.NODE_ENV,
+        // eslint-disable-next-line node/prefer-global/process
+        GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
+        // eslint-disable-next-line node/prefer-global/process
+        GIT_REF_NAME: process.env.GIT_REF_NAME,
+        // eslint-disable-next-line node/prefer-global/process
+        BUILD_TIME: process.env.BUILD_TIME,
+    });
+}
 
 function Examples() {
     const demos = [{

@@ -15,18 +15,19 @@
  */
 
 export { countryCurrencyMap } from './base/const/CURRENCY-SYMBOLS';
+export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
+export { MenuCurrencyService } from './service/menu.currency.service';
+export { getPatternPreview, getPatternType } from './utils/pattern';
+
+// #region - all commands
+
 export { AddDecimalCommand } from './commands/commands/add-decimal.command';
 export { SetCurrencyCommand } from './commands/commands/set-currency.command';
 export { type ISetNumfmtCommandParams, SetNumfmtCommand } from './commands/commands/set-numfmt.command';
-
-// #region - all commands
 
 export { SetPercentCommand } from './commands/commands/set-percent.command';
 export { SubtractDecimalCommand } from './commands/commands/subtract-decimal.command';
 export { CloseNumfmtPanelOperator } from './commands/operations/close.numfmt.panel.operation';
 export { OpenNumfmtPanelOperator } from './commands/operations/open.numfmt.panel.operation';
-export { UniverSheetsNumfmtPlugin } from './numfmt-plugin';
-export { MenuCurrencyService } from './service/menu.currency.service';
-export { getPatternPreview, getPatternType } from './utils/pattern';
 
 // #endregion

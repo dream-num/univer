@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: 'その関数を計算するために使用される、下限値と上限値の間の値。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'β分布における確率を指定します。' },
+            alpha: { name: 'alpha', detail: '分布の最初のパラメータ。' },
+            beta: { name: 'beta', detail: '分布の 2 番目のパラメーター。' },
+            A: { name: '下限', detail: '関数の下限。デフォルト値は 0 です。' },
+            B: { name: '上限', detail: '関数の上限。デフォルト値は 1 です。' },
         },
     },
     BINOMDIST: {
@@ -53,13 +59,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功数', detail: '試行における成功数を指定します。' },
+            trials: { name: '試行回数', detail: '独立試行の回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '各試行が成功する確率を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     CHIDIST: {
-        description: 'カイ 2 乗分布の片側確率の値を返します。',
-        abstract: 'カイ 2 乗分布の片側確率の値を返します。',
+        description: 'カイ 2 乗分布の右側確率の値を返します。',
+        abstract: 'カイ 2 乗分布の右側確率の値を返します。',
         links: [
             {
                 title: '指導',
@@ -67,13 +75,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '分布の評価に使用する値を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
         },
     },
     CHIINV: {
-        description: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
-        abstract: 'カイ 2 乗分布の片側確率の逆関数の値を返します。',
+        description: 'カイ 2 乗分布の右側確率の逆関数の値を返します。',
+        abstract: 'カイ 2 乗分布の右側確率の逆関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -81,8 +89,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'カイ 2 乗分布における確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度を表す数値を指定します。' },
         },
     },
     CHITEST: {
@@ -95,13 +103,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '実測値範囲', detail: '期待値に対する検定の実測値が入力されているデータ範囲を指定します。' },
+            expectedRange: { name: '期待値範囲', detail: '期待値が入力されているデータ範囲を指定します。実測値と期待値では、行方向の値の合計と列方向の値の合計がそれぞれ等しくなっている必要があります。' },
         },
     },
     CONFIDENCE: {
-        description: '母集団に対する信頼区間を返します。',
-        abstract: '母集団に対する信頼区間を返します。',
+        description: '正規分布を使用して、母集団の平均に対する信頼区間を求めます。',
+        abstract: '正規分布を使用して、母集団の平均に対する信頼区間を求めます。',
         links: [
             {
                 title: '指導',
@@ -109,13 +117,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '信頼度を計算するために使用する有意水準を指定します。 信頼度は 100*(1- α)% で計算されます。つまり、α が 0.05 であるとき、信頼度は 95% になります。' },
+            standardDev: { name: '標準偏差', detail: 'データ範囲の母標準偏差を指定します。これは既知の値であると仮定されます。' },
+            size: { name: '標本数', detail: '標本数を指定します。' },
         },
     },
     COVAR: {
-        description: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
-        abstract: '共分散を返します。共分散とは、2 組の対応するデータ間での標準偏差の積の平均値です。',
+        description: '母共分散 (2 組の対応するデータ間での標準偏差の積の平均値) を返します。',
+        abstract: '母共分散を返します。',
         links: [
             {
                 title: '指導',
@@ -123,8 +132,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: 'セル値の最初の範囲。' },
+            array2: { name: '配列2', detail: 'セル値の 2 番目の範囲。' },
         },
     },
     CRITBINOM: {
@@ -137,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '試行回数', detail: 'ベルヌーイ試行の回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '各試行が成功する確率を指定します。' },
+            alpha: { name: '目標確率', detail: '基準値を指定します。' },
         },
     },
     EXPONDIST: {
@@ -151,13 +161,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '分布の評価に使用する値を指定します。' },
+            lambda: { name: 'lambda', detail: 'パラメーターの値を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     FDIST: {
-        description: 'F 分布の確率関数の値を返します。',
-        abstract: 'F 分布の確率関数の値を返します。',
+        description: 'F 分布の右側確率関数の値を返します。',
+        abstract: 'F 分布の右側確率関数の値を返します。',
         links: [
             {
                 title: '指導',
@@ -165,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '値', detail: '関数に代入する値を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
         },
     },
     FINV: {
-        description: 'F 分布の確率関数の逆関数値を返します。',
-        abstract: 'F 分布の確率関数の逆関数値を返します。',
+        description: 'F 分布の右側確率関数の逆関数値を返します。',
+        abstract: 'F 分布の右側確率関数の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -179,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'F 累積分布における確率を指定します。' },
+            degFreedom1: { name: '自由度の分子', detail: '自由度の分子を指定します。' },
+            degFreedom2: { name: '自由度の分母', detail: '自由度の分母を指定します。' },
         },
     },
     FTEST: {
@@ -193,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列1', detail: '比較対象となる一方のデータを含む配列またはセル範囲を指定します。' },
+            array2: { name: '配列2', detail: '比較対象となるもう一方のデータを含む配列またはセル範囲を指定します。' },
         },
     },
     GAMMADIST: {
@@ -305,8 +318,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     NORMINV: {
@@ -319,8 +334,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: '正規分布における確率を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
         },
     },
     NORMSDIST: {
@@ -333,8 +349,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '関数に代入する値を指定します。' },
         },
     },
     NORMSINV: {
@@ -347,8 +362,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: '正規分布における確率を指定します。' },
         },
     },
     PERCENTILE: {

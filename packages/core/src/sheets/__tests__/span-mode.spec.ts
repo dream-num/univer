@@ -119,6 +119,65 @@ describe('test span mode', () => {
         expect(mergedCell).toEqual(range1);
     });
 
+    it('test getMergedCellByRange repeat using cache', () => {
+        const ranges: IRange[] = [
+            {
+                startRow: 0,
+                startColumn: 0,
+                endRow: 3,
+                endColumn: 2,
+                rangeType: 0,
+            },
+            {
+                startRow: 4,
+                startColumn: 3,
+                endRow: 9,
+                endColumn: 3,
+                rangeType: 0,
+            },
+            {
+                startRow: 1,
+                startColumn: 3,
+                endRow: 1,
+                endColumn: 7,
+                rangeType: 0,
+            },
+            {
+                startRow: 5,
+                startColumn: 4,
+                endRow: 13,
+                endColumn: 6,
+                rangeType: 0,
+            },
+            {
+                startRow: 1,
+                startColumn: 8,
+                endRow: 18,
+                endColumn: 8,
+                rangeType: 0,
+            },
+            {
+                startRow: 20,
+                startColumn: 0,
+                endRow: 21,
+                endColumn: 10,
+                rangeType: 0,
+            },
+        ];
+        const spanModel = new SpanModel(ranges);
+
+        const range1 = getMergeRange(ranges, 1, 1, 2, 2);
+        const mergedCell = spanModel.getMergedCellRange(1, 1, 2, 2);
+
+        expect(mergedCell).toEqual(range1);
+
+        const mergedCell1 = spanModel.getMergedCellRange(1, 1, 2, 2);
+        expect(mergedCell1).toEqual(range1);
+
+        const mergedCell2 = spanModel.getMergedCellRange(1, 1, 2, 2);
+        expect(mergedCell2).toEqual(mergedCell1);
+    });
+
     it('test update snapshot', () => {
         const ranges: IRange[] = [
             {

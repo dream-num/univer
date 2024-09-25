@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-export { DRAWING_IMAGE_WIDTH_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_ALLOW_IMAGE_LIST } from './basics/config';
-export { DrawingManagerService, UnitDrawingService, type IDrawingJson1Type, type IDrawingJsonUndo1 } from './services/drawing-manager-impl.service';
+export { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT } from './basics/config';
+export { DrawingManagerService, type IDrawingJson1Type, type IDrawingJsonUndo1, UnitDrawingService } from './services/drawing-manager-impl.service';
 export { getDrawingShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
 export { UniverDrawingPlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';
 export { IImageIoService, type IImageIoServiceParam, ImageSourceType, ImageUploadStatusType } from './services/image-io.service';
 export { ImageIoService } from './services/image-io-impl.service';
-export type { ITransformState, IRotationSkewFlipTransform } from './services/interface';
+export type { IRotationSkewFlipTransform, ITransformState } from './services/interface';
 export {
+    ArrangeTypeEnum,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     type DrawingType,
     DrawingTypeEnum,
+    type IDrawingGroupUpdateParam,
+    IDrawingManagerService,
+    type IDrawingMap,
+    type IDrawingMapItem,
+    type IDrawingMapItemData,
+    type IDrawingOrderMapParam,
+    type IDrawingOrderUpdateParam,
+    type IDrawingParam,
     type IDrawingSearch,
     type IDrawingSpace,
-    type IDrawingParam,
-    IDrawingManagerService,
-    type IDrawingOrderUpdateParam,
-    type IUnitDrawingService,
-    type IDrawingMap,
     type IDrawingSubunitMap,
-    type IDrawingOrderMapParam,
-    type IDrawingGroupUpdateParam,
     type IDrawingVisibleParam,
-    type IDrawingMapItemData,
-    type IDrawingMapItem,
-    ArrangeTypeEnum,
+    type IUnitDrawingService,
 } from './services/drawing-manager.service';

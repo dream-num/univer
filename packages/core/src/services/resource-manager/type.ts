@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
-import type { IDisposable } from '../../common/di';
+import type { Observable } from 'rxjs';
 import { createIdentifier } from '../../common/di';
+import type { IDisposable } from '../../common/di';
 
 export type IResources = Array<{ id?: string; name: string; data: string }>;
 
@@ -28,7 +28,8 @@ export interface IResourceHook<T = any> {
     businesses: UniverInstanceType[];
     onLoad: (unitID: string, resource: T) => void;
     onUnLoad: (unitID: string) => void;
-    toJson: (unitID: string) => string;
+    toJson: (unitID: string, model?: T) => string;
+
     parseJson: (bytes: string) => T;
 }
 

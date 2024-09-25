@@ -15,13 +15,13 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Offset extends BaseFunction {
     override minParams = 3;
@@ -81,22 +81,24 @@ export class Offset extends BaseFunction {
             _columns = (_columns as BaseReferenceObject).toArrayValueObject();
         }
 
-        let _height = height;
+        let _height = height ?? NumberValueObject.create(rowCount);
 
-        // The default row height is the row height of reference.
-        if (!_height) {
-            _height = NumberValueObject.create(rowCount);
-        } else if (_height.isReferenceObject()) {
+        if (_height.isReferenceObject()) {
             _height = (_height as BaseReferenceObject).toArrayValueObject();
         }
 
-        let _width = width;
+        if ((_height as BaseValueObject).isNull()) {
+            _height = NumberValueObject.create(rowCount);
+        }
 
-        // The default column width is the column width of reference.
-        if (!_width) {
-            _width = NumberValueObject.create(columnCount);
-        } else if (_width.isReferenceObject()) {
+        let _width = width ?? NumberValueObject.create(columnCount);
+
+        if (_width.isReferenceObject()) {
             _width = (_width as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if ((_width as BaseValueObject).isNull()) {
+            _width = NumberValueObject.create(columnCount);
         }
 
         // If rows/columns/height/width is a range, it needs to be extended
@@ -123,6 +125,11 @@ export class Offset extends BaseFunction {
 
         // If any parameter of row/columns/height/width is an array(not single cell reference), an error will be reported, and the error report also needs to be expanded and specific error information is required. Otherwise, calculate the offset.
         if (maxRowLength === 1 && maxColumnLength === 1) {
+            _rows = _rows.isArray() ? (_rows as ArrayValueObject).get(0, 0) as BaseValueObject : _rows;
+            _columns = _columns.isArray() ? (_columns as ArrayValueObject).get(0, 0) as BaseValueObject : _columns;
+            _height = _height.isArray() ? (_height as ArrayValueObject).get(0, 0) as BaseValueObject : _height;
+            _width = _width.isArray() ? (_width as ArrayValueObject).get(0, 0) as BaseValueObject : _width;
+
             return this._handleSingleObject(reference as BaseReferenceObject, _rows, _columns, _height, _width);
         }
 
@@ -157,11 +164,32 @@ export class Offset extends BaseFunction {
         });
     }
 
+    // eslint-disable-next-line
     private _handleSingleObject(reference: BaseReferenceObject, rowsValue: BaseValueObject, columnsValue: BaseValueObject, heightValue: BaseValueObject, widthValue: BaseValueObject, isReportError = false) {
         const { startRow: referenceStartRow, startColumn: referenceStartColumn } = reference.getRangePosition();
 
-        const rowOffset = this.getIndexNumValue(rowsValue);
-        const columnOffset = this.getIndexNumValue(columnsValue);
+        let _rowsValue = rowsValue;
+
+        if (_rowsValue.isString()) {
+            _rowsValue = _rowsValue.convertToNumberObjectValue();
+        }
+
+        if (_rowsValue.isError()) {
+            return _rowsValue;
+        }
+
+        let _columnsValue = columnsValue;
+
+        if (_columnsValue.isString()) {
+            _columnsValue = _columnsValue.convertToNumberObjectValue();
+        }
+
+        if (_columnsValue.isError()) {
+            return _columnsValue;
+        }
+
+        const rowOffset = +_rowsValue.getValue();
+        const columnOffset = +_columnsValue.getValue();
 
         if (typeof rowOffset !== 'number' || typeof columnOffset !== 'number') {
             return ErrorValueObject.create(ErrorType.VALUE);

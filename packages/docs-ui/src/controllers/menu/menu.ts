@@ -467,14 +467,12 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
                 if (id === SetTextSelectionsOperation.id || id === SetInlineFormatFontSizeCommand.id) {
                     const textRun = getFontStyleAtCursor(accessor);
-
                     if (textRun == null) {
                         subscriber.next(DEFAULT_SIZE);
                         return;
                     }
 
                     const fs = textRun.ts?.fs;
-
                     subscriber.next(fs ?? DEFAULT_SIZE);
                 }
             });

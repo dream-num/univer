@@ -23,7 +23,7 @@ import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 
 function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
     if (!node) {
@@ -55,7 +55,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
         return new LambdaValueObjectObject(lambdaNode, interpreter, lambdaPrivacyVarKeys);
     }
 
-    private _lambdaPrivacyValueMap = new Map<string, BaseValueObject>();
+    private _lambdaPrivacyValueMap = new Map<string, FunctionVariantType>();
 
     constructor(
         private _lambdaNode: BaseAstNode,
@@ -72,7 +72,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
         return true;
     }
 
-    execute(...variants: BaseValueObject[]) {
+    execute(...variants: FunctionVariantType[]) {
         const paramCount = this._lambdaPrivacyVarKeys.length;
         if (variants.length !== paramCount) {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -127,7 +127,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
         }
     }
 
-    private _setLambdaPrivacyValueMap(variants: BaseValueObject[]) {
+    private _setLambdaPrivacyValueMap(variants: FunctionVariantType[]) {
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
             const key = this._lambdaPrivacyVarKeys[i];

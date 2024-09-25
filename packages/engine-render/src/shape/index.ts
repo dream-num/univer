@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+export * from './checkbox';
 export * from './circle';
 export * from './control';
+export * from './dashedrect';
 export * from './drawing';
-export * from './path';
 export * from './image';
+export * from './path';
 export * from './rect';
 export * from './regular-polygon';
 export * from './rich-text';
 export * from './scroll-bar';
 export * from './shape';
-export * from './checkbox';
-export * from './dashedrect';

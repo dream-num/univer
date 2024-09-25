@@ -15,8 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { BESSEL } from '../engineering';
 import { Complex } from '../complex';
+import { BESSEL } from '../engineering';
 
 describe('Test ref regex', () => {
     it('BESSEL.besselj test', () => {

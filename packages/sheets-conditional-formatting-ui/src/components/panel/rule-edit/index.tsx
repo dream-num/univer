@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
-import { RangeSelector } from '@univerjs/docs-ui';
-import { serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 
-import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { RangeSelector } from '@univerjs/sheets-formula';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { IRange, IUnitRange, Workbook } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
@@ -58,6 +58,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
+    const [errorText, errorTextSet] = useState<string | undefined>(undefined);
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
 
     const rangeString = useMemo(() => {
@@ -174,8 +175,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
         result.current = config as Parameters<IStyleEditorProps['onChange']>;
     };
 
-    const onRangeSelectorChange = (ranges: IUnitRange[]) => {
-        rangeResult.current = ranges.map((r) => r.range);
+    const onRangeSelectorChange = (rangeString: string) => {
+        const result = rangeString.split(',').map(deserializeRangeWithSheet).map((item) => item.range);
+        rangeResult.current = result;
     };
 
     const handleSubmit = () => {
@@ -216,18 +218,30 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleCancel = () => {
         props.onCancel();
     };
+
+    const handleVerify = (v: boolean, rangeText: string) => {
+        if (v) {
+            if (rangeText.length < 1) {
+                errorTextSet(localeService.t('sheet.cf.errorMessage.notBlank'));
+            } else {
+                errorTextSet(undefined);
+            }
+        } else {
+            errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
+        }
+    };
+
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase}`}>
                 <RangeSelector
-                    placeholder={localeService.t('sheet.cf.form.rangeSelector')}
-                    width={'100%' as unknown as number}
-                    openForSheetSubUnitId={subUnitId}
-                    openForSheetUnitId={unitId}
-                    value={rangeString}
-                    id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_rangeSelector`)}
+                    unitId={unitId}
+                    errorText={errorText}
+                    subUnitId={subUnitId}
+                    initValue={rangeString}
                     onChange={onRangeSelectorChange}
+                    onVerify={handleVerify}
                 />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>

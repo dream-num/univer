@@ -32,6 +32,7 @@ import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ReactNode } from 'react';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
+// import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import styles from './index.module.less';
 
@@ -39,6 +40,8 @@ import { findIndexFromSequenceNodes } from './utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from './utils/getOffsetFromSequenceNodes';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
+
+export const RANGE_SPLIT_STRING = ',';
 
 interface IRangeSelectorProps {
     initValue: string | IUnitRangeName[];
@@ -69,18 +72,18 @@ export function RangeSelector(props: IRangeSelectorProps) {
         if (typeof initValue === 'string') {
             return initValue;
         } else {
-            return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(',');
+            return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
         }
     });
 
     const ranges = useMemo(() => {
-        return rangeString.split(',').filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
+        return rangeString.split(RANGE_SPLIT_STRING).filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
     }, [rangeString]);
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
     const handleConform = (ranges: IUnitRangeName[]) => {
-        const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(',');
+        const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
         rangeStringSet(text);
         onChange(text);
         rangeDialogVisibleSet(false);
@@ -96,7 +99,15 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
     };
 
-    const { sequenceNodes } = useFormulaToken(rangeString);
+    const focus = () => {
+        if (editor) {
+            setTimeout(() => {
+                editor.focus();
+            }, 30);
+        }
+    };
+
+    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeString);
     const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
     useSheetHighlight(!rangeDialogVisible, unitId, subUnitId, sheetHighlightRanges);
 
@@ -127,9 +138,20 @@ export function RangeSelector(props: IRangeSelectorProps) {
                                 index++;
                             }
                         }
-                        const result = sequenceNodeToText(sequenceNodes);
+                        const result = sequenceNodeToText(sequenceNodes)
+                            .split(RANGE_SPLIT_STRING)
+                            .reduce((pre, cur) => {
+                                if (!pre.cacheMap[cur]) {
+                                    pre.cacheMap[cur] = 1;
+                                    pre.result.push(cur);
+                                }
+                                return pre;
+                            }, { result: [] as string[], cacheMap: {} as Record<string, any> })
+                            .result
+                            .join(RANGE_SPLIT_STRING);
                         rangeStringSet(result);
                         onChange(result);
+                        focus();
                     }
                 } else if (!item || typeof item === 'string') {
                     const nextItem = sequenceNodes[index + 1];
@@ -160,12 +182,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     const result = sequenceNodeToText(newSequenceNodes);
                     rangeStringSet(result);
                     onChange(result);
+                    focus();
                 }
             }
         }
     }, [sequenceNodes]);
 
     useSheetSelectionChange(!rangeDialogVisible, unitId, subUnitId, handleSheetSelectionChange);
+    // useResize(editor);
 
     useEffect(() => {
         if (editor) {
@@ -184,7 +208,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         if (onVerify) {
             const result = sequenceNodes.some((item) => {
                 if (typeof item === 'string') {
-                    if (item !== ',') {
+                    if (item !== RANGE_SPLIT_STRING) {
                         // eslint-disable-next-line ts/no-unused-expressions
                         onVerify && onVerify(false, sequenceNodeToText(sequenceNodes));
                         return true;
@@ -236,6 +260,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
             if (info.id === SetWorksheetActiveOperation.id) {
                 docSelectionRef.current = undefined;
                 isFocusSet(false);
+                // Refresh the component
+                sequenceNodesSet((pre) => [...pre]);
             }
         });
         const d2 = commandService.onCommandExecuted((info) => {
@@ -254,7 +280,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (containerRef.current) {
-            dispose = editorService.register({ editorUnitId: editorId }, containerRef.current);
+            dispose = editorService.register({ editorUnitId: editorId, isSingle: true }, containerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
 
             editorSet(editor);
@@ -271,7 +297,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 [styles.sheetRangeSelectorError]: isError,
             })}
             >
-                <div ref={containerRef} className={styles.sheetRangeSelectorText}></div>
+                <div className={styles.sheetRangeSelectorText} ref={containerRef}>
+                </div>
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
                 </Tooltip>
@@ -315,7 +342,7 @@ function RangeSelectorDialog(props: {
 
     const colorMap = useColor();
 
-    const rangeText = useMemo(() => ranges.join(','), [ranges]);
+    const rangeText = useMemo(() => ranges.join(RANGE_SPLIT_STRING), [ranges]);
     const { sequenceNodes } = useFormulaToken(rangeText);
 
     const refSelections = useMemo(() => buildTextRuns(descriptionService, colorMap, sequenceNodes).refSelections, [sequenceNodes]);
@@ -344,9 +371,11 @@ function RangeSelectorDialog(props: {
     const handleRangeAdd = () => {
         rangesSet((v) => {
             v.push('');
+            focusIndexSet(v.length - 1);
             return [...v];
         });
     };
+
     const handleSheetSelectionChange = useCallback((rangeText: string) => {
         handleRangeInput(focusIndex, rangeText);
     }, [focusIndex]);

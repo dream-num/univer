@@ -50,6 +50,8 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
         if (!workbook || !worksheet || !isNeed) {
             return;
         }
+        const currentSheetId = worksheet?.getSheetId();
+        const isCrossSheet = currentSheetId !== subUnitId;
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
         const selectionWithStyle: ISelectionWithStyle[] = [];
@@ -65,7 +67,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
             const refSheetId = getSheetIdByName(sheetName);
 
-            if ((refSheetId && refSheetId !== worksheet.getSheetId())) { // Cross sheet operation
+            if (isCrossSheet && refSheetId !== currentSheetId) {
                 continue;
             }
 

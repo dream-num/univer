@@ -25,6 +25,7 @@ export default antfu({
         html: true,
     },
     rules: baseRules,
+    ignores: ['examples/'],
 }, {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: [
@@ -37,6 +38,7 @@ export default antfu({
         '**/*.spec.tsx',
         '**/*.test.ts',
         '**/*.test.tsx',
+        'examples/',
     ], // do not check test files
     rules: {
         complexity: ['warn', { max: 20 }],
@@ -44,7 +46,7 @@ export default antfu({
     },
 }, {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['**/*.d.ts', '**/vite.config.ts', 'playwright.config.ts'],
+    ignores: ['**/*.d.ts', '**/vite.config.ts', 'playwright.config.ts', 'examples/'],
     plugins: {
         header,
         barrel,
@@ -83,7 +85,7 @@ export default antfu({
     ignores: [
         '**/__tests__/**/*',
         '**/__testing__/**/*',
-        'examples/**/*',
+        'examples/',
     ],
     rules: {
         'penetrating/no-penetrating-import': 2,

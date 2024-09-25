@@ -127,7 +127,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
                 const unitId = documentModel.getUnitId();
 
-                if (unitId !== this._context.unitId) {
+                if (unitId !== this._context.unitId && !this._reserveRanges) {
                     this.removeAllRanges();
                 }
             });
@@ -721,9 +721,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     }
 
     private _removeAllRanges() {
-        if (!this._reserveRanges) {
-            this._removeAllTextRanges();
-        }
+        this._removeAllTextRanges();
         this._removeAllRectRanges();
     }
 

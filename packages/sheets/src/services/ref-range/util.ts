@@ -1013,7 +1013,7 @@ type MutationsAffectRange =
     | IInsertRowMutationParams
     | IMoveRangeMutationParams;
 
-export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo): IRange[] => {
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
         case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
@@ -1057,7 +1057,7 @@ export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRang
         }
     }
     const resultRange = runRefRangeMutations(operator, range);
-    return resultRange;
+    return resultRange ? [resultRange] : [];
 };
 
 export const handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests = (range: IRange, commandInfo: ICommandInfo, deps: { selectionManagerService: SheetsSelectionsService }) => {

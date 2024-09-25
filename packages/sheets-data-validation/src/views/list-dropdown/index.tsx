@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RectPopup, Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
@@ -30,8 +30,10 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import { PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import styles from './index.module.less';
+import type { IUniverSheetsDataValidationConfig } from '../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 
@@ -49,8 +51,10 @@ interface ISelectListProps {
 const SelectList = (props: ISelectListProps) => {
     const { value, onChange, multiple, options, title, onEdit, style, filter } = props;
     const localeService = useDependency(LocaleService);
+    const configService = useDependency(IConfigService);
     const lowerFilter = filter?.toLowerCase();
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -102,10 +106,16 @@ const SelectList = (props: ISelectListProps) => {
                     </div>
                 </Scrollbar>
             </div>
-            <div className={styles.dvListDropdownSplit} />
-            <div className={styles.dvListDropdownEdit}>
-                <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
-            </div>
+            {showEditOnDropdown
+                ? (
+                    <>
+                        <div className={styles.dvListDropdownSplit} />
+                        <div className={styles.dvListDropdownEdit}>
+                            <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
+                        </div>
+                    </>
+                )
+                : null}
         </div>
     );
 };

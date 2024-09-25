@@ -15,7 +15,7 @@
  */
 
 import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
-import { type Observable, Subject } from 'rxjs';
+import { merge, type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
@@ -213,17 +213,28 @@ export class Editor extends Disposable implements IEditor {
         );
 
         this.disposeWithMe(
-            docSelectionRenderService.onInput$.subscribe((e) => {
-                const { content = '' } = e;
-                const data = this.getDocumentData();
+            merge(
+                docSelectionRenderService.onInput$,
+                docSelectionRenderService.onKeydown$,
+                docSelectionRenderService.onCompositionupdate$,
+                docSelectionRenderService.onCompositionend$,
+                docSelectionRenderService.onPaste$
+            )
+                .subscribe((e) => {
+                    if (e == null) {
+                        return;
+                    }
 
-                this._input$.next({
-                    target: this,
-                    content,
-                    data,
-                    isComposing: false,
-                });
-            })
+                    const { content = '' } = e;
+                    const data = this.getDocumentData();
+
+                    this._input$.next({
+                        target: this,
+                        content,
+                        data,
+                        isComposing: e.event.type === 'compositionupdate',
+                    });
+                })
         );
 
         this.disposeWithMe(

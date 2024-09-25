@@ -18,6 +18,7 @@ import { IUniverInstanceService, useDependency } from '@univerjs/core';
 
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { useEffect } from 'react';
+import { RANGE_SPLIT_STRING } from '../index';
 import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
 
 export const useSheetSelectionChange = (isNeed: boolean, unitId: string, subUnitId: string, handleRangeChange: (refString: string) => void) => {
@@ -37,14 +38,15 @@ export const useSheetSelectionChange = (isNeed: boolean, unitId: string, subUnit
                     return;
                 }
                 const { unitId: rangeUnitId, sheetId: rangeSubUnitId } = params;
-                const range = selections[selections.length - 1].range;
-                const result = unitRangesToText([{
-                    range,
-                    unitId: rangeUnitId,
-                    sheetName: getSheetNameById(univerInstanceService, rangeUnitId, rangeSubUnitId),
-                }],
-                unitId, subUnitId, univerInstanceService)
-                    .join(',');
+                const result = unitRangesToText(selections.map((selection) => {
+                    return {
+                        range: selection.range,
+                        unitId: rangeUnitId,
+                        sheetName: getSheetNameById(univerInstanceService, rangeUnitId, rangeSubUnitId),
+                    };
+                }), unitId, subUnitId, univerInstanceService)
+                    .join(RANGE_SPLIT_STRING);
+
                 handleRangeChange(result);
             });
             return () => {

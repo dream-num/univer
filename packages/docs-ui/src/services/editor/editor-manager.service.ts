@@ -278,7 +278,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, editor.isSingle());
 
         if (!this._spreadsheetFocusState) {
-            this.singleSelection(editor.isSingleChoice());
+            this.singleSelection(!!editor.isSingleChoice());
         }
 
         this._focusStyle$.next(editorUnitId);

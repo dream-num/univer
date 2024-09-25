@@ -18,6 +18,7 @@ importers:
 =======
         specifier: 3.5.1
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
 =======
         version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.10.0(jiti@1.21.6)))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
@@ -26,7 +27,17 @@ importers:
 >>>>>>> f1def0615 (refactor: move editor service to docs-ui)
       '@commitlint/cli':
         specifier: ^19.5.0
+<<<<<<< HEAD
         version: 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
+=======
+        version: 19.5.0(@types/node@22.7.3)(typescript@5.6.2)
+=======
+        version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@commitlint/cli':
+        specifier: ^19.5.0
+        version: 19.5.0(@types/node@22.7.0)(typescript@5.6.2)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@commitlint/config-conventional':
         specifier: ^19.5.0
         version: 19.5.0
@@ -41,13 +52,27 @@ importers:
         version: 4.2.0(release-it@17.8.2(typescript@5.6.3))
       '@release-it/conventional-changelog':
         specifier: ^8.0.2
+<<<<<<< HEAD
         version: 8.0.2(release-it@17.8.2(typescript@5.6.3))
+=======
+        version: 8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.6.0(typescript@5.6.2))
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@storybook/react':
         specifier: 8.3.5
         version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@types/node':
+<<<<<<< HEAD
         specifier: ^22.7.5
         version: 22.7.5
+=======
+<<<<<<< HEAD
+        specifier: ^22.7.3
+        version: 22.7.3
+=======
+        specifier: ^22.5.5
+        version: 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.11
@@ -58,8 +83,17 @@ importers:
         specifier: workspace:*
         version: link:packages/design
       '@vitejs/plugin-react':
+<<<<<<< HEAD
         specifier: ^4.3.2
         version: 4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        specifier: ^4.3.1
+<<<<<<< HEAD
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       eslint:
         specifier: 9.12.0
         version: 9.12.0(jiti@1.21.6)
@@ -112,14 +146,35 @@ importers:
   common/shared:
     dependencies:
       '@typescript-eslint/parser':
+<<<<<<< HEAD
         specifier: ^8.8.1
         version: 8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
+=======
+<<<<<<< HEAD
+        specifier: ^8.7.0
+        version: 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@vitejs/plugin-react':
         specifier: ^4.3.2
         version: 4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@vitest/coverage-istanbul':
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        specifier: ^8.6.0
+        version: 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@vitejs/plugin-react':
+        specifier: ^4.3.1
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/coverage-istanbul':
+        specifier: ^2.1.1
+        version: 2.1.1(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       happy-dom:
         specifier: 15.0.0
         version: 15.0.0
@@ -127,14 +182,30 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vite-plugin-dts:
         specifier: ^4.2.3
         version: 4.2.3(@types/node@22.7.5)(rollup@4.22.4)(typescript@5.6.3)(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite-plugin-dts:
+        specifier: ^4.2.1
+        version: 4.2.1(@types/node@22.7.0)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   common/storybook:
     dependencies:
@@ -387,7 +458,15 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-mosaic-component:
         specifier: ^6.1.0
+<<<<<<< HEAD
         version: 6.1.0(@types/node@22.7.5)(@types/react@18.3.11)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+<<<<<<< HEAD
+        version: 6.1.0(@types/node@22.7.3)(@types/react@18.3.9)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+        version: 6.1.0(@types/node@22.7.0)(@types/react@18.3.5)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -618,11 +697,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/debugger:
     dependencies:
@@ -663,7 +755,15 @@ importers:
         version: link:../../common/shared
       '@vitejs/plugin-vue':
         specifier: ^5.1.3
+<<<<<<< HEAD
         version: 5.1.3(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.5.9(typescript@5.6.3))
+=======
+<<<<<<< HEAD
+        version: 5.1.3(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.5.9(typescript@5.6.2))
+=======
+        version: 5.1.3(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -671,11 +771,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/rpc-node:
     dependencies:
@@ -745,11 +858,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/uni-formula:
     dependencies:
@@ -776,11 +902,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/uni-formula-ui:
     dependencies:
@@ -840,11 +979,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/uni-sheets-ui:
     dependencies:
@@ -895,11 +1047,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/uni-slides-ui:
     dependencies:
@@ -950,11 +1115,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages-experimental/uniui:
     dependencies:
@@ -1020,11 +1198,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/core:
     dependencies:
@@ -1075,11 +1266,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/data-validation:
     dependencies:
@@ -1103,11 +1307,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/design:
     dependencies:
@@ -1206,11 +1423,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs:
     dependencies:
@@ -1231,11 +1461,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-drawing:
     dependencies:
@@ -1253,11 +1496,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-drawing-ui:
     dependencies:
@@ -1311,11 +1567,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-hyper-link:
     dependencies:
@@ -1336,11 +1605,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -1385,11 +1667,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-mention-ui:
     dependencies:
@@ -1434,11 +1729,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1489,11 +1797,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/docs-ui:
     dependencies:
@@ -1541,11 +1862,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/drawing:
     dependencies:
@@ -1572,11 +1906,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/drawing-ui:
     dependencies:
@@ -1618,11 +1965,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/engine-formula:
     dependencies:
@@ -1649,11 +2009,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/engine-numfmt:
     devDependencies:
@@ -1664,11 +2037,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/engine-render:
     dependencies:
@@ -1704,11 +2090,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/facade:
     dependencies:
@@ -1801,11 +2200,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/find-replace:
     dependencies:
@@ -1844,11 +2256,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/network:
     dependencies:
@@ -1866,11 +2291,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/rpc:
     dependencies:
@@ -1888,11 +2326,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets:
     dependencies:
@@ -1922,11 +2373,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -1965,11 +2429,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -2000,6 +2477,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2038,11 +2518,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -2084,11 +2577,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-data-validation:
     dependencies:
@@ -2209,11 +2715,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-drawing:
     dependencies:
@@ -2231,11 +2750,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -2289,11 +2821,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-filter:
     dependencies:
@@ -2314,11 +2859,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -2375,11 +2933,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-find-replace:
     dependencies:
@@ -2415,11 +2986,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-formula:
     dependencies:
@@ -2453,10 +3037,28 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+<<<<<<< HEAD
+=======
+      '@vitejs/plugin-react':
+<<<<<<< HEAD
+        specifier: ^4.3.2
+        version: 4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        specifier: ^4.3.1
+<<<<<<< HEAD
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
+>>>>>>> 43a6a6994 (feat(conditional-formatting): access the selection component)
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -2467,11 +3069,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2565,11 +3180,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -2623,11 +3251,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-numfmt:
     dependencies:
@@ -2678,11 +3319,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-sort:
     dependencies:
@@ -2706,11 +3360,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -2764,11 +3431,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-thread-comment:
     dependencies:
@@ -2822,11 +3502,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-thread-comment-base:
     dependencies:
@@ -2862,11 +3555,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-ui:
     dependencies:
@@ -2926,11 +3632,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -2981,11 +3700,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/slides:
     dependencies:
@@ -3006,11 +3738,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/slides-ui:
     dependencies:
@@ -3064,11 +3809,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/telemetry:
     dependencies:
@@ -3098,11 +3856,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/thread-comment:
     dependencies:
@@ -3123,11 +3894,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/thread-comment-ui:
     dependencies:
@@ -3181,11 +3965,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/ui:
     dependencies:
@@ -3255,11 +4052,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   packages/umd:
     dependencies:
@@ -3479,11 +4289,24 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
       vite:
+<<<<<<< HEAD
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
+<<<<<<< HEAD
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        specifier: ^5.4.7
+        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
 packages:
 
@@ -3624,6 +4447,7 @@ packages:
     resolution: {integrity: sha512-iYyACpW3iW8Fw+ZybQK+drQre+ns/tKpXbNESfrhNnPLIklLbXr7MYJ6gPEd0iETGLOK+SxMjVvKb/ffmk+FEw==}
     engines: {node: '>=6.9.0'}
 
+<<<<<<< HEAD
   '@babel/parser@7.25.6':
     resolution: {integrity: sha512-trGdfBdbD0l1ZPmcJ83eNxB9rbEax4ALFTF7fN386TMYbeCQbyme5cOEXQhbGXKebwGaB/J52w1mrklMcbgy6Q==}
     engines: {node: '>=6.0.0'}
@@ -3636,6 +4460,10 @@ packages:
 
   '@babel/plugin-transform-react-jsx-self@7.25.7':
     resolution: {integrity: sha512-JD9MUnLbPL0WdVK8AWC7F7tTG2OS6u/AKKnsK+NdRhUiVdnzyR1S3kKQCaRLOiaULvUiqK6Z4JQE635VgtCFeg==}
+=======
+  '@babel/plugin-transform-react-jsx-self@7.24.7':
+    resolution: {integrity: sha512-fOPQYbGSgH0HUp4UJO4sMBFjY6DuWq+2i8rixyUMb3CdGixs/gccURvYOAhajBdKDoGajFr3mUq5rH3phtkGzw==}
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -3677,6 +4505,7 @@ packages:
     resolution: {integrity: sha512-jatJPT1Zjqvh/1FyJs6qAHL+Dzb7sTb+xr7Q+gM1b+1oBsMsQQ4FkVKb6dFlJvLlVssqkRzV05Jzervt9yhnzg==}
     engines: {node: '>=6.9.0'}
 
+<<<<<<< HEAD
   '@babel/types@7.25.6':
     resolution: {integrity: sha512-/l42B1qxpG6RdfYf343Uw1vmDjeNhneUXtzhojE7pDgfpEypmRhI6j1kr17XCVv4Cgl9HdAiQY2x0GwKm7rWCw==}
     engines: {node: '>=6.9.0'}
@@ -3685,6 +4514,8 @@ packages:
     resolution: {integrity: sha512-JWtuCu8VQsMladxVz/P4HzHUGCAwpuqacmowgXFs5XjxIgKuNjnLokQzuVjlTvIzODaDmpjT3oxcC48vyk9EWg==}
     engines: {node: '>=6.9.0'}
 
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   '@base2/pretty-print-object@1.0.1':
     resolution: {integrity: sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==}
 
@@ -4704,83 +5535,83 @@ packages:
       rollup:
         optional: true
 
-  '@rollup/rollup-android-arm-eabi@4.22.4':
-    resolution: {integrity: sha512-Fxamp4aEZnfPOcGA8KSNEohV8hX7zVHOemC8jVBoBUHu5zpJK/Eu3uJwt6BMgy9fkvzxDaurgj96F/NiLukF2w==}
+  '@rollup/rollup-android-arm-eabi@4.21.2':
+    resolution: {integrity: sha512-fSuPrt0ZO8uXeS+xP3b+yYTCBUd05MoSp2N/MFOgjhhUhMmchXlpTQrTpI8T+YAwAQuK7MafsCOxW7VrPMrJcg==}
     cpu: [arm]
     os: [android]
 
-  '@rollup/rollup-android-arm64@4.22.4':
-    resolution: {integrity: sha512-VXoK5UMrgECLYaMuGuVTOx5kcuap1Jm8g/M83RnCHBKOqvPPmROFJGQaZhGccnsFtfXQ3XYa4/jMCJvZnbJBdA==}
+  '@rollup/rollup-android-arm64@4.21.2':
+    resolution: {integrity: sha512-xGU5ZQmPlsjQS6tzTTGwMsnKUtu0WVbl0hYpTPauvbRAnmIvpInhJtgjj3mcuJpEiuUw4v1s4BimkdfDWlh7gA==}
     cpu: [arm64]
     os: [android]
 
-  '@rollup/rollup-darwin-arm64@4.22.4':
-    resolution: {integrity: sha512-xMM9ORBqu81jyMKCDP+SZDhnX2QEVQzTcC6G18KlTQEzWK8r/oNZtKuZaCcHhnsa6fEeOBionoyl5JsAbE/36Q==}
+  '@rollup/rollup-darwin-arm64@4.21.2':
+    resolution: {integrity: sha512-99AhQ3/ZMxU7jw34Sq8brzXqWH/bMnf7ZVhvLk9QU2cOepbQSVTns6qoErJmSiAvU3InRqC2RRZ5ovh1KN0d0Q==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rollup/rollup-darwin-x64@4.22.4':
-    resolution: {integrity: sha512-aJJyYKQwbHuhTUrjWjxEvGnNNBCnmpHDvrb8JFDbeSH3m2XdHcxDd3jthAzvmoI8w/kSjd2y0udT+4okADsZIw==}
+  '@rollup/rollup-darwin-x64@4.21.2':
+    resolution: {integrity: sha512-ZbRaUvw2iN/y37x6dY50D8m2BnDbBjlnMPotDi/qITMJ4sIxNY33HArjikDyakhSv0+ybdUxhWxE6kTI4oX26w==}
     cpu: [x64]
     os: [darwin]
 
-  '@rollup/rollup-linux-arm-gnueabihf@4.22.4':
-    resolution: {integrity: sha512-j63YtCIRAzbO+gC2L9dWXRh5BFetsv0j0va0Wi9epXDgU/XUi5dJKo4USTttVyK7fGw2nPWK0PbAvyliz50SCQ==}
+  '@rollup/rollup-linux-arm-gnueabihf@4.21.2':
+    resolution: {integrity: sha512-ztRJJMiE8nnU1YFcdbd9BcH6bGWG1z+jP+IPW2oDUAPxPjo9dverIOyXz76m6IPA6udEL12reYeLojzW2cYL7w==}
     cpu: [arm]
     os: [linux]
 
-  '@rollup/rollup-linux-arm-musleabihf@4.22.4':
-    resolution: {integrity: sha512-dJnWUgwWBX1YBRsuKKMOlXCzh2Wu1mlHzv20TpqEsfdZLb3WoJW2kIEsGwLkroYf24IrPAvOT/ZQ2OYMV6vlrg==}
+  '@rollup/rollup-linux-arm-musleabihf@4.21.2':
+    resolution: {integrity: sha512-flOcGHDZajGKYpLV0JNc0VFH361M7rnV1ee+NTeC/BQQ1/0pllYcFmxpagltANYt8FYf9+kL6RSk80Ziwyhr7w==}
     cpu: [arm]
     os: [linux]
 
-  '@rollup/rollup-linux-arm64-gnu@4.22.4':
-    resolution: {integrity: sha512-AdPRoNi3NKVLolCN/Sp4F4N1d98c4SBnHMKoLuiG6RXgoZ4sllseuGioszumnPGmPM2O7qaAX/IJdeDU8f26Aw==}
+  '@rollup/rollup-linux-arm64-gnu@4.21.2':
+    resolution: {integrity: sha512-69CF19Kp3TdMopyteO/LJbWufOzqqXzkrv4L2sP8kfMaAQ6iwky7NoXTp7bD6/irKgknDKM0P9E/1l5XxVQAhw==}
     cpu: [arm64]
     os: [linux]
 
-  '@rollup/rollup-linux-arm64-musl@4.22.4':
-    resolution: {integrity: sha512-Gl0AxBtDg8uoAn5CCqQDMqAx22Wx22pjDOjBdmG0VIWX3qUBHzYmOKh8KXHL4UpogfJ14G4wk16EQogF+v8hmA==}
+  '@rollup/rollup-linux-arm64-musl@4.21.2':
+    resolution: {integrity: sha512-48pD/fJkTiHAZTnZwR0VzHrao70/4MlzJrq0ZsILjLW/Ab/1XlVUStYyGt7tdyIiVSlGZbnliqmult/QGA2O2w==}
     cpu: [arm64]
     os: [linux]
 
-  '@rollup/rollup-linux-powerpc64le-gnu@4.22.4':
-    resolution: {integrity: sha512-3aVCK9xfWW1oGQpTsYJJPF6bfpWfhbRnhdlyhak2ZiyFLDaayz0EP5j9V1RVLAAxlmWKTDfS9wyRyY3hvhPoOg==}
+  '@rollup/rollup-linux-powerpc64le-gnu@4.21.2':
+    resolution: {integrity: sha512-cZdyuInj0ofc7mAQpKcPR2a2iu4YM4FQfuUzCVA2u4HI95lCwzjoPtdWjdpDKyHxI0UO82bLDoOaLfpZ/wviyQ==}
     cpu: [ppc64]
     os: [linux]
 
-  '@rollup/rollup-linux-riscv64-gnu@4.22.4':
-    resolution: {integrity: sha512-ePYIir6VYnhgv2C5Xe9u+ico4t8sZWXschR6fMgoPUK31yQu7hTEJb7bCqivHECwIClJfKgE7zYsh1qTP3WHUA==}
+  '@rollup/rollup-linux-riscv64-gnu@4.21.2':
+    resolution: {integrity: sha512-RL56JMT6NwQ0lXIQmMIWr1SW28z4E4pOhRRNqwWZeXpRlykRIlEpSWdsgNWJbYBEWD84eocjSGDu/XxbYeCmwg==}
     cpu: [riscv64]
     os: [linux]
 
-  '@rollup/rollup-linux-s390x-gnu@4.22.4':
-    resolution: {integrity: sha512-GqFJ9wLlbB9daxhVlrTe61vJtEY99/xB3C8e4ULVsVfflcpmR6c8UZXjtkMA6FhNONhj2eA5Tk9uAVw5orEs4Q==}
+  '@rollup/rollup-linux-s390x-gnu@4.21.2':
+    resolution: {integrity: sha512-PMxkrWS9z38bCr3rWvDFVGD6sFeZJw4iQlhrup7ReGmfn7Oukrr/zweLhYX6v2/8J6Cep9IEA/SmjXjCmSbrMQ==}
     cpu: [s390x]
     os: [linux]
 
-  '@rollup/rollup-linux-x64-gnu@4.22.4':
-    resolution: {integrity: sha512-87v0ol2sH9GE3cLQLNEy0K/R0pz1nvg76o8M5nhMR0+Q+BBGLnb35P0fVz4CQxHYXaAOhE8HhlkaZfsdUOlHwg==}
+  '@rollup/rollup-linux-x64-gnu@4.21.2':
+    resolution: {integrity: sha512-B90tYAUoLhU22olrafY3JQCFLnT3NglazdwkHyxNDYF/zAxJt5fJUB/yBoWFoIQ7SQj+KLe3iL4BhOMa9fzgpw==}
     cpu: [x64]
     os: [linux]
 
-  '@rollup/rollup-linux-x64-musl@4.22.4':
-    resolution: {integrity: sha512-UV6FZMUgePDZrFjrNGIWzDo/vABebuXBhJEqrHxrGiU6HikPy0Z3LfdtciIttEUQfuDdCn8fqh7wiFJjCNwO+g==}
+  '@rollup/rollup-linux-x64-musl@4.21.2':
+    resolution: {integrity: sha512-7twFizNXudESmC9oneLGIUmoHiiLppz/Xs5uJQ4ShvE6234K0VB1/aJYU3f/4g7PhssLGKBVCC37uRkkOi8wjg==}
     cpu: [x64]
     os: [linux]
 
-  '@rollup/rollup-win32-arm64-msvc@4.22.4':
-    resolution: {integrity: sha512-BjI+NVVEGAXjGWYHz/vv0pBqfGoUH0IGZ0cICTn7kB9PyjrATSkX+8WkguNjWoj2qSr1im/+tTGRaY+4/PdcQw==}
+  '@rollup/rollup-win32-arm64-msvc@4.21.2':
+    resolution: {integrity: sha512-9rRero0E7qTeYf6+rFh3AErTNU1VCQg2mn7CQcI44vNUWM9Ze7MSRS/9RFuSsox+vstRt97+x3sOhEey024FRQ==}
     cpu: [arm64]
     os: [win32]
 
-  '@rollup/rollup-win32-ia32-msvc@4.22.4':
-    resolution: {integrity: sha512-SiWG/1TuUdPvYmzmYnmd3IEifzR61Tragkbx9D3+R8mzQqDBz8v+BvZNDlkiTtI9T15KYZhP0ehn3Dld4n9J5g==}
+  '@rollup/rollup-win32-ia32-msvc@4.21.2':
+    resolution: {integrity: sha512-5rA4vjlqgrpbFVVHX3qkrCo/fZTj1q0Xxpg+Z7yIo3J2AilW7t2+n6Q8Jrx+4MrYpAnjttTYF8rr7bP46BPzRw==}
     cpu: [ia32]
     os: [win32]
 
-  '@rollup/rollup-win32-x64-msvc@4.22.4':
-    resolution: {integrity: sha512-j8pPKp53/lq9lMXN57S8cFz0MynJk8OWNuUnXct/9KCpKU7DgU3bYMJhwWmcqC0UU29p8Lr0/7KEVcaM6bf47Q==}
+  '@rollup/rollup-win32-x64-msvc@4.21.2':
+    resolution: {integrity: sha512-6UUxd0+SKomjdzuAcp+HAmxw1FlGBnl1v2yEPSabtx4lBfdXHDVsW7+lQkgz9cNFJGY3AWR7+V8P5BqkD9L9nA==}
     cpu: [x64]
     os: [win32]
 
@@ -5254,8 +6085,24 @@ packages:
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
+<<<<<<< HEAD
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
+=======
+<<<<<<< HEAD
+  '@types/node@22.7.3':
+    resolution: {integrity: sha512-qXKfhXXqGTyBskvWEzJZPUxSslAiLaB6JGP1ic/XTH9ctGgzdgYguuLP1C601aRTSDNlLb0jbKqXjZ48GNraSA==}
+=======
+  '@types/node@18.19.47':
+    resolution: {integrity: sha512-1f7dB3BL/bpd9tnDJrrHb66Y+cVrhxSOTGorRNdHwYTUlTay3HuTDPKo9a/4vX9pMQkhYBcAbL4jQdNlhCFP9A==}
+
+  '@types/node@22.5.4':
+    resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
+
+  '@types/node@22.7.0':
+    resolution: {integrity: sha512-MOdOibwBs6KW1vfqz2uKMlxq5xAfAZ98SZjO8e3XnAbFnTJtAspqhWk7hrdSAs9/Y14ZWMiy7/MxMUzAOadYEw==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -5349,12 +6196,24 @@ packages:
     resolution: {integrity: sha512-87rC0k3ZlDOuz82zzXRtQ7Akv3GKhHs0ti4YcbAJtaomllXoSO8hi7Ix3ccEvCd824dy9aIX+j3d2UMAfCtVpg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+<<<<<<< HEAD
   '@typescript-eslint/scope-manager@8.8.1':
     resolution: {integrity: sha512-X4JdU+66Mazev/J0gfXlcC/dV6JI37h+93W9BRYXrSn0hrE64IoWgVkO9MSJgEzoWkxONgaQpICWg8vAN74wlA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+=======
+<<<<<<< HEAD
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   '@typescript-eslint/type-utils@8.7.0':
     resolution: {integrity: sha512-tl0N0Mj3hMSkEYhLkjREp54OSb/FI6qyCzfiiclvJvOqre6hsZTGSnHtmFLDU8TIM62G7ygEa1bI08lcuRwEnQ==}
+=======
+  '@typescript-eslint/scope-manager@8.7.0':
+    resolution: {integrity: sha512-87rC0k3ZlDOuz82zzXRtQ7Akv3GKhHs0ti4YcbAJtaomllXoSO8hi7Ix3ccEvCd824dy9aIX+j3d2UMAfCtVpg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/type-utils@8.5.0':
+    resolution: {integrity: sha512-N1K8Ix+lUM+cIDhL2uekVn/ZD7TZW+9/rwz8DclQpcQ9rk4sIL5CAlBC0CugWKREmDjBzI/kQqU4wkg46jWLYA==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '*'
@@ -5375,10 +6234,35 @@ packages:
     resolution: {integrity: sha512-LLt4BLHFwSfASHSF2K29SZ+ZCsbQOM+LuarPjRUuHm+Qd09hSe3GCeaQbcCr+Mik+0QFRmep/FyZBO6fJ64U3w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+<<<<<<< HEAD
   '@typescript-eslint/types@8.8.1':
     resolution: {integrity: sha512-WCcTP4SDXzMd23N27u66zTKMuEevH4uzU8C9jf0RO4E04yVHgQgW+r+TeVTNnO1KIfrL8ebgVVYYMMO3+jC55Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+=======
+<<<<<<< HEAD
+  '@typescript-eslint/typescript-estree@8.7.0':
+    resolution: {integrity: sha512-MC8nmcGHsmfAKxwnluTQpNqceniT8SteVwd2voYlmiSWGOtjvGXdPl17dYu2797GVscK30Z04WRM28CrKS9WOg==}
+=======
+  '@typescript-eslint/types@8.7.0':
+    resolution: {integrity: sha512-LLt4BLHFwSfASHSF2K29SZ+ZCsbQOM+LuarPjRUuHm+Qd09hSe3GCeaQbcCr+Mik+0QFRmep/FyZBO6fJ64U3w==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/typescript-estree@8.5.0':
+    resolution: {integrity: sha512-vEG2Sf9P8BPQ+d0pxdfndw3xIXaoSjliG0/Ejk7UggByZPKXmJmw3GW5jV2gHNQNawBUyfahoSiCFVov0Ruf7Q==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      typescript: '*'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+<<<<<<< HEAD
+  '@typescript-eslint/utils@8.7.0':
+    resolution: {integrity: sha512-ZbdUdwsl2X/s3CiyAu3gOlfQzpbuG3nTWKPoIvAu1pu5r8viiJvv2NPN2AqArL35NCYtw/lrPPfM4gxrMLNLPw==}
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   '@typescript-eslint/typescript-estree@8.7.0':
     resolution: {integrity: sha512-MC8nmcGHsmfAKxwnluTQpNqceniT8SteVwd2voYlmiSWGOtjvGXdPl17dYu2797GVscK30Z04WRM28CrKS9WOg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5388,6 +6272,7 @@ packages:
       typescript:
         optional: true
 
+<<<<<<< HEAD
   '@typescript-eslint/typescript-estree@8.8.1':
     resolution: {integrity: sha512-A5d1R9p+X+1js4JogdNilDuuq+EHZdsH9MjTVxXOdVFfTJXunKJR/v+fNNyO4TnoOn5HqobzfRlc70NC6HTcdg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5399,16 +6284,31 @@ packages:
 
   '@typescript-eslint/utils@8.7.0':
     resolution: {integrity: sha512-ZbdUdwsl2X/s3CiyAu3gOlfQzpbuG3nTWKPoIvAu1pu5r8viiJvv2NPN2AqArL35NCYtw/lrPPfM4gxrMLNLPw==}
+=======
+  '@typescript-eslint/utils@8.5.0':
+    resolution: {integrity: sha512-6yyGYVL0e+VzGYp60wvkBHiqDWOpT63pdMV2CVG4LVDd5uR6q1qQN/7LafBZtAtNIn/mqXjsSeS5ggv/P0iECw==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
+<<<<<<< HEAD
   '@typescript-eslint/utils@8.8.1':
     resolution: {integrity: sha512-/QkNJDbV0bdL7H7d0/y0qBbV2HTtf0TIyjSDTvvmQEzeVx8jEImEbLuOA4EsvE8gIgqMitns0ifb5uQhMj8d9w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
+=======
+<<<<<<< HEAD
+=======
+  '@typescript-eslint/visitor-keys@8.5.0':
+    resolution: {integrity: sha512-yTPqMnbAZJNy2Xq2XU8AdtOW9tJIr+UQb64aXB9f3B1498Zx9JorVgFJcZpEc9UBuCCrdzKID2RGAMkYcDtZOw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   '@typescript-eslint/visitor-keys@8.7.0':
     resolution: {integrity: sha512-b1tx0orFCCh/THWPQa2ZwWzvOeyzzp36vkJYOpVg0u8UVOIsfVrnuC9FqAw9gRKn+rG2VmWQ/zDJZzkxUnj/XQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -6483,15 +7383,6 @@ packages:
       supports-color:
         optional: true
 
-  debug@4.3.7:
-    resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   decimal.js@10.4.3:
     resolution: {integrity: sha512-VBBaLc1MgL5XpzgIP7ny5Z6Nx3UrRkIViUkPUdtl9aya5amy3De1gsUUSB1g3+3sExYNjCAsAznmukyxCb1GRA==}
 
@@ -7390,10 +8281,6 @@ packages:
     resolution: {integrity: sha512-TMKDUnIte6bfb5nWv7V/caI169OHgvwjb7V4WkeUvbQQdjr5rWKqHFiKWb/fcOwB+CzBT+qbWjvj+DVwRskpIg==}
     engines: {node: '>=14'}
 
-  foreground-child@3.3.0:
-    resolution: {integrity: sha512-Ld2g8rrAyMYFXBhEqMz8ZAHBi4J4uS1i/CxGMDnjyFWddMXLVcDp051DZfu+t7+ab7Wv6SMqpWmyFIj5UbfFvg==}
-    engines: {node: '>=14'}
-
   fork-ts-checker-webpack-plugin@8.0.0:
     resolution: {integrity: sha512-mX3qW3idpueT2klaQXBzrIM/pHw+T0B/V9KHEvNrqijTq9NFnMZU6oreVxDYcf33P8a5cW+67PjodNHthGnNVg==}
     engines: {node: '>=12.13.0', yarn: '>=1.0.0'}
@@ -7533,10 +8420,6 @@ packages:
   glob@10.4.1:
     resolution: {integrity: sha512-2jelhlq3E4ho74ZyVLN03oKdAZVUa6UDZzFLVH1H7dnoax+y9qyaq8zBkfDIggjniU19z0wU18y16jMB2eyVIw==}
     engines: {node: '>=16 || 14 >=14.18'}
-    hasBin: true
-
-  glob@10.4.5:
-    resolution: {integrity: sha512-7Bv8RF0k6xjo7d4A/PxYLbUCfb6c+Vpd2/mB2yRDlew7Jb5hEXiCD9ibfO7wpk8i4sevK6DFny9h7EYbM3/sHg==}
     hasBin: true
 
   glob@7.2.3:
@@ -8092,9 +8975,6 @@ packages:
     resolution: {integrity: sha512-JVYhQnN59LVPFCEcVa2C3CrEKYacvjRfqIQl+h8oi91aLYQVWRYbxjPcv1bUiUy/kLmQaANrYfNMCO3kuEDHfw==}
     engines: {node: '>=14'}
 
-  jackspeak@3.4.3:
-    resolution: {integrity: sha512-OGlZQpz2yfahA/Rd1Y8Cd9SIEsqvXkLVoSw/cgwhnhFMDbsQFeZYoJJ7bIZBS9BcamUW96asq/npPWugM+RQBw==}
-
   javascript-obfuscator@4.1.1:
     resolution: {integrity: sha512-gt+KZpIIrrxXHEQGD8xZrL8mTRwRY0U76/xz/YX0gZdPrSqQhT/c7dYLASlLlecT3r+FxE7je/+C0oLnTDCx4A==}
     engines: {node: '>=12.22.0'}
@@ -8390,8 +9270,8 @@ packages:
   magic-string@0.30.11:
     resolution: {integrity: sha512-+Wri9p0QHMy+545hKww7YAu5NyzF8iomPL/RQazugQ9+Ez4Ic3mERMd8ZTX5rfK944j+560ZJi8iAwgak1Ac7A==}
 
-  magicast@0.3.5:
-    resolution: {integrity: sha512-L0WhttDl+2BOsybvEOLK7fW3UA0OQ0IQ2d6Zl2x/a6vVRs3bAY0ECOSHHeL5jD+SbOpOCUEi0y1DgHEn9Qn1AQ==}
+  magicast@0.3.4:
+    resolution: {integrity: sha512-TyDF/Pn36bBji9rWKHlZe+PZb6Mx5V8IHCSxk7X4aljM4e/vyDvZZYwHewdVaqiA0nb3ghfHU/6AUpDxWoER2Q==}
 
   make-dir@2.1.0:
     resolution: {integrity: sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==}
@@ -8905,9 +9785,12 @@ packages:
     resolution: {integrity: sha512-5NPgf87AT2STgwa2ntRMr45jTKrYBGkVU36yT0ig/n/GMAa3oPqhZfIQ2kMEimReg0+t9kZViDVZ83qfVUlckg==}
     engines: {node: '>= 14'}
 
+<<<<<<< HEAD
   package-json-from-dist@1.0.1:
     resolution: {integrity: sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw==}
 
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   package-json@10.0.1:
     resolution: {integrity: sha512-ua1L4OgXSBdsu1FPb7F3tYH0F48a6kxvod4pLUlGY9COeJAJQNX/sNH2IiEmsxw7lqYiAwrdHMjz1FctOsyDQg==}
     engines: {node: '>=18'}
@@ -9123,8 +10006,17 @@ packages:
     resolution: {integrity: sha512-YF2kKIUzAofPMpfH6hOi2cGnv/HrUlfucspc7pDyvv7kGdqXrfj8SCl/t8owkEgKEuu8ZcRjSOxFxVLqwChZ2Q==}
     engines: {node: ^10 || ^12 || >=14}
 
+<<<<<<< HEAD
   postcss@8.4.47:
     resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
+=======
+  postcss@8.4.41:
+    resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.4.45:
+    resolution: {integrity: sha512-7KTLTdzdZZYscUc65XmjFiB73vBhBfbPztCYdUNvlaso9PrzjzcmjqBPR0lNGkcVlcO4BjiO5rK/qNz+XAen1Q==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.1.2:
@@ -9665,8 +10557,8 @@ packages:
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
-  rollup@4.22.4:
-    resolution: {integrity: sha512-vD8HJ5raRcWOyymsR6Z3o6+RzfEPCnVLMFJ6vRslO1jt4LO6dUo5Qnpg7y4RkZFM2DMe3WUirkI5c16onjrc6A==}
+  rollup@4.21.2:
+    resolution: {integrity: sha512-e3TapAgYf9xjdLvKQCkQTnbTKd4a6jwlpQSJJFokHGaX2IVjoEqkIIhiQfqsi0cdwlOD+tQGuOd5AJkc5RngBw==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
@@ -10147,16 +11039,21 @@ packages:
   tinyexec@0.3.0:
     resolution: {integrity: sha512-tVGE0mVJPGb0chKhqmsoosjsS+qUnJVGJpZgsHYQcGoPlG3B51R3PouqTgEGH2Dc9jjFyOqOpix6ZHNMXp1FZg==}
 
-  tinypool@1.0.1:
-    resolution: {integrity: sha512-URZYihUbRPcGv95En+sz6MfghfIc2OJ1sv/RmhWZLouPY0/8Vo80viwPvg3dlaS9fuq7fQMEfgRRK7BBZThBEA==}
+  tinypool@1.0.0:
+    resolution: {integrity: sha512-KIKExllK7jp3uvrNtvRBYBWBOAXSX8ZvoaD8T+7KB/QHIuoJW3Pmr60zucywjAlMb5TeXUkcs/MWeWLu0qvuAQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
 
   tinyrainbow@1.2.0:
     resolution: {integrity: sha512-weEDEq7Z5eTHPDh4xjX789+fHfF+P8boiFB+0vbWzpbnbsEr/GRaohi/uMKxg8RZMXnl1ItAi/IUHWMsjDV7kQ==}
     engines: {node: '>=14.0.0'}
 
+<<<<<<< HEAD
   tinyspy@3.0.2:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
+=======
+  tinyspy@3.0.0:
+    resolution: {integrity: sha512-q5nmENpTHgiPVd1cJDDc9cVoYN5x4vCvwT3FMilvKPKneCBZAxn2YWQjDF0UMcE9k0Cay1gBiDfTMU0g+mPMQA==}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: '>=14.0.0'}
 
   tmp@0.0.33:
@@ -10799,6 +11696,7 @@ snapshots:
       '@babel/runtime': 7.25.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
@@ -10812,6 +11710,8 @@ snapshots:
       eslint: 9.12.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.12.0(jiti@1.21.6))
 =======
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 <<<<<<< HEAD
   '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
@@ -10828,17 +11728,21 @@ snapshots:
 =======
 <<<<<<< HEAD
   '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+  '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
       '@eslint-community/eslint-plugin-eslint-comments': 4.4.0(eslint@9.11.0(jiti@1.21.6))
       '@eslint/markdown': 6.1.0(eslint@9.11.0(jiti@1.21.6))
       '@stylistic/eslint-plugin': 2.8.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.6.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/parser': 8.6.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@vitest/eslint-plugin': 1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/parser': 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@vitest/eslint-plugin': 1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.11.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.11.0(jiti@1.21.6))
+<<<<<<< HEAD
 =======
   '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.10.0(jiti@1.21.6)))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
@@ -10854,7 +11758,12 @@ snapshots:
       eslint-config-flat-gitignore: 0.3.0(eslint@9.10.0(jiti@1.21.6))
 >>>>>>> 60f2ae270 (refactor: move editor service to docs-ui)
 >>>>>>> 2c9e9d2af (refactor: move editor service to docs-ui)
+<<<<<<< HEAD
 >>>>>>> f1def0615 (refactor: move editor service to docs-ui)
+=======
+=======
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       eslint-flat-config-utils: 0.4.0
       eslint-merge-processors: 0.1.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-antfu: 2.7.0(eslint@9.12.0(jiti@1.21.6))
@@ -10864,6 +11773,7 @@ snapshots:
       eslint-plugin-jsonc: 2.16.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-n: 17.10.3(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-no-only-tests: 3.3.0
+<<<<<<< HEAD
       eslint-plugin-perfectionist: 3.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vue-eslint-parser@9.4.3(eslint@9.12.0(jiti@1.21.6)))
       eslint-plugin-regexp: 2.6.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-toml: 0.11.1(eslint@9.12.0(jiti@1.21.6))
@@ -10872,6 +11782,27 @@ snapshots:
       eslint-plugin-vue: 9.28.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-yml: 1.14.0(eslint@9.12.0(jiti@1.21.6))
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.5.9)(eslint@9.12.0(jiti@1.21.6))
+=======
+<<<<<<< HEAD
+      eslint-plugin-perfectionist: 3.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vue-eslint-parser@9.4.3(eslint@9.11.1(jiti@1.21.6)))
+      eslint-plugin-regexp: 2.6.0(eslint@9.11.1(jiti@1.21.6))
+      eslint-plugin-toml: 0.11.1(eslint@9.11.1(jiti@1.21.6))
+      eslint-plugin-unicorn: 55.0.0(eslint@9.11.1(jiti@1.21.6))
+      eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))
+      eslint-plugin-vue: 9.28.0(eslint@9.11.1(jiti@1.21.6))
+      eslint-plugin-yml: 1.14.0(eslint@9.11.1(jiti@1.21.6))
+      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.5.9)(eslint@9.11.1(jiti@1.21.6))
+=======
+      eslint-plugin-perfectionist: 3.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vue-eslint-parser@9.4.3(eslint@9.11.0(jiti@1.21.6)))
+      eslint-plugin-regexp: 2.6.0(eslint@9.11.0(jiti@1.21.6))
+      eslint-plugin-toml: 0.11.1(eslint@9.11.0(jiti@1.21.6))
+      eslint-plugin-unicorn: 55.0.0(eslint@9.11.0(jiti@1.21.6))
+      eslint-plugin-unused-imports: 4.1.3(@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))
+      eslint-plugin-vue: 9.28.0(eslint@9.11.0(jiti@1.21.6))
+      eslint-plugin-yml: 1.14.0(eslint@9.11.0(jiti@1.21.6))
+      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.11.0(jiti@1.21.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       globals: 15.9.0
       jsonc-eslint-parser: 2.4.0
       local-pkg: 0.5.0
@@ -11003,11 +11934,15 @@ snapshots:
       js-tokens: 4.0.0
       picocolors: 1.1.0
 
+<<<<<<< HEAD
   '@babel/parser@7.25.6':
     dependencies:
       '@babel/types': 7.25.6
 
   '@babel/parser@7.25.8':
+=======
+  '@babel/plugin-transform-react-jsx-self@7.24.7(@babel/core@7.24.7)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@babel/types': 7.25.8
 
@@ -11053,28 +11988,71 @@ snapshots:
 
   '@babel/traverse@7.25.7':
     dependencies:
+<<<<<<< HEAD
       '@babel/code-frame': 7.25.7
       '@babel/generator': 7.25.7
       '@babel/parser': 7.25.8
       '@babel/template': 7.25.7
       '@babel/types': 7.25.8
       debug: 4.3.7
+=======
+      '@babel/code-frame': 7.24.7
+      '@babel/parser': 7.25.4
+      '@babel/types': 7.25.4
+
+  '@babel/traverse@7.24.7':
+    dependencies:
+      '@babel/code-frame': 7.24.7
+      '@babel/generator': 7.24.7
+      '@babel/helper-environment-visitor': 7.24.7
+      '@babel/helper-function-name': 7.24.7
+      '@babel/helper-hoist-variables': 7.24.7
+      '@babel/helper-split-export-declaration': 7.24.7
+      '@babel/parser': 7.24.7
+      '@babel/types': 7.24.7
+      debug: 4.3.5
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@babel/types@7.25.6':
+=======
+  '@babel/traverse@7.25.4':
+    dependencies:
+      '@babel/code-frame': 7.24.7
+      '@babel/generator': 7.25.5
+      '@babel/parser': 7.25.4
+      '@babel/template': 7.25.0
+      '@babel/types': 7.25.4
+      debug: 4.3.6
+      globals: 11.12.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@babel/types@7.24.7':
+    dependencies:
+      '@babel/helper-string-parser': 7.24.7
+      '@babel/helper-validator-identifier': 7.24.7
+      to-fast-properties: 2.0.0
+
+  '@babel/types@7.25.4':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@babel/helper-string-parser': 7.24.8
       '@babel/helper-validator-identifier': 7.24.7
       to-fast-properties: 2.0.0
 
+<<<<<<< HEAD
   '@babel/types@7.25.8':
     dependencies:
       '@babel/helper-string-parser': 7.25.7
       '@babel/helper-validator-identifier': 7.25.7
       to-fast-properties: 2.0.0
 
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   '@base2/pretty-print-object@1.0.1': {}
 
   '@chromatic-com/storybook@2.0.2(react@18.3.1)':
@@ -11100,11 +12078,27 @@ snapshots:
       picocolors: 1.1.0
       sisteransi: 1.0.5
 
+<<<<<<< HEAD
   '@commitlint/cli@19.5.0(@types/node@22.7.5)(typescript@5.6.3)':
     dependencies:
       '@commitlint/format': 19.5.0
       '@commitlint/lint': 19.5.0
       '@commitlint/load': 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
+=======
+<<<<<<< HEAD
+  '@commitlint/cli@19.5.0(@types/node@22.7.3)(typescript@5.6.2)':
+    dependencies:
+      '@commitlint/format': 19.5.0
+      '@commitlint/lint': 19.5.0
+      '@commitlint/load': 19.5.0(@types/node@22.7.3)(typescript@5.6.2)
+=======
+  '@commitlint/cli@19.5.0(@types/node@22.7.0)(typescript@5.6.2)':
+    dependencies:
+      '@commitlint/format': 19.5.0
+      '@commitlint/lint': 19.5.0
+      '@commitlint/load': 19.5.0(@types/node@22.7.0)(typescript@5.6.2)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@commitlint/read': 19.5.0
       '@commitlint/types': 19.5.0
       tinyexec: 0.3.0
@@ -11151,15 +12145,32 @@ snapshots:
       '@commitlint/rules': 19.5.0
       '@commitlint/types': 19.5.0
 
+<<<<<<< HEAD
   '@commitlint/load@19.5.0(@types/node@22.7.5)(typescript@5.6.3)':
+=======
+<<<<<<< HEAD
+  '@commitlint/load@19.5.0(@types/node@22.7.3)(typescript@5.6.2)':
+=======
+  '@commitlint/load@19.5.0(@types/node@22.7.0)(typescript@5.6.2)':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@commitlint/config-validator': 19.5.0
       '@commitlint/execute-rule': 19.5.0
       '@commitlint/resolve-extends': 19.5.0
       '@commitlint/types': 19.5.0
       chalk: 5.3.0
+<<<<<<< HEAD
       cosmiconfig: 9.0.0(typescript@5.6.3)
       cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.5)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3)
+=======
+      cosmiconfig: 9.0.0(typescript@5.6.2)
+<<<<<<< HEAD
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.3)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
+=======
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.0)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -11210,10 +12221,13 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.0
       chalk: 5.3.0
 
-  '@conventional-changelog/git-client@1.0.1':
+  '@conventional-changelog/git-client@1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)':
     dependencies:
       '@types/semver': 7.5.8
       semver: 7.6.3
+    optionalDependencies:
+      conventional-commits-filter: 4.0.0
+      conventional-commits-parser: 5.0.0
 
   '@dprint/formatter@0.3.0': {}
 
@@ -11788,7 +12802,12 @@ snapshots:
       '@types/react': 18.3.11
       react: 18.3.1
 
+<<<<<<< HEAD
   '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.5)':
+=======
+<<<<<<< HEAD
+  '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.3)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
@@ -11803,8 +12822,32 @@ snapshots:
       '@microsoft/tsdoc-config': 0.17.0
       '@rushstack/node-core-library': 5.7.0(@types/node@22.7.5)
       '@rushstack/rig-package': 0.5.3
+<<<<<<< HEAD
       '@rushstack/terminal': 0.14.0(@types/node@22.7.5)
       '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.5)
+=======
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.3)
+      '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.3)
+=======
+  '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.0)':
+    dependencies:
+      '@microsoft/tsdoc': 0.15.0
+      '@microsoft/tsdoc-config': 0.17.0
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
+    transitivePeerDependencies:
+      - '@types/node'
+
+  '@microsoft/api-extractor@7.47.7(@types/node@22.7.0)':
+    dependencies:
+      '@microsoft/api-extractor-model': 7.29.6(@types/node@22.7.0)
+      '@microsoft/tsdoc': 0.15.0
+      '@microsoft/tsdoc-config': 0.17.0
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
+      '@rushstack/rig-package': 0.5.3
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.0)
+      '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.0)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.8
@@ -11991,75 +13034,96 @@ snapshots:
       walk-sync: 2.2.0
       yaml: 2.4.5
 
+<<<<<<< HEAD
   '@release-it/conventional-changelog@8.0.2(release-it@17.8.2(typescript@5.6.3))':
+=======
+  '@release-it/conventional-changelog@8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.6.0(typescript@5.6.2))':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       concat-stream: 2.0.0
       conventional-changelog: 5.1.0
       conventional-recommended-bump: 9.0.0
+<<<<<<< HEAD
       git-semver-tags: 8.0.0
       release-it: 17.8.2(typescript@5.6.3)
+=======
+      git-semver-tags: 8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
+      release-it: 17.6.0(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       semver: 7.6.3
     transitivePeerDependencies:
       - conventional-commits-filter
       - conventional-commits-parser
 
+<<<<<<< HEAD
   '@rollup/pluginutils@5.1.2(rollup@4.22.4)':
+=======
+  '@rollup/pluginutils@5.1.0(rollup@4.21.2)':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@types/estree': 1.0.6
       estree-walker: 2.0.2
       picomatch: 2.3.1
     optionalDependencies:
-      rollup: 4.22.4
+      rollup: 4.21.2
 
-  '@rollup/rollup-android-arm-eabi@4.22.4':
+  '@rollup/rollup-android-arm-eabi@4.21.2':
     optional: true
 
-  '@rollup/rollup-android-arm64@4.22.4':
+  '@rollup/rollup-android-arm64@4.21.2':
     optional: true
 
-  '@rollup/rollup-darwin-arm64@4.22.4':
+  '@rollup/rollup-darwin-arm64@4.21.2':
     optional: true
 
-  '@rollup/rollup-darwin-x64@4.22.4':
+  '@rollup/rollup-darwin-x64@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-arm-gnueabihf@4.22.4':
+  '@rollup/rollup-linux-arm-gnueabihf@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-arm-musleabihf@4.22.4':
+  '@rollup/rollup-linux-arm-musleabihf@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-arm64-gnu@4.22.4':
+  '@rollup/rollup-linux-arm64-gnu@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-arm64-musl@4.22.4':
+  '@rollup/rollup-linux-arm64-musl@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-powerpc64le-gnu@4.22.4':
+  '@rollup/rollup-linux-powerpc64le-gnu@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-riscv64-gnu@4.22.4':
+  '@rollup/rollup-linux-riscv64-gnu@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-s390x-gnu@4.22.4':
+  '@rollup/rollup-linux-s390x-gnu@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-x64-gnu@4.22.4':
+  '@rollup/rollup-linux-x64-gnu@4.21.2':
     optional: true
 
-  '@rollup/rollup-linux-x64-musl@4.22.4':
+  '@rollup/rollup-linux-x64-musl@4.21.2':
     optional: true
 
-  '@rollup/rollup-win32-arm64-msvc@4.22.4':
+  '@rollup/rollup-win32-arm64-msvc@4.21.2':
     optional: true
 
-  '@rollup/rollup-win32-ia32-msvc@4.22.4':
+  '@rollup/rollup-win32-ia32-msvc@4.21.2':
     optional: true
 
-  '@rollup/rollup-win32-x64-msvc@4.22.4':
+  '@rollup/rollup-win32-x64-msvc@4.21.2':
     optional: true
 
+<<<<<<< HEAD
   '@rushstack/node-core-library@5.7.0(@types/node@22.7.5)':
+=======
+<<<<<<< HEAD
+  '@rushstack/node-core-library@5.7.0(@types/node@22.7.3)':
+=======
+  '@rushstack/node-core-library@5.7.0(@types/node@22.7.0)':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -12070,14 +13134,27 @@ snapshots:
       resolve: 1.22.8
       semver: 7.5.4
     optionalDependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
       resolve: 1.22.8
       strip-json-comments: 3.1.1
 
+<<<<<<< HEAD
   '@rushstack/terminal@0.14.0(@types/node@22.7.5)':
+=======
+<<<<<<< HEAD
+  '@rushstack/terminal@0.14.0(@types/node@22.7.3)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@rushstack/node-core-library': 5.7.0(@types/node@22.7.5)
       supports-color: 8.1.1
@@ -12086,7 +13163,23 @@ snapshots:
 
   '@rushstack/ts-command-line@4.22.6(@types/node@22.7.5)':
     dependencies:
+<<<<<<< HEAD
       '@rushstack/terminal': 0.14.0(@types/node@22.7.5)
+=======
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.3)
+=======
+  '@rushstack/terminal@0.14.0(@types/node@22.7.0)':
+    dependencies:
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
+      supports-color: 8.1.1
+    optionalDependencies:
+      '@types/node': 22.7.0
+
+  '@rushstack/ts-command-line@4.22.6(@types/node@22.7.0)':
+    dependencies:
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.0)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -12229,8 +13322,18 @@ snapshots:
 
   '@storybook/builder-webpack5@8.3.5(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
+<<<<<<< HEAD
       '@storybook/core-webpack': 8.3.5(storybook@8.3.5)
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@storybook/core-webpack': 8.3.3(storybook@8.3.3)
+      '@types/node': 22.7.3
+=======
+      '@storybook/core-webpack': 8.3.0(storybook@8.3.0)
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/semver': 7.5.8
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
@@ -12273,8 +13376,22 @@ snapshots:
 
   '@storybook/core-webpack@8.3.5(storybook@8.3.5)':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
       storybook: 8.3.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+      storybook: 8.3.3
+=======
+      storybook: 8.3.0
+
+  '@storybook/core-webpack@8.3.0(storybook@8.3.0)':
+    dependencies:
+      '@types/node': 22.7.0
+      storybook: 8.3.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       ts-dedent: 2.2.0
 
   '@storybook/core@8.3.5':
@@ -12328,10 +13445,21 @@ snapshots:
 
   '@storybook/preset-react-webpack@8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
+<<<<<<< HEAD
       '@storybook/core-webpack': 8.3.5(storybook@8.3.5)
       '@storybook/react': 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.6.3)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       '@types/node': 22.7.5
+=======
+      '@storybook/core-webpack': 8.3.3(storybook@8.3.3)
+      '@storybook/react': 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
+      '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.6.2)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/semver': 7.5.8
       find-up: 5.0.0
       fs-extra: 11.2.0
@@ -12586,7 +13714,12 @@ snapshots:
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@types/connect@3.4.38':
     dependencies:
@@ -12594,7 +13727,22 @@ snapshots:
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+
+  '@types/connect@3.4.38':
+    dependencies:
+      '@types/node': 22.7.0
+
+  '@types/conventional-commits-parser@5.0.0':
+    dependencies:
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@types/d3-color@3.1.3': {}
 
@@ -12633,7 +13781,15 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.5':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -12675,7 +13831,23 @@ snapshots:
 
   '@types/ms@0.7.34': {}
 
+<<<<<<< HEAD
   '@types/node@22.7.5':
+=======
+<<<<<<< HEAD
+  '@types/node@22.7.3':
+=======
+  '@types/node@18.19.47':
+    dependencies:
+      undici-types: 5.26.5
+
+  '@types/node@22.5.4':
+    dependencies:
+      undici-types: 6.19.8
+
+  '@types/node@22.7.0':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       undici-types: 6.19.8
 
@@ -12727,17 +13899,41 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@types/send': 0.17.4
 
   '@types/stylus@0.48.42':
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@types/unist@3.0.3': {}
 
@@ -12745,7 +13941,12 @@ snapshots:
 
   '@types/validator@13.12.0': {}
 
+<<<<<<< HEAD
   '@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)':
+=======
+<<<<<<< HEAD
+  '@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@eslint-community/regexpp': 4.11.1
       '@typescript-eslint/parser': 8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
@@ -12753,7 +13954,22 @@ snapshots:
       '@typescript-eslint/type-utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/visitor-keys': 8.7.0
+<<<<<<< HEAD
       eslint: 9.12.0(jiti@1.21.6)
+=======
+      eslint: 9.11.1(jiti@1.21.6)
+=======
+  '@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
+    dependencies:
+      '@eslint-community/regexpp': 4.11.0
+      '@typescript-eslint/parser': 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/scope-manager': 8.5.0
+      '@typescript-eslint/type-utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/visitor-keys': 8.5.0
+      eslint: 9.11.0(jiti@1.21.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       graphemer: 1.4.0
       ignore: 5.3.2
       natural-compare: 1.4.0
@@ -12763,6 +13979,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@typescript-eslint/parser@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 8.8.1
@@ -12771,6 +13988,25 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.8.1
       debug: 4.3.7
       eslint: 9.12.0(jiti@1.21.6)
+=======
+<<<<<<< HEAD
+  '@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
+=======
+  '@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+    dependencies:
+      '@typescript-eslint/scope-manager': 8.7.0
+      '@typescript-eslint/types': 8.7.0
+      '@typescript-eslint/typescript-estree': 8.7.0(typescript@5.6.2)
+      '@typescript-eslint/visitor-keys': 8.7.0
+<<<<<<< HEAD
+      debug: 4.3.7
+      eslint: 9.11.1(jiti@1.21.6)
+=======
+      debug: 4.3.6
+      eslint: 9.11.0(jiti@1.21.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     optionalDependencies:
       typescript: 5.6.3
     transitivePeerDependencies:
@@ -12781,7 +14017,12 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/visitor-keys': 8.7.0
 
+<<<<<<< HEAD
   '@typescript-eslint/scope-manager@8.8.1':
+=======
+<<<<<<< HEAD
+  '@typescript-eslint/type-utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@typescript-eslint/types': 8.8.1
       '@typescript-eslint/visitor-keys': 8.8.1
@@ -12791,7 +14032,23 @@ snapshots:
       '@typescript-eslint/typescript-estree': 8.7.0(typescript@5.6.3)
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       debug: 4.3.7
+<<<<<<< HEAD
       ts-api-utils: 1.3.0(typescript@5.6.3)
+=======
+=======
+  '@typescript-eslint/scope-manager@8.7.0':
+    dependencies:
+      '@typescript-eslint/types': 8.7.0
+      '@typescript-eslint/visitor-keys': 8.7.0
+
+  '@typescript-eslint/type-utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
+    dependencies:
+      '@typescript-eslint/typescript-estree': 8.5.0(typescript@5.6.2)
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      debug: 4.3.6
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      ts-api-utils: 1.3.0(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     optionalDependencies:
       typescript: 5.6.3
     transitivePeerDependencies:
@@ -12812,13 +14069,42 @@ snapshots:
 
   '@typescript-eslint/types@8.7.0': {}
 
+<<<<<<< HEAD
   '@typescript-eslint/types@8.8.1': {}
 
   '@typescript-eslint/typescript-estree@8.7.0(typescript@5.6.3)':
+=======
+<<<<<<< HEAD
+  '@typescript-eslint/typescript-estree@8.7.0(typescript@5.6.2)':
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/visitor-keys': 8.7.0
       debug: 4.3.7
+=======
+  '@typescript-eslint/types@8.7.0': {}
+
+  '@typescript-eslint/typescript-estree@8.5.0(typescript@5.6.2)':
+    dependencies:
+      '@typescript-eslint/types': 8.5.0
+      '@typescript-eslint/visitor-keys': 8.5.0
+      debug: 4.3.6
+      fast-glob: 3.3.2
+      is-glob: 4.0.3
+      minimatch: 9.0.5
+      semver: 7.6.3
+      ts-api-utils: 1.3.0(typescript@5.6.2)
+    optionalDependencies:
+      typescript: 5.6.2
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/typescript-estree@8.7.0(typescript@5.6.2)':
+    dependencies:
+      '@typescript-eslint/types': 8.7.0
+      '@typescript-eslint/visitor-keys': 8.7.0
+      debug: 4.3.6
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
@@ -12868,6 +14154,14 @@ snapshots:
 
   '@typescript-eslint/visitor-keys@8.7.0':
     dependencies:
+<<<<<<< HEAD
+=======
+      '@typescript-eslint/types': 8.5.0
+      eslint-visitor-keys: 3.4.3
+
+  '@typescript-eslint/visitor-keys@8.7.0':
+    dependencies:
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       '@typescript-eslint/types': 8.7.0
       eslint-visitor-keys: 3.4.3
 
@@ -12890,14 +14184,27 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
+<<<<<<< HEAD
   '@vitejs/plugin-react@4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+<<<<<<< HEAD
+  '@vitejs/plugin-react@4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+  '@vitejs/plugin-react@4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@babel/core': 7.25.8
       '@babel/plugin-transform-react-jsx-self': 7.25.7(@babel/core@7.25.8)
       '@babel/plugin-transform-react-jsx-source': 7.25.7(@babel/core@7.25.8)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
+<<<<<<< HEAD
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+<<<<<<< HEAD
+      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     transitivePeerDependencies:
       - supports-color
 
@@ -12906,19 +14213,40 @@ snapshots:
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vue: 3.5.9(typescript@5.6.3)
 
+<<<<<<< HEAD
   '@vitest/coverage-istanbul@2.1.2(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+  '@vitest/coverage-istanbul@2.1.1(vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitejs/plugin-vue@5.1.3(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))':
+    dependencies:
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vue: 3.4.38(typescript@5.6.2)
+
+  '@vitest/coverage-istanbul@2.1.1(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@istanbuljs/schema': 0.1.3
-      debug: 4.3.7
+      debug: 4.3.6
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-instrument: 6.0.3
       istanbul-lib-report: 3.0.1
       istanbul-lib-source-maps: 5.0.6
       istanbul-reports: 3.1.7
-      magicast: 0.3.5
+      magicast: 0.3.4
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
+<<<<<<< HEAD
       vitest: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+<<<<<<< HEAD
+      vitest: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     transitivePeerDependencies:
       - supports-color
 
@@ -12934,13 +14262,33 @@ snapshots:
   '@vitest/eslint-plugin@1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
 >>>>>>> 60f2ae270 (refactor: move editor service to docs-ui)
 >>>>>>> 2c9e9d2af (refactor: move editor service to docs-ui)
+<<<<<<< HEAD
 >>>>>>> f1def0615 (refactor: move editor service to docs-ui)
+=======
+=======
+      vitest: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@vitest/eslint-plugin@1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       eslint: 9.12.0(jiti@1.21.6)
     optionalDependencies:
+<<<<<<< HEAD
       '@typescript-eslint/utils': 8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       typescript: 5.6.3
       vitest: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+      typescript: 5.6.2
+<<<<<<< HEAD
+      vitest: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+      vitest: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@vitest/expect@2.0.5':
     dependencies:
@@ -12956,13 +14304,29 @@ snapshots:
       chai: 5.1.1
       tinyrainbow: 1.2.0
 
+<<<<<<< HEAD
   '@vitest/mocker@2.1.2(@vitest/spy@2.1.2)(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+<<<<<<< HEAD
+  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+=======
+  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@vitest/spy': 2.1.2
       estree-walker: 3.0.3
       magic-string: 0.30.11
     optionalDependencies:
+<<<<<<< HEAD
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+<<<<<<< HEAD
+      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -12989,7 +14353,7 @@ snapshots:
 
   '@vitest/spy@2.1.2':
     dependencies:
-      tinyspy: 3.0.2
+      tinyspy: 3.0.0
 
   '@vitest/utils@2.0.5':
     dependencies:
@@ -13900,10 +15264,23 @@ snapshots:
     dependencies:
       browserslist: 4.24.0
 
+<<<<<<< HEAD
   cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.5)(cosmiconfig@9.0.0(typescript@5.6.3))(typescript@5.6.3):
     dependencies:
       '@types/node': 22.7.5
       cosmiconfig: 9.0.0(typescript@5.6.3)
+=======
+<<<<<<< HEAD
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.3)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
+    dependencies:
+      '@types/node': 22.7.3
+=======
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.0)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
+    dependencies:
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      cosmiconfig: 9.0.0(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       jiti: 1.21.6
       typescript: 5.6.3
 
@@ -14058,10 +15435,6 @@ snapshots:
   debug@4.3.6:
     dependencies:
       ms: 2.1.2
-
-  debug@4.3.7:
-    dependencies:
-      ms: 2.1.3
 
   decimal.js@10.4.3: {}
 
@@ -14653,8 +16026,17 @@ snapshots:
 
   eslint-plugin-import-x@4.3.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3):
     dependencies:
+<<<<<<< HEAD
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
+=======
+<<<<<<< HEAD
+      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       debug: 4.3.7
+=======
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      debug: 4.3.6
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       doctrine: 3.0.0
       eslint: 9.12.0(jiti@1.21.6)
       eslint-import-resolver-node: 0.3.9
@@ -14673,7 +16055,7 @@ snapshots:
       '@es-joy/jsdoccomment': 0.48.0
       are-docs-informative: 0.0.2
       comment-parser: 1.4.1
-      debug: 4.3.7
+      debug: 4.3.6
       escape-string-regexp: 4.0.0
       eslint: 9.12.0(jiti@1.21.6)
       espree: 10.1.0
@@ -14722,9 +16104,20 @@ snapshots:
 
   eslint-plugin-perfectionist@3.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vue-eslint-parser@9.4.3(eslint@9.12.0(jiti@1.21.6))):
     dependencies:
+<<<<<<< HEAD
       '@typescript-eslint/types': 8.7.0
+<<<<<<< HEAD
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       eslint: 9.12.0(jiti@1.21.6)
+=======
+      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+      eslint: 9.11.1(jiti@1.21.6)
+=======
+      '@typescript-eslint/types': 8.5.0
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      eslint: 9.11.0(jiti@1.21.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       minimatch: 9.0.5
       natural-compare-lite: 1.4.0
     optionalDependencies:
@@ -14896,9 +16289,20 @@ snapshots:
 
   eslint-plugin-toml@0.11.1(eslint@9.12.0(jiti@1.21.6)):
     dependencies:
+<<<<<<< HEAD
       debug: 4.3.7
+<<<<<<< HEAD
       eslint: 9.12.0(jiti@1.21.6)
       eslint-compat-utils: 0.5.1(eslint@9.12.0(jiti@1.21.6))
+=======
+      eslint: 9.11.1(jiti@1.21.6)
+      eslint-compat-utils: 0.5.1(eslint@9.11.1(jiti@1.21.6))
+=======
+      debug: 4.3.6
+      eslint: 9.11.0(jiti@1.21.6)
+      eslint-compat-utils: 0.5.1(eslint@9.11.0(jiti@1.21.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       lodash: 4.17.21
       toml-eslint-parser: 0.10.0
     transitivePeerDependencies:
@@ -14924,11 +16328,27 @@ snapshots:
       semver: 7.6.3
       strip-indent: 3.0.0
 
+<<<<<<< HEAD
   eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6)):
+=======
+<<<<<<< HEAD
+  eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6)):
+=======
+  eslint-plugin-unused-imports@4.1.3(@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6)):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       eslint: 9.12.0(jiti@1.21.6)
     optionalDependencies:
+<<<<<<< HEAD
       '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
+=======
+<<<<<<< HEAD
+      '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+=======
+      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   eslint-plugin-vue@9.28.0(eslint@9.12.0(jiti@1.21.6)):
     dependencies:
@@ -14946,9 +16366,20 @@ snapshots:
 
   eslint-plugin-yml@1.14.0(eslint@9.12.0(jiti@1.21.6)):
     dependencies:
+<<<<<<< HEAD
       debug: 4.3.7
+<<<<<<< HEAD
       eslint: 9.12.0(jiti@1.21.6)
       eslint-compat-utils: 0.5.1(eslint@9.12.0(jiti@1.21.6))
+=======
+      eslint: 9.11.1(jiti@1.21.6)
+      eslint-compat-utils: 0.5.1(eslint@9.11.1(jiti@1.21.6))
+=======
+      debug: 4.3.6
+      eslint: 9.11.0(jiti@1.21.6)
+      eslint-compat-utils: 0.5.1(eslint@9.11.0(jiti@1.21.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       lodash: 4.17.21
       natural-compare: 1.4.0
       yaml-eslint-parser: 1.2.3
@@ -15257,12 +16688,16 @@ snapshots:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
+<<<<<<< HEAD
   foreground-child@3.3.0:
     dependencies:
       cross-spawn: 7.0.3
       signal-exit: 4.1.0
 
   fork-ts-checker-webpack-plugin@8.0.0(typescript@5.6.3)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)):
+=======
+  fork-ts-checker-webpack-plugin@8.0.0(typescript@5.6.2)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)):
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@babel/code-frame': 7.25.7
       chalk: 4.1.2
@@ -15386,9 +16821,9 @@ snapshots:
       meow: 12.1.1
       semver: 7.6.3
 
-  git-semver-tags@8.0.0:
+  git-semver-tags@8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0):
     dependencies:
-      '@conventional-changelog/git-client': 1.0.1
+      '@conventional-changelog/git-client': 1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
       meow: 13.2.0
     transitivePeerDependencies:
       - conventional-commits-filter
@@ -15423,6 +16858,7 @@ snapshots:
       minipass: 7.1.2
       path-scurry: 1.11.1
 
+<<<<<<< HEAD
   glob@10.4.5:
     dependencies:
       foreground-child: 3.3.0
@@ -15432,6 +16868,8 @@ snapshots:
       package-json-from-dist: 1.0.1
       path-scurry: 1.11.1
 
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   glob@7.2.3:
     dependencies:
       fs.realpath: 1.0.0
@@ -15597,7 +17035,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.1
-      debug: 4.3.6
+      debug: 4.3.5
     transitivePeerDependencies:
       - supports-color
 
@@ -15926,8 +17364,13 @@ snapshots:
 
   istanbul-lib-instrument@6.0.3:
     dependencies:
+<<<<<<< HEAD
       '@babel/core': 7.25.8
       '@babel/parser': 7.25.8
+=======
+      '@babel/core': 7.25.2
+      '@babel/parser': 7.25.4
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.2
       semver: 7.6.3
@@ -15943,7 +17386,7 @@ snapshots:
   istanbul-lib-source-maps@5.0.6:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      debug: 4.3.7
+      debug: 4.3.6
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
@@ -15962,12 +17405,6 @@ snapshots:
       set-function-name: 2.0.2
 
   jackspeak@3.4.0:
-    dependencies:
-      '@isaacs/cliui': 8.0.2
-    optionalDependencies:
-      '@pkgjs/parseargs': 0.11.0
-
-  jackspeak@3.4.3:
     dependencies:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
@@ -16006,7 +17443,15 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -16289,10 +17734,15 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  magicast@0.3.5:
+  magicast@0.3.4:
     dependencies:
+<<<<<<< HEAD
       '@babel/parser': 7.25.8
       '@babel/types': 7.25.8
+=======
+      '@babel/parser': 7.25.4
+      '@babel/types': 7.25.4
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       source-map-js: 1.2.1
 
   make-dir@2.1.0:
@@ -16623,7 +18073,7 @@ snapshots:
   micromark@4.0.0:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.3.7
+      debug: 4.3.6
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.1
@@ -16988,8 +18438,11 @@ snapshots:
       degenerator: 5.0.1
       netmask: 2.0.2
 
+<<<<<<< HEAD
   package-json-from-dist@1.0.1: {}
 
+=======
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
   package-json@10.0.1:
     dependencies:
       ky: 1.7.2
@@ -17234,7 +18687,17 @@ snapshots:
       picocolors: 1.0.1
       source-map-js: 1.2.0
 
+<<<<<<< HEAD
   postcss@8.4.47:
+=======
+  postcss@8.4.41:
+    dependencies:
+      nanoid: 3.3.7
+      picocolors: 1.0.1
+      source-map-js: 1.2.0
+
+  postcss@8.4.45:
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.1.0
@@ -17283,7 +18746,15 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       long: 5.2.3
 
   protocols@2.0.1: {}
@@ -17551,26 +19022,62 @@ snapshots:
     dependencies:
       dnd-core: 16.0.1
 
+<<<<<<< HEAD
   react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+=======
+<<<<<<< HEAD
+  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+=======
+  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       dnd-core: 16.0.1
       dnd-multi-backend: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
+<<<<<<< HEAD
       react-dnd: 16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1)
       react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1))(react@18.3.1)
+=======
+<<<<<<< HEAD
+      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
+      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react@18.3.1)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       react-dom: 18.3.1(react@18.3.1)
 
   react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
+<<<<<<< HEAD
       react-dnd: 16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1)
+=======
+      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
+=======
+      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
+      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react@18.3.1)
+      react-dom: 18.3.1(react@18.3.1)
+
+  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   react-dnd-touch-backend@16.0.1:
     dependencies:
       '@react-dnd/invariant': 4.0.2
       dnd-core: 16.0.1
 
+<<<<<<< HEAD
   react-dnd@16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1):
+=======
+<<<<<<< HEAD
+  react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1):
+=======
+  react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@react-dnd/invariant': 4.0.2
       '@react-dnd/shallowequal': 4.0.2
@@ -17579,8 +19086,18 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
     optionalDependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
       '@types/react': 18.3.11
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+      '@types/react': 18.3.9
+=======
+      '@types/node': 22.7.0
+      '@types/react': 18.3.5
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 
   react-docgen-typescript@2.2.2(typescript@5.6.3):
     dependencies:
@@ -17655,7 +19172,15 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       substyle: 9.4.1(react@18.3.1)
 
+<<<<<<< HEAD
   react-mosaic-component@6.1.0(@types/node@22.7.5)(@types/react@18.3.11)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+=======
+<<<<<<< HEAD
+  react-mosaic-component@6.1.0(@types/node@22.7.3)(@types/react@18.3.9)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+=======
+  react-mosaic-component@6.1.0(@types/node@22.7.0)(@types/react@18.3.5)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       classnames: 2.5.1
       immutability-helper: 3.1.1
@@ -17663,9 +19188,21 @@ snapshots:
       prop-types: 15.8.1
       rdndmb-html5-to-touch: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
+<<<<<<< HEAD
       react-dnd: 16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1)
       react-dnd-html5-backend: 16.0.1
       react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.5)(@types/react@18.3.11)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+<<<<<<< HEAD
+      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
+      react-dnd-html5-backend: 16.0.1
+      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+=======
+      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
+      react-dnd-html5-backend: 16.0.1
+      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       react-dnd-touch-backend: 16.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -17924,26 +19461,26 @@ snapshots:
     dependencies:
       glob: 7.2.3
 
-  rollup@4.22.4:
+  rollup@4.21.2:
     dependencies:
       '@types/estree': 1.0.5
     optionalDependencies:
-      '@rollup/rollup-android-arm-eabi': 4.22.4
-      '@rollup/rollup-android-arm64': 4.22.4
-      '@rollup/rollup-darwin-arm64': 4.22.4
-      '@rollup/rollup-darwin-x64': 4.22.4
-      '@rollup/rollup-linux-arm-gnueabihf': 4.22.4
-      '@rollup/rollup-linux-arm-musleabihf': 4.22.4
-      '@rollup/rollup-linux-arm64-gnu': 4.22.4
-      '@rollup/rollup-linux-arm64-musl': 4.22.4
-      '@rollup/rollup-linux-powerpc64le-gnu': 4.22.4
-      '@rollup/rollup-linux-riscv64-gnu': 4.22.4
-      '@rollup/rollup-linux-s390x-gnu': 4.22.4
-      '@rollup/rollup-linux-x64-gnu': 4.22.4
-      '@rollup/rollup-linux-x64-musl': 4.22.4
-      '@rollup/rollup-win32-arm64-msvc': 4.22.4
-      '@rollup/rollup-win32-ia32-msvc': 4.22.4
-      '@rollup/rollup-win32-x64-msvc': 4.22.4
+      '@rollup/rollup-android-arm-eabi': 4.21.2
+      '@rollup/rollup-android-arm64': 4.21.2
+      '@rollup/rollup-darwin-arm64': 4.21.2
+      '@rollup/rollup-darwin-x64': 4.21.2
+      '@rollup/rollup-linux-arm-gnueabihf': 4.21.2
+      '@rollup/rollup-linux-arm-musleabihf': 4.21.2
+      '@rollup/rollup-linux-arm64-gnu': 4.21.2
+      '@rollup/rollup-linux-arm64-musl': 4.21.2
+      '@rollup/rollup-linux-powerpc64le-gnu': 4.21.2
+      '@rollup/rollup-linux-riscv64-gnu': 4.21.2
+      '@rollup/rollup-linux-s390x-gnu': 4.21.2
+      '@rollup/rollup-linux-x64-gnu': 4.21.2
+      '@rollup/rollup-linux-x64-musl': 4.21.2
+      '@rollup/rollup-win32-arm64-msvc': 4.21.2
+      '@rollup/rollup-win32-ia32-msvc': 4.21.2
+      '@rollup/rollup-win32-x64-msvc': 4.21.2
       fsevents: 2.3.3
 
   rrweb-cssom@0.6.0: {}
@@ -18455,7 +19992,7 @@ snapshots:
   test-exclude@7.0.1:
     dependencies:
       '@istanbuljs/schema': 0.1.3
-      glob: 10.4.5
+      glob: 10.4.1
       minimatch: 9.0.5
 
   text-extensions@2.4.0: {}
@@ -18472,11 +20009,15 @@ snapshots:
 
   tinyexec@0.3.0: {}
 
-  tinypool@1.0.1: {}
+  tinypool@1.0.0: {}
 
   tinyrainbow@1.2.0: {}
 
+<<<<<<< HEAD
   tinyspy@3.0.2: {}
+=======
+  tinyspy@3.0.0: {}
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
 
   tmp@0.0.33:
     dependencies:
@@ -18773,12 +20314,28 @@ snapshots:
 
   vary@1.1.2: {}
 
+<<<<<<< HEAD
   vite-node@2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+=======
+<<<<<<< HEAD
+  vite-node@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+=======
+  vite-node@2.1.1(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       cac: 6.7.14
-      debug: 4.3.7
+      debug: 4.3.6
       pathe: 1.1.2
+<<<<<<< HEAD
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+<<<<<<< HEAD
+      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -18790,12 +20347,29 @@ snapshots:
       - supports-color
       - terser
 
+<<<<<<< HEAD
   vite-plugin-dts@4.2.3(@types/node@22.7.5)(rollup@4.22.4)(typescript@5.6.3)(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
+=======
+<<<<<<< HEAD
+  vite-plugin-dts@4.2.2(@types/node@22.7.3)(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@microsoft/api-extractor': 7.47.7(@types/node@22.7.5)
       '@rollup/pluginutils': 5.1.2(rollup@4.22.4)
+<<<<<<< HEAD
       '@volar/typescript': 2.4.6
       '@vue/language-core': 2.1.6(typescript@5.6.3)
+=======
+      '@volar/typescript': 2.4.5
+=======
+  vite-plugin-dts@4.2.1(@types/node@22.7.0)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
+    dependencies:
+      '@microsoft/api-extractor': 7.47.7(@types/node@22.7.0)
+      '@rollup/pluginutils': 5.1.0(rollup@4.21.2)
+      '@volar/typescript': 2.4.4
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@vue/language-core': 2.1.6(typescript@5.6.2)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       compare-versions: 6.1.1
       debug: 4.3.7
       kolorist: 1.8.0
@@ -18803,24 +20377,49 @@ snapshots:
       magic-string: 0.30.11
       typescript: 5.6.3
     optionalDependencies:
+<<<<<<< HEAD
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+<<<<<<< HEAD
+      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
       - supports-color
 
+<<<<<<< HEAD
   vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+=======
+<<<<<<< HEAD
+  vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+=======
+  vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
     dependencies:
       esbuild: 0.21.5
-      postcss: 8.4.47
-      rollup: 4.22.4
+      postcss: 8.4.45
+      rollup: 4.21.2
     optionalDependencies:
+<<<<<<< HEAD
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      '@types/node': 22.7.3
+=======
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       fsevents: 2.3.3
       less: 4.2.0
       sass: 1.77.5
       terser: 5.31.6
 
+<<<<<<< HEAD
   vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       '@vitest/expect': 2.1.2
@@ -18830,20 +20429,54 @@ snapshots:
       '@vitest/snapshot': 2.1.2
       '@vitest/spy': 2.1.2
       '@vitest/utils': 2.1.2
+=======
+<<<<<<< HEAD
+  vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+    dependencies:
+      '@vitest/expect': 2.1.1
+      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+  vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+    dependencies:
+      '@vitest/expect': 2.1.1
+      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@vitest/pretty-format': 2.1.1
+      '@vitest/runner': 2.1.1
+      '@vitest/snapshot': 2.1.1
+      '@vitest/spy': 2.1.1
+      '@vitest/utils': 2.1.1
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       chai: 5.1.1
-      debug: 4.3.7
+      debug: 4.3.6
       magic-string: 0.30.11
       pathe: 1.1.2
       std-env: 3.7.0
       tinybench: 2.9.0
       tinyexec: 0.3.0
-      tinypool: 1.0.1
+      tinypool: 1.0.0
       tinyrainbow: 1.2.0
+<<<<<<< HEAD
       vite: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vite-node: 2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.7.5
+=======
+<<<<<<< HEAD
+      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite-node: 2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 22.7.3
+=======
+      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite-node: 2.1.1(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 22.7.0
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       happy-dom: 15.0.0
       jsdom: 24.1.1
     transitivePeerDependencies:
@@ -18861,8 +20494,17 @@ snapshots:
 
   vue-eslint-parser@9.4.3(eslint@9.12.0(jiti@1.21.6)):
     dependencies:
+<<<<<<< HEAD
       debug: 4.3.7
+<<<<<<< HEAD
       eslint: 9.12.0(jiti@1.21.6)
+=======
+      eslint: 9.11.1(jiti@1.21.6)
+=======
+      debug: 4.3.6
+      eslint: 9.11.0(jiti@1.21.6)
+>>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+>>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
       eslint-scope: 7.2.2
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1

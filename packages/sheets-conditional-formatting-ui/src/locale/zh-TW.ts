@@ -171,6 +171,7 @@ const locale: typeof zhCN = {
             },
             errorMessage: {
                 notBlank: '條件不能為空',
+                rangeError: '選區錯誤',
                 formulaError: '公式錯誤',
             },
         },

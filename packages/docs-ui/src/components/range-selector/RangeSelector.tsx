@@ -51,6 +51,9 @@ const dialogOnlyInputStyle: React.CSSProperties = {
     pointerEvents: 'none',
 };
 
+/**
+ * @deprecated
+ */
 export function RangeSelector(props: IRangeSelectorProps) {
     const { dialogOnly, onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange } = props;
     const onSelectorVisibleChange = useEvent(_onSelectorVisibleChange);

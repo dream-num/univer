@@ -1,0 +1,406 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
+import { IEditorService } from '@univerjs/docs-ui';
+import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { IDescriptionService } from '@univerjs/sheets-formula';
+import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import cl from 'clsx';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+
+import type { ISequenceNode } from '@univerjs/engine-formula';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { ReactNode } from 'react';
+import { useFormulaToken } from './hooks/useFormulaToken';
+import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
+import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
+import styles from './index.module.less';
+
+import { findIndexFromSequenceNodes } from './utils/findIndexFromSequenceNodes';
+import { getOffsetFromSequenceNodes } from './utils/getOffsetFromSequenceNodes';
+import { sequenceNodeToText } from './utils/sequenceNodeToText';
+import { unitRangesToText } from './utils/unitRangesToText';
+
+interface IRangeSelectorProps {
+    initValue: string | IUnitRangeName[];
+    onChange: (result: string) => void;
+    unitId: string;
+    subUnitId: string;
+    errorText?: string | ReactNode;
+    onVerify?: (res: boolean, result: string) => void;
+    placeholder?: string;
+};
+
+export function RangeSelector(props: IRangeSelectorProps) {
+    const { initValue, unitId, subUnitId, onChange, onVerify, errorText, placeholder } = props;
+
+    const editorService = useDependency(IEditorService);
+    const localeService = useDependency(LocaleService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
+
+    const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
+    const [isFocus, isFocusSet] = useState(false);
+    const editorId = useMemo(() => createInternalEditorID(`range-selector-${generateRandomId(4)}`), []);
+    const [editor, editorSet] = useState<Editor>();
+    const docSelectionRef = useRef<ITextRangeWithStyle>();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const [rangeString, rangeStringSet] = useState(() => {
+        if (typeof initValue === 'string') {
+            return initValue;
+        } else {
+            return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(',');
+        }
+    });
+
+    const ranges = useMemo(() => {
+        return rangeString.split(',').filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
+    }, [rangeString]);
+
+    const isError = useMemo(() => errorText !== undefined, [errorText]);
+
+    const handleConform = (ranges: IUnitRangeName[]) => {
+        const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(',');
+        rangeStringSet(text);
+        onChange(text);
+        rangeDialogVisibleSet(false);
+    };
+
+    const handleClose = () => {
+        rangeDialogVisibleSet(false);
+    };
+
+    const handleOpenModal = () => {
+        if (!isError) {
+            rangeDialogVisibleSet(true);
+        }
+    };
+
+    const { sequenceNodes } = useFormulaToken(rangeString);
+    const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
+    useSheetHighlight(!rangeDialogVisible, unitId, subUnitId, sheetHighlightRanges);
+
+    const handleSheetSelectionChange = useCallback((rangeText: string) => {
+        if (docSelectionRef.current) {
+            const { endOffset, startOffset } = docSelectionRef.current;
+            if (endOffset === startOffset) {
+                let index = findIndexFromSequenceNodes(sequenceNodes, endOffset, false);
+                const item = sequenceNodes[index];
+                if (item && typeof item !== 'string') {
+                    const item = sequenceNodes[index];
+                    if (typeof item !== 'string') {
+                        const newLength = rangeText.length - 1;
+                        const oldLength = item.token.length - 1;
+                        item.endIndex = item.startIndex + newLength;
+                        item.token = rangeText;
+                        const diffLength = newLength - oldLength;
+                        if (diffLength !== 0) {
+                            index++;
+                            while (index <= (sequenceNodes.length - 1)) {
+                                const item = sequenceNodes[index];
+                                index++;
+                                if (typeof item === 'string') {
+                                    continue;
+                                }
+                                item.startIndex += diffLength;
+                                item.endIndex += diffLength;
+                                index++;
+                            }
+                        }
+                        const result = sequenceNodeToText(sequenceNodes);
+                        rangeStringSet(result);
+                        onChange(result);
+                    }
+                } else if (!item || typeof item === 'string') {
+                    const nextItem = sequenceNodes[index + 1];
+                    if (nextItem && typeof nextItem !== 'string') {
+                        return;
+                    }
+                    const cloneList = [...sequenceNodes];
+                    const preList = cloneList.splice(0, index + 1);
+                    const startIndex = getOffsetFromSequenceNodes(preList);
+                    const endIndex = rangeText.length - 1 + startIndex;
+                    const node: ISequenceNode = {
+                        token: rangeText,
+                        startIndex,
+                        endIndex,
+                        nodeType: sequenceNodeType.REFERENCE,
+                    };
+                    const newSequenceNodes = [...preList, node, ...cloneList];
+
+                    cloneList.forEach((item) => {
+                        if (typeof item !== 'string') {
+                            item.startIndex += rangeText.length;
+                            item.endIndex += rangeText.length;
+                        }
+                    });
+
+                    docSelectionRef.current.startOffset += rangeText.length;
+                    docSelectionRef.current.endOffset += rangeText.length;
+                    const result = sequenceNodeToText(newSequenceNodes);
+                    rangeStringSet(result);
+                    onChange(result);
+                }
+            }
+        }
+    }, [sequenceNodes]);
+
+    useSheetSelectionChange(!rangeDialogVisible, unitId, subUnitId, handleSheetSelectionChange);
+
+    useEffect(() => {
+        if (editor) {
+            const dispose = editor?.selectionChange$.subscribe((selection) => {
+                const { textRanges } = selection;
+                const range = textRanges[textRanges.length - 1];
+                docSelectionRef.current = range;
+            });
+            return () => {
+                dispose?.unsubscribe();
+            };
+        }
+    }, [editor]);
+
+    useEffect(() => {
+        if (onVerify) {
+            const result = sequenceNodes.some((item) => {
+                if (typeof item === 'string') {
+                    if (item !== ',') {
+                        // eslint-disable-next-line ts/no-unused-expressions
+                        onVerify && onVerify(false, sequenceNodeToText(sequenceNodes));
+                        return true;
+                    }
+                } else {
+                    if (item.nodeType !== sequenceNodeType.REFERENCE) {
+                        onVerify && onVerify(false, sequenceNodeToText(sequenceNodes));
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (!result) {
+                onVerify && onVerify(true, sequenceNodeToText(sequenceNodes));
+            }
+        }
+    }, [sequenceNodes, onVerify]);
+
+    useEffect(() => {
+        if (editor) {
+            const dispose = editor.input$.subscribe((e) => {
+                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
+                rangeStringSet(text);
+                onChange(text);
+            });
+            return () => {
+                dispose.unsubscribe();
+            };
+        }
+    }, [editor]);
+
+    useEffect(() => {
+        if (editor) {
+            const d1 = editor.focus$.subscribe(() => {
+                isFocusSet(true);
+            });
+            const d2 = editor.blur$.subscribe(() => {
+                isFocusSet(false);
+            });
+            return () => {
+                d1.unsubscribe();
+                d2.unsubscribe();
+            };
+        }
+    }, [editor]);
+
+    useEffect(() => {
+        const d1 = commandService.beforeCommandExecuted((info) => {
+            if (info.id === SetWorksheetActiveOperation.id) {
+                docSelectionRef.current = undefined;
+                isFocusSet(false);
+            }
+        });
+        const d2 = commandService.onCommandExecuted((info) => {
+            if (info.id === SetCellEditVisibleOperation.id) {
+                rangeDialogVisibleSet(false);
+                docSelectionRef.current = undefined;
+                isFocusSet(false);
+            }
+        });
+        return () => {
+            d1.dispose();
+            d2.dispose();
+        };
+    }, []);
+
+    useLayoutEffect(() => {
+        let dispose: IDisposable;
+        if (containerRef.current) {
+            dispose = editorService.register({ editorUnitId: editorId }, containerRef.current);
+            const editor = editorService.getEditor(editorId)! as Editor;
+
+            editorSet(editor);
+        }
+        return () => {
+            dispose?.dispose();
+        };
+    }, [containerRef.current]);
+
+    return (
+        <div className={styles.sheetRangeSelector}>
+            <div className={cl(styles.sheetRangeSelectorTextWrap, {
+                [styles.sheetRangeSelectorActive]: isFocus && !isError,
+                [styles.sheetRangeSelectorError]: isError,
+            })}
+            >
+                <div ref={containerRef} className={styles.sheetRangeSelectorText}></div>
+                <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
+                    <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
+                </Tooltip>
+                {errorText !== undefined ? <div className={styles.sheetRangeSelectorErrorWrap}>{errorText}</div> : null}
+                {(placeholder !== undefined && !rangeString) ? <div className={styles.sheetRangeSelectorPlaceholder}>{placeholder}</div> : null}
+            </div>
+
+            {rangeDialogVisible && (
+                <RangeSelectorDialog
+                    handleConform={handleConform}
+                    handleClose={handleClose}
+                    unitId={unitId}
+                    subUnitId={subUnitId}
+                    initValue={ranges}
+                    visible={rangeDialogVisible}
+                >
+                </RangeSelectorDialog>
+            )}
+        </div>
+    );
+}
+
+function RangeSelectorDialog(props: {
+    handleConform: (ranges: IUnitRangeName[]) => void;
+    handleClose: () => void;
+    visible: boolean;
+    initValue: IUnitRangeName[];
+    unitId: string;
+    subUnitId: string;
+}) {
+    const { handleConform, handleClose, visible, initValue, unitId, subUnitId } = props;
+
+    const localeService = useDependency(LocaleService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const descriptionService = useDependency(IDescriptionService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+
+    const [focusIndex, focusIndexSet] = useState(-1);
+
+    const [ranges, rangesSet] = useState(() => unitRangesToText(initValue, unitId, subUnitId, univerInstanceService));
+
+    const colorMap = useColor();
+
+    const rangeText = useMemo(() => ranges.join(','), [ranges]);
+    const { sequenceNodes } = useFormulaToken(rangeText);
+
+    const refSelections = useMemo(() => buildTextRuns(descriptionService, colorMap, sequenceNodes).refSelections, [sequenceNodes]);
+    useSheetHighlight(true, unitId, subUnitId, refSelections);
+
+    const handleRangeInput = (index: number, value: string) => {
+        rangesSet((v) => {
+            const result = [...v];
+            result[index] = value;
+            return result;
+        });
+    };
+
+    const handleRangeRemove = (index: number) => {
+        rangesSet((v) => {
+            const result: string[] = [];
+            v.forEach((r, i) => {
+                if (index !== i) {
+                    result.push(r);
+                }
+            });
+            return result;
+        });
+    };
+
+    const handleRangeAdd = () => {
+        rangesSet((v) => {
+            v.push('');
+            return [...v];
+        });
+    };
+    const handleSheetSelectionChange = useCallback((rangeText: string) => {
+        handleRangeInput(focusIndex, rangeText);
+    }, [focusIndex]);
+
+    useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, handleSheetSelectionChange);
+
+    return (
+        <Dialog
+            width="328px"
+            visible={visible}
+            title={localeService.t('rangeSelector.title')}
+            draggable
+            closeIcon={<CloseSingle />}
+            footer={(
+                <footer>
+                    <Button onClick={handleClose}>{localeService.t('rangeSelector.cancel')}</Button>
+                    <Button
+                        style={{ marginLeft: 10 }}
+                        onClick={() => handleConform(ranges.filter((text) => {
+                            const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
+                            return nodes && nodes.length === 1 && typeof nodes[0] !== 'string' && nodes[0].nodeType === sequenceNodeType.REFERENCE;
+                        }).map((text) => deserializeRangeWithSheet(text)))}
+                        type="primary"
+                    >
+                        {localeService.t('rangeSelector.confirm')}
+                    </Button>
+                </footer>
+            )}
+            onClose={handleClose}
+        >
+            <div className={styles.sheetRangeSelectorDialog}>
+                {ranges.map((text, index) => (
+                    <div key={index} className={styles.sheetRangeSelectorDialogItem}>
+                        <div>
+                            <Input
+                                placeholder={localeService.t('rangeSelector.placeHolder')}
+                                key={`input_${index}`}
+                                onFocus={() => focusIndexSet(index)}
+                                value={text}
+                                onChange={(value) => handleRangeInput(index, value)}
+                            />
+                        </div>
+                        <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />
+                    </div>
+                ))}
+
+                <div>
+                    <Button type="link" size="small" onClick={handleRangeAdd}>
+                        <IncreaseSingle />
+                        <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
+                    </Button>
+                </div>
+            </div>
+
+        </Dialog>
+    );
+}

@@ -1715,6 +1715,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
+    resetCache(): void {
+        this._resetCache();
+    }
+
     /**
      * Any changes to sheet model would reset cache.
      */

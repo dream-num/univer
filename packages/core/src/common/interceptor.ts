@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../shared/types';
 import { remove } from './array';
+import type { Nullable } from '../shared/types';
 
 export type InterceptorHandler<M = unknown, C = unknown> = (
     value: Nullable<M>,
@@ -23,9 +23,17 @@ export type InterceptorHandler<M = unknown, C = unknown> = (
     next: (value: Nullable<M>) => Nullable<M>
 ) => Nullable<M>;
 
+export enum InterceptorEffectEnum {
+    Style = 1, // 1<< 0
+    Value = 2, // 1<< 1
+}
 export interface IInterceptor<M, C> {
     priority?: number;
     handler: InterceptorHandler<M, C>;
+}
+
+export interface ICellInterceptor<M, C> extends IInterceptor<M, C> {
+    effect: InterceptorEffectEnum;
 }
 
 export function createInterceptorKey<T, C>(key: string): IInterceptor<T, C> {
@@ -42,28 +50,35 @@ export type IComposeInterceptors<T = any, C = any> = (
  */
 export const composeInterceptors = <T, C>(interceptors: Array<IInterceptor<T, C>>) =>
 
-    function (initialValue: T, context: C) {
+    function (initialValue: Nullable<T>, context: C) {
         let index = -1;
+        let value: Nullable<T> = initialValue;
 
-        function passThrough(
-            i: number,
-            v: Parameters<IInterceptor<T, C>['handler']>[0]
-        ): Parameters<IInterceptor<T, C>['handler']>[0] {
+        for (let i = 0; i <= interceptors.length; i++) {
             if (i <= index) {
                 throw new Error('[SheetInterceptorService]: next() called multiple times!');
             }
 
             index = i;
+
             if (i === interceptors.length) {
-                return v;
+                return value;
             }
 
             const interceptor = interceptors[i];
+            let nextCalled = false;
 
-            return interceptor.handler!(v, context, passThrough.bind(null, i + 1));
+            value = interceptor.handler!(value, context, (nextValue) => {
+                nextCalled = true;
+                return nextValue;
+            });
+
+            if (!nextCalled) {
+                break;
+            }
         }
 
-        return passThrough(0, initialValue);
+        return value;
     } as ReturnType<IComposeInterceptors<T, C>>;
 
 export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>> {

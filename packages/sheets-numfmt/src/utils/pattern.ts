@@ -18,7 +18,12 @@ import { LocaleType, numfmt } from '@univerjs/core';
 import type { FormatType } from '@univerjs/sheets';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
-export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType) => {
+interface IPatternPreview {
+    result: string;
+    color?: string;
+}
+
+export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType): IPatternPreview => {
     const info = numfmt.getInfo(pattern);
     const locale = _locale === LocaleType.ZH_CN ? 'zh-CN' : 'en';
     const negInfo = info._partitions[1];
@@ -32,4 +37,13 @@ export const getPatternPreview = (pattern: string, value: number, _locale?: Loca
     return {
         result,
     };
+};
+
+export const getPatternPreviewIgnoreGeneral = (pattern: string, value: number, _locale?: LocaleType): IPatternPreview => {
+    if (pattern === 'General') {
+        return {
+            result: String(value),
+        };
+    }
+    return getPatternPreview(pattern, value, _locale);
 };

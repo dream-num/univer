@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { IRange } from '@univerjs/core';
-import { LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 
 import type { UnitObject } from '@univerjs/protocol';
 
@@ -101,6 +101,11 @@ export class RangeProtectionRuleModel {
     getSubunitRuleList(unitId: string, subUnitId: string) {
         const map = this._model.get(unitId)?.get(subUnitId) || new Map();
         return [...map.values()] as IRangeProtectionRule[];
+    }
+
+    getSubunitRuleListLength(unitId: string, subUnitId: string) {
+        const map = this._model.get(unitId)?.get(subUnitId);
+        return map ? map.size : 0;
     }
 
     private _ensureRuleMap(unitId: string, subUnitId: string) {

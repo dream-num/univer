@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
-import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
+import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import type { ICommandInfo } from '@univerjs/core';
+import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
 export class ArrayFormulaDisplayController extends Disposable {
@@ -64,6 +64,7 @@ export class ArrayFormulaDisplayController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
+                effect: InterceptorEffectEnum.Value,
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
                     const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();

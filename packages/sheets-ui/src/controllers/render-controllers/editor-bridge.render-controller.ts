@@ -208,13 +208,13 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             }
 
             if (options?.fromCollab) return;
-
-            if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
+            if (command.id !== SetWorksheetActiveOperation.id && COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
                 this._hideEditor();
             }
         }));
 
         d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            if (options?.fromCollab) return;
             if (command.id === SetWorksheetActiveOperation.id) {
                 this._tryHideEditor();
             }

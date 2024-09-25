@@ -22,9 +22,9 @@ import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
+import { RectRange } from './rect-range';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
-import type { RectRange } from './rect-range';
 
 export interface IEditorInputConfig {
     event: Event | CompositionEvent | KeyboardEvent;
@@ -161,6 +161,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._selectionStyle = style;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _currentSegmentId: segmentId,
@@ -176,17 +177,39 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
             const { startOffset, endOffset, rangeType } = range;
 
             if (rangeType === DOC_RANGE_TYPE.RECT) {
-                const rectRange = getRectRangeFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
-                );
+                const { startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
+
+                const rectRange = startNodePosition && endNodePosition
+                    ? new RectRange(scene, document, docSkeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage)
+                    : getRectRangeFromCharIndex(
+                        startOffset,
+                        endOffset,
+                        scene,
+                        document,
+                        docSkeleton,
+                        style,
+                        segmentId,
+                        segmentPage
+                    );
 
                 if (rectRange) {
                     this._addRectRanges([rectRange]);
                 }
             } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
-                const textRange = getTextRangeFromCharIndex(
-                    startOffset, endOffset, scene, document, docSkeleton, style, segmentId, segmentPage
-                );
+                const { startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
+
+                const textRange = startNodePosition && endNodePosition
+                    ? new TextRange(scene, document, docSkeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage)
+                    : getTextRangeFromCharIndex(
+                        startOffset,
+                        endOffset,
+                        scene,
+                        document,
+                        docSkeleton,
+                        style,
+                        segmentId,
+                        segmentPage
+                    );
 
                 if (textRange) {
                     this._addTextRange(textRange);

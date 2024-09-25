@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FOCUSING_DOC, ICommandService, IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -33,7 +33,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -82,7 +83,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.attachControl();
 
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
-            if (!this._contextService.getContextValue(FOCUSING_DOC)) {
+            const currentDocUnit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            if (currentDocUnit?.getUnitId() !== this._context.unitId) {
                 return;
             }
 

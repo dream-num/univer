@@ -28,7 +28,6 @@ import {
     ICommandService,
     IContextService,
     Inject,
-    IResourceLoaderService,
     isFormulaString,
     IUndoRedoService,
     IUniverInstanceService,
@@ -122,8 +121,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
-        @IEditorService private readonly _editorService: IEditorService,
-        @IResourceLoaderService private readonly _resourceLoaderService: IResourceLoaderService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -833,7 +831,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
-        const { keycode } = param;
+        let { keycode } = param;
         this._setOpenForCurrent(null, null);
 
         this._cursorChange = CursorChange.InitialState;
@@ -846,13 +844,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
-
         // If neither the formula bar editor nor the cell editor has been edited,
         // it is considered that the content has not changed and returns directly.
         const editorIsDirty = this._editorBridgeService.getEditorDirty();
         if (editorIsDirty === false) {
-            this._moveCursor(keycode);
-            return;
+            keycode = KeyCode.ESC;
         }
 
         const workbook = this._context.unit;

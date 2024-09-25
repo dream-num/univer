@@ -88,17 +88,17 @@ export function addCustomDecorationBySelectionFactory(accessor: IAccessor, param
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
 
-    const selections = docSelectionManagerService.getTextRanges();
-    if (!selections) {
-        return false;
-    }
-
     const documentDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
     if (!documentDataModel) {
         return false;
     }
-    const body = documentDataModel.getBody();
+
     const unitId = documentDataModel.getUnitId();
+    const selections = docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId });
+    if (!selections) {
+        return false;
+    }
+    const body = documentDataModel.getBody();
     if (!body) {
         return false;
     }

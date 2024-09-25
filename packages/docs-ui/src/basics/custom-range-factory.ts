@@ -64,8 +64,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
     const { rangeId, rangeType, wholeEntity, properties, unitId, selection: propSelection } = param;
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
-
-    const selection = propSelection ?? docSelectionManagerService.getActiveTextRange();
+    const selection = propSelection ?? docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId })?.[0];
     const segmentId = selection?.segmentId;
     if (!selection) {
         return false;

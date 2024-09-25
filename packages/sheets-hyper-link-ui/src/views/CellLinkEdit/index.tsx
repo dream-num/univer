@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { RangeSelector } from '@univerjs/docs-ui';
+import { DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
@@ -54,6 +55,7 @@ export const CellLinkEdit = () => {
     const sidePanelService = useDependency(SheetsHyperLinkSidePanelService);
     const sidePanelOptions = useMemo(() => sidePanelService.getOptions(), [sidePanelService]);
     const zenZoneService = useDependency(IZenZoneService);
+    const renderManagerService = useDependency(IRenderManagerService);
     const markSelectionService = useDependency(IMarkSelectionService);
     const textSelectionService = useDependency(DocSelectionManagerService);
     const contextService = useDependency(IContextService);
@@ -200,10 +202,22 @@ export const CellLinkEdit = () => {
     const payloadInitial = useMemo(() => payload, [type]);
 
     useEffect(() => {
+        const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
+        const disposeCollection = new DisposableCollection();
+
+        if (render) {
+            const selectionRenderService = render.with(DocSelectionRenderService);
+            selectionRenderService.setReserveRangesStatus(true);
+            disposeCollection.add(() => {
+                selectionRenderService.setReserveRangesStatus(false);
+            });
+        }
+
         return () => {
             editorBridgeService.disableForceKeepVisible();
+            disposeCollection.dispose();
         };
-    }, [editorBridgeService]);
+    }, [editorBridgeService, renderManagerService]);
 
     const linkTypeOptions: Array<{
         label: string;

@@ -199,26 +199,162 @@ function betaFunctionNaturalLogarithm(alpha: number, beta: number): number {
     return logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta);
 }
 
-function logGamma(x: number): number {
-    const coefficients = [
-        76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
-        -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
-    ];
-
-    let y = x;
-    let tmp = x + 5.5;
-    tmp -= (x + 0.5) * Math.log(tmp);
-    let ser = 1.000000000190015;
-
-    for (let j = 0; j < 6; j++) {
-        y += 1;
-        ser += coefficients[j] / y;
+export function binomialCDF(x: number, trials: number, probability: number): number {
+    if (x < 0) {
+        return 0;
     }
 
-    return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
+    if (x >= trials) {
+        return 1;
+    }
+
+    if (probability < 0 || probability > 1 || trials <= 0) {
+        return Number.NaN;
+    }
+
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += binomialPDF(i, trials, probability);
+    }
+
+    return result;
 }
 
-function gammaFunction(x: number): number {
+export function binomialPDF(x: number, trials: number, probability: number): number {
+    if (probability === 0 || probability === 1) {
+        if (trials * probability === x) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    return calculateCombin(trials, x) * (probability ** x) * ((1 - probability) ** (trials - x));
+}
+
+export function chisquareCDF(x: number, degFreedom: number): number {
+    if (x <= 0) {
+        return 0;
+    }
+
+    return lowRegGamma(degFreedom / 2, x / 2);
+}
+
+export function chisquarePDF(x: number, degFreedom: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x === 0 && degFreedom === 2) {
+        return 0.5;
+    }
+
+    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
+}
+
+export function chisquareINV(probability: number, degFreedom: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return 2 * lowRegGammaInverse(probability, degFreedom / 2);
+}
+
+export function centralFCDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return incompleteBetaFunction((degFreedom1 * x) / (degFreedom1 * x + degFreedom2), degFreedom1 / 2, degFreedom2 / 2);
+}
+
+export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    if (x === 0 && degFreedom1 < 2) {
+        return Infinity;
+    }
+
+    if (x === 0 && degFreedom1 === 2) {
+        return 1;
+    }
+
+    let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
+    result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
+    result *= x ** ((degFreedom1 / 2) - 1);
+    result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
+
+    return result;
+}
+
+export function centralFINV(probability: number, degFreedom1: number, degFreedom2: number): number {
+    if (probability <= 0) {
+        return 0;
+    }
+
+    if (probability >= 1) {
+        return Infinity;
+    }
+
+    return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
+}
+
+export function exponentialCDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return 1 - Math.exp(-lambda * x);
+}
+
+export function exponentialPDF(x: number, lambda: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return lambda * Math.exp(-lambda * x);
+}
+
+export function forecastLinear(x: number, knownYs: number[], knownXs: number[]): number {
+    const n = knownYs.length;
+
+    let knownYsSum = 0;
+    let knownXsSum = 0;
+
+    for (let i = 0; i < n; i++) {
+        knownYsSum += knownYs[i];
+        knownXsSum += knownXs[i];
+    }
+
+    const knownYsMean = knownYsSum / n;
+    const knownXsMean = knownXsSum / n;
+
+    let num = 0;
+    let den = 0;
+
+    for (let i = 0; i < n; i++) {
+        num += (knownYs[i] - knownYsMean) * (knownXs[i] - knownXsMean);
+        den += (knownXs[i] - knownXsMean) ** 2;
+    }
+
+    if (den === 0) {
+        return Infinity;
+    }
+
+    const b = num / den;
+    const a = knownYsMean - b * knownXsMean;
+
+    return a + b * x;
+}
+
+export function gammaFunction(x: number): number {
     const p = [
         -1.716185138865495, 24.76565080557592, -379.80425647094563,
         629.3311553128184, 866.9662027904133, -31451.272968848367,
@@ -284,61 +420,27 @@ function gammaFunction(x: number): number {
     return res;
 }
 
-export function binomialCDF(x: number, trials: number, probability: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    if (x >= trials) {
-        return 1;
-    }
-
-    if (probability < 0 || probability > 1 || trials <= 0) {
-        return Number.NaN;
-    }
-
-    let result = 0;
-
-    for (let i = 0; i <= x; i++) {
-        result += binomialPDF(i, trials, probability);
-    }
-
-    return result;
-}
-
-export function binomialPDF(x: number, trials: number, probability: number): number {
-    if (probability === 0 || probability === 1) {
-        if (trials * probability === x) {
-            return 1;
-        }
-
-        return 0;
-    }
-
-    return calculateCombin(trials, x) * (probability ** x) * ((1 - probability) ** (trials - x));
-}
-
-export function chisquareCDF(x: number, degFreedom: number): number {
+export function gammaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
         return 0;
     }
 
-    return lowRegGamma(degFreedom / 2, x / 2);
+    return lowRegGamma(alpha, x / beta);
 }
 
-export function chisquarePDF(x: number, degFreedom: number): number {
+export function gammaPDF(x: number, alpha: number, beta: number): number {
     if (x < 0) {
         return 0;
     }
 
-    if (x === 0 && degFreedom === 2) {
-        return 0.5;
+    if (x === 0 && alpha === 1) {
+        return 1 / beta;
     }
 
-    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
+    return Math.exp((alpha - 1) * Math.log(x) - x / beta - logGamma(alpha) - alpha * Math.log(beta));
 }
 
-export function chisquareINV(probability: number, degFreedom: number): number {
+export function gammaINV(probability: number, alpha: number, beta: number): number {
     if (probability <= 0) {
         return 0;
     }
@@ -347,7 +449,26 @@ export function chisquareINV(probability: number, degFreedom: number): number {
         return Infinity;
     }
 
-    return 2 * lowRegGammaInverse(probability, degFreedom / 2);
+    return beta * lowRegGammaInverse(probability, alpha);
+}
+
+function logGamma(x: number): number {
+    const coefficients = [
+        76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
+        -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
+    ];
+
+    let y = x;
+    let tmp = x + 5.5;
+    tmp -= (x + 0.5) * Math.log(tmp);
+    let ser = 1.000000000190015;
+
+    for (let j = 0; j < 6; j++) {
+        y += 1;
+        ser += coefficients[j] / y;
+    }
+
+    return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
 }
 
 function lowRegGamma(a: number, x: number): number {
@@ -466,102 +587,6 @@ function lowRegGammaInverse(p: number, a: number): number {
     return x;
 }
 
-export function studentTINV(probability: number, degFreedom: number): number {
-    let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
-    x = Math.sqrt(degFreedom * (1 - x) / x);
-
-    return (probability > 0.5) ? x : -x;
-}
-
-export function exponentialCDF(x: number, lambda: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    return 1 - Math.exp(-lambda * x);
-}
-
-export function exponentialPDF(x: number, lambda: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    return lambda * Math.exp(-lambda * x);
-}
-
-export function centralFCDF(x: number, degFreedom1: number, degFreedom2: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    return incompleteBetaFunction((degFreedom1 * x) / (degFreedom1 * x + degFreedom2), degFreedom1 / 2, degFreedom2 / 2);
-}
-
-export function centralFPDF(x: number, degFreedom1: number, degFreedom2: number): number {
-    if (x < 0) {
-        return 0;
-    }
-
-    if (x === 0 && degFreedom1 < 2) {
-        return Infinity;
-    }
-
-    if (x === 0 && degFreedom1 === 2) {
-        return 1;
-    }
-
-    let result = 1 / betaFunction(degFreedom1 / 2, degFreedom2 / 2);
-    result *= (degFreedom1 / degFreedom2) ** (degFreedom1 / 2);
-    result *= x ** ((degFreedom1 / 2) - 1);
-    result *= (1 + (degFreedom1 / degFreedom2) * x) ** (-(degFreedom1 + degFreedom2) / 2);
-
-    return result;
-}
-
-export function centralFINV(probability: number, degFreedom1: number, degFreedom2: number): number {
-    if (probability <= 0) {
-        return 0;
-    }
-
-    if (probability >= 1) {
-        return Infinity;
-    }
-
-    return degFreedom2 / (degFreedom1 * (1 / betaINV(probability, degFreedom1 / 2, degFreedom2 / 2) - 1));
-}
-
-export function forecastLinear(x: number, knownYs: number[], knownXs: number[]): number {
-    const n = knownYs.length;
-
-    let knownYsSum = 0;
-    let knownXsSum = 0;
-
-    for (let i = 0; i < n; i++) {
-        knownYsSum += knownYs[i];
-        knownXsSum += knownXs[i];
-    }
-
-    const knownYsMean = knownYsSum / n;
-    const knownXsMean = knownXsSum / n;
-
-    let num = 0;
-    let den = 0;
-
-    for (let i = 0; i < n; i++) {
-        num += (knownYs[i] - knownYsMean) * (knownXs[i] - knownXsMean);
-        den += (knownXs[i] - knownXsMean) ** 2;
-    }
-
-    if (den === 0) {
-        return Infinity;
-    }
-
-    const b = num / den;
-    const a = knownYsMean - b * knownXsMean;
-
-    return a + b * x;
-}
-
 export function normalCDF(x: number, mean: number, standardDev: number): number {
     return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
 }
@@ -573,6 +598,13 @@ export function normalPDF(x: number, mean: number, standardDev: number): number 
 export function normalINV(probability: number, mean: number, standardDev: number): number {
     // eslint-disable-next-line
     return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
+}
+
+export function studentTINV(probability: number, degFreedom: number): number {
+    let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
+    x = Math.sqrt(degFreedom * (1 - x) / x);
+
+    return (probability > 0.5) ? x : -x;
 }
 
 export function getTwoArrayNumberValues(

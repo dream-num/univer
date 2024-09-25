@@ -508,5 +508,42 @@ describe('Test FWorksheet', () => {
         expect(freeze3).toEqual({ startRow: -1, startColumn: -1, xSplit: 0, ySplit: 0 });
     });
 
+    it('Worksheet setFrozenColumns and getFrozenColumns', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        activeSheet?.setFrozenColumns(2);
+        expect(activeSheet?.getFrozenColumns()).toBe(2);
+
+        const freeze = activeSheet?.getFreeze();
+        expect(freeze).toEqual({ startRow: -1, startColumn: 2, xSplit: 2, ySplit: 0 });
+    });
+
+    it('Worksheet setFrozenRows and getFrozenRows', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        activeSheet?.setFrozenRows(3);
+        expect(activeSheet?.getFrozenRows()).toBe(3);
+
+        const freeze = activeSheet?.getFreeze();
+        expect(freeze).toEqual({ startRow: 3, startColumn: -1, xSplit: 0, ySplit: 3 });
+    });
+
+    it('Worksheet combined frozen rows and columns', () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        activeSheet?.setFrozenColumns(2);
+        activeSheet?.setFrozenRows(3);
+
+        expect(activeSheet?.getFrozenColumns()).toBe(2);
+        expect(activeSheet?.getFrozenRows()).toBe(3);
+
+        const freeze = activeSheet?.getFreeze();
+        expect(freeze).toEqual({ startRow: 3, startColumn: 2, xSplit: 2, ySplit: 3 });
+
+        activeSheet?.setFreeze({ startRow: 21, startColumn: 9, ySplit: 16, xSplit: 4 });
+        expect(activeSheet?.getFrozenRows()).toBe(21);
+        expect(activeSheet?.getFrozenColumns()).toBe(9);
+    });
+
     // #endregion
 });

@@ -951,8 +951,8 @@ export class FWorksheet {
 
     /**
      * Sets the frozen state of the current sheet.
-     * @param {IFreeze} freeze - The freeze object containing the parameters for freezing the sheet.
-     * @returns {boolean} True if the command was successful, false otherwise.
+     * @param freeze - The freeze object containing the parameters for freezing the sheet.
+     * @returns True if the command was successful, false otherwise.
      */
     setFreeze(freeze: IFreeze): boolean {
         return this._commandService.syncExecuteCommand(SetFrozenCommand.id, {
@@ -964,7 +964,7 @@ export class FWorksheet {
 
     /**
      * Cancels the frozen state of the current sheet.
-     * @returns {boolean} True if the command was successful, false otherwise.
+     * @returns True if the command was successful, false otherwise.
      */
     cancelFreeze(): boolean {
         return this._commandService.syncExecuteCommand(CancelFrozenCommand.id, {
@@ -975,9 +975,63 @@ export class FWorksheet {
 
     /**
      * Get the freeze state of the current sheet.
-     * @returns {IFreeze} The freeze state of the current sheet.
+     * @returns The freeze state of the current sheet.
      */
     getFreeze(): IFreeze {
         return this._worksheet.getFreeze();
+    }
+
+    /**
+     * Set the number of frozen columns.
+     * @param columns The number of columns to freeze.
+     * To unfreeze all columns, set this value to 0.
+     */
+    setFrozenColumns(columns: number): void {
+        const currentFreeze = this.getFreeze();
+        this.setFreeze({
+            ...currentFreeze,
+            startColumn: columns > 0 ? columns : -1,
+            xSplit: columns,
+        });
+    }
+
+    /**
+     * Set the number of frozen rows.
+     * @param rows The number of rows to freeze.
+     * To unfreeze all rows, set this value to 0.
+     */
+    setFrozenRows(rows: number): void {
+        const currentFreeze = this.getFreeze();
+        this.setFreeze({
+            ...currentFreeze,
+            startRow: rows > 0 ? rows : -1,
+            ySplit: rows,
+        });
+    }
+
+    /**
+     * Get the number of frozen columns.
+     * @returns The number of frozen columns.
+     * Returns 0 if no columns are frozen.
+     */
+    getFrozenColumns(): number {
+        const freeze = this.getFreeze();
+        if (freeze.startColumn === -1) {
+            return 0;
+        }
+        return freeze.startColumn;
+    }
+
+    /**
+     * Get the number of frozen rows.
+     * @returns The number of frozen rows.
+     * Returns 0 if no rows are frozen.
+     */
+    getFrozenRows(): number {
+        const freeze = this.getFreeze();
+        if (freeze.startRow === -1) {
+            return 0;
+        }
+        return freeze.startRow;
     }
 }

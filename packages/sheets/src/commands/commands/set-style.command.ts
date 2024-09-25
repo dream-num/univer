@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    HorizontalAlign,
-    IAccessor,
-    ICellData,
-    IColorStyle,
-    ICommand,
-    IRange,
-    IStyleData,
-    ITextRotation,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -38,13 +26,25 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
+import type {
+    HorizontalAlign,
+    IAccessor,
+    ICellData,
+    IColorStyle,
+    ICommand,
+    IRange,
+    IStyleData,
+    ITextRotation,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -75,8 +75,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
-        const { unitId, subUnitId, worksheet } = target;
-        const { range, style } = params;
+        const { worksheet } = target;
+        const { range, style, unitId: paramsUnitId, subUnitId: paramsSubUnitId } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -112,8 +112,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
+            subUnitId: paramsSubUnitId || target.subUnitId,
+            unitId: paramsUnitId || target.unitId,
             cellValue: cellValue.getMatrix(),
         };
 
@@ -136,7 +136,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: unitId,
+                unitID: setRangeValuesMutationParams.unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });
@@ -230,7 +230,8 @@ export const SetUnderlineCommand: ICommand = {
         if (selection.primary) {
             currentlyUnderline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getUnderline().s;
+                .getUnderline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -265,7 +266,8 @@ export const SetStrikeThroughCommand: ICommand = {
         if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
                 .getRange(selection.primary.actualRow, selection.primary.actualColumn)
-                .getStrikeThrough().s;
+                .getStrikeThrough()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -297,7 +299,8 @@ export const SetOverlineCommand: ICommand = {
         if (selection.primary) {
             currentlyOverline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getOverline().s;
+                .getOverline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {

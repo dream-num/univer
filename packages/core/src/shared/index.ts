@@ -34,7 +34,7 @@ export { LRUHelper, LRUMap } from './lru/lru-map';
 export { numfmt } from './numfmt';
 export * from './object-matrix';
 export { queryObjectMatrix } from './object-matrix-query';
-export { moveRangeByOffset } from './range';
+export { moveRangeByOffset, splitIntoGrid } from './range';
 export * from './rectangle';
 export { RefAlias } from './ref-alias';
 export * from './row-col-iter';

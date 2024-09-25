@@ -49,7 +49,7 @@ export class Border extends SheetExtension {
         _parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges: IRange[],
-        { viewRanges, checkOutOfViewBound }: IDrawInfo
+        { viewRanges }: IDrawInfo
     ) {
         const { stylesCache, overflowCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
         if (!worksheet) return;
@@ -61,13 +61,13 @@ export class Border extends SheetExtension {
         ) {
             return;
         }
+        const { borderMatrix } = stylesCache;
+        if (!borderMatrix) return;
+
         ctx.save();
-
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
-
         const precisionScale = this._getScale(ctx.getScale());
-        const { border } = stylesCache;
-        if (!border) return;
+
         const renderBorderContext = {
             ctx,
             precisionScale,
@@ -77,11 +77,12 @@ export class Border extends SheetExtension {
             spreadsheetSkeleton,
         } as IRenderBorderContext;
 
+        ctx.beginPath();
         viewRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const borderConfig = border!.getValue(row, col);
+                const borderConfig = borderMatrix!.getValue(row, col);
                 if (borderConfig) {
-                    this.renderBorderByCell(renderBorderContext, row, col, borderConfig);
+                    this.renderBorderEachCell(renderBorderContext, row, col, borderConfig);
                 }
             });
         });
@@ -90,13 +91,14 @@ export class Border extends SheetExtension {
         ctx.restore();
     }
 
-    renderBorderByCell(renderBorderContext: IRenderBorderContext, row: number, col: number, borderCacheItem: BorderCache) {
+    renderBorderEachCell(renderBorderContext: IRenderBorderContext, row: number, col: number, borderCacheItem: BorderCache) {
         const { ctx, precisionScale, overflowCache, spreadsheetSkeleton, diffRanges } = renderBorderContext;
 
-        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+        const calcHeader = false;
+        const cellMergeInfo = spreadsheetSkeleton.getMergedCellInfo(row, col, calcHeader);
 
-        const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
-        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellMergeInfo;
+        const { isMerged, isMergedMainCell, mergeInfo } = cellMergeInfo;
 
         if (!isMerged) {
             const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
@@ -135,16 +137,9 @@ export class Border extends SheetExtension {
 
             const lineWidth = getLineWidth(style);
 
-            // if (style !== preStyle) {
             setLineType(ctx, style);
             ctx.setLineWidthByPrecision(lineWidth);
-                // preStyle = style;
-            // }
-
-            // if (color !== preColor) {
             ctx.strokeStyle = color || COLOR_BLACK_RGB;
-                // preColor = color;
-            // }
 
             drawDiagonalLineByBorderType(ctx, type, {
                 startX,

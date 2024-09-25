@@ -22,7 +22,7 @@ import { clampRange } from '@univerjs/engine-render';
 import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
-import { expandRangeIfIntersects, inRowViewRanges, inViewRanges } from '../../../basics/tools';
+import { inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -105,37 +105,40 @@ export class Font extends SheetExtension {
             range.endColumn += 20;
             range = clampRange(range);
             Range.foreach(range, (row, col) => {
-                const fontsConfig = fontMatrix.getValue(row, col);
-                if (fontsConfig) {
-                    this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
-                }
+                this.renderFontByCellMatrix2(renderFontContext, row, col, fontMatrix);
             });
         });
 
         ctx.restore();
     }
 
-    renderFontByCellMatrix(renderFontContext: IRenderFontContext, rowIndex: number, columnIndex: number, fontsConfig: IFontCacheItem) {
+    renderFontByCellMatrix2(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
         const { ctx, scale, rowHeightAccumulation, columnWidthAccumulation, viewRanges, checkOutOfViewBound, diffRanges, spreadsheetSkeleton } = renderFontContext;
+
         if (!checkOutOfViewBound) {
-            if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
-                return true;
-            }
+        //     if (!inViewRanges(viewRanges!, row, col)) {
+        //         return true;
+        //     }
         }
 
-        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(
-            rowIndex,
-            columnIndex
-        );
+        //#region merged cell
+        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+        // if (row === 6 && col === 1) debugger;
         let { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
+        // if (isMerged && !isMergedMainCell) {
         if (isMerged) {
-            return true;
-        } else {
-            const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
-            const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
-            if (!visibleRow || !visibleCol) return true;
+            // return true;
+            const mergeMainCellRow = mergeInfo.startRow;
+            const mergeMainCellCol = mergeInfo.startColumn;
+            row = mergeMainCellRow;
+            col = mergeMainCellCol;
+
+            startY = mergeInfo.startY;
+            endY = mergeInfo.endY;
+            startX = mergeInfo.startX;
+            endX = mergeInfo.endX;
         }
 
         // If the merged cell area intersects with the current viewRange,
@@ -145,11 +148,10 @@ export class Font extends SheetExtension {
         // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
         // At this moment, we can only exclude the cells that are not within the current row.
 
-        const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-        const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
-        if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
-            return true;
-        }
+        // const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
+        // if (!inRowViewRanges(combineWithMergeRanges, row)) {
+        //     return true;
+        // }
 
         if (isMergedMainCell) {
             startY = mergeInfo.startY;
@@ -157,34 +159,43 @@ export class Font extends SheetExtension {
             startX = mergeInfo.startX;
             endX = mergeInfo.endX;
         }
+        //#endregion
+
         /**
          * Incremental content rendering for texture mapping
          * If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
          *
          * If this cell is not within a merged region, the mergeInfo start and end values are just the cell itself.
          */
-        if (diffRanges) {
-            if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                return true;
-            }
-        }
+        // if (diffRanges) {
+        //     if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+        //         return true;
+        //     }
+        // }
 
         // If the cell is overflowing, but the overflowRectangle has not been set,
         // then overflowRectangle is set to undefined.
-        const overflowRectangle = spreadsheetSkeleton.overflowCache.getValue(rowIndex, columnIndex);
-        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = fontsConfig;
+        const overflowRectangle = spreadsheetSkeleton.overflowCache.getValue(row, col);
 
         // If it's neither an overflow nor within the current range,
         // then we can exit early (taking into account the range extension
         // caused by the merged cells).
-        if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
+        // if (!overflowRectangle && !inViewRanges(renderRange, row, col)) {
+        const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+        if (!overflowRectangle && !inViewRanges(renderRange, row, col)) {
             return true;
         }
 
+        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+        if (!visibleRow || !visibleCol) return true;
         /**
          * https://github.com/dream-num/univer-pro/issues/334
          * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
          */
+        const fontsConfig = fontMatrix.getValue(row, col);
+        if (!fontsConfig) return true;
+        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = fontsConfig;
         let horizontalAlignOverFlow = horizontalAlign;
         if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
             if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
@@ -194,7 +205,7 @@ export class Font extends SheetExtension {
             }
         }
 
-        const cellData = spreadsheetSkeleton.worksheet.getCell(rowIndex, columnIndex) as ICellDataForSheetInterceptor || {};
+        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
         if (cellData.fontRenderExtension?.isSkip) {
             return true;
         }
@@ -223,7 +234,7 @@ export class Font extends SheetExtension {
          */
         if (overflowRectangle && isOverflow) {
             const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
-            if (startColumn === endColumn && startColumn === columnIndex) {
+            if (startColumn === endColumn && startColumn === col) {
                 ctx.rectByPrecision(
                     startX + 1 / scale,
                     startY + 1 / scale,
@@ -253,9 +264,9 @@ export class Font extends SheetExtension {
                     this._clipRectangleForOverflow(
                         ctx,
                         startRow,
-                        rowIndex,
+                        row,
                         startColumn,
-                        columnIndex,
+                        col,
                         scale,
                         rowHeightAccumulation,
                         columnWidthAccumulation
@@ -263,9 +274,9 @@ export class Font extends SheetExtension {
                 } else {
                     this._clipRectangleForOverflow(
                         ctx,
-                        rowIndex,
+                        row,
                         endRow,
-                        columnIndex,
+                        col,
                         endColumn,
                         scale,
                         rowHeightAccumulation,
@@ -285,7 +296,7 @@ export class Font extends SheetExtension {
             // );
         }
         ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        this._renderDocuments(ctx, fontsConfig, startX, startY, endX, endY, rowIndex, columnIndex, spreadsheetSkeleton.overflowCache);
+        this._renderDocuments(ctx, fontsConfig, startX, startY, endX, endY, row, col, spreadsheetSkeleton.overflowCache);
 
         ctx.closePath();
         ctx.restore();

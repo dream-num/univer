@@ -350,7 +350,7 @@ export class Rectangle {
             res = multiSubtractSingleRange(res, range);
         });
 
-        return Rectangle.mergeRanges(res);
+        return res;
     }
 
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {

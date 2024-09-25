@@ -55,8 +55,8 @@ export class Byrow extends BaseFunction {
 
         const _lambda = lambda as LambdaValueObjectObject;
 
-        const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
-        const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
+        const rowCount = _array.isArray() ? (_array as ArrayValueObject).getRowCount() : 1;
+        const columnCount = _array.isArray() ? (_array as ArrayValueObject).getColumnCount() : 1;
         _array = expandArrayValueObject(rowCount, columnCount, _array as BaseValueObject);
 
         const result: BaseValueObject[][] = [];

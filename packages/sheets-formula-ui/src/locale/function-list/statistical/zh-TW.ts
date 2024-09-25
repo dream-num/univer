@@ -636,8 +636,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataArray: { name: '資料陣列', detail: '這是所要計算頻率的一組數值的陣列或參照。 如果 data_array 沒有值，FREQUENCY 會傳回零陣列。' },
+            binsArray: { name: '區間陣列', detail: '這是區間的陣列或參照，用以將 data_array 中的值分組。 如果 bins_array 沒有值，FREQUENCY 會傳回 data_array 中的元素個數。' },
         },
     },
     GAMMA: {
@@ -650,8 +650,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '伽瑪函數的輸入值。' },
         },
     },
     GAMMA_DIST: {
@@ -664,8 +663,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出分佈的數值。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 GAMMA.DIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     GAMMA_INV: {
@@ -678,8 +679,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是與伽瑪分佈的相關機率。' },
+            alpha: { name: 'alpha', detail: '分佈的第一個參數。' },
+            beta: { name: 'beta', detail: '分佈的第二個參數。' },
         },
     },
     GAMMALN: {

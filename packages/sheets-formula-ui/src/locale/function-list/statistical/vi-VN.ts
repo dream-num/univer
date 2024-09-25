@@ -558,6 +558,64 @@ export default {
             knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
         },
     },
+    FREQUENCY: {
+        description: '以垂直数组的形式返回频率分布',
+        abstract: '以垂直数组的形式返回频率分布',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/frequency-%E5%87%BD%E6%95%B0-44e3be2b-eca0-42cd-a3f7-fd9ea898fdb9',
+            },
+        ],
+        functionParameter: {
+            dataArray: { name: 'dữ liệuMảng', detail: 'Một mảng hoặc tham chiếu tới một tập giá trị mà bạn muốn đếm tần suất của nó. Nếu data_array không chứa giá trị, thì hàm FREQUENCY trả về mảng các số không.' },
+            binsArray: { name: 'mảng ngắt quãng', detail: 'Mảng hoặc tham chiếu tới các khoảng mà bạn muốn nhóm các giá trị trong data_array vào trong đó. Nếu bins_array không chứa giá trị, thì hàm FREQUENCY trả về số thành phần trong data_array.' },
+        },
+    },
+    GAMMA: {
+        description: 'Trả về giá trị hàm gamma.',
+        abstract: 'Trả về giá trị hàm gamma.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gamma-%E5%87%BD%E6%95%B0-ce1702b1-cf55-471d-8307-f83be0fc5297',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Giá trị đầu vào của hàm gamma.' },
+        },
+    },
+    GAMMA_DIST: {
+        description: 'Trả về phân bố gamma.',
+        abstract: 'Trả về phân bố gamma.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gamma-dist-%E5%87%BD%E6%95%B0-9b6f1538-d11c-4d5f-8966-21f6a2201def',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm GAMMA.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    GAMMA_INV: {
+        description: 'Trả về giá trị đảo của phân bố lũy tích gamma.',
+        abstract: 'Trả về giá trị đảo của phân bố lũy tích gamma.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gamma-inv-%E5%87%BD%E6%95%B0-74991443-c2b0-4be5-aaab-1aa4d71fbb18',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố gamma.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+        },
+    },
     INTERCEPT: {
         description: 'Trả về điểm chặn của đường hồi quy tuyến tính',
         abstract: 'Trả về điểm chặn của đường hồi quy tuyến tính',

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import PickerViVN from 'rc-picker/lib/locale/vi_VN';
 import dajsViVN from 'dayjs/locale/vi';
+import PickerViVN from 'rc-picker/lib/locale/vi_VN';
 import type { ILocale } from './interface';
 
 const locale: ILocale = {
@@ -34,8 +34,10 @@ const locale: ILocale = {
         CascaderList: {
             empty: 'Không có',
         },
+        Select: {
+            empty: 'Không có',
+        },
     },
-
 };
 
 export default locale;

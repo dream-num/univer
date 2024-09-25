@@ -14,4 +14,19 @@
  * limitations under the License.
  */
 
-export default {};
+import { Disposable, ICommandService } from '@univerjs/core';
+import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
+import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
+
+export class FormulaController extends Disposable {
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+
+        [
+            InsertFunctionCommand,
+            OtherFormulaMarkDirty,
+        ].forEach((c) => this._commandService.registerCommand(c));
+    }
+}

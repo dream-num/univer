@@ -20,8 +20,6 @@ import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService,
 
 import type { Dependency } from '@univerjs/core';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
-import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
-import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
@@ -72,7 +70,6 @@ export class FormulaUIController extends Disposable {
 
     private _registerCommands(): void {
         [
-            InsertFunctionCommand,
             SheetOnlyPasteFormulaCommand,
             InsertFunctionOperation,
             MoreFunctionsOperation,
@@ -80,7 +77,6 @@ export class FormulaUIController extends Disposable {
             HelpFunctionOperation,
             SelectEditorFormulaOperation,
             ReferenceAbsoluteOperation,
-            OtherFormulaMarkDirty,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

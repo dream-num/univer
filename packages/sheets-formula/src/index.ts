@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export { InsertFunctionCommand } from './commands/commands/insert-function.command';
+export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 
 // #region - all commands

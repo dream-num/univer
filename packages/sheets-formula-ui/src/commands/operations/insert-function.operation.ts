@@ -33,9 +33,8 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 
+import { type IInsertFunction, InsertFunctionCommand } from '@univerjs/sheets-formula';
 import type { IAccessor, ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
-import { InsertFunctionCommand } from '../commands/insert-function.command';
-import type { IInsertFunction } from '../commands/insert-function.command';
 
 export interface IInsertFunctionOperationParams {
     /**

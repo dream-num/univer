@@ -15,8 +15,6 @@
  */
 
 export { SheetOnlyPasteFormulaCommand } from './commands/commands/formula-clipboard.command';
-export { InsertFunctionCommand } from './commands/commands/insert-function.command';
-export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { SelectEditorFormulaOperation } from './commands/operations/editor-formula.operation';
 export { HelpFunctionOperation } from './commands/operations/help-function.operation';
 export { InsertFunctionOperation } from './commands/operations/insert-function.operation';
@@ -28,7 +26,6 @@ export { SearchFunctionOperation } from './commands/operations/search-function.o
 
 export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';
 export { FORMULA_PROMPT_ACTIVATED } from './services/prompt.service';
-export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
 export { UniverSheetsFormulaUIPlugin } from './sheets-formula-ui.plugin';
 
 // #endregion

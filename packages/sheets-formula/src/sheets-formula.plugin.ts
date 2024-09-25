@@ -29,6 +29,7 @@ import {
     PLUGIN_CONFIG_KEY_REMOTE,
 } from './controllers/config.schema';
 import { DefinedNameController } from './controllers/defined-name.controller';
+import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
@@ -89,6 +90,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [IDescriptionService, { useClass: DescriptionService }],
+            [FormulaController],
             [FormulaRefRangeService],
             [RegisterOtherFormulaService],
             [ArrayFormulaCellInterceptorController],
@@ -111,7 +113,8 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onReady(): void {
-        ([TriggerCalculationController]).forEach((module) => this._injector.get(module));
+        this._injector.get(TriggerCalculationController);
+        this._injector.get(FormulaController);
     }
 }
 

@@ -182,7 +182,7 @@ export class Font extends SheetExtension {
         // caused by the merged cells).
         // if (!overflowRectangle && !inViewRanges(renderRange, row, col)) {
         const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-        if (!overflowRectangle && !inViewRanges(renderRange, row, col)) {
+        if (!overflowRectangle && (!isMergedMainCell && !isMerged) && !inViewRanges(renderRange, row, col)) {
             return true;
         }
 

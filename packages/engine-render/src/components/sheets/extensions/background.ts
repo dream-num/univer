@@ -33,7 +33,7 @@ const UNIQUE_KEY = 'DefaultBackgroundExtension';
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;
 
-interface IBgRenderContext {
+interface IRenderBGContext {
     ctx: UniverRenderingContext;
     spreadsheetSkeleton: SpreadsheetSkeleton;
     backgroundPositions: ObjectMatrix<ISelectionCellWithMergeInfo>;
@@ -76,7 +76,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         const { scaleX, scaleY } = ctx.getScale();
-        const bgRenderContext = {
+        const renderBGContext = {
             ctx,
             backgroundPositions,
             scaleX,
@@ -85,20 +85,20 @@ export class Background extends SheetExtension {
             viewRanges,
             diffRanges,
             spreadsheetSkeleton,
-        } as IBgRenderContext;
+        } as IRenderBGContext;
         const renderBGCore = (rgb: string) => {
             const bgColorMatrix = bgMatrixCacheByColor[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
             const backgroundPaths = new Path2D();
 
-            bgRenderContext.backgroundPaths = backgroundPaths;
+            renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
             // bgColorMatrix.forValue(renderBGByCell);
             viewRanges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
-                        this.renderBGByCell(bgRenderContext, row, col);
+                        this.renderBGByCell(renderBGContext, row, col);
                     }
                 });
             });
@@ -110,7 +110,7 @@ export class Background extends SheetExtension {
         ctx.restore();
     }
 
-    renderBGByCell(bgContext: IBgRenderContext, row: number, col: number) {
+    renderBGByCell(bgContext: IRenderBGContext, row: number, col: number) {
         const { spreadsheetSkeleton, backgroundPositions, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
         // if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
         //     return true;

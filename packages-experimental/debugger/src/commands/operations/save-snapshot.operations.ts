@@ -52,15 +52,19 @@ export const SaveSnapshotOptions: ICommand = {
         const resourceLoaderService = accessor.get(IResourceLoaderService);
         const localFileService = accessor.get(ILocalFileService);
         const recordController = accessor.get(RecordController);
-        const gitHash = process.env.GIT_COMMIT_HASH;
-        const gitBranch = process.env.GIT_REF_NAME;
-        const buildTime = process.env.BUILD_TIME;
+
         const preName = new Date().toLocaleString();
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) {
             const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)!;
             const snapshot = resourceLoaderService.saveUnit(doc.getUnitId());
-            (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
+
+            if (process.env.NODE_ENV === 'production') {
+                const gitHash = process.env.GIT_COMMIT_HASH;
+                const gitBranch = process.env.GIT_REF_NAME;
+                const buildTime = process.env.BUILD_TIME;
+                (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
+            }
             const text = JSON.stringify(snapshot, null, 2);
             localFileService.downloadFile(new Blob([text]), `${preName} snapshot.json`);
             return true;
@@ -72,7 +76,12 @@ export const SaveSnapshotOptions: ICommand = {
         }
         const snapshot = resourceLoaderService.saveUnit<ReturnType<typeof workbook.getSnapshot>>(workbook.getUnitId())!;
 
-        (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
+        if (process.env.NODE_ENV === 'production') {
+            const gitHash = process.env.GIT_COMMIT_HASH;
+            const gitBranch = process.env.GIT_REF_NAME;
+            const buildTime = process.env.BUILD_TIME;
+            (snapshot as any).__env__ = { gitHash, gitBranch, buildTime };
+        }
 
         switch (params.value) {
             case 'sheet': {

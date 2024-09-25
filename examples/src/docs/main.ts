@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable node/prefer-global/process */
-/* eslint-disable no-console */
-
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -33,15 +30,8 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
+/* eslint-disable node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
-
-// package info
-console.table({
-    NODE_ENV: process.env.NODE_ENV,
-    GIT_COMMIT_HASH: process.env.GIT_COMMIT_HASH,
-    GIT_REF_NAME: process.env.GIT_REF_NAME,
-    BUILD_TIME: process.env.BUILD_TIME,
-});
 
 // univer
 const univer = new Univer({
@@ -61,7 +51,6 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
-    // footer: false,
 });
 
 univer.registerPlugin(UniverDocsPlugin);

@@ -155,7 +155,7 @@ export class MergeCellController extends Disposable {
                         // TODO@Gggpound: get by unit id and subUnitId
                         const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         const unitId = workbook.getUnitId();
-                        const worksheet = workbook.getActiveSheet();
+                        const worksheet = workbook?.getActiveSheet();
                         if (!worksheet) {
                             return { redos: [], undos: [] };
                         }
@@ -331,10 +331,10 @@ export class MergeCellController extends Disposable {
         );
 
         this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(first((workbook) => !!workbook)).subscribe((workbook) => {
-            const sheet = workbook.getActiveSheet();
+            const sheet = workbook!.getActiveSheet();
             if (!sheet) return;
 
-            registerRefRange(workbook.getUnitId(), sheet.getSheetId());
+            registerRefRange(workbook!.getUnitId(), sheet.getSheetId());
         });
     }
 

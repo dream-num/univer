@@ -74,7 +74,7 @@ export interface ISetBorderColorCommandParams {
     value: string;
 }
 
-const setBorderStyleForRange = (borderContext: ReturnType<typeof getBorderContext>, range: IRange, defaultStyle: IBorderData, reserve?: boolean) => {
+const setBorderStyleForRange = (borderContext: ReturnType<typeof createBorderContext>, range: IRange, defaultStyle: IBorderData, reserve?: boolean) => {
     const { mr, worksheet } = borderContext;
     if (range.startRow < 0 || range.startColumn < 0) return;
     forEach(range, (row, column) => {
@@ -173,7 +173,7 @@ const prepareEdgeRange = (range: IRange) => {
     };
 };
 
-function getBorderContext(borderStyleManagerService: BorderStyleManagerService, target: IResult, selections: IRange[]) {
+function createBorderContext(borderStyleManagerService: BorderStyleManagerService, target: IResult, selections: IRange[]) {
     const { style, color, type } = borderStyleManagerService.getBorderInfo();
 
     const top = type === BorderType.TOP || type === BorderType.ALL || type === BorderType.OUTSIDE;
@@ -253,7 +253,7 @@ function getBorderContext(borderStyleManagerService: BorderStyleManagerService, 
 // };
 
 // eslint-disable-next-line max-lines-per-function
-const innerBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
+const innerBorder = (borderContext: ReturnType<typeof createBorderContext>) => {
     const { range, mr, borderStyle, vertical, horizontal, worksheet } = borderContext;
     //#region inner vertical border
     if (vertical) {
@@ -341,7 +341,7 @@ const innerBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
     //#endregion
 };
 
-function otherBorders(borderContext: ReturnType<typeof getBorderContext>) {
+function otherBorders(borderContext: ReturnType<typeof createBorderContext>) {
     const { borderStyle, tl_br, tl_bc, tl_mr, bl_tr, ml_tr, bc_tr } = borderContext;
 
     const setBorderStyle = (range: IRange, defaultStyle: IBorderData, reserve?: boolean) => {
@@ -373,7 +373,7 @@ function otherBorders(borderContext: ReturnType<typeof getBorderContext>) {
     }
 }
 
-const outlineBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
+const outlineBorder = (borderContext: ReturnType<typeof createBorderContext>) => {
     const { top, left, right, bottom, borderStyle, bottomRange, topRange, leftRange, rightRange, bottomRangeOut, topRangeOut, leftRangeOut, rightRangeOut } = borderContext;
     const setBorderStyle = (range: IRange, defaultStyle: IBorderData, reserve?: boolean) => {
         setBorderStyleForRange(borderContext, range, defaultStyle, reserve);
@@ -410,7 +410,7 @@ const outlineBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
 };
 
 // eslint-disable-next-line max-lines-per-function
-const clearBorder = (borderContext: ReturnType<typeof getBorderContext>) => {
+const clearBorder = (borderContext: ReturnType<typeof createBorderContext>) => {
     const { range, worksheet, mr, top, bottom, left, right, vertical, horizontal, tl_br, tl_bc, tl_mr, bl_tr, ml_tr, bc_tr, topRange, bottomRange, leftRange, rightRange, topRangeOut, bottomRangeOut, leftRangeOut, rightRangeOut } = borderContext;
 
     const setBorderStyle = (range: IRange, defaultStyle: IBorderData, reserve?: boolean) => {
@@ -556,7 +556,7 @@ export const SetBorderCommand: ICommand = {
         const { activeBorderType } = borderStyleManagerService.getBorderInfo();
         if (!activeBorderType) return false;
 
-        const borderContext = getBorderContext(borderStyleManagerService, target, selections);
+        const borderContext = createBorderContext(borderStyleManagerService, target, selections);
         innerBorder(borderContext);
         outlineBorder(borderContext);
         otherBorders(borderContext);

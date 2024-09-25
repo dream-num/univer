@@ -70,7 +70,9 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*"
+        "@univerjs/ui": "workspace:*",
+        "clsx": "^2.1.1"
+
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

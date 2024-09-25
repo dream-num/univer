@@ -64,22 +64,10 @@ export class UniverSheetsPlugin extends Plugin {
         this._initDependencies(_injector);
     }
 
-    override onRendered(): void {
-    }
-
     private _initConfig(): void {
         if (this._config?.onlyRegisterFormulaRelatedMutations) {
             this._configService.setConfig(ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY, true);
         }
-    }
-
-    override onStarting(_injector?: Injector): void {
-        const dependencies: Dependency[] = [
-            [MergeCellController],
-        ];
-        mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            this._injector?.add(d);
-        });
     }
 
     private _initDependencies(sheetInjector: Injector): void {
@@ -94,6 +82,7 @@ export class UniverSheetsPlugin extends Plugin {
 
             // controllers
             [BasicWorksheetController],
+            [MergeCellController],
             [NumberCellDisplayController],
             [DefinedNameDataController],
 
@@ -124,5 +113,9 @@ export class UniverSheetsPlugin extends Plugin {
         this._injector.get(SheetInterceptorService);
         this._injector.get(RangeProtectionService);
         this._injector.get(IExclusiveRangeService);
+    }
+
+    override onStarting(_injector?: Injector): void {
+        this._injector.get(MergeCellController);
     }
 }

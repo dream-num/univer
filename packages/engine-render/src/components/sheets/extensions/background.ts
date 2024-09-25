@@ -47,9 +47,7 @@ interface IRenderBGContext {
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
-
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
-
     PRINTING_Z_INDEX = PRINTING_Z_INDEX;
 
     override get zIndex() {
@@ -64,8 +62,8 @@ export class Background extends SheetExtension {
         { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
-        const { background: bgMatrixCacheByColor, backgroundPositions } = stylesCache;
-        if (!worksheet || !bgMatrixCacheByColor) return;
+        const { bgGroupMatrix } = stylesCache;
+        if (!worksheet || !bgGroupMatrix) return;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -78,7 +76,6 @@ export class Background extends SheetExtension {
         const { scaleX, scaleY } = ctx.getScale();
         const renderBGContext = {
             ctx,
-            backgroundPositions,
             scaleX,
             scaleY,
             checkOutOfViewBound,
@@ -87,18 +84,17 @@ export class Background extends SheetExtension {
             spreadsheetSkeleton,
         } as IRenderBGContext;
         const renderBGCore = (rgb: string) => {
-            const bgColorMatrix = bgMatrixCacheByColor[rgb];
+            const bgColorMatrix = bgGroupMatrix[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
             const backgroundPaths = new Path2D();
 
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
-            // bgColorMatrix.forValue(renderBGByCell);
             viewRanges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
-                        this.renderBGByCell(renderBGContext, row, col);
+                        this.renderBGEachCell(renderBGContext, row, col);
                     }
                 });
             });
@@ -106,23 +102,18 @@ export class Background extends SheetExtension {
             ctx.closePath();
         };
 
-        Object.keys(bgMatrixCacheByColor).forEach(renderBGCore);
+        Object.keys(bgGroupMatrix).forEach(renderBGCore);
         ctx.restore();
     }
 
-    renderBGByCell(bgContext: IRenderBGContext, row: number, col: number) {
-        const { spreadsheetSkeleton, backgroundPositions, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
-        // if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
-        //     return true;
-        // }
+    renderBGEachCell(bgContext: IRenderBGContext, row: number, col: number) {
+        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
 
-        const cellInfo = backgroundPositions?.getValue(row, col);
-        if (cellInfo == null) {
-            return true;
-        }
+        const calcHeader = false;
+        const cellMergeInfo = spreadsheetSkeleton.getMergedCellInfo(row, col, calcHeader);
 
-        let { startY, endY, startX, endX } = cellInfo;
-        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        let { startY, endY, startX, endX } = cellMergeInfo;
+        const { isMerged, isMergedMainCell, mergeInfo } = cellMergeInfo;
         const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
 
         // isMerged isMergedMainCell are mutually exclusive. isMerged true then isMergedMainCell false.
@@ -139,12 +130,6 @@ export class Background extends SheetExtension {
             startX = mergeInfo.startX;
             endX = mergeInfo.endX;
         }
-
-        // in merge range , but not top-left cell.
-        // if (isMerged) return true;
-
-        // const combineWithMergeRanges = mergeTo;
-        //expandRangeIfIntersects([...mergeTo], [mergeInfo]);
 
         // If curr cell is not in the viewrange (viewport + merged cells), exit early.
         if ((!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {

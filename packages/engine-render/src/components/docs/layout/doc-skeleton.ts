@@ -147,7 +147,10 @@ export class DocumentSkeleton extends Skeleton {
         return this._docViewModel;
     }
 
-    // Layout the document.
+    /**
+     * Layout the document.
+     * PS: This method has significant impact on performance.
+     */
     calculate(bounds?: IViewportInfo) {
         if (!this.dirty) {
             return;

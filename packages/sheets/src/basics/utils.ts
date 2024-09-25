@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
 import { ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, UniverInstanceService, Workbook, Worksheet } from '@univerjs/core';
 import type { IExpandParams } from '../commands/commands/utils/selection-utils';
 
 export const groupByKey = <T = Record<string, unknown>>(arr: T[], key: string, blankKey = '') => {
@@ -84,7 +84,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
                 endColumn: destRange.endColumn,
             };
             for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
-                const cell = allMatrix.getValue(checkRange.startRow, col);
+                const cell = allMatrix.getValue(checkRange.startRow, col)!;
                 if (cellHasValue(cell)) {
                     destRange.startRow = Math.min(checkRange.startRow, destRange.startRow);
                     destRange.startColumn = Math.min(col, destRange.startColumn);
@@ -103,7 +103,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
                 endColumn: destRange.endColumn,
             };
             for (let col = checkRange.startColumn; col <= checkRange.endColumn; col++) {
-                const cellValue = allMatrix.getValue(checkRange.startRow, col);
+                const cellValue = allMatrix.getValue(checkRange.startRow, col)!;
                 if (cellHasValue(cellValue)) {
                     destRange.endRow = Math.max(checkRange.endRow, destRange.endRow);
                     destRange.endRow = Math.max(
@@ -126,7 +126,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
                 endColumn: destCol,
             };
             for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
-                const cell = allMatrix.getValue(row, checkRange.startColumn);
+                const cell = allMatrix.getValue(row, checkRange.startColumn)!;
                 if (cellHasValue(cell)) {
                     destRange.startColumn = Math.min(checkRange.startColumn, destRange.startColumn);
                     destRange.startRow = Math.min(row, destRange.startRow);
@@ -145,7 +145,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
                 endColumn: destCol,
             };
             for (let row = checkRange.startRow; row <= checkRange.endRow; row++) {
-                const cellValue = allMatrix.getValue(row, checkRange.endColumn);
+                const cellValue = allMatrix.getValue(row, checkRange.endColumn)!;
                 if (cellHasValue(cellValue)) {
                     destRange.endColumn = Math.max(
                         checkRange.endColumn + (cellValue.colSpan !== undefined ? cellValue.colSpan - 1 : 0),

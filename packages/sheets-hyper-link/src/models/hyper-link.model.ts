@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { Workbook } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { ICellHyperLink, ICellLinkContent } from '../types/interfaces/i-hyper-link';
 
 type LinkUpdate = {
@@ -210,7 +210,7 @@ export class HyperLinkModel extends Disposable {
 
     getHyperLinkByLocation(unitId: string, subUnitId: string, row: number, column: number): ICellHyperLink | undefined {
         const { matrix } = this._ensureMap(unitId, subUnitId);
-        return matrix.getValue(row, column);
+        return matrix.getValue(row, column)!;
     }
 
     getHyperLinkByLocationSync(unitId: string, subUnitId: string, row: number, column: number) {

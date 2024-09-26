@@ -31,6 +31,7 @@ import { SheetClipboardController } from './controllers/clipboard/clipboard.cont
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
+import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
 import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
@@ -140,6 +141,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoFillController],
             [FormatPainterController],
             [SheetsDefinedNameController],
+            [EditorDataSyncController],
 
             // permission
             [SheetPermissionPanelModel],

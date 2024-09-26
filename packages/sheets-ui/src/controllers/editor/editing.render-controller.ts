@@ -625,7 +625,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 this._editorBridgeService.changeEditorDirty(true);
             }
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: 0,
                     endOffset: 0,
@@ -639,7 +639,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 viewportScrollX: Number.POSITIVE_INFINITY,
             });
 
-            this._textSelectionManagerService.replaceTextRanges([
+            this._textSelectionManagerService.replaceDocRanges([
                 {
                     startOffset: cursor,
                     endOffset: cursor,

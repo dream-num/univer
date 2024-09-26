@@ -125,11 +125,11 @@ export interface IEditorConfigParams {
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    openForSheetUnitId: Nullable<string>;
+    openForSheetUnitId?: Nullable<string>;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    openForSheetSubUnitId: Nullable<string>;
+    openForSheetSubUnitId?: Nullable<string>;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {

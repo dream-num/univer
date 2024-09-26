@@ -34,6 +34,8 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
     options?: { [key: string]: boolean };
+    // Whether this mutation is from a sync operation.
+    isSync?: boolean;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';

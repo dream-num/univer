@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
     useDependency,
+    useObservable,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import React, { useCallback, useEffect, useState } from 'react';
+import type { Workbook } from '@univerjs/core';
 
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { useActiveWorkbook } from '../../components/hook';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 const ZOOM_MAP = [50, 80, 100, 130, 150, 170, 200, 400];
 
@@ -36,6 +38,8 @@ export function ZoomSlider() {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = useActiveWorkbook();
+    const editorBridgeService = useDependency(IEditorBridgeService);
+    const visible = useObservable(editorBridgeService.visible$);
 
     const getCurrentZoom = useCallback(() => {
         if (!workbook) return 100;
@@ -79,6 +83,7 @@ export function ZoomSlider() {
 
     return (
         <Slider
+            disabled={visible?.visible && visible.unitId === workbook?.getUnitId()}
             min={SHEET_ZOOM_RANGE[0]}
             value={zoom}
             shortcuts={ZOOM_MAP}

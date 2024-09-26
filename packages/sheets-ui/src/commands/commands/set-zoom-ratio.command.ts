@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
-
 import { getSheetCommandTarget } from '@univerjs/sheets';
+
+import type { ICommand } from '@univerjs/core';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
 
 export interface ISetZoomRatioCommandParams {
@@ -55,6 +56,9 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         zoom = Math.min(SHEET_ZOOM_RANGE[1], zoom);
 
         const zoomRatio = zoom / 100;
+        const editorBridgeService = accessor.get(IEditorBridgeService);
+        const state = editorBridgeService.isVisible();
+        if (state.unitId === unitId && state.visible) return false;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,

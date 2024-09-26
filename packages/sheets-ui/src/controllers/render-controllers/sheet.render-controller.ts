@@ -249,8 +249,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             bottom: 0,
             right: 0,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: false,
+            //explicitViewportWidthSet: false,
+            //explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY,
@@ -258,8 +258,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY: 0,
@@ -268,8 +268,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: false,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: false,
             allowCache: true,
             bufferEdgeX: 0,
             bufferEdgeY,
@@ -278,8 +278,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewMainTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: false,
+            //explicitViewportHeightSet: true,
             allowCache: true,
             bufferEdgeX,
             bufferEdgeY: 0,
@@ -288,8 +288,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const viewRowTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: true,
         });
 
         const viewRowBottom = new Viewport(SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
@@ -298,15 +298,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             bottom: 0,
             width: rowHeader.width,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: false,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: false,
         });
 
         const viewColumnLeft = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: true,
         });
 
         const viewColumnRight = new Viewport(SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
@@ -315,8 +315,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             height: columnHeader.height,
             right: 0,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: false,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: false,
+            //explicitViewportHeightSet: true,
         });
 
         const viewLeftTop = new Viewport(SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
@@ -325,8 +325,8 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             width: rowHeader.width,
             height: columnHeader.height,
             isWheelPreventDefaultX: true,
-            explicitViewportWidthSet: true,
-            explicitViewportHeightSet: true,
+            //explicitViewportWidthSet: true,
+            //explicitViewportHeightSet: true,
         });
 
         return {

@@ -72,6 +72,13 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
 
         scene.resize(sceneWidth, sceneHeight + 200);
 
+        // the engine width is 1, when engine has no container.
+        // Use to fix flickering issues into the page.
+        if (engineWidth <= 1) {
+            docsLeft = Number.POSITIVE_INFINITY;
+            docsTop = Number.POSITIVE_INFINITY;
+        }
+
         docsComponent.translate(docsLeft, docsTop);
         docBackground.translate(docsLeft, docsTop);
 

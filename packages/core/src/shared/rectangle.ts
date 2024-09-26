@@ -270,6 +270,12 @@ export class Rectangle {
         endColumn: range.endColumn + offsetX,
     });
 
+    /**
+     * Subtract range2 from range1, the result is is horizontal first then vertical
+     * @param {IRange} range1 The source range
+     * @param {IRange} range2 The range to be subtracted
+     * @returns {IRange[]} Returns the array of ranges, which are the result not intersected with range1
+     */
     static subtract(range1: IRange, range2: IRange): IRange[] {
         // 如果没有交集，则返回 range1
         if (

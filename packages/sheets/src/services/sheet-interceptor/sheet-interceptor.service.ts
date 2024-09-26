@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
+import {
+    composeInterceptors,
+    Disposable,
+    DisposableCollection,
+    InterceptorEffectEnum,
+    IUniverInstanceService,
+    remove,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import type {
     ICellData,
+    ICellInterceptor,
     ICommandInfo,
     IDisposable,
     IInterceptor,
@@ -24,15 +35,6 @@ import type {
     Nullable,
     Workbook,
     Worksheet,
-} from '@univerjs/core';
-import {
-    composeInterceptors,
-    Disposable,
-    DisposableCollection,
-    IUniverInstanceService,
-    remove,
-    toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
@@ -88,6 +90,7 @@ export class SheetInterceptorService extends Disposable {
         // register default viewModel interceptor
         this.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
             priority: -1,
+            effect: InterceptorEffectEnum.Style | InterceptorEffectEnum.Value,
             handler(value, context): Nullable<ICellData> {
                 const rawData = context.worksheet.getCellRaw(context.row, context.col);
                 if (value) {
@@ -191,17 +194,34 @@ export class SheetInterceptorService extends Disposable {
         }
         const interceptors = this._interceptorsByName.get(key)!;
         interceptors.push(interceptor);
+        const sortedInterceptors = interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-        this._interceptorsByName.set(
-            key,
-            interceptors.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-        );
+        if (key === INTERCEPTOR_POINT.CELL_CONTENT as unknown as string) {
+            this._interceptorsByName.set(
+                `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
+                sortedInterceptors
+            );
+            // 3 means both style and value
+            this._interceptorsByName.set(
+                `${key}-${(InterceptorEffectEnum.Style)}`,
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Style) > 0)
+            );
+            this._interceptorsByName.set(
+                `${key}-${(InterceptorEffectEnum.Value)}`,
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Value) > 0)
+            );
+        } else {
+            this._interceptorsByName.set(
+                key,
+                sortedInterceptors
+            );
+        }
 
         return this.disposeWithMe(toDisposable(() => remove(this._interceptorsByName.get(key)!, interceptor)));
     }
 
-    fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>) {
-        const key = name as unknown as string;
+    fetchThroughInterceptors<T, C>(name: IInterceptor<T, C>, effect?: InterceptorEffectEnum) {
+        const key = effect === undefined ? name as unknown as string : `${name as unknown as string}-${effect}`;
         const interceptors = this._interceptorsByName.get(key) as unknown as Array<typeof name>;
         return composeInterceptors<T, C>(interceptors || []);
     }
@@ -219,8 +239,8 @@ export class SheetInterceptorService extends Disposable {
                 sheetInterceptorService._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
 
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
-                    getCell(row: number, col: number): Nullable<ICellData> {
-                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(
+                    getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
+                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
                             worksheet.getCellRaw(row, col),
                             {
                                 unitId,

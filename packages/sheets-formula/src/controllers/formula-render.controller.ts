@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { extractFormulaError } from './utils/utils';
 
@@ -39,6 +39,7 @@ export class FormulaRenderManagerController extends RxDisposable {
         this.disposeWithMe(this._sheetInterceptorService.intercept(
             INTERCEPTOR_POINT.CELL_CONTENT,
             {
+                effect: InterceptorEffectEnum.Style,
                 handler: (cell, pos, next) => {
                     const errorType = extractFormulaError(cell);
                     if (!errorType) {

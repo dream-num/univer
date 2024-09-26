@@ -293,7 +293,7 @@ export class SheetsFilterController extends Disposable {
                 subUnitId,
             };
             redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+            undos.unshift({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
         } else {
             const newStartColumn = startColumn <= removeStartColumn
                 ? startColumn :
@@ -794,7 +794,7 @@ export class SheetsFilterController extends Disposable {
             }
 
             // extend filter range when set range values
-            if (command.id === SetRangeValuesMutation.id && !options?.fromCollab && !options?.onlyLocal) {
+            if (command.id === SetRangeValuesMutation.id && !options?.onlyLocal) {
                 const extendRegion = this._getExtendRegion(unitId, subUnitId);
                 if (extendRegion) {
                     const cellValue = (command.params as ISetRangeValuesMutationParams).cellValue;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget } from '@univerjs/sheets';
 
 import type { ICommand } from '@univerjs/core';
@@ -58,7 +58,7 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         const zoomRatio = zoom / 100;
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const state = editorBridgeService.isVisible();
-        if (state.unitId === unitId && state.visible) return false;
+        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) return false;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,
@@ -79,7 +79,7 @@ export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
         const { unitId, subUnitId, zoomRatio } = params;
         const editorBridgeService = accessor.get(IEditorBridgeService);
         const state = editorBridgeService.isVisible();
-        if (state.unitId === unitId && state.visible) return false;
+        if ((state.unitId === unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) return false;
 
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,

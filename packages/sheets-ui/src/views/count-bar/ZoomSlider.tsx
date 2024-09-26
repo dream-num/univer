@@ -15,6 +15,7 @@
  */
 
 import {
+    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     UniverInstanceType,
@@ -81,9 +82,11 @@ export function ZoomSlider() {
         });
     }
 
+    const disabled = visible?.visible && (visible.unitId === workbook?.getUnitId() || visible.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+
     return (
         <Slider
-            disabled={visible?.visible && visible.unitId === workbook?.getUnitId()}
+            disabled={disabled}
             min={SHEET_ZOOM_RANGE[0]}
             value={zoom}
             shortcuts={ZOOM_MAP}

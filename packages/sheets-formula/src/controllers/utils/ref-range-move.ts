@@ -16,6 +16,7 @@
 
 import {
     Direction,
+    getIntersectRange,
     RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
@@ -50,7 +51,7 @@ export interface IUnitRangeWithOffset extends IUnitRange {
     sheetName: string;
 }
 
-enum OriginRangeEdgeType {
+export enum OriginRangeEdgeType {
     UP,
     DOWN,
     LEFT,
@@ -99,7 +100,7 @@ export function getNewRangeByMoveParam(
 
         const moveEdge = checkMoveEdge(sequenceRange, from);
 
-        const remainRange = Rectangle.getIntersects(sequenceRange, from);
+        const remainRange = getIntersectRange(sequenceRange, from);
 
         if (remainRange == null || moveEdge !== OriginRangeEdgeType.ALL) {
             return;
@@ -124,7 +125,7 @@ export function getNewRangeByMoveParam(
 
         const moveEdge = checkMoveEdge(sequenceRange, from);
 
-        let remainRange = Rectangle.getIntersects(sequenceRange, from);
+        let remainRange = getIntersectRange(sequenceRange, from);
 
         if (
             remainRange == null &&
@@ -162,7 +163,7 @@ export function getNewRangeByMoveParam(
 
         const moveEdge = checkMoveEdge(sequenceRange, from);
 
-        let remainRange = Rectangle.getIntersects(sequenceRange, from);
+        let remainRange = getIntersectRange(sequenceRange, from);
 
         if (
             remainRange == null &&
@@ -405,6 +406,7 @@ function getMoveNewRange(
         endRow: originEndRow,
         startColumn: originStartColumn,
         endColumn: originEndColumn,
+        rangeType: originRangeType = RANGE_TYPE.NORMAL,
     } = origin;
 
     const newRange = { ...origin };
@@ -462,7 +464,7 @@ function getMoveNewRange(
         newRange.startColumn = startColumn;
         newRange.endRow = endRow;
         newRange.endColumn = endColumn;
-    } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
+    } else if ((fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) || (fromRangeType === RANGE_TYPE.ROW && originRangeType === RANGE_TYPE.ROW)) { // For the entire row, originStartColumn and originEndColumn may be NaN
         if (from.endRow < originStartRow) {
             if (toStartRow >= originStartRow) {
                 newRange.startRow -= fromEndRow - fromStartRow + 1;
@@ -477,8 +479,14 @@ function getMoveNewRange(
             if (toEndRow <= originStartRow) {
                 newRange.startRow += fromEndRow - fromStartRow + 1;
             }
+        } else if (from.startRow >= originStartRow && from.endRow <= originEndRow) { // from range is in the middle of the original range
+            if (toStartRow <= originStartRow) {
+                newRange.startRow += fromEndRow - fromStartRow + 1;
+            } else if (toStartRow >= originEndRow) {
+                newRange.endRow -= fromEndRow - fromStartRow + 1;
+            }
         }
-    } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
+    } else if ((fromStartRow <= originStartRow && fromEndRow >= originEndRow) || (fromRangeType === RANGE_TYPE.COLUMN && originRangeType === RANGE_TYPE.COLUMN)) { // For the entire column, originStartRow and originEndRow may be NaN
         if (from.endColumn < originStartColumn) {
             if (toStartColumn >= originStartColumn) {
                 newRange.startColumn -= fromEndColumn - fromStartColumn + 1;
@@ -492,6 +500,12 @@ function getMoveNewRange(
             }
             if (toEndColumn <= originStartColumn) {
                 newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+            }
+        } else if (from.startColumn >= originStartColumn && from.endColumn <= originEndColumn) { // from range is in the middle of the original range
+            if (toStartColumn <= originStartColumn) {
+                newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+            } else if (toStartColumn >= originEndColumn) {
+                newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
             }
         }
     } else if (
@@ -531,16 +545,28 @@ function getMoveNewRange(
  * @param originRange
  * @param fromRange
  */
-// eslint-disable-next-line
-function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
-    const { startRow, startColumn, endRow, endColumn } = originRange;
+// eslint-disable-next-line complexity
+export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
+    // Helper functions to get start and end values, treating NaN as unbounded
+    function getStartValue(value: number): number {
+        // If value is NaN, treat as -Infinity (unbounded start)
+        return isNaN(value) ? -Infinity : value;
+    }
 
-    const {
-        startRow: fromStartRow,
-        startColumn: fromStartColumn,
-        endRow: fromEndRow,
-        endColumn: fromEndColumn,
-    } = fromRange;
+    function getEndValue(value: number): number {
+        // If value is NaN, treat as Infinity (unbounded end)
+        return isNaN(value) ? Infinity : value;
+    }
+
+    const startRow = getStartValue(originRange.startRow);
+    const endRow = getEndValue(originRange.endRow);
+    const startColumn = getStartValue(originRange.startColumn);
+    const endColumn = getEndValue(originRange.endColumn);
+
+    const fromStartRow = getStartValue(fromRange.startRow);
+    const fromEndRow = getEndValue(fromRange.endRow);
+    const fromStartColumn = getStartValue(fromRange.startColumn);
+    const fromEndColumn = getEndValue(fromRange.endColumn);
 
     if (
         startRow >= fromStartRow &&
@@ -590,4 +616,6 @@ function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginR
     ) {
         return OriginRangeEdgeType.RIGHT;
     }
+
+    return null; // Return null if no edge type matches
 }

@@ -77,6 +77,10 @@ export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
         }
 
         const { unitId, subUnitId, zoomRatio } = params;
+        const editorBridgeService = accessor.get(IEditorBridgeService);
+        const state = editorBridgeService.isVisible();
+        if (state.unitId === unitId && state.visible) return false;
+
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,
             subUnitId,

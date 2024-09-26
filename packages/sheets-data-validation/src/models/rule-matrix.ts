@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import { Range, Rectangle, Tools } from '@univerjs/core';
-import type { IRange, ISheetDataValidationRule, Worksheet } from '@univerjs/core';
+import { Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import RBush from 'rbush';
+import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
+
+interface IRuleItem extends RBush.BBox {
+    ruleId: string;
+}
 
 export type RangeMutation = {
     type: 'update';
@@ -33,17 +38,48 @@ export type RangeMutation = {
 
 export class RuleMatrix {
     private _map = new Map<string, IRange[]>();
+    private _tree = new RBush<IRuleItem>();
+    private _dirty = false;
 
     constructor(
         value: Map<string, IRange[]>,
-        private _worksheet: Worksheet
+        private _unitId: string,
+        private _subUnitId: string,
+        private _univerInstanceService: IUniverInstanceService
     ) {
         this._map = value;
+        this._buildTree();
+    }
+
+    private _buildTree() {
+        const items: IRuleItem[] = [];
+        this._map.forEach((ranges, ruleId) => {
+            ranges.forEach((range) => {
+                items.push({
+                    minX: range.startColumn,
+                    minY: range.startRow,
+                    maxX: range.endColumn,
+                    maxY: range.endRow,
+                    ruleId,
+                });
+            });
+        });
+        this._tree.clear();
+        this._tree.load(items);
+        this._dirty = false;
+    }
+
+    get _worksheet() {
+        return this._univerInstanceService.getUnit<Workbook>(this._unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(this._subUnitId);
     }
 
     addRule(rule: ISheetDataValidationRule) {
+        if (!this._worksheet) {
+            return;
+        }
+
         const ruleId = rule.uid;
-        const ranges = rule.ranges.map((range) => Range.transformRange(range, this._worksheet));
+        const ranges = rule.ranges.map((range) => Range.transformRange(range, this._worksheet!));
 
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);
@@ -54,11 +90,15 @@ export class RuleMatrix {
             }
         });
 
+        this._dirty = true;
         this._map.set(ruleId, ranges);
     }
 
     removeRange(_ranges: IRange[]) {
-        const ranges = _ranges.map((range) => Range.transformRange(range, this._worksheet));
+        if (!this._worksheet) {
+            return;
+        }
+        const ranges = _ranges.map((range) => Range.transformRange(range, this._worksheet!));
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
@@ -67,15 +107,20 @@ export class RuleMatrix {
                 this._map.set(key, newRanges);
             }
         });
+        this._dirty = true;
     }
 
     removeRule(rule: ISheetDataValidationRule) {
         this._map.delete(rule.uid);
+        this._dirty = true;
     }
 
     updateRange(ruleId: string, _newRanges: IRange[]) {
+        if (!this._worksheet) {
+            return;
+        }
         this._map.delete(ruleId);
-        const ranges = _newRanges.map((range) => Range.transformRange(range, this._worksheet));
+        const ranges = _newRanges.map((range) => Range.transformRange(range, this._worksheet!));
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
@@ -84,8 +129,7 @@ export class RuleMatrix {
                 this._map.set(key, newRanges);
             }
         });
-
-        this._map.set(ruleId, ranges);
+        this._dirty = true;
     }
 
     diff(rules: ISheetDataValidationRule[]) {
@@ -158,17 +202,25 @@ export class RuleMatrix {
     }
 
     clone() {
-        return new RuleMatrix(new Map(Tools.deepClone(Array.from(this._map.entries()))), this._worksheet);
+        return new RuleMatrix(
+            new Map(Tools.deepClone(Array.from(this._map.entries()))),
+            this._unitId,
+            this._subUnitId,
+            this._univerInstanceService
+        );
     }
 
     getValue(row: number, col: number) {
-        const keys = Array.from(this._map.keys());
-        for (const id of keys) {
-            const ranges = this._map.get(id) ?? [];
-            if (ranges.find((range) => range.startRow <= row && range.endRow >= row && range.startColumn <= col && range.endColumn >= col)) {
-                return id;
-            }
+        if (this._dirty) {
+            this._buildTree();
         }
+        const result = this._tree.search({
+            minX: col,
+            minY: row,
+            maxX: col,
+            maxY: row,
+        });
+        return result.length > 0 ? result[0].ruleId : undefined;
     }
 
     addRangeRules(rules: { id: string;ranges: IRange[] }[]) {

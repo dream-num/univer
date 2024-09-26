@@ -168,8 +168,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     // eslint-disable-next-line complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
-                        const styleMap = workbook.getStyles();
-                        const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+
                         const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
@@ -183,6 +182,8 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         const cellOrigin = worksheet.getCellRaw(row, col);
                         const cellValue = getCellValueOrigin(cellOrigin);
                         const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
+                        const styleMap = workbook.getStyles();
+                        const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
 
                         return next({
                             ...cell,

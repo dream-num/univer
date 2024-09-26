@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, toDisposable } from '../shared/lifecycle';
+import { InterceptorEffectEnum } from '../common/interceptor';
 
+import { Disposable, toDisposable } from '../shared/lifecycle';
 import type { IDisposable } from '../common/di';
 import type { Nullable } from '../shared/types';
 import type { ICellData, ICellDataForSheetInterceptor } from './typedef';
@@ -24,7 +25,7 @@ import type { ICellData, ICellDataForSheetInterceptor } from './typedef';
  * @internal
  */
 export interface ICellContentInterceptor {
-    getCell: (row: number, col: number) => Nullable<ICellDataForSheetInterceptor>;
+    getCell: (row: number, col: number, effect: InterceptorEffectEnum) => Nullable<ICellDataForSheetInterceptor>;
 }
 
 export interface IRowFilteredInterceptor {}
@@ -71,7 +72,23 @@ export class SheetViewModel extends Disposable {
 
     getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
         if (this._cellContentInterceptor) {
-            return this._cellContentInterceptor.getCell(row, col);
+            return this._cellContentInterceptor.getCell(row, col, InterceptorEffectEnum.Value | InterceptorEffectEnum.Style);
+        }
+
+        return this.getRawCell(row, col);
+    }
+
+    getCellValueOnly(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
+        if (this._cellContentInterceptor) {
+            return this._cellContentInterceptor.getCell(row, col, InterceptorEffectEnum.Value);
+        }
+
+        return this.getRawCell(row, col);
+    }
+
+    getCellStyleOnly(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
+        if (this._cellContentInterceptor) {
+            return this._cellContentInterceptor.getCell(row, col, InterceptorEffectEnum.Style);
         }
 
         return this.getRawCell(row, col);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { createInterceptorKey, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
 
@@ -58,6 +58,7 @@ describe('Test SheetInterceptorService', () => {
     describe('Test intercepting getting cell content', () => {
         it('should intercept cells and merge result if next is called', () => {
             get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+                effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 priority: 100,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
@@ -75,6 +76,7 @@ describe('Test SheetInterceptorService', () => {
         it('interceptors should directly return result if next is not called', () => {
             get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
+                effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 handler(_cell, location: ISheetLocation, next: (v: Nullable<ICellData>) => Nullable<ICellData>) {
                     if (location.row === 0 && location.col === 0) {
                         return { v: 'intercepted' };

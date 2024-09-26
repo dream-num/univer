@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Workbook } from '@univerjs/core';
-import { CommandType, fromCallback, ICommandService, Inject, Injector, RxDisposable, ThemeService } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
+import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
 import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-
 import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
-import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
+
+import type { FilterModel } from '@univerjs/sheets-filter';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
+import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 
@@ -171,6 +171,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
     private _interceptCellContent(workbookId: string, worksheetId: string, range: IRange): void {
         const { startRow, startColumn, endColumn } = range;
         this._buttonRenderDisposable = this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            effect: InterceptorEffectEnum.Style,
             handler: (cell, pos, next) => {
                 const { row, col, unitId, subUnitId } = pos;
                 if (

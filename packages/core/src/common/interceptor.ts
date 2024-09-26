@@ -33,7 +33,7 @@ export interface IInterceptor<M, C> {
 }
 
 export interface ICellInterceptor<M, C> extends IInterceptor<M, C> {
-    effect: InterceptorEffectEnum;
+    effect?: InterceptorEffectEnum;
 }
 
 export function createInterceptorKey<T, C>(key: string): IInterceptor<T, C> {

@@ -201,13 +201,14 @@ export class SheetInterceptorService extends Disposable {
                 `${key}-${(InterceptorEffectEnum.Style | InterceptorEffectEnum.Value)}`,
                 sortedInterceptors
             );
+            // 3 means both style and value
             this._interceptorsByName.set(
                 `${key}-${(InterceptorEffectEnum.Style)}`,
-                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => (i.effect & InterceptorEffectEnum.Style) > 0)
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Style) > 0)
             );
             this._interceptorsByName.set(
                 `${key}-${(InterceptorEffectEnum.Value)}`,
-                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => (i.effect & InterceptorEffectEnum.Value) > 0)
+                (sortedInterceptors as ICellInterceptor<unknown, unknown>[]).filter((i) => ((i.effect || 3) & InterceptorEffectEnum.Value) > 0)
             );
         } else {
             this._interceptorsByName.set(

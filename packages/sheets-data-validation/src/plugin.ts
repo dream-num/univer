@@ -78,7 +78,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationDropdownManagerService],
             [SheetsDataValidationValidatorService],
             [SheetDataValidationModel],
-            // controller
             [DataValidationController],
             [SheetsDataValidationRenderController],
             [DataValidationAlertController],
@@ -103,7 +102,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             RemoveSheetAllDataValidationCommand,
             ClearRangeDataValidationCommand,
 
-             // operation
+            // operation
             ShowDataValidationDropdown,
             HideDataValidationDropdown,
             CloseValidationPanelOperation,
@@ -112,5 +111,9 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+    }
+
+    override onReady(): void {
+        this._injector.get(DataValidationPermissionController);
     }
 }

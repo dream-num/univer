@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import type { ICommandInfo } from '@univerjs/core';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationPermissionController)
 export class DataValidationPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(SheetPermissionInterceptorBaseController) private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
+        @Inject(SheetPermissionInterceptorBaseController)
+        private readonly _sheetPermissionInterceptorBaseController: SheetPermissionInterceptorBaseController
     ) {
         super();
         this._commandExecutedListener();

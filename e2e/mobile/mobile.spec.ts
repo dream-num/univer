@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import { PermissionStatus } from '@univerjs/core';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
-import type { IPermissionPoint } from '@univerjs/core';
+import { expect, test } from '@playwright/test';
 
-export class WorksheetViewPermission implements IPermissionPoint {
-    value = true;
-    type = UnitObject.Worksheet;
-    status = PermissionStatus.INIT;
-    id: string;
-    subType = UnitAction.View;
-    constructor(public unitId: string, public subUnitId: string) {
-        this.id = `${this.type}.${UnitAction.View}_${unitId}_${subUnitId}`;
-    }
-}
+test('mobile minimum', async ({ page }) => {
+    let errored = false;
+
+    page.on('pageerror', (error) => {
+        console.error('Page error:', error);
+        errored = true;
+    });
+
+    // This test is for ensuring the mobile page can run without logging errors.
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(5000);
+
+    expect(errored).toBeFalsy();
+});

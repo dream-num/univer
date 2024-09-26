@@ -78,7 +78,6 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             [DataValidationDropdownManagerService],
             [SheetsDataValidationValidatorService],
             [SheetDataValidationModel],
-            // controller
             [DataValidationController],
             [SheetsDataValidationMobileRenderController],
             [DataValidationAlertController],
@@ -100,7 +99,7 @@ export class UniverSheetsDataValidationMobilePlugin extends Plugin {
             RemoveSheetAllDataValidationCommand,
             ClearRangeDataValidationCommand,
 
-             // operation
+            // operation
             ShowDataValidationDropdown,
             HideDataValidationDropdown,
             CloseValidationPanelOperation,

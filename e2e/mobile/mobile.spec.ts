@@ -25,7 +25,7 @@ test('mobile minimum', async ({ page }) => {
     });
 
     // This test is for ensuring the mobile page can run without logging errors.
-    await page.goto('http://localhost:3000/sheets/');
+    await page.goto('http://localhost:3000/mobile-s/');
     await page.waitForTimeout(5000);
 
     expect(errored).toBeFalsy();

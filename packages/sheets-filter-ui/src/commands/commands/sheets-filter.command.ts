@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IContextService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
-import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
+import { CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY } from '../operations/sheets-filter.operation';
 
 /**
  * Parameters of command {@link SetSheetFilterRangeCommand}.
@@ -85,6 +86,13 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
+
+        // Because popup does not support keydownOutside yet, so do this first
+        const contextService = accessor.get(IContextService);
+        if (contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
+            commandService.syncExecuteCommand(CloseFilterPanelOperation.id);
+        }
+
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const commandTarget = getSheetCommandTarget(univerInstanceService, params);

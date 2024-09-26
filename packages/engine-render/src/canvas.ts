@@ -40,7 +40,6 @@ interface ICanvasProps {
     height?: number;
     pixelRatio?: number;
     mode?: CanvasRenderMode;
-    name: string;
 }
 
 /**
@@ -57,15 +56,17 @@ export class Canvas {
     isCache = false;
 
     private _pixelRatio = 1;
+
     private _canvasEle: Nullable<HTMLCanvasElement>;
+
     private _context: Nullable<UniverRenderingContext>;
+
     private _width = 0;
+
     private _height = 0;
-    private _name = '';
 
     constructor(props?: ICanvasProps) {
         props = props || {};
-        this._name = props.name || '';
 
         this._canvasEle = createCanvasElement();
         // set inline styles
@@ -126,9 +127,6 @@ export class Canvas {
     }
 
     setSize(width?: number, height?: number, pixelRatioParam?: number) {
-        // if (this._name === 'engine') {
-        //     console.log('canvas set size', width, height);
-        // }
         // this.setWidth(width || 0);
         // this.setHeight(height || 0);
         this._pixelRatio = pixelRatioParam || getDevicePixelRatio();

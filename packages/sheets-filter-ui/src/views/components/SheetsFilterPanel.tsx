@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
 import { ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
-
-import { of } from 'rxjs';
+import { Button, type ISegmentedProps, Segmented } from '@univerjs/design';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsUIPart } from '@univerjs/sheets-ui';
-import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
-import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
+
+import { ComponentContainer, useComponentsOfPart, useObservable } from '@univerjs/ui';
+import React, { useCallback, useMemo } from 'react';
+import { of } from 'rxjs';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import styles from './index.module.less';
 import { FilterByCondition } from './SheetsFilterByConditionsPanel';
 import { FilterByValue } from './SheetsFilterByValuesPanel';
+import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 
 /**
  * This Filter Panel component is used to filter the data in the sheet.
@@ -79,7 +79,7 @@ export function FilterPanel() {
             <div className={styles.sheetsFilterPanelHeader}>
                 <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
             </div>
-            { filterByModel
+            {filterByModel
                 ? (
                     <div className={styles.sheetsFilterPanelContent}>
                         {filterBy === FilterBy.VALUES
@@ -87,7 +87,9 @@ export function FilterPanel() {
                             : <FilterByCondition model={filterByModel as ByConditionsModel} />}
                     </div>
                 )
-                : null }
+                : (
+                    <div style={{ flex: 1 }} />
+                )}
             <div className={styles.sheetsFilterPanelFooter}>
                 <Button type="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>{localeService.t('sheets-filter.panel.clear-filter')}</Button>
                 <span className={styles.sheetsFilterPanelFooterPrimaryButtons}>
@@ -105,7 +107,7 @@ function useFilterByOptions(localeService: LocaleService): ISegmentedProps['opti
         { label: localeService.t('sheets-filter.panel.by-values'), value: FilterBy.VALUES },
         { label: localeService.t('sheets-filter.panel.by-conditions'), value: FilterBy.CONDITIONS },
     ]
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     , [locale, localeService]);
 }
 

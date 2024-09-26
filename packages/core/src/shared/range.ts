@@ -303,7 +303,7 @@ function getOverlap1D(
     const start = Math.max(s1, s2);
     const end = Math.min(e1, e2);
 
-    if (start < end) {
+    if (start <= end) {
         const resultStart = start === -Infinity ? Number.NaN : start;
         const resultEnd = end === Infinity ? Number.NaN : end;
         return [resultStart, resultEnd];

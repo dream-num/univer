@@ -360,7 +360,11 @@ describe('Test update formula ', () => {
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
                 .getUnit<Workbook>('test')
+<<<<<<< HEAD
                 ?.getSheetBySheetId('sheet1')
+=======
+                ?.getSheetBySheetId(sheetId)
+>>>>>>> 55fa2461b (fix(formula): get move range)
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
@@ -704,7 +708,7 @@ describe('Test update formula ', () => {
             // A1
             selectionManager.addSelections([
                 {
-                    range: { startRow: Number.NaN, startColumn: 1, endRow: Number.NaN, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
+                    range: { startRow: 0, startColumn: 1, endRow: 999, endColumn: 1, rangeType: RANGE_TYPE.COLUMN },
                     primary: null,
                     style: null,
                 },

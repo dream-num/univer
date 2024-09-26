@@ -516,7 +516,7 @@ describe('test getIntersectRange', () => {
         };
 
         const rect2 = {
-            startRow: 2,
+            startRow: 3,
             startColumn: Number.NaN,
             endRow: 4,
             endColumn: Number.NaN,
@@ -524,7 +524,7 @@ describe('test getIntersectRange', () => {
         };
 
         expect(getIntersectRange(rect1, rect2)).toStrictEqual({
-            startRow: 2,
+            startRow: 3,
             startColumn: 1,
             endRow: 3,
             endColumn: 3,
@@ -559,7 +559,7 @@ describe('test getIntersectRange', () => {
 
         const rect2 = {
             startRow: Number.NaN,
-            startColumn: 2,
+            startColumn: 3,
             endRow: Number.NaN,
             endColumn: 4,
             rangeType: RANGE_TYPE.COLUMN,
@@ -567,7 +567,7 @@ describe('test getIntersectRange', () => {
 
         expect(getIntersectRange(rect1, rect2)).toStrictEqual({
             startRow: 1,
-            startColumn: 2,
+            startColumn: 3,
             endRow: 3,
             endColumn: 3,
             rangeType: RANGE_TYPE.NORMAL,

@@ -136,6 +136,7 @@ export class Engine extends ThinEngine<Scene> {
     constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
         super();
         this._canvas = new Canvas({
+            name: 'engine',
             mode,
             width: elemWidth,
             height: elemHeight,
@@ -219,6 +220,7 @@ export class Engine extends ThinEngine<Scene> {
         this._container = elem;
         this._container.appendChild(this.getCanvasElement());
 
+        // console.log('setContainer >>>>>>>>>>>>>>', elem);
         if (resize) {
             this.resize();
 

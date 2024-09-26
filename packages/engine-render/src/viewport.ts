@@ -373,6 +373,15 @@ export class Viewport {
 
     set height(height: Nullable<number>) {
         const maxHeight = this.scene.getParent().height;
+        // if (this.viewportKey === 'viewColumnRight' && height) {
+        //     if (window.lastH === 20) {
+        //         if (height === 1) {
+        //             // debugger;
+        //         }
+        //     }
+        //     window.lastH = height;
+        //     console.log(' viewColumnRight set height', height, 'max', maxHeight, 'lastH', window.lastH);
+        // }
         if (Tools.isDefine(height)) {
             this._height = Tools.clamp(height!, 0, maxHeight);
         } else {
@@ -1207,6 +1216,9 @@ export class Viewport {
      */
     private _resizeCacheCanvas() {
         const { width, height } = this._getViewPortSize();
+        // if (this.viewportKey === 'viewColumnRight') {
+        //     console.log('resizeCacheCanvas', height);
+        // }
         this.width = width;
         this.height = height;
         const scaleX = this.scene.scaleX;
@@ -1250,10 +1262,11 @@ export class Viewport {
 
     private _getViewPortSize() {
         const parent = this._scene.getParent();
-
         const { width: parentWidth, height: parentHeight } = parent;
-
         const { scaleX = 1, scaleY = 1 } = this._scene;
+        // if (this.viewportKey === 'viewColumnRight') {
+        //     console.log('viewColumnRight getVP size parentH', parent.height, this._explicitViewportHeightSet, 'origin:', this._heightOrigin);
+        // }
 
         let width;
         let height;
@@ -1592,7 +1605,7 @@ export class Viewport {
 
         if (Tools.isDefine(props?.width) && this._explicitViewportWidthSet) {
             this.width = props?.width;
-            this._widthOrigin = this.width;
+            this._widthOrigin = props?.width;
         } else {
             this.width = null;
             this._widthOrigin = null;
@@ -1600,7 +1613,7 @@ export class Viewport {
 
         if (Tools.isDefine(props?.height) && this._explicitViewportHeightSet) {
             this.height = props?.height;
-            this._heightOrigin = this.height;
+            this._heightOrigin = props?.height;
         } else {
             this.height = null;
             this._heightOrigin = null;

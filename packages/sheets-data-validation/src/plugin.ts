@@ -61,7 +61,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration.
+        // Manage the plugin configuration..
         const { menu, ...rest } = this._config;
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });

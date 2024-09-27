@@ -15,11 +15,11 @@
  */
 
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+import type { ISelectionWithStyle } from '../../../basics/selection';
 
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
+import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
-import type { ISelectionWithStyle } from '../../../basics/selection';
 
 export interface IExpandParams {
     left?: boolean;
@@ -191,7 +191,7 @@ export const followSelectionOperation = (range: IRange, workbook: Workbook, work
     params: {
         unitId: workbook.getUnitId(),
         subUnitId: worksheet.getSheetId(),
-
+        reveal: true,
         selections: [{ range, primary: getPrimaryForRange(range, worksheet) }],
     } as ISetSelectionsOperationParams,
 });

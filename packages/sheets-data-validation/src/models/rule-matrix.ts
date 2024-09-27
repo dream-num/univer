@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import IntervalTree from '@flatten-js/interval-tree';
 import { debounce, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import RBush from 'rbush';
 import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
 
-interface IRuleItem extends RBush.BBox {
+interface IRuleItem {
     ruleId: string;
+    startRow: number;
+    endRow: number;
 }
 
 export type RangeMutation = {
@@ -38,7 +40,7 @@ export type RangeMutation = {
 
 export class RuleMatrix {
     private _map = new Map<string, IRange[]>();
-    private _tree = new RBush<IRuleItem>(2);
+    private _tree = new Map<number, IntervalTree<string>>();
     private _dirty = false;
 
     constructor(
@@ -52,24 +54,37 @@ export class RuleMatrix {
     }
 
     private _buildTree = () => {
-        const items: IRuleItem[] = [];
+        const map = new Map<number, IRuleItem[]>();
         this._map.forEach((ranges, ruleId) => {
             ranges.forEach((range) => {
-                items.push({
-                    minX: range.startColumn,
-                    minY: range.startRow,
-                    maxX: range.endColumn,
-                    maxY: range.endRow,
-                    ruleId,
-                });
+                for (let col = range.startColumn; col <= range.endColumn; col++) {
+                    let items = map.get(col);
+                    if (!items) {
+                        items = [];
+                        map.set(col, items);
+                    }
+                    items.push({
+                        startRow: range.startRow,
+                        endRow: range.endRow,
+                        ruleId,
+                    });
+                }
             });
         });
-        this._tree.clear();
-        this._tree.load(items);
+        const treeMap = new Map<number, IntervalTree<string>>();
+        map.forEach((items, col) => {
+            const tree = new IntervalTree<string>();
+            items.forEach((item) => {
+                tree.insert([item.startRow, item.endRow], item.ruleId);
+            });
+
+            treeMap.set(col, tree);
+        });
+        this._tree = treeMap;
         this._dirty = false;
     };
 
-    private _debonceBuildTree = debounce(this._buildTree, 100);
+    private _debonceBuildTree = debounce(this._buildTree, 0);
 
     get _worksheet() {
         return this._univerInstanceService.getUnit<Workbook>(this._unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(this._subUnitId);
@@ -222,13 +237,12 @@ export class RuleMatrix {
         if (this._dirty) {
             this._buildTree();
         }
-        const result = this._tree.search({
-            minX: col,
-            minY: row,
-            maxX: col,
-            maxY: row,
-        });
-        return result.length > 0 ? result[0].ruleId : undefined;
+        const tree = this._tree.get(col);
+        if (!tree) {
+            return undefined;
+        }
+        const result = tree.search([row, row]);
+        return result.length > 0 ? result[0] : undefined;
     }
 
     addRangeRules(rules: { id: string;ranges: IRange[] }[]) {

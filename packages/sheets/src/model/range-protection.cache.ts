@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import type { IRangePermissionPoint } from '../services/permission/range-permission/util';
 import type { IRuleChange } from './range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, LRUMap, Range } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, Range } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { filter, map } from 'rxjs';
 import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../services/permission/permission-point';
@@ -26,7 +26,7 @@ import { RangeProtectionRuleModel } from './range-protection-rule.model';
 export class RangeProtectionCache extends Disposable {
     private readonly _cellRuleCache: Map<string, Map<string, Map<string, string>>> = new Map();
     private readonly _permissionIdCache: Map<string, string> = new Map();
-    private readonly _cellInfoCache = new LRUMap<string, Partial<Record<UnitAction, boolean>> & { ruleId?: string; ranges?: IRange[] }>(50000);
+    private readonly _cellInfoCache: Map<string, Map<string, Map<string, Partial<Record<UnitAction, boolean>> & { ruleId?: string; ranges?: IRange[] }>>> = new Map();
 
     constructor(
         @Inject(RangeProtectionRuleModel) private readonly _ruleModel: RangeProtectionRuleModel,
@@ -34,10 +34,10 @@ export class RangeProtectionCache extends Disposable {
     ) {
         super();
         this._initUpdateCellRuleCache();
-        this._initUpdateCellViewCache();
+        this._initUpdateCellInfoCache();
     }
 
-    private _initUpdateCellViewCache() {
+    private _initUpdateCellInfoCache() {
         this._permissionService.permissionPointUpdate$.pipe(
             filter((permission) => permission.type === UnitObject.SelectRange),
             map((permission) => permission as IRangePermissionPoint)
@@ -51,29 +51,30 @@ export class RangeProtectionCache extends Disposable {
             if (!ruleInstance) {
                 return;
             }
+
+            const cellInfoMap = this._ensureCellInfoMap(unitId, subUnitId);
             ruleInstance.ranges.forEach((range) => {
                 const { startRow, endRow, startColumn, endColumn } = range;
                 for (let i = startRow; i <= endRow; i++) {
                     for (let j = startColumn; j <= endColumn; j++) {
-                        const key = this._createKey(unitId, subUnitId, i, j);
-                        this._cellInfoCache.delete(key);
+                        cellInfoMap.delete(`${i}-${j}`);
                     }
                 }
             });
         });
 
         this._ruleModel.ruleChange$.subscribe((info) => {
+            const { unitId, subUnitId } = info;
+            const cellInfoMap = this._ensureCellInfoMap(unitId, subUnitId);
             info.rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
-                    const key = this._createKey(info.unitId, info.subUnitId, row, col);
-                    this._cellInfoCache.delete(key);
+                    cellInfoMap.delete(`${row}-${col}`);
                 });
             });
             if (info.type === 'set') {
                 info.oldRule?.ranges.forEach((range) => {
                     Range.foreach(range, (row, col) => {
-                        const key = this._createKey(info.unitId, info.subUnitId, row, col);
-                        this._cellInfoCache.delete(key);
+                        this._cellInfoCache.delete(`${row}-${col}`);
                     });
                 });
             }
@@ -109,6 +110,21 @@ export class RangeProtectionCache extends Disposable {
         return cellMap;
     }
 
+    private _ensureCellInfoMap(unitId: string, subUnitId: string) {
+        let subUnitMap = this._cellInfoCache.get(unitId);
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            this._cellInfoCache.set(unitId, subUnitMap);
+        }
+        let cellMap = subUnitMap.get(subUnitId);
+
+        if (!cellMap) {
+            cellMap = new Map<string, Partial<Record<UnitAction, boolean>> & { ruleId?: string; ranges?: IRange[] }>();
+            subUnitMap.set(subUnitId, cellMap);
+        }
+        return cellMap;
+    }
+
     private _addCellRuleCache(ruleChange: IRuleChange) {
         const { subUnitId, unitId, rule } = ruleChange;
         const cellMap = this._ensureRuleMap(unitId, subUnitId);
@@ -138,27 +154,34 @@ export class RangeProtectionCache extends Disposable {
     }
 
     public reBuildCache(unitId: string, subUnitId: string) {
-        const cellMap = this._ensureRuleMap(unitId, subUnitId);
-        cellMap.clear();
+        const cellRuleMap = this._ensureRuleMap(unitId, subUnitId);
+        const cellInfoMap = this._ensureCellInfoMap(unitId, subUnitId);
+        cellRuleMap.clear();
+        cellInfoMap.clear();
         this._ruleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
+            const edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
+            const view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
+            const selectionProtection = {
+                [UnitAction.Edit]: edit,
+                [UnitAction.View]: view,
+                ruleId: rule.id,
+                ranges: rule.ranges,
+            };
             rule.ranges.forEach((range) => {
                 const { startRow, endRow, startColumn, endColumn } = range;
                 for (let i = startRow; i <= endRow; i++) {
                     for (let j = startColumn; j <= endColumn; j++) {
-                        cellMap.set(`${i}-${j}`, rule.id);
+                        cellRuleMap.set(`${i}-${j}`, rule.id);
+                        cellInfoMap.set(`${i}-${j}`, selectionProtection);
                     }
                 }
             });
         });
     }
 
-    private _createKey(unitId: string, subUnitId: string, row: number, col: number) {
-        return `${unitId}_${subUnitId}_${row}_${col}`;
-    }
-
     public getCellInfo(unitId: string, subUnitId: string, row: number, col: number) {
-        const key = this._createKey(unitId, subUnitId, row, col);
-        const cacheValue = this._cellInfoCache.get(key);
+        const cellMap = this._ensureCellInfoMap(unitId, subUnitId);
+        const cacheValue = cellMap.get(`${row}-${col}`);
         if (cacheValue) {
             return cacheValue;
         }
@@ -180,7 +203,7 @@ export class RangeProtectionCache extends Disposable {
                 ruleId,
                 ranges: rule.ranges,
             };
-            this._cellInfoCache.set(key, selectionProtection);
+            cellMap.set(`${row}-${col}`, selectionProtection);
             return selectionProtection;
         }
     }

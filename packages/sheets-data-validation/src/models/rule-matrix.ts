@@ -39,9 +39,9 @@ export type RangeMutation = {
 };
 
 export class RuleMatrix {
-    private _map = new Map<string, IRange[]>();
+    private _map: Map<string, IRange[]>;
     private _tree = new Map<number, IntervalTree<string>>();
-    private _dirty = false;
+    private _dirty = true;
 
     constructor(
         value: Map<string, IRange[]>,
@@ -54,6 +54,9 @@ export class RuleMatrix {
     }
 
     private _buildTree = () => {
+        if (!this._dirty) {
+            return;
+        }
         const map = new Map<number, IRuleItem[]>();
         this._map.forEach((ranges, ruleId) => {
             ranges.forEach((range) => {

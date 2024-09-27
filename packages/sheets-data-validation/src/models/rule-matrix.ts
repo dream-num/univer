@@ -121,6 +121,7 @@ export class RuleMatrix {
         }
         this._map.delete(ruleId);
         const ranges = _newRanges.map((range) => Range.transformRange(range, this._worksheet!));
+
         this._map.forEach((value, key) => {
             const newRanges = Rectangle.subtractMulti(value, ranges);
             if (newRanges.length === 0) {
@@ -129,6 +130,7 @@ export class RuleMatrix {
                 this._map.set(key, newRanges);
             }
         });
+        this._map.set(ruleId, ranges);
         this._dirty = true;
     }
 
@@ -139,7 +141,7 @@ export class RuleMatrix {
             const newRanges = this._map.get(rule.uid) ?? [];
             const oldRanges = rule.ranges;
 
-            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
+            if (newRanges.length !== 0 && (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i])))) {
                 mutations.push({
                     type: 'update',
                     ruleId: rule.uid,
@@ -168,7 +170,7 @@ export class RuleMatrix {
             const newRanges = this._map.get(rule.uid) ?? [];
             const oldRanges = rule.ranges;
 
-            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
+            if (newRanges.length !== 0 && (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i])))) {
                 mutations.push({
                     type: 'update',
                     ruleId: rule.uid,

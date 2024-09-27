@@ -148,6 +148,7 @@ export { checkRangesEditablePermission } from './services/permission/util';
 // range-protection
 export { type ICellPermission, RangeProtectionRenderModel } from './model/range-protection-render.model';
 export { type IModel, type IObjectModel, type IRangeProtectionRule, RangeProtectionRuleModel } from './model/range-protection-rule.model';
+export { RangeProtectionCache } from './model/range-protection.cache';
 export type { IWorksheetProtectionRenderCellData } from './services/permission/worksheet-permission/type';
 
 export { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';

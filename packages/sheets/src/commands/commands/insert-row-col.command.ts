@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -24,15 +23,9 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     sequenceExecute,
-    UniverInstanceType,
 } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
 
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    IRemoveColMutationParams,
-    IRemoveRowsMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import {
@@ -44,6 +37,13 @@ import {
 import { RemoveColMutation, RemoveRowMutation } from '../mutations/remove-row-col.mutation';
 import { SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { copyRangeStyles, followSelectionOperation } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    IRemoveColMutationParams,
+    IRemoveRowsMutationParams,
+} from '../../basics/interfaces/mutation-interface';
 
 export interface IInsertRowCommandParams {
     unitId: string;
@@ -77,11 +77,14 @@ export const InsertRowCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
-        const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
 
+        const { workbook, worksheet } = target;
         const { range, direction, unitId, subUnitId, cellValue } = params;
         const { startRow, endRow } = range;
+        range.rangeType = RANGE_TYPE.ROW;
+
         const anchorRow = direction === Direction.UP ? startRow : startRow - 1;
         const height = worksheet.getRowHeight(anchorRow);
 
@@ -100,14 +103,7 @@ export const InsertRowCommand: ICommand = {
             insertRowParams
         );
 
-        const canPerform = await sheetInterceptorService.beforeCommandExecute({
-            id: InsertRowCommand.id,
-            params: insertRowParams,
-        });
-
-        if (!canPerform) {
-            return false;
-        }
+        if (!await sheetInterceptorService.beforeCommandExecute({ id: InsertRowCommand.id, params: insertRowParams })) return false;
 
         const redos: IMutationInfo[] = [{ id: InsertRowMutation.id, params: insertRowParams }];
         const undos: IMutationInfo[] = [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }];
@@ -168,26 +164,13 @@ export const InsertRowBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-
+        const { worksheet, subUnitId, unitId } = target;
         const { startRow, endRow } = range;
         const startColumn = 0;
         const endColumn = worksheet.getColumnCount() - 1;
-
-        // copy styles from the row above
-        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1);
-
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
             subUnitId,
@@ -198,7 +181,8 @@ export const InsertRowBeforeCommand: ICommand = {
                 startColumn,
                 endColumn,
             },
-            cellValue,
+            // copy styles from the row above
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, startRow - 1),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
@@ -222,27 +206,16 @@ export const InsertRowAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const { worksheet, unitId, subUnitId } = target;
         const count = range.endRow - range.startRow + 1;
 
         const startRow = range.endRow + 1;
         const endRow = range.endRow + count;
         const startColumn = 0;
         const endColumn = worksheet.getColumnCount() - 1;
-
-        // copy styles from the row below
-        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, range.endRow);
 
         const insertRowParams: IInsertRowCommandParams = {
             unitId,
@@ -255,7 +228,8 @@ export const InsertRowAfterCommand: ICommand = {
                 endColumn,
                 rangeType: RANGE_TYPE.ROW,
             },
-            cellValue,
+            // copy styles from the row below
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, true, range.endRow),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertRowCommand.id, insertRowParams);
@@ -282,6 +256,8 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
         const { range, direction, subUnitId, unitId, cellValue } = params;
         const { startColumn, endColumn } = params.range;
+        range.rangeType = RANGE_TYPE.COLUMN;
+
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
         const anchorCol = direction === Direction.LEFT ? startColumn : startColumn - 1;
@@ -367,25 +343,14 @@ export const InsertColBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const { worksheet, unitId, subUnitId } = target;
 
         const { startColumn, endColumn } = range;
         const startRow = 0;
         const endRow = worksheet.getRowCount() - 1;
-
-        // copy styles from the column before
-        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1);
 
         const insertColParams: IInsertColCommandParams = {
             unitId,
@@ -398,7 +363,9 @@ export const InsertColBeforeCommand: ICommand = {
                 endRow,
                 rangeType: RANGE_TYPE.COLUMN,
             },
-            cellValue,
+
+            // copy styles from the column before
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, startColumn - 1),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);
@@ -420,27 +387,16 @@ export const InsertColAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return false;
-        }
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const worksheet = workbook.getActiveSheet();
-        if (!worksheet) {
-            return false;
-        }
-
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const { worksheet, unitId, subUnitId } = target;
         const count = range.endColumn - range.startColumn + 1;
 
         const startColumn = range.endColumn + 1;
         const endColumn = range.endColumn + count;
         const startRow = 0;
         const endRow = worksheet.getRowCount() - 1;
-
-        // copy styles from the column after
-        const cellValue = copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, range.endColumn);
 
         const insertColParams: IInsertColCommandParams = {
             unitId,
@@ -452,7 +408,8 @@ export const InsertColAfterCommand: ICommand = {
                 startRow,
                 endRow,
             },
-            cellValue,
+            // copy styles from the column after
+            cellValue: copyRangeStyles(worksheet, startRow, endRow, startColumn, endColumn, false, range.endColumn),
         };
 
         return accessor.get(ICommandService).executeCommand(InsertColCommand.id, insertColParams);

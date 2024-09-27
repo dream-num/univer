@@ -17,8 +17,9 @@
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
-import type { Dependency } from '@univerjs/core';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 
+import type { Dependency } from '@univerjs/core';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
 import { ArrayFormulaCellInterceptorController } from './controllers/array-formula-cell-interceptor.controller';
@@ -68,7 +69,7 @@ export class UniverRemoteSheetsFormulaPlugin extends Plugin {
     }
 }
 
-@DependentOn(UniverFormulaEnginePlugin)
+@DependentOn(UniverFormulaEnginePlugin, UniverSheetsPlugin)
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

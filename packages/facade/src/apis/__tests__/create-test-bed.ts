@@ -54,8 +54,8 @@ import {
     RegisterFunctionService,
     RegisterOtherFormulaService,
 } from '@univerjs/sheets-formula';
-import enUS from '@univerjs/sheets-formula/locale/en-US';
-import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
+import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
+import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';

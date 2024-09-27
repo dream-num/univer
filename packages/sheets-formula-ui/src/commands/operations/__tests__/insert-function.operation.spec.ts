@@ -21,10 +21,10 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { InsertFunctionCommand } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { Injector, Univer } from '@univerjs/core';
 
-import { InsertFunctionCommand } from '../../commands/insert-function.command';
+import type { Injector, Univer } from '@univerjs/core';
 import {
     InsertFunctionOperation,
     isMultiRowsColumnsRange,

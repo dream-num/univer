@@ -382,7 +382,7 @@ function getMoveNewRange(
     origin: IRange,
     remain: IRange
 ) {
-    const { startRow, endRow, startColumn, endColumn } = result;
+    const { startRow, endRow, startColumn, endColumn, rangeType } = getStartEndValue(result);
 
     const {
         startRow: fromStartRow,
@@ -390,16 +390,16 @@ function getMoveNewRange(
         endRow: fromEndRow,
         endColumn: fromEndColumn,
         rangeType: fromRangeType = RANGE_TYPE.NORMAL,
-    } = from;
+    } = getStartEndValue(from);
 
-    const { startRow: toStartRow, startColumn: toStartColumn, endRow: toEndRow, endColumn: toEndColumn } = to;
+    const { startRow: toStartRow, startColumn: toStartColumn, endRow: toEndRow, endColumn: toEndColumn } = getStartEndValue(to);
 
     const {
         startRow: remainStartRow,
         endRow: remainEndRow,
         startColumn: remainStartColumn,
         endColumn: remainEndColumn,
-    } = remain;
+    } = getStartEndValue(remain);
 
     const {
         startRow: originStartRow,
@@ -407,12 +407,26 @@ function getMoveNewRange(
         startColumn: originStartColumn,
         endColumn: originEndColumn,
         rangeType: originRangeType = RANGE_TYPE.NORMAL,
-    } = origin;
+    } = getStartEndValue(origin);
 
     const newRange = { ...origin };
 
+    function rowsCover(): boolean {
+        if (rangeType === RANGE_TYPE.COLUMN && originRangeType === RANGE_TYPE.COLUMN) {
+            return true;
+        }
+        return startColumn >= originStartColumn && endColumn <= originEndColumn;
+    }
+
+    function columnsCover(): boolean {
+        if (rangeType === RANGE_TYPE.ROW && originRangeType === RANGE_TYPE.ROW) {
+            return true;
+        }
+        return startRow >= originStartRow && endRow <= originEndRow;
+    }
+
     if (moveEdge === OriginRangeEdgeType.UP) {
-        if (startColumn === originStartColumn && endColumn === originEndColumn) {
+        if (rowsCover()) {
             if (startRow < originStartRow) {
                 newRange.startRow = startRow;
             } else if (startRow >= originEndRow) {
@@ -424,7 +438,7 @@ function getMoveNewRange(
             return;
         }
     } else if (moveEdge === OriginRangeEdgeType.DOWN) {
-        if (startColumn === originStartColumn && endColumn === originEndColumn) {
+        if (rowsCover()) {
             if (endRow > originEndRow) {
                 newRange.endRow = endRow;
             } else if (endRow <= originStartRow) {
@@ -436,7 +450,7 @@ function getMoveNewRange(
             return;
         }
     } else if (moveEdge === OriginRangeEdgeType.LEFT) {
-        if (startRow === originStartRow && endRow === originEndRow) {
+        if (columnsCover()) {
             if (startColumn < originStartColumn) {
                 newRange.startColumn = startColumn;
             } else if (startColumn >= originEndColumn) {
@@ -448,7 +462,7 @@ function getMoveNewRange(
             return;
         }
     } else if (moveEdge === OriginRangeEdgeType.RIGHT) {
-        if (startRow === originStartRow && endRow === originEndRow) {
+        if (columnsCover()) {
             if (endColumn > originEndColumn) {
                 newRange.endColumn = endColumn;
             } else if (endColumn <= originStartColumn) {
@@ -545,19 +559,7 @@ function getMoveNewRange(
  * @param originRange
  * @param fromRange
  */
-// eslint-disable-next-line complexity
 export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
-    // Helper functions to get start and end values, treating NaN as unbounded
-    function getStartValue(value: number): number {
-        // If value is NaN, treat as -Infinity (unbounded start)
-        return isNaN(value) ? -Infinity : value;
-    }
-
-    function getEndValue(value: number): number {
-        // If value is NaN, treat as Infinity (unbounded end)
-        return isNaN(value) ? Infinity : value;
-    }
-
     const startRow = getStartValue(originRange.startRow);
     const endRow = getEndValue(originRange.endRow);
     const startColumn = getStartValue(originRange.startColumn);
@@ -568,18 +570,30 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
     const fromStartColumn = getStartValue(fromRange.startColumn);
     const fromEndColumn = getEndValue(fromRange.endColumn);
 
-    if (
-        startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
-            startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn
-    ) {
+    function rowsCover(): boolean {
+        if (originRange.rangeType === RANGE_TYPE.COLUMN && fromRange.rangeType === RANGE_TYPE.COLUMN) {
+            return true;
+        }
+        return startRow >= fromStartRow && endRow <= fromEndRow;
+    }
+
+    function columnsCover(): boolean {
+        if (originRange.rangeType === RANGE_TYPE.ROW && fromRange.rangeType === RANGE_TYPE.ROW) {
+            return true;
+        }
+        return startColumn >= fromStartColumn && endColumn <= fromEndColumn;
+    }
+
+    function allCover(): boolean {
+        return originRange.rangeType === RANGE_TYPE.ALL && fromRange.rangeType === RANGE_TYPE.ALL;
+    }
+
+    if ((rowsCover() && columnsCover()) || allCover()) {
         return OriginRangeEdgeType.ALL;
     }
 
     if (
-        startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn &&
+        columnsCover() &&
             startRow >= fromStartRow &&
             startRow <= fromEndRow &&
             endRow > fromEndRow
@@ -588,8 +602,7 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
     }
 
     if (
-        startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn &&
+        columnsCover() &&
             endRow >= fromStartRow &&
             endRow <= fromEndRow &&
             startRow < fromStartRow
@@ -598,8 +611,7 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
     }
 
     if (
-        startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
+        rowsCover() &&
             startColumn >= fromStartColumn &&
             startColumn <= fromEndColumn &&
             endColumn > fromEndColumn
@@ -608,8 +620,7 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
     }
 
     if (
-        startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
+        rowsCover() &&
             endColumn >= fromStartColumn &&
             endColumn <= fromEndColumn &&
             startColumn < fromStartColumn
@@ -618,4 +629,27 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
     }
 
     return null; // Return null if no edge type matches
+}
+
+// Helper functions to get start values, treating NaN as unbounded
+function getStartValue(value: number): number {
+        // If value is NaN, treat as -Infinity (unbounded start)
+    return isNaN(value) ? -Infinity : value;
+}
+
+// Helper functions to get end values, treating NaN as unbounded
+function getEndValue(value: number): number {
+        // If value is NaN, treat as Infinity (unbounded end)
+    return isNaN(value) ? Infinity : value;
+}
+
+function getStartEndValue(range: IRange) {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    return {
+        ...range,
+        startRow: getStartValue(startRow),
+        endRow: getEndValue(endRow),
+        startColumn: getStartValue(startColumn),
+        endColumn: getEndValue(endColumn),
+    };
 }

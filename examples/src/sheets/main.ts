@@ -94,7 +94,9 @@ setTimeout(() => {
 
 // mock lazy load data validation
 setTimeout(() => {
-    univer.registerPlugin(UniverSheetsDataValidationPlugin);
+    univer.registerPlugin(UniverSheetsDataValidationPlugin, {
+        // showEditOnDropdown: false,
+    });
 }, 500);
 
 // sort

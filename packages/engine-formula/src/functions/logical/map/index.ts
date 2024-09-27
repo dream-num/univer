@@ -28,6 +28,8 @@ export class Map extends BaseFunction {
 
     override maxParams = 255;
 
+    override needsReferenceObject = true;
+
     override calculate(...variants: FunctionVariantType[]): BaseValueObject {
         const _variants: FunctionVariantType[] = [];
         let lambda: Nullable<LambdaValueObjectObject> = null;

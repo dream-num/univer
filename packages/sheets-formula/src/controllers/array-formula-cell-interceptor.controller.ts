@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { ICommandInfo } from '@univerjs/core';
@@ -25,8 +25,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -64,6 +63,7 @@ export class ArrayFormulaCellInterceptorController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
+                effect: InterceptorEffectEnum.Value,
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
                     const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();

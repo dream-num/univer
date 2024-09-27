@@ -234,7 +234,13 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 }}
             >
                 <span className={styles.menuItemContent}>
-                    <CustomLabel value={value} title={title} label={label} icon={item.icon} onChange={onChange} />
+                    <CustomLabel
+                        value={value}
+                        title={title}
+                        label={label}
+                        icon={item.icon}
+                        onChange={onChange}
+                    />
                 </span>
             </DesignMenuItem>
         );

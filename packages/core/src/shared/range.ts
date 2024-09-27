@@ -72,32 +72,37 @@ export function splitIntoGrid(ranges: IRange[]): IRange[] {
     const sortedColumns = Array.from(columns).sort((a, b) => a - b);
     const sortedRows = Array.from(rows).sort((a, b) => a - b);
 
-    // Create grid cells based on unique boundaries
-    const gridCells: IRange[] = [];
+     // Sort ranges by startRow and startColumn
+    ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+
+     // Assign original ranges to the grid cells
+    const result: IRange[] = [];
     for (let i = 0; i < sortedRows.length - 1; i++) {
         for (let j = 0; j < sortedColumns.length - 1; j++) {
-            gridCells.push({
-                startColumn: sortedColumns[j],
-                endColumn: sortedColumns[j + 1] - 1,
-                startRow: sortedRows[i],
-                endRow: sortedRows[i + 1] - 1,
-            });
-        }
-    }
+            // grid cell
+            const startColumn = sortedColumns[j];
+            const endColumn = sortedColumns[j + 1] - 1;
+            const startRow = sortedRows[i];
+            const endRow = sortedRows[i + 1] - 1;
 
-    // Assign original ranges to the grid cells
-    const result: IRange[] = [];
-    for (const gridCell of gridCells) {
-        for (const range of ranges) {
-            if (range.startRow <= gridCell.endRow && range.endRow >= gridCell.startRow &&
-                range.startColumn <= gridCell.endColumn && range.endColumn >= gridCell.startColumn) {
-                result.push({
-                    startColumn: Math.max(gridCell.startColumn, range.startColumn),
-                    endColumn: Math.min(gridCell.endColumn, range.endColumn),
-                    startRow: Math.max(gridCell.startRow, range.startRow),
-                    endRow: Math.min(gridCell.endRow, range.endRow),
-                });
-                break; // No need to check other ranges for this grid cell
+            for (const range of ranges) {
+                if (range.startRow > endRow) {
+                    // Since ranges are sorted, we can break early
+                    break;
+                }
+
+                // grid cell must be in some range
+                // just need to check range is contain grid cell
+                if (range.startRow <= startRow && range.endRow >= endRow &&
+                    range.startColumn <= startColumn && range.endColumn >= endColumn) {
+                    result.push({
+                        startColumn,
+                        endColumn,
+                        startRow,
+                        endRow,
+                    });
+                    break; // No need to check other ranges for this grid cell
+                }
             }
         }
     }
@@ -213,7 +218,6 @@ export function mergeRanges(ranges: IRange[]): IRange[] {
     const split = splitIntoGrid(ranges);
     const horizontalMerged = mergeHorizontalRanges(split);
     return mergeVerticalRanges(horizontalMerged);
-    // return horizontalMerged;
 }
 
 export function multiSubtractSingleRange(ranges: IRange[], toDelete: IRange) {

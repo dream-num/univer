@@ -16,7 +16,7 @@
 
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
 import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 
@@ -181,7 +181,7 @@ export function getBaseRangeMenuHidden$(accessor: IAccessor) {
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
@@ -215,7 +215,7 @@ export function getInsertAfterMenuHidden$(accessor: IAccessor, type: 'row' | 'co
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
@@ -257,7 +257,7 @@ export function getInsertBeforeMenuHidden$(accessor: IAccessor, type: 'row' | 'c
     const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
@@ -300,7 +300,7 @@ export function getDeleteMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;
@@ -345,7 +345,7 @@ export function getCellMenuHidden$(accessor: IAccessor, type: 'row' | 'col') {
 
     const permissionService = accessor.get(IPermissionService);
 
-    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$).pipe(
+    return merge(selectionManagerService.selectionMoveEnd$, permissionService.permissionPointUpdate$.pipe(debounceTime(100))).pipe(
         map(() => {
             const range = selectionManagerService.getCurrentLastSelection()?.range;
             if (!range) return true;

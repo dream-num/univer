@@ -34,7 +34,7 @@
                 height: 12px;
                 margin-top: 4px;
 
-                border: 2px solid #999;
+                border: 2px solid rgb(var(--border-color));
                 border-top-color: transparent;
                 border-bottom-color: transparent;
                 border-radius: 100%;
@@ -238,7 +238,7 @@
                 height: 0;
 
                 border: 5px solid transparent;
-                border-top-color: #999;
+                border-top-color: rgb(var(--border-color));
             }
         }
     }
@@ -307,13 +307,15 @@
 
             // ------ Disabled ------
             &-disabled {
-                color: #999;
+                color: rgb(var(--text-color-tertiary));
             }
         }
 
         // >>> Empty
         &-empty {
-            color: #999;
+            padding: var(--padding-xs) 0;
+            color: rgb(var(--text-color-tertiary));
+            font-size: var(--font-size-sm);
             text-align: center;
         }
     }

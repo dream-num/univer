@@ -176,7 +176,7 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
     private _initialBlur() {
         this.disposeWithMe(
             this._editorService.blur$.subscribe(() => {
-                this._docSelectionRenderService.removeAllRanges();
+                // this._docSelectionRenderService.removeAllRanges();
 
                 this._docSelectionRenderService.blur();
             })

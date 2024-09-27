@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -27,10 +26,11 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import { ISheetClipboardService } from '../clipboard.service';
+import type { ICellData, Injector, IStyleData, Nullable, Univer } from '@univerjs/core';
 
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
+
+import { ISheetClipboardService } from '../clipboard.service';
 
 import { clipboardTestBed } from './clipboard-test-bed';
 
@@ -165,7 +165,7 @@ describe('Test clipboard', () => {
                     s: 0,
                 },
                 pd: {
-                    b: 1,
+                    b: 2,
                     l: 2,
                     r: 2,
                     t: 0,

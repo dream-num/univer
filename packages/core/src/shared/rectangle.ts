@@ -56,6 +56,23 @@ export class Rectangle {
         );
     }
 
+    /**
+     * Check intersects of normal range(RANGE_TYPE.NORMAL)
+     * For other types of ranges, please consider using the intersects method.
+     * @param rangeA
+     * @param rangeB
+     * @returns boolean
+     */
+    static simpleRangesIntersect(rangeA: IRange, rangeB: IRange): boolean {
+        const { startRow: startRowA, endRow: endRowA, startColumn: startColumnA, endColumn: endColumnA } = rangeA;
+        const { startRow: startRowB, endRow: endRowB, startColumn: startColumnB, endColumn: endColumnB } = rangeB;
+
+        const rowsOverlap = (startRowA <= endRowB) && (endRowA >= startRowB);
+        const columnsOverlap = (startColumnA <= endColumnB) && (endColumnA >= startColumnB);
+
+        return rowsOverlap && columnsOverlap;
+    }
+
     static intersects(src: IRange, target: IRange): boolean {
         if (src.rangeType === RANGE_TYPE.ROW && target.rangeType === RANGE_TYPE.COLUMN) {
             return true;
@@ -253,6 +270,12 @@ export class Rectangle {
         endColumn: range.endColumn + offsetX,
     });
 
+    /**
+     * Subtract range2 from range1, the result is is horizontal first then vertical
+     * @param {IRange} range1 The source range
+     * @param {IRange} range2 The range to be subtracted
+     * @returns {IRange[]} Returns the array of ranges, which are the result not intersected with range1
+     */
     static subtract(range1: IRange, range2: IRange): IRange[] {
         // 如果没有交集，则返回 range1
         if (
@@ -333,7 +356,7 @@ export class Rectangle {
             res = multiSubtractSingleRange(res, range);
         });
 
-        return Rectangle.mergeRanges(res);
+        return res;
     }
 
     static hasIntersectionBetweenTwoRect(rect1: IRectLTRB, rect2: IRectLTRB) {

@@ -38,9 +38,11 @@ export class DocChecklistRenderController extends Disposable implements IRenderM
 
     private _initPointerDownObserver() {
         this._docEventManagerService.clickBullets$.subscribe((paragraph) => {
+            const textRanges = this._textSelectionManagerService.getTextRanges();
             this._commandService.executeCommand(ToggleCheckListCommand.id, {
                 index: paragraph.paragraph.startIndex,
                 segmentId: paragraph.segmentId,
+                textRanges,
             });
         });
     }

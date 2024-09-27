@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { CellValueType, Inject, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import type { Workbook } from '@univerjs/core';
+import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -47,6 +47,7 @@ export class ForceStringRenderController extends RxDisposable implements IRender
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     priority: 10,
+                    effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                         if (!skeleton) {

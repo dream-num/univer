@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -162,6 +162,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    effect: InterceptorEffectEnum.Style,
                     // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
                     // eslint-disable-next-line complexity
@@ -322,6 +323,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    effect: InterceptorEffectEnum.Style,
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
                     // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {

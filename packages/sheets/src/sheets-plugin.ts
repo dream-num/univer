@@ -58,10 +58,7 @@ export class UniverSheetsPlugin extends Plugin {
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         this._initConfig();
-        this._initDependencies(_injector);
-    }
-
-    override onRendered(): void {
+        this._initDependencies();
     }
 
     private _initConfig(): void {
@@ -70,7 +67,7 @@ export class UniverSheetsPlugin extends Plugin {
         }
     }
 
-    private _initDependencies(sheetInjector: Injector): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
@@ -107,11 +104,15 @@ export class UniverSheetsPlugin extends Plugin {
         }
 
         mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            sheetInjector.add(d);
+            this._injector.add(d);
         });
 
         this._injector.get(SheetInterceptorService);
         this._injector.get(RangeProtectionService);
         this._injector.get(IExclusiveRangeService);
+    }
+
+    override onStarting(_injector?: Injector): void {
+        this._injector.get(MergeCellController);
     }
 }

@@ -124,8 +124,7 @@ export enum BaselineOffset {
 /**
  * General Boolean Enum
  */
-// eslint-disable-next-line no-restricted-syntax
-export const enum BooleanNumber {
+export enum BooleanNumber {
     FALSE = 0,
     TRUE = 1,
 }

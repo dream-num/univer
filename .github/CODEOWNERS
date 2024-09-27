@@ -10,11 +10,10 @@ packages/core/src/services/permission @Gggpound
 
 # basics
 packages/design @jikkai
-packages/engine-formula @DR-Univer
+packages/engine-formula @Dushusir @wzhudev
 packages/engine-numfmt @Gggpound
-packages/engine-render @DR-Univer @lumixraku
+packages/engine-render @lumixraku
 packages/find-replace @siam-ese
-packages/image @DR-Univer
 packages/network @wzhudev
 packages/rpc @wzhudev
 packages/ui @jikkai @Jocs
@@ -26,11 +25,11 @@ packages/uniscript @wzhudev
 packages/facade @dushusir @hexf00
 
 # business - docs
-packages/docs @DR-Univer @Jocs
+packages/docs @Jocs
 packages/docs-ui @jikkai @Jocs
 
 # business - sheets
-packages/sheets @wzhudev @DR-Univer
+packages/sheets @wzhudev @VicKun4937
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs
@@ -46,7 +45,7 @@ packages/sheets-find-replace @siam-ese
 ## number-format
 packages/sheets-numfmt @Gggpound
 ## formula
-packages/sheets-formula @DR-Univer @Dushusir
+packages/sheets-formula @wzhudev @Dushusir
 ## conditional-formatting
 packages/sheets-conditional-formatting @Gggpound
 packages/sheets-conditional-formatting-ui @Gggpound
@@ -60,5 +59,5 @@ packages/sheets-filter-ui @ybzky @yuhongz
 packages/sheets-zen-editor @Jocs
 
 # business - slides
-packages/slides @DR-Univer @jikkai
+packages/slides @jikkai
 packages/slides-ui @jikkai

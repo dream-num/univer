@@ -159,7 +159,7 @@ export class SheetDataValidationModel extends Disposable {
 
     getRuleIdByLocation(unitId: string, subUnitId: string, row: number, col: number): string | undefined {
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
-        return ruleMatrix.getValue(row, col);
+        return ruleMatrix.getValue(row, col)!;
     }
 
     getRuleByLocation(unitId: string, subUnitId: string, row: number, col: number): ISheetDataValidationRule | undefined {

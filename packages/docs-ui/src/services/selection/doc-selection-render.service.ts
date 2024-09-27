@@ -37,7 +37,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
     private readonly _onInputBefore$ = new Subject<Nullable<IEditorInputConfig>>();
     readonly onInputBefore$ = this._onInputBefore$.asObservable();
 
-    private readonly _onKeydown$ = new BehaviorSubject<Nullable<IEditorInputConfig>>(null);
+    private readonly _onKeydown$ = new Subject<IEditorInputConfig>();
     readonly onKeydown$ = this._onKeydown$.asObservable();
 
     private readonly _onInput$ = new Subject<IEditorInputConfig>();

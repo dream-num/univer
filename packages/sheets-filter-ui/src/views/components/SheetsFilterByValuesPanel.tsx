@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Button, Checkbox, Input, Tooltip } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
@@ -21,7 +22,6 @@ import List from 'rc-virtual-list';
 import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
-import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 
 /**
  * Filter by values.

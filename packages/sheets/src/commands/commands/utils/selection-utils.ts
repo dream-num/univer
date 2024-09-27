@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
-
-import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { ISelectionWithStyle } from '../../../basics/selection';
+
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
+import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
+import { SetSelectionsOperation } from '../../operations/selection.operation';
 
 export interface IExpandParams {
     left?: boolean;

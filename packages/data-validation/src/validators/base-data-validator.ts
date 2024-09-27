@@ -89,9 +89,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return this.localeService.t(this.title);
     }
 
-    skipDefaultFontRender(rule: IDataValidationRule, cellValue: Nullable<CellValue>, pos: any) {
-        return false;
-    };
+    skipDefaultFontRender: ((rule: IDataValidationRule, cellValue: Nullable<CellValue>, pos: any) => boolean) | undefined;
 
     generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {

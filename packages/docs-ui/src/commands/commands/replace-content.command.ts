@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, ITextRange } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
@@ -39,9 +39,10 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const { unitId, body, textRanges, segmentId = '', options } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
-        const docDataModel = univerInstanceService.getUniverDocInstance(unitId);
-        const prevBody = docDataModel?.getSnapshot().body;
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+        const prevBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getSnapshot().body;
 
         if (docDataModel == null || prevBody == null) {
             return false;
@@ -50,7 +51,19 @@ export const ReplaceContentCommand: ICommand<IReplaceContentCommandParams> = {
         const doMutation = getMutationParams(unitId, segmentId, docDataModel, prevBody, body);
 
         doMutation.params.textRanges = textRanges;
-        options && (doMutation.params.options = options);
+        if (options) {
+            doMutation.params.options = options;
+        }
+
+        // Handle body is equal to prevBody.
+        if (doMutation.params.actions == null && textRanges) {
+            docSelectionManagerService.replaceDocRanges(textRanges, {
+                unitId,
+                subUnitId: unitId,
+            }, false);
+
+            return true;
+        }
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

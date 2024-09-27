@@ -58,7 +58,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         skeleton.calculate();
 
-        if (this._editorService.isEditor(unitId)) {
+        // REFACTOR: @should not use scroll bar to indicate a Zen Editor.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -236,7 +238,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
 
-        if (!this._editorService.isEditor(unitId)) {
+        const editor = this._editorService.getEditor(unitId);
+
+        // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
+        if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
     }

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
-import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { IMessageService } from '@univerjs/ui';
+import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 
 /**
  * Parameters of command {@link SetSheetFilterRangeCommand}.
@@ -85,6 +85,7 @@ export const RemoveSheetFilterCommand: ICommand<ISheetCommandSharedParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
+
         const undoRedoService = accessor.get(IUndoRedoService);
 
         const commandTarget = getSheetCommandTarget(univerInstanceService, params);

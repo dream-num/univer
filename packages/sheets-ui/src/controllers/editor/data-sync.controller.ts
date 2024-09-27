@@ -106,7 +106,7 @@ export class EditorDataSyncController extends Disposable {
                         return;
                     }
                     if (INCLUDE_LIST.includes(unitId)) {
-                    // sync cell content to formula editor bar when edit cell editor and vice verse.
+                        // sync cell content to formula editor bar when edit cell editor and vice verse.
                         const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
                         const syncId =
@@ -179,16 +179,12 @@ export class EditorDataSyncController extends Disposable {
         if (docDataModel == null || docViewModel == null) {
             return;
         }
-        // console.log('===before', Tools.deepClone(docDataModel.getBody()));
-        // Update document data model.
-        // docDataModel.apply(actions);
+
         this._commandService.syncExecuteCommand(RichTextEditingMutation.id, {
             ...parmas,
             isSync: true,
             unitId,
         });
-        // console.log('===after', parmas, Tools.deepClone(docDataModel.getBody()));
-        // this._checkAndSetRenderStyleConfig(docDataModel);
 
         docViewModel.reset(docDataModel);
 
@@ -253,8 +249,6 @@ export class EditorDataSyncController extends Disposable {
             renderConfig.isRenderStyle = BooleanNumber.FALSE;
         }
     }
-
-// private normalize
 
     private _clearParagraph(paragraphs: IParagraph[]) {
         const newParagraphs = Tools.deepClone(paragraphs);

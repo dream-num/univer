@@ -612,6 +612,13 @@ export class SheetsFilterController extends Disposable {
 
             // redos.push({ id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
             // undos.push({ id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
+        } else if (Rectangle.intersects(toRange, filterRange)) {
+            const newFilterRange: IRange = {
+                ...filterRange,
+                endRow: Math.max(filterRange.endRow, toRange.endRow),
+            };
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } });
+            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } });
         }
         return {
             redos,
@@ -816,7 +823,6 @@ export class SheetsFilterController extends Disposable {
                             }
                         }
                     }
-                    filterModel.reCalc();
                 }
             }
         }));

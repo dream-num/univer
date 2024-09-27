@@ -816,6 +816,7 @@ export class SheetsFilterController extends Disposable {
                             }
                         }
                     }
+                    filterModel.reCalc();
                 }
             }
         }));

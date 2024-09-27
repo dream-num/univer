@@ -21,7 +21,7 @@ import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorServic
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, debounceTime, filter } from 'rxjs';
-import type { ICellRenderContext, IRange, Workbook } from '@univerjs/core';
+import type { CellValue, ICellRenderContext, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
@@ -164,7 +164,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     effect: InterceptorEffectEnum.Style,
                     // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
-                    // eslint-disable-next-line complexity
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
 
@@ -178,9 +178,22 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         }
                         const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                        const cellOrigin = worksheet.getCellRaw(row, col);
-                        const cellValue = getCellValueOrigin(cellOrigin);
-                        const valueStr = `${cellValue ?? ''}`;
+                        const cellOrigin = pos.rawData;
+                        let cache: Nullable<CellValue>;
+                        const cellValue = {
+                            get value() {
+                                if (cache !== undefined) {
+                                    return cache;
+                                }
+                                cache = getCellValueOrigin(cellOrigin) ?? null;
+                                return cache;
+                            },
+                        };
+                        const valueStr = {
+                            get value() {
+                                return `${cellValue.value ?? ''}`;
+                            },
+                        };
 
                         return next({
                             ...cell,
@@ -200,11 +213,11 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             ],
                             fontRenderExtension: {
                                 ...cell?.fontRenderExtension,
-                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender(rule, cellValue, pos),
+                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue.value, pos),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,
-                                ...validator?.getExtraStyle(rule, valueStr, {
+                                ...validator?.getExtraStyle(rule, valueStr.value, {
                                     get style() {
                                         const styleMap = workbook.getStyles();
                                         return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
@@ -365,7 +378,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                             ],
                             fontRenderExtension: {
                                 ...cell?.fontRenderExtension,
-                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender(rule, cellValue, pos),
+                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue, pos),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,

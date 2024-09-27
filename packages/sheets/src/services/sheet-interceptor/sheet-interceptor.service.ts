@@ -240,8 +240,9 @@ export class SheetInterceptorService extends Disposable {
 
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
+                        const rawData = worksheet.getCellRaw(row, col);
                         return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
-                            worksheet.getCellRaw(row, col),
+                            rawData,
                             {
                                 unitId,
                                 subUnitId,
@@ -249,6 +250,7 @@ export class SheetInterceptorService extends Disposable {
                                 col,
                                 worksheet,
                                 workbook,
+                                rawData,
                             }
                         );
                     },

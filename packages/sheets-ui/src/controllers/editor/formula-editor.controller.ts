@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { RenderComponentType } from '@univerjs/engine-render';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
@@ -36,10 +38,8 @@ import {
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { takeUntil } from 'rxjs';
-import type { Nullable } from '@univerjs/core';
 
-import type { RenderComponentType } from '@univerjs/engine-render';
+import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -68,7 +68,6 @@ export class FormulaEditorController extends RxDisposable {
     private _initialize() {
         this._syncEditorSize();
         this._listenFxBtnClick();
-        this._listenFoldBtnClick();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             this._create(unitId);
@@ -162,14 +161,8 @@ export class FormulaEditorController extends RxDisposable {
 
                 this._commandService.executeCommand(CoverContentCommand.id, coverContentParams);
 
-                this._textSelectionManagerService.replaceTextRanges(textRanges);
+                this._textSelectionManagerService.replaceDocRanges(textRanges);
             }
-        });
-    }
-
-    private _listenFoldBtnClick() {
-        this._formulaEditorManagerService.foldBtnStatus$.pipe(takeUntil(this.dispose$)).subscribe(() => {
-            this._textSelectionManagerService.refreshSelection();
         });
     }
 
@@ -195,11 +188,11 @@ export class FormulaEditorController extends RxDisposable {
                         eventType: DeviceInputEventType.Dblclick,
                         unitId,
                     });
+                    this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
                 }
 
                 // Open the normal editor first, and then we mark formula editor as activated.
                 this._contextService.setContextValue(FOCUSING_FX_BAR_EDITOR, true);
-                this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             })
         );
     }
@@ -221,7 +214,7 @@ export class FormulaEditorController extends RxDisposable {
 
             const { engine } = editorObject;
             formulaEditorDataModel.updateDocumentDataPageSize(width);
-            this._autoScroll();
+            // this._autoScroll();
             this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
         });
     }

@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import type { DocumentDataModel, ICommandInfo, IDocumentBody, IParagraph, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
+import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { SetEditorResizeOperation } from '@univerjs/ui';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
+/**
+ * sync data between cell editor and formula editor
+ */
 @OnLifecycle(LifecycleStages.Rendered, EditorDataSyncController)
 export class EditorDataSyncController extends Disposable {
     constructor(
@@ -90,68 +94,32 @@ export class EditorDataSyncController extends Disposable {
         this._syncContentAndRender(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, body);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _commandExecutedListener() {
         const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id !== RichTextEditingMutation.id) {
-                    return;
-                }
-                const params = command.params as IRichTextEditingMutationParams;
-                const { unitId } = params;
-                if (params.isSync) {
-                    return;
-                }
-                if (INCLUDE_LIST.includes(unitId)) {
+                if (command.id === RichTextEditingMutation.id || command.id === SetEditorResizeOperation.id) {
+                    const params = command.params as IRichTextEditingMutationParams;
+                    const { unitId } = params;
+                    if (params.isSync) {
+                        return;
+                    }
+                    if (INCLUDE_LIST.includes(unitId)) {
                     // sync cell content to formula editor bar when edit cell editor and vice verse.
-                    const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
+                        const editorDocDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
-                    const syncId =
+                        const syncId =
                         unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
                             ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
                             : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
 
-                    this._checkAndSetRenderStyleConfig(editorDocDataModel!);
-                    this._syncActionsAndRender(syncId, params);
+                        this._checkAndSetRenderStyleConfig(editorDocDataModel!);
+                        this._syncActionsAndRender(syncId, params);
+                    }
                 }
             })
         );
-
-        // this.disposeWithMe(
-        //     this._commandService.onCommandExecuted((command: ICommandInfo) => {
-        //         if (command.id !== SetEditorResizeOperation.id) {
-        //             return;
-        //         }
-
-        //         const params = command.params as IRichTextEditingMutationParams;
-        //         const { unitId } = params;
-
-        //         if (INCLUDE_LIST.includes(unitId)) {
-        //             // sync cell content to formula editor bar when edit cell editor and vice verse.
-        //             const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
-        //             const dataStream = editorDocDataModel?.getBody()?.dataStream;
-        //             const paragraphs = editorDocDataModel?.getBody()?.paragraphs;
-        //             const textRuns = editorDocDataModel?.getBody()?.textRuns;
-        //             const customRanges = editorDocDataModel?.getBody()?.customRanges;
-
-        //             const syncId =
-        //                 unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY
-        //                     ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY
-        //                     : DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY;
-
-        //             if (dataStream == null || paragraphs == null) {
-        //                 return;
-        //             }
-
-        //             this._syncContentAndRender(syncId, dataStream, paragraphs, textRuns, customRanges);
-
-        //             // handle weather need to show scroll bar.
-        //             // this._autoScroll();
-        //         }
-        //     })
-        // );
 
         // Update formula bar content when you call SetRangeValuesMutation and MoveRangeMutation.
         const needUpdateFormulaEditorContentCommandList = [SetRangeValuesMutation.id, MoveRangeMutation.id];

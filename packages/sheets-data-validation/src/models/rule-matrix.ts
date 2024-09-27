@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { debounce, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import RBush from 'rbush';
 import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
 
@@ -38,7 +38,7 @@ export type RangeMutation = {
 
 export class RuleMatrix {
     private _map = new Map<string, IRange[]>();
-    private _tree = new RBush<IRuleItem>();
+    private _tree = new RBush<IRuleItem>(2);
     private _dirty = false;
 
     constructor(
@@ -51,7 +51,7 @@ export class RuleMatrix {
         this._buildTree();
     }
 
-    private _buildTree() {
+    private _buildTree = () => {
         const items: IRuleItem[] = [];
         this._map.forEach((ranges, ruleId) => {
             ranges.forEach((range) => {
@@ -67,7 +67,9 @@ export class RuleMatrix {
         this._tree.clear();
         this._tree.load(items);
         this._dirty = false;
-    }
+    };
+
+    private _debonceBuildTree = debounce(this._buildTree, 100);
 
     get _worksheet() {
         return this._univerInstanceService.getUnit<Workbook>(this._unitId, UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(this._subUnitId);
@@ -92,6 +94,7 @@ export class RuleMatrix {
 
         this._dirty = true;
         this._map.set(ruleId, ranges);
+        this._debonceBuildTree();
     }
 
     removeRange(_ranges: IRange[]) {
@@ -108,11 +111,13 @@ export class RuleMatrix {
             }
         });
         this._dirty = true;
+        this._debonceBuildTree();
     }
 
     removeRule(rule: ISheetDataValidationRule) {
         this._map.delete(rule.uid);
         this._dirty = true;
+        this._debonceBuildTree();
     }
 
     updateRange(ruleId: string, _newRanges: IRange[]) {
@@ -132,6 +137,7 @@ export class RuleMatrix {
         });
         this._map.set(ruleId, ranges);
         this._dirty = true;
+        this._debonceBuildTree();
     }
 
     diff(rules: ISheetDataValidationRule[]) {

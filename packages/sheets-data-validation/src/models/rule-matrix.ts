@@ -270,7 +270,7 @@ export class RuleMatrix {
         );
     }
 
-    getValue(row: number, col: number) {
+    getValue(row: number, col: number): string | undefined {
         if (this._dirty) {
             this._buildTree();
         }

@@ -15,11 +15,11 @@
  */
 
 import { createInterceptorKey } from '@univerjs/core';
-import type { ICellDataForSheetInterceptor, ICellInterceptor } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, ICellInterceptor, Nullable } from '@univerjs/core';
 
 import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
 
-const CELL_CONTENT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('CELL_CONTENT') as ICellInterceptor<ICellDataForSheetInterceptor, ISheetLocation>;
+const CELL_CONTENT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>('CELL_CONTENT') as ICellInterceptor<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>;
 const ROW_FILTERED = createInterceptorKey<boolean, ISheetRowLocation>('ROW_FILTERED');
 
 export const INTERCEPTOR_POINT = {

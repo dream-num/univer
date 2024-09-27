@@ -14,14 +14,6 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import {
-    InsertSheetMutation,
-    RemoveSheetMutation,
-    SetSelectionsOperation,
-    SetWorksheetActiveOperation,
-    SetWorksheetHideMutation,
-} from '@univerjs/sheets';
 import type { IMutationInfo, IOperationInfo, Workbook } from '@univerjs/core';
 import type {
     IInsertSheetMutationParams,
@@ -29,6 +21,14 @@ import type {
     ISetSelectionsOperationParams,
     ISetWorksheetActiveOperationParams,
     ISetWorksheetHideMutationParams,
+} from '@univerjs/sheets';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import {
+    InsertSheetMutation,
+    RemoveSheetMutation,
+    SetSelectionsOperation,
+    SetWorksheetActiveOperation,
+    SetWorksheetHideMutation,
 } from '@univerjs/sheets';
 
 /**

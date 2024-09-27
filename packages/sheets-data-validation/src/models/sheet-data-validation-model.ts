@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { isReferenceString } from '@univerjs/engine-formula';
-import { RemoveSheetMutation } from '@univerjs/sheets';
-import { Subject } from 'rxjs';
-import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { DataValidationType, ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
 import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
+import { RemoveSheetMutation } from '@univerjs/sheets';
+import { Subject } from 'rxjs';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -130,12 +129,6 @@ export class SheetDataValidationModel extends Disposable {
     }
 
     private _addRuleSideEffect(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
-            if (isReferenceString(rule.formula1 ?? '')) {
-                // polyfill old-version ref-string, transform to formula
-                rule.formula1 = `=${rule.formula1}`;
-            }
-        }
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(unitId, subUnitId, rule);

@@ -17,7 +17,6 @@
 import type {
     BorderStyleTypes,
     HorizontalAlign,
-    ISelectionCellWithMergeInfo,
     ObjectMatrix,
     VerticalAlign,
     WrapStrategy,

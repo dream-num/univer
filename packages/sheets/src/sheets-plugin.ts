@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsConfig } from './controllers/config.schema';
+
 import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
-
-import type { Dependency } from '@univerjs/core';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 import { MergeCellController } from './controllers/merge-cell.controller';
-import { NumberCellDisplayController } from './controllers/number-cell.controller';
 
+import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { RangeProtectionCache } from './model/range-protection.cache';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 import { BorderStyleManagerService } from './services/border-style-manager.service';
 import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
+
 import { NumfmtService } from './services/numfmt/numfmt.service';
 import { INumfmtService } from './services/numfmt/type';
-
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
 import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
@@ -40,7 +42,6 @@ import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetPro
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-import type { IUniverSheetsConfig } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -94,6 +95,7 @@ export class UniverSheetsPlugin extends Plugin {
             // range protection
             [RangeProtectionRenderModel],
             [RangeProtectionRuleModel],
+            [RangeProtectionCache],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
             [IExclusiveRangeService, {

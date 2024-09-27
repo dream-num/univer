@@ -88,7 +88,7 @@ import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { BorderCache, colorString, IFontCacheItem, IStylesCache } from './interfaces';
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -2040,7 +2040,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 row = i;
             }
 
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this.worksheet.getCellStyleOnly(row, column);
             if (!cell) {
                 isAddBorders = false;
                 break;

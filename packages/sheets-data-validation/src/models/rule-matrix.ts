@@ -265,6 +265,7 @@ export class RuleMatrix {
             this._unitId,
             this._subUnitId,
             this._univerInstanceService,
+            // disable tree on cloned matrix, cause there is no need to search
             true
         );
     }

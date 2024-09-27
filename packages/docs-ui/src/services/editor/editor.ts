@@ -19,7 +19,7 @@ import { merge, type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { ReplaceContentCommand } from '../../commands/commands/replace-content.command';
+import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
 
 interface IEditorEvent {
@@ -342,16 +342,11 @@ export class Editor extends Disposable implements IEditor {
 
     // Set the new document data.
     setDocumentData(data: IDocumentData, textRanges: Nullable<ITextRangeWithStyle[]>) {
-        const { id, body } = data;
+        const { id } = data;
 
-        this._commandService.executeCommand(ReplaceContentCommand.id, {
+        this._commandService.executeCommand(ReplaceSnapshotCommand.id, {
             unitId: id,
-            body: {
-                ...body,
-                dataStream: body?.dataStream.endsWith('\r\n')
-                    ? body.dataStream.substring(0, body.dataStream.length - 2)
-                    : body!.dataStream,
-            },
+            snapshot: data,
             textRanges,
         });
     }

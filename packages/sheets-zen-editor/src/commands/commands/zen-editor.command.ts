@@ -130,7 +130,7 @@ export const ConfirmZenEditCommand: ICommand = {
             const editingRenderController = renderManagerService.getRenderById(currentSheetId)?.with(EditingRenderController);
 
             if (editingRenderController) {
-                const snapshot = editor.getDocumentData();
+                const snapshot = Tools.deepClone(editor.getDocumentData());
                 editingRenderController.submitCellData(new DocumentDataModel(snapshot));
             }
 

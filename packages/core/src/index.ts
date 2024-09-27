@@ -18,6 +18,8 @@ import { installShims } from './common/shims';
 
 installShims();
 
+export { debounce, get, merge, mergeWith, set } from 'lodash-es';
+
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
 export { isBooleanString } from './common/boolean';
 export {

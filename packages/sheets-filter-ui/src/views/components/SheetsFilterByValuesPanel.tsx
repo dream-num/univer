@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useCallback } from 'react';
 import { LocaleService, useDependency } from '@univerjs/core';
+import { Button, Checkbox, Input, Tooltip } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
 import List from 'rc-virtual-list';
-import { Button, Checkbox, Input, Tooltip } from '@univerjs/design';
-import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
+import React, { useCallback } from 'react';
 import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
+import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 
 /**
  * Filter by values.
@@ -54,7 +54,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     return (
         <div className={styles.sheetsFilterPanelValuesContainer}>
-            <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
+            <Input autoFocus value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             <div className={styles.sheetsFilterPanelValuesList}>
                 {/* The on-top select all button */}
                 <div className={styles.sheetsFilterPanelValuesItem}>

@@ -24,7 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import lodash from 'lodash';
+import { merge } from '@univerjs/core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,7 +106,7 @@ async function generateLocale() {
             }
 
             const data = fs.readFileSync(file, 'utf-8');
-            output = lodash.merge(JSON.parse(data), output);
+            output = merge(JSON.parse(data), output);
         }
 
         let result = generateUMDTemplate(`{
@@ -282,7 +282,6 @@ async function main() {
 
     await generateLocale();
 
-    // eslint-disable-next-line no-console
     console.log('\u001B[32m[@univerjs/umd] Build completed.');
 }
 

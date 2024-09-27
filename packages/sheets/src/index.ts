@@ -186,6 +186,7 @@ export { ClearSelectionAllCommand } from './commands/commands/clear-selection-al
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
 export { CopySheetCommand } from './commands/commands/copy-worksheet.command';
+export type { ICopySheetCommandParams } from './commands/commands/copy-worksheet.command';
 export { DeleteRangeMoveLeftCommand, type IDeleteRangeMoveLeftCommandParams } from './commands/commands/delete-range-move-left.command';
 export { DeleteRangeMoveUpCommand, type IDeleteRangeMoveUpCommandParams } from './commands/commands/delete-range-move-up.command';
 export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams } from './commands/commands/delete-range-protection.command';

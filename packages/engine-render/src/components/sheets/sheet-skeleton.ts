@@ -227,7 +227,7 @@ export interface IDocumentLayoutObject {
 
 export const DEFAULT_PADDING_DATA = {
     t: 0,
-    b: 1,
+    b: 2, // must over 1, see https://github.com/dream-num/univer/issues/2727
     l: 2,
     r: 2,
 };
@@ -1931,12 +1931,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const contentLength = content.length;
         const {
             textRotation,
-            paddingData = {
-                t: 0,
-                r: 2,
-                b: 2, // must over 1, see https://github.com/dream-num/univer/issues/2727
-                l: 2,
-            },
+            paddingData = DEFAULT_PADDING_DATA,
             horizontalAlign = HorizontalAlign.UNSPECIFIED,
             verticalAlign = VerticalAlign.UNSPECIFIED,
             wrapStrategy = WrapStrategy.UNSPECIFIED,

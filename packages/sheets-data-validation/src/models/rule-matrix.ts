@@ -47,14 +47,15 @@ export class RuleMatrix {
         value: Map<string, IRange[]>,
         private _unitId: string,
         private _subUnitId: string,
-        private _univerInstanceService: IUniverInstanceService
+        private _univerInstanceService: IUniverInstanceService,
+        private _disableTree = false
     ) {
         this._map = value;
         this._buildTree();
     }
 
     private _buildTree = () => {
-        if (!this._dirty) {
+        if (!this._dirty || this._disableTree) {
             return;
         }
         const map = new Map<number, IRuleItem[]>();
@@ -232,7 +233,8 @@ export class RuleMatrix {
             new Map(Tools.deepClone(Array.from(this._map.entries()))),
             this._unitId,
             this._subUnitId,
-            this._univerInstanceService
+            this._univerInstanceService,
+            true
         );
     }
 

@@ -128,7 +128,7 @@ describe('checkMoveEdge', () => {
         expect(checkMoveEdge(originRange, fromRange)).toBeNull();
     });
 
-    it('should handle NaN values correctly when fromRange is an entire row', () => {
+    it('should handle NaN values correctly when originRange is an entire row', () => {
         const originRange = {
             startRow: 2,
             endRow: 3,
@@ -138,13 +138,31 @@ describe('checkMoveEdge', () => {
         };
 
         const fromRange = {
-            startRow: 1,
-            endRow: 5,
+            startRow: 2,
+            endRow: 2,
             startColumn: 0,
             endColumn: 10,
         };
 
         expect(checkMoveEdge(originRange, fromRange)).toBeNull();
+
+        const originRange2 = {
+            startRow: 2,
+            endRow: 3,
+            startColumn: Number.NaN,
+            endColumn: Number.NaN,
+            rangeType: RANGE_TYPE.ROW,
+        };
+
+        const fromRange2 = {
+            startRow: 2,
+            endRow: 2,
+            startColumn: 0,
+            endColumn: 10,
+            rangeType: RANGE_TYPE.ROW,
+        };
+
+        expect(checkMoveEdge(originRange2, fromRange2)).toBe(OriginRangeEdgeType.UP);
     });
 
     it('should handle NaN values correctly when originRange is an entire column', () => {
@@ -159,11 +177,29 @@ describe('checkMoveEdge', () => {
         const fromRange = {
             startRow: 0,
             endRow: 10,
-            startColumn: 2,
-            endColumn: 5,
+            startColumn: 3,
+            endColumn: 3,
         };
 
         expect(checkMoveEdge(originRange, fromRange)).toBeNull();
+
+        const originRange2 = {
+            startRow: Number.NaN,
+            endRow: Number.NaN,
+            startColumn: 3,
+            endColumn: 4,
+            rangeType: RANGE_TYPE.COLUMN,
+        };
+
+        const fromRange2 = {
+            startRow: 0,
+            endRow: 10,
+            startColumn: 3,
+            endColumn: 3,
+            rangeType: RANGE_TYPE.COLUMN,
+        };
+
+        expect(checkMoveEdge(originRange2, fromRange2)).toBe(OriginRangeEdgeType.LEFT);
     });
 
     it('should handle NaN values correctly when originRange is the entire sheet', () => {
@@ -183,6 +219,24 @@ describe('checkMoveEdge', () => {
         };
 
         expect(checkMoveEdge(originRange, fromRange)).toBeNull();
+
+        const originRange2 = {
+            startRow: Number.NaN,
+            endRow: Number.NaN,
+            startColumn: Number.NaN,
+            endColumn: Number.NaN,
+            rangeType: RANGE_TYPE.ALL,
+        };
+
+        const fromRange2 = {
+            startRow: 0,
+            endRow: 100,
+            startColumn: 0,
+            endColumn: 100,
+            rangeType: RANGE_TYPE.ALL,
+        };
+
+        expect(checkMoveEdge(originRange2, fromRange2)).toBe(OriginRangeEdgeType.ALL);
     });
 
     it('should return UP when fromRange is at the top edge of originRange (an entire row)', () => {

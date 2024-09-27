@@ -26,10 +26,10 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ApplyFormatPainterCommand,
@@ -121,18 +121,25 @@ export class FormatPainterController extends Disposable {
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();
         const merges = [];
+        let mergedMainCell: Nullable<ICellData> = null;
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellData.getValue(r, c) as ICellData;
                 stylesMatrix.setValue(r, c, styles.getStyleByCell(cell) || {});
-                const { isMergedMainCell, ...mergeInfo } = worksheet.getCellInfoInMergeData(r, c);
+                const { isMerged, isMergedMainCell, ...mergeInfo } = worksheet.getCellInfoInMergeData(r, c);
                 if (isMergedMainCell) {
+                    mergedMainCell = cell;
                     merges.push({
                         startRow: mergeInfo.startRow,
                         startColumn: mergeInfo.startColumn,
                         endRow: mergeInfo.endRow,
                         endColumn: mergeInfo.endColumn,
                     });
+                } else if (isMerged) {
+                    //see univer-pro/issues/2568
+                    if (mergedMainCell) {
+                        stylesMatrix.setValue(r, c, styles.getStyleByCell(mergedMainCell) || {});
+                    }
                 }
             }
         }
@@ -142,6 +149,7 @@ export class FormatPainterController extends Disposable {
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, originRange: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;

@@ -15,9 +15,9 @@
  */
 
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, moveMatrixArray, Rectangle } from '@univerjs/core';
-import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { CopySheetCommand, EffectRefRangId, expandToContinuousRange, getSheetCommandTarget, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, MoveRowsCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SetWorksheetActiveOperation, SheetInterceptorService } from '@univerjs/sheets';
 import type { ICellData, ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, ICopySheetCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams, ISetWorksheetActiveOperationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '../commands/mutations/sheets-filter.mutation';
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -57,8 +57,8 @@ export class SheetsFilterController extends Disposable {
             getMutations: (command) => this._getUpdateFilter(command),
         }));
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetWorksheetActivateCommand.id) {
-                const params = commandInfo.params as ISetWorksheetActivateCommandParams;
+            if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                const params = commandInfo.params as ISetWorksheetActiveOperationParams;
                 const sheetId = params.subUnitId;
                 const unitId = params.unitId;
                 if (!sheetId || !unitId) {

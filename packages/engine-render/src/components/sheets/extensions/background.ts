@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
+import { Range } from '@univerjs/core';
+import type { IRange, IScale, ISelectionCellWithMergeInfo, ObjectMatrix } from '@univerjs/core';
 import { fixLineWidthByScale, getColor, inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
@@ -32,11 +33,21 @@ const UNIQUE_KEY = 'DefaultBackgroundExtension';
 const DOC_EXTENSION_Z_INDEX = 21;
 const PRINTING_Z_INDEX = 21;
 
+interface IRenderBGContext {
+    ctx: UniverRenderingContext;
+    spreadsheetSkeleton: SpreadsheetSkeleton;
+    backgroundPositions: ObjectMatrix<ISelectionCellWithMergeInfo>;
+    checkOutOfViewBound: boolean;
+    backgroundPaths: Path2D;
+    scaleX: number;
+    scaleY: number;
+    viewRanges: IRange[];
+    diffRanges: IRange[];
+}
+
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
-
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
-
     PRINTING_Z_INDEX = PRINTING_Z_INDEX;
 
     override get zIndex() {
@@ -51,9 +62,8 @@ export class Background extends SheetExtension {
         { viewRanges, checkOutOfViewBound }: IDrawInfo
     ) {
         const { stylesCache, worksheet, rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } = spreadsheetSkeleton;
-        const { background: backgroundCache, backgroundPositions } = stylesCache;
-        if (!worksheet || !backgroundCache) return;
-
+        const { bgGroupMatrix } = stylesCache;
+        if (!worksheet || !bgGroupMatrix) return;
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -64,64 +74,80 @@ export class Background extends SheetExtension {
         }
         ctx.save();
         const { scaleX, scaleY } = ctx.getScale();
-
+        const renderBGContext = {
+            ctx,
+            scaleX,
+            scaleY,
+            checkOutOfViewBound,
+            viewRanges,
+            diffRanges,
+            spreadsheetSkeleton,
+        } as IRenderBGContext;
         const renderBGCore = (rgb: string) => {
-            ctx.beginPath();
-
-            const bgColorMatrix = backgroundCache[rgb];
+            const bgColorMatrix = bgGroupMatrix[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
             const backgroundPaths = new Path2D();
-            const renderBGByCell = (row: number, col: number) => {
-                if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
-                    return true;
-                }
 
-                const cellInfo = backgroundPositions?.getValue(row, col);
-                if (cellInfo == null) {
-                    return true;
-                }
-
-                let { startY, endY, startX, endX } = cellInfo;
-                const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-                const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-                const combineWithMergeRanges = mergeTo;
-                //expandRangeIfIntersects([...mergeTo], [mergeInfo]);
-
-                // If curr cell is not in the viewrange (viewport + merged cells), exit early.
-                if (!inViewRanges(combineWithMergeRanges!, row, col)) {
-                    return true;
-                }
-                // For merged cells, and the current cell is the top-left cell in the merged region.
-                if (isMergedMainCell) {
-                    startY = mergeInfo.startY;
-                    endY = mergeInfo.endY;
-                    startX = mergeInfo.startX;
-                    endX = mergeInfo.endX;
-                }
-
-                // in merge range , but not top-left cell.
-                if (isMerged) return true;
-
-                // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
-                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
-                if (!visibleRow || !visibleCol) return true;
-
-                // precise is a workaround for windows, macOS does not have this issue.
-                const startXPrecise = fixLineWidthByScale(startX, scaleX);
-                const startYPrecise = fixLineWidthByScale(startY, scaleY);
-                const endXPrecise = fixLineWidthByScale(endX, scaleX);
-                const endYPrecise = fixLineWidthByScale(endY, scaleY);
-                backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
-            };
-            bgColorMatrix.forValue(renderBGByCell);
+            renderBGContext.backgroundPaths = backgroundPaths;
+            ctx.beginPath();
+            viewRanges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
+                    const bgConfig = bgColorMatrix.getValue(row, col);
+                    if (bgConfig) {
+                        this.renderBGEachCell(renderBGContext, row, col);
+                    }
+                });
+            });
             ctx.fill(backgroundPaths);
             ctx.closePath();
         };
 
-        Object.keys(backgroundCache).forEach(renderBGCore);
+        Object.keys(bgGroupMatrix).forEach(renderBGCore);
         ctx.restore();
     }
+
+    renderBGEachCell(bgContext: IRenderBGContext, row: number, col: number) {
+        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
+
+        const calcHeader = false;
+        const cellMergeInfo = spreadsheetSkeleton.getMergedCellInfo(row, col, calcHeader);
+
+        let { startY, endY, startX, endX } = cellMergeInfo;
+        const { isMerged, isMergedMainCell, mergeInfo } = cellMergeInfo;
+        const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+
+        // isMerged isMergedMainCell are mutually exclusive. isMerged true then isMergedMainCell false.
+        if (isMerged) {
+            startY = mergeInfo.startY;
+            endY = mergeInfo.endY;
+            startX = mergeInfo.startX;
+            endX = mergeInfo.endX;
+        }
+        // For merged cells, and the current cell is the top-left cell in the merged region.
+        if (isMergedMainCell) {
+            startY = mergeInfo.startY;
+            endY = mergeInfo.endY;
+            startX = mergeInfo.startX;
+            endX = mergeInfo.endX;
+        }
+
+        // If curr cell is not in the viewrange (viewport + merged cells), exit early.
+        if ((!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {
+            return true;
+        }
+
+        // getRowVisible can take a lot of time, sometimes over 20+ms, this return condition should put in the last.
+        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+        if (!visibleRow || !visibleCol) return true;
+
+        // precise is a workaround for windows, macOS does not have this issue.
+        const startXPrecise = fixLineWidthByScale(startX, scaleX);
+        const startYPrecise = fixLineWidthByScale(startY, scaleY);
+        const endXPrecise = fixLineWidthByScale(endX, scaleX);
+        const endYPrecise = fixLineWidthByScale(endY, scaleY);
+        backgroundPaths.rect(startXPrecise, startYPrecise, endXPrecise - startXPrecise, endYPrecise - startYPrecise);
+    };
 }
 
 SpreadsheetExtensionRegistry.add(Background);

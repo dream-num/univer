@@ -17,12 +17,12 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellDataForSheetInterceptor, IRange, IScale, ObjectMatrix } from '@univerjs/core';
-
+import { HorizontalAlign, Range, WrapStrategy } from '@univerjs/core';
+import { clampRange } from '@univerjs/engine-render';
+import type { ICellDataForSheetInterceptor, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
-import { expandRangeIfIntersects, inRowViewRanges, inViewRanges } from '../../../basics/tools';
+import { inViewRanges } from '../../../basics/tools';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SheetExtension } from './sheet-extension';
@@ -33,8 +33,26 @@ import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
-
 const EXTENSION_Z_INDEX = 45;
+const EXPAND_SIZE_FOR_RENDER_OVERFLOW = 20;
+interface IRenderFontContext {
+    ctx: UniverRenderingContext;
+    scale: number;
+    rowHeightAccumulation: number[];
+    columnTotalWidth: number;
+    columnWidthAccumulation: number[];
+    rowTotalHeight: number;
+    viewRanges: IRange[];
+    checkOutOfViewBound: boolean;
+    diffRanges: IRange[];
+    spreadsheetSkeleton: SpreadsheetSkeleton;
+    overflowRectangle: Nullable<IRange>;
+    cellData: ICellDataForSheetInterceptor;
+    startY: number;
+    endY: number;
+    startX: number;
+    endX: number;
+}
 
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
@@ -53,7 +71,7 @@ export class Font extends SheetExtension {
         diffRanges: IRange[],
         moreBoundsInfo: IDrawInfo
     ) {
-        const { stylesCache, overflowCache, worksheet } = spreadsheetSkeleton;
+        const { stylesCache, worksheet } = spreadsheetSkeleton;
         const { fontMatrix } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet || !fontMatrix) return;
 
@@ -69,187 +87,203 @@ export class Font extends SheetExtension {
             return;
         }
 
-        ctx.save();
         const scale = this._getScale(parentScale);
         const { viewRanges = [], checkOutOfViewBound } = moreBoundsInfo;
-        const renderFontByCellMatrix = (rowIndex: number, columnIndex: number, docsConfig: IFontCacheItem) => {
-            if (!checkOutOfViewBound) {
-                if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
-                    return true;
-                }
-            }
+        const renderFontContext = {
+            ctx,
+            scale,
+            rowHeightAccumulation,
+            columnTotalWidth,
+            columnWidthAccumulation,
+            rowTotalHeight,
+            viewRanges,
+            checkOutOfViewBound: checkOutOfViewBound || true,
+            diffRanges,
+            spreadsheetSkeleton,
+        } as IRenderFontContext;
+        ctx.save();
+        // fontMatrix.forValue((row: number, col: number, fontsConfig: IFontCacheItem) => {
+        //     this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
+        // });
+        viewRanges.forEach((range) => {
+            range.startColumn -= EXPAND_SIZE_FOR_RENDER_OVERFLOW;
+            range.endColumn += EXPAND_SIZE_FOR_RENDER_OVERFLOW;
+            range = clampRange(range);
+            Range.foreach(range, (row, col) => {
+                this.renderFontEachCell(renderFontContext, row, col, fontMatrix);
+            });
+        });
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(
-                rowIndex,
-                columnIndex
-            );
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-
-            if (isMerged) {
-                return true;
-            } else {
-                const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(rowIndex);
-                const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(columnIndex);
-                if (!visibleRow || !visibleCol) return true;
-            }
-
-            // If the merged cell area intersects with the current viewRange,
-            // then merge it into the current viewRange.
-            // After the merge, the font extension within the current viewBounds
-            // also needs to be drawn once.
-            // But at this moment, we cannot assume that it is not within the viewRanges and exit, because there may still be horizontal overflow.
-            // At this moment, we can only exclude the cells that are not within the current row.
-
-            const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
-            const combineWithMergeRanges = expandRangeIfIntersects([...mergeTo], [mergeInfo]);
-            if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
-                return true;
-            }
-
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
-            /**
-             * Incremental content rendering for texture mapping
-             * If the diffRanges do not intersect with the startRow and endRow on the row, then exit early.
-             *
-             * If this cell is not within a merged region, the mergeInfo start and end values are just the cell itself.
-             */
-            if (diffRanges) {
-                if (!this.isRowInRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                    return true;
-                }
-            }
-
-            // If the cell is overflowing, but the overflowRectangle has not been set,
-            // then overflowRectangle is set to undefined.
-            const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
-            const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
-
-            // If it's neither an overflow nor within the current range,
-            // then we can exit early (taking into account the range extension
-            // caused by the merged cells).
-            if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
-                return true;
-            }
-
-            /**
-             * https://github.com/dream-num/univer-pro/issues/334
-             * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
-             */
-            let horizontalAlignOverFlow = horizontalAlign;
-            if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-                if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
-                    horizontalAlignOverFlow = HorizontalAlign.CENTER;
-                } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
-                    horizontalAlignOverFlow = HorizontalAlign.RIGHT;
-                }
-            }
-
-            const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellDataForSheetInterceptor || {};
-            if (cellData.fontRenderExtension?.isSkip) {
-                return true;
-            }
-
-            ctx.save();
-            ctx.beginPath();
-
-            const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
-            const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
-            let isOverflow = true;
-
-            if (vertexAngle === 0) {
-                startX = startX + leftOffset;
-                endX = endX - rightOffset;
-
-                if (rightOffset !== 0 || leftOffset !== 0) {
-                    isOverflow = false;
-                }
-            }
-
-            const cellWidth = endX - startX;
-            const cellHeight = endY - startY;
-
-            /**
-             * In scenarios with offsets, there is no need to respond to text overflow.
-             */
-            if (overflowRectangle && isOverflow) {
-                const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
-                if (startColumn === endColumn && startColumn === columnIndex) {
-                    ctx.rectByPrecision(
-                        startX + 1 / scale,
-                        startY + 1 / scale,
-                        cellWidth - 2 / scale,
-                        cellHeight - 2 / scale
-                    );
-                    ctx.clip();
-                    // ctx.clearRectForTexture(
-                    //     startX + 1 / scale,
-                    //     startY + 1 / scale,
-                    //     cellWidth - 2 / scale,
-                    //     cellHeight - 2 / scale
-                    // );
-                } else {
-                    if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
-                        this._clipRectangleForOverflow(
-                            ctx,
-                            startRow,
-                            endRow,
-                            startColumn,
-                            endColumn,
-                            scale,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation
-                        );
-                    } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
-                        this._clipRectangleForOverflow(
-                            ctx,
-                            startRow,
-                            rowIndex,
-                            startColumn,
-                            columnIndex,
-                            scale,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation
-                        );
-                    } else {
-                        this._clipRectangleForOverflow(
-                            ctx,
-                            rowIndex,
-                            endRow,
-                            columnIndex,
-                            endColumn,
-                            scale,
-                            rowHeightAccumulation,
-                            columnWidthAccumulation
-                        );
-                    }
-                }
-            } else {
-                ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
-                // for normal cell, forbid text overflow cellarea
-                ctx.clip();
-                // ctx.clearRectForTexture(
-                //     startX + 1 / scale,
-                //     startY + 1 / scale,
-                //     cellWidth - 2 / scale,
-                //     cellHeight - 2 / scale
-                // );
-            }
-            ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-            this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
-
-            ctx.closePath();
-            ctx.restore();
-        };
-
-        fontMatrix.forValue(renderFontByCellMatrix);
         ctx.restore();
     }
+
+    clipTextOverflow(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+        const { ctx, scale, overflowRectangle, rowHeightAccumulation, columnWidthAccumulation, cellData } = renderFontContext;
+        let { startX, endX, startY, endY } = renderFontContext;
+
+        // https://github.com/dream-num/univer-pro/issues/334
+        // When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
+        const fontsConfig = fontMatrix.getValue(row, col)!;
+        const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = fontsConfig;
+        let horizontalAlignOverFlow = horizontalAlign;
+        if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+            if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
+                horizontalAlignOverFlow = HorizontalAlign.CENTER;
+            } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
+                horizontalAlignOverFlow = HorizontalAlign.RIGHT;
+            }
+        }
+
+        const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
+        const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+        let isOverflow = true;
+
+        if (vertexAngle === 0) {
+            startX = startX + leftOffset;
+            endX = endX - rightOffset;
+
+            if (rightOffset !== 0 || leftOffset !== 0) {
+                isOverflow = false;
+            }
+        }
+        const cellWidth = endX - startX;
+        const cellHeight = endY - startY;
+
+        /**
+         * In scenarios with offsets, there is no need to respond to text overflow.
+         */
+        if (overflowRectangle && isOverflow) {
+            const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
+            if (startColumn === endColumn && startColumn === col) {
+                ctx.rectByPrecision(
+                    startX + 1 / scale,
+                    startY + 1 / scale,
+                    cellWidth - 2 / scale,
+                    cellHeight - 2 / scale
+                );
+                ctx.clip();
+            } else {
+                if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
+                    this._clipRectangleForOverflow(
+                        ctx,
+                        startRow,
+                        endRow,
+                        startColumn,
+                        endColumn,
+                        scale,
+                        rowHeightAccumulation,
+                        columnWidthAccumulation
+                    );
+                } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
+                    this._clipRectangleForOverflow(
+                        ctx,
+                        startRow,
+                        row,
+                        startColumn,
+                        col,
+                        scale,
+                        rowHeightAccumulation,
+                        columnWidthAccumulation
+                    );
+                } else {
+                    this._clipRectangleForOverflow(
+                        ctx,
+                        row,
+                        endRow,
+                        col,
+                        endColumn,
+                        scale,
+                        rowHeightAccumulation,
+                        columnWidthAccumulation
+                    );
+                }
+            }
+        } else {
+            ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+            // for normal cell, forbid text overflow cellarea
+            ctx.clip();
+        }
+    }
+
+    renderFontEachCell(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+        const { ctx, viewRanges, diffRanges, spreadsheetSkeleton } = renderFontContext;
+
+        //#region merged cell
+        const calcHeader = false;
+        const cellInfo = spreadsheetSkeleton.getMergedCellInfo(row, col, calcHeader);
+        let { startY, endY, startX, endX } = cellInfo;
+        const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+
+        // merged, but not primary cell
+        if (isMerged && !isMergedMainCell) {
+            // return true;
+            const mergeMainCellRow = mergeInfo.startRow;
+            const mergeMainCellCol = mergeInfo.startColumn;
+            row = mergeMainCellRow;
+            col = mergeMainCellCol;
+
+            startY = mergeInfo.startY;
+            endY = mergeInfo.endY;
+            startX = mergeInfo.startX;
+            endX = mergeInfo.endX;
+        }
+
+        // merged and primary cell
+        if (isMergedMainCell) {
+            startY = mergeInfo.startY;
+            endY = mergeInfo.endY;
+            startX = mergeInfo.startX;
+            endX = mergeInfo.endX;
+        }
+        //#endregion
+
+        const fontsConfig = fontMatrix.getValue(row, col);
+        if (!fontsConfig) return true;
+
+        //#region overflow
+        // If the cell is overflowing, but the overflowRectangle has not been set,
+        // then overflowRectangle is set to undefined.
+        const overflowRange = spreadsheetSkeleton.overflowCache.getValue(row, col);
+
+        // If it's neither an overflow nor within the current range,
+        // then we can exit early
+        const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+        const notInMergeRange = !isMergedMainCell && !isMerged;
+        if (!overflowRange && notInMergeRange) {
+            if (!inViewRanges(renderRange, row, col)) {
+                return true;
+            }
+        }
+        //#endregion
+
+        const visibleRow = spreadsheetSkeleton.worksheet.getRowVisible(row);
+        const visibleCol = spreadsheetSkeleton.worksheet.getColVisible(col);
+        if (!visibleRow || !visibleCol) return true;
+
+        const cellData = spreadsheetSkeleton.worksheet.getCell(row, col) as ICellDataForSheetInterceptor || {};
+        if (cellData.fontRenderExtension?.isSkip) {
+            return true;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+
+        //#region text overflow
+        renderFontContext.overflowRectangle = overflowRange;
+        renderFontContext.cellData = cellData;
+        renderFontContext.startX = startX;
+        renderFontContext.startY = startY;
+        renderFontContext.endX = endX;
+        renderFontContext.endY = endY;
+        this.clipTextOverflow(renderFontContext, row, col, fontMatrix);
+        //#endregion
+
+        ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
+        this._renderDocuments(ctx, fontsConfig, startX, startY, endX, endY, row, col, spreadsheetSkeleton.overflowCache);
+
+        ctx.closePath();
+        ctx.restore();
+    };
 
     private _renderDocuments(
         ctx: UniverRenderingContext,

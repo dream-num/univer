@@ -159,6 +159,37 @@ export class RuleMatrix {
         this._debonceBuildTree();
     }
 
+    addRangeRules(rules: { id: string;ranges: IRange[] }[]) {
+        rules.forEach(({ id: ruleId, ranges }) => {
+            if (!ranges.length) {
+                return;
+            }
+
+            let current = this._map.get(ruleId);
+            if (!current) {
+                current = ranges;
+                this._map.set(ruleId, current);
+            } else {
+                this._map.set(ruleId, Rectangle.mergeRanges([...current, ...ranges]));
+                current = this._map.get(ruleId)!;
+            }
+
+            this._map.forEach((value, key) => {
+                if (key === ruleId) {
+                    return;
+                }
+                const newRanges = Rectangle.subtractMulti(value, ranges);
+                if (newRanges.length === 0) {
+                    this._map.delete(key);
+                } else {
+                    this._map.set(key, newRanges);
+                }
+            });
+        });
+        this._dirty = true;
+        this._debonceBuildTree();
+    }
+
     diff(rules: ISheetDataValidationRule[]) {
         const mutations: RangeMutation[] = [];
         let deleteIndex = 0;
@@ -248,34 +279,5 @@ export class RuleMatrix {
         }
         const result = tree.search([row, row]);
         return result.length > 0 ? result[0] : undefined;
-    }
-
-    addRangeRules(rules: { id: string;ranges: IRange[] }[]) {
-        rules.forEach(({ id: ruleId, ranges }) => {
-            if (!ranges.length) {
-                return;
-            }
-
-            let current = this._map.get(ruleId);
-            if (!current) {
-                current = ranges;
-                this._map.set(ruleId, current);
-            } else {
-                this._map.set(ruleId, Rectangle.mergeRanges([...current, ...ranges]));
-                current = this._map.get(ruleId)!;
-            }
-
-            this._map.forEach((value, key) => {
-                if (key === ruleId) {
-                    return;
-                }
-                const newRanges = Rectangle.subtractMulti(value, ranges);
-                if (newRanges.length === 0) {
-                    this._map.delete(key);
-                } else {
-                    this._map.set(key, newRanges);
-                }
-            });
-        });
     }
 }

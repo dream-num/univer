@@ -53,6 +53,18 @@ export class GammaInv extends BaseFunction {
             const alphaObject = alphaArray.get(rowIndex, columnIndex) as BaseValueObject;
             const betaObject = betaArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (probabilityObject.isError()) {
+                return probabilityObject;
+            }
+
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
+
+            if (betaObject.isError()) {
+                return betaObject;
+            }
+
             return this._handleSignleObject(probabilityObject, alphaObject, betaObject);
         });
 

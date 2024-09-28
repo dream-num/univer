@@ -15,7 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { centralFINV } from '../../../basics/statistical';
+import { lognormalINV } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -23,49 +23,49 @@ import { NumberValueObject } from '../../../engine/value-object/primitive-object
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
-export class FInv extends BaseFunction {
+export class LognormInv extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
 
     override calculate(
         probability: BaseValueObject,
-        degFreedom1: BaseValueObject,
-        degFreedom2: BaseValueObject
+        mean: BaseValueObject,
+        standardDev: BaseValueObject
     ): BaseValueObject {
         const maxRowLength = Math.max(
             probability.isArray() ? (probability as ArrayValueObject).getRowCount() : 1,
-            degFreedom1.isArray() ? (degFreedom1 as ArrayValueObject).getRowCount() : 1,
-            degFreedom2.isArray() ? (degFreedom2 as ArrayValueObject).getRowCount() : 1
+            mean.isArray() ? (mean as ArrayValueObject).getRowCount() : 1,
+            standardDev.isArray() ? (standardDev as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
             probability.isArray() ? (probability as ArrayValueObject).getColumnCount() : 1,
-            degFreedom1.isArray() ? (degFreedom1 as ArrayValueObject).getColumnCount() : 1,
-            degFreedom2.isArray() ? (degFreedom2 as ArrayValueObject).getColumnCount() : 1
+            mean.isArray() ? (mean as ArrayValueObject).getColumnCount() : 1,
+            standardDev.isArray() ? (standardDev as ArrayValueObject).getColumnCount() : 1
         );
 
         const probabilityArray = expandArrayValueObject(maxRowLength, maxColumnLength, probability, ErrorValueObject.create(ErrorType.NA));
-        const degFreedom1Array = expandArrayValueObject(maxRowLength, maxColumnLength, degFreedom1, ErrorValueObject.create(ErrorType.NA));
-        const degFreedom2Array = expandArrayValueObject(maxRowLength, maxColumnLength, degFreedom2, ErrorValueObject.create(ErrorType.NA));
+        const meanArray = expandArrayValueObject(maxRowLength, maxColumnLength, mean, ErrorValueObject.create(ErrorType.NA));
+        const standardDevArray = expandArrayValueObject(maxRowLength, maxColumnLength, standardDev, ErrorValueObject.create(ErrorType.NA));
 
         const resultArray = probabilityArray.mapValue((probabilityObject, rowIndex, columnIndex) => {
-            const degFreedom1Object = degFreedom1Array.get(rowIndex, columnIndex) as BaseValueObject;
-            const degFreedom2Object = degFreedom2Array.get(rowIndex, columnIndex) as BaseValueObject;
+            const meanObject = meanArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const standardDevObject = standardDevArray.get(rowIndex, columnIndex) as BaseValueObject;
 
             if (probabilityObject.isError()) {
                 return probabilityObject;
             }
 
-            if (degFreedom1Object.isError()) {
-                return degFreedom1Object;
+            if (meanObject.isError()) {
+                return meanObject;
             }
 
-            if (degFreedom2Object.isError()) {
-                return degFreedom2Object;
+            if (standardDevObject.isError()) {
+                return standardDevObject;
             }
 
-            return this._handleSignleObject(probabilityObject, degFreedom1Object, degFreedom2Object);
+            return this._handleSignleObject(probabilityObject, meanObject, standardDevObject);
         });
 
         if (maxRowLength === 1 && maxColumnLength === 1) {
@@ -77,30 +77,26 @@ export class FInv extends BaseFunction {
 
     private _handleSignleObject(
         probabilityObject: BaseValueObject,
-        degFreedom1Object: BaseValueObject,
-        degFreedom2Object: BaseValueObject
+        meanObject: BaseValueObject,
+        standardDevObject: BaseValueObject
     ): BaseValueObject {
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject, degFreedom1Object, degFreedom2Object);
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject, meanObject, standardDevObject);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [_probabilityObject, _degFreedom1Object, _degFreedom2Object] = variants as BaseValueObject[];
+        const [_probabilityObject, _meanObject, _standardDevObject] = variants as BaseValueObject[];
 
         const probabilityValue = +_probabilityObject.getValue();
-        const degFreedom1Value = Math.floor(+_degFreedom1Object.getValue());
-        const degFreedom2Value = Math.floor(+_degFreedom2Object.getValue());
+        const meanValue = +_meanObject.getValue();
+        const standardDevValue = +_standardDevObject.getValue();
 
-        if (probabilityValue < 0 || probabilityValue > 1 || degFreedom1Value < 1 || degFreedom1Value > 10 ** 10 || degFreedom2Value < 1 || degFreedom2Value > 10 ** 10) {
+        if (probabilityValue <= 0 || probabilityValue >= 1 || standardDevValue <= 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = centralFINV(probabilityValue, degFreedom1Value, degFreedom2Value);
-
-        if (Number.isNaN(result) || !Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
+        const result = lognormalINV(probabilityValue, meanValue, standardDevValue);
 
         return NumberValueObject.create(result);
     }

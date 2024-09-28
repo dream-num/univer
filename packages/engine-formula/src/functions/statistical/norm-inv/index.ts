@@ -53,6 +53,18 @@ export class NormInv extends BaseFunction {
             const meanObject = meanArray.get(rowIndex, columnIndex) as BaseValueObject;
             const standardDevObject = standardDevArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (probabilityObject.isError()) {
+                return probabilityObject;
+            }
+
+            if (meanObject.isError()) {
+                return meanObject;
+            }
+
+            if (standardDevObject.isError()) {
+                return standardDevObject;
+            }
+
             return this._handleSignleObject(probabilityObject, meanObject, standardDevObject);
         });
 

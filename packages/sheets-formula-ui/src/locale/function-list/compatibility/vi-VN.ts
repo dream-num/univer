@@ -259,8 +259,8 @@ export default {
         },
     },
     LOGINV: {
-        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy lô-ga',
-        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy lô-ga',
+        description: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
+        abstract: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
         links: [
             {
                 title: 'Giảng dạy',
@@ -268,13 +268,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
     LOGNORMDIST: {
-        description: 'Trả về hàm phân phối tích lũy lô-ga',
-        abstract: 'Trả về hàm phân phối tích lũy lô-ga',
+        description: 'Trả về phân bố chuẩn lô-ga-rít của',
+        abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
         links: [
             {
                 title: 'Giảng dạy',
@@ -282,8 +283,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì LOGNORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     MODE: {

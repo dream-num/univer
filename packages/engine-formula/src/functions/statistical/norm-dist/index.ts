@@ -58,6 +58,22 @@ export class NormDist extends BaseFunction {
             const standardDevObject = standardDevArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (meanObject.isError()) {
+                return meanObject;
+            }
+
+            if (standardDevObject.isError()) {
+                return standardDevObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(xObject, meanObject, standardDevObject, cumulativeObject);
         });
 

@@ -28,6 +28,7 @@ import { FInvRt } from '../statistical/f-inv-rt';
 import { FTest } from '../statistical/f-test';
 import { GammaDist } from '../statistical/gamma-dist';
 import { GammaInv } from '../statistical/gamma-inv';
+import { LognormInv } from '../statistical/lognorm-inv';
 import { NormDist } from '../statistical/norm-dist';
 import { NormInv } from '../statistical/norm-inv';
 import { NormSInv } from '../statistical/norm-s-inv';
@@ -38,6 +39,7 @@ import { VarS } from '../statistical/var-s';
 import { Betadist } from './betadist';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
 import { Hypgeomdist } from './hypgeomdist';
+import { Lognormdist } from './lognormdist';
 import { Normsdist } from './normsdist';
 import { Rank } from './rank';
 
@@ -58,6 +60,8 @@ export const functionCompatibility = [
     [GammaDist, FUNCTION_NAMES_COMPATIBILITY.GAMMADIST],
     [GammaInv, FUNCTION_NAMES_COMPATIBILITY.GAMMAINV],
     [Hypgeomdist, FUNCTION_NAMES_COMPATIBILITY.HYPGEOMDIST],
+    [Lognormdist, FUNCTION_NAMES_COMPATIBILITY.LOGNORMDIST],
+    [LognormInv, FUNCTION_NAMES_COMPATIBILITY.LOGINV],
     [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
     [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Normsdist, FUNCTION_NAMES_COMPATIBILITY.NORMSDIST],

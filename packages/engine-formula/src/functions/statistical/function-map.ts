@@ -63,9 +63,12 @@ import { HypgeomDist } from './hypgeom-dist';
 import { Intercept } from './intercept';
 import { Kurt } from './kurt';
 import { Large } from './large';
+import { LognormDist } from './lognorm-dist';
+import { LognormInv } from './lognorm-inv';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
+import { Median } from './median';
 import { Min } from './min';
 import { Mina } from './mina';
 import { Minifs } from './minifs';
@@ -136,9 +139,12 @@ export const functionStatistical = [
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
     [Kurt, FUNCTION_NAMES_STATISTICAL.KURT],
     [Large, FUNCTION_NAMES_STATISTICAL.LARGE],
+    [LognormDist, FUNCTION_NAMES_STATISTICAL.LOGNORM_DIST],
+    [LognormInv, FUNCTION_NAMES_STATISTICAL.LOGNORM_INV],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
+    [Median, FUNCTION_NAMES_STATISTICAL.MEDIAN],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Mina, FUNCTION_NAMES_STATISTICAL.MINA],
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],

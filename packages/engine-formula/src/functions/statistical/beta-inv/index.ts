@@ -91,6 +91,26 @@ export class BetaInv extends BaseFunction {
         AObject: BaseValueObject,
         BObject: BaseValueObject
     ): BaseValueObject {
+        if (probabilityObject.isError()) {
+            return probabilityObject;
+        }
+
+        if (alphaObject.isError()) {
+            return alphaObject;
+        }
+
+        if (betaObject.isError()) {
+            return betaObject;
+        }
+
+        if (AObject.isError()) {
+            return AObject;
+        }
+
+        if (BObject.isError()) {
+            return BObject;
+        }
+
         const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(probabilityObject, alphaObject, betaObject, AObject, BObject);
 
         if (isError) {

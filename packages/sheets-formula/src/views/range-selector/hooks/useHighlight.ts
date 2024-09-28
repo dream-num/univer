@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ColorKit, IUniverInstanceService, Rectangle, ThemeService, useDependency } from '@univerjs/core';
+import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
-import { getPrimaryForRange, setEndForRange } from '@univerjs/sheets';
-import { IDescriptionService } from '@univerjs/sheets-formula';
-import { IMarkSelectionService } from '@univerjs/sheets-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
+import { IDescriptionService, RefSelectionsRenderService } from '@univerjs/sheets-formula';
+import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
 import type { ITextRun, Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
@@ -40,7 +41,11 @@ interface IRefSelection {
 export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: string, refSelections: IRefSelection[]) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const themeService = useDependency(ThemeService);
-    const markSelectionService = useDependency(IMarkSelectionService);
+    const refSelectionsService = useDependency(IRefSelectionsService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const render = renderManagerService.getRenderById(unitId);
+    const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+    const sheetSkeletonManagerService = render?.with(SheetSkeletonManagerService);
 
     const [ranges, rangesSet] = useState<ISelectionWithStyle[]>([]);
 
@@ -73,22 +78,9 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
             const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
 
-            const primary = getPrimaryForRange(range, worksheet);
-
-            if (
-                !Rectangle.equals(primary, range) &&
-                range.startRow === range.endRow &&
-                range.startColumn === range.endColumn
-            ) {
-                range.startRow = primary.startRow;
-                range.endRow = primary.endRow;
-                range.startColumn = primary.startColumn;
-                range.endColumn = primary.endColumn;
-            }
-
             selectionWithStyle.push({
                 range,
-                primary,
+                primary: undefined,
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }
@@ -96,15 +88,29 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
     }, [unitId, subUnitId, refSelections, isNeed]);
 
     useEffect(() => {
-        if (isNeed) {
-            const ids = ranges.map((range) => markSelectionService.addShape(range));
-            return () => {
-                ids.forEach((id) => {
-                    id && markSelectionService.removeShape(id);
+        const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
+        if (isNeed && skeleton) {
+            const allControls = refSelectionsRenderService?.getSelectionControls() || [];
+            if (allControls.length === ranges.length) {
+                allControls.forEach((control, index) => {
+                    const range = ranges[index];
+                    control.updateRange(attachRangeWithCoord(skeleton, range.range));
+                    control.updateStyle(range.style!);
                 });
-            };
+            } else {
+                refSelectionsService.setSelections(ranges);
+            }
         }
-    }, [ranges, isNeed]);
+    }, [ranges, isNeed, sheetSkeletonManagerService]);
+
+    useEffect(() => {
+        return () => {
+            refSelectionsService.clearCurrentSelections();
+            const controls = refSelectionsRenderService?.getSelectionControls() || [];
+            controls.forEach((c) => c.dispose());
+            controls.length = 0;
+        };
+    }, []);
 }
 
 export function useDocHight(editorId: string, sequenceNodes: (string | ISequenceNode)[]) {

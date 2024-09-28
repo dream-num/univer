@@ -105,6 +105,7 @@ export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
+export { SelectionControl } from './services/selection/selection-shape';
 
 export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';

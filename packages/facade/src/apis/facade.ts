@@ -316,17 +316,6 @@ export class FUniver {
     }
 
     /**
-     * Subscribe to the lifecycle stage changes.
-     *
-     * @param {Function} callback - The callback function to be executed when the lifecycle stage changes.
-     * @returns {IDisposable} - The disposable object to unsubscribe from the lifecycle stage changes.
-     */
-    onLifecycle(callback: (stage: LifecycleStages) => void): IDisposable {
-        const lifecycleService = this._injector.get(LifecycleService);
-        return toDisposable(lifecycleService.lifecycle$.subscribe(callback));
-    }
-
-    /**
      * Get the current lifecycle stage.
      *
      * @returns {LifecycleStages} - The current lifecycle stage.

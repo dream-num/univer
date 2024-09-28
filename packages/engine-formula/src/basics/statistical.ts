@@ -587,6 +587,20 @@ function lowRegGammaInverse(p: number, a: number): number {
     return x;
 }
 
+export function hypergeometricCDF(x: number, n: number, M: number, N: number): number {
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += hypergeometricPDF(i, n, M, N);
+    }
+
+    return result;
+}
+
+export function hypergeometricPDF(x: number, n: number, M: number, N: number): number {
+    return calculateCombin(M, x) * calculateCombin(N - M, n - x) / calculateCombin(N, n);
+}
+
 export function normalCDF(x: number, mean: number, standardDev: number): number {
     return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
 }

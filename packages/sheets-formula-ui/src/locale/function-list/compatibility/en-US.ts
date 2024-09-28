@@ -251,8 +251,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: 'sample_s', detail: 'The number of successes in the sample.' },
+            numberSample: { name: 'number_sample', detail: 'The size of the sample.' },
+            populationS: { name: 'population_s', detail: 'The number of successes in the population.' },
+            numberPop: { name: 'number_pop', detail: 'The population size.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, HYPGEOMDIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     LOGINV: {

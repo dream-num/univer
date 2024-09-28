@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     ICommandService,
@@ -23,16 +29,10 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
-
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
 
 export interface ICopySheetCommandParams {
     unitId?: string;

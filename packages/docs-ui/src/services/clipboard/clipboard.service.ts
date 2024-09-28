@@ -286,7 +286,9 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
                 .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
-                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '');
+                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+                // Replace `\r\n` in table cell to white space.
+                .replaceAll('\r\n', ' ');
 
         let html = this._umdToHtml.convert(documentBodyList);
 

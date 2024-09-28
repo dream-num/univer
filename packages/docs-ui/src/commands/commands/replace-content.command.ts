@@ -46,16 +46,6 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
             return false;
         }
 
-        // Handle snapshot is equal to previous snapshot, only set the text ranges.
-        if (Tools.diffValue(snapshot, prevSnapshot) && textRanges) {
-            docSelectionManagerService.replaceDocRanges(textRanges, {
-                unitId,
-                subUnitId: unitId,
-            }, false);
-
-            return true;
-        }
-
         const { body, tableSource, footers, headers, lists, drawings, drawingsOrder } = snapshot;
         const {
             body: prevBody,
@@ -69,6 +59,16 @@ export const ReplaceSnapshotCommand: ICommand<IReplaceSnapshotCommandParams> = {
 
         if (body == null || prevBody == null) {
             return false;
+        }
+
+        // Handle body is equal to previous prevBody, only set the text ranges.
+        if (Tools.diffValue(body, prevBody) && textRanges) {
+            docSelectionManagerService.replaceDocRanges(textRanges, {
+                unitId,
+                subUnitId: unitId,
+            }, false);
+
+            return true;
         }
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {

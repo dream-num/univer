@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
+
 import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
-
-import type { IDataValidationRule, IDocumentData, IWorkbookData } from '@univerjs/core';
-import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
@@ -207,23 +206,6 @@ const dv2 = [
         formula2: '',
     },
 ];
-
-const hyperLink = [
-    {
-        row: 20,
-        column: 8,
-        id: '321',
-        display: 'linkTest',
-        payload: '#gid=sheet-0011&range=1:1',
-    },
-    {
-        row: 20,
-        column: 12,
-        id: '123',
-        display: 'linkTest哈哈哈哈',
-        payload: '#gid=sheet-0011&range=1:1',
-    },
-] as ICellHyperLink[];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
@@ -14165,12 +14147,119 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         t: 2,
                     },
                     8: {
-                        v: 'linkTest',
-                        t: 1,
+                        p: {
+                            id: '__INTERNAL_EDITOR__DOCS_NORMAL',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 270.44940185546875,
+                                    height: null,
+                                },
+                                marginTop: 0,
+                                marginBottom: 1,
+                                marginRight: 2,
+                                marginLeft: 2,
+                                renderConfig: {
+                                    horizontalAlign: 0,
+                                    verticalAlign: 0,
+                                    centerAngle: 0,
+                                    vertexAngle: 0,
+                                    wrapStrategy: 0,
+                                },
+                            },
+                            body: {
+                                dataStream:
+                              '\u001Fhttps://univer-preview.vercel.app/sheets/\u001E\r12323\r\u001FA100\u001E\r\n',
+                                textRuns: [],
+                                paragraphs: [
+                                    {
+                                        startIndex: 43,
+                                        paragraphStyle: {
+                                            horizontalAlign: 0,
+                                        },
+                                    },
+                                    {
+                                        startIndex: 49,
+                                        paragraphStyle: {
+                                            horizontalAlign: 0,
+                                        },
+                                    },
+                                    {
+                                        startIndex: 93,
+                                        paragraphStyle: {
+                                            horizontalAlign: 0,
+                                        },
+                                    },
+                                ],
+                                sectionBreaks: [
+                                    {
+                                        startIndex: 94,
+                                    },
+                                ],
+                                customRanges: [
+                                    {
+                                        startIndex: 0,
+                                        endIndex: 42,
+                                        rangeId: 'tnxxGNtWAuHrpz4fBGAYh',
+                                        rangeType: 0,
+                                        properties: {
+                                            url: 'https://univer-preview.vercel.app/sheets/',
+                                        },
+                                    },
+                                    {
+                                        startIndex: 50,
+                                        endIndex: 54,
+                                        rangeId: 'j4NsUHxjolNihMoYdZ-oj',
+                                        rangeType: 0,
+                                        properties: {
+                                            url: '#gid=sheet-0011&range=A100',
+                                        },
+                                    },
+                                ],
+                                customDecorations: [],
+                            },
+                            drawings: {},
+                            drawingsOrder: [],
+                            settings: {
+                                zoomRatio: 1,
+                            },
+                        },
                     },
                     12: {
-                        v: 'linkTest哈哈哈哈',
-                        t: 1,
+                        p: {
+                            id: 'd',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 111.55900573730469,
+                                },
+                                marginTop: 0,
+                                marginBottom: 1,
+                                marginRight: 2,
+                                marginLeft: 2,
+                                renderConfig: {
+                                    horizontalAlign: 0,
+                                    verticalAlign: 0,
+                                    centerAngle: 0,
+                                    vertexAngle: 0,
+                                    wrapStrategy: 0,
+                                },
+                            },
+                            body: {
+                                dataStream: '\u001Fhttps://univer.ai/\u001E\r\n',
+                                customRanges: [
+                                    {
+                                        startIndex: 0,
+                                        endIndex: 19,
+                                        rangeId: 'QY6zbQrxGw8IaLGXDgVVj',
+                                        rangeType: 0,
+                                        properties: {
+                                            url: 'https://univer.ai/',
+                                        },
+                                    },
+                                ],
+                            },
+                            drawings: {},
+                            drawingsOrder: [],
+                        },
                     },
                 },
                 21: {
@@ -14260,8 +14349,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
                 20: {
                     hd: 0,
-                    h: 19,
-                    ah: 19,
+                    h: 60,
+                    ah: 60,
                 },
                 21: {
                     hd: 0,
@@ -23804,12 +23893,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         // },
     },
     resources: [
-        {
-            name: 'SHEET_HYPER_LINK_PLUGIN',
-            data: JSON.stringify({
-                'sheet-0011': hyperLink,
-            }),
-        },
         {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({

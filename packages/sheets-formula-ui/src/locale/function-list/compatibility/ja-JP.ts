@@ -299,8 +299,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '最頻値を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '最頻値を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     NEGBINOMDIST: {

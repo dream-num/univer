@@ -72,6 +72,8 @@ import { Median } from './median';
 import { Min } from './min';
 import { Mina } from './mina';
 import { Minifs } from './minifs';
+import { ModeMult } from './mode-mult';
+import { ModeSngl } from './mode-sngl';
 import { NormDist } from './norm-dist';
 import { NormInv } from './norm-inv';
 import { NormSDist } from './norm-s-dist';
@@ -148,6 +150,8 @@ export const functionStatistical = [
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Mina, FUNCTION_NAMES_STATISTICAL.MINA],
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
+    [ModeMult, FUNCTION_NAMES_STATISTICAL.MODE_MULT],
+    [ModeSngl, FUNCTION_NAMES_STATISTICAL.MODE_SNGL],
     [NormDist, FUNCTION_NAMES_STATISTICAL.NORM_DIST],
     [NormInv, FUNCTION_NAMES_STATISTICAL.NORM_INV],
     [NormSDist, FUNCTION_NAMES_STATISTICAL.NORM_S_DIST],

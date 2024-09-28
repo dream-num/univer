@@ -1011,8 +1011,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算眾數的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算眾數的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     MODE_SNGL: {
@@ -1025,8 +1025,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算眾數的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算眾數的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     NEGBINOM_DIST: {

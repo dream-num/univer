@@ -15,7 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { gamma } from '../../../basics/statistical';
+import { gammaln } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -23,14 +23,14 @@ import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
-export class Gamma extends BaseFunction {
+export class Gammaln extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    override calculate(number: BaseValueObject): BaseValueObject {
-        if (number.isArray()) {
-            const resultArray = (number as ArrayValueObject).mapValue((numberObject) => this._handleSingleObject(numberObject));
+    override calculate(x: BaseValueObject): BaseValueObject {
+        if (x.isArray()) {
+            const resultArray = (x as ArrayValueObject).mapValue((xObject) => this._handleSingleObject(xObject));
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -39,25 +39,25 @@ export class Gamma extends BaseFunction {
             return resultArray;
         }
 
-        return this._handleSingleObject(number);
+        return this._handleSingleObject(x);
     }
 
-    private _handleSingleObject(number: BaseValueObject): BaseValueObject {
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(number);
+    private _handleSingleObject(x: BaseValueObject): BaseValueObject {
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(x);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [numberObject] = variants as BaseValueObject[];
+        const [xObject] = variants as BaseValueObject[];
 
-        const numberValue = +numberObject.getValue();
+        const xValue = +xObject.getValue();
 
-        if (numberValue === 0 || (numberValue < 0 && numberValue % 1 === 0)) {
+        if (xValue <= 0) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        const result = gamma(numberValue);
+        const result = gammaln(xValue);
 
         return NumberValueObject.create(result);
     }

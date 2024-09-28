@@ -372,7 +372,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path, isBack } = position;
 
         let { glyph } = position;
 

@@ -419,7 +419,7 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
-                        disableInput={editing.type === HyperLinkEditSourceType.ZEN_EDITOR}
+                        dialogOnly
                         onSelectorVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {

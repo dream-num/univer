@@ -360,7 +360,9 @@ export {
     type ISetRowHiddenMutationParams,
     type ISetRowVisibleMutationParams,
     SetRowHiddenMutation,
+    SetRowHiddenUndoMutationFactory,
     SetRowVisibleMutation,
+    SetRowVisibleUndoMutationFactory,
 } from './commands/mutations/set-row-visible.mutation';
 export { type ISetTabColorMutationParams, SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
@@ -383,7 +385,9 @@ export {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,
+    SetWorksheetRowHeightMutationFactory,
     SetWorksheetRowIsAutoHeightMutation,
+    SetWorksheetRowIsAutoHeightMutationFactory,
 } from './commands/mutations/set-worksheet-row-height.mutation';
 
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';

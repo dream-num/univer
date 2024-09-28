@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, IStyleData } from '@univerjs/core';
+import type { IMutationInfo, IRange, IStyleData, Nullable } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { createIdentifier, Disposable, ICommandService, ILogService, Inject, IUndoRedoService, ObjectMatrix, ThemeService } from '@univerjs/core';
 import { SetRangeValuesMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
@@ -37,6 +37,7 @@ export interface IFormatPainterService {
 export interface ISelectionFormatInfo {
     styles: ObjectMatrix<IStyleData>;
     merges: IRange[];
+    range: Nullable<IRange>;
 }
 
 export interface IFormatPainterHook {
@@ -90,7 +91,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
 
         this._status$ = new BehaviorSubject<FormatPainterStatus>(FormatPainterStatus.OFF);
         this.status$ = this._status$.asObservable();
-        this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [] };
+        this._selectionFormat = { styles: new ObjectMatrix<IStyleData>(), merges: [], range: null };
     }
 
     addHook(hook: IFormatPainterHook): void {

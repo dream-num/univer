@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useEvent } from 'rc-util';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 interface IAbsolutePosition {
@@ -41,8 +41,9 @@ export interface IRectPopupProps {
     // #region closing behavior
     onClickOutside?: (e: MouseEvent) => void;
     excludeOutside?: HTMLElement[];
+    onContextMenu?: () => void;
 
-    onPinterEnter?: (e: React.PointerEvent<HTMLElement>) => void;
+    onPointerEnter?: (e: React.PointerEvent<HTMLElement>) => void;
     onPointerLeave?: (e: React.PointerEvent<HTMLElement>) => void;
     onClick?: (e: React.MouseEvent<HTMLElement>) => void;
     // #endregion
@@ -102,9 +103,10 @@ function calcPopupPosition(layout: IPopupLayoutInfo): { top: number; left: numbe
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPinterEnter, onPointerLeave, onClick, hidden } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, excludeRects, onPointerEnter, onPointerLeave, onClick, hidden, onContextMenu } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { /* empty */ }));
+    const contextMenuFn = useEvent(onContextMenu ?? (() => { /* empty */ }));
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
@@ -165,13 +167,22 @@ function RectPopup(props: IRectPopupProps) {
             clickOtherFn(e);
         };
 
-        window.addEventListener('pointerdown', handleClickOther);
-        return () => window.removeEventListener('pointerdown', handleClickOther);
+        window.addEventListener('contextmenu', handleClickOther);
+        return () => {
+            window.removeEventListener('pointerdown', handleClickOther);
+        };
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
+
+    useEffect(() => {
+        window.addEventListener('contextmenu', contextMenuFn);
+        return () => {
+            window.removeEventListener('contextmenu', contextMenuFn);
+        };
+    }, [contextMenuFn]);
 
     return (
         <section
-            onPointerEnter={onPinterEnter}
+            onPointerEnter={onPointerEnter}
             onPointerLeave={onPointerLeave}
             ref={nodeRef}
             style={{ ...style, ...hidden ? { display: 'none' } : null }}

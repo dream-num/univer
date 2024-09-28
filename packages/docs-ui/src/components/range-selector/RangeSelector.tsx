@@ -311,7 +311,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             <div
                 className={sClassName}
                 ref={selectorRef}
-                style={{ width, height }}
+                style={{ width, height, cursor: dialogOnly ? 'pointer' : undefined }}
                 onClickCapture={(event) => {
                     if (dialogOnly) {
                         event.stopPropagation();

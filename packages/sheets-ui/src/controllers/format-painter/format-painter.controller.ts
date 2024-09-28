@@ -31,6 +31,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     RANGE_TYPE,
+    Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -188,16 +189,24 @@ export class FormatPainterController extends Disposable {
                 endColumn: merge.endColumn - startColumn,
             };
             // merge will apply at least once
-            const rowRepeats = Math.max(1, Math.floor((targetRange.endRow - targetRange.startRow + 1) / styleRowsNum));
-            const colRepeats = Math.max(1, Math.floor((targetRange.endColumn - targetRange.startColumn + 1) / styleColsNum));
+            const rowRepeats = Math.max(1, Math.ceil((targetRange.endRow - targetRange.startRow + 1) / styleRowsNum));
+            const colRepeats = Math.max(1, Math.ceil((targetRange.endColumn - targetRange.startColumn + 1) / styleColsNum));
             for (let i = 0; i < rowRepeats; i++) {
                 for (let j = 0; j < colRepeats; j++) {
-                    mergeRanges.push({
-                        startRow: relatedRange.startRow + i * styleRowsNum + targetRange.startRow,
-                        startColumn: relatedRange.startColumn + j * styleColsNum + targetRange.startColumn,
-                        endRow: relatedRange.endRow + i * styleRowsNum + targetRange.startRow,
-                        endColumn: relatedRange.endColumn + j * styleColsNum + targetRange.startColumn,
-                    });
+                    const repeatStartRow = relatedRange.startRow + i * styleRowsNum + targetRange.startRow;
+                    const repeatStartColumn = relatedRange.startColumn + j * styleColsNum + targetRange.startColumn;
+                    if (repeatStartRow <= targetRange.endRow && repeatStartColumn <= targetRange.endColumn) {
+                        const repeatEndRow = Math.min(relatedRange.endRow + i * styleRowsNum + targetRange.startRow, targetRange.endRow);
+                        const repeatEndColumn = Math.min(relatedRange.endColumn + j * styleColsNum + targetRange.startColumn, targetRange.endColumn);
+                        if (repeatStartRow !== repeatEndRow || repeatStartColumn !== repeatEndColumn) {
+                            mergeRanges.push({
+                                startRow: repeatStartRow,
+                                startColumn: repeatStartColumn,
+                                endRow: repeatEndRow,
+                                endColumn: repeatEndColumn,
+                            });
+                        }
+                    }
                 }
             }
         });
@@ -238,46 +247,48 @@ export class FormatPainterController extends Disposable {
         });
 
         // handle merge
-        const ranges = getAddMergeMutationRangeByType(mergeRanges);
-
+        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];
+        // Hole-to-hole means that the source range and target range are both merge range.
+        if (!this._isHoleToHole(worksheet, sourceRange, targetRange)) {
+            const ranges = getAddMergeMutationRangeByType(mergeRanges);
 
-        // First we should check if there are values in the going-to-be-merged cells.
-        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
-        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
+            // First we should check if there are values in the going-to-be-merged cells.
+            const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
 
-        // prepare redo mutations
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-        mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+            // prepare redo mutations
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+            mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
 
         // prepare undo mutations
-        const undoRemoveMergeMutationParams = this._injector.invoke(
-            RemoveMergeUndoMutationFactory,
-            removeMergeMutationParams
-        );
-        const undoMutationParams = this._injector.invoke(
-            AddMergeUndoMutationFactory,
-            addMergeMutationParams
-        );
-        mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
-        mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            const undoRemoveMergeMutationParams = this._injector.invoke(
+                RemoveMergeUndoMutationFactory,
+                removeMergeMutationParams
+            );
+            const undoMutationParams = this._injector.invoke(
+                AddMergeUndoMutationFactory,
+                addMergeMutationParams
+            );
+            mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
+            mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
-        // add set range values mutations to undo redo mutations
-        if (willRemoveSomeCell) {
-            const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
-            mergeRedos.unshift(...data.redos);
-            mergeUndos.push(...data.undos);
+            // add set range values mutations to undo redo mutations
+            if (willRemoveSomeCell) {
+                const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
+                mergeRedos.unshift(...data.redos);
+                mergeUndos.push(...data.undos);
+            }
         }
 
         const { undos: rowUndos, redos: rowRedos } = this._getRowDataMutations(unitId, subUnitId, sourceRange, targetRange, worksheet);
@@ -457,5 +468,10 @@ export class FormatPainterController extends Disposable {
             undos: colUndos,
             redos: colRedos,
         };
+    }
+
+    private _isHoleToHole(worksheet: Worksheet, range1: IRange, range2: IRange) {
+        const mergeData = worksheet.getConfig()?.mergeData || [];
+        return mergeData.some((merge) => Rectangle.equals(range1, merge)) && mergeData.some((merge) => Rectangle.equals(range2, merge));
     }
 }

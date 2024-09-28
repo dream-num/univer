@@ -220,4 +220,16 @@ export class RangeProtectionCache extends Disposable {
             return selectionProtection;
         }
     }
+
+    public deleteUnit(unitId: string) {
+        this._cellRuleCache.delete(unitId);
+        this._cellInfoCache.delete(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+        workbook?.getSheets().forEach((sheet) => {
+            const subUnitId = sheet.getSheetId();
+            this._ruleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
+                this._permissionIdCache.delete(rule.permissionId);
+            });
+        });
+    }
 }

@@ -694,8 +694,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '要计算其 GAMMALN 的数值。' },
         },
     },
     GAMMALN_PRECISE: {
@@ -708,8 +707,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '要计算其 GAMMALN.PRECISE 的数值。' },
         },
     },
     GAUSS: {
@@ -722,8 +720,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '需要计算其分布的数值。' },
         },
     },
     GEOMEAN: {
@@ -736,8 +733,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算几何平均值的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算几何平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     GROWTH: {
@@ -750,8 +747,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知数据_y', detail: '关系表达式 y = b*m^x 中已知的 y 值集合。' },
+            knownXs: { name: '已知数据_x', detail: '关系表达式 y = b*m^x 中已知的 x 值集合。' },
+            newXs: { name: '新数据_x', detail: '需要 GROWTH 返回对应 y 值的新 x 值。' },
+            constb: { name: 'b', detail: '一个逻辑值，用于指定是否将常量 b 强制设为 1。' },
         },
     },
     HARMEAN: {
@@ -764,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算调和平均值的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算调和平均值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     HYPGEOM_DIST: {

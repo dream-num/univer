@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { IRangePermissionPoint } from '../services/permission/range-permission/util';
 import type { IRuleChange } from './range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, Range } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { filter, map } from 'rxjs';
 import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../services/permission/permission-point';
@@ -30,11 +30,23 @@ export class RangeProtectionCache extends Disposable {
 
     constructor(
         @Inject(RangeProtectionRuleModel) private readonly _ruleModel: RangeProtectionRuleModel,
-        @Inject(IPermissionService) private readonly _permissionService: IPermissionService
+        @Inject(IPermissionService) private readonly _permissionService: IPermissionService,
+        @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initUpdateCellRuleCache();
         this._initUpdateCellInfoCache();
+        this._initCache();
+    }
+
+    private _initCache() {
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
+            workbook.getSheets().forEach((sheet) => {
+                const unitId = workbook.getUnitId();
+                const subUnitId = sheet.getSheetId();
+                this.reBuildCache(unitId, subUnitId);
+            });
+        });
     }
 
     private _initUpdateCellInfoCache() {

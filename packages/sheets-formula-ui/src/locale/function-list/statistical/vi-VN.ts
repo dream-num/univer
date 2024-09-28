@@ -905,6 +905,34 @@ export default {
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
         },
     },
+    MODE_MULT: {
+        description: 'Trả về một mảng dọc của các giá trị thường xảy ra nhất, hoặc các giá trị lặp lại trong một mảng hoặc phạm vi dữ liệu.',
+        abstract: 'Trả về một mảng dọc của các giá trị thường xảy ra nhất, hoặc các giá trị lặp lại trong một mảng hoặc phạm vi dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mode-mult-%E5%87%BD%E6%95%B0-50fd9464-b2ba-4191-b57a-39446689ae8c',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô mà chế độ sẽ được tính toán.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
+        },
+    },
+    MODE_SNGL: {
+        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
+        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mode-sngl-%E5%87%BD%E6%95%B0-f1267c16-66c6-4386-959f-8fba5f8bb7f8',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô mà chế độ sẽ được tính toán.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
+        },
+    },
     NORM_DIST: {
         description: 'Trả về hàm phân phối tích lũy chuẩn',
         abstract: 'Trả về hàm phân phối tích lũy chuẩn',

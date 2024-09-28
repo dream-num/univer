@@ -29,6 +29,7 @@ import { FTest } from '../statistical/f-test';
 import { GammaDist } from '../statistical/gamma-dist';
 import { GammaInv } from '../statistical/gamma-inv';
 import { LognormInv } from '../statistical/lognorm-inv';
+import { ModeSngl } from '../statistical/mode-sngl';
 import { NormDist } from '../statistical/norm-dist';
 import { NormInv } from '../statistical/norm-inv';
 import { NormSInv } from '../statistical/norm-s-inv';
@@ -62,6 +63,7 @@ export const functionCompatibility = [
     [Hypgeomdist, FUNCTION_NAMES_COMPATIBILITY.HYPGEOMDIST],
     [Lognormdist, FUNCTION_NAMES_COMPATIBILITY.LOGNORMDIST],
     [LognormInv, FUNCTION_NAMES_COMPATIBILITY.LOGINV],
+    [ModeSngl, FUNCTION_NAMES_COMPATIBILITY.MODE],
     [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
     [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Normsdist, FUNCTION_NAMES_COMPATIBILITY.NORMSDIST],

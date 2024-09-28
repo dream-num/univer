@@ -101,7 +101,7 @@ export class RangeProtectionCache extends Disposable {
             } else if (type === 'delete') {
                 this._deleteCellRuleCache(ruleChange);
             } else {
-                this._deleteCellRuleCache(ruleChange);
+                this._deleteCellRuleCache({ ...ruleChange, rule: ruleChange.oldRule! });
                 this._addCellRuleCache(ruleChange);
             }
         });
@@ -154,11 +154,13 @@ export class RangeProtectionCache extends Disposable {
     private _deleteCellRuleCache(ruleChange: IRuleChange) {
         const { subUnitId, unitId, rule } = ruleChange;
         const cellMap = this._ensureRuleMap(unitId, subUnitId);
+        const cellInfoMap = this._ensureCellInfoMap(unitId, subUnitId);
         rule.ranges.forEach((range) => {
             const { startRow, endRow, startColumn, endColumn } = range;
             for (let i = startRow; i <= endRow; i++) {
                 for (let j = startColumn; j <= endColumn; j++) {
                     cellMap.delete(`${i}-${j}`);
+                    cellInfoMap.delete(`${i}-${j}`);
                 }
             }
         });

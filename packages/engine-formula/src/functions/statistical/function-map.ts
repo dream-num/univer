@@ -54,6 +54,11 @@ import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Gamma } from './gamma';
 import { GammaDist } from './gamma-dist';
 import { GammaInv } from './gamma-inv';
+import { Gammaln } from './gammaln';
+import { Gauss } from './gauss';
+import { Geomean } from './geomean';
+import { Growth } from './growth';
+import { Harmean } from './harmean';
 import { Intercept } from './intercept';
 import { Max } from './max';
 import { Maxa } from './maxa';
@@ -117,6 +122,12 @@ export const functionStatistical = [
     [Gamma, FUNCTION_NAMES_STATISTICAL.GAMMA],
     [GammaDist, FUNCTION_NAMES_STATISTICAL.GAMMA_DIST],
     [GammaInv, FUNCTION_NAMES_STATISTICAL.GAMMA_INV],
+    [Gammaln, FUNCTION_NAMES_STATISTICAL.GAMMALN],
+    [Gammaln, FUNCTION_NAMES_STATISTICAL.GAMMALN_PRECISE],
+    [Gauss, FUNCTION_NAMES_STATISTICAL.GAUSS],
+    [Geomean, FUNCTION_NAMES_STATISTICAL.GEOMEAN],
+    [Growth, FUNCTION_NAMES_STATISTICAL.GROWTH],
+    [Harmean, FUNCTION_NAMES_STATISTICAL.HARMEAN],
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],

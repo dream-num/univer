@@ -53,6 +53,18 @@ export class FDistRt extends BaseFunction {
             const degFreedom1Object = degFreedom1Array.get(rowIndex, columnIndex) as BaseValueObject;
             const degFreedom2Object = degFreedom2Array.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (degFreedom1Object.isError()) {
+                return degFreedom1Object;
+            }
+
+            if (degFreedom2Object.isError()) {
+                return degFreedom2Object;
+            }
+
             return this._handleSignleObject(xObject, degFreedom1Object, degFreedom2Object);
         });
 

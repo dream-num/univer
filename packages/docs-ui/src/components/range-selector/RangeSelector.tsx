@@ -44,22 +44,15 @@ export interface IRangeSelectorProps {
     className?: string;
     textEditorClassName?: string;
     onSelectorVisibleChange?: (visible: boolean) => void;
-    disableInput?: boolean;
     dialogOnly?: boolean;
 }
-
-const disableInputStyle: React.CSSProperties = {
-    pointerEvents: 'none',
-    cursor: 'not-allowed',
-    opacity: 0.5,
-};
 
 const dialogOnlyInputStyle: React.CSSProperties = {
     pointerEvents: 'none',
 };
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { dialogOnly, onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange, disableInput } = props;
+    const { dialogOnly, onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange } = props;
     const onSelectorVisibleChange = useEvent(_onSelectorVisibleChange);
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -329,9 +322,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     }
                 }}
             >
-                <TextEditor style={disableInput ? disableInputStyle : dialogOnly ? dialogOnlyInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor style={dialogOnly ? dialogOnlyInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                    <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
+                    <button type="button" className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle style={disableInput ? { color: theme.primaryColor } : undefined} />
                     </button>
                 </Tooltip>

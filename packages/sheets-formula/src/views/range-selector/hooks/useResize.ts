@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import { debounce } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
-import { useEffect } from 'react';
-import type { Editor } from '@univerjs/docs-ui';
+import { type Editor, VIEWPORT_KEY } from '@univerjs/docs-ui';
+import { ScrollBar } from '@univerjs/engine-render';
+import { useEffect, useMemo } from 'react';
+import type { Nullable } from '@univerjs/core';
 
 export const useResize = (editor?: Editor) => {
     const resize = () => {
@@ -35,15 +38,65 @@ export const useResize = (editor?: Editor) => {
         }
     };
 
+    const checkScrollBar = useMemo(() => {
+        return debounce(() => {
+            if (!editor) {
+                return;
+            }
+            const docSkeletonManagerService = editor.render.with(DocSkeletonManagerService);
+            const skeleton = docSkeletonManagerService.getSkeleton();
+            const { scene, mainComponent } = editor.render;
+            const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+            const { actualWidth } = skeleton.getActualSize();
+            const { width, height } = editor.getBoundingClientRect();
+            let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
+            const contentWidth = Math.max(actualWidth, width);
+
+            const contentHeight = height;
+
+            scene.transformByState({
+                width: contentWidth,
+                height: contentHeight,
+            });
+
+            mainComponent?.resize(contentWidth, contentHeight);
+
+            if (actualWidth > width) {
+                if (scrollBar == null) {
+                    viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
+                } else {
+                    viewportMain?.resetCanvasSizeAndUpdateScroll();
+                }
+            } else {
+                scrollBar = null;
+                viewportMain?.scrollToBarPos({ x: 0, y: 0 });
+                viewportMain?.getScrollBar()?.dispose();
+            }
+        }, 30);
+    }, [editor]);
+
     useEffect(() => {
         if (editor) {
             const time = setTimeout(() => {
                 resize();
+                checkScrollBar();
             }, 500);
             return () => {
                 clearTimeout(time);
             };
         }
     }, [editor]);
-    return resize;
+
+    useEffect(() => {
+        if (editor) {
+            const d = editor.input$.subscribe(() => {
+                checkScrollBar();
+            });
+            return () => {
+                d.unsubscribe();
+            };
+        }
+    }, [editor]);
+
+    return { resize, checkScrollBar };
 };

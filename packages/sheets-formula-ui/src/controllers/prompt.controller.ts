@@ -16,23 +16,6 @@
 
 // FIXME: why so many calling to close the editor here?
 
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    ITextRun,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
-import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import {
     AbsoluteRefType,
     Direction,
@@ -94,9 +77,26 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+
+import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import { isRangeSelector } from '../../src/views/range-selector/utils/isRangeSelector';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -105,6 +105,7 @@ import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 
 interface IRefSelection {
     refIndex: number;
@@ -256,7 +257,10 @@ export class PromptController extends Disposable {
                 if (params?.unitId == null) {
                     return;
                 }
-
+                // ToDo: range
+                if (isRangeSelector(params.unitId)) {
+                    return;
+                }
                 const editor = this._editorService.getEditor(params.unitId);
                 if (!editor
                     || editor.onlyInputContent()
@@ -302,6 +306,10 @@ export class PromptController extends Disposable {
             const unitId = documentDataModel?.getUnitId();
 
             if (unitId == null) {
+                return;
+            }
+
+            if (isRangeSelector(unitId)) {
                 return;
             }
 
@@ -376,6 +384,9 @@ export class PromptController extends Disposable {
 
                 const editorId = documentDataModel.getUnitId();
 
+                if (isRangeSelector(editorId)) {
+                    return;
+                }
                 if (!this._editorService.isEditor(editorId) || this._previousEditorUnitId === editorId) {
                     return;
                 }
@@ -1551,7 +1562,9 @@ export class PromptController extends Disposable {
         const nodeIndex = Number(id);
 
         const currentNode = this._formulaPromptService.getCurrentSequenceNodeByIndex(nodeIndex);
-
+        if (!currentNode) {
+            return;
+        }
         let refType: IAbsoluteRefTypeForRange = { startAbsoluteRefType: AbsoluteRefType.NONE };
         if (typeof currentNode !== 'string') {
             const token = (currentNode as ISequenceNode).token;

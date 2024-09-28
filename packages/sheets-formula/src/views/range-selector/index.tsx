@@ -16,7 +16,7 @@
 
 import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
-import { IEditorService } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -27,17 +27,15 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ReactNode } from 'react';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
-// import { useResize } from './hooks/useResize';
+import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
-import styles from './index.module.less';
 
-import { findIndexFromSequenceNodes } from './utils/findIndexFromSequenceNodes';
-import { getOffsetFromSequenceNodes } from './utils/getOffsetFromSequenceNodes';
+import styles from './index.module.less';
+import { RANGE_SELECTOR_SYMBOLS } from './utils/isRangeSelector';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
 
@@ -63,7 +61,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(false);
-    const editorId = useMemo(() => createInternalEditorID(`range-selector-${generateRandomId(4)}`), []);
+    const editorId = useMemo(() => createInternalEditorID(`${RANGE_SELECTOR_SYMBOLS}-${generateRandomId(4)}`), []);
     const [editor, editorSet] = useState<Editor>();
     const docSelectionRef = useRef<ITextRangeWithStyle>();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -106,103 +104,31 @@ export function RangeSelector(props: IRangeSelectorProps) {
             }, 30);
         }
     };
+    const { checkScrollBar } = useResize(editor);
+
+    const handleSheetSelectionChange = useMemo(() => {
+        return (text: string, offset: number) => {
+            rangeStringSet(text);
+            onChange(text);
+            focus();
+            if (offset !== -1) {
+                // 在渲染结束之后再设置选区
+                setTimeout(() => {
+                    const range = { startOffset: offset, endOffset: offset };
+                    editor?.setSelectionRanges([range]);
+                    const docBackScrollRenderController = editor?.render.with(DocBackScrollRenderController);
+                    docBackScrollRenderController?.scrollToRange({ ...range, collapsed: true });
+                }, 50);
+            }
+            checkScrollBar();
+        };
+    }, [editor]);
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeString);
     const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
     useSheetHighlight(!rangeDialogVisible, unitId, subUnitId, sheetHighlightRanges);
 
-    const handleSheetSelectionChange = useCallback((rangeText: string) => {
-        if (docSelectionRef.current) {
-            const { endOffset, startOffset } = docSelectionRef.current;
-            if (endOffset === startOffset) {
-                let index = findIndexFromSequenceNodes(sequenceNodes, endOffset, false);
-                const item = sequenceNodes[index];
-                if (item && typeof item !== 'string') {
-                    const item = sequenceNodes[index];
-                    if (typeof item !== 'string') {
-                        const newLength = rangeText.length - 1;
-                        const oldLength = item.token.length - 1;
-                        item.endIndex = item.startIndex + newLength;
-                        item.token = rangeText;
-                        const diffLength = newLength - oldLength;
-                        if (diffLength !== 0) {
-                            index++;
-                            while (index <= (sequenceNodes.length - 1)) {
-                                const item = sequenceNodes[index];
-                                index++;
-                                if (typeof item === 'string') {
-                                    continue;
-                                }
-                                item.startIndex += diffLength;
-                                item.endIndex += diffLength;
-                                index++;
-                            }
-                        }
-                        const result = sequenceNodeToText(sequenceNodes)
-                            .split(RANGE_SPLIT_STRING)
-                            .reduce((pre, cur) => {
-                                if (!pre.cacheMap[cur]) {
-                                    pre.cacheMap[cur] = 1;
-                                    pre.result.push(cur);
-                                }
-                                return pre;
-                            }, { result: [] as string[], cacheMap: {} as Record<string, any> })
-                            .result
-                            .join(RANGE_SPLIT_STRING);
-                        rangeStringSet(result);
-                        onChange(result);
-                        focus();
-                    }
-                } else if (!item || typeof item === 'string') {
-                    const nextItem = sequenceNodes[index + 1];
-                    if (nextItem && typeof nextItem !== 'string') {
-                        return;
-                    }
-                    const cloneList = [...sequenceNodes];
-                    const preList = cloneList.splice(0, index + 1);
-                    const startIndex = getOffsetFromSequenceNodes(preList);
-                    const endIndex = rangeText.length - 1 + startIndex;
-                    const node: ISequenceNode = {
-                        token: rangeText,
-                        startIndex,
-                        endIndex,
-                        nodeType: sequenceNodeType.REFERENCE,
-                    };
-                    const newSequenceNodes = [...preList, node, ...cloneList];
-
-                    cloneList.forEach((item) => {
-                        if (typeof item !== 'string') {
-                            item.startIndex += rangeText.length;
-                            item.endIndex += rangeText.length;
-                        }
-                    });
-
-                    docSelectionRef.current.startOffset += rangeText.length;
-                    docSelectionRef.current.endOffset += rangeText.length;
-                    const result = sequenceNodeToText(newSequenceNodes);
-                    rangeStringSet(result);
-                    onChange(result);
-                    focus();
-                }
-            }
-        }
-    }, [sequenceNodes]);
-
-    useSheetSelectionChange(!rangeDialogVisible, unitId, subUnitId, handleSheetSelectionChange);
-    // useResize(editor);
-
-    useEffect(() => {
-        if (editor) {
-            const dispose = editor?.selectionChange$.subscribe((selection) => {
-                const { textRanges } = selection;
-                const range = textRanges[textRanges.length - 1];
-                docSelectionRef.current = range;
-            });
-            return () => {
-                dispose?.unsubscribe();
-            };
-        }
-    }, [editor]);
+    useSheetSelectionChange(!rangeDialogVisible, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
 
     useEffect(() => {
         if (onVerify) {
@@ -280,9 +206,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (containerRef.current) {
-            dispose = editorService.register({ editorUnitId: editorId, isSingle: true }, containerRef.current);
+            dispose = editorService.register({ editorUnitId: editorId, isSingle: true, isSheetEditor: true }, containerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
-
             editorSet(editor);
         }
         return () => {
@@ -336,9 +261,9 @@ function RangeSelectorDialog(props: {
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
-    const [focusIndex, focusIndexSet] = useState(-1);
-
     const [ranges, rangesSet] = useState(() => unitRangesToText(initValue, unitId, subUnitId, univerInstanceService));
+
+    const [focusIndex, focusIndexSet] = useState(() => ranges.length - 1);
 
     const colorMap = useColor();
 
@@ -377,10 +302,10 @@ function RangeSelectorDialog(props: {
     };
 
     const handleSheetSelectionChange = useCallback((rangeText: string) => {
-        handleRangeInput(focusIndex, rangeText);
+        rangesSet(rangeText.split(RANGE_SPLIT_STRING).filter((e) => !!e));
     }, [focusIndex]);
 
-    useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, handleSheetSelectionChange);
+    useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
 
     return (
         <Dialog

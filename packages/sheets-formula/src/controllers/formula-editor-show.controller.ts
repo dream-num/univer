@@ -15,13 +15,14 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit, Disposable,
     ICommandService,
     ILogService,
     Inject,
     ObjectMatrix,
-    Rectangle,
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
@@ -31,10 +32,9 @@ import {
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
+import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
 import {
     IEditorBridgeService,
     ISheetSelectionRenderService,
@@ -50,6 +50,10 @@ const REFRESH_ARRAY_SHAPE_MUTATIONS = [
     SetColVisibleMutation.id,
     SetRowHiddenMutation.id,
     SetRowVisibleMutation.id,
+    SetSheetsFilterRangeMutation.id,
+    SetSheetsFilterCriteriaMutation.id,
+    RemoveSheetsFilterMutation.id,
+    ReCalcSheetsFilterMutation.id,
 ];
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
@@ -72,6 +76,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this._commandExecutedListener();
 
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
+        window.fec = this;
     }
 
     private _initSkeletonChangeListener(): void {
@@ -306,23 +311,23 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             const { startRow, endRow, startColumn, endColumn } = range;
-            if (Rectangle.intersects(
-                {
-                    startRow, endRow, startColumn, endColumn,
-                },
-                {
-                    startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn,
-                }
-            ) || shapeStartRow >= endRow || startColumn >= endColumn) {
-                const shapeRange = {
-                    startRow: shapeStartRow,
-                    endRow: shapeEndRow,
-                    startColumn: shapeStartColumn,
-                    endColumn: shapeEndColumn,
-                };
-                this._refreshArrayFormulaRangeShape(unitId, shapeRange);
-                break;
-            }
+            // if (Rectangle.intersects(
+            //     {
+            //         startRow, endRow, startColumn, endColumn,
+            //     },
+            //     {
+            //         startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn,
+            //     }
+            // ) || shapeStartRow >= endRow || startColumn >= endColumn) {
+            const shapeRange = {
+                startRow,
+                endRow: shapeEndRow,
+                startColumn: shapeStartColumn,
+                endColumn: shapeEndColumn,
+            };
+            this._refreshArrayFormulaRangeShape(unitId, shapeRange);
+            // break;
+            // }
         }
     }
 

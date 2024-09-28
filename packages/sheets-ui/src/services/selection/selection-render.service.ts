@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
-import { attachSelectionWithCoord } from './util';
 
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import { attachSelectionWithCoord } from './util';
 
 /**
  * This services controls rendering of normal selections in a render unit.
@@ -59,6 +59,8 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
         this._workbookSelections = selectionManagerService.getWorkbookSelections(this._context.unitId);
         this._init();
+
+        window.srs = this;
     }
 
     private _init(): void {

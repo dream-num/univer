@@ -154,9 +154,11 @@ export class SheetClipboardController extends RxDisposable {
             return;
         }
 
-        return Array.from(clipboardData.items)
+        const files = Array.from(clipboardData.items)
             .map((item) => item.kind === 'file' ? item.getAsFile() : undefined)
             .filter(Boolean) as File[];
+
+        return files.length > 0 ? files : undefined;
     }
 
     private _init(): void {

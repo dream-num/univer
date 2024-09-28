@@ -249,7 +249,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
-        if (files && files.length > 0) {
+        if (files) {
             return this._pasteFiles(files, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);

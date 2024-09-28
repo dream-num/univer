@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix } from '@univerjs/core';
-import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor, ICellData, IMutationInfo, IPosition, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ICollaborator } from '@univerjs/protocol';
 import type { ISetRangeValuesMutationParams, ISheetLocation } from '@univerjs/sheets';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
+import { ObjectMatrix } from '@univerjs/core';
+import { SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 
 export function getUserListEqual(userList1: ICollaborator[], userList2: ICollaborator[]) {
     if (userList1.length !== userList2.length) return false;
@@ -218,7 +218,31 @@ export function transformPosition2Offset(x: number, y: number, scene: Scene, ske
     };
 }
 
-// eslint-disable-next-line max-lines-per-function
+export function getCellRealRange(workbook: Workbook, worksheet: Worksheet, skeleton: SpreadsheetSkeleton, row: number, col: number) {
+    let actualRow = row;
+    let actualCol = col;
+
+    skeleton.overflowCache.forValue((r, c, range) => {
+        if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualCol && range.endColumn >= actualCol) {
+            actualCol = c;
+            actualRow = r;
+        }
+    });
+
+    const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
+
+    const location: ISheetLocation = {
+        unitId: workbook.getUnitId(),
+        subUnitId: worksheet.getSheetId(),
+        workbook,
+        worksheet,
+        row: actualCell.actualRow,
+        col: actualCell.actualColumn,
+    };
+
+    return location;
+}
+
 export function getHoverCellPosition(currentRender: IRender, workbook: Workbook, worksheet: Worksheet, skeletonParam: ISheetSkeletonManagerParam, offsetX: number, offsetY: number) {
     const { scene } = currentRender;
 
@@ -251,15 +275,7 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
         col: originCell.actualColumn,
     };
 
-    const location: ISheetLocation = {
-        unitId,
-        subUnitId: sheetId,
-        workbook,
-        worksheet,
-        row: actualCell.actualRow,
-        col: actualCell.actualColumn,
-    };
-
+    const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);
     let anchorCell: IRange;
     if (actualCell.mergeInfo) {
         anchorCell = actualCell.mergeInfo;

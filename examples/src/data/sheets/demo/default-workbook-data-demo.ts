@@ -14207,7 +14207,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                                     },
                                     {
                                         startIndex: 50,
-                                        endIndex: 54,
+                                        endIndex: 55,
                                         rangeId: 'j4NsUHxjolNihMoYdZ-oj',
                                         rangeType: 0,
                                         properties: {

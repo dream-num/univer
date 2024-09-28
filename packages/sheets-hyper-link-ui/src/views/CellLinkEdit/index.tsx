@@ -170,9 +170,11 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         let id: Nullable<string> = null;
-        if (editing && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
-            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(editing.subUnitId);
+        if (editing && !editing.customRangeId && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
+            const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId, UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
             const mergeInfo = worksheet?.getMergedCell(editing.row, editing.col);
+
             id = markSelectionService.addShape(
                 {
                     range: mergeInfo ?? {
@@ -199,7 +201,7 @@ export const CellLinkEdit = () => {
                 markSelectionService.removeShape(id);
             }
         };
-    }, [editing, markSelectionService]);
+    }, [editing, markSelectionService, univerInstanceService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
 

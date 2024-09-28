@@ -699,6 +699,23 @@ export default {
             number2: { name: 'số 2', detail: 'Lên đến 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị trung bình hài hòa.' },
         },
     },
+    HYPGEOM_DIST: {
+        description: 'Trả về phân bố siêu bội.',
+        abstract: 'Trả về phân bố siêu bội.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/hypgeom-dist-%E5%87%BD%E6%95%B0-6dbd547f-1d12-4b1f-8ae5-b0d9e3d22fbf',
+            },
+        ],
+        functionParameter: {
+            sampleS: { name: 'Số lần thành công mẫu', detail: 'Số lần thành công trong mẫu.' },
+            numberSample: { name: 'Kích thước mẫu', detail: 'Kích thước mẫu.' },
+            populationS: { name: 'Tổng số thành công', detail: 'Số lượng thành công trong dân số.' },
+            numberPop: { name: 'Kích thước tổng thể', detail: 'Kích thước tổng thể.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm HYPGEOM.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+        },
+    },
     INTERCEPT: {
         description: 'Trả về điểm chặn của đường hồi quy tuyến tính',
         abstract: 'Trả về điểm chặn của đường hồi quy tuyến tính',
@@ -711,6 +728,34 @@ export default {
         functionParameter: {
             knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
             knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    KURT: {
+        description: 'Trả về hệ số nhọn của tập dữ liệu.',
+        abstract: 'Trả về hệ số nhọn của tập dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/kurt-%E5%87%BD%E6%95%B0-bc3a265c-5da4-4dcb-b7fd-c237789095ab',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số, tham chiếu ô hoặc phạm vi ô đầu tiên cần tính giá trị đỉnh.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị đỉnh.' },
+        },
+    },
+    LARGE: {
+        description: 'Trả về giá trị lớn thứ k của tập dữ liệu.',
+        abstract: 'Trả về giá trị lớn thứ k của tập dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/large-%E5%87%BD%E6%95%B0-3af0af19-1190-42bb-bb8b-01672ec00a64',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu mà bạn muốn xác định giá trị lớn thứ k trong đó.' },
+            k: { name: 'k', detail: 'Vị trí (tính từ lớn nhất) trong mảng hoặc phạm vi ô dữ liệu cần trả về.' },
         },
     },
     MAX: {
@@ -901,6 +946,20 @@ export default {
             number: { name: 'số', detail: 'Số mà bạn muốn tìm thứ hạng của nó.' },
             ref: { name: 'danh sách các số', detail: 'Tham chiếu tới danh sách các số. Các giá trị không phải là số trong tham chiếu sẽ được bỏ qua.' },
             order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
+        },
+    },
+    SMALL: {
+        description: 'Trả về giá trị nhỏ thứ k của tập dữ liệu.',
+        abstract: 'Trả về giá trị nhỏ thứ k của tập dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/small-%E5%87%BD%E6%95%B0-17da8222-7c82-42b2-961b-14c45384df07',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu dạng số mà bạn muốn xác định giá trị nhỏ thứ k của nó.' },
+            k: { name: 'k', detail: 'Vị trí (từ giá trị nhỏ nhất) trong mảng hoặc phạm vi dữ liệu cần trả về.' },
         },
     },
     STDEV_P: {

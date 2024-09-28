@@ -777,8 +777,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: 'sample_s', detail: 'The number of successes in the sample.' },
+            numberSample: { name: 'number_sample', detail: 'The size of the sample.' },
+            populationS: { name: 'population_s', detail: 'The number of successes in the population.' },
+            numberPop: { name: 'number_pop', detail: 'The population size.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, HYPGEOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     INTERCEPT: {
@@ -805,8 +808,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the kurtosis.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the kurtosis, up to a maximum of 255.' },
         },
     },
     LARGE: {
@@ -819,8 +822,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want to determine the k-th largest value.' },
+            k: { name: 'k', detail: 'The position (from the largest) in the array or cell range of data to return.' },
         },
     },
     LINEST: {
@@ -1359,8 +1362,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want to determine the k-th smallest value.' },
+            k: { name: 'k', detail: 'The position (from the smallest) in the array or cell range of data to return.' },
         },
     },
     STANDARDIZE: {

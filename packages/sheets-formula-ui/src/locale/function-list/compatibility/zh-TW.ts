@@ -251,8 +251,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '樣本成功次數', detail: '樣本中成功的次數。' },
+            numberSample: { name: '樣本大小', detail: '樣本大小。' },
+            populationS: { name: '總體成功次數', detail: '總體中成功的次數。' },
+            numberPop: { name: '總體大小', detail: '總體大小。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 HYPGEOMDIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     LOGINV: {

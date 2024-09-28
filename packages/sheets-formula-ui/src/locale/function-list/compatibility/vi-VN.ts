@@ -242,8 +242,8 @@ export default {
         },
     },
     HYPGEOMDIST: {
-        description: 'Trả về phân phối siêu bội',
-        abstract: 'Trả về phân phối siêu bội',
+        description: 'Trả về phân bố siêu bội.',
+        abstract: 'Trả về phân bố siêu bội.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -251,8 +251,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            sampleS: { name: 'Số lần thành công mẫu', detail: 'Số lần thành công trong mẫu.' },
+            numberSample: { name: 'Kích thước mẫu', detail: 'Kích thước mẫu.' },
+            populationS: { name: 'Tổng số thành công', detail: 'Số lượng thành công trong dân số.' },
+            numberPop: { name: 'Kích thước tổng thể', detail: 'Kích thước tổng thể.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm HYPGEOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     LOGINV: {

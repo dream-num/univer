@@ -15,7 +15,7 @@
  */
 
 import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
@@ -113,7 +113,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const isSingleChoiceRef = useRef<Nullable<boolean>>(isSingleChoice);
 
     const isReadonlyRef = useRef<Nullable<boolean>>(isReadonly);
-    const themeService = useDependency(ThemeService);
 
     useEffect(() => {
         const selector = selectorRef.current;
@@ -307,7 +306,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     } else if (size === 'large') {
         height = 32;
     }
-    const theme = themeService.getCurrentTheme();
     return (
         <>
             <div

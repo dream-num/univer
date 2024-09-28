@@ -188,6 +188,7 @@ export class RangeProtectionCache extends Disposable {
                     }
                 }
             });
+            this._permissionIdCache.set(rule.permissionId, rule.id);
         });
     }
 

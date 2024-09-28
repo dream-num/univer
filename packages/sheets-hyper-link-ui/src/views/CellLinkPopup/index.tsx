@@ -74,7 +74,7 @@ export const CellLinkPopup = () => {
         <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
             <div
                 className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })}
-                onClick={(e) => {
+                onClick={() => {
                     if (zenZoneService.visible) {
                         return;
                     }

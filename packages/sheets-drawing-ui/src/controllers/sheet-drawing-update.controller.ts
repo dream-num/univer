@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { WorkbookSelections } from '@univerjs/sheets';
+import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
+import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
+import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
 import { Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
@@ -21,19 +28,12 @@ import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetDrawingService } from '@univerjs/sheets-drawing';
 import { attachRangeWithCoord, ISheetSelectionRenderService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import type { IRange, Nullable, Workbook } from '@univerjs/core';
-import type { IImageData, IImageIoServiceParam } from '@univerjs/drawing';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
-import type { ISheetDrawing, ISheetDrawingPosition } from '@univerjs/sheets-drawing';
 import { drawingPositionToTransform, transformToDrawingPosition } from '../basics/transform-position';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
 import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
-import type { IInsertDrawingCommandParams, ISetDrawingCommandParams } from '../commands/commands/interfaces';
-import type { ISetDrawingArrangeCommandParams } from '../commands/commands/set-drawing-arrange.command';
 
 export class SheetDrawingUpdateController extends Disposable implements IRenderModule {
     private readonly _workbookSelections: WorkbookSelections;
@@ -78,11 +78,11 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             return false;
         }
 
-        files.forEach(async (file) => await this._insertFloatImage(file));
+        files.forEach(async (file) => await this.insertFloatImageByFile(file));
         return true;
     }
 
-    private async _insertFloatImage(file: File) {
+    async insertFloatImageByFile(file: File) {
         let imageParam: Nullable<IImageIoServiceParam>;
 
         try {
@@ -143,7 +143,7 @@ export class SheetDrawingUpdateController extends Disposable implements IRenderM
             sheetTransform,
         };
 
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+        return this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);

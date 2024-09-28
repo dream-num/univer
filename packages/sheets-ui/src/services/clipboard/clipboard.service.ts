@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import type {
+    ICellData, IDisposable,
+    IMutationInfo,
+    IRange,
+    Nullable, Workbook, Worksheet,
+} from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    IPasteTarget,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+    IUniverSheetCopyDataModel,
+} from './type';
 import {
     createIdentifier, Disposable, ErrorService, extractPureTextFromCell, ICommandService,
     ILogService,
@@ -29,6 +45,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     getPrimaryForRange,
     SetSelectionsOperation,
@@ -36,36 +53,19 @@ import {
 } from '@univerjs/sheets';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import type {
-    ICellData, IDisposable,
-    IMutationInfo,
-    IRange,
-    Nullable, Workbook, Worksheet,
-} from '@univerjs/core';
-
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { rangeToDiscreteRange, virtualizeDiscreteRanges } from '../../controllers/utils/range-tools';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { createCopyPasteSelectionStyle } from '../utils/selection-util';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
+
 import { HtmlToUSMService } from './html-to-usm/converter';
 import { LarkPastePlugin } from './html-to-usm/paste-plugins/plugin-lark';
-
 import { UniverPastePlugin } from './html-to-usm/paste-plugins/plugin-univer';
 import { WordPastePlugin } from './html-to-usm/paste-plugins/plugin-word';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
 import { clipboardItemIsFromExcel, convertTextToTable, discreteRangeContainsRange, mergeSetRangeValues, rangeIntersectWithDiscreteRange } from './utils';
-import type { IDiscreteRange } from '../../controllers/utils/range-tools';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    IPasteTarget,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-    IUniverSheetCopyDataModel,
-} from './type';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -85,6 +85,15 @@ interface ICopyContent {
     discreteRange: IDiscreteRange;
 }
 
+enum PasteType {
+    Text = 1,
+    File,
+}
+
+interface IPasteContent {
+    [PasteType.Text]: string;
+    [PasteType.File]: File[];
+}
 /**
  * This service provide hooks for sheet features to supplement content or modify behavior of clipboard.
  */
@@ -97,7 +106,7 @@ export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
     paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
-    legacyPaste(html?: string, text?: string): Promise<boolean>; // paste a HTML string or plain text directly.
+    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean>; // paste a HTML string or plain text directly.
 
     generateCopyContent(workbookId: string, worksheetId: string, range: IRange): Nullable<ICopyContent>;
     copyContentCache(): CopyContentCache; // return the cache content for inner copy/cut/paste.
@@ -239,8 +248,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return false;
     }
 
-    legacyPaste(html?: string, text?: string): Promise<boolean> {
-        if (html) {
+    legacyPaste(html?: string, text?: string, files?: File[]): Promise<boolean> {
+        if (files && files.length > 0) {
+            return this._pasteFiles(files, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
+        } else if (html) {
             return this._pasteHTML(html, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
         } else if (text) {
             // Converts text with tabs and newlines into an HTML table
@@ -349,7 +360,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._clipboardHooks$.next(this._clipboardHooks);
     }
 
-    private async _pastePlainText(text: string, pasteType: string): Promise<boolean> {
+    private async _executePaste<T extends PasteType>(type: T, content: IPasteContent[T], pasteType: string): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;
@@ -377,17 +388,30 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         enabledHooks.forEach((h) => {
-            const contentReturn = h.onPastePlainText?.(
-                {
-                    unitId,
-                    subUnitId,
-                    range,
-                },
-                text,
-                {
-                    pasteType,
-                }
-            );
+            const contentReturn = type === PasteType.Text
+                ? h.onPastePlainText?.(
+                    {
+                        unitId,
+                        subUnitId,
+                        range,
+                    },
+                    content as string,
+                    {
+                        pasteType,
+                    }
+                )
+                : h.onPasteFiles?.(
+                    {
+                        unitId,
+                        subUnitId,
+                        range,
+                    },
+                    content as File[],
+                    {
+                        pasteType,
+                    }
+                );
+
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
                 undoMutationsInfo.push(...contentReturn.undos);
@@ -404,6 +428,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         return result;
+    }
+
+    private async _pasteFiles(files: File[], pasteType: string): Promise<boolean> {
+        return this._executePaste(PasteType.File, files, pasteType);
+    }
+
+    private async _pastePlainText(text: string, pasteType: string): Promise<boolean> {
+        return this._executePaste(PasteType.Text, text, pasteType);
     }
 
     private async _pasteHTML(html: string, pasteType: string): Promise<boolean> {

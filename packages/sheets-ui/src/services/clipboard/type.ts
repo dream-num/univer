@@ -172,6 +172,10 @@ export interface ISheetClipboardHook {
         undos: IMutationInfo[];
         redos: IMutationInfo[];
     };
+    onPasteFiles?(pasteTo: ISheetDiscreteRangeLocation, files: File[], payload: ICopyPastePayload): {
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    };
     onAfterPaste?(success: boolean): void;
 
     /**

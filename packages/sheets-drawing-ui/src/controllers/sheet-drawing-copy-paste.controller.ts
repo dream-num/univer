@@ -15,13 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
 export class SheetsDrawingCopyPasteController extends Disposable {
@@ -55,6 +56,22 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 return this._generateMutations(pastedRange, { copyType, pasteType, copyRange, unitId, subUnitId });
             },
             onPastePlainText: (pasteTo: ISheetDiscreteRangeLocation, clipText: string) => {
+                return { undos: [], redos: [] };
+            },
+            onPasteFiles: (pasteTo: ISheetDiscreteRangeLocation, files) => {
+                const images = files.filter((file) => file.type.includes('image'));
+                if (images.length) {
+                    return {
+                        undos: [],
+                        redos: [
+                            {
+                                id: InsertFloatImageCommand.id,
+                                params: { files: images },
+                            },
+                        ],
+                    };
+                }
+
                 return { undos: [], redos: [] };
             },
         });

@@ -14,6 +14,33 @@
  * limitations under the License.
  */
 
+import type {
+    ICellData,
+    ICommandInfo,
+    IDocumentData,
+    IMutationInfo,
+    IObjectArrayPrimitiveType,
+    IObjectMatrixPrimitiveType,
+    IRange,
+    IRowData,
+    Nullable,
+    Workbook,
+    Worksheet,
+} from '@univerjs/core';
+import type {
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetColWidthMutationParams,
+    ISetWorksheetRowHeightMutationParams,
+} from '@univerjs/sheets';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyPastePayload,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '../../services/clipboard/type';
 import {
     BooleanNumber,
     convertBodyToHtml,
@@ -38,7 +65,9 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+
 import { MessageType } from '@univerjs/design';
+
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -53,30 +82,8 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-
 import { IMessageService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-
-import type {
-    ICellData,
-    ICommandInfo,
-    IDocumentData,
-    IMutationInfo,
-    IObjectArrayPrimitiveType,
-    IObjectMatrixPrimitiveType,
-    IRange,
-    IRowData,
-    Nullable,
-    Workbook,
-    Worksheet,
-} from '@univerjs/core';
-import type {
-    IInsertColMutationParams,
-    IInsertRowMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetColWidthMutationParams,
-    ISetWorksheetRowHeightMutationParams,
-} from '@univerjs/sheets';
 import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
@@ -99,13 +106,6 @@ import {
     getSetCellStyleMutations,
     getSetCellValueMutations,
 } from './utils';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyPastePayload,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-} from '../../services/clipboard/type';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
@@ -131,7 +131,7 @@ export class SheetClipboardController extends RxDisposable {
         const docSelectionRenderService = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.with(DocSelectionRenderService);
 
         if (docSelectionRenderService) {
-            docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+            docSelectionRenderService.onPaste$.pipe(takeUntil(this.dispose$)).subscribe(async (config) => {
                 if (!whenSheetEditorFocused(this._contextService)) {
                     return;
                 }
@@ -142,9 +142,21 @@ export class SheetClipboardController extends RxDisposable {
                 const clipboardEvent = config!.event as ClipboardEvent;
                 const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
                 const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent });
+                const files = this._resolveClipboardFiles(clipboardEvent.clipboardData);
+
+                this._commandService.executeCommand(SheetPasteShortKeyCommand.id, { htmlContent, textContent, files });
             });
         }
+    }
+
+    private _resolveClipboardFiles(clipboardData: DataTransfer | null) {
+        if (!clipboardData) {
+            return;
+        }
+
+        return Array.from(clipboardData.items)
+            .map((item) => item.kind === 'file' ? item.getAsFile() : undefined)
+            .filter(Boolean) as File[];
     }
 
     private _init(): void {

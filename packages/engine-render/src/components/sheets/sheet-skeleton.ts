@@ -239,6 +239,11 @@ export interface ICacheItem {
     border: boolean;
 }
 
+export interface ISetStyleCacheOptions {
+    mergeData?: ISelectionCell;
+    cacheItem?: ICacheItem;
+}
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
     private _columnWidthAccumulation: number[] = [];
@@ -296,6 +301,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._updateLayout();
         this._initContextListener();
+        window.sk = this;
         // this.updateDataMerge();
     }
 
@@ -1740,10 +1746,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._stylesCache.fontMatrix.getValue(row, col)?.documentSkeleton.makeDirty(true); ;
     }
 
-    _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
-        mergeRange?: IRange;
-        cacheItem?: ICacheItem;
-    } | undefined) {
+    _setBorderStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: ISetStyleCacheOptions | undefined) {
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
         if (!cacheItem.border) return;
@@ -1752,12 +1755,12 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         this._cellBorderCacheMatrix.setValue(row, col, true);
         if (style && style.bd) {
-            const mergeRange = options?.mergeRange;
-            if (mergeRange) {
-                this._setMergeBorderProps(BORDER_LTRB.TOP, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.BOTTOM, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.LEFT, mergeRange);
-                this._setMergeBorderProps(BORDER_LTRB.RIGHT, mergeRange);
+            const mergeData = options?.mergeData;
+            if (mergeData) {
+                this._setMergeBorderProps(BORDER_LTRB.TOP, mergeData);
+                this._setMergeBorderProps(BORDER_LTRB.BOTTOM, mergeData);
+                this._setMergeBorderProps(BORDER_LTRB.LEFT, mergeData);
+                this._setMergeBorderProps(BORDER_LTRB.RIGHT, mergeData);
             } else if (!this.intersectMergeRange(row, col)) {
                 this._setBorderProps(row, col, BORDER_LTRB.TOP, style);
                 this._setBorderProps(row, col, BORDER_LTRB.BOTTOM, style);
@@ -1774,10 +1777,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    _setBgStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: {
-        mergeRange?: IRange;
-        cacheItem?: ICacheItem;
-    } | undefined) {
+    _setBgStylesCache(row: number, col: number, style: Nullable<IStyleData>, options: ISetStyleCacheOptions | undefined) {
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
         if (!cacheItem.bg) return;
@@ -1844,7 +1844,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param col {number}
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
-    private _setStylesCache(row: number, col: number, options?: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+    private _setStylesCache(row: number, col: number, options?: ISetStyleCacheOptions): void {
         if (row === -1 || col === -1) {
             return;
         }
@@ -1859,9 +1859,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             options = { cacheItem: { bg: true, border: true } };
         }
 
-        const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this._getCellMergeInfo(row, col);
+        const mergeData = this._getCellMergeInfo(row, col);
+        const { isMerged, isMergedMainCell } = mergeData;
         if (options) {
-            options.mergeRange = { startRow, startColumn, endRow, endColumn };
+            options.mergeData = mergeData;
         }
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
@@ -1994,13 +1995,14 @@ export class SpreadsheetSkeleton extends Skeleton {
      * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
-    private _setMergeBorderProps(ltrb: BORDER_LTRB, mergeRange: IRange): void {
+    // eslint-disable-next-line complexity
+    private _setMergeBorderProps(ltrb: BORDER_LTRB, mergeRange: ISelectionCell): void {
         if (!this.worksheet || !this._stylesCache.border) return;
         const borders: Array<{ style: BorderStyleTypes; color: string; r: number; c: number }> = [];
         let forStart = mergeRange.startRow;
         let forEnd = mergeRange.endRow;
         let row = mergeRange.startRow;
-        let column = mergeRange.startColumn;
+        let col = mergeRange.startColumn;
 
         switch (ltrb) {
             case BORDER_LTRB.TOP:
@@ -2014,12 +2016,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                 forEnd = mergeRange.endColumn;
                 break;
             case BORDER_LTRB.LEFT:
-                column = mergeRange.startColumn;
+                col = mergeRange.startColumn;
                 forStart = mergeRange.startRow;
                 forEnd = mergeRange.endRow;
                 break;
             case BORDER_LTRB.RIGHT:
-                column = mergeRange.endColumn;
+                col = mergeRange.endColumn;
                 forStart = mergeRange.startRow;
                 forEnd = mergeRange.endRow;
                 break;
@@ -2029,7 +2031,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             switch (ltrb) {
                 case BORDER_LTRB.TOP:
                 case BORDER_LTRB.BOTTOM:
-                    column = i;
+                    col = i;
                     break;
                 case BORDER_LTRB.LEFT:
                 case BORDER_LTRB.RIGHT:
@@ -2037,9 +2039,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                     break;
             }
 
-            const cell = this.worksheet.getCell(row, column);
+            const cell = this.worksheet.getCell(row, col);
             if (!cell) break;
             const style = this._styles.getStyleByCell(cell);
+
+            if (row <= 12 && row >= 10 && col >= 6 && col <= 9) {
+                console.log('set border props style', row, col, style);
+            }
+
             if (!style) break;
 
             const props: Nullable<IBorderStyleData> = style.bd?.[ltrb];
@@ -2047,7 +2054,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 const rgb = getColorStyle(props.cl) || COLOR_BLACK_RGB;
                 borders.push({
                     r: row,
-                    c: column,
+                    c: col,
                     style: props.s,
                     color: rgb,
                 });

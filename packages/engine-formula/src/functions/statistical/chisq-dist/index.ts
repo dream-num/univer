@@ -53,6 +53,18 @@ export class ChisqDist extends BaseFunction {
             const degFreedomObject = degFreedomArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (degFreedomObject.isError()) {
+                return degFreedomObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(xObject, degFreedomObject, cumulativeObject);
         });
 

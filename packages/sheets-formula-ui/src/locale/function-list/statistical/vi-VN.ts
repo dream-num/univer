@@ -758,6 +758,37 @@ export default {
             k: { name: 'k', detail: 'Vị trí (tính từ lớn nhất) trong mảng hoặc phạm vi ô dữ liệu cần trả về.' },
         },
     },
+    LOGNORM_DIST: {
+        description: 'Trả về phân bố chuẩn lô-ga-rít của',
+        abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/lognorm-dist-%E5%87%BD%E6%95%B0-eb60d00b-48a9-4217-be2b-6074aee6b070',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì LOGNORM.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    LOGNORM_INV: {
+        description: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
+        abstract: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/lognorm-inv-%E5%87%BD%E6%95%B0-fe79751a-f1f2-4af8-a0a1-e151b2d4f600',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+        },
+    },
     MAX: {
         description: 'Trả về giá trị lớn nhất trong tập giá trị.',
         abstract: 'Trả về giá trị lớn nhất trong tập giá trị.',
@@ -807,6 +838,20 @@ export default {
             criteria1: { name: 'tiêu chí 1', detail: 'Là tiêu chí ở dạng số, biểu thức hoặc văn bản xác định ô nào sẽ được đánh giá là lớn nhất. ' },
             criteriaRange2: { name: 'phạm vi tiêu chí 2', detail: 'Khu vực bổ sung. Có thể nhập tới 127 khu vực.' },
             criteria2: { name: 'tiêu chí 2', detail: 'Điều kiện liên kết bổ sung. Có thể nhập tối đa 127 điều kiện.' },
+        },
+    },
+    MEDIAN: {
+        description: 'Trả về số trung vị của các số đã cho.',
+        abstract: 'Trả về số trung vị của các số đã cho.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/median-%E5%87%BD%E6%95%B0-d0916313-4753-414c-8537-ce85bdd967d2',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô để tính trung vị.' },
+            number2: { name: 'số 2', detail: 'Bạn có thể bao gồm tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính trung vị.' },
         },
     },
     MIN: {

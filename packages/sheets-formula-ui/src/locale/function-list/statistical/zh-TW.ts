@@ -855,8 +855,8 @@ export default {
         },
     },
     LOGNORM_DIST: {
-        description: '傳回對數累積分佈函數',
-        abstract: '傳回對數累積分佈函數',
+        description: '傳回對數常態累積分佈',
+        abstract: '傳回對數常態累積分佈',
         links: [
             {
                 title: '教導',
@@ -864,13 +864,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出分佈的數值。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            standardDev: { name: '標準差', detail: '這是分佈的標準差。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，LOGNORM.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     LOGNORM_INV: {
-        description: '傳回對數累積分佈的反函數',
-        abstract: '傳回對數累積分佈的反函數',
+        description: '傳回對數常態累積分佈的反函數',
+        abstract: '傳回對數常態累積分佈的反函數',
         links: [
             {
                 title: '教導',
@@ -878,8 +880,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '這是對應到對數常態分佈的機率。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            standardDev: { name: '標準差', detail: '這是分佈的標準差。' },
         },
     },
     MAX: {
@@ -943,8 +946,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算中位數的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算中位數的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     MIN: {

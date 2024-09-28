@@ -58,6 +58,22 @@ export class GammaDist extends BaseFunction {
             const betaObject = betaArray.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
+
+            if (betaObject.isError()) {
+                return betaObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(xObject, alphaObject, betaObject, cumulativeObject);
         });
 

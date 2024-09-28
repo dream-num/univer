@@ -864,8 +864,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, LOGNORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     LOGNORM_INV: {
@@ -878,8 +880,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability corresponding to the lognormal distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
         },
     },
     MAX: {
@@ -943,8 +946,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the given numbers.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the given numbers, up to a maximum of 255.' },
         },
     },
     MIN: {

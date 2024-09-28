@@ -601,6 +601,26 @@ export function hypergeometricPDF(x: number, n: number, M: number, N: number): n
     return calculateCombin(M, x) * calculateCombin(N - M, n - x) / calculateCombin(N, n);
 }
 
+export function lognormalCDF(x: number, mean: number, standardDev: number): number {
+    if (x < 0) {
+        return 0;
+    }
+
+    return 0.5 + 0.5 * erf((Math.log(x) - mean) / Math.sqrt(2 * standardDev * standardDev));
+}
+
+export function lognormalPDF(x: number, mean: number, standardDev: number): number {
+    if (x <= 0) {
+        return 0;
+    }
+
+    return Math.exp(-Math.log(x) - 0.5 * Math.log(2 * Math.PI) - Math.log(standardDev) - ((Math.log(x) - mean) ** 2) / (2 * standardDev * standardDev));
+}
+
+export function lognormalINV(probability: number, mean: number, standardDev: number): number {
+    return Math.exp(normalINV(probability, mean, standardDev));
+}
+
 export function normalCDF(x: number, mean: number, standardDev: number): number {
     return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
 }

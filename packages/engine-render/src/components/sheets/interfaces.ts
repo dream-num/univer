@@ -52,13 +52,11 @@ export interface IFontCacheItem {
     // content?: string;
 }
 
-type colorString = string;
+export type colorString = string;
 export interface IStylesCache {
-    background?: Record<colorString, ObjectMatrix<string>>;
-    backgroundPositions?: ObjectMatrix<ISelectionCellWithMergeInfo>;
-    font?: Record<string, ObjectMatrix<IFontCacheItem>>;
+    bgGroupMatrix: Record<colorString, ObjectMatrix<colorString>>;
     fontMatrix: ObjectMatrix<IFontCacheItem>;
-    border?: ObjectMatrix<BorderCache>;
+    borderMatrix: ObjectMatrix<BorderCache>;
 }
 
 export enum ShowGridlinesState {

@@ -24,6 +24,8 @@ import { DrawingApplyType, SetDrawingApplyMutation, SheetDrawingAnchorType } fro
 import { COPY_TYPE, discreteRangeToRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
+const IMAGE_PNG_MIME_TYPE = 'image/png';
+
 function base64ToBlob(base64: string) {
     const arr = base64.split(',');
     const binStr = atob(arr[1]);
@@ -34,11 +36,11 @@ function base64ToBlob(base64: string) {
         bytes[i] = binStr.charCodeAt(i);
     }
 
-    return new Blob([bytes], { type: 'image/png' });
+    return new Blob([bytes], { type: IMAGE_PNG_MIME_TYPE });
 }
 
 function copyBase64ToClipboard(base64: string) {
-    const item = new ClipboardItem({ 'image/png': base64ToBlob(base64) });
+    const item = new ClipboardItem({ [IMAGE_PNG_MIME_TYPE]: base64ToBlob(base64) });
     navigator.clipboard.write([item]).catch((err) => {
         console.error('Could not copy image using clipboard API: ', err);
     });
@@ -80,6 +82,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                     const [drawing] = focusDrawings;
 
                     if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
+                        // Override the default clipboard copy behavior for images
                         const imageDrawing = drawing as ISheetImage;
                         if (imageDrawing.imageSourceType === ImageSourceType.BASE64) {
                             setTimeout(() => {

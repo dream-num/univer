@@ -15,13 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import type { ISheetDrawing } from '@univerjs/sheets-drawing';
+import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { DrawingTypeEnum, type IDrawingJsonUndo1, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { IClipboardInterfaceService } from '@univerjs/ui';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
@@ -34,12 +35,11 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
-        // @Inject(ISheetSelectionRenderService) private readonly _selectionRenderService: ISheetSelectionRenderService,
 
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
 
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
-        // @Inject(Injector) private _injector: Injector
     ) {
         super();
         this._initCopyPaste();
@@ -49,6 +49,21 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_IMAGE_UI_PLUGIN',
             onBeforeCopy: (unitId, subUnitId, range) => this._collect(unitId, subUnitId, range),
+            onAfterCopy: () => {
+                const focusDrawings = this._sheetDrawingService.getFocusDrawings();
+                if (focusDrawings.length > 0) {
+                    const [drawing] = focusDrawings;
+
+                    if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
+                        const imageDrawing = drawing as ISheetImage;
+                        if (imageDrawing.imageSourceType === ImageSourceType.BASE64) {
+                            setTimeout(() => {
+                                this._clipboardInterfaceService.write(imageDrawing.source, `<img src="${imageDrawing.source}" />`);
+                            });
+                        }
+                    }
+                }
+            },
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;
                 const { range: copyRange } = pasteFrom || {};

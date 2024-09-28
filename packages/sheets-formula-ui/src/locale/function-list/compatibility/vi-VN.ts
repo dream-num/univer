@@ -290,8 +290,8 @@ export default {
         },
     },
     MODE: {
-        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu',
-        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu',
+        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
+        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -299,8 +299,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô mà chế độ sẽ được tính toán.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
         },
     },
     NEGBINOMDIST: {

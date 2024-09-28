@@ -616,6 +616,89 @@ export default {
             beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
         },
     },
+    GAMMALN: {
+        description: 'Trả về lô-ga-rít tự nhiên của hàm gamma, Γ(x).',
+        abstract: 'Trả về lô-ga-rít tự nhiên của hàm gamma, Γ(x).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gammaln-%E5%87%BD%E6%95%B0-b838c48b-c65f-484f-9e1d-141c55470eb9',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn tính toán GAMMALN.' },
+        },
+    },
+    GAMMALN_PRECISE: {
+        description: 'Trả về lô-ga-rít tự nhiên của hàm gamma, Γ(x).',
+        abstract: 'Trả về lô-ga-rít tự nhiên của hàm gamma, Γ(x).',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gammaln-precise-%E5%87%BD%E6%95%B0-5cdfe601-4e1e-4189-9d74-241ef1caa599',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn tính toán GAMMALN.PRECISE.' },
+        },
+    },
+    GAUSS: {
+        description: 'Trả về ít hơn 0.5 so với phân phối tích lũy chuẩn',
+        abstract: 'Trả về ít hơn 0.5 so với phân phối tích lũy chuẩn',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/gauss-%E5%87%BD%E6%95%B0-069f1b4e-7dee-4d6a-a71f-4b69044a6b33',
+            },
+        ],
+        functionParameter: {
+            z: { name: 'z', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+        },
+    },
+    GEOMEAN: {
+        description: 'Trả về giá trị trung bình hình học',
+        abstract: 'Trả về giá trị trung bình hình học',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/geomean-%E5%87%BD%E6%95%B0-db1ac48d-25a5-40a0-ab83-0b38980e40d5',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô để tính giá trị trung bình hình học.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị trung bình hình học.' },
+        },
+    },
+    GROWTH: {
+        description: 'Trả về giá trị xu hướng hàm mũ',
+        abstract: 'Trả về giá trị xu hướng hàm mũ',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/growth-%E5%87%BD%E6%95%B0-541a91dc-3d5e-437d-b156-21324e68b80d',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'dữ liệu đã biết_y', detail: 'Tập giá trị y mà bạn đã biết trong quan hệ y = b*m^x.' },
+            knownXs: { name: 'dữ liệu đã biết_x', detail: 'Tập giá trị x mà bạn đã biết trong quan hệ y = b*m^x.' },
+            newXs: { name: 'dữ liệu mới_x', detail: 'Là những giá trị x mới mà bạn muốn hàm GROWTH trả về tương ứng với các giá trị y.' },
+            constb: { name: 'b', detail: 'Một giá trị lô-gic cho biết có bắt buộc hằng số b phải bằng 1 hay không.' },
+        },
+    },
+    HARMEAN: {
+        description: 'Trả về giá trị trung bình điều hòa',
+        abstract: 'Trả về giá trị trung bình điều hòa',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/harmean-%E5%87%BD%E6%95%B0-5efd9184-fab5-42f9-b1d3-57883a1d3bc6',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô để tính giá trị trung bình điều hòa.' },
+            number2: { name: 'số 2', detail: 'Lên đến 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính giá trị trung bình hài hòa.' },
+        },
+    },
     INTERCEPT: {
         description: 'Trả về điểm chặn của đường hồi quy tuyến tính',
         abstract: 'Trả về điểm chặn của đường hồi quy tuyến tính',

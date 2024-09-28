@@ -120,7 +120,7 @@ export function betaINV(probability: number, alpha: number, beta: number): numbe
 function incompleteBetaFunction(x: number, alpha: number, beta: number): number {
     const bt = (x === 0 || x === 1)
         ? 0
-        : Math.exp(logGamma(alpha + beta) - logGamma(alpha) - logGamma(beta) + alpha * Math.log(x) + beta * Math.log(1 - x));
+        : Math.exp(gammaln(alpha + beta) - gammaln(alpha) - gammaln(beta) + alpha * Math.log(x) + beta * Math.log(1 - x));
 
     if (x < (alpha + 1) / (alpha + beta + 2)) {
         return bt * betaContinuedFraction(x, alpha, beta) / alpha;
@@ -192,11 +192,11 @@ function betaFunction(alpha: number, beta: number): number {
         return Math.exp(betaFunctionNaturalLogarithm(alpha, beta));
     }
 
-    return gammaFunction(alpha) * gammaFunction(beta) / gammaFunction(alpha + beta);
+    return gamma(alpha) * gamma(beta) / gamma(alpha + beta);
 }
 
 function betaFunctionNaturalLogarithm(alpha: number, beta: number): number {
-    return logGamma(alpha) + logGamma(beta) - logGamma(alpha + beta);
+    return gammaln(alpha) + gammaln(beta) - gammaln(alpha + beta);
 }
 
 export function binomialCDF(x: number, trials: number, probability: number): number {
@@ -250,7 +250,7 @@ export function chisquarePDF(x: number, degFreedom: number): number {
         return 0.5;
     }
 
-    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - logGamma(degFreedom / 2));
+    return Math.exp((degFreedom / 2 - 1) * Math.log(x) - x / 2 - (degFreedom / 2) * Math.log(2) - gammaln(degFreedom / 2));
 }
 
 export function chisquareINV(probability: number, degFreedom: number): number {
@@ -354,7 +354,7 @@ export function forecastLinear(x: number, knownYs: number[], knownXs: number[]):
     return a + b * x;
 }
 
-export function gammaFunction(x: number): number {
+export function gamma(x: number): number {
     const p = [
         -1.716185138865495, 24.76565080557592, -379.80425647094563,
         629.3311553128184, 866.9662027904133, -31451.272968848367,
@@ -437,7 +437,7 @@ export function gammaPDF(x: number, alpha: number, beta: number): number {
         return 1 / beta;
     }
 
-    return Math.exp((alpha - 1) * Math.log(x) - x / beta - logGamma(alpha) - alpha * Math.log(beta));
+    return Math.exp((alpha - 1) * Math.log(x) - x / beta - gammaln(alpha) - alpha * Math.log(beta));
 }
 
 export function gammaINV(probability: number, alpha: number, beta: number): number {
@@ -452,7 +452,7 @@ export function gammaINV(probability: number, alpha: number, beta: number): numb
     return beta * lowRegGammaInverse(probability, alpha);
 }
 
-function logGamma(x: number): number {
+export function gammaln(x: number): number {
     const coefficients = [
         76.18009172947146, -86.50532032941677, 24.01409824083091, // eslint-disable-line
         -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5,
@@ -478,7 +478,7 @@ function lowRegGamma(a: number, x: number): number {
 
     // calculate maximum number of itterations required for a
     const MAX_ITER = Math.min(-~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17), 10000);
-    const aln = logGamma(a);
+    const aln = gammaln(a);
     const exp = Math.exp(-x + a * Math.log(x) - aln);
 
     let _a = a;
@@ -552,7 +552,7 @@ function lowRegGammaInverse(p: number, a: number): number {
     }
 
     const EPSILON = 1e-8;
-    const aln = logGamma(a);
+    const aln = gammaln(a);
 
     let err, t;
 

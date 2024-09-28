@@ -669,8 +669,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'GAMMALN 関数に代入する値を指定します。' },
         },
     },
     GAMMALN_PRECISE: {
@@ -683,8 +682,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'GAMMALN.PRECISE 関数に代入する値を指定します。' },
         },
     },
     GAUSS: {
@@ -697,8 +695,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '関数に代入する値を指定します。' },
         },
     },
     GEOMEAN: {
@@ -711,8 +708,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '相乗平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '相乗平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     GROWTH: {
@@ -725,8 +722,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既にわかっている y の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            knownXs: { name: '既知の x', detail: '既にわかっている x の値の系列であり、y = b*m^x という関係が成り立ちます。' },
+            newXs: { name: '新しい x', detail: 'GROWTH 関数を利用して、対応する y の値を計算する新しい x の値を指定します。' },
+            constb: { name: 'b', detail: '定数 b を 1 にするかどうかを論理値で指定します。' },
         },
     },
     HARMEAN: {
@@ -739,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '調和平均を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '調和平均を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     HYPGEOM_DIST: {

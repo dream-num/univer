@@ -694,8 +694,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是要計算 GAMMALN 的值。' },
         },
     },
     GAMMALN_PRECISE: {
@@ -708,8 +707,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是要計算 GAMMALN.PRECISE 的值。' },
         },
     },
     GAUSS: {
@@ -722,8 +720,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '這是您要找出分佈的數值。' },
         },
     },
     GEOMEAN: {
@@ -736,8 +733,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算幾何平均值的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算幾何平均值的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     GROWTH: {
@@ -750,8 +747,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '已知資料_y', detail: '這是在 y = b*m^x 關係中一組已知的 y 值。' },
+            knownXs: { name: '已知資料_x', detail: '這是在 y = b*m^x 關係中一組已知的 x 值。' },
+            newXs: { name: '新資料_x', detail: '這是要 GROWTH 傳回對應 y 值的新 x 值。' },
+            constb: { name: 'b', detail: '這是指定是否強迫常數 b 等於 1 的邏輯值。' },
         },
     },
     HARMEAN: {
@@ -764,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算調和平均值的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算調和平均值的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     HYPGEOM_DIST: {

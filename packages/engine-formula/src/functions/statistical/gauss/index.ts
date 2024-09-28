@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../../basics/error-type';
-import { gamma } from '../../../basics/statistical';
+import { normalCDF } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 
-export class Gamma extends BaseFunction {
+export class Gauss extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
 
-    override calculate(number: BaseValueObject): BaseValueObject {
-        if (number.isArray()) {
-            const resultArray = (number as ArrayValueObject).mapValue((numberObject) => this._handleSingleObject(numberObject));
+    override calculate(z: BaseValueObject): BaseValueObject {
+        if (z.isArray()) {
+            const resultArray = (z as ArrayValueObject).mapValue((zObject) => this._handleSingleObject(zObject));
 
             if ((resultArray as ArrayValueObject).getRowCount() === 1 && (resultArray as ArrayValueObject).getColumnCount() === 1) {
                 return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
@@ -39,25 +37,21 @@ export class Gamma extends BaseFunction {
             return resultArray;
         }
 
-        return this._handleSingleObject(number);
+        return this._handleSingleObject(z);
     }
 
-    private _handleSingleObject(number: BaseValueObject): BaseValueObject {
-        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(number);
+    private _handleSingleObject(z: BaseValueObject): BaseValueObject {
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(z);
 
         if (isError) {
             return errorObject as ErrorValueObject;
         }
 
-        const [numberObject] = variants as BaseValueObject[];
+        const [zObject] = variants as BaseValueObject[];
 
-        const numberValue = +numberObject.getValue();
+        const zValue = +zObject.getValue();
 
-        if (numberValue === 0 || (numberValue < 0 && numberValue % 1 === 0)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-
-        const result = gamma(numberValue);
+        const result = normalCDF(zValue, 0, 1) - 0.5;
 
         return NumberValueObject.create(result);
     }

@@ -75,7 +75,7 @@
         "@univerjs/ui": "workspace:*"
     },
     "optionalDependencies": {
-        "vue": "^3.5.9"
+        "vue": ">=3.0.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

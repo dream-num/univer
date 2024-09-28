@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { BuildTextUtils, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -25,8 +27,6 @@ import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -206,7 +206,6 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
-
         if (render) {
             const selectionRenderService = render.with(DocSelectionRenderService);
             selectionRenderService.setReserveRangesStatus(true);
@@ -443,9 +442,12 @@ export const CellLinkEdit = () => {
                                     contextService.setContextValue(FOCUSING_SHEET, false);
                                     const docBackScrollRenderController = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
                                     const range = docSelectionManagerService.getTextRanges({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY })?.[0];
+
                                     if (docBackScrollRenderController && range) {
+                                        // TODO: this was hacking
                                         setTimeout(() => {
                                             docBackScrollRenderController.scrollToRange(range);
+                                            docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
                                         }, 100);
                                     }
                                 }

@@ -28,6 +28,7 @@ import type { IRemoveRowColCommandParams } from '../../../commands/commands/remo
 import type { IAddRangeProtectionMutationParams } from '../../../commands/mutations/add-range-protection.mutation';
 import type { IDeleteSelectionProtectionMutationParams } from '../../../commands/mutations/delete-range-protection.mutation';
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
+import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';
 import type { EffectRefRangeParams } from '../../../services/ref-range/type';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
@@ -36,6 +37,7 @@ import {
     MoveRowsCommand,
 } from '../../../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../../../commands/commands/remove-row-col.command';
+import { RemoveSheetCommand } from '../../../commands/commands/remove-sheet.command';
 import {
     type ISetWorksheetActivateCommandParams,
     SetWorksheetActivateCommand,
@@ -50,6 +52,7 @@ import { RangeProtectionCache } from '../../../model/range-protection.cache';
 import { RangeProtectionRenderModel } from '../../../model/range-protection-render.model';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { RefRangeService } from '../../../services/ref-range/ref-range.service';
+import { SheetInterceptorService } from '../../sheet-interceptor/sheet-interceptor.service';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
 const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
@@ -66,13 +69,15 @@ export class RangeProtectionRefRangeService extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
         @Inject(RangeProtectionRenderModel) private readonly _selectionProtectionRenderModel: RangeProtectionRenderModel,
-        @Inject(RangeProtectionCache) private readonly _rangeProtectionCache: RangeProtectionCache
-
+        @Inject(RangeProtectionCache) private readonly _rangeProtectionCache: RangeProtectionCache,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel
     ) {
         super();
         this._onRefRangeChange();
         this._correctPermissionRange();
         this._initReBuildCache();
+        this._initRemoveSheet();
     }
 
     private _onRefRangeChange() {
@@ -549,6 +554,40 @@ export class RangeProtectionRefRangeService extends Disposable {
                 this._rangeProtectionCache.reBuildCache(unitId, subUnitId);
             }
         }));
+    }
+
+    private _initRemoveSheet() {
+        this._sheetInterceptorService.interceptCommand(
+            {
+                getMutations: (commandInfo) => {
+                    const undos: IMutationInfo[] = [];
+                    const redos: IMutationInfo[] = [];
+                    const preRedos: IMutationInfo[] = [];
+                    const preUndos: IMutationInfo[] = [];
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const params = commandInfo.params as { unitId: string; subUnitId: string };
+                        const deleteRuleIds: string[] = [];
+                        const addRuleArr: IRangeProtectionRule[] = [];
+                        this._rangeProtectionRuleModel.getSubunitRuleList(params.unitId, params.subUnitId).forEach((rule) => {
+                            // preRedos.push({ id: DeleteRangeProtectionMutation.id, params: { unitId: params.unitId, subUnitId: params.subUnitId, ruleIds: [rule.id] } });
+                            // undos.push({ id: AddRangeProtectionMutation.id, params: { unitId: params.unitId, subUnitId: params.subUnitId, name: '', rules: [rule] } });
+                            deleteRuleIds.push(rule.id);
+                            addRuleArr.push(rule);
+                        });
+                        if (deleteRuleIds.length && addRuleArr.length) {
+                            preRedos.push({ id: DeleteRangeProtectionMutation.id, params: { unitId: params.unitId, subUnitId: params.subUnitId, ruleIds: deleteRuleIds } });
+                            undos.push({ id: AddRangeProtectionMutation.id, params: { unitId: params.unitId, subUnitId: params.subUnitId, name: '', rules: addRuleArr } });
+                        }
+                    }
+                    return {
+                        redos,
+                        undos,
+                        preRedos,
+                        preUndos,
+                    };
+                },
+            }
+        );
     }
 }
 

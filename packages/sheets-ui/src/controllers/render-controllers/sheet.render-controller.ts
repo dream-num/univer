@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import { CommandType, ICommandService, IContextService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
 import {
     Rect,
@@ -30,6 +28,8 @@ import {
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
+import type { ICommandInfo, IExecutionOptions, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,
@@ -242,7 +242,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
 
-        window.sc = scene;
         const viewMain = new Viewport(SHEET_VIEWPORT_KEY.VIEW_MAIN, scene, {
             left: rowHeader.width,
             top: columnHeader.height,

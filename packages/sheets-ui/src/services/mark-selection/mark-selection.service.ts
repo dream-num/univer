@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import type { Workbook } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';
@@ -57,7 +57,6 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
-        window.msrs = this;
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {

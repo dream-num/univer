@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit, Disposable,
     ICommandService,
@@ -42,6 +39,9 @@ import {
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
+import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
 
 const REFRESH_ARRAY_SHAPE_MUTATIONS = [
     SetWorksheetRowHeightMutation.id,
@@ -76,7 +76,6 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this._commandExecutedListener();
 
         // Do not intercept v:null and add t: CellValueType.NUMBER. When the cell =TODAY() is automatically filled, the number format will recognize the Number type and parse it as 1900-01-00 date format.
-        window.fec = this;
     }
 
     private _initSkeletonChangeListener(): void {
@@ -278,7 +277,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         this._previousShape = null;
     }
 
-    private _refreshArrayFormulaRangeShape(unitId: string, range: IRange): void {
+    private _refreshArrayFormulaRangeShape(unitId: string, _range?: IRange): void {
         if (this._previousShape) {
             const { startRow, endRow, startColumn, endColumn } = this._previousShape.getRange();
             const range = { startRow, endRow, startColumn, endColumn };
@@ -301,34 +300,10 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         return false;
     }
 
-    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges: IRange[]): void {
+    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges?: IRange[]): void {
         if (!this._checkCurrentSheet(unitId, subUnitId)) return;
-
         if (!this._previousShape) return;
-
-        const { startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn } = this._previousShape.getRange();
-
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            const { startRow, endRow, startColumn, endColumn } = range;
-            // if (Rectangle.intersects(
-            //     {
-            //         startRow, endRow, startColumn, endColumn,
-            //     },
-            //     {
-            //         startRow: shapeStartRow, endRow: shapeEndRow, startColumn: shapeStartColumn, endColumn: shapeEndColumn,
-            //     }
-            // ) || shapeStartRow >= endRow || startColumn >= endColumn) {
-            const shapeRange = {
-                startRow,
-                endRow: shapeEndRow,
-                startColumn: shapeStartColumn,
-                endColumn: shapeEndColumn,
-            };
-            this._refreshArrayFormulaRangeShape(unitId, shapeRange);
-            // break;
-            // }
-        }
+        this._refreshArrayFormulaRangeShape(unitId);
     }
 
     private _refreshArrayFormulaRangeShapeByRow(unitId: string, subUnitId: string, rowAutoHeightInfo: IRowAutoHeightInfo[]): void {

@@ -694,8 +694,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want to calculate GAMMALN.' },
         },
     },
     GAMMALN_PRECISE: {
@@ -708,8 +707,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want to calculate GAMMALN.PRECISE.' },
         },
     },
     GAUSS: {
@@ -722,8 +720,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: 'The value for which you want the distribution.' },
         },
     },
     GEOMEAN: {
@@ -736,8 +733,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the geometric mean.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the geometric mean, up to a maximum of 255.' },
         },
     },
     GROWTH: {
@@ -750,8 +747,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = b*m^x.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = b*m^x.' },
+            newXs: { name: "new_x's", detail: 'Are new x-values for which you want GROWTH to return corresponding y-values.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 1.' },
         },
     },
     HARMEAN: {
@@ -764,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the harmonic mean.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the harmonic mean, up to a maximum of 255.' },
         },
     },
     HYPGEOM_DIST: {

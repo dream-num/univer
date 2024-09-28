@@ -44,6 +44,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISheetCommandSharedParams } from '../../../lib/types';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 
 export interface IStyleTypeValue<T> {
@@ -51,9 +52,7 @@ export interface IStyleTypeValue<T> {
     value: T | T[][];
 }
 
-interface ISetStyleCommonParams {
-    subUnitId?: string;
-    unitId?: string;
+interface ISetStyleCommonParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
 }
 
@@ -72,11 +71,11 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
-        const { worksheet } = target;
-        const { range, style, unitId: paramsUnitId, subUnitId: paramsSubUnitId } = params;
+        const { unitId, subUnitId, worksheet } = target;
+        const { range, style } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SheetsSelectionsService);
@@ -112,8 +111,8 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
         }
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-            subUnitId: paramsSubUnitId || target.subUnitId,
-            unitId: paramsUnitId || target.unitId,
+            subUnitId,
+            unitId,
             cellValue: cellValue.getMatrix(),
         };
 

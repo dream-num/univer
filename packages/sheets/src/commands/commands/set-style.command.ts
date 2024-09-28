@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BooleanNumber,
-    CommandType,
-    FontItalic,
-    FontWeight,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    sequenceExecute,
-    Tools,
-} from '@univerjs/core';
 import type {
     HorizontalAlign,
     IAccessor,
@@ -38,14 +26,26 @@ import type {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 
+import type { ISheetCommandSharedParams } from '../utils/interface';
+import {
+    BooleanNumber,
+    CommandType,
+    FontItalic,
+    FontWeight,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    sequenceExecute,
+    Tools,
+} from '@univerjs/core';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISheetCommandSharedParams } from '../../../lib/types';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;

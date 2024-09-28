@@ -251,8 +251,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '样本成功次数', detail: '样本中成功的次数。' },
+            numberSample: { name: '样本大小', detail: '样本大小。' },
+            populationS: { name: '总体成功次数', detail: '总体中成功的次数。' },
+            numberPop: { name: '总体大小', detail: '总体大小。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 HYPGEOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     LOGINV: {

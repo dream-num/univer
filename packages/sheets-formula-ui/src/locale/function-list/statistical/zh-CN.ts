@@ -777,8 +777,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '样本成功次数', detail: '样本中成功的次数。' },
+            numberSample: { name: '样本大小', detail: '样本大小。' },
+            populationS: { name: '总体成功次数', detail: '总体中成功的次数。' },
+            numberPop: { name: '总体大小', detail: '总体大小。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 HYPGEOM.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     INTERCEPT: {
@@ -805,8 +808,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算峰值的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算峰值的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     LARGE: {
@@ -819,8 +822,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '需要确定第 k 个最大值的数组或数据区域。' },
+            k: { name: 'k', detail: '返回值在数组或数据单元格区域中的位置（从大到小排）。' },
         },
     },
     LINEST: {
@@ -1359,8 +1362,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '需要确定第 k 个最小值的数组或数据区域。' },
+            k: { name: 'k', detail: '返回值在数组或数据单元格区域中的位置（从小到大排）。' },
         },
     },
     STANDARDIZE: {

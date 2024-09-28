@@ -777,8 +777,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: '樣本成功次數', detail: '樣本中成功的次數。' },
+            numberSample: { name: '樣本大小', detail: '樣本大小。' },
+            populationS: { name: '總體成功次數', detail: '總體中成功的次數。' },
+            numberPop: { name: '總體大小', detail: '總體大小。' },
+            cumulative: { name: '累積', detail: '決定函數形式的邏輯值。如果為 TRUE，則 HYPGEOM.DIST 傳回累積分佈函數；如果為 FALSE，則傳回機率密度函數。' },
         },
     },
     INTERCEPT: {
@@ -805,8 +808,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算峰值的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算峰值的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     LARGE: {
@@ -819,8 +822,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是要判斷第 k 個最大值的陣列或資料範圍。' },
+            k: { name: 'k', detail: ' 這是要傳回之資料陣列或儲存格範圍中的位置 (由最大起算)。' },
         },
     },
     LINEST: {
@@ -1359,8 +1362,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '這是要判斷第 k 個最小值的陣列或資料範圍。' },
+            k: { name: 'k', detail: ' 這是要傳回之資料陣列或儲存格範圍中的位置 (由最小起算)。' },
         },
     },
     STANDARDIZE: {

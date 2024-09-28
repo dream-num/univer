@@ -37,6 +37,7 @@ import { VarP } from '../statistical/var-p';
 import { VarS } from '../statistical/var-s';
 import { Betadist } from './betadist';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
+import { Hypgeomdist } from './hypgeomdist';
 import { Normsdist } from './normsdist';
 import { Rank } from './rank';
 
@@ -56,6 +57,7 @@ export const functionCompatibility = [
     [FTest, FUNCTION_NAMES_COMPATIBILITY.FTEST],
     [GammaDist, FUNCTION_NAMES_COMPATIBILITY.GAMMADIST],
     [GammaInv, FUNCTION_NAMES_COMPATIBILITY.GAMMAINV],
+    [Hypgeomdist, FUNCTION_NAMES_COMPATIBILITY.HYPGEOMDIST],
     [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
     [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Normsdist, FUNCTION_NAMES_COMPATIBILITY.NORMSDIST],

@@ -59,7 +59,10 @@ import { Gauss } from './gauss';
 import { Geomean } from './geomean';
 import { Growth } from './growth';
 import { Harmean } from './harmean';
+import { HypgeomDist } from './hypgeom-dist';
 import { Intercept } from './intercept';
+import { Kurt } from './kurt';
+import { Large } from './large';
 import { Max } from './max';
 import { Maxa } from './maxa';
 import { Maxifs } from './maxifs';
@@ -72,6 +75,7 @@ import { NormSDist } from './norm-s-dist';
 import { NormSInv } from './norm-s-inv';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
+import { Small } from './small';
 import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
@@ -128,7 +132,10 @@ export const functionStatistical = [
     [Geomean, FUNCTION_NAMES_STATISTICAL.GEOMEAN],
     [Growth, FUNCTION_NAMES_STATISTICAL.GROWTH],
     [Harmean, FUNCTION_NAMES_STATISTICAL.HARMEAN],
+    [HypgeomDist, FUNCTION_NAMES_STATISTICAL.HYPGEOM_DIST],
     [Intercept, FUNCTION_NAMES_STATISTICAL.INTERCEPT],
+    [Kurt, FUNCTION_NAMES_STATISTICAL.KURT],
+    [Large, FUNCTION_NAMES_STATISTICAL.LARGE],
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Maxa, FUNCTION_NAMES_STATISTICAL.MAXA],
     [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
@@ -141,6 +148,7 @@ export const functionStatistical = [
     [NormSInv, FUNCTION_NAMES_STATISTICAL.NORM_S_INV],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
+    [Small, FUNCTION_NAMES_STATISTICAL.SMALL],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],

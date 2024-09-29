@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange } from './typedef';
 import { LRUMap, Rectangle, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
+import type { IRange } from './typedef';
 
 export class SpanModel extends Disposable {
     /**
@@ -32,6 +32,14 @@ export class SpanModel extends Disposable {
      * @property Cache for RANGE_TYPE.COLUMN
      */
     private _columnCache: Map<number, number> = new Map();
+    /**
+     * @property Whether has RANGE_TYPE.ROW
+     */
+    private _hasRow: boolean = false;
+    /**
+     * @property Whether has RANGE_TYPE.COLUMN
+     */
+    private _hasColumn: boolean = false;
     /**
      * @property Whether has RANGE_TYPE.ALL
      */
@@ -68,6 +76,8 @@ export class SpanModel extends Disposable {
         this._allIndex = -1;
         this._rangeMap.clear();
         this._skeletonCache.clear();
+        this._hasColumn = false;
+        this._hasRow = false;
     }
 
     private _createCache(mergeData: IRange[]) {
@@ -100,6 +110,7 @@ export class SpanModel extends Disposable {
         const { startRow, endRow } = range;
         for (let i = startRow; i <= endRow; i++) {
             this._rowCache.set(i, index);
+            this._hasRow = true;
         }
     }
 
@@ -107,6 +118,7 @@ export class SpanModel extends Disposable {
         const { startColumn, endColumn } = range;
         for (let i = startColumn; i <= endColumn; i++) {
             this._columnCache.set(i, index);
+            this._hasColumn = true;
         }
     }
 
@@ -274,14 +286,18 @@ export class SpanModel extends Disposable {
             return this._allIndex;
         }
 
-        const rowValue = this._rowCache.get(row);
-        if (rowValue !== undefined) {
-            return rowValue;
+        if (this._hasRow) {
+            const rowValue = this._rowCache.get(row);
+            if (rowValue !== undefined) {
+                return rowValue;
+            }
         }
 
-        const columnValue = this._columnCache.get(column);
-        if (columnValue !== undefined) {
-            return columnValue;
+        if (this._hasColumn) {
+            const columnValue = this._columnCache.get(column);
+            if (columnValue !== undefined) {
+                return columnValue;
+            }
         }
 
         const cellValue = this._cellCache.get(row)?.get(column);

@@ -1185,8 +1185,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each permutations.' },
         },
     },
     PERMUTATIONA: {
@@ -1199,8 +1199,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each permutations.' },
         },
     },
     PHI: {
@@ -1213,8 +1213,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'X is the number for which you want the density of the standard normal distribution.' },
         },
     },
     POISSON_DIST: {

@@ -1079,6 +1079,47 @@ export default {
             significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK.INC dùng ba chữ số (0.xxx).' },
         },
     },
+    PERMUT: {
+        description: 'Trả về số hoán vị của một số đối tượng nhất định',
+        abstract: 'Trả về số hoán vị của một số đối tượng nhất định',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/permut-%E5%87%BD%E6%95%B0-3bd1cb9a-2880-41ab-a197-f246a7a602d3',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'tổng cộng', detail: 'Số hạng mục.' },
+            numberChosen: { name: 'số lượng mẫu', detail: 'Số lượng các mục trong mỗi sự sắp xếp.' },
+        },
+    },
+    PERMUTATIONA: {
+        description: 'Trả về số hoán vị cho số đối tượng đã cho (với tần suất lặp) có thể được chọn từ tổng số đối tượng.',
+        abstract: 'Trả về số hoán vị cho số đối tượng đã cho (với tần suất lặp) có thể được chọn từ tổng số đối tượng.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/permutationa-%E5%87%BD%E6%95%B0-6c7d7fdc-d657-44e6-aa19-2857b25cae4e',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'tổng cộng', detail: 'Số hạng mục.' },
+            numberChosen: { name: 'số lượng mẫu', detail: 'Số lượng các mục trong mỗi sự sắp xếp.' },
+        },
+    },
+    PHI: {
+        description: 'Trả về giá trị của hàm mật độ cho một phân bố chuẩn chuẩn hóa.',
+        abstract: 'Trả về giá trị của hàm mật độ cho một phân bố chuẩn chuẩn hóa.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/phi-%E5%87%BD%E6%95%B0-23e49bc6-a8e8-402d-98d3-9ded87f6295c',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'X là số bạn muốn tìm mật độ của phân bố chuẩn chuẩn hóa cho số này.' },
+        },
+    },
     RANK_AVG: {
         description: 'Trả về thứ hạng của một số trong một danh sách các số',
         abstract: 'Trả về thứ hạng của một số trong một danh sách các số',

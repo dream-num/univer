@@ -2,7 +2,8 @@ name: 🎭 Playwright Tests
 
 on:
     pull_request:
-        branches: [dev]
+        branches:
+            - dev
 
 jobs:
     e2e-test:

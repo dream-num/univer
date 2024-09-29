@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-export { UniverSheetsZenEditorPlugin } from './plugin';
+export { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from './commands/commands/zen-editor.command';
 
 // #region - all commands
 
-export { OpenZenEditorOperation } from './commands/operations/zen-editor.operation';
-export { CancelZenEditCommand, ConfirmZenEditCommand } from './commands/commands/zen-editor.command';
+export { UniverSheetsZenEditorPlugin } from './plugin';
 
 // #endregion

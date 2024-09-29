@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { LocaleService, useDependency } from '@univerjs/core';
 import type { ISelectProps } from '@univerjs/design';
+import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
+import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
+
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
-
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
-import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
 
 import styles from './index.module.less';
@@ -60,15 +60,17 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
         const shouldRenderInput = FilterConditionItems.getItemByOperator(operator).numOfParameters === 1;
         return (
             <>
-                { name === 'operator2' && (
+                {name === 'operator2' && (
                     <RadioGroup value={radioValue} onChange={onRadioChange}>
                         <Radio value="AND">{localeService.t('sheets-filter.panel.and')}</Radio>
                         <Radio value="OR">{localeService.t('sheets-filter.panel.or')}</Radio>
                     </RadioGroup>
                 )}
                 <Select value={operator} options={secondaryOptions} onChange={(operator) => onFormParamsChange({ [name]: operator as FilterOperator })} />
-                { shouldRenderInput && (
-                    <Input value={val} placeholder={placeholder} onChange={(value) => onFormParamsChange({ [name === 'operator1' ? 'val1' : 'val2']: value })} />
+                {shouldRenderInput && (
+                    <div>
+                        <Input value={val} placeholder={placeholder} onChange={(value) => onFormParamsChange({ [name === 'operator1' ? 'val1' : 'val2']: value })} />
+                    </div>
                 )}
             </>
         );

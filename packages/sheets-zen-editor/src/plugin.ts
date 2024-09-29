@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
 
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { ZenEditorController } from './controllers/zen-editor.controller';
 import { ZenEditorUIController } from './controllers/zen-editor-ui.controller';
 import { IZenEditorManagerService, ZenEditorManagerService } from './services/zen-editor.service';
-import type { IUniverSheetsZenEditorConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'SHEET_ZEN_EDITOR_PLUGIN';

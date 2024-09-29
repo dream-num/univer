@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMessageOptions, IMessageProps } from '@univerjs/design';
-import { Message } from '@univerjs/design';
 import type { IDisposable } from '@univerjs/core';
-
-import canUseDom from 'rc-util/lib/Dom/canUseDom';
+import type { IMessageOptions, IMessageProps } from '@univerjs/design';
 import type { IMessageService } from './message.service';
+
+import { Message } from '@univerjs/design';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 export class DesktopMessageService implements IMessageService, IDisposable {
     // in node environment, document is undefined

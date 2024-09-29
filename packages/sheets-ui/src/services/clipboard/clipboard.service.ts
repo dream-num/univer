@@ -172,6 +172,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
         const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
+            this._clipboardHooks.forEach((h) => h.onNoSelectionCopy?.(copyType));
             return false; // maybe we should notify user that there is no selection
         }
 
@@ -260,6 +261,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             } else {
                 return this._pastePlainText(text, PREDEFINED_HOOK_NAME.DEFAULT_PASTE);
             }
+        } else {
+            return this._pasteEmpty();
         }
 
         return Promise.resolve(false);
@@ -360,7 +363,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         this._clipboardHooks$.next(this._clipboardHooks);
     }
 
-    private async _executePaste<T extends PasteType>(type: T, content: IPasteContent[T], pasteType: string): Promise<boolean> {
+    private async _executePaste(generateMutations: (hook: ISheetClipboardHook, payload: {
+        unitId: string;
+        subUnitId: string;
+        range: IDiscreteRange;
+    }) => undefined | ({
+        undos: IMutationInfo[];
+        redos: IMutationInfo[];
+    })): Promise<boolean> {
         const target = this._getPastingTarget();
         if (!target.subUnitId || !target.selection) {
             return false;
@@ -388,29 +398,11 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const redoMutationsInfo: IMutationInfo[] = [];
         const undoMutationsInfo: IMutationInfo[] = [];
         enabledHooks.forEach((h) => {
-            const contentReturn = type === PasteType.Text
-                ? h.onPastePlainText?.(
-                    {
-                        unitId,
-                        subUnitId,
-                        range,
-                    },
-                    content as string,
-                    {
-                        pasteType,
-                    }
-                )
-                : h.onPasteFiles?.(
-                    {
-                        unitId,
-                        subUnitId,
-                        range,
-                    },
-                    content as File[],
-                    {
-                        pasteType,
-                    }
-                );
+            const contentReturn = generateMutations(h, {
+                unitId,
+                subUnitId,
+                range,
+            });
 
             if (contentReturn) {
                 redoMutationsInfo.push(...contentReturn.redos);
@@ -431,11 +423,21 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private async _pasteFiles(files: File[], pasteType: string): Promise<boolean> {
-        return this._executePaste(PasteType.File, files, pasteType);
+        return this._executePaste((h, payload) => {
+            return h.onPasteFiles?.(payload, files, { pasteType });
+        });
     }
 
     private async _pastePlainText(text: string, pasteType: string): Promise<boolean> {
-        return this._executePaste(PasteType.Text, text, pasteType);
+        return this._executePaste((h, payload) => {
+            return h.onPastePlainText?.(payload, text, { pasteType });
+        });
+    }
+
+    private _pasteEmpty() {
+        return this._executePaste((h, payload) => {
+            return h.onPasteEmpty?.(payload);
+        });
     }
 
     private async _pasteHTML(html: string, pasteType: string): Promise<boolean> {

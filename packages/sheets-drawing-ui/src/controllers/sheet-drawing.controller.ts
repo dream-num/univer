@@ -15,27 +15,29 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { IDrawingManagerService } from '@univerjs/drawing';
 
 import { AddImageSingle } from '@univerjs/icons';
-import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
+import { SheetsSelectionsService } from '@univerjs/sheets';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
-import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
-import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
-import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
+import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 
+import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
+import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
+import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
+import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 import { menuSchema } from './menu.schema';
+import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
@@ -44,7 +46,9 @@ export class SheetDrawingUIController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @Inject(SheetsSelectionsService) private readonly _sheetsSelectionsService: SheetsSelectionsService
     ) {
         super();
 
@@ -96,5 +100,15 @@ export class SheetDrawingUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initShortcuts();
+        this.disposeWithMe(
+            this._drawingManagerService.focus$.subscribe((drawings) => {
+                if (drawings.length > 0) {
+                    drawings.forEach((drawing) => {
+                        const wbSelection = this._sheetsSelectionsService.getWorkbookSelections(drawing.unitId);
+                        wbSelection.clear();
+                    });
+                }
+            })
+        );
     }
 }

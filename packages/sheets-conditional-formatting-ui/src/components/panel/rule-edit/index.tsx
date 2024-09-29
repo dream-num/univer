@@ -181,6 +181,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const handleSubmit = () => {
+        if (errorText) {
+            return;
+        }
         const getRanges = () => {
             const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             if (!worksheet) {
@@ -222,7 +225,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleVerify = (v: boolean, rangeText: string) => {
         if (v) {
             if (rangeText.length < 1) {
-                errorTextSet(localeService.t('sheet.cf.errorMessage.notBlank'));
+                errorTextSet(localeService.t('sheet.cf.errorMessage.rangeError'));
             } else {
                 errorTextSet(undefined);
             }

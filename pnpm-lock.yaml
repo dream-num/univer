@@ -9,27 +9,11 @@ importers:
   .:
     devDependencies:
       '@antfu/eslint-config':
-<<<<<<< HEAD
         specifier: 3.7.3
-        version: 3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        specifier: 3.5.1
-<<<<<<< HEAD
-<<<<<<< HEAD
-        version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.10.0(jiti@1.21.6)))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> 60f2ae270 (refactor: move editor service to docs-ui)
->>>>>>> 2c9e9d2af (refactor: move editor service to docs-ui)
+        version: 3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@commitlint/cli':
         specifier: ^19.5.0
-        version: 19.5.0(@types/node@22.7.3)(typescript@5.6.2)
-=======
-        version: 3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-      '@commitlint/cli':
-        specifier: ^19.5.0
-        version: 19.5.0(@types/node@22.7.0)(typescript@5.6.2)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 19.5.0(@types/node@22.7.4)(typescript@5.6.2)
       '@commitlint/config-conventional':
         specifier: ^19.5.0
         version: 19.5.0
@@ -47,18 +31,13 @@ importers:
         version: 8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.6.0(typescript@5.6.2))
       '@storybook/react':
         specifier: 8.3.3
-        version: 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
+        version: 8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@types/node':
-<<<<<<< HEAD
         specifier: ^22.7.3
-        version: 22.7.3
-=======
-        specifier: ^22.5.5
-        version: 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 22.7.4
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:common/shared
@@ -67,11 +46,7 @@ importers:
         version: link:packages/design
       '@vitejs/plugin-react':
         specifier: ^4.3.1
-<<<<<<< HEAD
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint:
         specifier: 9.11.1
         version: 9.11.1(jiti@1.21.6)
@@ -124,25 +99,14 @@ importers:
   common/shared:
     dependencies:
       '@typescript-eslint/parser':
-<<<<<<< HEAD
         specifier: ^8.7.0
         version: 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@vitejs/plugin-react':
         specifier: ^4.3.1
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@vitest/coverage-istanbul':
         specifier: ^2.1.1
-        version: 2.1.1(vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        specifier: ^8.6.0
-        version: 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@vitejs/plugin-react':
-        specifier: ^4.3.1
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-      '@vitest/coverage-istanbul':
-        specifier: ^2.1.1
-        version: 2.1.1(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       happy-dom:
         specifier: 15.0.0
         version: 15.0.0
@@ -150,25 +114,14 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vite-plugin-dts:
         specifier: ^4.2.2
-        version: 4.2.2(@types/node@22.7.3)(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 4.2.2(@types/node@22.7.4)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vite-plugin-dts:
-        specifier: ^4.2.1
-        version: 4.2.1(@types/node@22.7.0)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   common/storybook:
     dependencies:
@@ -177,13 +130,13 @@ importers:
         version: 2.0.2(react@18.3.1)
       '@storybook/addon-essentials':
         specifier: ^8.3.3
-        version: 8.3.3(storybook@8.3.3)
+        version: 8.3.4(storybook@8.3.4)
       '@storybook/addon-interactions':
         specifier: ^8.3.3
-        version: 8.3.3(storybook@8.3.3)
+        version: 8.3.4(storybook@8.3.4)
       '@storybook/addon-links':
         specifier: ^8.3.3
-        version: 8.3.3(react@18.3.1)(storybook@8.3.3)
+        version: 8.3.4(react@18.3.1)(storybook@8.3.4)
       '@storybook/addon-styling-webpack':
         specifier: ^1.0.0
         version: 1.0.0(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
@@ -192,19 +145,19 @@ importers:
         version: 1.0.5(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       '@storybook/blocks':
         specifier: ^8.3.3
-        version: 8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)
+        version: 8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)
       '@storybook/icons':
         specifier: ^1.2.12
         version: 1.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: ^8.3.3
-        version: 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
+        version: 8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/react-webpack5':
         specifier: ^8.3.3
-        version: 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
+        version: 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/types':
         specifier: ^8.3.3
-        version: 8.3.3(storybook@8.3.3)
+        version: 8.3.4(storybook@8.3.4)
       '@univerjs/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -222,7 +175,7 @@ importers:
         version: 12.2.0(less@4.2.0)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       storybook:
         specifier: ^8.3.3
-        version: 8.3.3
+        version: 8.3.4
       storybook-addon-swc:
         specifier: ^1.2.0
         version: 1.2.0(@swc/core@1.7.5)(terser-webpack-plugin@5.3.10(@swc/core@1.7.5)(esbuild@0.23.1)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)))(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
@@ -421,18 +374,14 @@ importers:
         version: 18.3.1(react@18.3.1)
       react-mosaic-component:
         specifier: ^6.1.0
-<<<<<<< HEAD
-        version: 6.1.0(@types/node@22.7.3)(@types/react@18.3.9)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-=======
-        version: 6.1.0(@types/node@22.7.0)(@types/react@18.3.5)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 6.1.0(@types/node@22.7.4)(@types/react@18.3.10)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
@@ -453,7 +402,7 @@ importers:
         version: 2.1.1(esbuild@0.24.0)
       esbuild-plugin-vue3:
         specifier: ^0.4.2
-        version: 0.4.2(sass@1.77.5)(vue@3.5.9(typescript@5.6.2))
+        version: 0.4.2(sass@1.77.5)(vue@3.4.38(typescript@5.6.2))
       esbuild-style-plugin:
         specifier: ^1.6.3
         version: 1.6.3
@@ -682,19 +631,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/debugger:
     dependencies:
@@ -731,18 +672,14 @@ importers:
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
-        version: 3.5.9(typescript@5.6.2)
+        version: 3.4.38(typescript@5.6.2)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
       '@vitejs/plugin-vue':
         specifier: ^5.1.3
-<<<<<<< HEAD
-        version: 5.1.3(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.5.9(typescript@5.6.2))
-=======
-        version: 5.1.3(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 5.1.3(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -750,19 +687,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-docs-ui:
     dependencies:
@@ -807,19 +736,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-formula:
     dependencies:
@@ -846,19 +767,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-formula-ui:
     dependencies:
@@ -918,19 +831,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-sheets-ui:
     dependencies:
@@ -981,19 +886,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uni-slides-ui:
     dependencies:
@@ -1044,19 +941,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/uniui:
     dependencies:
@@ -1065,7 +954,7 @@ importers:
         version: 2.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
@@ -1098,7 +987,7 @@ importers:
         version: 'link:'
       '@xyflow/react':
         specifier: ^12.2.1
-        version: 12.2.1(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 12.2.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1125,19 +1014,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/core:
     dependencies:
@@ -1185,19 +1066,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/data-validation:
     dependencies:
@@ -1221,19 +1094,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/design:
     dependencies:
@@ -1303,10 +1168,10 @@ importers:
     devDependencies:
       '@testing-library/react':
         specifier: ^16.0.1
-        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
@@ -1332,19 +1197,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs:
     dependencies:
@@ -1365,19 +1222,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-drawing:
     dependencies:
@@ -1395,19 +1244,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-drawing-ui:
     dependencies:
@@ -1461,19 +1302,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-hyper-link:
     dependencies:
@@ -1494,19 +1327,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-hyper-link-ui:
     dependencies:
@@ -1551,19 +1376,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-mention-ui:
     dependencies:
@@ -1591,7 +1408,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1608,19 +1425,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-thread-comment-ui:
     dependencies:
@@ -1671,19 +1480,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/docs-ui:
     dependencies:
@@ -1714,7 +1515,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -1731,19 +1532,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/drawing:
     dependencies:
@@ -1770,19 +1563,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/drawing-ui:
     dependencies:
@@ -1824,19 +1609,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-formula:
     dependencies:
@@ -1863,19 +1640,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-numfmt:
     devDependencies:
@@ -1886,19 +1655,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/engine-render:
     dependencies:
@@ -1934,19 +1695,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/facade:
     dependencies:
@@ -2039,19 +1792,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/find-replace:
     dependencies:
@@ -2090,19 +1835,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/network:
     dependencies:
@@ -2120,19 +1857,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/rpc:
     dependencies:
@@ -2150,19 +1879,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets:
     dependencies:
@@ -2195,19 +1916,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -2246,19 +1959,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -2330,19 +2035,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-crosshair-highlight:
     dependencies:
@@ -2384,19 +2081,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-data-validation:
     dependencies:
@@ -2538,19 +2227,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-drawing:
     dependencies:
@@ -2571,19 +2252,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-drawing-ui:
     dependencies:
@@ -2637,19 +2310,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-filter:
     dependencies:
@@ -2670,19 +2335,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -2739,19 +2396,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-find-replace:
     dependencies:
@@ -2787,19 +2436,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-formula:
     dependencies:
@@ -2839,17 +2480,13 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
       '@vitejs/plugin-react':
         specifier: ^4.3.1
-<<<<<<< HEAD
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 4.3.1(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -2863,19 +2500,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-formula-ui:
     dependencies:
@@ -2978,19 +2607,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-hyper-link-ui:
     dependencies:
@@ -3047,19 +2668,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-numfmt:
     dependencies:
@@ -3093,7 +2706,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -3110,19 +2723,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-sort:
     dependencies:
@@ -3146,19 +2751,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-sort-ui:
     dependencies:
@@ -3212,19 +2809,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-thread-comment:
     dependencies:
@@ -3278,19 +2867,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-thread-comment-base:
     dependencies:
@@ -3326,19 +2907,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-ui:
     dependencies:
@@ -3381,7 +2954,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -3398,19 +2971,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -3461,19 +3026,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/slides:
     dependencies:
@@ -3494,19 +3051,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/slides-ui:
     dependencies:
@@ -3543,7 +3092,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -3560,19 +3109,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/telemetry:
     dependencies:
@@ -3602,19 +3143,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/thread-comment:
     dependencies:
@@ -3635,19 +3168,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/thread-comment-ui:
     dependencies:
@@ -3701,19 +3226,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/ui:
     dependencies:
@@ -3743,24 +3260,24 @@ importers:
         version: 1.10.0
       rc-notification:
         specifier: ^5.6.1
-        version: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util:
         specifier: ^5.43.0
         version: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
-        version: 3.5.9(typescript@5.6.2)
+        version: 3.4.38(typescript@5.6.2)
     devDependencies:
       '@testing-library/react':
         specifier: ^16.0.1
-        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@testing-library/react-hooks':
         specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 8.0.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
@@ -3786,19 +3303,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages/umd:
     dependencies:
@@ -3998,7 +3507,7 @@ importers:
     devDependencies:
       '@types/react':
         specifier: ^18.3.9
-        version: 18.3.9
+        version: 18.3.10
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -4012,19 +3521,11 @@ importers:
         specifier: ^5.6.2
         version: 5.6.2
       vite:
-<<<<<<< HEAD
         specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-        specifier: ^5.4.7
-        version: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.1
-        version: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
 packages:
 
@@ -4231,10 +3732,6 @@ packages:
 
   '@babel/runtime@7.25.4':
     resolution: {integrity: sha512-DSgLeL/FNcpXuzav5wfYvHCGvynXkJbn3Zvc3823AEe9nPwW9IK4UoCSS5yGymmQzN0pCPvivtgS6/8U2kkm1w==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.25.6':
-    resolution: {integrity: sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.4.5':
@@ -4820,8 +4317,8 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
 
-  '@eslint-community/regexpp@4.11.1':
-    resolution: {integrity: sha512-m4DVN9ZqskZoLU5GlWZadwDnYo3vAEydiUayB9widCl9ffWx2IvPnp6n3on5rJmziJSw9Bv+Z3ChDVdMwXCY8Q==}
+  '@eslint-community/regexpp@4.11.0':
+    resolution: {integrity: sha512-G/M/tIiMrTAxEWRfLfQJMmGNX28IxBg4PBz8XqQhqUHLFI6TL2htpIB1iQCj144V5ee/JaKyT9/WZ0MGZWfA7A==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
   '@eslint-react/ast@1.14.2':
@@ -5269,8 +4766,8 @@ packages:
     peerDependencies:
       release-it: ^17.0.0
 
-  '@rollup/pluginutils@5.1.2':
-    resolution: {integrity: sha512-/FIdS3PyZ39bjZlwqFnWqCOVnW7o963LtKMwQOD0NhQqw22gSr2YY1afu3FxRip4ZCZNsD5jq6Aaz6QV3D/Njw==}
+  '@rollup/pluginutils@5.1.0':
+    resolution: {integrity: sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -5388,117 +4885,117 @@ packages:
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
     engines: {node: '>=18'}
 
-  '@storybook/addon-actions@8.3.3':
-    resolution: {integrity: sha512-cbpksmld7iADwDGXgojZ4r8LGI3YA3NP68duAHg2n1dtnx1oUaFK5wd6dbNuz7GdjyhIOIy3OKU1dAuylYNGOQ==}
+  '@storybook/addon-actions@8.3.4':
+    resolution: {integrity: sha512-1y0yD3upKcyzNwwA6loAGW2cRDqExwl4oAT7GJQA4tmabI+fNwmANSgU/ezLvvSUf4Qo0eJHg2Zcn8y+Apq2eA==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-backgrounds@8.3.3':
-    resolution: {integrity: sha512-aX0OIrtjIB7UgSaiv20SFkfC1iWwJIGMPsPSJ5ZPhXIIOWIEBtSujh8YXwjDEXSC4DOHalmeT4bitRRe5KrVKA==}
+  '@storybook/addon-backgrounds@8.3.4':
+    resolution: {integrity: sha512-o3nl7cN3x8erJNxLEv8YptanEQAnbqnaseOAsvSC6/nnSAcRYBSs3BvekKvo4CcpS2mxn7F5NJTBFYnCXzy8EA==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-controls@8.3.3':
-    resolution: {integrity: sha512-78xRtVpY7eX/Lti00JLgwYCBRB6ZcvzY3SWk0uQjEqcTnQGoQkVg2L7oWFDlDoA1LBY18P5ei2vu8MYT9GXU4g==}
+  '@storybook/addon-controls@8.3.4':
+    resolution: {integrity: sha512-qQcaK6dczsb6wXkzGZKOjUYNA7FfKBewRv6NvoVKYY6LfhllGOkmUAtYpdtQG8adsZWTSoZaAOJS2vP2uM67lw==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-docs@8.3.3':
-    resolution: {integrity: sha512-REUandqq1RnMNOhsocRwx5q2fdlBAYPTDFlKASYfEn4Ln5NgbQRGxOAWl7yXAAFzbDmUDU7K20hkauecF0tyMw==}
+  '@storybook/addon-docs@8.3.4':
+    resolution: {integrity: sha512-TWauhqF/gJgfwPuWeM6KM3LwC+ErCOM+K2z16w3vgao9s67sij8lnrdAoQ0hjA+kw2/KAdCakFS6FyciG81qog==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-essentials@8.3.3':
-    resolution: {integrity: sha512-E/uXoUYcg8ulG3lVbsEKb4v5hnMeGkq9YJqiZYKgVK7iRFa6p4HeVB1wU1adnm7RgjWvh+p0vQRo4KL2CTNXqw==}
+  '@storybook/addon-essentials@8.3.4':
+    resolution: {integrity: sha512-C3+3hpmSn/8zdx5sXEP0eE6zMzxgRosHVZYfe9nBcMiEDp6UKVUyHVetWxEULOEgN46ysjcpllZ0bUkRYxi2IQ==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-highlight@8.3.3':
-    resolution: {integrity: sha512-MB084xJM66rLU+iFFk34kjLUiAWzDiy6Kz4uZRa1CnNqEK0sdI8HaoQGgOxTIa2xgJor05/8/mlYlMkP/0INsQ==}
+  '@storybook/addon-highlight@8.3.4':
+    resolution: {integrity: sha512-rxZTeuZyZ7RnU+xmRhS01COFLbGnVEmlUNxBw8ArsrTEZKW5PbKpIxNLTj9F0zdH8H0MfryJGP+Aadcm0oHWlw==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-interactions@8.3.3':
-    resolution: {integrity: sha512-3w5tpCGYdF33wF44xEhTS3Zmcwd6nITtwy5q+PJvHCJAm3fpjzL3xrjtlHKDvXNwYacJPRCbWKn2QwtxZIdN0g==}
+  '@storybook/addon-interactions@8.3.4':
+    resolution: {integrity: sha512-ORxqe35wUmF7EDHo45mdDHiju3Ryk2pZ1vO9PyvW6ZItNlHt/IxAr7T/TysGejZ/eTBg6tMZR3ExGky3lTg/CQ==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-links@8.3.3':
-    resolution: {integrity: sha512-rz4KEbzr1ca4zZEZwbOnhKiaEsokCl1KkngxT/C1YIkpW908j/kg2nnIb5MrtlAW1nirXguAR74t6CGntvdU9w==}
+  '@storybook/addon-links@8.3.4':
+    resolution: {integrity: sha512-R1DjARmxRIKJDGIG6uxmQ1yFNyoQbb+QIPUFjgWCak8+AdLJbC7W+Esvo9F5hQfh6czyy0piiM3qj5hpQJVh3A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-      storybook: ^8.3.3
+      storybook: ^8.3.4
     peerDependenciesMeta:
       react:
         optional: true
 
-  '@storybook/addon-measure@8.3.3':
-    resolution: {integrity: sha512-R20Z83gnxDRrocES344dw1Of/zDhe3XHSM6TLq80UQTJ9PhnMI+wYHQlK9DsdP3KiRkI+pQA6GCOp0s2ZRy5dg==}
+  '@storybook/addon-measure@8.3.4':
+    resolution: {integrity: sha512-IJ6WKEbqmG+r7sukFjo+bVmPB2Zry04sylGx/OGyOh7zIhhqAqpwOwMHP0uQrc3tLNnUM6qB/o83UyYX79ql+A==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-outline@8.3.3':
-    resolution: {integrity: sha512-OwqYfieNuqSqWNtUZLu3UmsfQNnwA2UaSMBZyeC2Dte9Jd59PPYggcWmH+b0S6OTbYXWNAUK5U6WdK+X9Ypzdw==}
+  '@storybook/addon-outline@8.3.4':
+    resolution: {integrity: sha512-kRRJTTLKM8gMfeh/e83djN5XLlc0hFtr9zKWxuZxaXt9Hmr+9tH/PRFtVK/S4SgqnBDoXk49Wgv6raiwj5/e3A==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
   '@storybook/addon-styling-webpack@1.0.0':
     resolution: {integrity: sha512-jo1kzn7pi+NA+LZxrWoRvW6w7dXIKY/BjTG80XX2uU92lIKT+X1k/9vYk/0KPVK3Bsf4tO6ToAuqIRyOk7MHtg==}
     peerDependencies:
       webpack: ^5.0.0
 
-  '@storybook/addon-toolbars@8.3.3':
-    resolution: {integrity: sha512-4WyiVqDm4hlJdENIVQg9pLNLdfhnNKa+haerYYSzTVjzYrUx0X6Bxafshq+sud6aRtSYU14abwP56lfW8hgTlA==}
+  '@storybook/addon-toolbars@8.3.4':
+    resolution: {integrity: sha512-Km1YciVIxqluDbd1xmHjANNFyMonEOtnA6e4MrnBnC9XkPXSigeFlj0JvxyI/zjBsLBoFRmQiwq55W6l3hQ9sA==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/addon-viewport@8.3.3':
-    resolution: {integrity: sha512-2S+UpbKAL+z1ppzUCkixjaem2UDMkfmm/kyJ1wm3A/ofGLYi4fjMSKNRckk+7NdolXGQJjBo0RcaotUTxFIFwQ==}
+  '@storybook/addon-viewport@8.3.4':
+    resolution: {integrity: sha512-fU4LdXSSqIOLbCEh2leq/tZUYlFliXZBWr/+igQHdUoU7HY8RIImXqVUaR9wlCaTb48WezAWT60vJtwNijyIiQ==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
   '@storybook/addon-webpack5-compiler-swc@1.0.5':
     resolution: {integrity: sha512-1NlM3noit2vA22OyWb8Ma2lhcEKCS1Snv2kr+EkaVABUqNDfVc9AD/GgYQhF7F/2CoF5N2JU7uzXDzFHd5TzZg==}
     engines: {node: '>=18'}
 
-  '@storybook/blocks@8.3.3':
-    resolution: {integrity: sha512-8Vsvxqstop3xfbsx3Dn1nEjyxvQUcOYd8vpxyp2YumxYO8FlXIRuYL6HAkYbcX8JexsKvCZYxor52D2vUGIKZg==}
+  '@storybook/blocks@8.3.4':
+    resolution: {integrity: sha512-1g4aCrd5CcN+pVhF2ATu9ZRVvAIgBMb2yF9KkCuTpdvqKDuDNK3sGb0CxjS7jp3LOvyjJr9laTOQsz8v8MQc5A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-      storybook: ^8.3.3
+      storybook: ^8.3.4
     peerDependenciesMeta:
       react:
         optional: true
       react-dom:
         optional: true
 
-  '@storybook/builder-webpack5@8.3.3':
-    resolution: {integrity: sha512-4zBvHZoKjm+ZgZ6CpGEFlgGMfoSbHiKdwFLG+t/hV6zKDN/tmBC65KCjZ6pq/RUukvDJyfFLOiOZpc8JyTVFZw==}
+  '@storybook/builder-webpack5@8.3.4':
+    resolution: {integrity: sha512-EI6ULxRap5f4YSHf5xKUQqkoNGm4MVxJR/+GImx8K5fuZ+xYw2SdYdTu6dG8V+zTh1WZ4MDwmRb6aEbXvRcrFw==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@storybook/components@8.3.3':
-    resolution: {integrity: sha512-i2JYtesFGkdu+Hwuj+o9fLuO3yo+LPT1/8o5xBVYtEqsgDtEAyuRUWjSz8d8NPtzloGPOv5kvR6MokWDfbeMfw==}
+  '@storybook/components@8.3.4':
+    resolution: {integrity: sha512-iQzLJd87uGbFBbYNqlrN/ABrnx3dUrL0tjPCarzglzshZoPCNOsllJeJx5TJwB9kCxSZ8zB9TTOgr7NXl+oyVA==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/core-webpack@8.3.3':
-    resolution: {integrity: sha512-GKEpGGe8gzf+2BCZ4PeUb5JBcLPF3TS5fRrm8Zp5+iOc8Y51xfys2ifL3KqqZR0KLig9LcLlKMnFlSXPb4a7Cw==}
+  '@storybook/core-webpack@8.3.4':
+    resolution: {integrity: sha512-Ftsk/8RANt46roiHT0hTyqfMPUO2/jV7EvlOR5H2XKhSbssA9njK04O2ry+BbfgKItIDIx0LTiz/I575qBCCnQ==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
-  '@storybook/core@8.3.3':
-    resolution: {integrity: sha512-pmf2bP3fzh45e56gqOuBT8sDX05hGdUKIZ/hcI84d5xmd6MeHiPW8th2v946wCHcxHzxib2/UU9vQUh+mB4VNw==}
+  '@storybook/core@8.3.4':
+    resolution: {integrity: sha512-4PZB91JJpuKfcjeOR2LXj3ABaPLLSd2P/SfYOKNCygrDstsQa/yay3/yN5Z9yi1cIG84KRr6/sUW+0x8HsGLPg==}
 
-  '@storybook/csf-plugin@8.3.3':
-    resolution: {integrity: sha512-7AD7ojpXr3THqpTcEI4K7oKUfSwt1hummgL/cASuQvEPOwAZCVZl2gpGtKxcXhtJXTkn3GMCAvlYMoe7O/1YWw==}
+  '@storybook/csf-plugin@8.3.4':
+    resolution: {integrity: sha512-ZMFWYxeTN4GxCn8dyIH4roECyLDy29yv/QKM+pHM3AC5Ny2HWI35SohWao4fGBAFxPQFbR5hPN8xa6ofHPSSTg==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
   '@storybook/csf@0.1.11':
     resolution: {integrity: sha512-dHYFQH3mA+EtnCkHXzicbLgsvzYjcDJ1JWsogbItZogkPHgSJM/Wr71uMkcvw8v9mmCyP4NpXJuu6bPoVsOnzg==}
@@ -5513,35 +5010,40 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@storybook/instrumenter@8.3.3':
-    resolution: {integrity: sha512-ZiODB9EwCQkl4PBxGJjBHXRTLxcNs68ZZvR+xeMr0eMFzzlJG+trXoX5kK95oA4BFhGN+3uM0Zl3MoRjBtJTNA==}
+  '@storybook/instrumenter@8.3.0':
+    resolution: {integrity: sha512-oJmX8jbNKbPBlNMItRvEoaVAJWX1u6jsqXdIcNRCXo3PDdVnunVYz8vVkG8mbL8Cp/cKlsuQk7YBZA4IM5mRgg==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.0
 
-  '@storybook/manager-api@8.3.3':
-    resolution: {integrity: sha512-Na4U+McOeVUJAR6qzJfQ6y2Qt0kUgEDUriNoAn+curpoKPTmIaZ79RAXBzIqBl31VyQKknKpZbozoRGf861YaQ==}
+  '@storybook/instrumenter@8.3.4':
+    resolution: {integrity: sha512-jVhfNOPekOyJmta0BTkQl9Z6rgRbFHlc0eV4z1oSrzaawSlc9TFzAeDCtCP57vg3FuBX8ydDYAvyZ7s4xPpLyg==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
+
+  '@storybook/manager-api@8.3.4':
+    resolution: {integrity: sha512-tBx7MBfPUrKSlD666zmVjtIvoNArwCciZiW/UJ8IWmomrTJRfFBnVvPVM2gp1lkDIzRHYmz5x9BHbYaEDNcZWQ==}
+    peerDependencies:
+      storybook: ^8.3.4
 
   '@storybook/node-logger@8.1.6':
     resolution: {integrity: sha512-IZEiTLFHu8Oom/vdEGpisSw5CfU+cw6/fTaX1P3EVClFOWVuy8/3X5MPu4wJH3jPym6E2DBduIUFeRsiuq61gA==}
 
-  '@storybook/preset-react-webpack@8.3.3':
-    resolution: {integrity: sha512-uvGtGQ2BDzmHCDl0jCvoAzbD7AWPf9nU7zQsgvpCgs7BiHQVXq40ZU+aFhU74K/WLvdArMOoyZPU70dJGzvdKg==}
+  '@storybook/preset-react-webpack@8.3.4':
+    resolution: {integrity: sha512-aNbozlcBhuX71anW5+2Ujj+vtXHPsYLf5RKOL82lMkCc1q2CzeMuhUB2BoSsU4R4GVnXVpgRPq+3+qLAQMwr6Q==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-      storybook: ^8.3.3
+      storybook: ^8.3.4
       typescript: '*'
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@storybook/preview-api@8.3.3':
-    resolution: {integrity: sha512-GP2QlaF3BBQGAyo248N7549YkTQjCentsc1hUvqPnFWU4xfjkejbnFk8yLaIw0VbYbL7jfd7npBtjZ+6AnphMQ==}
+  '@storybook/preview-api@8.3.4':
+    resolution: {integrity: sha512-/YKQ3QDVSHmtFXXCShf5w0XMlg8wkfTpdYxdGv1CKFV8DU24f3N7KWulAgeWWCWQwBzZClDa9kzxmroKlQqx3A==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
 
   '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0':
     resolution: {integrity: sha512-KUqXC3oa9JuQ0kZJLBhVdS4lOneKTOopnNBK4tUAgoxWQ3u/IjzdueZjFr7gyBrXMoU6duutk3RQR9u8ZpYJ4Q==}
@@ -5556,13 +5058,20 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       storybook: ^8.3.3
 
-  '@storybook/react-webpack5@8.3.3':
-    resolution: {integrity: sha512-ikD48XvgmP/kegnjJ9+RoiKGF9IdVjOc1MFUnnIU1TNLwCsqkwf5jGcOvFTAzK8Phu/ykwUBWT41UqBptkrHEQ==}
+  '@storybook/react-dom-shim@8.3.4':
+    resolution: {integrity: sha512-L4llDvjaAzqPx6h4ddZMh36wPr75PrI2S8bXy+flLqAeVRYnRt4WNKGuxqH0t0U6MwId9+vlCZ13JBfFuY7eQQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      storybook: ^8.3.4
+
+  '@storybook/react-webpack5@8.3.4':
+    resolution: {integrity: sha512-N8dAu9fBsWaa4cw5GTo7z6ANes+PA57oK020RLdt9KSAv5qO9zZYnysC2oq5o9q8W9D+L8wCOBpy6jEQPAyiTQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
-      storybook: ^8.3.3
+      storybook: ^8.3.4
       typescript: '>= 4.2.x'
     peerDependenciesMeta:
       typescript:
@@ -5583,20 +5092,40 @@ packages:
       typescript:
         optional: true
 
-  '@storybook/test@8.3.3':
-    resolution: {integrity: sha512-uZ8nMIovfI2ry989K2+cYAeEVD/3dpjj2+Rbmy7DiZWWVhFALfmqaTRkzZfShLmlH0TFv+rfcBPihGccBtw0FQ==}
+  '@storybook/react@8.3.4':
+    resolution: {integrity: sha512-PA7iQL4/9X2/iLrv+AUPNtlhTHJWhDao9gQIT1Hef39FtFk+TU9lZGbv+g29R1H9V3cHP5162nG2aTu395kmbA==}
+    engines: {node: '>=18.0.0'}
     peerDependencies:
-      storybook: ^8.3.3
+      '@storybook/test': 8.3.4
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      storybook: ^8.3.4
+      typescript: '>= 4.2.x'
+    peerDependenciesMeta:
+      '@storybook/test':
+        optional: true
+      typescript:
+        optional: true
 
-  '@storybook/theming@8.3.3':
-    resolution: {integrity: sha512-gWJKetI6XJQgkrvvry4ez10+jLaGNCQKi5ygRPM9N+qrjA3BB8F2LCuFUTBuisa4l64TILDNjfwP/YTWV5+u5A==}
+  '@storybook/test@8.3.0':
+    resolution: {integrity: sha512-d8y8ST8YY/pSjTxBcWitKM7YbbupN8D0obVlciZRt6WW3o8WUz6iwMuzuJuiUVwtxiRtdKL9jygC5M+aaCpFYQ==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.0
 
-  '@storybook/types@8.3.3':
-    resolution: {integrity: sha512-wV1kupG1tfTMOXaBrtVHXuqp19vURVDqWTQX6nqkoUFD7Xb1lz/YNVeGP1uT/zJdJy42/HIyoib9JPx9h0Vx9w==}
+  '@storybook/test@8.3.4':
+    resolution: {integrity: sha512-HRiUenitln8QPHu6DEWUg9s9cEoiGN79lMykzXzw9shaUvdEIhWCsh82YKtmB3GJPj6qcc6dZL/Aio8srxyGAg==}
     peerDependencies:
-      storybook: ^8.3.3
+      storybook: ^8.3.4
+
+  '@storybook/theming@8.3.4':
+    resolution: {integrity: sha512-D4XVsQgTtpHEHLhwkx59aGy1GBwOedVr/mNns7hFrH8FjEpxrrWCuZQASq1ZpCl8LXlh7uvmT5sM2rOdQbGuGg==}
+    peerDependencies:
+      storybook: ^8.3.4
+
+  '@storybook/types@8.3.4':
+    resolution: {integrity: sha512-kIyb0g8C6EizI0Mv+l6L6yjCJe9/vW3UvgsZL5BXqs8THTAfs3/+A9Q9jDEMovSIVI3EgesO79+OCEazDUHmOA==}
+    peerDependencies:
+      storybook: ^8.3.4
 
   '@stylistic/eslint-plugin@2.8.0':
     resolution: {integrity: sha512-Ufvk7hP+bf+pD35R/QfunF793XlSRIC7USr3/EdgduK9j13i2JjmsM0LUz3/foS+jDYp2fzyWZA9N44CPur0Ow==}
@@ -5839,19 +5368,8 @@ packages:
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
-<<<<<<< HEAD
-  '@types/node@22.7.3':
-    resolution: {integrity: sha512-qXKfhXXqGTyBskvWEzJZPUxSslAiLaB6JGP1ic/XTH9ctGgzdgYguuLP1C601aRTSDNlLb0jbKqXjZ48GNraSA==}
-=======
-  '@types/node@18.19.47':
-    resolution: {integrity: sha512-1f7dB3BL/bpd9tnDJrrHb66Y+cVrhxSOTGorRNdHwYTUlTay3HuTDPKo9a/4vX9pMQkhYBcAbL4jQdNlhCFP9A==}
-
-  '@types/node@22.5.4':
-    resolution: {integrity: sha512-FDuKUJQm/ju9fT/SeX/6+gBzoPzlVCzfzmGkwKvRHQVxi4BntVbyIwf6a4Xn62mrvndLiml6z/UBXIdEVjQLXg==}
-
-  '@types/node@22.7.0':
-    resolution: {integrity: sha512-MOdOibwBs6KW1vfqz2uKMlxq5xAfAZ98SZjO8e3XnAbFnTJtAspqhWk7hrdSAs9/Y14ZWMiy7/MxMUzAOadYEw==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@types/node@22.7.4':
+    resolution: {integrity: sha512-y+NPi1rFzDs1NdQHHToqeiX2TIS79SWEAw9GYhkkx8bD0ChpfqC+n2j5OXOCpzfojBEBt6DnEnnG9MY0zk1XLg==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -5865,8 +5383,8 @@ packages:
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
 
-  '@types/prop-types@15.7.13':
-    resolution: {integrity: sha512-hCZTSvwbzWGvhqxp/RqVqwU999pBf2vp7hzIjiYOsl8wqOmUxkQ6ddw1cV3l8811+kdUFus/q4d1Y3E3SyEifA==}
+  '@types/prop-types@15.7.12':
+    resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
 
   '@types/qs@6.9.15':
     resolution: {integrity: sha512-uXHQKES6DQKKCLh441Xv/dwxOq1TVS3JPUMlEqoEglvlhR6Mxnlew/Xq/LRVHpLyk7iK3zODe1qYHIMltO7XGg==}
@@ -5886,8 +5404,8 @@ packages:
   '@types/react-transition-group@4.4.11':
     resolution: {integrity: sha512-RM05tAniPZ5DZPzzNFP+DmrcOdD0efDUxMy3145oljWSl3x9ZV5vhme98gTxFrj2lhXvmGNnUiuDyJgY9IKkNA==}
 
-  '@types/react@18.3.9':
-    resolution: {integrity: sha512-+BpAVyTpJkNWWSSnaLBk6ePpHLOGJKnEQNbINNovPWzvEUyAe3e+/d494QdEh71RekM/qV7lw6jzf1HGrJyAtQ==}
+  '@types/react@18.3.10':
+    resolution: {integrity: sha512-02sAAlBnP39JgXwkAq3PeU9DVaaGpZyF3MGcC0MKgQVkZor5IiiDAipVaxQHtDJAmO4GIy/rVBy/LzVj76Cyqg==}
 
   '@types/resolve@1.20.6':
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -5938,21 +5456,16 @@ packages:
       typescript:
         optional: true
 
+  '@typescript-eslint/scope-manager@8.5.0':
+    resolution: {integrity: sha512-06JOQ9Qgj33yvBEx6tpC8ecP9o860rsR22hWMEd12WcTRrfaFgHr2RB/CA/B+7BMhHkXT4chg2MyboGdFGawYg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   '@typescript-eslint/scope-manager@8.7.0':
     resolution: {integrity: sha512-87rC0k3ZlDOuz82zzXRtQ7Akv3GKhHs0ti4YcbAJtaomllXoSO8hi7Ix3ccEvCd824dy9aIX+j3d2UMAfCtVpg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-<<<<<<< HEAD
   '@typescript-eslint/type-utils@8.7.0':
     resolution: {integrity: sha512-tl0N0Mj3hMSkEYhLkjREp54OSb/FI6qyCzfiiclvJvOqre6hsZTGSnHtmFLDU8TIM62G7ygEa1bI08lcuRwEnQ==}
-=======
-  '@typescript-eslint/scope-manager@8.7.0':
-    resolution: {integrity: sha512-87rC0k3ZlDOuz82zzXRtQ7Akv3GKhHs0ti4YcbAJtaomllXoSO8hi7Ix3ccEvCd824dy9aIX+j3d2UMAfCtVpg==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/type-utils@8.5.0':
-    resolution: {integrity: sha512-N1K8Ix+lUM+cIDhL2uekVn/ZD7TZW+9/rwz8DclQpcQ9rk4sIL5CAlBC0CugWKREmDjBzI/kQqU4wkg46jWLYA==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '*'
@@ -5960,21 +5473,16 @@ packages:
       typescript:
         optional: true
 
-  '@typescript-eslint/types@8.7.0':
-    resolution: {integrity: sha512-LLt4BLHFwSfASHSF2K29SZ+ZCsbQOM+LuarPjRUuHm+Qd09hSe3GCeaQbcCr+Mik+0QFRmep/FyZBO6fJ64U3w==}
+  '@typescript-eslint/types@8.5.0':
+    resolution: {integrity: sha512-qjkormnQS5wF9pjSi6q60bKUHH44j2APxfh9TQRXK8wbYVeDYYdYJGIROL87LGZZ2gz3Rbmjc736qyL8deVtdw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-<<<<<<< HEAD
-  '@typescript-eslint/typescript-estree@8.7.0':
-    resolution: {integrity: sha512-MC8nmcGHsmfAKxwnluTQpNqceniT8SteVwd2voYlmiSWGOtjvGXdPl17dYu2797GVscK30Z04WRM28CrKS9WOg==}
-=======
   '@typescript-eslint/types@8.7.0':
     resolution: {integrity: sha512-LLt4BLHFwSfASHSF2K29SZ+ZCsbQOM+LuarPjRUuHm+Qd09hSe3GCeaQbcCr+Mik+0QFRmep/FyZBO6fJ64U3w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript-eslint/typescript-estree@8.5.0':
     resolution: {integrity: sha512-vEG2Sf9P8BPQ+d0pxdfndw3xIXaoSjliG0/Ejk7UggByZPKXmJmw3GW5jV2gHNQNawBUyfahoSiCFVov0Ruf7Q==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       typescript: '*'
@@ -5982,10 +5490,6 @@ packages:
       typescript:
         optional: true
 
-<<<<<<< HEAD
-  '@typescript-eslint/utils@8.7.0':
-    resolution: {integrity: sha512-ZbdUdwsl2X/s3CiyAu3gOlfQzpbuG3nTWKPoIvAu1pu5r8viiJvv2NPN2AqArL35NCYtw/lrPPfM4gxrMLNLPw==}
-=======
   '@typescript-eslint/typescript-estree@8.7.0':
     resolution: {integrity: sha512-MC8nmcGHsmfAKxwnluTQpNqceniT8SteVwd2voYlmiSWGOtjvGXdPl17dYu2797GVscK30Z04WRM28CrKS9WOg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -5997,18 +5501,20 @@ packages:
 
   '@typescript-eslint/utils@8.5.0':
     resolution: {integrity: sha512-6yyGYVL0e+VzGYp60wvkBHiqDWOpT63pdMV2CVG4LVDd5uR6q1qQN/7LafBZtAtNIn/mqXjsSeS5ggv/P0iECw==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
-<<<<<<< HEAD
-=======
+  '@typescript-eslint/utils@8.7.0':
+    resolution: {integrity: sha512-ZbdUdwsl2X/s3CiyAu3gOlfQzpbuG3nTWKPoIvAu1pu5r8viiJvv2NPN2AqArL35NCYtw/lrPPfM4gxrMLNLPw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0
+
   '@typescript-eslint/visitor-keys@8.5.0':
     resolution: {integrity: sha512-yTPqMnbAZJNy2Xq2XU8AdtOW9tJIr+UQb64aXB9f3B1498Zx9JorVgFJcZpEc9UBuCCrdzKID2RGAMkYcDtZOw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
   '@typescript-eslint/visitor-keys@8.7.0':
     resolution: {integrity: sha512-b1tx0orFCCh/THWPQa2ZwWzvOeyzzp36vkJYOpVg0u8UVOIsfVrnuC9FqAw9gRKn+rG2VmWQ/zDJZzkxUnj/XQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
@@ -6107,26 +5613,26 @@ packages:
   '@vitest/utils@2.1.1':
     resolution: {integrity: sha512-Y6Q9TsI+qJ2CC0ZKj6VBb+T8UPz593N113nnUykqwANqhgf3QkZeHFlusgKLTqrnVHbj/XDKZcDHol+dxVT+rQ==}
 
-  '@volar/language-core@2.4.5':
-    resolution: {integrity: sha512-F4tA0DCO5Q1F5mScHmca0umsi2ufKULAnMOVBfMsZdT4myhVl4WdKRwCaKcfOkIEuyrAVvtq1ESBdZ+rSyLVww==}
+  '@volar/language-core@2.4.4':
+    resolution: {integrity: sha512-kO9k4kTLfxpg+6lq7/KAIv3m2d62IHuCL6GbVgYZTpfKvIGoAIlDxK7pFcB/eczN2+ydg/vnyaeZ6SGyZrJw2w==}
 
-  '@volar/source-map@2.4.5':
-    resolution: {integrity: sha512-varwD7RaKE2J/Z+Zu6j3mNNJbNT394qIxXwdvz/4ao/vxOfyClZpSDtLKkwWmecinkOVos5+PWkWraelfMLfpw==}
+  '@volar/source-map@2.4.4':
+    resolution: {integrity: sha512-xG3PZqOP2haG8XG4Pg3PD1UGDAdqZg24Ru8c/qYjYAnmcj6GBR64mstx+bZux5QOyRaJK+/lNM/RnpvBD3489g==}
 
-  '@volar/typescript@2.4.5':
-    resolution: {integrity: sha512-mcT1mHvLljAEtHviVcBuOyAwwMKz1ibXTi5uYtP/pf4XxoAzpdkQ+Br2IC0NPCvLCbjPZmbf3I0udndkfB1CDg==}
+  '@volar/typescript@2.4.4':
+    resolution: {integrity: sha512-QQMQRVj0fVHJ3XdRKiS1LclhG0VBXdFYlyuHRQF/xLk2PuJuHNWP26MDZNvEVCvnyUQuUQhIAfylwY5TGPgc6w==}
 
-  '@vue/compiler-core@3.5.9':
-    resolution: {integrity: sha512-KE1sCdwqSKq0CQ/ltg3XnlMTKeinjegIkuFsuq9DKvNPmqLGdmI51ChZdGBBRXIvEYTLm8X/JxOuBQ1HqF/+PA==}
+  '@vue/compiler-core@3.4.38':
+    resolution: {integrity: sha512-8IQOTCWnLFqfHzOGm9+P8OPSEDukgg3Huc92qSG49if/xI2SAwLHQO2qaPQbjCWPBcQoO1WYfXfTACUrWV3c5A==}
 
-  '@vue/compiler-dom@3.5.9':
-    resolution: {integrity: sha512-gEAURwPo902AsJF50vl59VaWR+Cx6cX9SoqLYHu1jq9hDbmQlXvpZyYNIIbxa2JTJ+FD/oBQweVUwuTQv79KTg==}
+  '@vue/compiler-dom@3.4.38':
+    resolution: {integrity: sha512-Osc/c7ABsHXTsETLgykcOwIxFktHfGSUDkb05V61rocEfsFDcjDLH/IHJSNJP+/Sv9KeN2Lx1V6McZzlSb9EhQ==}
 
-  '@vue/compiler-sfc@3.5.9':
-    resolution: {integrity: sha512-kp9qawcTXakYm0TN6YAwH24IurSywoXh4fWhRbLu0at4UVyo994bhEzJlQn82eiyqtut4GjkQodSfn8drFbpZQ==}
+  '@vue/compiler-sfc@3.4.38':
+    resolution: {integrity: sha512-s5QfZ+9PzPh3T5H4hsQDJtI8x7zdJaew/dCGgqZ2630XdzaZ3AD8xGZfBqpT8oaD/p2eedd+pL8tD5vvt5ZYJQ==}
 
-  '@vue/compiler-ssr@3.5.9':
-    resolution: {integrity: sha512-fb1g2mQv32QzIei76rlXRTz08Grw+ZzBXSQfHo4StGFutm/flyebw3dGJkexKwcU3GjX9s5fIGjEv/cjO8j8Yw==}
+  '@vue/compiler-ssr@3.4.38':
+    resolution: {integrity: sha512-YXznKFQ8dxYpAz9zLuVvfcXhc31FSPFDcqr0kyujbOwNhlmaNvL2QfIy+RZeJgSn5Fk54CWoEUeW+NVBAogGaw==}
 
   '@vue/compiler-vue2@2.7.16':
     resolution: {integrity: sha512-qYC3Psj9S/mfu9uVi5WvNZIzq+xnXMhOwbTFKKDD7b1lhpnn71jXSFdTQ+WsIEk0ONCd7VV2IMm7ONl6tbQ86A==}
@@ -6139,22 +5645,22 @@ packages:
       typescript:
         optional: true
 
-  '@vue/reactivity@3.5.9':
-    resolution: {integrity: sha512-88ApgNZ6yPYpyYkTfXzcbWk6O8+LrPRIpa/U4AdeTzpfRUO+EUt5jemnTBVSlAUNmlYY96xa5feUNEq+BouLog==}
+  '@vue/reactivity@3.4.38':
+    resolution: {integrity: sha512-4vl4wMMVniLsSYYeldAKzbk72+D3hUnkw9z8lDeJacTxAkXeDAP1uE9xr2+aKIN0ipOL8EG2GPouVTH6yF7Gnw==}
 
-  '@vue/runtime-core@3.5.9':
-    resolution: {integrity: sha512-YAeP0zNkjSl5mEc1NxOg9qoAhLNbREElHAhfYbMXT57oF0ixehEEJWBhg2uvVxslCGh23JhpEAyMvJrJHW9WGg==}
+  '@vue/runtime-core@3.4.38':
+    resolution: {integrity: sha512-21z3wA99EABtuf+O3IhdxP0iHgkBs1vuoCAsCKLVJPEjpVqvblwBnTj42vzHRlWDCyxu9ptDm7sI2ZMcWrQqlA==}
 
-  '@vue/runtime-dom@3.5.9':
-    resolution: {integrity: sha512-5Oq/5oenpB9lw94moKvOHqBDEaMSyDmcu2HS8AtAT6/pwdo/t9fR9aVtLh6FzYGGqZR9yRfoHAN6P7goblq1aA==}
+  '@vue/runtime-dom@3.4.38':
+    resolution: {integrity: sha512-afZzmUreU7vKwKsV17H1NDThEEmdYI+GCAK/KY1U957Ig2NATPVjCROv61R19fjZNzMmiU03n79OMnXyJVN0UA==}
 
-  '@vue/server-renderer@3.5.9':
-    resolution: {integrity: sha512-tbuUsZfMWGazR9LXLNiiDSTwkO8K9sLyR70diY+FbQmKmh7236PPz4jkTxymelV8D89IJUGtbfe4VdmpHkmuxg==}
+  '@vue/server-renderer@3.4.38':
+    resolution: {integrity: sha512-NggOTr82FbPEkkUvBm4fTGcwUY8UuTsnWC/L2YZBmvaQ4C4Jl/Ao4HHTB+l7WnFCt5M/dN3l0XLuyjzswGYVCA==}
     peerDependencies:
-      vue: 3.5.9
+      vue: 3.4.38
 
-  '@vue/shared@3.5.9':
-    resolution: {integrity: sha512-8wiT/m0mnsLhTME0mPgc57jv+4TipRBSAAmheUdYgiOaO6AobZPNOmm87ub4np65VVDgLcWxc+Edc++5Wyz1uA==}
+  '@vue/shared@3.4.38':
+    resolution: {integrity: sha512-q0xCiLkuWWQLzVrecPb0RMsNWyxICOjPrcrwxTUEHb1fsnvni4dcuyG7RT/Ie7VPTvnjzIaWzRMUBsrqNj/hhw==}
 
   '@webassemblyjs/ast@1.12.1':
     resolution: {integrity: sha512-EKfMUOPRRUTy5UII4qJDGPpqfwjOmZ5jeGFwid9mnoqIFK+e0vqoi1qH56JpmZSzEL53jKnNzScdmftJyG5xWg==}
@@ -6519,11 +6025,6 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  browserslist@4.24.0:
-    resolution: {integrity: sha512-Rmb62sR1Zpjql25eSanFGEhAxcFwfA1K0GuQcLoaJBAcENegrQut3hYdhXFF1obQfiDyqIW/cLM5HSJ/9k884A==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
-
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
 
@@ -6578,9 +6079,6 @@ packages:
 
   caniuse-lite@1.0.30001651:
     resolution: {integrity: sha512-9Cf+Xv1jJNe1xPZLGuUXLNkE1BoDkqRqYyFJ9TDYSqhduqA4hu4oR9HluGoWYQC/aj8WHjsGVV+bwkh0+tegRg==}
-
-  caniuse-lite@1.0.30001664:
-    resolution: {integrity: sha512-AmE7k4dXiNKQipgn7a2xg558IRqPN3jMQY/rOsbxDhrd0tyChwbITBfiwtnqz8bi2M5mIWbxAYBvk7W7QBUS2g==}
 
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
@@ -7282,9 +6780,6 @@ packages:
 
   electron-to-chromium@1.4.799:
     resolution: {integrity: sha512-3D3DwWkRTzrdEpntY0hMLYwj7SeBk1138CkPE8sBDSj3WzrzOiG2rHm3luw8jucpf+WiyLBCZyU9lMHyQI9M9Q==}
-
-  electron-to-chromium@1.5.29:
-    resolution: {integrity: sha512-PF8n2AlIhCKXQ+gTpiJi0VhcHDb69kYX4MtCiivctc2QD3XuNZ/XIOlbGzt7WAjjEev0TtaH6Cu3arZExm5DOw==}
 
   electron-to-chromium@1.5.6:
     resolution: {integrity: sha512-jwXWsM5RPf6j9dPYzaorcBSUg6AiqocPEyMpkchkvntaH9HGfOOMZwxMJjDY/XEs3T5dM7uyH1VhRMkqUU9qVw==}
@@ -8115,8 +7610,8 @@ packages:
     resolution: {integrity: sha512-g0QYk1dZBxGwk+Ngc+ltRH2IBp2f7zBkBMBJZCDerh6EhlhSR6+9irMCuT/09zD6qkarHUSn529sK/yL4S27mg==}
     engines: {node: '>= 0.4'}
 
-  get-tsconfig@4.8.1:
-    resolution: {integrity: sha512-k9PN+cFBmaLWtVz29SkUoqU5O0slLuHJXt/2P+tMVFT+phsSGXGkp9t3rQIqdz0e+06EHNGs3oM6ZX1s2zHxRg==}
+  get-tsconfig@4.7.6:
+    resolution: {integrity: sha512-ZAqrLlu18NbDdRaHq+AKXzAmqIUPswPWKUchfytdAjiRFnCe5ojG2bstg6mRiZabkKfCoL/e98pbBELIV/YCeA==}
 
   get-uri@6.0.3:
     resolution: {integrity: sha512-BzUrJBS9EcUb4cFol8r4W3v1cPsSyajLSthNkz5BxbpDcHN5tIrM10E2eNvfnvBn3DaT3DUgx0OpsBKkaOpanw==}
@@ -9431,9 +8926,6 @@ packages:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
 
-  object-inspect@1.13.1:
-    resolution: {integrity: sha512-5qoj1RUiKOMsCCNLV1CBiPYE10sziTsnmNxkAI/rZhiD63CF7IqdFGC/XzjWjpSgLf0LxXX3bDFIh0E18f6UhQ==}
-
   object-inspect@1.13.2:
     resolution: {integrity: sha512-IRZSRuzJiynemAXPYtPe5BoI/RESNYR7TYm50MC5Mqbd3Jmw5y790sErYw3V6SryFJD64b74qQQs9wn5Bg/k3g==}
     engines: {node: '>= 0.4'}
@@ -9597,8 +9089,8 @@ packages:
     resolution: {integrity: sha512-RmVuCHWsfu0QPNW+mraxh/xjQVw/lhUCUru8Zni3Ctq3AoMhpDTq0OVdKS6iesd6Kqb7viCV3isAL43dciOSog==}
     engines: {node: '>=14'}
 
-  parse-imports@2.2.1:
-    resolution: {integrity: sha512-OL/zLggRp8mFhKL0rNORUTR4yBYujK/uU+xZL+/0Rgm2QE4nLO9v8PzEweSJEbMGKmDRjJE4R3IMJlL2di4JeQ==}
+  parse-imports@2.1.1:
+    resolution: {integrity: sha512-TDT4HqzUiTMO1wJRwg/t/hYk8Wdp3iF/ToMIlAoVQfL1Xs/sTxq1dKWSMjMbQmIarfWKymOyly40+zmPHXMqCA==}
     engines: {node: '>= 18'}
 
   parse-json@5.2.0:
@@ -9718,9 +9210,6 @@ packages:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
 
-  pkg-types@1.1.3:
-    resolution: {integrity: sha512-+JrgthZG6m3ckicaOB74TwQ+tBWsFl3qVQg7mN8ulwSOElJ7gBhKzj2VkCPnZ4NlF6kEquYU+RIYNVAvzd54UA==}
-
   pkg-types@1.2.0:
     resolution: {integrity: sha512-+ifYuSSqOQ8CqP4MbZA5hDpb97n3E8SVWdJe+Wms9kj745lmd3b7EZJiqvmLwAlmRfjrI7Hi5z3kdBJ93lFNPA==}
 
@@ -9794,17 +9283,12 @@ packages:
     resolution: {integrity: sha512-YF2kKIUzAofPMpfH6hOi2cGnv/HrUlfucspc7pDyvv7kGdqXrfj8SCl/t8owkEgKEuu8ZcRjSOxFxVLqwChZ2Q==}
     engines: {node: ^10 || ^12 || >=14}
 
-<<<<<<< HEAD
-  postcss@8.4.47:
-    resolution: {integrity: sha512-56rxCq7G/XfB4EkXq9Egn5GCqugWvDFjafDOThIdMBsI15iqPqR5r15TfSr1YPYeEI19YeaXMCbY6u88Y76GLQ==}
-=======
   postcss@8.4.41:
     resolution: {integrity: sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   postcss@8.4.45:
     resolution: {integrity: sha512-7KTLTdzdZZYscUc65XmjFiB73vBhBfbPztCYdUNvlaso9PrzjzcmjqBPR0lNGkcVlcO4BjiO5rK/qNz+XAen1Q==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.1.2:
@@ -9945,14 +9429,8 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
-  rc-motion@2.9.3:
-    resolution: {integrity: sha512-rkW47ABVkic7WEB0EKJqzySpvDqwl60/tdkY7hWP7dYnh5pm0SzJpo54oW3TDUGXV5wfxXFmMkxrzRRbotQ0+w==}
-    peerDependencies:
-      react: '>=16.9.0'
-      react-dom: '>=16.9.0'
-
-  rc-notification@5.6.1:
-    resolution: {integrity: sha512-Q4ZKES3IBxWmpNnlDiMFYoH6D7MJ1L3n3gp59pnpaMI8gm9Vj+gVRxdInvoYjBoZvEOenxb9MbbKvnFhzJpgvA==}
+  rc-notification@5.6.2:
+    resolution: {integrity: sha512-Id4IYMoii3zzrG0lB0gD6dPgJx4Iu95Xu0BQrhHIbp7ZnAZbLqdqQ73aIWH0d0UFcElxwaKjnzNovTjo7kXz7g==}
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '>=16.9.0'
@@ -10620,8 +10098,8 @@ packages:
       webpack:
         optional: true
 
-  storybook@8.3.3:
-    resolution: {integrity: sha512-FG2KAVQN54T9R6voudiEftehtkXtLO+YVGP2gBPfacEdDQjY++ld7kTbHzpTT/bpCDx7Yq3dqOegLm9arVJfYw==}
+  storybook@8.3.4:
+    resolution: {integrity: sha512-nzvuK5TsEgJwcWGLGgafabBOxKn37lfJVv7ZoUVPgJIjk2mNRyJDFwYRJzUZaD37eiR/c/lQ6MoaeqlGwiXoxw==}
     hasBin: true
 
   string-argv@0.3.2:
@@ -10834,13 +10312,8 @@ packages:
     resolution: {integrity: sha512-weEDEq7Z5eTHPDh4xjX789+fHfF+P8boiFB+0vbWzpbnbsEr/GRaohi/uMKxg8RZMXnl1ItAi/IUHWMsjDV7kQ==}
     engines: {node: '>=14.0.0'}
 
-<<<<<<< HEAD
-  tinyspy@3.0.2:
-    resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
-=======
   tinyspy@3.0.0:
     resolution: {integrity: sha512-q5nmENpTHgiPVd1cJDDc9cVoYN5x4vCvwT3FMilvKPKneCBZAxn2YWQjDF0UMcE9k0Cay1gBiDfTMU0g+mPMQA==}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     engines: {node: '>=14.0.0'}
 
   tmp@0.0.33:
@@ -10889,8 +10362,8 @@ packages:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
     engines: {node: '>=6.10'}
 
-  ts-pattern@5.4.0:
-    resolution: {integrity: sha512-hgfOMfjlrARCnYtGD/xEAkFHDXuSyuqjzFSltyQCbN689uNvoQL20TVN2XFcLMjfNuwSsQGU+xtH6MrjIwhwUg==}
+  ts-pattern@5.3.1:
+    resolution: {integrity: sha512-1RUMKa8jYQdNfmnK4jyzBK3/PS/tnjcZ1CW0v1vWDeYe5RBklc/nquw03MEoB66hVBm4BnlCfmOqDVxHyT1DpA==}
 
   tsconfig-paths-webpack-plugin@4.1.0:
     resolution: {integrity: sha512-xWFISjviPydmtmgeUAuXp4N1fky+VCtfhOkDUFIv5ea7p4wuTomI4QTrXvFBX2S4jZsmyTSrStQl+E+4w+RzxA==}
@@ -11243,8 +10716,8 @@ packages:
     peerDependencies:
       eslint: '>=6.0.0'
 
-  vue@3.5.9:
-    resolution: {integrity: sha512-nHzQhZ5cjFKynAY2beAm7XtJ5C13VKAFTLTgRYXy+Id1KEKBeiK6hO2RcW1hUjdbHMadz1YzxyHgQigOC54wug==}
+  vue@3.4.38:
+    resolution: {integrity: sha512-f0ZgN+mZ5KFgVv9wz0f4OgVKukoXtS3nwET4c2vLBGQR50aI8G0cqbFtLlX9Yiyg3LFGBitruPHt2PxwTduJEw==}
     peerDependencies:
       typescript: '*'
     peerDependenciesMeta:
@@ -11439,11 +10912,6 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
-  yaml@2.5.1:
-    resolution: {integrity: sha512-bLQOjaX/ADgQ20isPJRvF0iRUHIxVhYvr53Of7wGcWlO2jvtUlH5m87DsmulFVxRpNLOnI4tB6p/oh8D7kpn9Q==}
-    engines: {node: '>= 14'}
-    hasBin: true
-
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
@@ -11495,9 +10963,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -11506,44 +10972,9 @@ snapshots:
       '@stylistic/eslint-plugin': 2.8.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/parser': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.11.1(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.11.1(jiti@1.21.6))
-=======
-<<<<<<< HEAD
-  '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-  '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.11.0(jiti@1.21.6)))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
-    dependencies:
-      '@antfu/install-pkg': 0.4.1
-      '@clack/prompts': 0.7.0
-      '@eslint-community/eslint-plugin-eslint-comments': 4.4.0(eslint@9.11.0(jiti@1.21.6))
-      '@eslint/markdown': 6.1.0(eslint@9.11.0(jiti@1.21.6))
-      '@stylistic/eslint-plugin': 2.8.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/parser': 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@vitest/eslint-plugin': 1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-      eslint: 9.11.0(jiti@1.21.6)
-      eslint-config-flat-gitignore: 0.3.0(eslint@9.11.0(jiti@1.21.6))
-<<<<<<< HEAD
-=======
-  '@antfu/eslint-config@3.5.1(@eslint-react/eslint-plugin@1.14.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.10.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.11(eslint@9.10.0(jiti@1.21.6)))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-    dependencies:
-      '@antfu/install-pkg': 0.4.1
-      '@clack/prompts': 0.7.0
-      '@eslint-community/eslint-plugin-eslint-comments': 4.4.0(eslint@9.10.0(jiti@1.21.6))
-      '@eslint/markdown': 6.1.0(eslint@9.10.0(jiti@1.21.6))
-      '@stylistic/eslint-plugin': 2.8.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/parser': 8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)
-      '@vitest/eslint-plugin': 1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-      eslint: 9.10.0(jiti@1.21.6)
-      eslint-config-flat-gitignore: 0.3.0(eslint@9.10.0(jiti@1.21.6))
->>>>>>> 60f2ae270 (refactor: move editor service to docs-ui)
->>>>>>> 2c9e9d2af (refactor: move editor service to docs-ui)
-=======
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       eslint-flat-config-utils: 0.4.0
       eslint-merge-processors: 0.1.0(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-antfu: 2.7.0(eslint@9.11.1(jiti@1.21.6))
@@ -11553,7 +10984,6 @@ snapshots:
       eslint-plugin-jsonc: 2.16.0(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-n: 17.10.3(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-no-only-tests: 3.3.0
-<<<<<<< HEAD
       eslint-plugin-perfectionist: 3.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vue-eslint-parser@9.4.3(eslint@9.11.1(jiti@1.21.6)))
       eslint-plugin-regexp: 2.6.0(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-toml: 0.11.1(eslint@9.11.1(jiti@1.21.6))
@@ -11561,17 +10991,7 @@ snapshots:
       eslint-plugin-unused-imports: 4.1.4(@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-vue: 9.28.0(eslint@9.11.1(jiti@1.21.6))
       eslint-plugin-yml: 1.14.0(eslint@9.11.1(jiti@1.21.6))
-      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.5.9)(eslint@9.11.1(jiti@1.21.6))
-=======
-      eslint-plugin-perfectionist: 3.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vue-eslint-parser@9.4.3(eslint@9.11.0(jiti@1.21.6)))
-      eslint-plugin-regexp: 2.6.0(eslint@9.11.0(jiti@1.21.6))
-      eslint-plugin-toml: 0.11.1(eslint@9.11.0(jiti@1.21.6))
-      eslint-plugin-unicorn: 55.0.0(eslint@9.11.0(jiti@1.21.6))
-      eslint-plugin-unused-imports: 4.1.3(@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))
-      eslint-plugin-vue: 9.28.0(eslint@9.11.0(jiti@1.21.6))
-      eslint-plugin-yml: 1.14.0(eslint@9.11.0(jiti@1.21.6))
-      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.11.0(jiti@1.21.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.11.1(jiti@1.21.6))
       globals: 15.9.0
       jsonc-eslint-parser: 2.4.0
       local-pkg: 0.5.0
@@ -11791,10 +11211,6 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-  '@babel/runtime@7.25.6':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
   '@babel/runtime@7.4.5':
     dependencies:
       regenerator-runtime: 0.13.11
@@ -11875,19 +11291,11 @@ snapshots:
       picocolors: 1.1.0
       sisteransi: 1.0.5
 
-<<<<<<< HEAD
-  '@commitlint/cli@19.5.0(@types/node@22.7.3)(typescript@5.6.2)':
+  '@commitlint/cli@19.5.0(@types/node@22.7.4)(typescript@5.6.2)':
     dependencies:
       '@commitlint/format': 19.5.0
       '@commitlint/lint': 19.5.0
-      '@commitlint/load': 19.5.0(@types/node@22.7.3)(typescript@5.6.2)
-=======
-  '@commitlint/cli@19.5.0(@types/node@22.7.0)(typescript@5.6.2)':
-    dependencies:
-      '@commitlint/format': 19.5.0
-      '@commitlint/lint': 19.5.0
-      '@commitlint/load': 19.5.0(@types/node@22.7.0)(typescript@5.6.2)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@commitlint/load': 19.5.0(@types/node@22.7.4)(typescript@5.6.2)
       '@commitlint/read': 19.5.0
       '@commitlint/types': 19.5.0
       tinyexec: 0.3.0
@@ -11934,11 +11342,7 @@ snapshots:
       '@commitlint/rules': 19.5.0
       '@commitlint/types': 19.5.0
 
-<<<<<<< HEAD
-  '@commitlint/load@19.5.0(@types/node@22.7.3)(typescript@5.6.2)':
-=======
-  '@commitlint/load@19.5.0(@types/node@22.7.0)(typescript@5.6.2)':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@commitlint/load@19.5.0(@types/node@22.7.4)(typescript@5.6.2)':
     dependencies:
       '@commitlint/config-validator': 19.5.0
       '@commitlint/execute-rule': 19.5.0
@@ -11946,11 +11350,7 @@ snapshots:
       '@commitlint/types': 19.5.0
       chalk: 5.3.0
       cosmiconfig: 9.0.0(typescript@5.6.2)
-<<<<<<< HEAD
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.3)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
-=======
-      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.0)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      cosmiconfig-typescript-loader: 5.0.0(@types/node@22.7.4)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -12253,7 +11653,7 @@ snapshots:
       eslint: 9.11.1(jiti@1.21.6)
       eslint-visitor-keys: 3.4.3
 
-  '@eslint-community/regexpp@4.11.1': {}
+  '@eslint-community/regexpp@4.11.0': {}
 
   '@eslint-react/ast@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
@@ -12264,7 +11664,7 @@ snapshots:
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       birecord: 0.1.1
       string-ts: 2.2.0
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -12284,7 +11684,7 @@ snapshots:
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       birecord: 0.1.1
       short-unique-id: 5.2.0
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -12320,7 +11720,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 8.7.0
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -12356,7 +11756,7 @@ snapshots:
       '@typescript-eslint/scope-manager': 8.7.0
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     transitivePeerDependencies:
       - eslint
       - supports-color
@@ -12367,7 +11767,7 @@ snapshots:
   '@eslint/config-array@0.18.0':
     dependencies:
       '@eslint/object-schema': 2.1.4
-      debug: 4.3.7
+      debug: 4.3.6
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -12377,7 +11777,7 @@ snapshots:
   '@eslint/eslintrc@3.1.0':
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.7
+      debug: 4.3.6
       espree: 10.1.0
       globals: 14.0.0
       ignore: 5.3.2
@@ -12574,49 +11974,29 @@ snapshots:
 
   '@js-sdsl/ordered-map@4.4.2': {}
 
-  '@mdx-js/react@3.0.1(@types/react@18.3.9)(react@18.3.1)':
+  '@mdx-js/react@3.0.1(@types/react@18.3.10)(react@18.3.1)':
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
       react: 18.3.1
 
-<<<<<<< HEAD
-  '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.3)':
+  '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.4)':
     dependencies:
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.3)
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.4)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.47.7(@types/node@22.7.3)':
+  '@microsoft/api-extractor@7.47.7(@types/node@22.7.4)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.29.6(@types/node@22.7.3)
+      '@microsoft/api-extractor-model': 7.29.6(@types/node@22.7.4)
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.3)
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.4)
       '@rushstack/rig-package': 0.5.3
-      '@rushstack/terminal': 0.14.0(@types/node@22.7.3)
-      '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.3)
-=======
-  '@microsoft/api-extractor-model@7.29.6(@types/node@22.7.0)':
-    dependencies:
-      '@microsoft/tsdoc': 0.15.0
-      '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
-    transitivePeerDependencies:
-      - '@types/node'
-
-  '@microsoft/api-extractor@7.47.7(@types/node@22.7.0)':
-    dependencies:
-      '@microsoft/api-extractor-model': 7.29.6(@types/node@22.7.0)
-      '@microsoft/tsdoc': 0.15.0
-      '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
-      '@rushstack/rig-package': 0.5.3
-      '@rushstack/terminal': 0.14.0(@types/node@22.7.0)
-      '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.0)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.4)
+      '@rushstack/ts-command-line': 4.22.6(@types/node@22.7.4)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.8
@@ -12777,10 +12157,10 @@ snapshots:
 
   '@rc-component/trigger@2.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.25.4
       '@rc-component/portal': 1.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
-      rc-motion: 2.9.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-motion: 2.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
@@ -12815,13 +12195,9 @@ snapshots:
       - conventional-commits-filter
       - conventional-commits-parser
 
-<<<<<<< HEAD
-  '@rollup/pluginutils@5.1.2(rollup@4.22.4)':
-=======
   '@rollup/pluginutils@5.1.0(rollup@4.21.2)':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.5
       estree-walker: 2.0.2
       picomatch: 2.3.1
     optionalDependencies:
@@ -12875,11 +12251,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.21.2':
     optional: true
 
-<<<<<<< HEAD
-  '@rushstack/node-core-library@5.7.0(@types/node@22.7.3)':
-=======
-  '@rushstack/node-core-library@5.7.0(@types/node@22.7.0)':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@rushstack/node-core-library@5.7.0(@types/node@22.7.4)':
     dependencies:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -12890,40 +12262,23 @@ snapshots:
       resolve: 1.22.8
       semver: 7.5.4
     optionalDependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
       resolve: 1.22.8
       strip-json-comments: 3.1.1
 
-<<<<<<< HEAD
-  '@rushstack/terminal@0.14.0(@types/node@22.7.3)':
+  '@rushstack/terminal@0.14.0(@types/node@22.7.4)':
     dependencies:
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.3)
+      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.4)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 22.7.3
+      '@types/node': 22.7.4
 
-  '@rushstack/ts-command-line@4.22.6(@types/node@22.7.3)':
+  '@rushstack/ts-command-line@4.22.6(@types/node@22.7.4)':
     dependencies:
-      '@rushstack/terminal': 0.14.0(@types/node@22.7.3)
-=======
-  '@rushstack/terminal@0.14.0(@types/node@22.7.0)':
-    dependencies:
-      '@rushstack/node-core-library': 5.7.0(@types/node@22.7.0)
-      supports-color: 8.1.1
-    optionalDependencies:
-      '@types/node': 22.7.0
-
-  '@rushstack/ts-command-line@4.22.6(@types/node@22.7.0)':
-    dependencies:
-      '@rushstack/terminal': 0.14.0(@types/node@22.7.0)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@rushstack/terminal': 0.14.0(@types/node@22.7.4)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -12934,93 +12289,93 @@ snapshots:
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
-  '@storybook/addon-actions@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-actions@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
       '@types/uuid': 9.0.8
       dequal: 2.0.3
       polished: 4.3.1
-      storybook: 8.3.3
+      storybook: 8.3.4
       uuid: 9.0.1
 
-  '@storybook/addon-backgrounds@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-backgrounds@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
       memoizerific: 1.11.3
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/addon-controls@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-controls@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
       dequal: 2.0.3
       lodash: 4.17.21
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/addon-docs@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-docs@8.3.4(storybook@8.3.4)':
     dependencies:
-      '@mdx-js/react': 3.0.1(@types/react@18.3.9)(react@18.3.1)
-      '@storybook/blocks': 8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)
-      '@storybook/csf-plugin': 8.3.3(storybook@8.3.3)
+      '@mdx-js/react': 3.0.1(@types/react@18.3.10)(react@18.3.1)
+      '@storybook/blocks': 8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)
+      '@storybook/csf-plugin': 8.3.4(storybook@8.3.4)
       '@storybook/global': 5.0.0
-      '@storybook/react-dom-shim': 8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)
-      '@types/react': 18.3.9
+      '@storybook/react-dom-shim': 8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)
+      '@types/react': 18.3.10
       fs-extra: 11.2.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       rehype-external-links: 3.0.0
       rehype-slug: 6.0.0
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/addon-essentials@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-essentials@8.3.4(storybook@8.3.4)':
     dependencies:
-      '@storybook/addon-actions': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-backgrounds': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-controls': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-docs': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-highlight': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-measure': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-outline': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-toolbars': 8.3.3(storybook@8.3.3)
-      '@storybook/addon-viewport': 8.3.3(storybook@8.3.3)
-      storybook: 8.3.3
+      '@storybook/addon-actions': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-backgrounds': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-controls': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-docs': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-highlight': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-measure': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-outline': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-toolbars': 8.3.4(storybook@8.3.4)
+      '@storybook/addon-viewport': 8.3.4(storybook@8.3.4)
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/addon-highlight@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-highlight@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
-      storybook: 8.3.3
+      storybook: 8.3.4
 
-  '@storybook/addon-interactions@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-interactions@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.3.3(storybook@8.3.3)
-      '@storybook/test': 8.3.3(storybook@8.3.3)
+      '@storybook/instrumenter': 8.3.4(storybook@8.3.4)
+      '@storybook/test': 8.3.4(storybook@8.3.4)
       polished: 4.3.1
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/addon-links@8.3.3(react@18.3.1)(storybook@8.3.3)':
+  '@storybook/addon-links@8.3.4(react@18.3.1)(storybook@8.3.4)':
     dependencies:
       '@storybook/csf': 0.1.11
       '@storybook/global': 5.0.0
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
     optionalDependencies:
       react: 18.3.1
 
-  '@storybook/addon-measure@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-measure@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
-      storybook: 8.3.3
+      storybook: 8.3.4
       tiny-invariant: 1.3.3
 
-  '@storybook/addon-outline@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-outline@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
   '@storybook/addon-styling-webpack@1.0.0(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))':
@@ -13028,14 +12383,14 @@ snapshots:
       '@storybook/node-logger': 8.1.6
       webpack: 5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)
 
-  '@storybook/addon-toolbars@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-toolbars@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
-  '@storybook/addon-viewport@8.3.3(storybook@8.3.3)':
+  '@storybook/addon-viewport@8.3.4(storybook@8.3.4)':
     dependencies:
       memoizerific: 1.11.3
-      storybook: 8.3.3
+      storybook: 8.3.4
 
   '@storybook/addon-webpack5-compiler-swc@1.0.5(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))':
     dependencies:
@@ -13045,7 +12400,7 @@ snapshots:
       - '@swc/helpers'
       - webpack
 
-  '@storybook/blocks@8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)':
+  '@storybook/blocks@8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)':
     dependencies:
       '@storybook/csf': 0.1.11
       '@storybook/global': 5.0.0
@@ -13058,7 +12413,7 @@ snapshots:
       memoizerific: 1.11.3
       polished: 4.3.1
       react-colorful: 5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      storybook: 8.3.3
+      storybook: 8.3.4
       telejson: 7.2.0
       ts-dedent: 2.2.0
       util-deprecate: 1.0.2
@@ -13066,15 +12421,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/builder-webpack5@8.3.3(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.3)(typescript@5.6.2)':
+  '@storybook/builder-webpack5@8.3.4(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
-<<<<<<< HEAD
-      '@storybook/core-webpack': 8.3.3(storybook@8.3.3)
-      '@types/node': 22.7.3
-=======
-      '@storybook/core-webpack': 8.3.0(storybook@8.3.0)
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@storybook/core-webpack': 8.3.4(storybook@8.3.4)
+      '@types/node': 22.7.4
       '@types/semver': 7.5.8
       browser-assert: 1.2.1
       case-sensitive-paths-webpack-plugin: 2.4.0
@@ -13090,7 +12440,7 @@ snapshots:
       path-browserify: 1.0.1
       process: 0.11.10
       semver: 7.6.3
-      storybook: 8.3.3
+      storybook: 8.3.4
       style-loader: 3.3.4(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       terser-webpack-plugin: 5.3.10(@swc/core@1.7.5)(esbuild@0.23.1)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       ts-dedent: 2.2.0
@@ -13111,26 +12461,17 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/components@8.3.3(storybook@8.3.3)':
+  '@storybook/components@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
-  '@storybook/core-webpack@8.3.3(storybook@8.3.3)':
+  '@storybook/core-webpack@8.3.4(storybook@8.3.4)':
     dependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-      storybook: 8.3.3
-=======
-      storybook: 8.3.0
-
-  '@storybook/core-webpack@8.3.0(storybook@8.3.0)':
-    dependencies:
-      '@types/node': 22.7.0
-      storybook: 8.3.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
+      storybook: 8.3.4
       ts-dedent: 2.2.0
 
-  '@storybook/core@8.3.3':
+  '@storybook/core@8.3.4':
     dependencies:
       '@storybook/csf': 0.1.11
       '@types/express': 4.17.21
@@ -13150,9 +12491,9 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@storybook/csf-plugin@8.3.3(storybook@8.3.3)':
+  '@storybook/csf-plugin@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
       unplugin: 1.12.2
 
   '@storybook/csf@0.1.11':
@@ -13166,29 +12507,33 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/instrumenter@8.3.3(storybook@8.3.3)':
+  '@storybook/instrumenter@8.3.0(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
       '@vitest/utils': 2.1.1
-      storybook: 8.3.3
+      storybook: 8.3.4
+      util: 0.12.5
+    optional: true
+
+  '@storybook/instrumenter@8.3.4(storybook@8.3.4)':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@vitest/utils': 2.1.1
+      storybook: 8.3.4
       util: 0.12.5
 
-  '@storybook/manager-api@8.3.3(storybook@8.3.3)':
+  '@storybook/manager-api@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
   '@storybook/node-logger@8.1.6': {}
 
-  '@storybook/preset-react-webpack@8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)':
+  '@storybook/preset-react-webpack@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
-      '@storybook/core-webpack': 8.3.3(storybook@8.3.3)
-      '@storybook/react': 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
+      '@storybook/core-webpack': 8.3.4(storybook@8.3.4)
+      '@storybook/react': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.6.2)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       '@types/semver': 7.5.8
       find-up: 5.0.0
       fs-extra: 11.2.0
@@ -13198,7 +12543,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       resolve: 1.22.8
       semver: 7.6.3
-      storybook: 8.3.3
+      storybook: 8.3.4
       tsconfig-paths: 4.2.0
       webpack: 5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)
     optionalDependencies:
@@ -13211,13 +12556,13 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/preview-api@8.3.3(storybook@8.3.3)':
+  '@storybook/preview-api@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
   '@storybook/react-docgen-typescript-plugin@1.0.6--canary.9.0c3f3b7.0(typescript@5.6.2)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))':
     dependencies:
-      debug: 4.3.7
+      debug: 4.3.6
       endent: 2.1.0
       find-cache-dir: 3.3.2
       flat-cache: 3.2.0
@@ -13229,21 +12574,27 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@storybook/react-dom-shim@8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)':
+  '@storybook/react-dom-shim@8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 8.3.3
+      storybook: 8.3.4
 
-  '@storybook/react-webpack5@8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)':
+  '@storybook/react-dom-shim@8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)':
     dependencies:
-      '@storybook/builder-webpack5': 8.3.3(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.3)(typescript@5.6.2)
-      '@storybook/preset-react-webpack': 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
-      '@storybook/react': 8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)
-      '@types/node': 22.7.3
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      storybook: 8.3.3
+      storybook: 8.3.4
+
+  '@storybook/react-webpack5@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+    dependencies:
+      '@storybook/builder-webpack5': 8.3.4(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@storybook/preset-react-webpack': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@storybook/react': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@types/node': 22.7.4
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      storybook: 8.3.4
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -13255,17 +12606,17 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/react@8.3.3(@storybook/test@8.3.3(storybook@8.3.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)(typescript@5.6.2)':
+  '@storybook/react@8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
-      '@storybook/components': 8.3.3(storybook@8.3.3)
+      '@storybook/components': 8.3.4(storybook@8.3.4)
       '@storybook/global': 5.0.0
-      '@storybook/manager-api': 8.3.3(storybook@8.3.3)
-      '@storybook/preview-api': 8.3.3(storybook@8.3.3)
-      '@storybook/react-dom-shim': 8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.3)
-      '@storybook/theming': 8.3.3(storybook@8.3.3)
+      '@storybook/manager-api': 8.3.4(storybook@8.3.4)
+      '@storybook/preview-api': 8.3.4(storybook@8.3.4)
+      '@storybook/react-dom-shim': 8.3.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)
+      '@storybook/theming': 8.3.4(storybook@8.3.4)
       '@types/escodegen': 0.0.6
       '@types/estree': 0.0.51
-      '@types/node': 22.7.3
+      '@types/node': 22.7.4
       acorn: 7.4.1
       acorn-jsx: 5.3.2(acorn@7.4.1)
       acorn-walk: 7.2.0
@@ -13276,38 +12627,81 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       react-element-to-jsx-string: 15.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       semver: 7.6.3
-      storybook: 8.3.3
+      storybook: 8.3.4
       ts-dedent: 2.2.0
       type-fest: 2.19.0
       util-deprecate: 1.0.2
     optionalDependencies:
-      '@storybook/test': 8.3.3(storybook@8.3.3)
+      '@storybook/test': 8.3.0(storybook@8.3.4)
       typescript: 5.6.2
 
-  '@storybook/test@8.3.3(storybook@8.3.3)':
+  '@storybook/react@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+    dependencies:
+      '@storybook/components': 8.3.4(storybook@8.3.4)
+      '@storybook/global': 5.0.0
+      '@storybook/manager-api': 8.3.4(storybook@8.3.4)
+      '@storybook/preview-api': 8.3.4(storybook@8.3.4)
+      '@storybook/react-dom-shim': 8.3.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)
+      '@storybook/theming': 8.3.4(storybook@8.3.4)
+      '@types/escodegen': 0.0.6
+      '@types/estree': 0.0.51
+      '@types/node': 22.7.4
+      acorn: 7.4.1
+      acorn-jsx: 5.3.2(acorn@7.4.1)
+      acorn-walk: 7.2.0
+      escodegen: 2.1.0
+      html-tags: 3.3.1
+      prop-types: 15.8.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-element-to-jsx-string: 15.0.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      semver: 7.6.3
+      storybook: 8.3.4
+      ts-dedent: 2.2.0
+      type-fest: 2.19.0
+      util-deprecate: 1.0.2
+    optionalDependencies:
+      '@storybook/test': 8.3.0(storybook@8.3.4)
+      typescript: 5.6.2
+
+  '@storybook/test@8.3.0(storybook@8.3.4)':
     dependencies:
       '@storybook/csf': 0.1.11
       '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.3.3(storybook@8.3.3)
+      '@storybook/instrumenter': 8.3.0(storybook@8.3.4)
       '@testing-library/dom': 10.4.0
       '@testing-library/jest-dom': 6.5.0
       '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
       '@vitest/expect': 2.0.5
       '@vitest/spy': 2.0.5
-      storybook: 8.3.3
+      storybook: 8.3.4
+      util: 0.12.5
+    optional: true
+
+  '@storybook/test@8.3.4(storybook@8.3.4)':
+    dependencies:
+      '@storybook/csf': 0.1.11
+      '@storybook/global': 5.0.0
+      '@storybook/instrumenter': 8.3.4(storybook@8.3.4)
+      '@testing-library/dom': 10.4.0
+      '@testing-library/jest-dom': 6.5.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/expect': 2.0.5
+      '@vitest/spy': 2.0.5
+      storybook: 8.3.4
       util: 0.12.5
 
-  '@storybook/theming@8.3.3(storybook@8.3.3)':
+  '@storybook/theming@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
-  '@storybook/types@8.3.3(storybook@8.3.3)':
+  '@storybook/types@8.3.4(storybook@8.3.4)':
     dependencies:
-      storybook: 8.3.3
+      storybook: 8.3.4
 
   '@stylistic/eslint-plugin@2.8.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
-      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
       eslint-visitor-keys: 4.0.0
       espree: 10.1.0
@@ -13394,23 +12788,23 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
 
-  '@testing-library/react-hooks@8.0.1(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@testing-library/react-hooks@8.0.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.24.7
       react: 18.3.1
       react-error-boundary: 3.1.4(react@18.3.1)
     optionalDependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
       react-dom: 18.3.1(react@18.3.1)
 
-  '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.25.4
       '@testing-library/dom': 10.4.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
     optionalDependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
       '@types/react-dom': 18.3.0
 
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.0)':
@@ -13447,27 +12841,15 @@ snapshots:
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-<<<<<<< HEAD
-      '@types/node': 22.7.3
+      '@types/node': 22.7.4
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.7.3
+      '@types/node': 22.7.4
 
   '@types/conventional-commits-parser@5.0.0':
     dependencies:
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
-
-  '@types/connect@3.4.38':
-    dependencies:
-      '@types/node': 22.7.0
-
-  '@types/conventional-commits-parser@5.0.0':
-    dependencies:
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
 
   '@types/d3-color@3.1.3': {}
 
@@ -13506,11 +12888,7 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.5':
     dependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       '@types/qs': 6.9.15
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -13554,19 +12932,7 @@ snapshots:
 
   '@types/ms@0.7.34': {}
 
-<<<<<<< HEAD
-  '@types/node@22.7.3':
-=======
-  '@types/node@18.19.47':
-    dependencies:
-      undici-types: 5.26.5
-
-  '@types/node@22.5.4':
-    dependencies:
-      undici-types: 6.19.8
-
-  '@types/node@22.7.0':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@types/node@22.7.4':
     dependencies:
       undici-types: 6.19.8
 
@@ -13578,7 +12944,7 @@ snapshots:
 
   '@types/parse-json@4.0.2': {}
 
-  '@types/prop-types@15.7.13': {}
+  '@types/prop-types@15.7.12': {}
 
   '@types/qs@6.9.15': {}
 
@@ -13586,23 +12952,23 @@ snapshots:
 
   '@types/react-dom@18.3.0':
     dependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
 
   '@types/react-grid-layout@1.3.5':
     dependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
 
   '@types/react-mentions@4.4.0':
     dependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
 
   '@types/react-transition-group@4.4.11':
     dependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
 
-  '@types/react@18.3.9':
+  '@types/react@18.3.10':
     dependencies:
-      '@types/prop-types': 15.7.13
+      '@types/prop-types': 15.7.12
       csstype: 3.1.3
 
   '@types/resolve@1.20.6': {}
@@ -13616,29 +12982,17 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
 
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       '@types/send': 0.17.4
 
   '@types/stylus@0.48.42':
     dependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
 
   '@types/unist@3.0.3': {}
 
@@ -13646,27 +13000,15 @@ snapshots:
 
   '@types/validator@13.12.0': {}
 
-<<<<<<< HEAD
   '@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       '@typescript-eslint/parser': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/scope-manager': 8.7.0
       '@typescript-eslint/type-utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/visitor-keys': 8.7.0
       eslint: 9.11.1(jiti@1.21.6)
-=======
-  '@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
-    dependencies:
-      '@eslint-community/regexpp': 4.11.0
-      '@typescript-eslint/parser': 8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/scope-manager': 8.5.0
-      '@typescript-eslint/type-utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      '@typescript-eslint/visitor-keys': 8.5.0
-      eslint: 9.11.0(jiti@1.21.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       graphemer: 1.4.0
       ignore: 5.3.2
       natural-compare: 1.4.0
@@ -13676,51 +13018,34 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-<<<<<<< HEAD
   '@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
-=======
-  '@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       '@typescript-eslint/scope-manager': 8.7.0
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/typescript-estree': 8.7.0(typescript@5.6.2)
       '@typescript-eslint/visitor-keys': 8.7.0
-<<<<<<< HEAD
-      debug: 4.3.7
-      eslint: 9.11.1(jiti@1.21.6)
-=======
       debug: 4.3.6
-      eslint: 9.11.0(jiti@1.21.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      eslint: 9.11.1(jiti@1.21.6)
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
       - supports-color
 
+  '@typescript-eslint/scope-manager@8.5.0':
+    dependencies:
+      '@typescript-eslint/types': 8.5.0
+      '@typescript-eslint/visitor-keys': 8.5.0
+
   '@typescript-eslint/scope-manager@8.7.0':
     dependencies:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/visitor-keys': 8.7.0
 
-<<<<<<< HEAD
   '@typescript-eslint/type-utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
       '@typescript-eslint/typescript-estree': 8.7.0(typescript@5.6.2)
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      debug: 4.3.7
-=======
-  '@typescript-eslint/scope-manager@8.7.0':
-    dependencies:
-      '@typescript-eslint/types': 8.7.0
-      '@typescript-eslint/visitor-keys': 8.7.0
-
-  '@typescript-eslint/type-utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)':
-    dependencies:
-      '@typescript-eslint/typescript-estree': 8.5.0(typescript@5.6.2)
-      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
       debug: 4.3.6
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       ts-api-utils: 1.3.0(typescript@5.6.2)
     optionalDependencies:
       typescript: 5.6.2
@@ -13728,15 +13053,8 @@ snapshots:
       - eslint
       - supports-color
 
-  '@typescript-eslint/types@8.7.0': {}
+  '@typescript-eslint/types@8.5.0': {}
 
-<<<<<<< HEAD
-  '@typescript-eslint/typescript-estree@8.7.0(typescript@5.6.2)':
-    dependencies:
-      '@typescript-eslint/types': 8.7.0
-      '@typescript-eslint/visitor-keys': 8.7.0
-      debug: 4.3.7
-=======
   '@typescript-eslint/types@8.7.0': {}
 
   '@typescript-eslint/typescript-estree@8.5.0(typescript@5.6.2)':
@@ -13759,7 +13077,6 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/visitor-keys': 8.7.0
       debug: 4.3.6
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       fast-glob: 3.3.2
       is-glob: 4.0.3
       minimatch: 9.0.5
@@ -13769,6 +13086,17 @@ snapshots:
       typescript: 5.6.2
     transitivePeerDependencies:
       - supports-color
+
+  '@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@9.11.1(jiti@1.21.6))
+      '@typescript-eslint/scope-manager': 8.5.0
+      '@typescript-eslint/types': 8.5.0
+      '@typescript-eslint/typescript-estree': 8.5.0(typescript@5.6.2)
+      eslint: 9.11.1(jiti@1.21.6)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
 
   '@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)':
     dependencies:
@@ -13781,16 +13109,13 @@ snapshots:
       - supports-color
       - typescript
 
-  '@typescript-eslint/visitor-keys@8.7.0':
+  '@typescript-eslint/visitor-keys@8.5.0':
     dependencies:
-<<<<<<< HEAD
-=======
       '@typescript-eslint/types': 8.5.0
       eslint-visitor-keys: 3.4.3
 
   '@typescript-eslint/visitor-keys@8.7.0':
     dependencies:
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       '@typescript-eslint/types': 8.7.0
       eslint-visitor-keys: 3.4.3
 
@@ -13808,40 +13133,23 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
-<<<<<<< HEAD
-  '@vitejs/plugin-react@4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-  '@vitejs/plugin-react@4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@vitejs/plugin-react@4.3.1(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@babel/core': 7.24.7
       '@babel/plugin-transform-react-jsx-self': 7.24.7(@babel/core@7.24.7)
       '@babel/plugin-transform-react-jsx-source': 7.24.7(@babel/core@7.24.7)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-<<<<<<< HEAD
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-vue@5.1.3(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.5.9(typescript@5.6.2))':
+  '@vitejs/plugin-vue@5.1.3(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))':
     dependencies:
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vue: 3.5.9(typescript@5.6.2)
-
-  '@vitest/coverage-istanbul@2.1.1(vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-vue@5.1.3(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))(vue@3.4.38(typescript@5.6.2))':
-    dependencies:
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vue: 3.4.38(typescript@5.6.2)
 
-  '@vitest/coverage-istanbul@2.1.1(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@vitest/coverage-istanbul@2.1.1(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@istanbuljs/schema': 0.1.3
       debug: 4.3.6
@@ -13853,37 +13161,17 @@ snapshots:
       magicast: 0.3.4
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-<<<<<<< HEAD
-      vitest: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - supports-color
 
-<<<<<<< HEAD
-  '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-<<<<<<< HEAD
-  '@vitest/eslint-plugin@1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.5.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-  '@vitest/eslint-plugin@1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.10.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.0.5(@types/node@22.5.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> 60f2ae270 (refactor: move editor service to docs-ui)
->>>>>>> 2c9e9d2af (refactor: move editor service to docs-ui)
-=======
-      vitest: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitest/eslint-plugin@1.1.0(@typescript-eslint/utils@8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       eslint: 9.11.1(jiti@1.21.6)
     optionalDependencies:
-      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       typescript: 5.6.2
-<<<<<<< HEAD
-      vitest: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-      vitest: 2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      vitest: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   '@vitest/expect@2.0.5':
     dependencies:
@@ -13899,21 +13187,13 @@ snapshots:
       chai: 5.1.1
       tinyrainbow: 1.2.0
 
-<<<<<<< HEAD
-  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
-=======
-  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  '@vitest/mocker@2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@vitest/spy': 2.1.1
       estree-walker: 3.0.3
       magic-string: 0.30.11
     optionalDependencies:
-<<<<<<< HEAD
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   '@vitest/pretty-format@2.0.5':
     dependencies:
@@ -13936,7 +13216,7 @@ snapshots:
 
   '@vitest/spy@2.0.5':
     dependencies:
-      tinyspy: 3.0.2
+      tinyspy: 3.0.0
 
   '@vitest/spy@2.1.1':
     dependencies:
@@ -13955,47 +13235,47 @@ snapshots:
       loupe: 3.1.1
       tinyrainbow: 1.2.0
 
-  '@volar/language-core@2.4.5':
+  '@volar/language-core@2.4.4':
     dependencies:
-      '@volar/source-map': 2.4.5
+      '@volar/source-map': 2.4.4
 
-  '@volar/source-map@2.4.5': {}
+  '@volar/source-map@2.4.4': {}
 
-  '@volar/typescript@2.4.5':
+  '@volar/typescript@2.4.4':
     dependencies:
-      '@volar/language-core': 2.4.5
+      '@volar/language-core': 2.4.4
       path-browserify: 1.0.1
       vscode-uri: 3.0.8
 
-  '@vue/compiler-core@3.5.9':
+  '@vue/compiler-core@3.4.38':
     dependencies:
-      '@babel/parser': 7.25.6
-      '@vue/shared': 3.5.9
+      '@babel/parser': 7.25.4
+      '@vue/shared': 3.4.38
       entities: 4.5.0
       estree-walker: 2.0.2
-      source-map-js: 1.2.1
+      source-map-js: 1.2.0
 
-  '@vue/compiler-dom@3.5.9':
+  '@vue/compiler-dom@3.4.38':
     dependencies:
-      '@vue/compiler-core': 3.5.9
-      '@vue/shared': 3.5.9
+      '@vue/compiler-core': 3.4.38
+      '@vue/shared': 3.4.38
 
-  '@vue/compiler-sfc@3.5.9':
+  '@vue/compiler-sfc@3.4.38':
     dependencies:
-      '@babel/parser': 7.25.6
-      '@vue/compiler-core': 3.5.9
-      '@vue/compiler-dom': 3.5.9
-      '@vue/compiler-ssr': 3.5.9
-      '@vue/shared': 3.5.9
+      '@babel/parser': 7.25.4
+      '@vue/compiler-core': 3.4.38
+      '@vue/compiler-dom': 3.4.38
+      '@vue/compiler-ssr': 3.4.38
+      '@vue/shared': 3.4.38
       estree-walker: 2.0.2
       magic-string: 0.30.11
-      postcss: 8.4.47
-      source-map-js: 1.2.1
+      postcss: 8.4.41
+      source-map-js: 1.2.0
 
-  '@vue/compiler-ssr@3.5.9':
+  '@vue/compiler-ssr@3.4.38':
     dependencies:
-      '@vue/compiler-dom': 3.5.9
-      '@vue/shared': 3.5.9
+      '@vue/compiler-dom': 3.4.38
+      '@vue/shared': 3.4.38
 
   '@vue/compiler-vue2@2.7.16':
     dependencies:
@@ -14004,10 +13284,10 @@ snapshots:
 
   '@vue/language-core@2.1.6(typescript@5.6.2)':
     dependencies:
-      '@volar/language-core': 2.4.5
-      '@vue/compiler-dom': 3.5.9
+      '@volar/language-core': 2.4.4
+      '@vue/compiler-dom': 3.4.38
       '@vue/compiler-vue2': 2.7.16
-      '@vue/shared': 3.5.9
+      '@vue/shared': 3.4.38
       computeds: 0.0.1
       minimatch: 9.0.5
       muggle-string: 0.4.1
@@ -14015,29 +13295,29 @@ snapshots:
     optionalDependencies:
       typescript: 5.6.2
 
-  '@vue/reactivity@3.5.9':
+  '@vue/reactivity@3.4.38':
     dependencies:
-      '@vue/shared': 3.5.9
+      '@vue/shared': 3.4.38
 
-  '@vue/runtime-core@3.5.9':
+  '@vue/runtime-core@3.4.38':
     dependencies:
-      '@vue/reactivity': 3.5.9
-      '@vue/shared': 3.5.9
+      '@vue/reactivity': 3.4.38
+      '@vue/shared': 3.4.38
 
-  '@vue/runtime-dom@3.5.9':
+  '@vue/runtime-dom@3.4.38':
     dependencies:
-      '@vue/reactivity': 3.5.9
-      '@vue/runtime-core': 3.5.9
-      '@vue/shared': 3.5.9
+      '@vue/reactivity': 3.4.38
+      '@vue/runtime-core': 3.4.38
+      '@vue/shared': 3.4.38
       csstype: 3.1.3
 
-  '@vue/server-renderer@3.5.9(vue@3.5.9(typescript@5.6.2))':
+  '@vue/server-renderer@3.4.38(vue@3.4.38(typescript@5.6.2))':
     dependencies:
-      '@vue/compiler-ssr': 3.5.9
-      '@vue/shared': 3.5.9
-      vue: 3.5.9(typescript@5.6.2)
+      '@vue/compiler-ssr': 3.4.38
+      '@vue/shared': 3.4.38
+      vue: 3.4.38(typescript@5.6.2)
 
-  '@vue/shared@3.5.9': {}
+  '@vue/shared@3.4.38': {}
 
   '@webassemblyjs/ast@1.12.1':
     dependencies:
@@ -14121,13 +13401,13 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.2.1(@types/react@18.3.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@xyflow/react@12.2.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@xyflow/system': 0.0.41
       classcat: 5.0.5
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      zustand: 4.5.4(@types/react@18.3.9)(react@18.3.1)
+      zustand: 4.5.4(@types/react@18.3.10)(react@18.3.1)
     transitivePeerDependencies:
       - '@types/react'
       - immer
@@ -14474,13 +13754,6 @@ snapshots:
       node-releases: 2.0.18
       update-browserslist-db: 1.1.0(browserslist@4.23.3)
 
-  browserslist@4.24.0:
-    dependencies:
-      caniuse-lite: 1.0.30001664
-      electron-to-chromium: 1.5.29
-      node-releases: 2.0.18
-      update-browserslist-db: 1.1.0(browserslist@4.24.0)
-
   buffer-from@1.1.2: {}
 
   buffer@5.7.1:
@@ -14532,8 +13805,6 @@ snapshots:
   caniuse-lite@1.0.30001632: {}
 
   caniuse-lite@1.0.30001651: {}
-
-  caniuse-lite@1.0.30001664: {}
 
   case-sensitive-paths-webpack-plugin@2.4.0: {}
 
@@ -14864,17 +14135,11 @@ snapshots:
 
   core-js-compat@3.38.1:
     dependencies:
-      browserslist: 4.24.0
+      browserslist: 4.23.3
 
-<<<<<<< HEAD
-  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.3)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
+  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.4)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
     dependencies:
-      '@types/node': 22.7.3
-=======
-  cosmiconfig-typescript-loader@5.0.0(@types/node@22.7.0)(cosmiconfig@9.0.0(typescript@5.6.2))(typescript@5.6.2):
-    dependencies:
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       cosmiconfig: 9.0.0(typescript@5.6.2)
       jiti: 1.21.6
       typescript: 5.6.2
@@ -14910,12 +14175,12 @@ snapshots:
 
   css-loader@6.11.0(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.47)
-      postcss: 8.4.47
-      postcss-modules-extract-imports: 3.1.0(postcss@8.4.47)
-      postcss-modules-local-by-default: 4.0.5(postcss@8.4.47)
-      postcss-modules-scope: 3.2.0(postcss@8.4.47)
-      postcss-modules-values: 4.0.0(postcss@8.4.47)
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
+      postcss-modules-extract-imports: 3.1.0(postcss@8.4.45)
+      postcss-modules-local-by-default: 4.0.5(postcss@8.4.45)
+      postcss-modules-scope: 3.2.0(postcss@8.4.45)
+      postcss-modules-values: 4.0.0(postcss@8.4.45)
       postcss-value-parser: 4.2.0
       semver: 7.6.3
     optionalDependencies:
@@ -15206,8 +14471,6 @@ snapshots:
 
   electron-to-chromium@1.4.799: {}
 
-  electron-to-chromium@1.5.29: {}
-
   electron-to-chromium@1.5.6: {}
 
   emoji-regex@10.3.0: {}
@@ -15411,17 +14674,17 @@ snapshots:
       fs-extra: 10.1.0
       globby: 11.1.0
 
-  esbuild-plugin-vue3@0.4.2(sass@1.77.5)(vue@3.5.9(typescript@5.6.2)):
+  esbuild-plugin-vue3@0.4.2(sass@1.77.5)(vue@3.4.38(typescript@5.6.2)):
     dependencies:
       esbuild: 0.14.54
       typescript: 4.9.5
-      vue: 3.5.9(typescript@5.6.2)
+      vue: 3.4.38(typescript@5.6.2)
     optionalDependencies:
       sass: 1.77.5
 
   esbuild-register@3.6.0(esbuild@0.23.1):
     dependencies:
-      debug: 4.3.7
+      debug: 4.3.6
       esbuild: 0.23.1
     transitivePeerDependencies:
       - supports-color
@@ -15618,7 +14881,7 @@ snapshots:
   eslint-plugin-es-x@7.8.0(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.11.1(jiti@1.21.6))
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       eslint: 9.11.1(jiti@1.21.6)
       eslint-compat-utils: 0.5.1(eslint@9.11.1(jiti@1.21.6))
 
@@ -15639,17 +14902,12 @@ snapshots:
 
   eslint-plugin-import-x@4.3.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2):
     dependencies:
-<<<<<<< HEAD
-      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      debug: 4.3.7
-=======
-      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
+      '@typescript-eslint/utils': 8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       debug: 4.3.6
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       doctrine: 3.0.0
       eslint: 9.11.1(jiti@1.21.6)
       eslint-import-resolver-node: 0.3.9
-      get-tsconfig: 4.8.1
+      get-tsconfig: 4.7.6
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.6.3
@@ -15669,7 +14927,7 @@ snapshots:
       eslint: 9.11.1(jiti@1.21.6)
       espree: 10.1.0
       esquery: 1.6.0
-      parse-imports: 2.2.1
+      parse-imports: 2.1.1
       semver: 7.6.3
       spdx-expression-parse: 4.0.0
       synckit: 0.9.1
@@ -15693,7 +14951,7 @@ snapshots:
       enhanced-resolve: 5.17.1
       eslint: 9.11.1(jiti@1.21.6)
       eslint-plugin-es-x: 7.8.0(eslint@9.11.1(jiti@1.21.6))
-      get-tsconfig: 4.8.1
+      get-tsconfig: 4.7.6
       globals: 15.9.0
       ignore: 5.3.2
       minimatch: 9.0.5
@@ -15713,15 +14971,9 @@ snapshots:
 
   eslint-plugin-perfectionist@3.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vue-eslint-parser@9.4.3(eslint@9.11.1(jiti@1.21.6))):
     dependencies:
-<<<<<<< HEAD
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
-=======
-      '@typescript-eslint/types': 8.5.0
-      '@typescript-eslint/utils': 8.5.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
-      eslint: 9.11.0(jiti@1.21.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       minimatch: 9.0.5
       natural-compare-lite: 1.4.0
     optionalDependencies:
@@ -15745,7 +14997,7 @@ snapshots:
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
       string-ts: 2.2.0
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15764,7 +15016,7 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15784,7 +15036,7 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15807,7 +15059,7 @@ snapshots:
       '@typescript-eslint/types': 8.7.0
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15831,7 +15083,7 @@ snapshots:
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       birecord: 0.1.1
       eslint: 9.11.1(jiti@1.21.6)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15852,7 +15104,7 @@ snapshots:
       '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       eslint: 9.11.1(jiti@1.21.6)
       is-immutable-type: 5.0.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      ts-pattern: 5.4.0
+      ts-pattern: 5.3.1
     optionalDependencies:
       typescript: 5.6.2
     transitivePeerDependencies:
@@ -15883,7 +15135,7 @@ snapshots:
   eslint-plugin-regexp@2.6.0(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.11.1(jiti@1.21.6))
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       comment-parser: 1.4.1
       eslint: 9.11.1(jiti@1.21.6)
       jsdoc-type-pratt-parser: 4.1.0
@@ -15893,15 +15145,9 @@ snapshots:
 
   eslint-plugin-toml@0.11.1(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
-<<<<<<< HEAD
-      debug: 4.3.7
+      debug: 4.3.6
       eslint: 9.11.1(jiti@1.21.6)
       eslint-compat-utils: 0.5.1(eslint@9.11.1(jiti@1.21.6))
-=======
-      debug: 4.3.6
-      eslint: 9.11.0(jiti@1.21.6)
-      eslint-compat-utils: 0.5.1(eslint@9.11.0(jiti@1.21.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       lodash: 4.17.21
       toml-eslint-parser: 0.10.0
     transitivePeerDependencies:
@@ -15927,19 +15173,11 @@ snapshots:
       semver: 7.6.3
       strip-indent: 3.0.0
 
-<<<<<<< HEAD
   eslint-plugin-unused-imports@4.1.4(@typescript-eslint/eslint-plugin@8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6)):
-=======
-  eslint-plugin-unused-imports@4.1.3(@typescript-eslint/eslint-plugin@8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6)):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       eslint: 9.11.1(jiti@1.21.6)
     optionalDependencies:
-<<<<<<< HEAD
       '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-=======
-      '@typescript-eslint/eslint-plugin': 8.5.0(@typescript-eslint/parser@8.7.0(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.0(jiti@1.21.6))(typescript@5.6.2)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
 
   eslint-plugin-vue@9.28.0(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
@@ -15957,24 +15195,18 @@ snapshots:
 
   eslint-plugin-yml@1.14.0(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
-<<<<<<< HEAD
-      debug: 4.3.7
+      debug: 4.3.6
       eslint: 9.11.1(jiti@1.21.6)
       eslint-compat-utils: 0.5.1(eslint@9.11.1(jiti@1.21.6))
-=======
-      debug: 4.3.6
-      eslint: 9.11.0(jiti@1.21.6)
-      eslint-compat-utils: 0.5.1(eslint@9.11.0(jiti@1.21.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       lodash: 4.17.21
       natural-compare: 1.4.0
       yaml-eslint-parser: 1.2.3
     transitivePeerDependencies:
       - supports-color
 
-  eslint-processor-vue-blocks@0.1.2(@vue/compiler-sfc@3.5.9)(eslint@9.11.1(jiti@1.21.6)):
+  eslint-processor-vue-blocks@0.1.2(@vue/compiler-sfc@3.4.38)(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
-      '@vue/compiler-sfc': 3.5.9
+      '@vue/compiler-sfc': 3.4.38
       eslint: 9.11.1(jiti@1.21.6)
 
   eslint-scope@5.1.1:
@@ -16006,7 +15238,7 @@ snapshots:
   eslint@9.11.1(jiti@1.21.6):
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@9.11.1(jiti@1.21.6))
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       '@eslint/config-array': 0.18.0
       '@eslint/core': 0.6.0
       '@eslint/eslintrc': 3.1.0
@@ -16020,7 +15252,7 @@ snapshots:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.7
+      debug: 4.3.6
       escape-string-regexp: 4.0.0
       eslint-scope: 8.0.2
       eslint-visitor-keys: 4.0.0
@@ -16367,7 +15599,7 @@ snapshots:
       es-errors: 1.3.0
       get-intrinsic: 1.2.4
 
-  get-tsconfig@4.8.1:
+  get-tsconfig@4.7.6:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
@@ -16654,9 +15886,9 @@ snapshots:
     dependencies:
       postcss: 8.4.40
 
-  icss-utils@5.1.0(postcss@8.4.47):
+  icss-utils@5.1.0(postcss@8.4.45):
     dependencies:
-      postcss: 8.4.47
+      postcss: 8.4.45
 
   ieee754@1.2.1: {}
 
@@ -17030,11 +16262,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -17738,7 +16966,7 @@ snapshots:
     dependencies:
       acorn: 8.12.1
       pathe: 1.1.2
-      pkg-types: 1.1.3
+      pkg-types: 1.2.0
       ufo: 1.5.4
 
   monaco-editor@0.52.0: {}
@@ -17847,8 +17075,6 @@ snapshots:
   nwsapi@2.2.12: {}
 
   object-assign@4.1.1: {}
-
-  object-inspect@1.13.1: {}
 
   object-inspect@1.13.2: {}
 
@@ -18056,7 +17282,7 @@ snapshots:
 
   parse-gitignore@2.0.0: {}
 
-  parse-imports@2.2.1:
+  parse-imports@2.1.1:
     dependencies:
       es-module-lexer: 1.5.4
       slashes: 3.0.12
@@ -18153,12 +17379,6 @@ snapshots:
     dependencies:
       find-up: 4.1.0
 
-  pkg-types@1.1.3:
-    dependencies:
-      confbox: 0.1.7
-      mlly: 1.7.1
-      pathe: 1.1.2
-
   pkg-types@1.2.0:
     dependencies:
       confbox: 0.1.7
@@ -18189,9 +17409,9 @@ snapshots:
     dependencies:
       postcss: 8.4.40
 
-  postcss-modules-extract-imports@3.1.0(postcss@8.4.47):
+  postcss-modules-extract-imports@3.1.0(postcss@8.4.45):
     dependencies:
-      postcss: 8.4.47
+      postcss: 8.4.45
 
   postcss-modules-local-by-default@4.0.5(postcss@8.4.38):
     dependencies:
@@ -18207,10 +17427,10 @@ snapshots:
       postcss-selector-parser: 6.1.0
       postcss-value-parser: 4.2.0
 
-  postcss-modules-local-by-default@4.0.5(postcss@8.4.47):
+  postcss-modules-local-by-default@4.0.5(postcss@8.4.45):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.47)
-      postcss: 8.4.47
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
       postcss-selector-parser: 6.1.0
       postcss-value-parser: 4.2.0
 
@@ -18224,9 +17444,9 @@ snapshots:
       postcss: 8.4.40
       postcss-selector-parser: 6.1.0
 
-  postcss-modules-scope@3.2.0(postcss@8.4.47):
+  postcss-modules-scope@3.2.0(postcss@8.4.45):
     dependencies:
-      postcss: 8.4.47
+      postcss: 8.4.45
       postcss-selector-parser: 6.1.0
 
   postcss-modules-values@4.0.0(postcss@8.4.38):
@@ -18239,10 +17459,10 @@ snapshots:
       icss-utils: 5.1.0(postcss@8.4.40)
       postcss: 8.4.40
 
-  postcss-modules-values@4.0.0(postcss@8.4.47):
+  postcss-modules-values@4.0.0(postcss@8.4.45):
     dependencies:
-      icss-utils: 5.1.0(postcss@8.4.47)
-      postcss: 8.4.47
+      icss-utils: 5.1.0(postcss@8.4.45)
+      postcss: 8.4.45
 
   postcss-modules@6.0.0(postcss@8.4.38):
     dependencies:
@@ -18280,9 +17500,6 @@ snapshots:
       picocolors: 1.0.1
       source-map-js: 1.2.0
 
-<<<<<<< HEAD
-  postcss@8.4.47:
-=======
   postcss@8.4.41:
     dependencies:
       nanoid: 3.3.7
@@ -18290,7 +17507,6 @@ snapshots:
       source-map-js: 1.2.0
 
   postcss@8.4.45:
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
     dependencies:
       nanoid: 3.3.7
       picocolors: 1.1.0
@@ -18339,11 +17555,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       long: 5.2.3
 
   protocols@2.0.1: {}
@@ -18466,26 +17678,18 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  rc-motion@2.9.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  rc-notification@5.6.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.25.4
       classnames: 2.5.1
-      rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
-  rc-notification@5.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      '@babel/runtime': 7.25.6
-      classnames: 2.5.1
-      rc-motion: 2.9.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      rc-motion: 2.9.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
   rc-overflow@1.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.24.7
+      '@babel/runtime': 7.25.4
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -18494,7 +17698,7 @@ snapshots:
 
   rc-picker@4.6.15(dayjs@1.11.13)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.25.4
       '@rc-component/trigger': 2.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       rc-overflow: 1.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -18537,7 +17741,7 @@ snapshots:
 
   rc-textarea@1.8.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.25.4
       classnames: 2.5.1
       rc-input: 1.6.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -18547,7 +17751,7 @@ snapshots:
 
   rc-tooltip@6.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.6
+      '@babel/runtime': 7.25.4
       '@rc-component/trigger': 2.2.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
       react: 18.3.1
@@ -18598,45 +17802,26 @@ snapshots:
     dependencies:
       dnd-core: 16.0.1
 
-<<<<<<< HEAD
-  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-=======
-  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       dnd-core: 16.0.1
       dnd-multi-backend: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
-<<<<<<< HEAD
-      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
-      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react@18.3.1)
+      react-dnd: 16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1)
+      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1))(react@18.3.1)
       react-dom: 18.3.1(react@18.3.1)
 
-  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react@18.3.1):
+  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
-      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
-=======
-      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
-      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react@18.3.1)
-      react-dom: 18.3.1(react@18.3.1)
-
-  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      react-dnd: 16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1)
 
   react-dnd-touch-backend@16.0.1:
     dependencies:
       '@react-dnd/invariant': 4.0.2
       dnd-core: 16.0.1
 
-<<<<<<< HEAD
-  react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1):
-=======
-  react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  react-dnd@16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1):
     dependencies:
       '@react-dnd/invariant': 4.0.2
       '@react-dnd/shallowequal': 4.0.2
@@ -18645,13 +17830,8 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       react: 18.3.1
     optionalDependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-      '@types/react': 18.3.9
-=======
-      '@types/node': 22.7.0
-      '@types/react': 18.3.5
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
+      '@types/react': 18.3.10
 
   react-docgen-typescript@2.2.2(typescript@5.6.2):
     dependencies:
@@ -18661,7 +17841,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.2
       '@babel/traverse': 7.25.4
-      '@babel/types': 7.25.6
+      '@babel/types': 7.25.4
       '@types/babel__core': 7.20.5
       '@types/babel__traverse': 7.20.6
       '@types/doctrine': 0.0.9
@@ -18726,11 +17906,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       substyle: 9.4.1(react@18.3.1)
 
-<<<<<<< HEAD
-  react-mosaic-component@6.1.0(@types/node@22.7.3)(@types/react@18.3.9)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-=======
-  react-mosaic-component@6.1.0(@types/node@22.7.0)(@types/react@18.3.5)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  react-mosaic-component@6.1.0(@types/node@22.7.4)(@types/react@18.3.10)(dnd-core@16.0.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       classnames: 2.5.1
       immutability-helper: 3.1.1
@@ -18738,15 +17914,9 @@ snapshots:
       prop-types: 15.8.1
       rdndmb-html5-to-touch: 8.0.3(dnd-core@16.0.1)
       react: 18.3.1
-<<<<<<< HEAD
-      react-dnd: 16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1)
+      react-dnd: 16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1)
       react-dnd-html5-backend: 16.0.1
-      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.3)(@types/react@18.3.9)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-=======
-      react-dnd: 16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1)
-      react-dnd-html5-backend: 16.0.1
-      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.0)(@types/react@18.3.5)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@22.7.4)(@types/react@18.3.10)(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-dnd-touch-backend: 16.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -18838,7 +18008,7 @@ snapshots:
 
   refa@0.12.1:
     dependencies:
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
 
   reflect-metadata@0.1.13: {}
 
@@ -18858,7 +18028,7 @@ snapshots:
 
   regexp-ast-analysis@0.7.1:
     dependencies:
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       refa: 0.12.1
 
   regexp-tree@0.1.27: {}
@@ -19107,7 +18277,7 @@ snapshots:
 
   scslre@0.3.0:
     dependencies:
-      '@eslint-community/regexpp': 4.11.1
+      '@eslint-community/regexpp': 4.11.0
       refa: 0.12.1
       regexp-ast-analysis: 0.7.1
 
@@ -19248,7 +18418,7 @@ snapshots:
       call-bind: 1.0.7
       es-errors: 1.3.0
       get-intrinsic: 1.2.4
-      object-inspect: 1.13.1
+      object-inspect: 1.13.2
 
   siginfo@2.0.0: {}
 
@@ -19353,9 +18523,9 @@ snapshots:
       terser-webpack-plugin: 5.3.10(@swc/core@1.7.5)(esbuild@0.23.1)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       webpack: 5.94.0(@swc/core@1.7.5)(esbuild@0.23.1)
 
-  storybook@8.3.3:
+  storybook@8.3.4:
     dependencies:
-      '@storybook/core': 8.3.3
+      '@storybook/core': 8.3.4
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -19566,11 +18736,7 @@ snapshots:
 
   tinyrainbow@1.2.0: {}
 
-<<<<<<< HEAD
-  tinyspy@3.0.2: {}
-=======
   tinyspy@3.0.0: {}
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
 
   tmp@0.0.33:
     dependencies:
@@ -19615,7 +18781,7 @@ snapshots:
 
   ts-dedent@2.2.0: {}
 
-  ts-pattern@5.4.0: {}
+  ts-pattern@5.3.1: {}
 
   tsconfig-paths-webpack-plugin@4.1.0:
     dependencies:
@@ -19811,12 +18977,6 @@ snapshots:
       escalade: 3.1.2
       picocolors: 1.0.1
 
-  update-browserslist-db@1.1.0(browserslist@4.24.0):
-    dependencies:
-      browserslist: 4.24.0
-      escalade: 3.1.2
-      picocolors: 1.0.1
-
   update-check@1.5.4:
     dependencies:
       registry-auth-token: 3.3.2
@@ -19889,20 +19049,12 @@ snapshots:
 
   vary@1.1.2: {}
 
-<<<<<<< HEAD
-  vite-node@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
-=======
-  vite-node@2.1.1(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  vite-node@2.1.1(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       cac: 6.7.14
       debug: 4.3.6
       pathe: 1.1.2
-<<<<<<< HEAD
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -19914,68 +19066,41 @@ snapshots:
       - supports-color
       - terser
 
-<<<<<<< HEAD
-  vite-plugin-dts@4.2.2(@types/node@22.7.3)(rollup@4.22.4)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
+  vite-plugin-dts@4.2.2(@types/node@22.7.4)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
     dependencies:
-      '@microsoft/api-extractor': 7.47.7(@types/node@22.7.3)
-      '@rollup/pluginutils': 5.1.2(rollup@4.22.4)
-      '@volar/typescript': 2.4.5
-=======
-  vite-plugin-dts@4.2.1(@types/node@22.7.0)(rollup@4.21.2)(typescript@5.6.2)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)):
-    dependencies:
-      '@microsoft/api-extractor': 7.47.7(@types/node@22.7.0)
+      '@microsoft/api-extractor': 7.47.7(@types/node@22.7.4)
       '@rollup/pluginutils': 5.1.0(rollup@4.21.2)
       '@volar/typescript': 2.4.4
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
       '@vue/language-core': 2.1.6(typescript@5.6.2)
       compare-versions: 6.1.1
-      debug: 4.3.7
+      debug: 4.3.6
       kolorist: 1.8.0
       local-pkg: 0.5.0
       magic-string: 0.30.11
       typescript: 5.6.2
     optionalDependencies:
-<<<<<<< HEAD
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-=======
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
       - supports-color
 
-<<<<<<< HEAD
-  vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
-=======
-  vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+  vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       esbuild: 0.21.5
       postcss: 8.4.45
       rollup: 4.21.2
     optionalDependencies:
-<<<<<<< HEAD
-      '@types/node': 22.7.3
-=======
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       fsevents: 2.3.3
       less: 4.2.0
       sass: 1.77.5
       terser: 5.31.6
 
-<<<<<<< HEAD
-  vitest@2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
+  vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:
       '@vitest/expect': 2.1.1
-      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-  vitest@2.1.1(@types/node@22.7.0)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
-    dependencies:
-      '@vitest/expect': 2.1.1
-      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@vitest/mocker': 2.1.1(@vitest/spy@2.1.1)(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@vitest/pretty-format': 2.1.1
       '@vitest/runner': 2.1.1
       '@vitest/snapshot': 2.1.1
@@ -19990,19 +19115,11 @@ snapshots:
       tinyexec: 0.3.0
       tinypool: 1.0.0
       tinyrainbow: 1.2.0
-<<<<<<< HEAD
-      vite: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vite-node: 2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vite-node: 2.1.1(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.7.3
-=======
-      vite: 5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vite-node: 2.1.1(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@types/node': 22.7.0
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      '@types/node': 22.7.4
       happy-dom: 15.0.0
       jsdom: 24.1.1
     transitivePeerDependencies:
@@ -20020,13 +19137,8 @@ snapshots:
 
   vue-eslint-parser@9.4.3(eslint@9.11.1(jiti@1.21.6)):
     dependencies:
-<<<<<<< HEAD
-      debug: 4.3.7
-      eslint: 9.11.1(jiti@1.21.6)
-=======
       debug: 4.3.6
-      eslint: 9.11.0(jiti@1.21.6)
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
+      eslint: 9.11.1(jiti@1.21.6)
       eslint-scope: 7.2.2
       eslint-visitor-keys: 3.4.3
       espree: 9.6.1
@@ -20036,13 +19148,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vue@3.5.9(typescript@5.6.2):
+  vue@3.4.38(typescript@5.6.2):
     dependencies:
-      '@vue/compiler-dom': 3.5.9
-      '@vue/compiler-sfc': 3.5.9
-      '@vue/runtime-dom': 3.5.9
-      '@vue/server-renderer': 3.5.9(vue@3.5.9(typescript@5.6.2))
-      '@vue/shared': 3.5.9
+      '@vue/compiler-dom': 3.4.38
+      '@vue/compiler-sfc': 3.4.38
+      '@vue/runtime-dom': 3.4.38
+      '@vue/server-renderer': 3.4.38(vue@3.4.38(typescript@5.6.2))
+      '@vue/shared': 3.4.38
     optionalDependencies:
       typescript: 5.6.2
 
@@ -20092,13 +19204,13 @@ snapshots:
 
   webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1):
     dependencies:
-      '@types/estree': 1.0.6
+      '@types/estree': 1.0.5
       '@webassemblyjs/ast': 1.12.1
       '@webassemblyjs/wasm-edit': 1.12.1
       '@webassemblyjs/wasm-parser': 1.12.1
       acorn: 8.12.1
       acorn-import-attributes: 1.9.5(acorn@8.12.1)
-      browserslist: 4.24.0
+      browserslist: 4.23.3
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.17.1
       es-module-lexer: 1.5.4
@@ -20247,15 +19359,13 @@ snapshots:
     dependencies:
       eslint-visitor-keys: 3.4.3
       lodash: 4.17.21
-      yaml: 2.5.1
+      yaml: 2.5.0
 
   yaml@1.10.2: {}
 
   yaml@2.4.5: {}
 
   yaml@2.5.0: {}
-
-  yaml@2.5.1: {}
 
   yargs-parser@21.1.1: {}
 
@@ -20275,11 +19385,11 @@ snapshots:
 
   yoctocolors-cjs@2.1.1: {}
 
-  zustand@4.5.4(@types/react@18.3.9)(react@18.3.1):
+  zustand@4.5.4(@types/react@18.3.10)(react@18.3.1):
     dependencies:
       use-sync-external-store: 1.2.0(react@18.3.1)
     optionalDependencies:
-      '@types/react': 18.3.9
+      '@types/react': 18.3.10
       react: 18.3.1
 
   zwitch@2.0.4: {}

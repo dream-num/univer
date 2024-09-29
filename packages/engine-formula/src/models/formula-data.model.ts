@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
-
-import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
-
-import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 import type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -30,7 +25,12 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
+
 import type { IFormulaIdMap } from './utils/formula-data-util';
+
+import { Disposable, Inject, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
 export interface IRangeChange {
     oldCell: IRange;
@@ -70,11 +70,12 @@ export class FormulaDataModel extends Disposable {
 
             Object.keys(clearSheetData).forEach((sheetId) => {
                 const clearCellMatrixData = clearSheetData[sheetId];
-                const rangeMatrix = this._arrayFormulaRange?.[unitId]?.[sheetId];
-                if (rangeMatrix == null) {
+                const formulaRange = this._arrayFormulaRange?.[unitId]?.[sheetId];
+                if (formulaRange == null) {
                     return true;
                 }
 
+                const rangeMatrix = new ObjectMatrix<IRange>(formulaRange); // Original array formula range.
                 let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
 
                 if (this._arrayFormulaCellData[unitId]?.[sheetId] != null) {
@@ -84,16 +85,20 @@ export class FormulaDataModel extends Disposable {
                 }
 
                 clearCellMatrixData.forValue((row, column) => {
-                    const range = rangeMatrix?.[row]?.[column];
+                    const range = rangeMatrix.getValue(row, column);
                     if (range == null) {
                         return true;
                     }
+
                     const { startRow, startColumn, endRow, endColumn } = range;
                     for (let r = startRow; r <= endRow; r++) {
                         for (let c = startColumn; c <= endColumn; c++) {
                             arrayFormulaCellMatrixData.setValue(r, c, null);
                         }
                     }
+
+                    // clear the array formula range
+                    rangeMatrix.realDeleteValue(row, column);
                 });
 
                 if (this._arrayFormulaCellData[unitId]) {

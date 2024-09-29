@@ -14,33 +14,14 @@
  * limitations under the License.
  */
 
-import {
-    RANGE_TYPE,
-} from '@univerjs/core';
-
-import {
-    DeleteRangeMoveLeftCommand,
-    DeleteRangeMoveUpCommand,
-    InsertColCommand,
-    InsertRangeMoveDownCommand,
-    InsertRangeMoveRightCommand,
-    InsertRowCommand,
-    MoveColsCommand,
-    MoveRangeCommand,
-    MoveRowsCommand,
-    RemoveColCommand,
-    RemoveRowCommand,
-    RemoveSheetCommand,
-    SetDefinedNameCommand,
-    SetWorksheetNameCommand,
-} from '@univerjs/sheets';
-
 import type {
     ICommandInfo,
     Nullable,
     Workbook,
 } from '@univerjs/core';
+
 import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -54,6 +35,26 @@ import type {
     IRemoveRowColCommandParams,
     IRemoveSheetCommandParams,
     ISetWorksheetNameCommandParams,
+} from '@univerjs/sheets';
+import {
+    RANGE_TYPE,
+} from '@univerjs/core';
+import {
+    DeleteRangeMoveLeftCommand,
+    DeleteRangeMoveUpCommand,
+    InsertColCommand,
+    InsertRangeMoveDownCommand,
+    InsertRangeMoveRightCommand,
+    InsertRowCommand,
+    MoveColsCommand,
+    MoveRangeCommand,
+    MoveRowsCommand,
+    RemoveColCommand,
+    RemoveDefinedNameCommand,
+    RemoveRowCommand,
+    RemoveSheetCommand,
+    SetDefinedNameCommand,
+    SetWorksheetNameCommand,
 } from '@univerjs/sheets';
 import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
 
@@ -103,6 +104,10 @@ export function getReferenceMoveParams(workbook: Workbook, command: ICommandInfo
             break;
         case SetDefinedNameCommand.id:
             result = handleRefSetDefinedName(command as ICommandInfo<ISetDefinedNameMutationParam>, workbook);
+            break;
+        case RemoveDefinedNameCommand.id:
+            result = handleRefRemoveDefinedName(command as ICommandInfo<ISetDefinedNameMutationParam>, workbook);
+            break;
     }
 
     return result;
@@ -371,6 +376,23 @@ function handleRefSetDefinedName(command: ICommandInfo<ISetDefinedNameMutationPa
 
     return {
         type: FormulaReferenceMoveType.SetDefinedName,
+        unitId,
+        sheetId,
+        definedName: name,
+        definedNameId: id,
+    };
+}
+
+function handleRefRemoveDefinedName(command: ICommandInfo<ISetDefinedNameMutationParam>, workbook: Workbook): Nullable<IFormulaReferenceMoveParam> {
+    const { params } = command;
+    if (!params) return null;
+
+    const { unitId, name, id } = params;
+
+    const { sheetId } = getCurrentSheetInfo(workbook);
+
+    return {
+        type: FormulaReferenceMoveType.RemoveDefinedName,
         unitId,
         sheetId,
         definedName: name,

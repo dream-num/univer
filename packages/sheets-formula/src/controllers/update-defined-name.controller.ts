@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
     Inject,
@@ -23,13 +26,10 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
-import { SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
-import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
-import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
-import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 
 @OnLifecycle(LifecycleStages.Ready, UpdateDefinedNameController)
 export class UpdateDefinedNameController extends Disposable {
@@ -55,7 +55,7 @@ export class UpdateDefinedNameController extends Disposable {
             this._sheetInterceptorService.interceptCommand({
                 getMutations: (command) => {
                     // Exclude processing in getReferenceMoveParams, SetDefinedNameCommand is only handled in UpdateFormulaController
-                    if (command.id === SetDefinedNameCommand.id) {
+                    if (command.id === SetDefinedNameCommand.id || command.id === RemoveDefinedNameCommand.id) {
                         return {
                             redos: [],
                             undos: [],

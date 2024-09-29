@@ -15,15 +15,13 @@
  */
 
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
-import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
+import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveDefinedNameCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
-
-
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
@@ -348,6 +346,7 @@ describe('Test update formula ', () => {
 
         // set defined name
         commandService.registerCommand(SetDefinedNameCommand);
+        commandService.registerCommand(RemoveDefinedNameCommand);
         commandService.registerCommand(SetDefinedNameMutation);
         commandService.registerCommand(RemoveDefinedNameMutation);
 
@@ -360,11 +359,7 @@ describe('Test update formula ', () => {
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
                 .getUnit<Workbook>('test')
-<<<<<<< HEAD
-                ?.getSheetBySheetId('sheet1')
-=======
                 ?.getSheetBySheetId(sheetId)
->>>>>>> 55fa2461b (fix(formula): get move range)
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
@@ -1447,6 +1442,21 @@ describe('Test update formula ', () => {
             expect(await commandService.executeCommand(SetDefinedNameCommand.id, params)).toBeTruthy();
             const values = getValues(2, 0, 2, 0, 'sheet2');
             expect(values).toStrictEqual([[{ f: '=SUM(DefinedName2)' }]]);
+        });
+
+        it('remove defined name', async () => {
+            const params: ISetDefinedNameMutationParam = {
+                unitId: 'test',
+                id: 'soAI3OK4sq',
+                name: 'DefinedName1',
+                formulaOrRefString: 'Sheet2!$A$1:$B$2',
+                comment: '',
+                localSheetId: 'AllDefaultWorkbook',
+            };
+
+            expect(await commandService.executeCommand(RemoveDefinedNameCommand.id, params)).toBeTruthy();
+            const values = getValues(2, 0, 2, 0, 'sheet2');
+            expect(values).toStrictEqual([[{ f: '=SUM(#REF!)' }]]);
         });
 
         it('remove worksheet', async () => {

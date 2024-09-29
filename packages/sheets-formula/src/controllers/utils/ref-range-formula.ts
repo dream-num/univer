@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Rectangle } from '@univerjs/core';
 import { deserializeRangeWithSheet, type IFormulaData, type IFormulaDataItem, type IRangeChange, type ISequenceNode, sequenceNodeType, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
-import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
@@ -36,6 +36,7 @@ export enum FormulaReferenceMoveType {
     SetName,
     RemoveSheet,
     SetDefinedName, // update defined name
+    RemoveDefinedName, // remove defined name
 }
 
 export interface IFormulaReferenceMoveParam {
@@ -50,12 +51,19 @@ export interface IFormulaReferenceMoveParam {
     definedName?: string; // new defined name
 }
 
+const formulaReferenceSheetList = [
+    FormulaReferenceMoveType.SetName,
+    FormulaReferenceMoveType.RemoveSheet,
+    FormulaReferenceMoveType.SetDefinedName,
+    FormulaReferenceMoveType.RemoveDefinedName,
+];
+
 export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     const { type } = formulaReferenceMoveParam;
 
-    if (type === FormulaReferenceMoveType.SetName || type === FormulaReferenceMoveType.RemoveSheet || type === FormulaReferenceMoveType.SetDefinedName) {
+    if (formulaReferenceSheetList.includes(type)) {
         return getFormulaReferenceSheet(oldFormulaData, newFormulaData);
     } else {
         return getFormulaReferenceRange(oldFormulaData, newFormulaData, formulaReferenceMoveParam);

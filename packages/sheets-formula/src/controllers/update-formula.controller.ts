@@ -15,19 +15,22 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommandInfo,
     IExecutionOptions,
-    IRange,
-    IUnitRange,
     Nullable,
-    Workbook } from '@univerjs/core';
-import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
+    SlideDataModel,
+    Workbook,
+} from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
+import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 
+import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Direction,
     Disposable,
@@ -41,6 +44,8 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+
+import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -77,29 +82,11 @@ import {
     SetStyleCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-
-import { map } from 'rxjs';
-
-
+import { filter, map, merge } from 'rxjs';
 import { removeFormulaData } from './utils/offset-formula-data';
-import { formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
-
-import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
+import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
+import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
-
-interface IUnitRangeWithOffset extends IUnitRange {
-    refOffsetX: number;
-    refOffsetY: number;
-    sheetName: string;
-}
-
-enum OriginRangeEdgeType {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    ALL,
-}
 
 /**
  * Update formula process
@@ -119,7 +106,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) readonly _injector: Injector
+        @Inject(Injector) readonly _injector: Injector,
     ) {
         super();
 
@@ -382,7 +369,47 @@ export class UpdateFormulaController extends Disposable {
                     const refChangeIds: number[] = [];
                     for (let i = 0, len = sequenceNodes.length; i < len; i++) {
                         const node = sequenceNodes[i];
-                        if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
+
+                        if (typeof node === 'string') {
+                            continue;
+                        }
+
+                        const { token, nodeType } = node;
+                        const { type } = formulaReferenceMoveParam;
+
+                        // The impact of defined name changes on formula calculation
+                        // 1. ref range only changes formulaOrRefString to trigger recalculation
+                        // 2. set defined name command, change name to trigger formula update, otherwise trigger recalculation
+                        // 3. remove defined name command, change name to #REF! to trigger formula update
+                        // 4. insert defined name No processing required
+                        // 5. remove sheet,  trigger recalculation
+                        // FIXME: Why is the node type of defined name 3?
+                        if ((type === FormulaReferenceMoveType.SetDefinedName || type === FormulaReferenceMoveType.RemoveDefinedName) && (nodeType === sequenceNodeType.DEFINED_NAME || nodeType === sequenceNodeType.FUNCTION)) {
+                            const { definedNameId, definedName } = formulaReferenceMoveParam;
+                            if (definedNameId === undefined || definedName === undefined) {
+                                continue;
+                            }
+
+                            const oldDefinedName = this._definedNamesService.getValueById(unitId, definedNameId);
+                            if (oldDefinedName === undefined || oldDefinedName === null) {
+                                continue;
+                            }
+
+                            // Make sure the current token is the defined name to be updated.
+                            if (oldDefinedName.name !== token) {
+                                continue;
+                            }
+
+                            // Update the defined name in the formula, if the defined name is removed, update the token to #REF!
+                            sequenceNodes[i] = {
+                                ...node,
+                                token: type === FormulaReferenceMoveType.SetDefinedName ? definedName : ErrorType.REF,
+                            };
+                            shouldModify = true;
+                            refChangeIds.push(i);
+
+                            continue;
+                        } else if (nodeType !== sequenceNodeType.REFERENCE) {
                             continue;
                         }
                         const { token } = node;
@@ -420,7 +447,7 @@ export class UpdateFormulaController extends Disposable {
 
                         let newRefString: Nullable<string> = null;
 
-                        if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.SetName) {
+                        if (type === FormulaReferenceMoveType.SetName) {
                             const {
                                 unitId: userUnitId,
                                 sheetId: userSheetId,
@@ -443,7 +470,7 @@ export class UpdateFormulaController extends Disposable {
                                 sheetName: newSheetName,
                                 unitId: sequenceUnitId,
                             });
-                        } else if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.RemoveSheet) {
+                        } else if (type === FormulaReferenceMoveType.RemoveSheet) {
                             const {
                                 unitId: userUnitId,
                                 sheetId: userSheetId,
@@ -459,9 +486,9 @@ export class UpdateFormulaController extends Disposable {
                             }
 
                             newRefString = ErrorType.REF;
-                        } else {
-                            newRefString = this._getNewRangeByMoveParam(
-                                sequenceUnitRangeWidthOffset as IUnitRangeWithOffset,
+                        } else if (type !== FormulaReferenceMoveType.SetDefinedName) {
+                            newRefString = getNewRangeByMoveParam(
+                                sequenceUnitRangeWidthOffset,
                                 formulaReferenceMoveParam,
                                 unitId,
                                 sheetId

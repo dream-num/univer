@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
+import type { ISheetHyperLinkInfo } from '../types/interfaces/i-sheet-hyper-link-info';
+import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
 import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
@@ -21,12 +26,7 @@ import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/s
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
-import type { IUniverSheetsHyperLinkUIConfig } from '../controllers/config.schema';
-import type { ISheetHyperLinkInfo } from '../types/interfaces/i-sheet-hyper-link-info';
-import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();
@@ -136,7 +136,7 @@ export class SheetsHyperLinkResolverService {
 
             if (!worksheet) {
                 this._messageService.show({
-                    content: this._localeService.t('hyperLink.message.noSheet'),
+                    content: this._localeService.t('hyperLink.message.refError'),
                     type: MessageType.Error,
                 });
                 return;

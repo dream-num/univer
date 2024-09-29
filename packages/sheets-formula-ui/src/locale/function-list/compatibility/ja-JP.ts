@@ -313,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: '失敗数', detail: '試行が失敗する回数を指定します。' },
+            numberS: { name: '成功数', detail: '分析のしきい値となる、試行が成功する回数を指定します。' },
+            probabilityS: { name: '成功率', detail: '試行が成功する確率を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     NORMDIST: {
@@ -375,8 +377,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
-        abstract: '特定の範囲に含まれるデータの第 k 百分位数に当たる値を返します。',
+        description: '配列内での第 k 百分位数に当たる値を返します (0と1が含まれています)。',
+        abstract: '配列内での第 k 百分位数に当たる値を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -384,13 +386,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            k: { name: 'k', detail: '0 から 1 (0と1が含まれています)までのパーセント値。' },
         },
     },
     PERCENTRANK: {
-        description: '配列内での値の順位を百分率で表した値を返します。',
-        abstract: '配列内での値の順位を百分率で表した値を返します。',
+        description: '配列内での値の順位を百分率で表した値を返します (0と1が含まれています)。',
+        abstract: '配列内での値の順位を百分率で表した値を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -398,8 +400,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '相対的な位置を決定するデータの配列またはセル範囲を指定します。' },
+            x: { name: 'x', detail: 'ランクを調べる値を指定します。' },
+            significance: { name: '有効桁数', detail: '計算結果として返される百分率の有効桁数を指定します。 有効桁数を省略すると、小数点以下第 3 位 (0.xxx) まで計算されます。' },
         },
     },
     POISSON: {

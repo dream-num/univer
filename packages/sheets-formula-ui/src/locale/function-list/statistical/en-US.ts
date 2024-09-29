@@ -1039,8 +1039,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: 'number_f', detail: 'The number of failures.' },
+            numberS: { name: 'number_s', detail: 'The threshold number of successes.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of a success.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NEGBINOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     NORM_DIST: {
@@ -1111,13 +1113,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The dependent array or range of data.' },
+            array2: { name: 'array2', detail: 'The independent array or range of data.' },
         },
     },
     PERCENTILE_EXC: {
-        description: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
-        abstract: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
+        description: 'Returns the k-th percentile of values in a data set (Excludes 0 and 1).',
+        abstract: 'Returns the k-th percentile of values in a data set (Excludes 0 and 1).',
         links: [
             {
                 title: 'Instruction',
@@ -1125,13 +1127,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            k: { name: 'k', detail: 'The percentile value in the range 0 and 1 (Excludes 0 and 1).' },
         },
     },
     PERCENTILE_INC: {
-        description: 'Returns the k-th percentile of values in a range',
-        abstract: 'Returns the k-th percentile of values in a range',
+        description: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
+        abstract: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1139,13 +1141,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            k: { name: 'k', detail: 'The percentile value in the range 0 and 1 (Includes 0 and 1).' },
         },
     },
     PERCENTRANK_EXC: {
-        description: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
-        abstract: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
+        description: 'Returns the percentage rank of a value in a data set (Excludes 0 and 1)',
+        abstract: 'Returns the percentage rank of a value in a data set (Excludes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1153,13 +1155,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            x: { name: 'x', detail: 'The value for which you want to know the rank.' },
+            significance: { name: 'significance', detail: 'A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK.EXC uses three digits (0.xxx).' },
         },
     },
     PERCENTRANK_INC: {
-        description: 'Returns the percentage rank of a value in a data set',
-        abstract: 'Returns the percentage rank of a value in a data set',
+        description: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
+        abstract: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1167,8 +1170,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            x: { name: 'x', detail: 'The value for which you want to know the rank.' },
+            significance: { name: 'significance', detail: 'A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK.INC uses three digits (0.xxx).' },
         },
     },
     PERMUT: {

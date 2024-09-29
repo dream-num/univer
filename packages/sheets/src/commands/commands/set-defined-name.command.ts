@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -21,7 +22,6 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameMutationFactory } from '@univerjs/engine-formula';
-import type { IAccessor, ICommand } from '@univerjs/core';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 /**

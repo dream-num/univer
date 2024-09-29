@@ -28,6 +28,7 @@ import {
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import { IDefinedNamesService } from '../services/defined-names.service';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 
@@ -36,7 +37,8 @@ export class SetDependencyController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
         @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
-        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
@@ -127,8 +129,23 @@ export class SetDependencyController extends Disposable {
                             });
                         });
                     });
+                } else if (command.id === SetDefinedNameMutation.id) {
+                    this._handleSetDefinedName(command);
                 }
             })
         );
+    }
+
+    private _handleSetDefinedName(
+        command: ICommandInfo
+    ): void {
+        const params = command.params as ISetDefinedNameMutationParam;
+        if (params == null) {
+            return;
+        }
+
+        const { unitId, name } = params;
+
+        this._dependencyManagerService.removeFormulaDependencyByDefinedName(unitId, name);
     }
 }

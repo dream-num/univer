@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
-import { getSheetCommandTarget, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
-import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 
-import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
@@ -61,7 +61,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                     if (!target) {
                         return false;
                     }
-                    const { worksheet, unitId, subUnitId } = target;
+                    const { unitId, subUnitId } = target;
 
                     const worksheetEditPermission = this._permissionService.composePermission([new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]).every((permission) => permission.value);
                     if (!worksheetEditPermission) {
@@ -72,26 +72,16 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return true;
                     }
 
-                    const protectionLapRange = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).reduce((p, c) => {
-                        return [...p, ...c.ranges];
-                    }, [] as IRange[]).filter((range) => {
-                        return Rectangle.intersects(range, selectionRange);
-                    });
-
-                    const haveNotPermission = protectionLapRange.some((range) => {
-                        const { startRow, startColumn, endRow, endColumn } = range;
-                        for (let row = startRow; row <= endRow; row++) {
-                            for (let col = startColumn; col <= endColumn; col++) {
-                                const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
-                                if (permission?.[UnitAction.Edit] === false) {
-                                    return true;
-                                }
+                    const permissionIds: string[] = [];
+                    this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
+                        rule.ranges.forEach((range) => {
+                            if (Rectangle.intersects(range, selectionRange)) {
+                                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
                             }
-                        }
-                        return false;
+                        });
                     });
 
-                    return !haveNotPermission;
+                    return this._permissionService.composePermission(permissionIds).every((permission) => permission.value === true);
                 },
             })
         );

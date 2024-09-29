@@ -1185,8 +1185,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一排列中项目的数量。' },
         },
     },
     PERMUTATIONA: {
@@ -1199,8 +1199,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '总数', detail: '项目的数量。' },
+            numberChosen: { name: '样品数量', detail: '每一排列中项目的数量。' },
         },
     },
     PHI: {
@@ -1213,8 +1213,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'X 是需要标准正态分布密度的数字。' },
         },
     },
     POISSON_DIST: {

@@ -1148,8 +1148,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る順列わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     PERMUTATIONA: {
@@ -1162,8 +1162,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '総数', detail: '抜き取る対象の全体の数を指定します。' },
+            numberChosen: { name: '抜き取り数', detail: '抜き取る順列わせ 1 組に含まれる項目の数を指定します。' },
         },
     },
     PHI: {
@@ -1176,8 +1176,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '標準正規分布の密度を求める数値を指定します。' },
         },
     },
     POISSON_DIST: {

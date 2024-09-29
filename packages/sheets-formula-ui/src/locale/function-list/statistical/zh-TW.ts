@@ -1185,8 +1185,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個排列中的項目數。' },
         },
     },
     PERMUTATIONA: {
@@ -1199,8 +1199,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '總數', detail: '這是項目數。' },
+            numberChosen: { name: '樣品數量', detail: '這是每個排列中的項目數。' },
         },
     },
     PHI: {
@@ -1213,8 +1213,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'X 是要求標準常態分佈密度的數位。' },
         },
     },
     POISSON_DIST: {

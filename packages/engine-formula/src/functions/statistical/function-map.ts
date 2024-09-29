@@ -84,6 +84,9 @@ import { PercentileExc } from './percentile-exc';
 import { PercentileInc } from './percentile-inc';
 import { PercentrankExc } from './percentrank-exc';
 import { PercentrankInc } from './percentrank-inc';
+import { Permut } from './permut';
+import { Permutationa } from './permutationa';
+import { Phi } from './phi';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
 import { Small } from './small';
@@ -168,6 +171,9 @@ export const functionStatistical = [
     [PercentileInc, FUNCTION_NAMES_STATISTICAL.PERCENTILE_INC],
     [PercentrankExc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_EXC],
     [PercentrankInc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_INC],
+    [Permut, FUNCTION_NAMES_STATISTICAL.PERMUT],
+    [Permutationa, FUNCTION_NAMES_STATISTICAL.PERMUTATIONA],
+    [Phi, FUNCTION_NAMES_STATISTICAL.PHI],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
     [Small, FUNCTION_NAMES_STATISTICAL.SMALL],

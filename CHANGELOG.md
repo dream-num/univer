@@ -1,5 +1,13 @@
 
 
+# [0.3.0-alpha.1](https://github.com/dream-num/univer/compare/v0.3.0-alpha.0...v0.3.0-alpha.1) (2024-09-29)
+
+
+### Bug Fixes
+
+* bg border return before  getCell ([#3623](https://github.com/dream-num/univer/issues/3623)) ([2e7b201](https://github.com/dream-num/univer/commit/2e7b201ab8a6183242619dfc908ba3a9326ef01c))
+* **data-validation:** remove useless interceptor mutations ([#3630](https://github.com/dream-num/univer/issues/3630)) ([fd48e15](https://github.com/dream-num/univer/commit/fd48e15e22ebf32c4cc5384cfea0f1735ff7d0b4))
+
 # [0.3.0-alpha.0](https://github.com/dream-num/univer/compare/v0.2.15...v0.3.0-alpha.0) (2024-09-28)
 
 

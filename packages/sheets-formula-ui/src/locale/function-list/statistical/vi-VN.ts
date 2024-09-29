@@ -933,6 +933,22 @@ export default {
             number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
         },
     },
+    NEGBINOM_DIST: {
+        description: 'Trả về phân bố nhị thức âm',
+        abstract: 'Trả về phân bố nhị thức âm',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/negbinom-dist-%E5%87%BD%E6%95%B0-c8239f89-c2d0-45bd-b6af-172e570f8599',
+            },
+        ],
+        functionParameter: {
+            numberF: { name: 'số lần thất bại.', detail: 'Số lần thất bại.' },
+            numberS: { name: 'số lần thành công', detail: 'Số ngưỡng thành công.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm NEGBINOM.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+        },
+    },
     NORM_DIST: {
         description: 'Trả về hàm phân phối tích lũy chuẩn',
         abstract: 'Trả về hàm phân phối tích lũy chuẩn',
@@ -989,6 +1005,78 @@ export default {
         ],
         functionParameter: {
             probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố chuẩn.' },
+        },
+    },
+    PEARSON: {
+        description: 'Trả về hệ số tương quan mô-men tích Pearson',
+        abstract: 'Trả về hệ số tương quan mô-men tích Pearson',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/pearson-%E5%87%BD%E6%95%B0-0c3e30fc-e5af-49c4-808a-3ef66e034c18',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    PERCENTILE_EXC: {
+        description: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (loại trừ 0 và 1)',
+        abstract: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (loại trừ 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/percentile-exc-%E5%87%BD%E6%95%B0-bbaa7204-e9e1-4010-85bf-c31dc5dce4ba',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            k: { name: 'k', detail: 'Giá trị phần trăm từ 0 đến 1 (loại trừ 0 và 1).' },
+        },
+    },
+    PERCENTILE_INC: {
+        description: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/percentile-inc-%E5%87%BD%E6%95%B0-680f9539-45eb-410b-9a5e-c1355e5fe2ed',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            k: { name: 'k', detail: 'Giá trị phần trăm từ 0 đến 1 (bao gồm 0 và 1).' },
+        },
+    },
+    PERCENTRANK_EXC: {
+        description: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (loại trừ 0 và 1)',
+        abstract: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (loại trừ 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/percentrank-exc-%E5%87%BD%E6%95%B0-d8afee96-b7e2-4a2f-8c01-8fcdedaa6314',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn biết thứ hạng của nó.' },
+            significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK.EXC dùng ba chữ số (0.xxx).' },
+        },
+    },
+    PERCENTRANK_INC: {
+        description: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/percentrank-inc-%E5%87%BD%E6%95%B0-149592c9-00c0-49ba-86c1-c1f45b80463a',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn biết thứ hạng của nó.' },
+            significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK.INC dùng ba chữ số (0.xxx).' },
         },
     },
     RANK_AVG: {

@@ -33,6 +33,8 @@ import { ModeSngl } from '../statistical/mode-sngl';
 import { NormDist } from '../statistical/norm-dist';
 import { NormInv } from '../statistical/norm-inv';
 import { NormSInv } from '../statistical/norm-s-inv';
+import { PercentileInc } from '../statistical/percentile-inc';
+import { PercentrankInc } from '../statistical/percentrank-inc';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
@@ -41,6 +43,7 @@ import { Betadist } from './betadist';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
 import { Hypgeomdist } from './hypgeomdist';
 import { Lognormdist } from './lognormdist';
+import { Negbinomdist } from './negbinomdist';
 import { Normsdist } from './normsdist';
 import { Rank } from './rank';
 
@@ -64,10 +67,13 @@ export const functionCompatibility = [
     [Lognormdist, FUNCTION_NAMES_COMPATIBILITY.LOGNORMDIST],
     [LognormInv, FUNCTION_NAMES_COMPATIBILITY.LOGINV],
     [ModeSngl, FUNCTION_NAMES_COMPATIBILITY.MODE],
+    [Negbinomdist, FUNCTION_NAMES_COMPATIBILITY.NEGBINOMDIST],
     [NormDist, FUNCTION_NAMES_COMPATIBILITY.NORMDIST],
     [NormInv, FUNCTION_NAMES_COMPATIBILITY.NORMINV],
     [Normsdist, FUNCTION_NAMES_COMPATIBILITY.NORMSDIST],
     [NormSInv, FUNCTION_NAMES_COMPATIBILITY.NORMSINV],
+    [PercentileInc, FUNCTION_NAMES_COMPATIBILITY.PERCENTILE],
+    [PercentrankInc, FUNCTION_NAMES_COMPATIBILITY.PERCENTRANK],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

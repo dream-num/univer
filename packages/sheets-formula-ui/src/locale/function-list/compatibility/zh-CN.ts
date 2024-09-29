@@ -313,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: '失败次数', detail: '失败的次数。' },
+            numberS: { name: '成功次数', detail: '成功次数的阈值。' },
+            probabilityS: { name: '成功概率', detail: '成功的概率。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NEGBINOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORMDIST: {
@@ -375,8 +377,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: '返回区域中数值的第 k 个百分点的值',
-        abstract: '返回区域中数值的第 k 个百分点的值',
+        description: '返回数据集中第 k 个百分点的值 (包含 0 和 1)',
+        abstract: '返回数据集中第 k 个百分点的值 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -384,13 +386,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '定义相对位置的数组或数据区域。' },
+            k: { name: 'k', detail: '0 到 1 之间的百分点值 (包含 0 和 1)。' },
         },
     },
     PERCENTRANK: {
-        description: '返回数据集中值的百分比排位',
-        abstract: '返回数据集中值的百分比排位',
+        description: '返回数据集中值的百分比排位 (包含 0 和 1)',
+        abstract: '返回数据集中值的百分比排位 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -398,8 +400,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '定义相对位置的数组或数据区域。' },
+            x: { name: 'x', detail: '需要得到其排位的值。' },
+            significance: { name: '有效位数', detail: '用于标识返回的百分比值的有效位数的值。 如果省略，则 PERCENTRANK 使用 3 位小数 (0.xxx)。' },
         },
     },
     POISSON: {

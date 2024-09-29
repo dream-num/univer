@@ -218,8 +218,8 @@ export default {
         },
     },
     COMBIN: {
-        description: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
-        abstract: 'Trả về số tổ hợp cho số mục nhất định. Hãy dùng COMBIN để xác định tổng số nhóm có thể có cho số hạng mục nhất định.',
+        description: 'Trả về số tổ hợp cho số mục nhất định.',
+        abstract: 'Trả về số tổ hợp cho số mục nhất định.',
         links: [
             {
                 title: 'Hướng dẫn',

@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
@@ -89,8 +89,8 @@ export const CellLinkEdit = () => {
                     const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
                     const cell = worksheet?.getCellRaw(editing.row, editing.col);
                     const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-                    const cellValue = `${getOriginCellValue(cell) ?? ''}`;
-                    if (cell && (cell.p || cellValue)) {
+                    const cellValue = cell?.v;
+                    if (cell && (!BuildTextUtils.transform.isEmptyDocument(cell.p?.body?.dataStream) || cellValue)) {
                         setShowLabel(false);
                     }
                     link = {

@@ -21,6 +21,7 @@ import { animationFrameScheduler, filter, throttleTime } from 'rxjs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 
+// REFACTOR: @JOCS, move to new-docs package.
 export class DocResizeRenderController extends Disposable implements IRenderModule {
     constructor(
         private _context: IRenderContext,

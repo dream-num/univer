@@ -19,7 +19,7 @@ import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { BuildTextUtils, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -59,6 +59,8 @@ export const CellLinkEdit = () => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const textSelectionService = useDependency(DocSelectionManagerService);
     const contextService = useDependency(IContextService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
+
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -206,7 +208,6 @@ export const CellLinkEdit = () => {
     useEffect(() => {
         const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
-
         if (render) {
             const selectionRenderService = render.with(DocSelectionRenderService);
             selectionRenderService.setReserveRangesStatus(true);
@@ -441,6 +442,16 @@ export const CellLinkEdit = () => {
 
                                     zenZoneService.show();
                                     contextService.setContextValue(FOCUSING_SHEET, false);
+                                    const docBackScrollRenderController = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
+                                    const range = docSelectionManagerService.getTextRanges({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY })?.[0];
+
+                                    if (docBackScrollRenderController && range) {
+                                        // TODO: this was hacking
+                                        setTimeout(() => {
+                                            docBackScrollRenderController.scrollToRange(range);
+                                            docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
+                                        }, 100);
+                                    }
                                 }
                                 editorBridgeService.disableForceKeepVisible();
                                 setHide(false);

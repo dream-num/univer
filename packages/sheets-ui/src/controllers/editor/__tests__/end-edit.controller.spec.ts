@@ -125,7 +125,7 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
             // @ts-ignore
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
+            return getCellDataByInput(cell, documentLayoutObject.documentModel, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
         };
 
         normalizeStringByLexer = (str: string) => {

@@ -19,7 +19,7 @@ import { merge, type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
-import { ReplaceContentCommand } from '../../commands/commands/replace-content.command';
+import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
 
 interface IEditorEvent {
@@ -81,7 +81,7 @@ export interface IEditorCanvasStyle {
 }
 
 export interface IEditorConfigParams {
-    initialSnapshot?: IDocumentData;
+    initialSnapshot: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.
@@ -91,50 +91,57 @@ export interface IEditorConfigParams {
     // Boolean. The value is not editable
     readonly?: boolean;
 
+    backScrollOffset?: number;
     // The unique id of editor.
-    editorUnitId: string;
+    editorUnitId?: string;
+
+    // show scrollBar
+    scrollBar?: boolean;
+
+    // need vertical align and update canvas style. TODO: remove this latter.
+    /** @deprecated */
+    noNeedVerticalAlign?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    isSheetEditor: boolean;
+    isSheetEditor?: boolean;
     /**
      * If the editor is for formula editing.
      * @deprecated this is a temp fix before refactoring editor.
      */
-    isFormulaEditor: boolean;
+    isFormulaEditor?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    isSingle: boolean;
+    isSingle?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    onlyInputFormula: boolean;
+    onlyInputFormula?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    onlyInputRange: boolean;
+    onlyInputRange?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    onlyInputContent: boolean;
+    onlyInputContent?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    isSingleChoice: boolean;
+    isSingleChoice?: boolean;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    openForSheetUnitId: Nullable<string>;
+    openForSheetUnitId?: Nullable<string>;
     /**
      * @deprecated The implementer makes its own judgment.
      */
-    openForSheetSubUnitId: Nullable<string>;
+    openForSheetSubUnitId?: Nullable<string>;
 }
 
 export interface IEditorOptions extends IEditorConfigParams, IEditorStateParams {
     render: IRender;
-    documentDataModel: DocumentDataModel;
     editorDom: HTMLDivElement;
 }
 
@@ -285,7 +292,6 @@ export class Editor extends Disposable implements IEditor {
         const docSelectionRenderService = this._param.render.with(DocSelectionRenderService);
 
         docSelectionRenderService.blur();
-
         this._focus = false;
     }
 
@@ -324,29 +330,23 @@ export class Editor extends Disposable implements IEditor {
 
     // get editor id.
     getEditorId(): string {
-        return this._param.editorUnitId;
+        return this._getEditorId();
     }
 
     // get document data.
     getDocumentData(): IDocumentData {
-        const editorUnitId = this.getEditorId();
-        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+        const docDataModel = this._getDocDataModel();
 
         return docDataModel.getSnapshot();
     }
 
     // Set the new document data.
     setDocumentData(data: IDocumentData, textRanges: Nullable<ITextRangeWithStyle[]>) {
-        const { id, body } = data;
+        const { id } = data;
 
-        this._commandService.executeCommand(ReplaceContentCommand.id, {
+        this._commandService.executeCommand(ReplaceSnapshotCommand.id, {
             unitId: id,
-            body: {
-                ...body,
-                dataStream: body?.dataStream.endsWith('\r\n')
-                    ? body.dataStream.substring(0, body.dataStream.length - 2)
-                    : body!.dataStream,
-            },
+            snapshot: data,
             textRanges,
         });
     }
@@ -358,11 +358,10 @@ export class Editor extends Disposable implements IEditor {
         return this._undoRedoService.clearUndoRedo(editorUnitId);
     }
 
-    /**
-     * @deprecated use getDocumentData.
-     */
-    get documentDataModel() {
-        return this._param.documentDataModel;
+    override dispose(): void {
+        const docDataModel = this._getDocDataModel();
+
+        docDataModel.dispose();
     }
 
     /**
@@ -370,6 +369,13 @@ export class Editor extends Disposable implements IEditor {
      */
     get editorUnitId() {
         return this._param.editorUnitId;
+    }
+
+    /**
+     * @deprecated @TODO: @JOCS remove this in the future.
+     */
+    get params() {
+        return this._param;
     }
 
     get cancelDefaultResizeListener() {
@@ -381,7 +387,7 @@ export class Editor extends Disposable implements IEditor {
     }
 
     isSingleChoice() {
-        return this._param.isSingleChoice;
+        return this._param.isSingleChoice ?? false;
     }
 
     /** @deprecated */
@@ -469,7 +475,8 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use getDocumentData.
      */
     getValue() {
-        const value = this._param.documentDataModel.getBody()?.dataStream || '';
+        const docDataModel = this._getDocDataModel();
+        const value = docDataModel.getBody()?.dataStream || '';
         return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
     }
 
@@ -477,7 +484,8 @@ export class Editor extends Disposable implements IEditor {
      * @deprecated use getDocumentData.
      */
     getBody() {
-        return this._param.documentDataModel.getBody();
+        const docDataModel = this._getDocDataModel();
+        return docDataModel.getBody();
     }
 
     /**
@@ -490,10 +498,13 @@ export class Editor extends Disposable implements IEditor {
         };
     }
 
+    /**
+     * @deprecated.
+     */
     verticalAlign() {
-        const documentDataModel = this._param?.documentDataModel;
+        const docDataModel = this._getDocDataModel();
 
-        if (documentDataModel == null) {
+        if (docDataModel == null) {
             return;
         }
 
@@ -504,7 +515,7 @@ export class Editor extends Disposable implements IEditor {
         }
 
         if (!this.isSingle()) {
-            documentDataModel.updateDocumentDataPageSize(width, undefined);
+            docDataModel.updateDocumentDataPageSize(width, undefined);
             return;
         }
 
@@ -516,16 +527,19 @@ export class Editor extends Disposable implements IEditor {
 
         const top = (height - (fontSize * 4 / 3)) / 2 - 2;
 
-        documentDataModel.updateDocumentDataMargin({
+        docDataModel.updateDocumentDataMargin({
             t: top < 0 ? 0 : top,
         });
 
-        documentDataModel.updateDocumentDataPageSize(undefined, undefined);
+        docDataModel.updateDocumentDataPageSize(undefined, undefined);
     }
 
+    /**
+     * @deprecated.
+     */
     updateCanvasStyle() {
-        const documentDataModel = this._param.documentDataModel;
-        if (documentDataModel == null) {
+        const docDataModel = this._getDocDataModel();
+        if (docDataModel == null) {
             return;
         }
 
@@ -539,6 +553,17 @@ export class Editor extends Disposable implements IEditor {
             documentStyle.textStyle.fs = this._param.canvasStyle.fontSize;
         }
 
-        documentDataModel.updateDocumentStyle(documentStyle);
+        docDataModel.updateDocumentStyle(documentStyle);
+    }
+
+    private _getDocDataModel() {
+        const editorUnitId = this._getEditorId();
+        const docDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)!;
+
+        return docDataModel;
+    }
+
+    private _getEditorId() {
+        return this._param.initialSnapshot?.id || this._param.editorUnitId || '';
     }
 }

@@ -1,5 +1,12 @@
 
 
+# [0.3.0](https://github.com/dream-num/univer/compare/v0.3.0-alpha.1...v0.3.0) (2024-09-29)
+
+
+### Features
+
+* **sheet:** add flag to get better performance ([#3631](https://github.com/dream-num/univer/issues/3631)) ([7f0d181](https://github.com/dream-num/univer/commit/7f0d181588ca03c8872693ec600e5e2bc5b809b9))
+
 # [0.3.0-alpha.1](https://github.com/dream-num/univer/compare/v0.3.0-alpha.0...v0.3.0-alpha.1) (2024-09-29)
 
 

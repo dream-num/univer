@@ -2,7 +2,8 @@ name: 🔫 Sync to Pro
 
 on:
     push:
-        branches: [dev]
+        branches:
+            - dev
 
 jobs:
     update-submodules:

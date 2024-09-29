@@ -51,8 +51,7 @@
     ],
     "scripts": {
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
-import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { getNormalSelectionStyle as getDefaultNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type {
     IDisposable,
     IFreeze,
@@ -35,14 +31,18 @@ import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkele
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
+import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
+import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { getNormalSelectionStyle as getDefaultNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
+import { SelectionControl } from './selection-control';
 import { SelectionLayer } from './selection-layer';
-import { SelectionControl } from './selection-shape';
 import { SelectionShapeExtension } from './selection-shape-extension';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
-import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 export interface IControlFillConfig {
     oldRange: IRange;

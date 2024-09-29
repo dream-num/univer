@@ -62,7 +62,7 @@ export { IMarkSelectionService } from './services/mark-selection/mark-selection.
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
 export { getAllSelection, getTopLeftSelection } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
-export { SelectionControl as SelectionShape } from './services/selection/selection-shape';
+export { SelectionControl as SelectionShape } from './services/selection/selection-control';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { attachRangeWithCoord, SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';

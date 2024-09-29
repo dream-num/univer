@@ -313,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: '失敗次數', detail: '這是失敗的次數。' },
+            numberS: { name: '成功次數', detail: '這是成功的閥值數目。' },
+            probabilityS: { name: '成功機率', detail: '這是成功的機率。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，NEGBINOMDIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     NORMDIST: {
@@ -374,8 +376,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: '傳回區域中數值的第 k 個百分點的值',
-        abstract: '傳回區域中數值的第 k 個百分點的值',
+        description: '傳回資料集中第 k 個百分點的值 (包括 0 與 1)',
+        abstract: '傳回資料集中第 k 個百分點的值 (包括 0 與 1)',
         links: [
             {
                 title: '教導',
@@ -383,13 +385,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '用以定義相對位置的陣列或資料範圍。' },
+            k: { name: 'k', detail: '在 0 到 1 範圍內 (包括 0 與 1) 的百分位數。' },
         },
     },
     PERCENTRANK: {
-        description: '傳回資料集中值的百分比排位',
-        abstract: '傳回資料集中值的百分比排位',
+        description: '傳回資料集中值的百分比排位 (包括 0 與 1)',
+        abstract: '傳回資料集中值的百分比排位 (包括 0 與 1)',
         links: [
             {
                 title: '教導',
@@ -397,8 +399,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '用以定義相對位置的陣列或資料範圍。' },
+            x: { name: 'x', detail: '想要知道排名的數值。' },
+            significance: { name: '有效位數', detail: '用以識別傳回百分比值的最高有效位數之數值。 如果省略，PERCENTRANK 會使用三位小數 (0.xxx)。' },
         },
     },
     POISSON: {

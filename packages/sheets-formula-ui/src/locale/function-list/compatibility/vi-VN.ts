@@ -304,8 +304,8 @@ export default {
         },
     },
     NEGBINOMDIST: {
-        description: 'Trả về phân phối nhị thức âm',
-        abstract: 'Trả về phân phối nhị thức âm',
+        description: 'Trả về phân bố nhị thức âm',
+        abstract: 'Trả về phân bố nhị thức âm',
         links: [
             {
                 title: 'Giảng dạy',
@@ -313,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            numberF: { name: 'số lần thất bại.', detail: 'Số lần thất bại.' },
+            numberS: { name: 'số lần thành công', detail: 'Số ngưỡng thành công.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm NEGBINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     NORMDIST: {
@@ -376,8 +378,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: 'Trả về giá trị phân vị thứ k trong một phạm vi dữ liệu',
-        abstract: 'Trả về giá trị phân vị thứ k trong một phạm vi dữ liệu',
+        description: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -385,13 +387,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            k: { name: 'k', detail: 'Giá trị phần trăm từ 0 đến 1 (bao gồm 0 và 1).' },
         },
     },
     PERCENTRANK: {
-        description: 'Trả về vị trí phần trăm của giá trị trong tập dữ liệu',
-        abstract: 'Trả về vị trí phần trăm của giá trị trong tập dữ liệu',
+        description: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -399,8 +401,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn biết thứ hạng của nó.' },
+            significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK dùng ba chữ số (0.xxx).' },
         },
     },
     POISSON: {

@@ -74,10 +74,16 @@ import { Mina } from './mina';
 import { Minifs } from './minifs';
 import { ModeMult } from './mode-mult';
 import { ModeSngl } from './mode-sngl';
+import { NegbinomDist } from './negbinom-dist';
 import { NormDist } from './norm-dist';
 import { NormInv } from './norm-inv';
 import { NormSDist } from './norm-s-dist';
 import { NormSInv } from './norm-s-inv';
+import { Pearson } from './pearson';
+import { PercentileExc } from './percentile-exc';
+import { PercentileInc } from './percentile-inc';
+import { PercentrankExc } from './percentrank-exc';
+import { PercentrankInc } from './percentrank-inc';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
 import { Small } from './small';
@@ -152,10 +158,16 @@ export const functionStatistical = [
     [Minifs, FUNCTION_NAMES_STATISTICAL.MINIFS],
     [ModeMult, FUNCTION_NAMES_STATISTICAL.MODE_MULT],
     [ModeSngl, FUNCTION_NAMES_STATISTICAL.MODE_SNGL],
+    [NegbinomDist, FUNCTION_NAMES_STATISTICAL.NEGBINOM_DIST],
     [NormDist, FUNCTION_NAMES_STATISTICAL.NORM_DIST],
     [NormInv, FUNCTION_NAMES_STATISTICAL.NORM_INV],
     [NormSDist, FUNCTION_NAMES_STATISTICAL.NORM_S_DIST],
     [NormSInv, FUNCTION_NAMES_STATISTICAL.NORM_S_INV],
+    [Pearson, FUNCTION_NAMES_STATISTICAL.PEARSON],
+    [PercentileExc, FUNCTION_NAMES_STATISTICAL.PERCENTILE_EXC],
+    [PercentileInc, FUNCTION_NAMES_STATISTICAL.PERCENTILE_INC],
+    [PercentrankExc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_EXC],
+    [PercentrankInc, FUNCTION_NAMES_STATISTICAL.PERCENTRANK_INC],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
     [Small, FUNCTION_NAMES_STATISTICAL.SMALL],

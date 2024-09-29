@@ -621,6 +621,28 @@ export function lognormalINV(probability: number, mean: number, standardDev: num
     return Math.exp(normalINV(probability, mean, standardDev));
 }
 
+export function negbinomialCDF(numberF: number, numberS: number, probabilityS: number): number {
+    if (numberF < 0) {
+        return 0;
+    }
+
+    let result = 0;
+
+    for (let i = 0; i <= numberF; i++) {
+        result += negbinomialPDF(i, numberS, probabilityS);
+    }
+
+    return result;
+}
+
+export function negbinomialPDF(numberF: number, numberS: number, probabilityS: number): number {
+    if (numberF < 0) {
+        return 0;
+    }
+
+    return calculateCombin(numberF + numberS - 1, numberS - 1) * (probabilityS ** numberS) * ((1 - probabilityS) ** numberF);
+}
+
 export function normalCDF(x: number, mean: number, standardDev: number): number {
     return 0.5 * (1 + erf((x - mean) / Math.sqrt(2 * standardDev * standardDev)));
 }

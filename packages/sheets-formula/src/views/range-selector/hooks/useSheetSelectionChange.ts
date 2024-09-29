@@ -25,6 +25,7 @@ import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useRef } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { RANGE_SPLIT_STRING } from '../index';
+import { rangePreProcess } from '../utils/rangePreProcess';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
 
@@ -89,6 +90,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                             const currentSelection = cloneSelectionList.shift();
                             if (currentSelection) {
                                 const cloneNode = { ...node };
+                                rangePreProcess(currentSelection.rangeWithCoord);
                                 cloneNode.token = serializeRange(currentSelection.rangeWithCoord);
                                 return cloneNode;
                             }
@@ -98,7 +100,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     return node;
                 });
                 const theLast = unitRangesToText(cloneSelectionList.map((e) => ({ range: e.rangeWithCoord, unitId: e.rangeWithCoord.unitId ?? '', sheetName: getSheetNameById(univerInstanceService, e.rangeWithCoord.unitId ?? '', e.rangeWithCoord.sheetId ?? '') })), unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
-                const result = `${sequenceNodeToText(newSequenceNodes)}${theLast ? `,${theLast}` : ''}`;
+                const thePre = sequenceNodeToText(newSequenceNodes);
+                const result = `${thePre}${(thePre && theLast) ? RANGE_SPLIT_STRING : ''}${theLast}`;
                 const isScaling = isScalingRef.current;
                 handleRangeChange(result, isScaling ? -1 : result.length);
             });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
+import { createInternalEditorID, debounce, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
@@ -36,8 +36,10 @@ import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 
 import styles from './index.module.less';
 import { RANGE_SELECTOR_SYMBOLS } from './utils/isRangeSelector';
+import { rangePreProcess } from './utils/rangePreProcess';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
+import { verifyRange } from './utils/verifyRange';
 
 export const RANGE_SPLIT_STRING = ',';
 
@@ -58,6 +60,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
     const [isFocus, isFocusSet] = useState(false);
@@ -80,7 +83,28 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
-    const handleConform = (ranges: IUnitRangeName[]) => {
+    const handleInputDebounce = useMemo(() => debounce((text: string) => {
+        const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
+        if (nodes) {
+            const verify = verifyRange(nodes);
+            if (verify) {
+                const preNodes = nodes.map((node) => {
+                    if (typeof node === 'string') {
+                        return node;
+                    } else if (node.nodeType === sequenceNodeType.REFERENCE) {
+                        const unitRange = deserializeRangeWithSheet(node.token);
+                        unitRange.range = rangePreProcess(unitRange.range);
+                        node.token = unitRangesToText([unitRange], unitId, subUnitId, univerInstanceService)[0];
+                    }
+                    return node;
+                });
+                const result = sequenceNodeToText(preNodes);
+                onChange(result);
+            }
+        }
+    }, 30), []);
+
+    const handleConfirm = (ranges: IUnitRangeName[]) => {
         const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
         rangeStringSet(text);
         onChange(text);
@@ -132,24 +156,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         if (onVerify) {
-            const result = sequenceNodes.some((item) => {
-                if (typeof item === 'string') {
-                    if (item !== RANGE_SPLIT_STRING) {
-                        // eslint-disable-next-line ts/no-unused-expressions
-                        onVerify && onVerify(false, sequenceNodeToText(sequenceNodes));
-                        return true;
-                    }
-                } else {
-                    if (item.nodeType !== sequenceNodeType.REFERENCE) {
-                        onVerify && onVerify(false, sequenceNodeToText(sequenceNodes));
-                        return true;
-                    }
-                }
-                return false;
-            });
-            if (!result) {
-                onVerify && onVerify(true, sequenceNodeToText(sequenceNodes));
-            }
+            const result = verifyRange(sequenceNodes);
+            onVerify(result, sequenceNodeToText(sequenceNodes));
         }
     }, [sequenceNodes, onVerify]);
 
@@ -158,7 +166,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             const dispose = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
                 rangeStringSet(text);
-                onChange(text);
+                handleInputDebounce(text);
             });
             return () => {
                 dispose.unsubscribe();
@@ -203,6 +211,18 @@ export function RangeSelector(props: IRangeSelectorProps) {
         };
     }, []);
 
+    useEffect(() => {
+        if (editor && rangeDialogVisible) {
+            editor.blur();
+            const d = editor.focus$.subscribe(() => {
+                editor.blur();
+            });
+            return () => {
+                d.unsubscribe();
+            };
+        }
+    }, [editor, rangeDialogVisible]);
+
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (containerRef.current) {
@@ -233,7 +253,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
             {rangeDialogVisible && (
                 <RangeSelectorDialog
-                    handleConform={handleConform}
+                    handleConfirm={handleConfirm}
                     handleClose={handleClose}
                     unitId={unitId}
                     subUnitId={subUnitId}
@@ -247,14 +267,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
 }
 
 function RangeSelectorDialog(props: {
-    handleConform: (ranges: IUnitRangeName[]) => void;
+    handleConfirm: (ranges: IUnitRangeName[]) => void;
     handleClose: () => void;
     visible: boolean;
     initValue: IUnitRangeName[];
     unitId: string;
     subUnitId: string;
 }) {
-    const { handleConform, handleClose, visible, initValue, unitId, subUnitId } = props;
+    const { handleConfirm, handleClose, visible, initValue, unitId, subUnitId } = props;
 
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -283,6 +303,9 @@ function RangeSelectorDialog(props: {
 
     const handleRangeRemove = (index: number) => {
         rangesSet((v) => {
+            if (v.length === 1) {
+                return v;
+            }
             const result: string[] = [];
             v.forEach((r, i) => {
                 if (index !== i) {
@@ -295,7 +318,7 @@ function RangeSelectorDialog(props: {
 
     const handleRangeAdd = () => {
         rangesSet((v) => {
-            v.push('');
+            v.push('A1');
             focusIndexSet(v.length - 1);
             return [...v];
         });
@@ -319,10 +342,10 @@ function RangeSelectorDialog(props: {
                     <Button onClick={handleClose}>{localeService.t('rangeSelector.cancel')}</Button>
                     <Button
                         style={{ marginLeft: 10 }}
-                        onClick={() => handleConform(ranges.filter((text) => {
+                        onClick={() => handleConfirm(ranges.filter((text) => {
                             const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
                             return nodes && nodes.length === 1 && typeof nodes[0] !== 'string' && nodes[0].nodeType === sequenceNodeType.REFERENCE;
-                        }).map((text) => deserializeRangeWithSheet(text)))}
+                        }).map((text) => deserializeRangeWithSheet(text)).map((unitRange) => ({ ...unitRange, range: rangePreProcess(unitRange.range) })))}
                         type="primary"
                     >
                         {localeService.t('rangeSelector.confirm')}
@@ -334,16 +357,16 @@ function RangeSelectorDialog(props: {
             <div className={styles.sheetRangeSelectorDialog}>
                 {ranges.map((text, index) => (
                     <div key={index} className={styles.sheetRangeSelectorDialogItem}>
-                        <div>
-                            <Input
-                                placeholder={localeService.t('rangeSelector.placeHolder')}
-                                key={`input_${index}`}
-                                onFocus={() => focusIndexSet(index)}
-                                value={text}
-                                onChange={(value) => handleRangeInput(index, value)}
-                            />
-                        </div>
-                        <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />
+                        <Input
+                            affixWrapperStyle={{ width: '100%' }}
+                            placeholder={localeService.t('rangeSelector.placeHolder')}
+                            key={`input_${index}`}
+                            onFocus={() => focusIndexSet(index)}
+                            value={text}
+                            onChange={(value) => handleRangeInput(index, value)}
+                        />
+                        {ranges.length > 1 && <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />}
+
                     </div>
                 ))}
 

@@ -167,7 +167,7 @@ function RectPopup(props: IRectPopupProps) {
             clickOtherFn(e);
         };
 
-        window.addEventListener('contextmenu', handleClickOther);
+        window.addEventListener('pointerdown', handleClickOther);
         return () => {
             window.removeEventListener('pointerdown', handleClickOther);
         };

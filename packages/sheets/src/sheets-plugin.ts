@@ -117,7 +117,7 @@ export class UniverSheetsPlugin extends Plugin {
         this._injector.get(IExclusiveRangeService);
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting(): void {
         this._injector.get(MergeCellController);
     }
 }

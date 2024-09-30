@@ -14,11 +14,34 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { debounceTime } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkRenderManagerController)
+export class SheetsHyperLinkRenderController extends Disposable implements IRenderModule {
+    constructor(
+        private readonly _context: IRenderContext<Workbook>,
+        @Inject(HyperLinkModel) private readonly _hyperLinkModel: HyperLinkModel
+    ) {
+        super();
+        this._initSkeletonChange();
+    }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            this._context.mainComponent?.makeForceDirty();
+        };
+
+        this.disposeWithMe(this._hyperLinkModel.linkUpdate$.pipe(debounceTime(16)).subscribe(() => {
+            markSkeletonDirty();
+        }));
+    }
+}
+
+@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRenderManagerController)
 export class SheetsHyperLinkRenderManagerController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,

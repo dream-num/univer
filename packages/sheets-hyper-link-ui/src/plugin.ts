@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsHyperLinkUIConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { SheetsHyperLinkAutoFillController } from './controllers/auto-fill.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -25,7 +26,7 @@ import { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.con
 import { SheetsHyperLinkPermissionController } from './controllers/hyper-link-permission.controller';
 import { SheetsHyperLinkPopupController } from './controllers/popup.controller';
 import { SheetsHyperLinkRemoveSheetController } from './controllers/remove-sheet.controller';
-import { SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
+import { SheetsHyperLinkRenderController, SheetsHyperLinkRenderManagerController } from './controllers/render-controllers/render.controller';
 import { SheetsHyperLinkRichTextRefRangeController } from './controllers/rich-text-ref-range.controller';
 import { SheetHyperLinkSetRangeController } from './controllers/set-range.controller';
 import { SheetsHyperLinkUIController } from './controllers/ui.controller';
@@ -74,5 +75,10 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
         ];
 
         dependencies.forEach((dep) => this._injector.add(dep));
+    }
+
+    override onReady(): void {
+        const renderManager = this._injector.get(IRenderManagerService);
+        renderManager.registerRenderModule<Workbook>(UniverInstanceType.UNIVER_SHEET, [SheetsHyperLinkRenderController] as Dependency);
     }
 }

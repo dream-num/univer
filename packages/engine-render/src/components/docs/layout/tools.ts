@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    AlignTypeH,
-    AlignTypeV,
-    BooleanNumber,
-    ColumnSeparatorType,
-    GridType,
-    HorizontalAlign,
-    NumberUnitType,
-    ObjectMatrix,
-    ObjectRelativeFromH,
-    ObjectRelativeFromV,
-    PageOrientType,
-    SectionType,
-    SpacingRule,
-    Tools,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
 import type {
     DocumentDataModel,
     IBullet,
@@ -44,13 +26,6 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-
-import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
-import { GlyphType } from '../../../basics/i-document-skeleton-cached';
-import { getFontStyleString, isFunction } from '../../../basics/tools';
-import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
-import { getCustomDecorationStyle } from './style/custom-decoration';
-import { getCustomRangeStyle } from './style/custom-range';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
@@ -63,11 +38,36 @@ import type {
     IDocumentSkeletonSection,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
+
 import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { Hyphen } from './hyphenation/hyphen';
 import type { LanguageDetector } from './hyphenation/language-detector';
+import {
+    AlignTypeH,
+    AlignTypeV,
+    BooleanNumber,
+    ColumnSeparatorType,
+    GridType,
+    HorizontalAlign,
+    mergeWith,
+    NumberUnitType,
+    ObjectMatrix,
+    ObjectRelativeFromH,
+    ObjectRelativeFromV,
+    PageOrientType,
+    SectionType,
+    SpacingRule,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
+import { getFontStyleString, isFunction } from '../../../basics/tools';
+import { updateInlineDrawingPosition } from './block/paragraph/layout-ruler';
+import { getCustomDecorationStyle } from './style/custom-decoration';
+import { getCustomRangeStyle } from './style/custom-range';
 
 export function getLastPage(pages: IDocumentSkeletonPage[]) {
     return pages[pages.length - 1];
@@ -1080,7 +1080,7 @@ export function mergeByV<T = unknown>(object: unknown, originObject: unknown, ty
     const mergeIterator = (obj: unknown, originObj: unknown, key: string) => {
         if (key !== 'v') {
             if (typeof originObj === 'object') {
-                return Tools.mergeWith(obj, originObj, mergeIterator);
+                return mergeWith(obj, originObj, mergeIterator);
             } else {
                 return originObj ?? obj;
             }
@@ -1092,7 +1092,7 @@ export function mergeByV<T = unknown>(object: unknown, originObject: unknown, ty
         }
         return originObj ?? obj;
     };
-    return Tools.mergeWith(object, originObject, mergeIterator) as T;
+    return mergeWith(object, originObject, mergeIterator) as T;
 }
 
 export function getPageFromPath(skeletonData: IDocumentSkeletonCached, path: (string | number)[]): Nullable<IDocumentSkeletonPage> {

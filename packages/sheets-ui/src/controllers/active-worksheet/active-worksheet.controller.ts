@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IMutationInfo, IOperationInfo, Workbook } from '@univerjs/core';
 import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
+    ISetSelectionsOperationParams,
     ISetWorksheetActiveOperationParams,
     ISetWorksheetHideMutationParams,
 } from '@univerjs/sheets';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
+    SetSelectionsOperation,
     SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
 } from '@univerjs/sheets';
@@ -44,49 +46,41 @@ export class ActiveWorksheetController extends Disposable {
     ) {
         super();
 
-        this.disposeWithMe(
-            this._commandService.beforeCommandExecuted((command) => {
-                if (command.id === RemoveSheetMutation.id) {
-                    return this._beforeAdjustActiveSheetOnRemoveSheet(
-                        command as IMutationInfo<IRemoveSheetMutationParams>
-                    );
-                }
-            })
-        );
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((command) => {
+            if (command.id === RemoveSheetMutation.id) {
+                return this._beforeAdjustActiveSheetOnRemoveSheet(
+                    command as IMutationInfo<IRemoveSheetMutationParams>
+                );
+            }
+        }));
 
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command, options) => {
-                if (command.id === RemoveSheetMutation.id) {
-                    return this._adjustActiveSheetOnRemoveSheet(command as IMutationInfo<IRemoveSheetMutationParams>);
-                }
+        this.disposeWithMe(this._commandService.onCommandExecuted((command, options) => {
+            if (command.id === RemoveSheetMutation.id) {
+                return this._adjustActiveSheetOnRemoveSheet(command as IMutationInfo<IRemoveSheetMutationParams>);
+            }
 
-                if (
-                    command.id === SetWorksheetHideMutation.id &&
-                    (command.params as ISetWorksheetHideMutationParams).hidden
-                ) {
-                    return this._adjustActiveSheetOnHideSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
-                }
+            if (command.id === SetWorksheetHideMutation.id && (command.params as ISetWorksheetHideMutationParams).hidden) {
+                return this._adjustActiveSheetOnHideSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
+            }
 
-                // It is a mutation that we comes from the collaboration peer so we should not handle them.
-                if (options?.fromCollab) {
-                    return;
-                }
+            // It is a mutation that we comes from the collaboration peer so we should not handle them.
+            if (options?.fromCollab) return false;
 
-                // We only handle the local mutations, for
-                // * add / copy sheet
-                // * set sheet visible
-                if (command.id === InsertSheetMutation.id) {
-                    return this._adjustActiveSheetOnInsertSheet(command as IMutationInfo<IInsertSheetMutationParams>);
-                }
+            // We only handle the local mutations, for
+            // * add / copy sheet
+            // * set sheet visible
+            if (command.id === InsertSheetMutation.id) {
+                return this._adjustActiveSheetOnInsertSheet(command as IMutationInfo<IInsertSheetMutationParams>);
+            }
 
-                if (
-                    command.id === SetWorksheetHideMutation.id &&
-                    !(command.params as ISetWorksheetHideMutationParams).hidden
-                ) {
-                    return this._adjustActiveSheetOnShowSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
-                }
-            })
-        );
+            if (command.id === SetWorksheetHideMutation.id && !(command.params as ISetWorksheetHideMutationParams).hidden) {
+                return this._adjustActiveSheetOnShowSheet(command as IMutationInfo<ISetWorksheetHideMutationParams>);
+            }
+
+            if (command.id === SetSelectionsOperation.id) {
+                return this._adjustActiveSheetOnSelection(command as IOperationInfo<ISetSelectionsOperationParams>);
+            }
+        }));
     }
 
     private _adjustActiveSheetOnHideSheet(mutation: IMutationInfo<ISetWorksheetHideMutationParams>) {
@@ -160,6 +154,13 @@ export class ActiveWorksheetController extends Disposable {
         // This is simple, just change the active sheet to the unhidden sheet.
         const { unitId, subUnitId } = mutation.params;
         this._switchToNextSheet(unitId, subUnitId);
+    }
+
+    private _adjustActiveSheetOnSelection(operation: IOperationInfo<ISetSelectionsOperationParams>) {
+        const { unitId, subUnitId } = operation.params;
+        if (subUnitId !== this._univerInstanceService.getUnit<Workbook>(unitId)?.getActiveSheet().getSheetId()) {
+            this._switchToNextSheet(unitId, subUnitId);
+        }
     }
 
     private _switchToNextSheet(unitId: string, subUnitId: string): void {

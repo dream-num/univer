@@ -1,6 +1,7 @@
 .zen-zone {
     position: absolute;
-    display: none;
+    z-index: -1;
+    transition: all 0.2s ease-in-out;
 
     &-open {
         z-index: 100;
@@ -13,9 +14,10 @@
         height: 100%;
 
         background: rgb(var(--bg-color));
+        opacity: 1;
     }
 
     &-close {
-        display: none;
+        opacity: 0;
     }
 }

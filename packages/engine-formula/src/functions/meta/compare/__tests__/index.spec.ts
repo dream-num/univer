@@ -16,14 +16,14 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
+import { compareToken } from '../../../../basics/token';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../function-names';
 import { Compare } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { compareToken } from '../../../../basics/token';
-import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { getObjectValue } from '../../../__tests__/create-function-test-bed';
-import { CELL_INVERTED_INDEX_CACHE } from '../../../../basics/inverted-index-cache';
 
 describe('Test compare function', () => {
     const testFunction = new Compare(FUNCTION_NAMES_META.COMPARE);

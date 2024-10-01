@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
     DisposableCollection,
     ICommandService,
     Inject,
+    InterceptorEffectEnum,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -31,7 +31,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
     INTERCEPTOR_POINT,
     INumfmtService,
@@ -40,23 +39,25 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
-import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
 import { SetNumfmtCommand } from '../commands/commands/set-numfmt.command';
+import { SetPercentCommand } from '../commands/commands/set-percent.command';
 import { SubtractDecimalCommand } from '../commands/commands/subtract-decimal.command';
 import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.panel.operation';
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
-import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
-import { getPatternPreview, getPatternType } from '../utils/pattern';
-import { SetPercentCommand } from '../commands/commands/set-percent.command';
+import { getPatternPreviewIgnoreGeneral, getPatternType } from '../utils/pattern';
+import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
+import type { ISheetNumfmtPanelProps } from '../components/index';
 import type { INumfmtController } from './type';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtController)
@@ -245,6 +246,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                                 priority: 99,
+                                effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                                 handler: (cell, location, next) => {
                                     const { row, col } = location;
                                     const defaultValue = next(cell) || {};
@@ -268,7 +270,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                         ) {
                                             return defaultValue;
                                         }
-                                        const info = getPatternPreview(this._previewPattern, value as number, this._localeService.getCurrentLocale());
+                                        const info = getPatternPreviewIgnoreGeneral(this._previewPattern, value as number, this._localeService.getCurrentLocale());
                                         if (info.color) {
                                             const colorMap = this._themeService.getCurrentTheme();
                                             const color = colorMap[`${info.color}500`];

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { ICommandService, Injector, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { checkRangesEditablePermission } from '@univerjs/sheets';
 import { useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand } from '../../commands/commands/data-validation.command';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import { createDefaultNewRule } from '../../utils/create';
 import { DataValidationItem } from '../item';
 import styles from './index.module.less';
-import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 
 export function DataValidationList() {
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -112,7 +112,7 @@ function DataValidationListWithWorkbook(props: { workbook: Workbook }) {
     const hasDisableRule = rulesByPermissionCheck?.some((rule) => rule.disable);
 
     return (
-        <div>
+        <div className={styles.dataValidationList}>
             {rulesByPermissionCheck?.map((rule) => (
                 <DataValidationItem
                     unitId={unitId}

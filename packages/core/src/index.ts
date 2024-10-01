@@ -18,6 +18,8 @@ import { installShims } from './common/shims';
 
 installShims();
 
+export { debounce, get, merge, mergeWith, set } from 'lodash-es';
+
 export { dedupe, groupBy, makeArray, remove, rotate } from './common/array';
 export { isBooleanString } from './common/boolean';
 export {
@@ -32,8 +34,8 @@ export * from './common/di';
 export { shallowEqual } from './common/equal';
 export { CustomCommandExecutionError } from './common/error';
 export { throttle } from './common/function';
-export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
-export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
+export type { ICellInterceptor, IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
+export { composeInterceptors, createInterceptorKey, InterceptorEffectEnum, InterceptorManager } from './common/interceptor';
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, IParagraph, IPosition, ISelectionCellWithMergeInfo, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, HorizontalAlign, IUniverInstanceService, UniverInstanceType, VerticalAlign } from '@univerjs/core';
+import type { ICustomRange, IParagraph, IPosition, Nullable, Workbook } from '@univerjs/core';
+import type { IBoundRectNoAngle, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
-import type { IBoundRectNoAngle, IFontCacheItem } from '@univerjs/engine-render';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { BehaviorSubject, distinctUntilChanged, map, Subject } from 'rxjs';
 import { getHoverCellPosition } from '../common/utils';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 import { SheetScrollManagerService } from './scroll-manager.service';
-import { calculateDocSkeletonRects } from './utils/doc-skeleton-util';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { calcPadding, calculateDocSkeletonRects } from './utils/doc-skeleton-util';
 
 export interface IHoverCellPosition {
     position: IPosition;
@@ -46,43 +46,6 @@ export interface IHoverRichTextPosition extends IHoverCellPosition {
      * rect of custom-range or bullet
      */
     rect?: Nullable<IBoundRectNoAngle>;
-}
-
-function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
-    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
-    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
-    const vt = font.verticalAlign;
-    const ht = font.horizontalAlign;
-
-    let paddingTop = 0;
-    switch (vt) {
-        case VerticalAlign.UNSPECIFIED:
-        case VerticalAlign.BOTTOM:
-            paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
-            break;
-        case VerticalAlign.MIDDLE:
-            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startY - height) / 2;
-            break;
-        default:
-            break;
-    }
-
-    let paddingLeft = 0;
-    switch (ht) {
-        case HorizontalAlign.RIGHT:
-            paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
-            break;
-        case HorizontalAlign.CENTER:
-            paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
-            break;
-        default:
-            break;
-    }
-
-    return {
-        paddingLeft,
-        paddingTop,
-    };
 }
 
 export class HoverManagerService extends Disposable {
@@ -165,10 +128,13 @@ export class HoverManagerService extends Disposable {
         }
 
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-        const skeletonParam = currentRender?.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
-        const scrollManagerService = currentRender?.with(SheetScrollManagerService);
+        if (!currentRender) return null;
+        const skeletonParam = currentRender.with(SheetSkeletonManagerService).getWorksheetSkeleton(worksheet.getSheetId());
+        if (!skeletonParam) return null;
+
+        const scrollManagerService = currentRender.with(SheetScrollManagerService);
         const scrollInfo = scrollManagerService?.getCurrentScrollState();
-        const skeleton = skeletonParam?.skeleton;
+        const skeleton = skeletonParam?.skeleton as SpreadsheetSkeleton;
 
         if (!skeleton || !scrollInfo || !currentRender) return;
 

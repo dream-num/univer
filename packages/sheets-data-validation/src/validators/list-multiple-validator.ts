@@ -23,7 +23,7 @@ export class ListMultipleValidator extends ListValidator {
     override title: string = 'dataValidation.listMultiple.title';
     override canvasRender = this.injector.createInstance(DropdownMultipleWidget);
 
-    override skipDefaultFontRender() {
+    override skipDefaultFontRender = () => {
         return true;
-    }
+    };
 }

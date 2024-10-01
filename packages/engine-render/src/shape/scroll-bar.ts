@@ -371,13 +371,15 @@ export class ScrollBar extends BaseScrollBar {
                 state.stopPropagation();
             }));
         }
+
+        // pointer down then move on scrollbar
         this._verticalPointerMoveSub = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isVerticalMove) {
                 return;
             }
-            this._viewport.scrollToBarPos({
-                y: e.offsetY,
+            this._viewport.scrollByBarDeltaValue({
+                y: e.offsetY - this._lastY,
             });
 
             this._lastY = e.offsetY;
@@ -439,6 +441,8 @@ export class ScrollBar extends BaseScrollBar {
                 this._hoverFunc(this.thumbHoverBackgroundColor!, this.horizonThumbRect!);
             }));
         }
+
+        // events for pointerdown at scrolltrack
         if (this.horizonScrollTrack) {
             this._eventSub.add(this.horizonScrollTrack.onPointerDown$.subscribeEvent((evt: unknown, state: EventState) => {
                 const e = evt as IPointerEvent | IMouseEvent;
@@ -466,13 +470,14 @@ export class ScrollBar extends BaseScrollBar {
             }));
         }
 
+        // pointer down then move on scrollbar
         this._horizonPointerMoveSub = mainScene.onPointerMove$.subscribeEvent((evt: unknown, _state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
             if (!this._isHorizonMove) {
                 return;
             }
-            this._viewport.scrollToBarPos({
-                x: e.offsetX,
+            this._viewport.scrollByBarDeltaValue({
+                x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;
             mainScene.getEngine()?.setRemainCapture();

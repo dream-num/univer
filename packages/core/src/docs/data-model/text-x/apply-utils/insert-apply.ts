@@ -15,7 +15,6 @@
  */
 
 import { insertTextToContent } from '../../../../shared';
-import type { IDocumentBody } from '../../../../types/interfaces';
 import {
     insertCustomBlocks,
     insertCustomDecorations,
@@ -25,6 +24,7 @@ import {
     insertTables,
     insertTextRuns,
 } from './common';
+import type { IDocumentBody } from '../../../../types/interfaces';
 
 export function updateAttributeByInsert(
     body: IDocumentBody,

@@ -17,7 +17,7 @@
 import { EventSubject, Tools } from '@univerjs/core';
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 
-import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from './basics/const';
+import { RENDER_CLASS_TYPE } from './basics/const';
 import { PointerInput } from './basics/i-events';
 import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
@@ -1431,7 +1431,7 @@ export class Viewport {
     }
 
     expandBounds(value: { top: number; left: number; bottom: number; right: number }) {
-        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+        const onePixelFix = 0;//FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
             left: value.left - this.bufferEdgeX - onePixelFix,
             right: value.right + this.bufferEdgeX + onePixelFix,

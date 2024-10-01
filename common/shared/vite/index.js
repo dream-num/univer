@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-const process = require('node:process');
 const { resolve } = require('node:path');
+const process = require('node:process');
 
-const { defineConfig, mergeConfig } = require('vitest/config');
-const { default: dts } = require('vite-plugin-dts');
 const react = require('@vitejs/plugin-react');
+const { default: dts } = require('vite-plugin-dts');
+const { defineConfig, mergeConfig } = require('vitest/config');
 const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
-const { obfuscator } = require('./obfuscator');
 const { buildPkg } = require('./build-pkg');
+const { obfuscator } = require('./obfuscator');
 const { convertLibNameFromPackageName } = require('./utils');
 
 /**
@@ -78,8 +78,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         ],
         define: {
             'process.env.NODE_ENV': JSON.stringify(mode),
-            'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
-            'process.env.BUILD_TIMESTAMP': JSON.stringify(parseInt(Date.now() / 1000)),
+            'process.env.BUILD_TIMESTAMP': JSON.stringify(Number.parseInt(Date.now() / 1000)),
         },
         test: {
             css: {

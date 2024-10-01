@@ -15,32 +15,33 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsConfig } from './controllers/config.schema';
 
+import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
-import { MergeCellController } from './controllers/merge-cell.controller';
-import { BorderStyleManagerService } from './services/border-style-manager.service';
-import { NumfmtService } from './services/numfmt/numfmt.service';
-import { INumfmtService } from './services/numfmt/type';
-import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
-
-import { RefRangeService } from './services/ref-range/ref-range.service';
-import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
-import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
+import { MergeCellController } from './controllers/merge-cell.controller';
+
+import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { RangeProtectionCache } from './model/range-protection.cache';
 import { RangeProtectionRenderModel } from './model/range-protection-render.model';
 import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
+import { BorderStyleManagerService } from './services/border-style-manager.service';
+import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
 
+import { NumfmtService } from './services/numfmt/numfmt.service';
+import { INumfmtService } from './services/numfmt/type';
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
-import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './controllers/config';
-import { NumberCellDisplayController } from './controllers/number-cell.controller';
+import { WorkbookPermissionService } from './services/permission/workbook-permission/workbook-permission.service';
+import { WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from './services/permission/worksheet-permission';
+import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SheetsSelectionsService } from './services/selections/selection-manager.service';
-import { ExclusiveRangeService, IExclusiveRangeService } from './services/exclusive-range/exclusive-range-service';
-import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -61,10 +62,7 @@ export class UniverSheetsPlugin extends Plugin {
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         this._initConfig();
-        this._initDependencies(_injector);
-    }
-
-    override onRendered(): void {
+        this._initDependencies();
     }
 
     private _initConfig(): void {
@@ -73,7 +71,7 @@ export class UniverSheetsPlugin extends Plugin {
         }
     }
 
-    private _initDependencies(sheetInjector: Injector): void {
+    private _initDependencies(): void {
         const dependencies: Dependency[] = [
             // services
             [BorderStyleManagerService],
@@ -97,6 +95,7 @@ export class UniverSheetsPlugin extends Plugin {
             // range protection
             [RangeProtectionRenderModel],
             [RangeProtectionRuleModel],
+            [RangeProtectionCache],
             [RangeProtectionRefRangeService],
             [RangeProtectionService],
             [IExclusiveRangeService, {
@@ -110,11 +109,15 @@ export class UniverSheetsPlugin extends Plugin {
         }
 
         mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            sheetInjector.add(d);
+            this._injector.add(d);
         });
 
         this._injector.get(SheetInterceptorService);
         this._injector.get(RangeProtectionService);
         this._injector.get(IExclusiveRangeService);
+    }
+
+    override onStarting(): void {
+        this._injector.get(MergeCellController);
     }
 }

@@ -14,57 +14,93 @@
  * limitations under the License.
  */
 
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, useDependency } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentFlavor, ICommandService, useDependency } from '@univerjs/core';
+import { IEditorService } from '@univerjs/docs-ui';
 import { CheckMarkSingle, CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect, useRef } from 'react';
 
+import type { IDocumentData } from '@univerjs/core';
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
+
 import { IZenEditorManagerService } from '../../services/zen-editor.service';
 import styles from './index.module.less';
 
 const COMPONENT_PREFIX = 'ZEN_EDITOR_PLUGIN_';
+// eslint-disable-next-line react-refresh/only-export-components
 export const ZEN_EDITOR_COMPONENT = `${COMPONENT_PREFIX}ZEN_EDITOR_COMPONENT`;
+
+const INITIAL_SNAPSHOT: IDocumentData = {
+    id: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    body: {
+        dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+        textRuns: [],
+        tables: [],
+        customBlocks: [],
+        paragraphs: [
+            {
+                startIndex: 0,
+            },
+        ],
+        sectionBreaks: [{
+            startIndex: 1,
+        }],
+    },
+    tableSource: {},
+    documentStyle: {
+        pageSize: {
+            width: 595,
+            height: 842,
+        },
+        documentFlavor: DocumentFlavor.MODERN,
+        marginTop: 50,
+        marginBottom: 50,
+        marginRight: 40,
+        marginLeft: 40,
+        renderConfig: {
+            vertexAngle: 0,
+            centerAngle: 0,
+        },
+    },
+    drawings: {},
+    drawingsOrder: [],
+};
 
 export function ZenEditor() {
     const editorRef = useRef<HTMLDivElement>(null);
-
-    const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
-
-    const zenEditorManagerService = useDependency(IZenEditorManagerService);
+    const zenEditorService = useDependency(IZenEditorManagerService);
+    const editorService = useDependency(IEditorService);
 
     const commandService = useDependency(ICommandService);
 
     useEffect(() => {
-        const editor = editorRef.current;
+        const editorDom = editorRef.current;
 
-        if (!editor) {
+        if (!editorDom) {
             return;
         }
 
-        const renderSubscription = renderManagerService.currentRender$.subscribe((param) => {
-            if (param !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                return;
-            }
-
-            const engine = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.engine;
-            engine?.setContainer(editor);
-        });
+        const registerSubscription = editorService.register({
+            editorUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+            initialSnapshot: INITIAL_SNAPSHOT,
+            scrollBar: true,
+            noNeedVerticalAlign: true,
+            backScrollOffset: 100,
+        },
+        editorDom);
 
         const resizeObserver = new ResizeObserver(() => {
-            const editorRect = editor.getBoundingClientRect();
-
-            zenEditorManagerService.setPosition(editorRect);
+            zenEditorService.setPosition(editorDom.getBoundingClientRect());
         });
 
-        resizeObserver.observe(editor);
+        resizeObserver.observe(editorDom);
 
         // Clean up on unmount
         return () => {
-            resizeObserver.unobserve(editor);
-            renderSubscription.unsubscribe();
+            registerSubscription.dispose();
+            resizeObserver.unobserve(editorDom);
         };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     function handleCloseBtnClick() {

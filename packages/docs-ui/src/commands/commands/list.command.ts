@@ -146,8 +146,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                             ? {
                                 paragraphStyle: {
                                     ...paragraphStyle,
-                                    hanging: undefined,
-                                    indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
+                                    // hanging: undefined,
+                                    // indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
                                 },
                                 startIndex: 0,
                             }
@@ -155,9 +155,9 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 startIndex: 0,
                                 paragraphStyle: {
                                     ...paragraphStyle,
-                                    indentFirstLine: undefined,
-                                    hanging: listHanging,
-                                    indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
+                                    // indentFirstLine: undefined,
+                                    // hanging: listHanging,
+                                    // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                                 },
                                 bullet: {
                                     nestingLevel: bullet?.nestingLevel ?? 0,
@@ -238,24 +238,24 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const customLists = docDataModel.getSnapshot().lists ?? {};
+        // const customLists = docDataModel.getSnapshot().lists ?? {};
 
-        const lists = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
+        // const lists = {
+        //     ...PRESET_LIST_TYPE,
+        //     ...customLists,
+        // };
 
-        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
+        // const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
 
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
+            // const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
+            // const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
             // const bulletParagraphTextStyle = paragraphProperties.textStyle;
-            const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
+            // const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
+            // const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
 
-            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+            // const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -273,9 +273,9 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                             startIndex: 0,
                             paragraphStyle: {
                                 ...paragraphStyle,
-                                indentFirstLine: undefined,
-                                hanging: listHanging,
-                                indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
+                                // indentFirstLine: undefined,
+                                // hanging: listHanging,
+                                // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                             },
                             bullet: {
                                 nestingLevel: bullet?.nestingLevel ?? 0,
@@ -480,6 +480,7 @@ export const CheckListCommand: ICommand<IBulletListCommandParams> = {
 export interface IToggleCheckListCommandParams {
     index: number;
     segmentId?: string;
+    textRanges?: ITextRangeWithStyle[];
 }
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
@@ -493,7 +494,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const { index, segmentId } = params;
+        const { index, segmentId, textRanges } = params;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
         if (docDataModel == null) {
@@ -515,7 +516,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: [],
+                textRanges: textRanges ?? [],
                 segmentId,
             },
         };

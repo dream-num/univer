@@ -30,6 +30,7 @@ import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEven
 import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { Vector2 } from './basics/vector2';
+import type { Canvas } from './canvas';
 import type { UniverRenderingContext } from './context';
 import type { Engine } from './engine';
 import type { SceneViewer } from './scene-viewer';
@@ -48,6 +49,10 @@ export class Scene extends ThinScene {
     private _addObject$ = new BehaviorSubject<Scene>(this);
 
     readonly addObject$ = this._addObject$.asObservable();
+
+    private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
+
+    readonly beforeRender$ = this._beforeRender$.asObservable();
     /**
      * Transformer constructor.  Transformer is a special type of group that allow you transform
      * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -595,6 +600,7 @@ export class Scene extends ThinScene {
         !parentCtx && this.getEngine()?.clearCanvas();
 
         const layers = this._layers.sort(sortRules);
+        this._beforeRender$.next(this.getEngine()?.getCanvas());
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }

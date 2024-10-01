@@ -85,6 +85,9 @@ function resetMatrix<T>(matrix: Nullable<T>[][], range: IRange) {
     });
 }
 
+/**
+ * @deprecated this function could cause memory out of use in large range.
+ */
 export function queryObjectMatrix<T>(matrix: ObjectMatrix<T>, match: (value: T) => boolean) {
     const arrayMatrix = matrix.toFullArray();
     const results: IRange[] = [];

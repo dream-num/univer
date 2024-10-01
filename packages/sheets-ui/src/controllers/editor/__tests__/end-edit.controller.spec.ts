@@ -63,7 +63,7 @@ const richTextDemo: IDocumentData = {
             wrapStrategy: 0,
         },
         marginTop: 0,
-        marginBottom: 1,
+        marginBottom: 2,
         marginRight: 2,
         marginLeft: 2,
     },
@@ -125,7 +125,7 @@ describe('Test EndEditController', () => {
                 throw new Error('documentLayoutObject is undefined');
             }
             // @ts-ignore
-            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
+            return getCellDataByInput(cell, documentLayoutObject.documentModel, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
         };
 
         normalizeStringByLexer = (str: string) => {
@@ -361,7 +361,7 @@ describe('Test EndEditController', () => {
                         width: 320.4903259277344,
                     },
                     marginTop: 0,
-                    marginBottom: 1,
+                    marginBottom: 2,
                     marginRight: 2,
                     marginLeft: 2,
                     renderConfig: {

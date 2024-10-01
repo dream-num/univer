@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
-import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
-import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton, UniverRenderingContext, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { ListValidator } from '../validators';
+import { BooleanNumber, DataValidationRenderMode, DataValidationType, DEFAULT_EMPTY_DOCUMENT_VALUE, DEFAULT_STYLES, DocumentDataModel, HorizontalAlign, ICommandService, Inject, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect } from '@univerjs/engine-render';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
-import type { ListValidator } from '../validators';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 const PADDING_H = 4;
 const ICON_SIZE = 4;
@@ -115,12 +115,11 @@ function calcPadding(cellWidth: number, cellHeight: number, fontWidth: number, f
     const realMargin = margin ? MARGIN_V : 0;
     switch (vt) {
         case VerticalAlign.BOTTOM:
-            paddingTop = (cellHeight - (realMargin * 2) - fontHeight) + realMargin;
+            paddingTop = cellHeight - fontHeight - realMargin;
             break;
         case VerticalAlign.MIDDLE:
-            paddingTop = ((cellHeight - (realMargin * 2) - fontHeight) / 2) + realMargin;
+            paddingTop = (cellHeight - fontHeight) / 2;
             break;
-
         default:
             paddingTop = realMargin;
             break;
@@ -194,19 +193,17 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const { t = DEFAULT_STYLES.pd.t, b = DEFAULT_STYLES.pd.b } = pd;
         const left = cellWidth - ICON_PLACE;
         let top;
-
         switch (vt) {
             case VerticalAlign.MIDDLE:
                 top = (cellHeight - ICON_SIZE) / 2;
                 break;
             case VerticalAlign.BOTTOM:
-                top = cellHeight - (ICON_SIZE / 2) - b - (fontHeight / 2);
+                top = (cellHeight - b - fontHeight - MARGIN_V) + (fontHeight / 2 - ICON_SIZE / 2);
                 break;
             default:
-                top = t + (fontHeight / 2) - (ICON_SIZE / 2);
+                top = t + MARGIN_V + (fontHeight / 2 - ICON_SIZE / 2);
                 break;
         }
-
         ctx.save();
         ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
         ctx.fillStyle = '#565656';
@@ -267,9 +264,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             documentSkeleton.calculate();
             documentSkeleton.getActualSize();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-
             const { height: fontHeight, width: fontWidth } = textLayout;
-            const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight - t - b, fontWidth, fontHeight, vt, ht, false);
+            const { paddingTop, paddingLeft } = calcPadding(realWidth, cellHeight - t - b, fontWidth, fontHeight, vt, ht, true);
 
             this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, fontHeight, vt, pd);
             ctx.save();
@@ -390,10 +386,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             documentSkeleton.calculate();
             documentSkeleton.getActualSize();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-
             const { height: fontHeight } = textLayout;
 
-            return fontHeight + t + b;
+            return fontHeight + t + b + MARGIN_V * 2;
         } else {
             const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
             const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);

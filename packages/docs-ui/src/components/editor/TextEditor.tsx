@@ -20,6 +20,7 @@ import type { IDocumentData, Nullable } from '@univerjs/core';
 import { isElementVisible } from '../../basics/editor';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import styles from './index.module.less';
+import { genSnapShotByValue } from './utils';
 import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
@@ -82,7 +83,7 @@ export interface ITextEditorProps {
 
     placeholder?: string; // Placeholder text.
     isValueValid?: boolean; // Whether the value is valid.
-    disbaled?: boolean;
+    disabled?: boolean;
 }
 
 /**
@@ -151,9 +152,15 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         resizeObserver.observe(editorDom);
 
+        const initialSnapshot = snapshot ?? genSnapShotByValue(id, value);
+
+        if (initialSnapshot.id !== id) {
+            initialSnapshot.id = id;
+        }
+
         const registerSubscription = editorService.register({
             editorUnitId: id,
-            initialSnapshot: snapshot,
+            initialSnapshot,
             cancelDefaultResizeListener,
             isSheetEditor,
             canvasStyle,
@@ -180,7 +187,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         // !IMPORTANT: Set a delay of 160ms to ensure that the position is corrected after the sidebar animation ends @jikkai
         const ANIMATION_DELAY = 160;
         const valueChange = debounce((editor: Readonly<Editor>) => {
-            const unitId = editor.editorUnitId;
+            const unitId = editor.getEditorId();
             const isLegality = editorService.checkValueLegality(unitId);
 
             setTimeout(() => {

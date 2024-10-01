@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
 import { ICommandService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
@@ -21,8 +23,6 @@ import { ThreadCommentPanel, ThreadCommentPanelService } from '@univerjs/thread-
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { map } from 'rxjs';
-import type { Workbook } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
 import { ShowAddSheetCommentModalOperation } from '../../commands/operations/comment.operation';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
@@ -72,14 +72,16 @@ export const SheetsThreadCommentPanel = () => {
     const showShape = useCallback((comment: IThreadComment) => {
         if (comment.unitId === unitId && comment.subUnitId === subUnitId && !comment.resolved) {
             const { row, column } = singleReferenceToGrid(comment.ref);
+            const worksheet = workbook.getSheetBySheetId(comment.subUnitId);
+            const mergeInfo = worksheet?.getMergedCell(row, column) ?? {
+                startColumn: column,
+                endColumn: column,
+                startRow: row,
+                endRow: row,
+            };
             if (!Number.isNaN(row) && !Number.isNaN(column)) {
                 return markSelectionService.addShape({
-                    range: {
-                        startColumn: column,
-                        endColumn: column,
-                        startRow: row,
-                        endRow: row,
-                    },
+                    range: mergeInfo,
                     style: {
                         hasAutoFill: false,
                         fill: 'rgb(255, 189, 55, 0.35)',

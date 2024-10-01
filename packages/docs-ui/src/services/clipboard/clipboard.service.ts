@@ -280,7 +280,15 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 ? documentBodyList.map((body) => body.dataStream).join('\n')
                 : documentBodyList[0].dataStream)
                 .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_START, '')
-                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '');
+                .replaceAll(DataStreamTreeTokenType.CUSTOM_RANGE_END, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_START, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_END, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_START, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_ROW_END, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_START, '')
+                .replaceAll(DataStreamTreeTokenType.TABLE_CELL_END, '')
+                // Replace `\r\n` in table cell to white space.
+                .replaceAll('\r\n', ' ');
 
         let html = this._umdToHtml.convert(documentBodyList);
 

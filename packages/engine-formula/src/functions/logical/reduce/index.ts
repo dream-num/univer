@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { IRange, Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { LambdaValueObjectObject } from '../../../engine/value-object/lambda-value-object';
 
@@ -26,15 +28,44 @@ export class Reduce extends BaseFunction {
 
     override maxParams = 3;
 
-    override calculate(initialValue: BaseValueObject, array: BaseValueObject, lambda: BaseValueObject): BaseValueObject {
-        if (initialValue.isArray()) {
-            return initialValue.mapValue((initialValueObject) => this._handleSingleValueObject(initialValueObject, array, lambda));
+    override needsReferenceObject = true;
+
+    override calculate(initialValue: FunctionVariantType, array: FunctionVariantType, lambda: BaseValueObject): BaseValueObject {
+        let _initialValue: BaseValueObject;
+        let _initialValueReference: Nullable<BaseReferenceObject>;
+        if (initialValue.isReferenceObject()) {
+            _initialValue = (initialValue as BaseReferenceObject).toArrayValueObject();
+            _initialValueReference = initialValue as BaseReferenceObject;
+        } else {
+            _initialValue = initialValue as BaseValueObject;
+            _initialValueReference = null;
         }
 
-        return this._handleSingleValueObject(initialValue, array, lambda);
+        let _array: BaseValueObject;
+        let _arrayReference: Nullable<BaseReferenceObject>;
+        if (array.isReferenceObject()) {
+            _array = (array as BaseReferenceObject).toArrayValueObject();
+            _arrayReference = array as BaseReferenceObject;
+        } else {
+            _array = array as BaseValueObject;
+            _arrayReference = null;
+        }
+
+        if (_initialValue.isArray()) {
+            return _initialValue.mapValue((initialValueObject) =>
+                this._handleSingleValueObject(initialValueObject, _array, lambda, _initialValueReference, _arrayReference));
+        }
+
+        return this._handleSingleValueObject(_initialValue, _array, lambda, _initialValueReference, _arrayReference);
     }
 
-    private _handleSingleValueObject(initialValue: BaseValueObject, array: BaseValueObject, lambda: BaseValueObject): BaseValueObject {
+    private _handleSingleValueObject(
+        initialValue: BaseValueObject,
+        array: BaseValueObject,
+        lambda: BaseValueObject,
+        _initialValue_reference: Nullable<BaseReferenceObject>,
+        _array_reference: Nullable<BaseReferenceObject>
+    ): BaseValueObject {
         if (initialValue.isError()) {
             return initialValue;
         }
@@ -56,21 +87,33 @@ export class Reduce extends BaseFunction {
         const rowCount = array.isArray() ? (array as ArrayValueObject).getRowCount() : 1;
         const columnCount = array.isArray() ? (array as ArrayValueObject).getColumnCount() : 1;
 
-        let accumulator = initialValue;
+        let accumulator: FunctionVariantType = initialValue;
+
+        if (_initialValue_reference) {
+            accumulator = _initialValue_reference;
+        }
 
         for (let r = 0; r < rowCount; r++) {
             for (let c = 0; c < columnCount; c++) {
-                const valueObject = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
+                let valueObject: FunctionVariantType = array.isArray() ? (array as ArrayValueObject).get(r, c) as BaseValueObject : array;
 
                 if (valueObject.isError()) {
                     return valueObject;
                 }
 
-                let value = _lambda.execute(accumulator, valueObject) as BaseValueObject;
+                if (_array_reference) {
+                    const { startRow, startColumn } = _array_reference.getRangePosition();
+                    const range: IRange = {
+                        startRow: startRow + r,
+                        startColumn: startColumn + c,
+                        endRow: startRow + r,
+                        endColumn: startColumn + c,
+                    };
 
-                if (value.isArray()) {
-                    value = (value as ArrayValueObject).get(0, 0) as BaseValueObject;
+                    valueObject = this.createReferenceObject(_array_reference, range);
                 }
+
+                let value = _lambda.execute(accumulator, valueObject) as BaseValueObject;
 
                 if (value.isError()) {
                     return value;
@@ -84,12 +127,10 @@ export class Reduce extends BaseFunction {
             }
         }
 
-        const result = +accumulator.getValue();
-
-        if (Number.isNaN(result) || !Number.isFinite(result)) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+        if (accumulator.isReferenceObject()) {
+            return (accumulator as BaseReferenceObject).toArrayValueObject();
         }
 
-        return NumberValueObject.create(result);
+        return accumulator as BaseValueObject;
     }
 }

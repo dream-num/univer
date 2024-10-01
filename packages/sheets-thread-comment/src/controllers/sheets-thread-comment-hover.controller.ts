@@ -15,10 +15,10 @@
  */
 
 import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { HoverManagerService, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
-import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
-import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentHoverController)
@@ -40,6 +40,7 @@ export class SheetsThreadCommentHoverController extends Disposable {
                 if (cell && ((currentPopup && currentPopup.temp) || !currentPopup)) {
                     const { location } = cell;
                     const { unitId, subUnitId, row, col } = location;
+
                     const commentId = this._sheetsThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
 
                     if (commentId) {

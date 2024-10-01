@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { Meta } from '@storybook/react';
 import React, { useState } from 'react';
+import type { Meta } from '@storybook/react';
 
 import { Select } from './Select';
+import type { ISelectProps } from './Select';
 
 const meta: Meta<typeof Select> = {
     title: 'Components / Select',
@@ -39,6 +40,20 @@ export const SelectBasic = {
             { label: 'Option 2', value: 'option2' },
             { label: 'Option 3 Option 3 Option 3 Option 3 Option 3 Option 3', value: 'option3' },
         ];
+
+        function handleChange(value: string | number | boolean) {
+            setValue(value as string);
+        }
+
+        return <Select value={value} options={options} onChange={handleChange} />;
+    },
+};
+
+export const SelectEmpty = {
+    render() {
+        const [value, setValue] = useState('');
+
+        const options: ISelectProps['options'] = [];
 
         function handleChange(value: string | number | boolean) {
             setValue(value as string);

@@ -18,9 +18,6 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -62,6 +59,7 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -74,7 +72,7 @@
     },
     "dependencies": {
         "@floating-ui/react-dom": "^2.1.1",
-        "@types/react": "^18.3.5",
+        "@types/react": "^18.3.9",
         "@types/react-dom": "^18.3.0",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -94,7 +92,7 @@
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",
-        "vite": "^5.4.7",
+        "vite": "^5.4.8",
         "vitest": "^2.1.1"
     },
     "univerSpace": {

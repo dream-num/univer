@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
 import dajsZhCN from 'dayjs/locale/zh';
+import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
 import type { ILocale } from './interface';
 
 const locale: ILocale = {
@@ -32,6 +32,9 @@ const locale: ILocale = {
             ...PickerZhCN,
         },
         CascaderList: {
+            empty: '无',
+        },
+        Select: {
             empty: '无',
         },
     },

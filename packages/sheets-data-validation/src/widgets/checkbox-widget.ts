@@ -103,7 +103,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         }
 
         const colors = this._themeService.getCurrentTheme();
-        if (!validator.skipDefaultFontRender(rule, value, { unitId: unitId!, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId })) {
             return;
         }
 
@@ -178,7 +178,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId })) {
             return;
         }
 

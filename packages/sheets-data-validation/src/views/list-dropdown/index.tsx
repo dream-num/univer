@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RectPopup, Scrollbar } from '@univerjs/design';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { IEditorBridgeService, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { KeyCode, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import { PLUGIN_CONFIG_KEY } from '../../controllers/config.schema';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import styles from './index.module.less';
+import type { IUniverSheetsDataValidationConfig } from '../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 
@@ -44,13 +46,28 @@ interface ISelectListProps {
     onEdit?: () => void;
     style?: React.CSSProperties;
     filter?: string;
+    location: ISheetLocation;
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title, onEdit, style, filter } = props;
+    const { value, onChange, multiple, options, title, onEdit, style, filter, location } = props;
     const localeService = useDependency(LocaleService);
+    const configService = useDependency(IConfigService);
     const lowerFilter = filter?.toLowerCase();
+    const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
+    const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
+    const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
+        {
+            workbookTypes: [WorkbookEditablePermission],
+            rangeTypes: [RangeProtectionPermissionEditPoint],
+            worksheetTypes: [WorksheetEditPermission],
+        },
+        [{ startColumn: col, startRow: row, endColumn: col, endRow: row }],
+        unitId,
+        subUnitId
+    ), [sheetPermissionInterceptorBaseController, col, row, unitId, subUnitId]);
 
     return (
         <div className={styles.dvListDropdown} style={style}>
@@ -102,10 +119,16 @@ const SelectList = (props: ISelectListProps) => {
                     </div>
                 </Scrollbar>
             </div>
-            <div className={styles.dvListDropdownSplit} />
-            <div className={styles.dvListDropdownEdit}>
-                <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
-            </div>
+            {showEditOnDropdown && hasPermission
+                ? (
+                    <>
+                        <div className={styles.dvListDropdownSplit} />
+                        <div className={styles.dvListDropdownEdit}>
+                            <a onClick={onEdit}>{localeService.t('dataValidation.list.edit')}</a>
+                        </div>
+                    </>
+                )
+                : null}
         </div>
     );
 };
@@ -218,6 +241,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
             options={options}
             onEdit={handleEdit}
             filter={editingText}
+            location={location}
         />
     );
 }

@@ -15,21 +15,21 @@
  */
 
 import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
-import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
+import type { IFloatDomLayout } from '@univerjs/ui';
+import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
+import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { IFloatDomLayout } from '@univerjs/ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 
 export interface ICanvasFloatDom {
     /**
@@ -156,6 +156,7 @@ const calcPosition = (
     };
 
     const offsetBound = transformBound2DOMBound(bound, scene, skeleton, worksheet);
+    const { scaleX, scaleY } = scene.getAncestorScale();
 
     return {
         startX: offsetBound.left,
@@ -163,8 +164,8 @@ const calcPosition = (
         startY: offsetBound.top,
         endY: offsetBound.bottom,
         rotate: angle,
-        width,
-        height,
+        width: width * scaleX,
+        height: height * scaleY,
         absolute: offsetBound.absolute,
     };
 };

@@ -113,7 +113,6 @@ export class FontAndBaseLine extends docExtension {
                 const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
                 // const MAGIC_OFFSET = 3;
                 // const lineHeight = glyph.parent?.parent?.lineHeight ?? 0;
-                // console.log('===lineHeight', lineHeight, spanPointWithFont);
                 ctx.translate(spanPointWithFont.x, spanPointWithFont.y - size);
                 Checkbox.drawWith(ctx, {
                     width: size,

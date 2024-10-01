@@ -19,6 +19,7 @@ import {
     Disposable,
     ICommandService,
     Inject,
+    InterceptorEffectEnum,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -37,7 +38,7 @@ import type {
 } from '@univerjs/core';
 
 import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { getPatternPreview } from '../utils/pattern';
+import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetsNumfmtCellContentController)
 export class SheetsNumfmtCellContentController extends Disposable {
@@ -57,10 +58,20 @@ export class SheetsNumfmtCellContentController extends Disposable {
     private _initInterceptorCellContent() {
         const renderCache = new ObjectMatrix<{ result: ICellData; parameters: string | number }>();
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
             handler: (cell, location, next) => {
                 const unitId = location.unitId;
                 const sheetId = location.subUnitId;
                 let numfmtValue;
+                const originCellValue = cell;
+                if (!originCellValue) {
+                    return next(cell);
+                }
+
+                // just handle number
+                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
+                    return next(cell);
+                }
 
                 if (cell?.s) {
                     const style = location.workbook.getStyles().get(cell.s);
@@ -75,15 +86,6 @@ export class SheetsNumfmtCellContentController extends Disposable {
                 if (!numfmtValue) {
                     return next(cell);
                 }
-                const originCellValue = cell;
-                if (!originCellValue) {
-                    return next(cell);
-                }
-
-                // just handle number
-                if (originCellValue.t !== CellValueType.NUMBER || originCellValue.v == null || Number.isNaN(originCellValue.v)) {
-                    return next(cell);
-                }
 
                 let numfmtRes: string = '';
                 const cache = renderCache.getValue(location.row, location.col);
@@ -91,7 +93,7 @@ export class SheetsNumfmtCellContentController extends Disposable {
                     return next({ ...cell, ...cache.result });
                 }
 
-                const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
+                const info = getPatternPreviewIgnoreGeneral(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
                 numfmtRes = info.result;
                 if (!numfmtRes) {
                     return next(cell);

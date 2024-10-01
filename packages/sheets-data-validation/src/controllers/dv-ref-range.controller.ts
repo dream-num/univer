@@ -18,7 +18,7 @@ import { DataValidationType, Disposable, Inject, Injector, isRangesEqual, Lifecy
 import { RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { ISheetDataValidationRule } from '@univerjs/core';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { removeDataValidationUndoFactory } from '../commands/commands/data-validation.command';
@@ -145,7 +145,7 @@ export class DataValidationRefRangeController extends Disposable {
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
             const resultRangesOrigin = oldRanges.map((range) => {
-                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
+                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
             }).filter((range) => !!range);
             const resultRanges = resultRangesOrigin.flat();
 
@@ -201,6 +201,15 @@ export class DataValidationRefRangeController extends Disposable {
     };
 
     private _initRefRange() {
+        const allRules = this._dataValidationModel.getAll();
+        for (const [unitId, subUnitMap] of allRules) {
+            for (const [subUnitId, rules] of subUnitMap) {
+                for (const rule of rules) {
+                    this.registerRule(unitId, subUnitId, rule);
+                }
+            }
+        }
+
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((option) => {
                 const { unitId, subUnitId, rule } = option;

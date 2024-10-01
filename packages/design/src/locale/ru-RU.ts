@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import PickerRuRU from 'rc-picker/lib/locale/ru_RU';
 import dajsRuRU from 'dayjs/locale/ru';
+import PickerRuRU from 'rc-picker/lib/locale/ru_RU';
 import type { ILocale } from './interface';
 
 const locale: ILocale = {
@@ -32,6 +32,9 @@ const locale: ILocale = {
             ...PickerRuRU,
         },
         CascaderList: {
+            empty: 'Нет',
+        },
+        Select: {
             empty: 'Нет',
         },
     },

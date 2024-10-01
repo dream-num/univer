@@ -27,22 +27,22 @@ import type {
     Nullable,
     ThemeService,
 } from '@univerjs/core';
-import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderModule, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
-import { getNormalSelectionStyle as getDefaultNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
 import type { IShortcutService } from '@univerjs/ui';
 import type { Observable, Subscription } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-
 import type { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { createIdentifier, Disposable, InterceptorManager, makeCellToSelection, RANGE_TYPE } from '@univerjs/core';
+import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+import { getNormalSelectionStyle as getDefaultNormalSelectionStyle, transformCellDataToSelectionData } from '@univerjs/sheets';
+
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { RANGE_FILL_PERMISSION_CHECK, RANGE_MOVE_PERMISSION_CHECK } from './const';
-import { SelectionControl } from './selection-shape';
+import { SelectionControl } from './selection-control';
+import { SelectionLayer } from './selection-layer';
 import { SelectionShapeExtension } from './selection-shape-extension';
 import { attachPrimaryWithCoord, attachSelectionWithCoord } from './util';
-import { SelectionLayer } from './selection-layer';
 
 export interface IControlFillConfig {
     oldRange: IRange;
@@ -281,6 +281,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
 
     refreshSelectionMoveStart(): void {
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
+    }
+
+    refreshSelectionMoveEnd(): void {
+        this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
     }
 
     protected _changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void {

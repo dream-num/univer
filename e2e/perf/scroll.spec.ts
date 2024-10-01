@@ -77,7 +77,11 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
             };
 
             // start mock wheel event.
-            continuousWheelSimulation(filteredCanvasElements[0], interval);
+            if (filteredCanvasElements.length > 0) {
+                continuousWheelSimulation(filteredCanvasElements[0], interval);
+            } else {
+                throw new Error('main canvas element not found');
+            }
         };
 
         const getMaxFrameTimes = (arr, n) => {
@@ -146,15 +150,8 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
                 window.E2EControllerAPI.disposeCurrSheetUnit();
                 window.univer.createUniverSheet(sheetData);
             }, { sheetData, window: windowOfPage });
-
             // wait for canvas has data
-            // await page.waitForFunction(() => {
-            //     const canvaslist = document.querySelectorAll('canvas');
-            //     if (canvaslist.length > 2) {
-            //         const imgData = canvaslist[2]!.getContext('2d')!.getImageData(40, 40, 1, 1).data;
-            //         return imgData[3] !== 0;
-            //     }
-            // });
+            await page.waitForTimeout(2000);
         });
 
         try {
@@ -168,6 +165,7 @@ const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, 
         } catch (error) {
             console.error('error when exec scrolling test', error);
         } finally {
+            // if you want to debug, use `await page.pause();` to pause browser
             console.log('Test case completed.');
         }
     });

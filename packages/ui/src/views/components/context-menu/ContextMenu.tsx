@@ -62,9 +62,12 @@ export function DesktopContextMenu() {
     }, [contextMenuService]);
 
     function handleContextMenu(event: IMouseEvent, menuType: string) {
-        setMenuType(menuType);
-        setOffset([event.clientX, event.clientY]);
-        setVisible(true);
+        setVisible(false);
+        requestAnimationFrame(() => {
+            setMenuType(menuType);
+            setOffset([event.clientX, event.clientY]);
+            setVisible(true);
+        });
     }
 
     function handleClose() {

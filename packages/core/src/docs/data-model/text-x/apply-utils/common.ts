@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../../../../shared';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
+import { DataStreamTreeTokenType } from '../../types';
+import type { Nullable } from '../../../../shared';
 import type {
     ICustomBlock,
     ICustomDecoration,
@@ -27,7 +28,6 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
-import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -199,12 +199,11 @@ export function insertParagraphs(
     currentIndex: number
 ) {
     const { paragraphs } = body;
-
     if (paragraphs == null) {
         return;
     }
 
-    const { paragraphs: insertParagraphs, dataStream: insertDataStream } = insertBody;
+    const { paragraphs: insertParagraphs } = insertBody;
 
     const paragraphIndexList = [];
     let firstInsertParagraphNextIndex = -1;
@@ -232,20 +231,6 @@ export function insertParagraphs(
             insertParagraph.startIndex += currentIndex;
             const insertIndex = insertParagraph.startIndex;
             deleteReptIndex = paragraphIndexList.indexOf(insertIndex);
-        }
-
-        if (insertDataStream === DataStreamTreeTokenType.PARAGRAPH && insertParagraphs.length === 1) {
-            const nextParagraph = paragraphs[firstInsertParagraphNextIndex];
-            const insertParagraph = insertParagraphs[0];
-
-            const nextParagraphStyle = nextParagraph.paragraphStyle;
-            const nextBullet = nextParagraph.bullet;
-
-            nextParagraph.paragraphStyle = insertParagraph.paragraphStyle;
-            nextParagraph.bullet = insertParagraph.bullet;
-
-            insertParagraph.paragraphStyle = nextParagraphStyle;
-            insertParagraph.bullet = nextBullet;
         }
 
         if (deleteReptIndex !== -1) {

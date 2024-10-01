@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FOCUSING_DOC, ICommandService, IContextService, Inject, RxDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -33,7 +33,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -57,7 +58,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         skeleton.calculate();
 
-        if (this._editorService.isEditor(unitId)) {
+        // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -82,7 +85,8 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         scene.attachControl();
 
         scene.onMouseWheel$.subscribeEvent((evt: unknown, state: EventState) => {
-            if (!this._contextService.getContextValue(FOCUSING_DOC)) {
+            const currentDocUnit = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
+            if (currentDocUnit?.getUnitId() !== this._context.unitId) {
                 return;
             }
 
@@ -234,7 +238,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
 
-        if (!this._editorService.isEditor(unitId)) {
+        const editor = this._editorService.getEditor(unitId);
+
+        // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
+        if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
     }

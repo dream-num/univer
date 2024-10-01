@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
+import type { IAccessor, ICommand } from '@univerjs/core';
 
-import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
+import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 
 export const SetFrozenCancelCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-frozen-cancel',
-    handler: async (accessor: IAccessor) => {
+    handler: (accessor: IAccessor) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

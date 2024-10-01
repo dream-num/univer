@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
 import { attachSelectionWithCoord } from './util';
 
-import { BaseSelectionRenderService, getAllSelection, getTopLeftSelection } from './base-selection-render.service';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 
 /**
  * This services controls rendering of normal selections in a render unit.
@@ -123,7 +123,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
             const selectionWithStyle = getAllSelection(skeleton);
             const selectionData = attachSelectionWithCoord(selectionWithStyle, skeleton);
             this._addSelectionControlBySelectionData(selectionData);
-            this.refreshSelectionMoveStart();
+            this.refreshSelectionMoveEnd();
 
             if (evt.button !== 2) {
                 state.stopPropagation();

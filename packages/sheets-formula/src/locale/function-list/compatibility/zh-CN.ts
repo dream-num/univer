@@ -25,8 +25,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算其函数的值，介于下限值和上限值之间。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BETAINV: {
@@ -39,8 +42,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 beta 分布相关的概率。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            A: { name: '下限', detail: '函数的下限，默认值为 0。' },
+            B: { name: '上限', detail: '函数的上限，默认值为 1。' },
         },
     },
     BINOMDIST: {
@@ -53,13 +59,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberS: { name: '成功次数', detail: '试验的成功次数。' },
+            trials: { name: '试验次数', detail: '独立试验次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为 TRUE，则 BINOMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     CHIDIST: {
-        description: '返回 χ2 分布的单尾概率',
-        abstract: '返回 χ2 分布的单尾概率',
+        description: '返回 χ2 分布的右尾概率。',
+        abstract: '返回 χ2 分布的右尾概率。',
         links: [
             {
                 title: '教学',
@@ -67,13 +75,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHIINV: {
-        description: '返回 χ2 分布的单尾概率的反函数',
-        abstract: '返回 χ2 分布的单尾概率的反函数',
+        description: '返回 χ2 分布的右尾概率的反函数。',
+        abstract: '返回 χ2 分布的右尾概率的反函数。',
         links: [
             {
                 title: '教学',
@@ -81,8 +89,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与 χ2 分布相关联的概率。' },
+            degFreedom: { name: '自由度', detail: '自由度数。' },
         },
     },
     CHITEST: {
@@ -95,13 +103,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            actualRange: { name: '观察范围', detail: '包含观察值的数据区域，用于检验预期值。' },
+            expectedRange: { name: '预期范围', detail: '包含行列汇总的乘积与总计值之比率的数据区域。' },
         },
     },
     CONFIDENCE: {
-        description: '返回总体平均值的置信区间',
-        abstract: '返回总体平均值的置信区间',
+        description: '使用正态分布返回总体平均值的置信区间。',
+        abstract: '使用正态分布返回总体平均值的置信区间。',
         links: [
             {
                 title: '教学',
@@ -109,13 +117,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            alpha: { name: 'alpha', detail: '用来计算置信水平的显著性水平。 置信水平等于 100*(1 - alpha)%，亦即，如果 alpha 为 0.05，则置信水平为 95%。' },
+            standardDev: { name: '总体标准偏差', detail: '数据区域的总体标准偏差，假定为已知。' },
+            size: { name: '样本大小', detail: '样本大小。' },
         },
     },
     COVAR: {
-        description: '返回协方差（成对偏差乘积的平均值）',
-        abstract: '返回协方差（成对偏差乘积的平均值）',
+        description: '返回总体协方差，即两个数据集中每对数据点的偏差乘积的平均值。',
+        abstract: '返回总体协方差',
         links: [
             {
                 title: '教学',
@@ -123,8 +132,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个单元格值区域。' },
+            array2: { name: '数组2', detail: '第二个单元格值区域。' },
         },
     },
     CRITBINOM: {
@@ -137,8 +146,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            trials: { name: '试验次数', detail: '伯努利试验的次数。' },
+            probabilityS: { name: '成功概率', detail: '每次试验成功的概率。' },
+            alpha: { name: '目标概率', detail: '临界值。' },
         },
     },
     EXPONDIST: {
@@ -151,13 +161,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算分布的数值。' },
+            lambda: { name: 'lambda', detail: '参数值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 EXPONDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     FDIST: {
-        description: '返回 F 概率分布',
-        abstract: '返回 F 概率分布',
+        description: '返回 F 概率分布（右尾）',
+        abstract: '返回 F 概率分布（右尾）',
         links: [
             {
                 title: '教学',
@@ -165,13 +176,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: '值', detail: '用来计算函数的值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     FINV: {
-        description: '返回 F 概率分布的反函数',
-        abstract: '返回 F 概率分布的反函数',
+        description: '返回 F 概率分布（右尾）的反函数',
+        abstract: '返回 F 概率分布（右尾）的反函数',
         links: [
             {
                 title: '教学',
@@ -179,8 +191,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: 'F 累积分布的概率值。' },
+            degFreedom1: { name: '分子自由度', detail: '分子自由度。' },
+            degFreedom2: { name: '分母自由度', detail: '分母自由度。' },
         },
     },
     FTEST: {
@@ -193,8 +206,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
         },
     },
     GAMMADIST: {
@@ -305,8 +318,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 NORMDIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     NORMINV: {
@@ -319,8 +334,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
         },
     },
     NORMSDIST: {
@@ -333,8 +349,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: '需要计算其分布的数值。' },
         },
     },
     NORMSINV: {
@@ -347,8 +362,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '对应于正态分布的概率。' },
         },
     },
     PERCENTILE: {

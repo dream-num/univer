@@ -105,9 +105,9 @@ export class ListValidator extends BaseDataValidator {
 
     override optionsInput: string | undefined = ListRenderModeInput.componentKey;
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule) {
+    override skipDefaultFontRender = (rule: ISheetDataValidationRule) => {
         return rule.renderMode !== DataValidationRenderMode.TEXT;
-    }
+    };
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);

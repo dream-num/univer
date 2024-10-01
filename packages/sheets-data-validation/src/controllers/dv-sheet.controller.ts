@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { AddDataValidationMutation, RemoveDataValidationMutation } from '@univerjs/data-validation';
-import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import type { Workbook } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams } from '@univerjs/data-validation';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
+import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { AddDataValidationMutation, RemoveDataValidationMutation } from '@univerjs/data-validation';
+import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 
 @OnLifecycle(LifecycleStages.Ready, SheetDataValidationSheetController)
@@ -51,6 +51,11 @@ export class SheetDataValidationSheetController extends Disposable {
                         }
 
                         const rules = this._sheetDataValidationModel.getRules(unitId, subUnitId);
+
+                        if (rules.length === 0) {
+                            return { redos: [], undos: [] };
+                        }
+
                         const ids = rules.map((i) => i.uid);
                         const redoParams: IRemoveDataValidationMutationParams = {
                             unitId,

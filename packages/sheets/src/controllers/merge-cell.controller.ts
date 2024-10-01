@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import {
     createInterceptorKey,
     Dimension,
@@ -24,14 +26,15 @@ import {
     Injector,
     InterceptorManager,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { first } from 'rxjs';
 
+import type {
+    ICommandInfo, IMutationInfo, IRange, Workbook,
+} from '@univerjs/core';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
@@ -41,7 +44,6 @@ import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-m
 import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
 import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
-import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import { getSheetCommandTarget } from '../commands/commands/utils/target-util';
 import {
     AddMergeUndoMutationFactory,
@@ -54,6 +56,7 @@ import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../commands/mutations/remove-worksheet-merge.mutation';
+import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { RefRangeService } from '../services/ref-range/ref-range.service';
 import { EffectRefRangId } from '../services/ref-range/type';
 import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
@@ -73,8 +76,8 @@ import type { InsertRangeMoveRightCommandParams } from '../commands/commands/ins
 import type { IInsertColCommandParams, IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
 import type { IMoveRangeCommandParams } from '../commands/commands/move-range.command';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../commands/commands/move-rows-cols.command';
-import type { ISetWorksheetActivateCommandParams } from '../commands/commands/set-worksheet-activate.command';
 import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
+import type { ISetWorksheetActiveOperationParams } from '../commands/operations/set-worksheet-active.operation';
 import type { EffectRefRangeParams } from '../services/ref-range/type';
 
 const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
@@ -123,7 +126,6 @@ export function getAddMergeMutationRangeByType(selection: IRange[], type?: Dimen
 
 export const MERGE_CELL_INTERCEPTOR_CHECK = createInterceptorKey<boolean, IRange[]>('mergeCellPermissionCheck');
 
-@OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {
     disposableCollection = new DisposableCollection();
 
@@ -153,7 +155,7 @@ export class MergeCellController extends Disposable {
                         // TODO@Gggpound: get by unit id and subUnitId
                         const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         const unitId = workbook.getUnitId();
-                        const worksheet = workbook.getActiveSheet();
+                        const worksheet = workbook?.getActiveSheet();
                         if (!worksheet) {
                             return { redos: [], undos: [] };
                         }
@@ -307,8 +309,8 @@ export class MergeCellController extends Disposable {
         };
         this.disposeWithMe(
             this._commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetActivateCommand.id) {
-                    const params = commandInfo.params as ISetWorksheetActivateCommandParams;
+                if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                    const params = commandInfo.params as ISetWorksheetActiveOperationParams;
                     const sheetId = params.subUnitId;
                     const unitId = params.unitId;
                     if (!sheetId || !unitId) {
@@ -328,13 +330,12 @@ export class MergeCellController extends Disposable {
             })
         );
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        if (workbook) {
-            const sheet = workbook.getActiveSheet();
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(first((workbook) => !!workbook)).subscribe((workbook) => {
+            const sheet = workbook!.getActiveSheet();
             if (!sheet) return;
 
-            registerRefRange(workbook.getUnitId(), sheet.getSheetId());
-        }
+            registerRefRange(workbook!.getUnitId(), sheet.getSheetId());
+        });
     }
 
     private _handleMoveRowsCommand(params: IMoveRowsCommandParams, unitId: string, subUnitId: string) {
@@ -844,19 +845,23 @@ export class MergeCellController extends Disposable {
             addMergeParams
         );
         return {
-            redos: [
+            preRedos: [
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+            ],
+            redos: [
                 {
                     id: AddWorksheetMergeMutation.id,
                     params: addMergeParams,
                 },
+            ],
+            preUndos: [
+                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
             ],
             undos: [
                 {
                     id: AddWorksheetMergeMutation.id,
                     params: undoRemoveMergeParams,
                 },
-                { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
             ],
         };
     }
@@ -915,14 +920,22 @@ export class MergeCellController extends Disposable {
 
             addMergeParams
         );
-        const redos = [
+        const preRedos = [
             {
                 id: RemoveWorksheetMergeMutation.id,
                 params: removeMergeParams,
             },
+        ];
+        const redos = [
             {
                 id: AddWorksheetMergeMutation.id,
                 params: addMergeParams,
+            },
+        ];
+        const preUndos = [
+            {
+                id: RemoveWorksheetMergeMutation.id,
+                params: undoAddMergeParams,
             },
         ];
         const undos = [
@@ -930,12 +943,9 @@ export class MergeCellController extends Disposable {
                 id: AddWorksheetMergeMutation.id,
                 params: undoRemoveMergeParams,
             },
-            {
-                id: RemoveWorksheetMergeMutation.id,
-                params: undoAddMergeParams,
-            },
+
         ];
-        return { redos, undos };
+        return { redos, undos, preRedos, preUndos };
     }
 
     private _handleDeleteRangeMoveUpCommand(
@@ -987,14 +997,23 @@ export class MergeCellController extends Disposable {
             this._injector,
             addMergeParams
         );
-        const redos = [
+        const preRedos = [
             {
                 id: RemoveWorksheetMergeMutation.id,
                 params: removeMergeParams,
             },
+        ];
+        const redos = [
+
             {
                 id: AddWorksheetMergeMutation.id,
                 params: addMergeParams,
+            },
+        ];
+        const preUndos = [
+            {
+                id: RemoveWorksheetMergeMutation.id,
+                params: undoAddMergeParams,
             },
         ];
         const undos = [
@@ -1002,12 +1021,9 @@ export class MergeCellController extends Disposable {
                 id: AddWorksheetMergeMutation.id,
                 params: undoRemoveMergeParams,
             },
-            {
-                id: RemoveWorksheetMergeMutation.id,
-                params: undoAddMergeParams,
-            },
+
         ];
-        return { redos, undos };
+        return { redos, undos, preRedos, preUndos };
     }
 
     private _handleDeleteRangeMoveLeftCommand(
@@ -1074,8 +1090,11 @@ export class MergeCellController extends Disposable {
         };
         const undoAddMergeParams: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(this._injector, addMergeParams);
         return {
-            redos: [
+            preRedos: [
                 { id: RemoveWorksheetMergeMutation.id, params: removeMergeParams },
+            ],
+            redos: [
+
                 {
                     id: AddWorksheetMergeMutation.id,
                     params: addMergeParams,
@@ -1086,6 +1105,9 @@ export class MergeCellController extends Disposable {
                     id: AddWorksheetMergeMutation.id,
                     params: undoRemoveMergeParams,
                 },
+
+            ],
+            preUndos: [
                 { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
             ],
         };

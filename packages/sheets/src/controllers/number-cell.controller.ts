@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
-import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
+import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
 @OnLifecycle(LifecycleStages.Ready, NumberCellDisplayController)
 export class NumberCellDisplayController extends Disposable {
@@ -36,6 +36,7 @@ export class NumberCellDisplayController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 11,
+                effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
                 handler: (cell, location, next) => {
                     // Skip if the cell contains a numfmt pattern
                     const style = location.workbook.getStyles().getStyleByCell(cell);

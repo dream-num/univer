@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.2.15",
+    "version": "0.3.0",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,14 +58,14 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -79,6 +79,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@flatten-js/interval-tree": "^1.1.3",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -102,7 +103,7 @@
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",
-        "vite": "^5.4.7",
+        "vite": "^5.4.8",
         "vitest": "^2.1.1"
     },
     "univerSpace": {

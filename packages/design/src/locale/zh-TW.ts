@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import PickerZhTw from 'rc-picker/lib/locale/zh_TW';
 import dajsZhTw from 'dayjs/locale/zh-tw';
+import PickerZhTw from 'rc-picker/lib/locale/zh_TW';
 import type { ILocale } from './interface';
 
 const locale: ILocale = {
@@ -32,6 +32,9 @@ const locale: ILocale = {
             ...PickerZhTw,
         },
         CascaderList: {
+            empty: '無',
+        },
+        Select: {
             empty: '無',
         },
     },

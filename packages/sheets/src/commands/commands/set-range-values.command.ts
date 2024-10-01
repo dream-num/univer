@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '../utils/interface';
+
 import {
     CommandType,
     ICommandService,
@@ -25,14 +28,12 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-import type { IAccessor, ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-
 import { WorksheetEditPermission } from '../../services/permission/permission-point';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { followSelectionOperation } from './utils/selection-utils';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISheetCommandSharedParams } from '../utils/interface';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
@@ -51,7 +52,7 @@ export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandShare
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function
+
     handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
@@ -60,26 +61,15 @@ export const SetRangeValuesCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const permissionService = accessor.get(IPermissionService);
 
-        // use subUnitId and unitId from params first
-        const target = getSheetCommandTarget(univerInstanceService, {
-            subUnitId: params.subUnitId,
-            unitId: params.unitId,
-        });
-        if (!target) {
-            return false;
-        }
-        const { subUnitId, unitId } = target;
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
 
+        const { subUnitId, unitId, workbook, worksheet } = target;
         const { value, range } = params;
         const currentSelections = range ? [range] : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
 
-        if (!currentSelections || !currentSelections.length) {
-            return false;
-        }
-
-        if (!permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)) {
-            return false;
-        }
+        if (!currentSelections || !currentSelections.length) return false;
+        if (!permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)) return false;
 
         const cellValue = new ObjectMatrix<ICellData>();
         let realCellValue: IObjectMatrixPrimitiveType<ICellData> | undefined;
@@ -108,40 +98,33 @@ export const SetRangeValuesCommand: ICommand = {
             realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
         }
 
-        const setRangeValuesMutationParams = {
-            subUnitId,
-            unitId,
-            cellValue: realCellValue ?? cellValue.getMatrix(),
-        };
-        const undoSetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
+        const setRangeValuesMutationParams = { subUnitId, unitId, cellValue: realCellValue ?? cellValue.getMatrix() };
+        const redoParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
 
-        // if (
-        //     !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
-        //         id: SetRangeValuesCommand.id,
-        //         params: setRangeValuesMutationParams,
-        //     })
-        // ) {
-        //     return false;
-        // }
+        const setValueMutationResult = commandService.syncExecuteCommand(SetRangeValuesMutation.id, setRangeValuesMutationParams);
+        if (!setValueMutationResult) return false;
 
-        const setValueMutationResult = commandService.syncExecuteCommand(
-            SetRangeValuesMutation.id,
-            setRangeValuesMutationParams
-        );
-
-        // may cause performance issues
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
             params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
         const result = sequenceExecute([...redos], commandService);
+        if (result.result) {
+            const selectionOperation = followSelectionOperation(range ?? cellValue.getRange(), workbook, worksheet);
 
-        if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
-                redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
+                undoMutations: [
+                    { id: SetRangeValuesMutation.id, params: redoParams },
+                    ...undos,
+                    selectionOperation,
+                ],
+                redoMutations: [
+                    { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
+                    ...redos,
+                    Tools.deepClone(selectionOperation),
+                ],
             });
 
             return true;

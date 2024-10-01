@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { Injector, IWorkbookData } from '@univerjs/core';
+import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { CellValueType, LocaleType } from '@univerjs/core';
+import type { Injector, IWorkbookData } from '@univerjs/core';
+import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
-import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
-import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
@@ -29,7 +28,8 @@ import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Offset } from '../index';
-import { ErrorType } from '../../../../basics/error-type';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {

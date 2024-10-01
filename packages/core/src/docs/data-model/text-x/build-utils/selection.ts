@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { DeleteDirection } from '../../../../types/enum';
-import { DataStreamTreeTokenType } from '../../types';
-import { TextXActionType } from '../action-types';
-import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import type { Nullable } from '../../../../shared';
 import type { ITextRange } from '../../../../sheets/typedef';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { IDeleteAction, IRetainAction } from '../action-types';
+import { DeleteDirection } from '../../../../types/enum';
+import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
+import { isCustomRangeSplitSymbol, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 
 export function makeSelection(startOffset: number, endOffset?: number): ITextRange {
     if (typeof endOffset === 'undefined') {
@@ -247,14 +247,15 @@ export function getRetainAndDeleteFromReplace(
             return;
         }
 
+        // only retain when the custom-range was intersecting with but not fully contained in the text-range.
         if (range.startIndex - memoryCursor >= textStart &&
-            range.startIndex - memoryCursor <= textEnd &&
-            range.endIndex - memoryCursor > textEnd) {
+            range.startIndex - memoryCursor < textEnd &&
+            range.endIndex - memoryCursor >= textEnd) {
             retainPoints.add(range.startIndex);
         }
         if (range.endIndex - memoryCursor >= textStart &&
-            range.endIndex - memoryCursor <= textEnd &&
-            range.startIndex < textStart) {
+            range.endIndex - memoryCursor < textEnd &&
+            range.startIndex - memoryCursor < textStart) {
             retainPoints.add(range.endIndex);
         }
     });

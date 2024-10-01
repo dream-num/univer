@@ -57,6 +57,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element {
             };
         }
     }, [value$]);
+
     const realValue = useMemo(() => {
         return value ?? subscribedValue;
     }, [subscribedValue, value]);
@@ -77,10 +78,6 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element {
     }, [icon]);
 
     // if value is not valid, use primary color
-    // let isValid = false;
-    // if (realValue && typeof realValue === 'string') {
-    //     isValid = new ColorKit(realValue).isValid;
-    // }
     const isValid = useMemo(() => {
         if (realValue && typeof realValue === 'string') {
             return new ColorKit(realValue).isValid;

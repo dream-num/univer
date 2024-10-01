@@ -15,19 +15,19 @@
  */
 
 import type { INeedCheckDisposable, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { IPopup } from '@univerjs/ui';
 import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import type { IPopup } from '@univerjs/ui';
+import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { ICanvasPopupService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { COMMAND_LISTENER_SKELETON_CHANGE, RefRangeService, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
-import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
+import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible' | 'hiddenType' | 'onClick'> {
     mask?: boolean;

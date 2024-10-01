@@ -355,6 +355,34 @@ export class Worksheet {
         return this._viewModel.getCell(row, col);
     }
 
+    /**
+     * Get cellData only use effect on value interceptor
+     * @param {number} number row The row index of the cell.
+     * @param {number} number col The column index of the cell.
+     * @returns {Nullable<ICellDataForSheetInterceptor>} The cell data only use effect on value interceptor
+     */
+    getCellValueOnly(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
+        if (row < 0 || col < 0) {
+            return null;
+        }
+
+        return this._viewModel.getCellValueOnly(row, col);
+    }
+
+    /**
+     * Get cellData only use effect on style interceptor
+     * @param {number} row The row index of the cell.
+     * @param {number} col The column index of the cell.
+     * @returns {Nullable<ICellDataForSheetInterceptor>} The cell data only use effect on style interceptor
+     */
+    getCellStyleOnly(row: number, col: number): Nullable<ICellDataForSheetInterceptor> {
+        if (row < 0 || col < 0) {
+            return null;
+        }
+
+        return this._viewModel.getCellStyleOnly(row, col);
+    }
+
     getCellRaw(row: number, col: number): Nullable<ICellData> {
         return this.getCellMatrix().getValue(row, col);
     }

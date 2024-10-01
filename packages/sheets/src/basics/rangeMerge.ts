@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 
 export const createTopMatrixFromRanges = (ranges: IRange[]) => {
     const matrix = new ObjectMatrix<number>();
@@ -96,12 +96,12 @@ const filterLeftMatrix = (topMatrix: ObjectMatrix<number>, range: IRange) => {
 
     for (let col = range.startColumn; col <= range.endColumn; col++) {
         const row = range.endRow + 1;
-        const v = topMatrix.getValue(row, col);
+        const v = topMatrix.getValue(row, col)!;
         if (v > 0) {
             topMatrix.setValue(row, col, 1);
             let nextRow = row + 1;
-            while (topMatrix.getValue(nextRow, col) > 0) {
-                topMatrix.setValue(nextRow, col, topMatrix.getValue(nextRow - 1, col) + 1);
+            while (topMatrix.getValue(nextRow, col)! > 0) {
+                topMatrix.setValue(nextRow, col, topMatrix.getValue(nextRow - 1, col)! + 1);
                 nextRow++;
             }
         }

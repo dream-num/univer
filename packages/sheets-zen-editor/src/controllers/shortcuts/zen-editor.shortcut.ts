@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
 import { EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
+import type { IContextService } from '@univerjs/core';
 
 import { CancelZenEditCommand, ConfirmZenEditCommand } from '../../commands/commands/zen-editor.command';
 

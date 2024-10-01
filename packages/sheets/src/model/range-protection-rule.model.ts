@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { IRange } from '@univerjs/core';
+import type { UnitObject } from '@univerjs/protocol';
 import { LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 
-import type { UnitObject } from '@univerjs/protocol';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IRangeProtectionRule {
     ranges: IRange[];
@@ -34,6 +34,14 @@ export type IObjectModel = Record<string, Record<string, IRangeProtectionRule[]>
 
 export type IModel = Map<string, Map<string, Map<string, IRangeProtectionRule>>>;
 
+export interface IRuleChange {
+    unitId: string;
+    subUnitId: string;
+    rule: IRangeProtectionRule;
+    oldRule?: IRangeProtectionRule;
+    type: IRuleChangeType;
+}
+
 type IRuleChangeType = 'add' | 'set' | 'delete';
 @OnLifecycle(LifecycleStages.Starting, RangeProtectionRuleModel)
 
@@ -44,13 +52,7 @@ export class RangeProtectionRuleModel {
      */
     private _model: IModel = new Map();
 
-    private _ruleChange = new Subject<{
-        unitId: string;
-        subUnitId: string;
-        rule: IRangeProtectionRule;
-        oldRule?: IRangeProtectionRule;
-        type: IRuleChangeType;
-    }>();
+    private _ruleChange = new Subject<IRuleChange>();
 
     ruleChange$ = this._ruleChange.asObservable();
 
@@ -101,6 +103,11 @@ export class RangeProtectionRuleModel {
     getSubunitRuleList(unitId: string, subUnitId: string) {
         const map = this._model.get(unitId)?.get(subUnitId) || new Map();
         return [...map.values()] as IRangeProtectionRule[];
+    }
+
+    getSubunitRuleListLength(unitId: string, subUnitId: string) {
+        const map = this._model.get(unitId)?.get(subUnitId);
+        return map ? map.size : 0;
     }
 
     private _ensureRuleMap(unitId: string, subUnitId: string) {

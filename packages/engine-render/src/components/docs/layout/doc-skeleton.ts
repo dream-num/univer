@@ -147,7 +147,10 @@ export class DocumentSkeleton extends Skeleton {
         return this._docViewModel;
     }
 
-    // Layout the document.
+    /**
+     * Layout the document.
+     * PS: This method has significant impact on performance.
+     */
     calculate(bounds?: IViewportInfo) {
         if (!this.dirty) {
             return;
@@ -369,7 +372,7 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeFooters, skeHeaders } = skeletonData;
 
-        const { divide, line, column, section, segmentPage, pageType, path } = position;
+        const { divide, line, column, section, segmentPage, pageType, path, isBack } = position;
 
         let { glyph } = position;
 

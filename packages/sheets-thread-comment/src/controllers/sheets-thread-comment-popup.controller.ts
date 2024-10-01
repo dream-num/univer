@@ -15,15 +15,15 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
-import { DeleteCommentMutation } from '@univerjs/thread-comment';
-import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { singleReferenceToGrid } from '@univerjs/engine-formula';
+import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { DeleteCommentMutation } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
@@ -227,15 +227,19 @@ export class SheetsThreadCommentPopupController extends Disposable {
                 return null;
             }
 
+            const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(subUnitId);
+
+            const mergeInfo = worksheet?.getMergedCell(row, column) ?? {
+                startColumn: column,
+                endColumn: column,
+                startRow: row,
+                endRow: row,
+            };
+
             // TODO: use evented: false to solve this problem later
             const shapeId = this._markSelectionService.addShape(
                 {
-                    range: {
-                        startColumn: column,
-                        endColumn: column,
-                        startRow: row,
-                        endRow: row,
-                    },
+                    range: mergeInfo,
                     style: {
                         hasAutoFill: false,
                         fill: 'rgb(255, 189, 55, 0.35)',

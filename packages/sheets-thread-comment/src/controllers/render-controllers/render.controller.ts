@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
+import type { Workbook } from '@univerjs/core';
+import type { Spreadsheet } from '@univerjs/engine-render';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
@@ -41,6 +41,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    effect: InterceptorEffectEnum.Style,
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         if (this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {

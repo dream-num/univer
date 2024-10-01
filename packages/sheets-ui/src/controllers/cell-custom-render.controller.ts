@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
+import { Disposable, DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import type { ICellCustomRender, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
+import { UnitAction, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
+import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
+import type { ICellPermission } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 
@@ -32,7 +34,8 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: UniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: UniverInstanceService,
+        @IPermissionService private readonly _permissionService: IPermissionService
     ) {
         super();
         this._initEventBinding();
@@ -143,6 +146,20 @@ export class CellCustomRenderController extends Disposable implements IRenderMod
                     const activeRenderInfo = getActiveRender(evt);
                     if (activeRenderInfo) {
                         const [activeRender, cellContext] = activeRenderInfo;
+                        const { row, col, worksheet, unitId, subUnitId } = cellContext;
+                        const sheetEditable = this._permissionService.composePermission(
+                            [new WorkbookEditablePermission(unitId).id, new WorksheetEditPermission(unitId, subUnitId).id]
+                        )?.every((permission) => permission.value);
+
+                        if (!sheetEditable) {
+                            return false;
+                        }
+
+                        const permission = (worksheet.getCell(row, col) as (ICellDataForSheetInterceptor & { selectionProtection: ICellPermission[] }))?.selectionProtection?.[0];
+                        if (permission?.[UnitAction.Edit] === false) {
+                            return false;
+                        }
+
                         activeRender.onPointerDown?.(cellContext, evt);
                     }
                 });

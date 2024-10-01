@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type {
+    IAddWorksheetMergeMutationParams,
+    IRemoveSheetMutationParams,
+    IRemoveWorksheetMergeMutationParams,
+    ISetRangeValuesMutationParams,
+} from '@univerjs/sheets';
+import type {
+    APPLY_FUNCTIONS,
+    IAutoFillLocation,
+    ICopyDataInType,
+    ICopyDataPiece,
+    IRuleConfirmedData,
+    ISheetAutoFillHook,
+} from '../services/auto-fill/type';
+import type { IDiscreteRange } from './utils/range-tools';
 import {
     Direction,
     Disposable,
@@ -30,6 +46,7 @@ import {
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
+
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
     AddMergeUndoMutationFactory,
@@ -53,14 +70,6 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetRowHeightMutation,
 } from '@univerjs/sheets';
-import type { IAccessor, ICellData, ICommandInfo, IExecutionOptions, IMutationCommonParams, IMutationInfo, IRange, Nullable, UnitModel, Workbook } from '@univerjs/core';
-import type {
-    IAddWorksheetMergeMutationParams,
-    IRemoveSheetMutationParams,
-    IRemoveWorksheetMergeMutationParams,
-    ISetRangeValuesMutationParams,
-} from '@univerjs/sheets';
-
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
@@ -72,15 +81,6 @@ import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISheetSelectionRenderService } from '../services/selection/base-selection-render.service';
 import { SheetsRenderService } from '../services/sheets-render.service';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
-import type {
-    APPLY_FUNCTIONS,
-    IAutoFillLocation,
-    ICopyDataInType,
-    ICopyDataPiece,
-    IRuleConfirmedData,
-    ISheetAutoFillHook,
-} from '../services/auto-fill/type';
-import type { IDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -848,32 +848,34 @@ export class AutoFillController extends Disposable {
         }
 
         // delete cross merge
-        const deleteMergeRanges: IRange[] = [];
-        const mergeData = this._univerInstanceService
-            .getUniverSheetInstance(unitId)
-            ?.getSheetBySheetId(subUnitId)
-            ?.getMergeData();
-        if (mergeData) {
-            mergeData.forEach((merge) => {
-                if (Rectangle.intersects(merge, targetRange)) {
-                    deleteMergeRanges.push(merge);
-                }
-            });
-        }
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges: deleteMergeRanges,
-        };
+        if (hasStyle) {
+            const deleteMergeRanges: IRange[] = [];
+            const mergeData = this._univerInstanceService
+                .getUniverSheetInstance(unitId)
+                ?.getSheetBySheetId(subUnitId)
+                ?.getMergeData();
+            if (mergeData) {
+                mergeData.forEach((merge) => {
+                    if (Rectangle.intersects(merge, targetRange)) {
+                        deleteMergeRanges.push(merge);
+                    }
+                });
+            }
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges: deleteMergeRanges,
+            };
 
-        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = this._injector.invoke(
-            AddMergeUndoMutationFactory,
-            removeMergeMutationParams
-        );
+            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = this._injector.invoke(
+                RemoveMergeUndoMutationFactory,
+                removeMergeMutationParams
+            );
 
-        if (deleteMergeRanges.length) {
-            redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-            undos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            if (deleteMergeRanges.length) {
+                redos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+                undos.unshift({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            }
         }
 
         // clear range value
@@ -890,7 +892,7 @@ export class AutoFillController extends Disposable {
 
         // const intercepted = this._sheetInterceptorService.onCommandExecute({ id: ClearSelectionContentCommand.id });
         redos.push({ id: SetRangeValuesMutation.id, params: clearMutationParams });
-        undos.push({ id: SetRangeValuesMutation.id, params: undoClearMutationParams });
+        undos.unshift({ id: SetRangeValuesMutation.id, params: undoClearMutationParams });
 
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();
@@ -913,7 +915,7 @@ export class AutoFillController extends Disposable {
             setRangeValuesMutationParams
         );
 
-        undos.push({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
+        undos.unshift({ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams });
         redos.push({ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams });
 
         // add worksheet merge
@@ -926,12 +928,12 @@ export class AutoFillController extends Disposable {
                 ranges,
             };
 
-            const undoRemoveMutationParams: IRemoveWorksheetMergeMutationParams = this._injector.invoke(
-                RemoveMergeUndoMutationFactory,
+            const undoAddMergeMutationParams: IRemoveWorksheetMergeMutationParams = this._injector.invoke(
+                AddMergeUndoMutationFactory,
                 addMergeMutationParams
             );
 
-            undos.push({ id: RemoveWorksheetMergeMutation.id, params: undoRemoveMutationParams });
+            undos.unshift({ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeMutationParams });
             redos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
         }
 

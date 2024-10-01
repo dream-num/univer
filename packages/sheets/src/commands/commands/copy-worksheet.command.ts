@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand, Workbook } from '@univerjs/core';
+import type { IAccessor, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import type {
+    IInsertSheetMutationParams,
+    IRemoveSheetMutationParams,
+} from '../../basics/interfaces/mutation-interface';
+
 import {
     CommandType,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    sequenceExecute,
     Tools,
 } from '@univerjs/core';
-
-import type {
-    IInsertSheetMutationParams,
-    IRemoveSheetMutationParams,
-} from '../../basics/interfaces/mutation-interface';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
@@ -44,6 +46,7 @@ export const CopySheetCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const localeService = accessor.get(LocaleService);
 
         const target = getSheetCommandTarget(univerInstanceService, params);
@@ -51,7 +54,7 @@ export const CopySheetCommand: ICommand = {
             return false;
         }
 
-        const { workbook, worksheet, unitId } = target;
+        const { workbook, worksheet, unitId, subUnitId } = target;
         const config = Tools.deepClone(worksheet.getConfig());
         config.name = getCopyUniqueSheetName(workbook, localeService, config.name);
         config.id = Tools.generateRandomId();
@@ -67,13 +70,31 @@ export const CopySheetCommand: ICommand = {
             accessor,
             insertSheetMutationParams
         );
-        const insertResult = commandService.syncExecuteCommand(InsertSheetMutation.id, insertSheetMutationParams);
+
+        const intercepted = sheetInterceptorService.onCommandExecute({
+            id: CopySheetCommand.id,
+            params: { unitId, subUnitId, targetSubUnitId: config.id },
+        });
+
+        const redos: IMutationInfo[] = [
+            ...(intercepted.preRedos ?? []),
+            { id: InsertSheetMutation.id, params: insertSheetMutationParams },
+            ...intercepted.redos,
+        ];
+
+        const undos: IMutationInfo[] = [
+            ...(intercepted.preUndos ?? []),
+            { id: RemoveSheetMutation.id, params: removeSheetMutationParams },
+            ...intercepted.undos,
+        ];
+
+        const insertResult = sequenceExecute(redos, commandService).result;
 
         if (insertResult) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: RemoveSheetMutation.id, params: removeSheetMutationParams }],
-                redoMutations: [{ id: InsertSheetMutation.id, params: insertSheetMutationParams }],
+                undoMutations: undos,
+                redoMutations: redos,
             });
             return true;
         }

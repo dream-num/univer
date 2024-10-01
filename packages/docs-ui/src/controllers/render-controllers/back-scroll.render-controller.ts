@@ -88,7 +88,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
-        const isEditor = !!this._editorService.getEditor(unitId);
+        const editor = this._editorService.getEditor(unitId);
 
         if (viewportMain == null) {
             return;
@@ -104,7 +104,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         let offsetY = 0;
         let offsetX = 0;
 
-        const delta = isEditor ? 0 : 100;
+        const delta = editor ? editor.params.backScrollOffset ?? 0 : 100;
 
         if (top < boundTop) {
             offsetY = top - boundTop - delta;

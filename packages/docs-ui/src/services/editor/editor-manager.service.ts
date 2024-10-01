@@ -192,6 +192,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         );
     }
 
+    /** @deprecated */
     private _blurSheetEditor(target: HTMLElement) {
         if (editorFocusInElements.some((item) => target.classList.contains(item))) {
             return;
@@ -225,11 +226,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors.has(editorUnitId);
     }
 
+    /** @deprecated */
     isSheetEditor(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
         return !!(editor && editor.isSheetEditor());
     }
 
+    /** @deprecated */
     closeRangePrompt() {
         const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         if (!documentDataModel) {
@@ -260,6 +263,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._spreadsheetFocusState;
     }
 
+    /** @deprecated */
     focusStyle(editorUnitId: string) {
         const editor = this.getEditor(editorUnitId);
         if (!editor) {
@@ -281,10 +285,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.setFocusId(editorUnitId);
     }
 
+    /** @deprecated */
     singleSelection(state: boolean) {
         this._singleSelection$.next(state);
     }
 
+    /** @deprecated */
     selectionChangingState() {
         // const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const editorUnitId = this.getFocusId();
@@ -419,6 +425,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return [...this.getAllEditor().values()][0];
     }
 
+    /** @deprecated */
     resize(unitId: string) {
         const editor = this.getEditor(unitId);
         if (editor == null) {
@@ -430,6 +437,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._resize$.next(unitId);
     }
 
+    /** @deprecated */
     isVisible(id: string) {
         return this.getEditor(id)?.isVisible();
     }
@@ -455,14 +463,18 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     register(config: IEditorConfigParams, container: HTMLDivElement): IDisposable {
-        const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
+        const { initialSnapshot, canvasStyle = {} } = config;
+        const editorUnitId = initialSnapshot.id;
 
-        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC)
-            ?? this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
+        const documentDataModel = this._univerInstanceService.getUnit<DocumentDataModel>(editorUnitId, UniverInstanceType.UNIVER_DOC);
+
+        if (documentDataModel == null) {
+            this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(
                 UniverInstanceType.UNIVER_DOC,
                 initialSnapshot || this._getBlank(editorUnitId),
                 { makeCurrent: false }
             );
+        }
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
         if (render == null) {
@@ -474,7 +486,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             render.engine.setContainer(container);
 
             const editor = new Editor(
-                { ...config, render, documentDataModel, editorDom: container, canvasStyle },
+                { ...config, render, editorDom: container, canvasStyle },
                 this._univerInstanceService,
                 this._docSelectionManagerService,
                 this._commandService,
@@ -484,10 +496,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             this._editors.set(editorUnitId, editor);
 
             // Delete scroll bar
-            // FIXME@Jocs: should add a configuration when creating a renderer, not delete it.
-            (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
+            if (!config.scrollBar) {
+                (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
+            }
 
-            if (!editor.isSheetEditor()) {
+            // @ggg, Move this to Text Editor?
+            if (!editor.isSheetEditor() && !config.noNeedVerticalAlign) {
                 editor.verticalAlign();
                 editor.updateCanvasStyle();
             }
@@ -504,7 +518,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         this._renderManagerService.removeRender(editorUnitId);
-        editor.documentDataModel.dispose();
+        editor.dispose();
         this._editors.delete(editorUnitId);
         this._univerInstanceService.disposeUnit(editorUnitId);
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, false);
@@ -516,6 +530,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
          * Compatible with the editor in the sheet scenario,
          * it is necessary to refocus back to the current sheet when unloading.
          */
+        // REFACTOR: @zw, move to sheet cell editor.
         const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (sheets.length > 0) {
             const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -526,10 +541,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
     }
 
+    /** @deprecated */
     refreshValueChange(editorUnitId: string) {
         this._refreshValueChange(editorUnitId);
     }
 
+    /** @deprecated */
     checkValueLegality(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
 

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICustomRange, Injector, IParagraph, ITextRangeParam, Workbook } from '@univerjs/core';
-import { CustomRangeType, IUniverInstanceService, PresetListType, UniverInstanceType } from '@univerjs/core';
-import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { ICustomRange, Injector, IParagraph, ISelectionCellWithMergeInfo, ITextRangeParam, Workbook } from '@univerjs/core';
+import type { DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IFontCacheItem } from '@univerjs/engine-render';
+import { CustomRangeType, HorizontalAlign, IUniverInstanceService, PresetListType, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DOC_VERTICAL_PADDING, getLineBounding, NodePositionConvertToCursor } from '@univerjs/docs-ui';
-import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '../editor-bridge.service';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 
 const calcDocRangePositions = (range: ITextRangeParam, skeleton: DocumentSkeleton): IBoundRectNoAngle[] | undefined => {
     const pageIndex = -1;
@@ -144,6 +144,43 @@ export const calculateDocSkeletonRects = (docSkeleton: DocumentSkeleton, padding
     };
 };
 
+export function calcPadding(cell: ISelectionCellWithMergeInfo, font: IFontCacheItem) {
+    const height = font.documentSkeleton.getSkeletonData()?.pages[0].height ?? 0;
+    const width = font.documentSkeleton.getSkeletonData()?.pages[0].width ?? 0;
+    const vt = font.verticalAlign;
+    const ht = font.horizontalAlign;
+
+    let paddingTop = 0;
+    switch (vt) {
+        case VerticalAlign.UNSPECIFIED:
+        case VerticalAlign.BOTTOM:
+            paddingTop = cell.mergeInfo.endY - cell.mergeInfo.startY - height;
+            break;
+        case VerticalAlign.MIDDLE:
+            paddingTop = (cell.mergeInfo.endY - cell.mergeInfo.startY - height) / 2;
+            break;
+        default:
+            break;
+    }
+
+    let paddingLeft = 0;
+    switch (ht) {
+        case HorizontalAlign.RIGHT:
+            paddingLeft = cell.mergeInfo.endX - cell.mergeInfo.startX - width;
+            break;
+        case HorizontalAlign.CENTER:
+            paddingLeft = (cell.mergeInfo.endX - cell.mergeInfo.startX - width) / 2;
+            break;
+        default:
+            break;
+    }
+
+    return {
+        paddingLeft,
+        paddingTop,
+    };
+}
+
 export const getCustomRangePosition = (injector: Injector, unitId: string, subUnitId: string, row: number, col: number, rangeId: string) => {
     const univerInstanceService = injector.get(IUniverInstanceService);
     const renderManagerService = injector.get(IRenderManagerService);
@@ -164,28 +201,43 @@ export const getCustomRangePosition = (injector: Injector, unitId: string, subUn
 
     if (!skeleton || !currentRender) return;
 
-    const font = skeleton.getFont(row, col)?.documentSkeleton;
-
-    if (!font) {
+    const font = skeleton.getFont(row, col);
+    const docSkeleton = font?.documentSkeleton;
+    if (!docSkeleton) {
         return null;
     }
-    const customRange = font.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
+    const customRange = docSkeleton.getViewModel().getBody()?.customRanges?.find((range) => range.rangeId === rangeId);
     if (!customRange) {
         return null;
     }
 
     const PADDING = DOC_VERTICAL_PADDING;
-    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, font);
-    const cell = skeleton.getCellByIndex(row, col);
+
+    const cellIndex = skeleton.getCellByIndex(row, col);
+    let { actualColumn, actualRow } = cellIndex;
+
+    skeleton.overflowCache.forValue((r, c, range) => {
+        if (range.startRow <= actualRow && range.endRow >= actualRow && range.startColumn <= actualColumn && range.endColumn >= actualColumn) {
+            actualColumn = c;
+            actualRow = r;
+        }
+    });
+
+    const actualCell = skeleton.getCellByIndex(actualRow, actualColumn);
+    const cellData = worksheet.getCell(actualCell.actualRow, actualCell.actualColumn);
+    const { topOffset = 0, leftOffset = 0 } = cellData?.fontRenderExtension ?? {};
+    const { paddingLeft, paddingTop } = calcPadding(actualCell, font);
+    const rects = calcDocRangePositions({ startOffset: customRange.startIndex, endOffset: customRange.endIndex, collapsed: false }, docSkeleton);
+
     return {
         rects: rects?.map((rect) => ({
-            top: rect.top + cell.startY - PADDING,
-            bottom: rect.bottom + cell.startY + PADDING,
-            left: rect.left + cell.startX,
-            right: rect.right + cell.startX,
+            top: rect.top + actualCell.mergeInfo.startY + paddingTop + topOffset + PADDING,
+            bottom: rect.bottom + actualCell.mergeInfo.startY + paddingTop + topOffset + PADDING,
+            left: rect.left + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
+            right: rect.right + actualCell.mergeInfo.startX + paddingLeft + leftOffset,
         })),
         customRange,
-        label: font.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
+        label: docSkeleton.getViewModel().getBody()!.dataStream.slice(customRange.startIndex + 1, customRange.endIndex),
     };
 };
 

@@ -15,8 +15,8 @@
  */
 
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import type { IDisposable } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 
 export interface IContextMenuHandler {
     /** A callback to open context menu with given position and menu type. */

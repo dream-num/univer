@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-const process = require('node:process');
 const { writeFileSync } = require('node:fs');
+const process = require('node:process');
 const { convertLibNameFromPackageName } = require('./utils');
 
 exports.autoExternalizeDependency = function autoExternalizeDependency() {
@@ -33,16 +33,6 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             global: 'dayjs',
             name: 'dayjs',
             version: '>=1.11.0',
-        },
-        lodash: {
-            global: '_',
-            name: 'lodash',
-            version: '>=4.0.0',
-        },
-        'lodash/debounce': {
-            global: 'lodash.debounce',
-            name: 'lodash',
-            version: 'lodash',
         },
         'monaco-editor': {
             global: 'monaco',

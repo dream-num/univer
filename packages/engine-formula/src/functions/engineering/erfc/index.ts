@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import { erfc } from '../../../basics/engineering';
 import { ErrorType } from '../../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import { erf } from '../../../basics/engineering';
 import { checkVariantsErrorIsArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Erfc extends BaseFunction {
     override minParams = 1;
@@ -41,7 +41,7 @@ export class Erfc extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const result = 1 - erf(xValue);
+        const result = erfc(xValue);
 
         return NumberValueObject.create(result);
     }

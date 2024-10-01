@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
+import { Disposable, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
+import type { Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 
 export class SheetsHyperLinkRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -78,6 +78,8 @@ export class SheetsHyperLinkRenderManagerController extends Disposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    effect: InterceptorEffectEnum.Value,
+                    priority: 100,
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const link = this._hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, col);
@@ -92,7 +94,6 @@ export class SheetsHyperLinkRenderManagerController extends Disposable {
 
                         return next(cell);
                     },
-                    priority: 100,
                 }
             )
         );

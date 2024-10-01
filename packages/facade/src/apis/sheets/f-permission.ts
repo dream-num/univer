@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
-import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 
 export class FPermission {
     constructor(

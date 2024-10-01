@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
+import type { ComponentManager, ComponentType } from '@univerjs/ui';
 import {
     DisposableCollection,
     generateRandomId,
@@ -26,8 +28,6 @@ import {
     Tools,
     VerticalAlign,
 } from '@univerjs/core';
-import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, IRangeWithCoord, Nullable, Worksheet } from '@univerjs/core';
-import type { ComponentManager, ComponentType } from '@univerjs/ui';
 
 export type FHorizontalAlignment = 'left' | 'center' | 'normal';
 export type FVerticalAlignment = 'top' | 'middle' | 'bottom';

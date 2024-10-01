@@ -18,7 +18,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 import { Tools } from '../../shared/tools';
-import { RTL_LOCALES } from '../../types/const/rtl-locales.ts';
 import { LocaleType } from '../../types/enum/locale-type';
 import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 
@@ -93,7 +92,6 @@ export class LocaleService extends Disposable {
     setLocale(locale: LocaleType) {
         this._currentLocale$.next(locale);
         this.localeChanged$.next();
-        this._changeHtmlDirectionBaseOnLocale(locale);
     }
 
     getLocales() {
@@ -118,10 +116,5 @@ export class LocaleService extends Disposable {
         }
 
         return null;
-    }
-
-    private _changeHtmlDirectionBaseOnLocale(locale: LocaleType): void {
-        const isRTL = RTL_LOCALES.includes(locale);
-        document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
     }
 }

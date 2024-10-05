@@ -1022,9 +1022,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@types/rbush':
-        specifier: ^4.0.0
-        version: 4.0.0
       '@univerjs/core':
         specifier: workspace:*
         version: 'link:'
@@ -1062,6 +1059,9 @@ importers:
       '@types/numeral':
         specifier: ^2.0.5
         version: 2.0.5
+      '@types/rbush':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared

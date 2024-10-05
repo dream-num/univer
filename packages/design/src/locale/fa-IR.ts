@@ -34,6 +34,9 @@ const locale: ILocale = {
         CascaderList: {
             empty: 'هیچ کدام',
         },
+        Select: {
+            empty: 'هیچ‌کدام',
+        },
     },
 };
 

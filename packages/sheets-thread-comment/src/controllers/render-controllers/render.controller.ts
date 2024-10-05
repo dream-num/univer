@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { debounceTime } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
@@ -29,6 +31,7 @@ export class SheetsThreadCommentRenderController extends Disposable {
     ) {
         super();
         this._initViewModelIntercept();
+        this._initSkeletonChange();
     }
 
     private _initViewModelIntercept() {
@@ -59,4 +62,19 @@ export class SheetsThreadCommentRenderController extends Disposable {
             )
         );
     }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            if (!workbook) return;
+            const unitId = workbook.getUnitId();
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+            currentRender?.mainComponent?.makeForceDirty();
+        };
+
+        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.pipe(debounceTime(16)).subscribe(() => {
+            markSkeletonDirty();
+        }));
+    }
 }
+

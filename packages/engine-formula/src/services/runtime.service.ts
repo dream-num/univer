@@ -15,22 +15,22 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
-
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../basics/common';
-import { isInDirtyRange } from '../basics/dirty';
-import { ErrorType } from '../basics/error-type';
+
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import { objectValueToCellValue } from '../engine/utils/value-object';
+import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { isInDirtyRange } from '../basics/dirty';
+import { ErrorType } from '../basics/error-type';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
+import { objectValueToCellValue } from '../engine/utils/value-object';
+import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**

@@ -15,8 +15,9 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
+import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 
+import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken } from '../../basics/match-token';
@@ -38,9 +39,8 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRangeToRefString } from '../utils/reference';
+import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
 
 enum bracketType {
@@ -1036,12 +1036,33 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    private _negativeCondition(prevString: string) {
+    private _findNextToken(data: string[], indexRaw: number) {
+        let index = indexRaw;
+        while (index >= 0) {
+            const token = data[index];
+            if (token !== ' ') {
+                return token;
+            }
+            index++;
+        }
+    }
+
+    private _negativePreCondition(prevString: string) {
         if (
             OPERATOR_TOKEN_SET.has(prevString) ||
             prevString === matchToken.OPEN_BRACKET ||
             prevString === matchToken.COMMA ||
+            prevString === operatorToken.EQUALS ||
             prevString === ''
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    private _negativeNextCondition(prevString: string) {
+        if (
+            OPERATOR_TOKEN_SET.has(prevString)
         ) {
             return true;
         }
@@ -1144,11 +1165,11 @@ export class LexerTreeBuilder extends Disposable {
             formulaString = formulaString.substring(1);
         }
 
-        let isZeroAdded = false;
-        if (formulaString.substring(0, 1) === operatorToken.MINUS) {
-            formulaString = `0${formulaString}`;
-            isZeroAdded = true;
-        }
+        // let isZeroAdded = false;
+        // if (formulaString.substring(0, 1) === operatorToken.MINUS) {
+        //     formulaString = `0${formulaString}`;
+        //     isZeroAdded = true;
+        // }
 
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
@@ -1176,7 +1197,7 @@ export class LexerTreeBuilder extends Disposable {
                 for (let i = 0; i < errorType.length; i++) {
                     const curStr = formulaStringArray[cur];
                     this._pushSegment(curStr);
-                    this._addSequenceArray(sequenceArray, curStr, cur, isZeroAdded);
+                    this._addSequenceArray(sequenceArray, curStr, cur);
                     cur++;
                 }
                 this._resetSegment();
@@ -1209,9 +1230,9 @@ export class LexerTreeBuilder extends Disposable {
                          * Copy or auto-fill at complex formula get error formula offset
                          */
 
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
                         cur++;
                         this._closeBracket();
                         continue;
@@ -1516,17 +1537,24 @@ export class LexerTreeBuilder extends Disposable {
                 if (currentString === operatorToken.MINUS && (trimSegment === '')) {
                     // negative number
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
-                    if (this._negativeCondition(prevString)) {
+                    const nextString = this._findNextToken(formulaStringArray, cur + 1) || '';
+                    if (this._negativePreCondition(prevString) && this._negativeNextCondition(nextString)) {
+                        this._pushNodeToChildren('0');
+                        this._pushNodeToChildren(operatorToken.MINUS);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
+                        this._resetSegment();
+                        cur++;
+                        continue;
+                    } else if (this._negativePreCondition(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
-
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
                         continue;
                     }
                 } else if (this._segment.length > 0 && this._isScientificNotation(formulaStringArray, cur, currentString)) {
                     this._pushSegment(currentString);
 
-                    this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                    this._addSequenceArray(sequenceArray, currentString, cur);
 
                     cur++;
                     continue;
@@ -1543,9 +1571,9 @@ export class LexerTreeBuilder extends Disposable {
                         this._pushNodeToChildren(trimSegment + currentString + nextCurrentString);
 
                         this._resetSegment();
-                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;
-                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur);
                         cur++;
                         continue;
                     } else {
@@ -1559,7 +1587,7 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushSegment(currentString);
             }
 
-            this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
+            this._addSequenceArray(sequenceArray, currentString, cur);
             cur++;
         }
 
@@ -1589,14 +1617,12 @@ export class LexerTreeBuilder extends Disposable {
         return preOneChar && preOneChar.toUpperCase() === 'E';
     }
 
-    private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number, isZeroAdded: boolean) {
-        if (!(isZeroAdded && cur === 0)) {
-            sequenceArray?.push({
-                segment: this._segment,
-                currentString,
-                cur,
-                currentLexerNode: this._currentLexerNode,
-            });
-        }
+    private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number) {
+        sequenceArray?.push({
+            segment: this._segment,
+            currentString,
+            cur,
+            currentLexerNode: this._currentLexerNode,
+        });
     }
 }

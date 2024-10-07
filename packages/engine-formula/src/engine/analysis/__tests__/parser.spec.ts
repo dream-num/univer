@@ -15,25 +15,25 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { BaseAstNode } from '../../ast-node/base-ast-node';
 
+import type { ArrayValueObject } from '../../value-object/array-value-object';
+import type { BaseValueObject } from '../../value-object/base-value-object';
+import type { LexerNode } from '../lexer-node';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
+import { Pi } from '../../../functions/math/pi';
 import { Sum } from '../../../functions/math/sum';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
+import { Minus } from '../../../functions/meta/minus';
 import { Plus } from '../../../functions/meta/plus';
 import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
-import type { BaseAstNode } from '../../ast-node/base-ast-node';
 import { Interpreter } from '../../interpreter/interpreter';
-import type { BaseValueObject } from '../../value-object/base-value-object';
 import { Lexer } from '../lexer';
-import type { LexerNode } from '../lexer-node';
 import { AstTreeBuilder } from '../parser';
-import type { ArrayValueObject } from '../../value-object/array-value-object';
-import { Minus } from '../../../functions/meta/minus';
-import { Pi } from '../../../functions/math/pi';
-import { ErrorType } from '../../../basics/error-type';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
@@ -239,6 +239,16 @@ describe('Test indirect', () => {
             const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NUM);
+        });
+
+        it('LET formula as parameter nest', async () => {
+            const lexerNode = lexer.treeBuilder('=LET(x,2,y,x+3,x+y+3)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(10);
         });
     });
 });

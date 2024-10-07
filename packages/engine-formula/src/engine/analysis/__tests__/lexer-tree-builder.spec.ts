@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import type { LexerNode } from '../lexer-node';
 
 import { AbsoluteRefType } from '@univerjs/core';
-import type { LexerNode } from '../lexer-node';
-import { LexerTreeBuilder } from '../lexer-tree-builder';
+import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../basics/error-type';
+import { LexerTreeBuilder } from '../lexer-tree-builder';
 
 describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
@@ -220,6 +220,16 @@ describe('lexer nodeMaker test', () => {
         it('array error lexer text', () => {
             const node = lexerTreeBuilder.treeBuilder('=RANK({1,2,121,#NAME?},A1:F1,0)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"RANK","st":0,"ed":3,"children":[{"token":"P_1","st":1,"ed":3,"children":["{1,2,121,#NAME?}"]},{"token":"P_1","st":18,"ed":20,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"F1","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":24,"ed":26,"children":["0"]}]}]}');
+        });
+
+        it('double minus for function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(--1*2)--A1-1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":["1","2","*"]}]}]}]}]}');
+        });
+
+        it('double minus for formula Outside of Functions', () => {
+            const node = lexerTreeBuilder.treeBuilder('=--1*2', false) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":["1","2","*"]}]}]}');
         });
     });
 

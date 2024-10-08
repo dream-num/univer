@@ -81,7 +81,7 @@ export default defineConfig({
 
     webServer: {
         command: 'pnpm serve:e2e',
-        url: 'http://localhost:3000/sheets',
+        url: 'http://localhost:3000',
         reuseExistingServer: !isCI,
         timeout: 10000,
         stdout: 'pipe',

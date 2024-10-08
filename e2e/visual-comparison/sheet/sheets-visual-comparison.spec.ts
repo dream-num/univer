@@ -21,9 +21,7 @@ test('diff default sheet content', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(5000);
-
-    await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
+    await expect(page).toHaveScreenshot({ maxDiffPixels: 5, timeout: 5000 });
 });
 
 test('diff demo sheet content', async ({ page }) => {
@@ -31,7 +29,5 @@ test('diff demo sheet content', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
-    await page.waitForTimeout(5000);
-
-    await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
+    await expect(page).toHaveScreenshot({ maxDiffPixels: 5, timeout: 5000 });
 });

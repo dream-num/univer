@@ -20,7 +20,7 @@ import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFilterUIWorkerPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 // Univer web worker is also a univer application.
 const univer = new Univer({
@@ -32,6 +32,7 @@ const univer = new Univer({
         [LocaleType.RU_RU]: ruRU,
         [LocaleType.ZH_TW]: zhTW,
         [LocaleType.VI_VN]: viVN,
+        [LocaleType.FA_IR]: faIR,
     },
 });
 

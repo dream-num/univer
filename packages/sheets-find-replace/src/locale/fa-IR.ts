@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    'sheet-find-replace': {
+        replace: {
+            'partial-failure': 'جایگزینی برخی سلول‌ها ناموفق بود',
+            failure: 'جایگزینی همه سلول‌ها ناموفق بود',
+        },
+    },
+};
+
+export default locale;

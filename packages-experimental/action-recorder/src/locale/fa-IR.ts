@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    'action-recorder': {
+        menu: {
+            title: 'ثبت اقدامات',
+            record: 'ثبت اقدامات...',
+            'replay-local': 'بازپخش محلی ثبت...',
+        },
+    },
+};
+
+export default locale;

@@ -33,7 +33,7 @@ import { UniverMobileUIPlugin } from '@univerjs/ui';
 import type { FUniver } from '@univerjs/facade';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { enUS } from '../locales';
+import { enUS, faIR } from '../locales';
 
 // univer
 const univer = new Univer({
@@ -41,6 +41,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

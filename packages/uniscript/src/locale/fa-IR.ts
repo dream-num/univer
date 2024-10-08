@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    'script-panel': {
+        title: 'Uniscript',
+        tooltip: {
+            'menu-button': 'نمایش/مخفی کردن پنل Uniscript',
+        },
+        panel: {
+            execute: 'اجرای اسکریپت',
+        },
+    },
+    uniscript: {
+        message: {
+            success: 'اجرای موفق',
+            failed: 'اجرای ناموفق',
+        },
+    },
+};
+
+export default locale;

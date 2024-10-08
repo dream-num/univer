@@ -1120,6 +1120,65 @@ export default {
             x: { name: 'x', detail: 'X là số bạn muốn tìm mật độ của phân bố chuẩn chuẩn hóa cho số này.' },
         },
     },
+    POISSON_DIST: {
+        description: 'Trả về phân bố Poisson.',
+        abstract: 'Trả về phân bố Poisson.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/poisson-dist-%E5%87%BD%E6%95%B0-8fe148ff-39a2-46cb-abf3-7772695d9636',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì POISSON.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    PROB: {
+        description: 'Trả về xác suất các giá trị trong một phạm vi nằm giữa hai giới hạn.',
+        abstract: 'Trả về xác suất các giá trị trong một phạm vi nằm giữa hai giới hạn.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/prob-%E5%87%BD%E6%95%B0-9ac30561-c81c-4259-8253-34f0a238fc49',
+            },
+        ],
+        functionParameter: {
+            xRange: { name: 'số', detail: 'Phạm vi số với các giá trị xác suất tương ứng.' },
+            probRange: { name: 'xác suất', detail: 'Một tập hợp các giá trị xác suất được liên kết với một giá trị số.' },
+            lowerLimit: { name: 'giới hạn dưới', detail: 'Giới hạn dưới bằng số của xác suất được tính toán.' },
+            upperLimit: { name: 'giới hạn trên', detail: 'Giới hạn trên bằng số của xác suất được tính toán.' },
+        },
+    },
+    QUARTILE_EXC: {
+        description: 'Trả về các phần tư của tập dữ liệu (loại trừ 0 và 1)',
+        abstract: 'Trả về các phần tư của tập dữ liệu (loại trừ 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/quartile-exc-%E5%87%BD%E6%95%B0-5a355b7a-840b-4a01-b0f1-f538c2864cad',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Một mảng hoặc phạm vi dữ liệu yêu cầu giá trị tứ phân vị.' },
+            quart: { name: 'giá trị tứ phân', detail: 'Giá trị tứ phân vị cần trả về.' },
+        },
+    },
+    QUARTILE_INC: {
+        description: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/quartile-inc-%E5%87%BD%E6%95%B0-1bbacc80-5075-42f1-aed6-47d735c4819d',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Một mảng hoặc phạm vi dữ liệu yêu cầu giá trị tứ phân vị.' },
+            quart: { name: 'giá trị tứ phân', detail: 'Giá trị tứ phân vị cần trả về.' },
+        },
+    },
     RANK_AVG: {
         description: 'Trả về thứ hạng của một số trong một danh sách các số',
         abstract: 'Trả về thứ hạng của một số trong một danh sách các số',

@@ -415,13 +415,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 POISSON 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     QUARTILE: {
-        description: '返回一组数据的四分位点',
-        abstract: '返回一组数据的四分位点',
+        description: '返回数据集的四分位数 (包含 0 和 1)',
+        abstract: '返回数据集的四分位数 (包含 0 和 1)',
         links: [
             {
                 title: '教学',
@@ -429,8 +430,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要求得四分位数值的数组或数据区域。' },
+            quart: { name: '四分位值', detail: '要返回的四分位数值。' },
         },
     },
     RANK: {

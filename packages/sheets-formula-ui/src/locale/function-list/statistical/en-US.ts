@@ -1226,8 +1226,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, POISSON.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     PROB: {
@@ -1240,13 +1241,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xRange: { name: 'x_range', detail: 'The range of numeric values of x with which there are associated probabilities.' },
+            probRange: { name: 'prob_range', detail: 'A set of probabilities associated with values in x_range.' },
+            lowerLimit: { name: 'lower_limit', detail: 'The lower bound on the value for which you want a probability.' },
+            upperLimit: { name: 'upper_limit', detail: 'The upper bound on the value for which you want a probability.' },
         },
     },
     QUARTILE_EXC: {
-        description: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
-        abstract: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
+        description: 'Returns the quartile of a data set (Excludes 0 and 1)',
+        abstract: 'Returns the quartile of a data set (Excludes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1254,13 +1257,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want quartile values.' },
+            quart: { name: 'quart', detail: 'The quartile value to return.' },
         },
     },
     QUARTILE_INC: {
-        description: 'Returns the quartile of a data set',
-        abstract: 'Returns the quartile of a data set',
+        description: 'Returns the quartile of a data set (Includes 0 and 1)',
+        abstract: 'Returns the quartile of a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1268,8 +1271,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want quartile values.' },
+            quart: { name: 'quart', detail: 'The quartile value to return.' },
         },
     },
     RANK_AVG: {

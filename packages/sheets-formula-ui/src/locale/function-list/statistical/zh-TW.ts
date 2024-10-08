@@ -1226,8 +1226,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出分佈的數值。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            cumulative: { name: '累積', detail: ' 這是決定函數形式的邏輯值。 如果為 TRUE，POISSON.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     PROB: {
@@ -1240,13 +1241,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xRange: { name: '數值', detail: '具有各自對應機率值的數值區域。' },
+            probRange: { name: '機率', detail: '與數值相關聯的一組機率值。' },
+            lowerLimit: { name: '下界', detail: '要計算其機率的數值下界。' },
+            upperLimit: { name: '上界', detail: '要計算其機率的數值上界。' },
         },
     },
     QUARTILE_EXC: {
-        description: '基於百分點值傳回資料集的四分位，此處的百分點值的範圍為 0 到 1（不含 0 和 1）',
-        abstract: '基於百分點值傳回資料集的四分位，此處的百分點值的範圍為 0 到 1（不含 0 和 1）',
+        description: '傳回資料集的四分位數 (不包括 0 與 1)',
+        abstract: '傳回資料集的四分位數 (不包括 0 與 1)',
         links: [
             {
                 title: '教導',
@@ -1254,13 +1257,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要求得四分位數值的陣列或資料範圍。' },
+            quart: { name: '四分位值', detail: '要傳回的四分位數值。' },
         },
     },
     QUARTILE_INC: {
-        description: '傳回一組資料的四分位點',
-        abstract: '傳回一組資料的四分位點',
+        description: '傳回資料集的四分位數 (包括 0 與 1)',
+        abstract: '傳回資料集的四分位數 (包括 0 與 1)',
         links: [
             {
                 title: '教導',
@@ -1268,8 +1271,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要求得四分位數值的陣列或資料範圍。' },
+            quart: { name: '四分位值', detail: '要傳回的四分位數值。' },
         },
     },
     RANK_AVG: {

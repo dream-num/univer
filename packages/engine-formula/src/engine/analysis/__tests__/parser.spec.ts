@@ -25,6 +25,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { FUNCTION_NAMES_MATH } from '../../../functions/math/function-names';
 import { Pi } from '../../../functions/math/pi';
 import { Sum } from '../../../functions/math/sum';
+import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
 import { Plus } from '../../../functions/meta/plus';
@@ -86,6 +87,7 @@ describe('Test indirect', () => {
             new Sum(FUNCTION_NAMES_MATH.SUM),
             new Plus(FUNCTION_NAMES_META.PLUS),
             new Minus(FUNCTION_NAMES_META.MINUS),
+            new Divided(FUNCTION_NAMES_META.DIVIDED),
             new Pi(FUNCTION_NAMES_MATH.PI)
         );
     });
@@ -265,6 +267,34 @@ describe('Test indirect', () => {
 
         it('test formula input validation with function', async () => {
             const lexerNode = lexer.treeBuilder('=sum(A1+)');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('test formula input suffix', async () => {
+            const lexerNode = lexer.treeBuilder('=%');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('test formula input suffix correctly', async () => {
+            const lexerNode = lexer.treeBuilder('=10%');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(0.1);
+        });
+
+        it('test formula function has operator parameter', async () => {
+            const lexerNode = lexer.treeBuilder('=sum(-)');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('test formula no parameter', async () => {
+            const lexerNode = lexer.treeBuilder('=sum(,,-)');
 
             expect(lexerNode).toStrictEqual(ErrorType.VALUE);
         });

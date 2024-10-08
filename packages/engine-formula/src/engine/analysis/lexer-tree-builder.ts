@@ -20,7 +20,7 @@ import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
 import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
-import { isFormulaLexerToken } from '../../basics/match-token';
+import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
 import { REFERENCE_SINGLE_RANGE_REGEX } from '../../basics/regex';
 import {
     matchToken,
@@ -1083,8 +1083,21 @@ export class LexerTreeBuilder extends Disposable {
      */
     private _formulaErrorLastTokenCheck(formulaStringArray: string[], indexRaw: number) {
         const lastToken = this._findPreviousToken(formulaStringArray, indexRaw) || '';
-        if (this._isOperatorToken(lastToken)) {
+        const isFirstCheck = formulaStringArray.length - 1 === indexRaw;
+        if (!isFirstCheck && this._isOperatorToken(lastToken)) {
             return true;
+        }
+
+        if (isFirstCheck && isTokenCannotBeAtEnd(lastToken)) {
+            return true;
+        }
+
+        if (SUFFIX_TOKEN_SET.has(lastToken)) {
+            const lastTwoToken = this._findSecondLastNonSpaceToken(formulaStringArray, indexRaw);
+
+            if (lastTwoToken == null || isTokenCannotPrecedeSuffixToken(lastTwoToken)) {
+                return true;
+            }
         }
 
         return false;
@@ -1099,6 +1112,22 @@ export class LexerTreeBuilder extends Disposable {
             }
             index--;
         }
+    }
+
+    private _findSecondLastNonSpaceToken(data: string[], indexRaw: number): string | null {
+        let index = indexRaw;
+        let nonSpaceTokenCount = 0;
+        while (index >= 0) {
+            const token = data[index];
+            if (token !== ' ') {
+                nonSpaceTokenCount++;
+                if (nonSpaceTokenCount === 2) {
+                    return token;
+                }
+            }
+            index--;
+        }
+        return null;
     }
 
     private _findNextToken(data: string[], indexRaw: number) {

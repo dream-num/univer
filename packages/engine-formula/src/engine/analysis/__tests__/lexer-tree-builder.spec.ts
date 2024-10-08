@@ -164,7 +164,7 @@ describe('lexer nodeMaker test', () => {
 
         it('negative ref', () => {
             const node = lexerTreeBuilder.treeBuilder('= ------A1 ') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" -","-","-","-","-","A1 ","-"]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","-","-","-","-","-A1 ","-"]}');
         });
 
         it('scientific notation', () => {
@@ -173,8 +173,8 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('parentheses and arithmetic', () => {
-            const node = lexerTreeBuilder.treeBuilder('=-(+2)+2') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","2","+"]}');
+            const node = lexerTreeBuilder.treeBuilder('=-(+2)+2', false) as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":0,"ed":0,"children":[{"token":"P_1","st":-2,"ed":0,"children":["+","2"]}]},"+","2"]}');
         });
 
         it('ref:ref parser', () => {
@@ -224,12 +224,17 @@ describe('lexer nodeMaker test', () => {
 
         it('double minus for function', () => {
             const node = lexerTreeBuilder.treeBuilder('=SUM(--1*2)--A1-1') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":["1","2","*"]}]}]}]}]}');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["0","-1","2","*","-"]}]},"-A1","-","1","-"]}');
         });
 
         it('double minus for formula Outside of Functions', () => {
-            const node = lexerTreeBuilder.treeBuilder('=--1*2', false) as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":[{"token":"-","st":-1,"ed":-1,"children":["1","2","*"]}]}]}');
+            const node = lexerTreeBuilder.treeBuilder('=--1*2') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","-1","2","*","-"]}');
+        });
+
+        it('one minus for formula', () => {
+            const node = lexerTreeBuilder.treeBuilder('=   -A1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["   -A1"]}');
         });
     });
 
@@ -523,6 +528,34 @@ describe('lexer nodeMaker test', () => {
                         token: '"AAA"',
                     },
                     ')',
+                ]
+            );
+        });
+
+        it('multi blank to minus formula', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=      -A1')).toStrictEqual(
+                [
+                    {
+                        endIndex: 6,
+                        nodeType: 0,
+                        startIndex: 0,
+                        token: '      -',
+                    },
+                    {
+                        endIndex: 8,
+                        nodeType: 4,
+
+                        startIndex: 7,
+                        token: 'A1',
+                    },
+                ]
+            );
+        });
+
+        it('one minus sequences error', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=-\r\n')).toStrictEqual(
+                [
+                    '-',
                 ]
             );
         });

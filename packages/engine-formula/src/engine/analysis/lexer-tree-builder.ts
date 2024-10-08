@@ -426,11 +426,11 @@ export class LexerTreeBuilder extends Disposable {
 
             let preSegment = preItem?.segment || '';
 
-            let startIndex = i - preSegment.length;
+            const startIndex = i - preSegment.length;
 
             let endIndex = i - 1;
 
-            let deleteEndIndex = i - 1;
+            const deleteEndIndex = i - 1;
 
             if (i === len - 1 && this._isLastMergeString(currentString)) {
                 preSegment += currentString;
@@ -451,16 +451,6 @@ export class LexerTreeBuilder extends Disposable {
                 maybeString = false;
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.STRING, preSegment, startIndex, endIndex, deleteEndIndex);
             } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
-                /**
-                 * =-A1  Separate the negative sign from the ref string.
-                 */
-                if (preSegmentNotPrefixToken.length !== preSegmentTrim.length) {
-                    const minusCount = preSegmentTrim.length - preSegmentNotPrefixToken.length;
-                    deleteEndIndex += minusCount;
-                    startIndex += minusCount;
-
-                    preSegment = this._replacePrefixString(preSegment);
-                }
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.REFERENCE, preSegment, startIndex, endIndex, deleteEndIndex);
             } else if (Tools.isStringNumber(preSegmentTrim)) {
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.NUMBER, preSegment, startIndex, endIndex, deleteEndIndex);
@@ -556,7 +546,57 @@ export class LexerTreeBuilder extends Disposable {
             i++;
         }
 
-        return newSequenceNodes;
+        return this._minusSplitSequenceNode(newSequenceNodes);
+    }
+
+    /**
+     * =-A1  Separate the negative sign from the ref string.
+     */
+    private _minusSplitSequenceNode(sequenceNodes: Array<string | ISequenceNode>): (string | ISequenceNode)[] {
+        // After the while loop, process nodes to split '-A1:B10' into '-' and 'A1:B10'
+        const finalSequenceNodes: Array<string | ISequenceNode> = [];
+        for (const node of sequenceNodes) {
+            if (typeof node !== 'string') {
+                const token = node.token;
+                // Use a regular expression to match leading whitespace and '-'
+                const match = token.match(/^(\s*-\s*)(.*)$/); // Captures leading whitespace and '-', then the rest
+                if (match) {
+                    const operatorPart = match[1]; // Includes leading whitespace and '-'
+                    const referencePart = match[2]; // The rest of the token after '-'
+
+                    if (isReferenceStringWithEffectiveColumn(referencePart.trim())) {
+                        // The referencePart is a valid reference
+                        // Calculate the length of the operator part
+                        const operatorLength = operatorPart.length;
+                        const operatorStart = node.startIndex;
+                        const operatorEnd = node.startIndex + operatorLength - 1;
+
+                        // Create an operator node for operatorPart
+                        const operatorNode: ISequenceNode = {
+                            nodeType: sequenceNodeType.NORMAL, // Adjust nodeType as needed
+                            token: operatorPart,
+                            startIndex: operatorStart,
+                            endIndex: operatorEnd,
+                        };
+
+                        // Create a reference node for referencePart
+                        const refNode: ISequenceNode = {
+                            nodeType: sequenceNodeType.REFERENCE,
+                            token: referencePart,
+                            startIndex: operatorEnd + 1,
+                            endIndex: node.endIndex,
+                        };
+
+                        finalSequenceNodes.push(operatorNode);
+                        finalSequenceNodes.push(refNode);
+                        continue;
+                    }
+                }
+            }
+            finalSequenceNodes.push(node);
+        }
+
+        return finalSequenceNodes;
     }
 
     private _pushSequenceNode(
@@ -1047,13 +1087,23 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    private _negativePreCondition(prevString: string) {
+    private _negativeZeroAddCondition(prevString: string) {
         if (
-            OPERATOR_TOKEN_SET.has(prevString) ||
+            // OPERATOR_TOKEN_SET.has(prevString) ||
             prevString === matchToken.OPEN_BRACKET ||
             prevString === matchToken.COMMA ||
             prevString === operatorToken.EQUALS ||
             prevString === ''
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    private _negativePreCondition(prevString: string) {
+        if (
+            OPERATOR_TOKEN_SET.has(prevString) ||
+            this._negativeZeroAddCondition(prevString)
         ) {
             return true;
         }
@@ -1159,7 +1209,8 @@ export class LexerTreeBuilder extends Disposable {
 
     // eslint-disable-next-line max-lines-per-function, complexity
     private _nodeMaker(formulaStringRaw: string, sequenceArray?: ISequenceArray[], matchCurrentNodeIndex?: number) {
-        let formulaString = formulaStringRaw.replace(/\r/g, ' ').replace(/\n/g, ' ');
+        // Editor will add '\r\n' at the end of the formula string
+        let formulaString = formulaStringRaw.replace(/\r\n$/, '').replace(/\r/g, ' ').replace(/\n/g, ' ');
 
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
@@ -1538,7 +1589,7 @@ export class LexerTreeBuilder extends Disposable {
                     // negative number
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
                     const nextString = this._findNextToken(formulaStringArray, cur + 1) || '';
-                    if (this._negativePreCondition(prevString) && this._negativeNextCondition(nextString)) {
+                    if (this._negativeZeroAddCondition(prevString) && this._negativeNextCondition(nextString)) {
                         this._pushNodeToChildren('0');
                         this._pushNodeToChildren(operatorToken.MINUS);
                         this._addSequenceArray(sequenceArray, currentString, cur);

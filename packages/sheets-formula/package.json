@@ -83,7 +83,6 @@
         "@univerjs/icons": "^0.1.78",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"

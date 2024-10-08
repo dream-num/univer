@@ -1,0 +1,22 @@
+name: 📸 Update Snapshots
+
+on:
+    issue_comment:
+        types: [created]
+
+jobs:
+    udpate-snapshots:
+        if: contains(github.event.comment.body, '/update-snapshots')
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Update Snapshots
+              uses: ./.github/actions/udpate-snapshots

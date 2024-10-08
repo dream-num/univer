@@ -83,8 +83,8 @@ export default defineConfig({
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000/sheets',
         reuseExistingServer: !isCI,
-        timeout: 10000,
-        stdout: 'pipe',
+        timeout: 10_000,
+        stdout: 'ignore',
         stderr: 'pipe',
     },
 });

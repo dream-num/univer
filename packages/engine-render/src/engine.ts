@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { CURSOR_TYPE } from './basics/const';
+
+import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
+import type { ITimeMetric } from './basics/interfaces';
+import type { IBasicFrameInfo } from './basics/performance-monitor';
+import type { Scene } from './scene';
 import { toDisposable, Tools } from '@univerjs/core';
 import { Observable, shareReplay, Subject } from 'rxjs';
-
-import type { Nullable } from '@univerjs/core';
 import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
@@ -25,11 +30,6 @@ import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './ba
 import { Canvas, CanvasRenderMode } from './canvas';
 import { observeClientRect } from './floating/util';
 import { ThinEngine } from './thin-engine';
-import type { CURSOR_TYPE } from './basics/const';
-import type { IKeyboardEvent, IPointerEvent } from './basics/i-events';
-import type { ITimeMetric } from './basics/interfaces';
-import type { IBasicFrameInfo } from './basics/performance-monitor';
-import type { Scene } from './scene';
 
 export class Engine extends ThinEngine<Scene> {
     renderEvenInBackground = true;

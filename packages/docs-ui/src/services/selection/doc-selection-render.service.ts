@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import type { Subscription } from 'rxjs';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
-import type { Subscription } from 'rxjs';
 import { RectRange } from './rect-range';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
@@ -286,7 +286,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement;
+        const isFocusing = this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';

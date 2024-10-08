@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable, Workbook } from '@univerjs/core';
+import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
+import type { Observable } from 'rxjs';
+import type { IEditorConfigParams, IEditorStateParams } from './editor';
 import { createIdentifier, DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, ICommandService, IContextService, Inject, IUndoRedoService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { fromEvent, Subject } from 'rxjs';
-import type { DocumentDataModel, IDisposable, IDocumentBody, IDocumentData, Nullable, Workbook } from '@univerjs/core';
-import type { ISuccinctDocRangeParam, Scene } from '@univerjs/engine-render';
-import type { Observable } from 'rxjs';
 import { Editor } from './editor';
-import type { IEditorConfigParams, IEditorStateParams } from './editor';
 
 /**
  * Not these elements will be considered as editor blur.

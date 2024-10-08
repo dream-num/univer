@@ -15,7 +15,7 @@
  */
 
 import { copyCustomRange, getCustomRangesInterestsWithRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
-import { fromPlainText, getPlainText } from './parse';
+import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
 
@@ -50,6 +50,7 @@ export class BuildTextUtils {
     static transform = {
         getPlainText,
         fromPlainText,
+        isEmptyDocument,
     };
 }
 

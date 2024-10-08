@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverDocsUIConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService,
     IConfigService,
     ILogService,
@@ -26,7 +28,6 @@ import { DependentOn, ICommandService,
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
-import type { Dependency } from '@univerjs/core';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -92,7 +93,6 @@ import {
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
-import type { IUniverDocsUIConfig } from './controllers/config.schema';
 
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {

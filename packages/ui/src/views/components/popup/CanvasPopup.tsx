@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import React, { useEffect, useMemo, useState } from 'react';
-import { RectPopup } from '@univerjs/design';
-import { animationFrameScheduler, throttleTime } from 'rxjs';
-import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
-import { useObservable } from '../../../components/hooks/observable';
-import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
+import { useDependency } from '@univerjs/core';
+import { RectPopup } from '@univerjs/design';
+import React, { useEffect, useMemo, useState } from 'react';
+import { animationFrameScheduler, throttleTime } from 'rxjs';
+import { ComponentManager } from '../../../common';
+import { useObservable } from '../../../components/hooks/observable';
+import { ICanvasPopupService } from '../../../services/popup/canvas-popup.service';
 
 interface ISingleCanvasPopupProps {
     popup: IPopup;
@@ -77,9 +77,10 @@ const SingleCanvasPopup = ({ popup, children }: ISingleCanvasPopupProps) => {
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
             excludeRects={excludeRects}
-            onPinterEnter={popup.onPointerEnter}
+            onPointerEnter={popup.onPointerEnter}
             onPointerLeave={popup.onPointerLeave}
             onClick={popup.onClick}
+            onContextMenu={popup.onContextMenu}
         >
             {children}
         </RectPopup>

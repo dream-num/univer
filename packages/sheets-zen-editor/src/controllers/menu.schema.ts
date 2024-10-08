@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import type { MenuSchemaType } from '@univerjs/ui';
+import { ContextMenuGroup, ContextMenuPosition } from '@univerjs/ui';
 import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 import { ZenEditorMenuItemFactory } from '../views/menu';
 

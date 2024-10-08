@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { ICommand, Workbook } from '@univerjs/core';
 import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentDataModel, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import type { ICommand, Workbook } from '@univerjs/core';
 
 export const OpenZenEditorCommand: ICommand = {
     id: 'zen-editor.command.open-zen-editor',

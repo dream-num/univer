@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDocumentData, Nullable } from '@univerjs/core';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor';
 import { debounce, isInternalEditorID, LocaleService, useDependency } from '@univerjs/core';
 import React, { useEffect, useRef, useState } from 'react';
-import type { IDocumentData, Nullable } from '@univerjs/core';
 import { isElementVisible } from '../../basics/editor';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import styles from './index.module.less';
 import { genSnapShotByValue } from './utils';
-import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 

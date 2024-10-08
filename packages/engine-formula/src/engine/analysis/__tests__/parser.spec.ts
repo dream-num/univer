@@ -298,5 +298,25 @@ describe('Test indirect', () => {
 
             expect(lexerNode).toStrictEqual(ErrorType.VALUE);
         });
+
+        it('test array string error', async () => {
+            const lexerNode = lexer.treeBuilder('="{1,2,3;4,5,6}"');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual('{1,2,3;4,5,6}');
+        });
+
+        it('test array formula correctly', async () => {
+            const lexerNode = lexer.treeBuilder('={10,2,3;4,5,6}');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(10);
+        });
     });
 });

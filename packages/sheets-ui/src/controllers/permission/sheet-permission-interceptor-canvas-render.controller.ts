@@ -16,10 +16,10 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
-import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
+import { getSheetCommandTarget, RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
 import { HeaderFreezeRenderController } from '../render-controllers/freeze.render-controller';
 import { HeaderMoveRenderController } from '../render-controllers/header-move.render-controller';
@@ -43,6 +43,7 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         @Inject(HeaderMoveRenderController) private _headerMoveRenderController: HeaderMoveRenderController,
         @ISheetSelectionRenderService private _selectionRenderService: ISheetSelectionRenderService,
         @Inject(HeaderFreezeRenderController) private _headerFreezeRenderController: HeaderFreezeRenderController,
+        @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache,
         @Optional(HeaderResizeRenderController) private _headerResizeRenderController?: HeaderResizeRenderController
     ) {
         super();
@@ -73,16 +74,27 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return true;
                     }
 
-                    const allowedMoveHeader = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).every((rule) => {
-                        const overlap = rule.ranges.some((range) => Rectangle.intersects(range, selectionRange));
-                        if (overlap) {
-                            return this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id)?.value ?? true;
-                        } else {
-                            return true;
-                        }
-                    });
+                    if (selectionRange.rangeType !== RANGE_TYPE.ROW && selectionRange.rangeType !== RANGE_TYPE.COLUMN) {
+                        return defaultValue;
+                    }
 
-                    return allowedMoveHeader;
+                    if (selectionRange.rangeType === RANGE_TYPE.ROW) {
+                        for (let i = selectionRange.startRow; i <= selectionRange.endRow; i++) {
+                            const rowAllowed = this._rangeProtectionCache.getRowPermissionInfo(unitId, subUnitId, i, [UnitAction.Edit]);
+                            if (rowAllowed === false) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        for (let i = selectionRange.startColumn; i <= selectionRange.endColumn; i++) {
+                            const colAllowed = this._rangeProtectionCache.getColPermissionInfo(unitId, subUnitId, i, [UnitAction.Edit]);
+                            if (colAllowed === false) {
+                                return false;
+                            }
+                        }
+                    }
+
+                    return true;
                 },
             })
         );

@@ -1,0 +1,21 @@
+name: 📸 Manually Update Snapshots
+
+# manual trigger
+on:
+    workflow_dispatch:
+
+jobs:
+    udpate-snapshots:
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Update Snapshots
+              uses: ./.github/actions/update-snapshots

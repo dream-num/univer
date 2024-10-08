@@ -1,5 +1,6 @@
 packages:
     - common/*
-    - packages/*
-    - packages-experimental/*
     - examples
+    - mockdata
+    - packages-experimental/*
+    - packages/*

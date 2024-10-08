@@ -120,6 +120,7 @@ export class RangeProtectionService extends Disposable {
                                 this._permissionService.addPermissionPoint(instance);
                             });
                         });
+                        this._selectionProtectionCache.reBuildCache(unitId, subUnitId);
                     });
                 },
                 onUnLoad: (unitId: string) => {

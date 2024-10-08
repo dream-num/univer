@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IRowAutoHeightInfo, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import type { ISetColHiddenMutationParams, ISetColVisibleMutationParams, ISetRowHiddenMutationParams, ISetRowVisibleMutationParams, ISetWorksheetColWidthMutationParams, ISetWorksheetRowAutoHeightMutationParams, ISetWorksheetRowHeightMutationParams } from '@univerjs/sheets';
+import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import {
     ColorKit, Disposable,
     ICommandService,
@@ -33,8 +33,7 @@ import {
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetColHiddenMutation, SetColVisibleMutation, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
+import { SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import {
     IEditorBridgeService,
     ISheetSelectionRenderService,
@@ -42,19 +41,6 @@ import {
     SelectionShape,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-
-const REFRESH_ARRAY_SHAPE_MUTATIONS = [
-    SetWorksheetRowHeightMutation.id,
-    SetWorksheetColWidthMutation.id,
-    SetColHiddenMutation.id,
-    SetColVisibleMutation.id,
-    SetRowHiddenMutation.id,
-    SetRowVisibleMutation.id,
-    SetSheetsFilterRangeMutation.id,
-    SetSheetsFilterCriteriaMutation.id,
-    RemoveSheetsFilterMutation.id,
-    ReCalcSheetsFilterMutation.id,
-];
 
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
@@ -91,6 +77,9 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                     // change to another sheet
                     if (prevSheetId !== skeleton.worksheet.getSheetId()) {
                         this._removeArrayFormulaRangeShape();
+                    } else {
+                        const { unitId, sheetId } = param;
+                        this._updateArrayFormulaRangeShape(unitId, sheetId);
                     }
                 }
             })
@@ -178,14 +167,6 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                         const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
                         const { unitId, subUnitId, rowsAutoHeightInfo } = params;
                         this._refreshArrayFormulaRangeShapeByRow(unitId, subUnitId, rowsAutoHeightInfo);
-                    });
-                }
-
-                if (REFRESH_ARRAY_SHAPE_MUTATIONS.includes(command.id)) {
-                    requestIdleCallback(() => {
-                        const params = command.params as ISetRowVisibleMutationParams | ISetColHiddenMutationParams | ISetWorksheetRowHeightMutationParams | ISetWorksheetColWidthMutationParams | ISetRowHiddenMutationParams | ISetColVisibleMutationParams;
-                        const { unitId, subUnitId, ranges } = params;
-                        this._refreshArrayFormulaRangeShapeByRanges(unitId, subUnitId, ranges);
                     });
                 }
             })
@@ -300,7 +281,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         return false;
     }
 
-    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string, ranges?: IRange[]): void {
+    private _updateArrayFormulaRangeShape(unitId: string, subUnitId: string): void {
         if (!this._checkCurrentSheet(unitId, subUnitId)) return;
         if (!this._previousShape) return;
         this._refreshArrayFormulaRangeShape(unitId);

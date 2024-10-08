@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
+import type { IUniverDebuggerConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DebuggerController } from './controllers/debugger.controller';
-import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
+import { E2EController } from './controllers/e2e/e2e.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
-import type { IUniverDebuggerConfig } from './controllers/config.schema';
 
 export class UniverDebuggerPlugin extends Plugin {
     static override pluginName = 'UNIVER_DEBUGGER_PLUGIN';
@@ -46,10 +45,11 @@ export class UniverDebuggerPlugin extends Plugin {
     override onStarting(): void {
         ([
             [PerformanceMonitorController],
-            [E2EMemoryController],
+            [DebuggerController],
+            [E2EController],
         ] as Dependency[]).forEach((d) => this._injector.add(d));
 
-        this._injector.add([DebuggerController]);
+        this._injector.get(E2EController);
     }
 
     getDebuggerController() {

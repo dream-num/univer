@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, EDITOR_ACTIVATED, ICommandService, IContextService, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
+import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
+import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
+import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-name';
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
-import { AutoImageCropOperation, CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
-import { ImageViewer } from '../views/image-viewer/ImageViewer';
 import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
-import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
-import { SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
+import { ImageViewer } from '../views/image-viewer/ImageViewer';
 
 @OnLifecycle(LifecycleStages.Rendered, DrawingUIController)
 export class DrawingUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
 
@@ -51,7 +52,28 @@ export class DrawingUIController extends Disposable {
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 
+    private _initInputFocus() {
+        const handleFocus = (event: FocusEvent) => {
+            if (event.target instanceof HTMLInputElement) {
+                this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+            }
+        };
+        const handleBlur = (event: FocusEvent) => {
+            if (event.target instanceof HTMLInputElement) {
+                this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+            }
+        };
+
+        document.addEventListener('focus', handleFocus, { capture: true });
+        document.addEventListener('blur', handleBlur, { capture: true });
+        this.disposeWithMe(() => {
+            document.removeEventListener('focus', handleFocus, { capture: true });
+            document.removeEventListener('blur', handleBlur, { capture: true });
+        });
+    }
+
     private _init(): void {
+        this._initInputFocus();
         this._initCommands();
         this._initCustomComponents();
     }

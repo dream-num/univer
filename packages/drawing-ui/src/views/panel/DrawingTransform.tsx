@@ -17,12 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 import type { IDrawingParam } from '@univerjs/drawing';
 import type { IChangeObserverConfig, Scene } from '@univerjs/engine-render';
-import { debounce, EDITOR_ACTIVATED, IContextService, LocaleService, useDependency } from '@univerjs/core';
+import { debounce, LocaleService, useDependency } from '@univerjs/core';
 import { Checkbox, InputNumber } from '@univerjs/design';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import clsx from 'clsx';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MIN_DRAWING_HEIGHT_LIMIT, MIN_DRAWING_WIDTH_LIMIT, RANGE_DRAWING_ROTATION_LIMIT } from '../../utils/config';
 import { getUpdateParams } from '../../utils/get-update-params';
 import styles from './index.module.less';
@@ -38,10 +38,6 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
     const localeService = useDependency(LocaleService);
     const drawingManagerService = useDependency(IDrawingManagerService);
     const renderManagerService = useDependency(IRenderManagerService);
-    const contextService = useDependency(IContextService);
-
-    const handleFocus = useCallback(() => contextService.setContextValue(EDITOR_ACTIVATED, true), [contextService]);
-    const handleBlur = useCallback(() => contextService.setContextValue(EDITOR_ACTIVATED, false), [contextService]);
 
     const { drawings, transformShow } = props;
 
@@ -389,7 +385,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber onFocus={handleFocus} onBlur={handleBlur} precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={width} onChange={(val) => { handleWidthChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -403,7 +399,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber onFocus={handleFocus} onBlur={handleBlur} precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={height} onChange={(val) => { handleHeightChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -433,7 +429,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber onFocus={handleFocus} onBlur={handleBlur} precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={xPosition} onChange={(val) => { handleXChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -447,7 +443,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber onFocus={handleFocus} onBlur={handleBlur} precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={yPosition} onChange={(val) => { handleYChange(val); }} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>
@@ -461,7 +457,7 @@ export const DrawingTransform = (props: IDrawingTransformProps) => {
                         </div>
                         <div className={styles.imageCommonPanelRow}>
                             <div className={styles.imageCommonPanelColumn}>
-                                <InputNumber onFocus={handleFocus} onBlur={handleBlur} precision={1} value={rotation} onChange={handleRotationChange} className={styles.imageCommonPanelInput} />
+                                <InputNumber precision={1} value={rotation} onChange={handleRotationChange} className={styles.imageCommonPanelInput} />
                             </div>
                         </div>
                     </label>

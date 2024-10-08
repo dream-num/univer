@@ -18,4 +18,4 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Update Snapshots
-              uses: ./.github/actions/udpate-snapshots
+              uses: ./.github/actions/update-snapshots

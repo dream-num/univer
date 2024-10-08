@@ -1,4 +1,4 @@
-name: 📸 Update Snapshots
+name: 📸 Update Snapshots on Comment
 
 on:
     issue_comment:

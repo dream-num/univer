@@ -25,3 +25,13 @@ test('diff default sheet content', async ({ page }) => {
 
     await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
 });
+
+test('diff demo sheet content', async ({ page }) => {
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
+    await page.waitForTimeout(5000);
+
+    await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
+});

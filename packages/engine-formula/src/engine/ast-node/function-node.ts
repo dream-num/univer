@@ -269,6 +269,27 @@ export class FunctionNode extends BaseAstNode {
     }
 }
 
+export class ErrorFunctionNode extends BaseAstNode {
+    constructor(
+        token: string = 'Error'
+    ) {
+        super(token);
+    }
+
+    override get nodeType() {
+        return NodeType.FUNCTION;
+    }
+
+    override async executeAsync() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+        return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    override execute() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+    }
+}
+
 export class FunctionNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,

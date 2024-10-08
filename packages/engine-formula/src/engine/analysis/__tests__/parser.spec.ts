@@ -228,7 +228,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(astNode as BaseAstNode);
 
-            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.VALUE);
         });
 
         it('error as return #NUM!', async () => {

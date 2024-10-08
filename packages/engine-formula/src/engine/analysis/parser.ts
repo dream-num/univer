@@ -30,7 +30,7 @@ import {
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
-import { FunctionNodeFactory } from '../ast-node/function-node';
+import { ErrorFunctionNode, FunctionNodeFactory } from '../ast-node/function-node';
 import { LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
 import { NodeType } from '../ast-node/node-type';
@@ -295,8 +295,8 @@ export class AstTreeBuilder extends Disposable {
             }
             // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
-                case NodeType.ERROR:
-                    return astNode;
+                // case NodeType.ERROR:
+                //     return astNode;
                 case NodeType.FUNCTION:
                     calculateStack.push(astNode);
                     break;
@@ -363,6 +363,11 @@ export class AstTreeBuilder extends Disposable {
                 break;
             }
         }
+
+        if (astNode == null) {
+            return new ErrorFunctionNode();
+        }
+
         // console.log('astNode111', astNode, item);
         return astNode;
     }

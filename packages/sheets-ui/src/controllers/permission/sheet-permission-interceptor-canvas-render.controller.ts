@@ -54,8 +54,9 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
     }
 
     private _initHeaderMovePermissionInterceptor() {
+        const headerMoveInterceptor = this._headerMoveRenderController.interceptor.getInterceptPoints().HEADER_MOVE_PERMISSION_CHECK;
         this.disposeWithMe(
-            this._headerMoveRenderController.interceptor.intercept(this._headerMoveRenderController.interceptor.getInterceptPoints().HEADER_MOVE_PERMISSION_CHECK, {
+            this._headerMoveRenderController.interceptor.intercept(headerMoveInterceptor, {
                 handler: (defaultValue: Nullable<boolean>, selectionRange: IRange) => {
                     const target = getSheetCommandTarget(this._univerInstanceService);
                     if (!target) {
@@ -72,16 +73,16 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
                         return true;
                     }
 
-                    const permissionIds: string[] = [];
-                    this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
-                        rule.ranges.forEach((range) => {
-                            if (Rectangle.intersects(range, selectionRange)) {
-                                permissionIds.push(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id);
-                            }
-                        });
+                    const allowedMoveHeader = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).every((rule) => {
+                        const overlap = rule.ranges.some((range) => Rectangle.intersects(range, selectionRange));
+                        if (overlap) {
+                            return this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId).id)?.value ?? true;
+                        } else {
+                            return true;
+                        }
                     });
 
-                    return this._permissionService.composePermission(permissionIds).every((permission) => permission.value === true);
+                    return allowedMoveHeader;
                 },
             })
         );

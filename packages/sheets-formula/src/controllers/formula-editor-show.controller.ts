@@ -42,19 +42,6 @@ import {
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
 
-// const REFRESH_ARRAY_SHAPE_MUTATIONS = [
-//     SetWorksheetRowHeightMutation.id,
-//     SetWorksheetColWidthMutation.id,
-//     SetColHiddenMutation.id,
-//     SetColVisibleMutation.id,
-//     SetRowHiddenMutation.id,
-//     SetRowVisibleMutation.id,
-//     SetSheetsFilterRangeMutation.id,
-//     SetSheetsFilterCriteriaMutation.id,
-//     RemoveSheetsFilterMutation.id,
-//     ReCalcSheetsFilterMutation.id,
-// ];
-
 export class FormulaEditorShowController extends Disposable implements IRenderModule {
     private _previousShape: Nullable<SelectionShape>;
     private _skeleton: SpreadsheetSkeleton;
@@ -92,9 +79,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
                         this._removeArrayFormulaRangeShape();
                     } else {
                         const { unitId, sheetId } = param;
-                        if (unitId) {
-                            this._refreshArrayFormulaRangeShapeByRanges(unitId, sheetId);
-                        }
+                        this._updateArrayFormulaRangeShape(unitId, sheetId);
                     }
                 }
             })
@@ -296,7 +281,7 @@ export class FormulaEditorShowController extends Disposable implements IRenderMo
         return false;
     }
 
-    private _refreshArrayFormulaRangeShapeByRanges(unitId: string, subUnitId: string): void {
+    private _updateArrayFormulaRangeShape(unitId: string, subUnitId: string): void {
         if (!this._checkCurrentSheet(unitId, subUnitId)) return;
         if (!this._previousShape) return;
         this._refreshArrayFormulaRangeShape(unitId);

@@ -41,6 +41,7 @@ import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { FormulaDependencyTree } from './dependency-tree';
+import { generateRandomDependencyTreeId } from './generate-tree-id';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
@@ -226,7 +227,7 @@ export class FormulaDependencyGenerator extends Disposable {
     private _getFeatureFormulaTree(featureId: string, params: IFeatureCalculationManagerParam) {
         const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
 
-        const FDtree = new FormulaDependencyTree();
+        const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
         FDtree.unitId = unitId;
         FDtree.subUnitId = subUnitId;
@@ -277,7 +278,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     const node = this._generateAstNode(unitId, formulaString);
 
-                    const FDtree = new FormulaDependencyTree();
+                    const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
                     FDtree.node = node;
                     FDtree.formula = formulaString;
@@ -325,7 +326,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     const node = this._generateAstNode(unitId, formulaString, x, y);
 
-                    const FDtree = new FormulaDependencyTree();
+                    const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
                     const sheetItem = unitData[unitId][sheetId];
 

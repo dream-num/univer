@@ -73,9 +73,13 @@ export class FormulaDependencyTree extends Disposable {
 
     isCache: boolean = false;
 
-    constructor() {
+    constructor(treeId?: string) {
         super();
-        this.treeId = generateRandomId(8);
+        if (treeId != null) {
+            this.treeId = treeId;
+        } else {
+            this.treeId = generateRandomId(8);
+        }
     }
 
     getDirtyData: Nullable<

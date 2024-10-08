@@ -1,5 +1,9 @@
 name: 📸 Manually Update Snapshots
 
+# manual trigger
+on:
+    workflow_dispatch:
+
 jobs:
     udpate-snapshots:
         runs-on: ubuntu-latest

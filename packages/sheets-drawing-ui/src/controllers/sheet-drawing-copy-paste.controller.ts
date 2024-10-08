@@ -59,6 +59,7 @@ function focusDocument() {
         return input;
     }
 
+    const activeElement = document.activeElement;
     const input = createInputElement();
     document.body.appendChild(input);
     input.focus();
@@ -66,6 +67,9 @@ function focusDocument() {
     return () => {
         input.blur();
         document.body.removeChild(input);
+        if (activeElement instanceof HTMLElement) {
+            activeElement.focus();
+        }
     };
 }
 
@@ -74,7 +78,6 @@ export class SheetsDrawingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         drawings: ISheetDrawing[];
         copyRange?: IRange;
-        copyType: COPY_TYPE;
         unitId: string;
         subUnitId: string;
     }>;
@@ -96,41 +99,37 @@ export class SheetsDrawingCopyPasteController extends Disposable {
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_IMAGE_UI_PLUGIN',
-            onNoSelectionCopy: (copyType) => {
-                const focusDrawings = this._focusedDrawings;
-
-                if (focusDrawings.length <= 0) {
-                    this._copyInfo = undefined;
-                    return;
-                }
-
-                const [drawing] = focusDrawings;
-
-                const dispose = focusDocument();
-                if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE) {
-                    // Override the default clipboard copy behavior for images
-                    const imageDrawing = drawing as ISheetImage;
-                    if (imageDrawing.imageSourceType === ImageSourceType.BASE64) {
-                        copyBase64ToClipboard(imageDrawing.source);
-                    }
-                } else {
-                    this._clipboardInterfaceService.writeText('');
-                }
-                dispose();
-
-                const newCopyInfo = {
-                    unitId: drawing.unitId,
-                    subUnitId: drawing.subUnitId,
-                    drawings: [drawing],
-                    copyType,
-                };
-
-                this._copyInfo = newCopyInfo;
-            },
 
             onBeforeCopy: (unitId, subUnitId, range) => {
-                const newCopyInfo = this._createCellsCopyInfo(unitId, subUnitId, range);
-                this._copyInfo = newCopyInfo;
+                const focusDrawings = this._focusedDrawings;
+                if (focusDrawings.length > 0) {
+                    // handle single drawing copy
+                    const [drawing] = focusDrawings;
+
+                    setTimeout(() => {
+                        // Rewrite the clipboard content to prevent the default copy behavior
+                        const dispose = focusDocument();
+                        if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
+                            && (drawing as ISheetImage).imageSourceType === ImageSourceType.BASE64) {
+                            copyBase64ToClipboard((drawing as ISheetImage).source);
+                        } else {
+                            this._clipboardInterfaceService.writeText('');
+                        }
+                        dispose();
+                    }, 200);
+
+                    const newCopyInfo = {
+                        unitId: drawing.unitId,
+                        subUnitId: drawing.subUnitId,
+                        drawings: [drawing],
+                    };
+
+                    this._copyInfo = newCopyInfo;
+                } else {
+                    // handle drawings in range copy
+                    const newCopyInfo = this._createDrawingsCopyInfoByRange(unitId, subUnitId, range);
+                    this._copyInfo = newCopyInfo;
+                }
             },
 
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
@@ -140,7 +139,10 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;
                 const { range: copyRange } = pasteFrom || {};
                 const { range: pasteRange, unitId, subUnitId } = pasteTo;
-                const mutations = this._generatePasteCellMutations({ pasteType, unitId, subUnitId, pasteRange }, { copyRange, copyType });
+
+                const mutations = this._copyInfo.copyRange
+                    ? this._generateRangeDrawingsPasteMutations({ pasteType, unitId, subUnitId, pasteRange }, { copyRange, copyType })
+                    : this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
 
                 return mutations;
             },
@@ -151,7 +153,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
             onPasteEmpty: (pasteTo: ISheetDiscreteRangeLocation) => {
                 if (this._copyInfo) {
-                    return this._generatePasteDrawingMutations(pasteTo);
+                    return this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
                 } else {
                     return { undos: [], redos: [] };
                 }
@@ -159,7 +161,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
             onPasteFiles: (pasteTo: ISheetDiscreteRangeLocation, files) => {
                 if (this._copyInfo) {
-                    return this._generatePasteDrawingMutations(pasteTo);
+                    return this._generateSingleDrawingPasteMutations(pasteTo, COPY_TYPE.COPY);
                 } else {
                     // Paste image from external
                     const images = files.filter((file) => file.type.includes('image'));
@@ -181,7 +183,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         });
     }
 
-    private _createCellsCopyInfo(unitId: string, subUnitId: string, range: IRange) {
+    private _createDrawingsCopyInfoByRange(unitId: string, subUnitId: string, range: IRange) {
         const skeletonManagerService = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService);
         if (!skeletonManagerService) return;
 
@@ -223,12 +225,11 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                 drawings: containedDrawings,
                 unitId,
                 subUnitId,
-                copyType: COPY_TYPE.COPY,
             };
         }
     }
 
-    private _generatePasteDrawingMutations(pasteTo: ISheetDiscreteRangeLocation) {
+    private _generateSingleDrawingPasteMutations(pasteTo: ISheetDiscreteRangeLocation, copyType: COPY_TYPE) {
         const { unitId, subUnitId, range } = pasteTo;
         const render = this._renderManagerService.getRenderById(unitId);
         const skeletonManagerService = render?.with(SheetSkeletonManagerService);
@@ -240,11 +241,11 @@ export class SheetsDrawingCopyPasteController extends Disposable {
             return { redos: [], undos: [] };
         }
 
-        const { drawings, copyType } = copyInfo;
+        const { drawings } = copyInfo;
 
         const pasteRange = discreteRangeToRange(range);
 
-        return this._generateMutationsByDrawings(drawings, {
+        return this._generateMutations(drawings, {
             unitId,
             subUnitId,
             isCut: copyType === COPY_TYPE.CUT,
@@ -270,7 +271,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         });
     }
 
-    private _generateMutationsByDrawings(drawings: ISheetDrawing[], payload: {
+    private _generateMutations(drawings: ISheetDrawing[], payload: {
         unitId: string;
         subUnitId: string;
         getTransform: (transform: ISheetDrawing['transform'], sheetTransform: ISheetDrawing['sheetTransform']) => {
@@ -338,7 +339,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         return { redos, undos };
     }
 
-    private _generatePasteCellMutations(
+    private _generateRangeDrawingsPasteMutations(
         pasteContext: {
             unitId: string;
             subUnitId: string;
@@ -383,11 +384,11 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         const { drawings } = this._copyInfo;
 
         if (!copyRange) {
-            return this._generatePasteDrawingMutations({
+            return this._generateSingleDrawingPasteMutations({
                 unitId,
                 subUnitId,
                 range: pasteRange,
-            });
+            }, copyType);
         }
 
         const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyRange, pasteRange]);
@@ -416,7 +417,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         const rowOffset = pasteRow - copyRow;
         const columnOffset = pasteCol - copyCol;
 
-        return this._generateMutationsByDrawings(drawings, {
+        return this._generateMutations(drawings, {
             unitId,
             subUnitId,
             getTransform: (transform, sheetTransform) => ({

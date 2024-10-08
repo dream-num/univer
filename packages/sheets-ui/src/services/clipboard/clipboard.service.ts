@@ -172,7 +172,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
         const selection = this._selectionManagerService.getCurrentLastSelection();
         if (!selection) {
-            this._clipboardHooks.forEach((h) => h.onNoSelectionCopy?.(copyType));
             return false; // maybe we should notify user that there is no selection
         }
 
@@ -265,7 +264,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return this._pasteEmpty();
         }
 
-        return Promise.resolve(false);
+        // return Promise.resolve(false);
     }
 
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {

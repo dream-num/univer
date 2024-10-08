@@ -85,9 +85,6 @@ export interface ISheetClipboardHook {
     isDefaultHook?: boolean;
     specialPasteInfo?: ISpecialPasteInfo; // only special paste info should be provided, which will replace the default hook.
     priority?: number;
-
-    /** Use to listen the element copy that no contained in cells of sheet, as float image */
-    onNoSelectionCopy?(copyType: COPY_TYPE): void;
     /**
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.

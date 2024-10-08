@@ -100,15 +100,5 @@ export class SheetDrawingUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initShortcuts();
-        this.disposeWithMe(
-            this._drawingManagerService.focus$.subscribe((drawings) => {
-                if (drawings.length > 0) {
-                    drawings.forEach((drawing) => {
-                        const wbSelection = this._sheetsSelectionsService.getWorkbookSelections(drawing.unitId);
-                        wbSelection.clear();
-                    });
-                }
-            })
-        );
     }
 }

@@ -648,6 +648,9 @@ importers:
       '@univerjs/facade':
         specifier: workspace:*
         version: link:../../packages/facade
+      '@univerjs/mockdata':
+        specifier: workspace:*
+        version: link:../../mockdata
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets

@@ -184,8 +184,8 @@ export default {
         },
     },
     CHISQ_DIST: {
-        description: '返回 χ2 分佈的左尾機率。',
-        abstract: '返回 χ2 分佈的左尾機率。',
+        description: '傳回 χ2 分佈的左尾機率。',
+        abstract: '傳回 χ2 分佈的左尾機率。',
         links: [
             {
                 title: '教導',
@@ -213,8 +213,8 @@ export default {
         },
     },
     CHISQ_INV: {
-        description: '返回 χ2 分佈的左尾機率的反函數值。',
-        abstract: '返回 χ2 分佈的左尾機率的反函數值。',
+        description: '傳回 χ2 分佈的左尾機率的反函數值。',
+        abstract: '傳回 χ2 分佈的左尾機率的反函數值。',
         links: [
             {
                 title: '教導',
@@ -424,8 +424,8 @@ export default {
         },
     },
     EXPON_DIST: {
-        description: '返回指數分佈',
-        abstract: '返回指數分佈',
+        description: '傳回指數分佈',
+        abstract: '傳回指數分佈',
         links: [
             {
                 title: '教導',
@@ -439,8 +439,8 @@ export default {
         },
     },
     F_DIST: {
-        description: '返回 F 機率分佈',
-        abstract: '返回 F 機率分佈',
+        description: '傳回 F 機率分佈',
+        abstract: '傳回 F 機率分佈',
         links: [
             {
                 title: '教導',
@@ -455,8 +455,8 @@ export default {
         },
     },
     F_DIST_RT: {
-        description: '返回 F 機率分佈（右尾）',
-        abstract: '返回 F 機率分佈（右尾）',
+        description: '傳回 F 機率分佈（右尾）',
+        abstract: '傳回 F 機率分佈（右尾）',
         links: [
             {
                 title: '教導',
@@ -642,7 +642,7 @@ export default {
     },
     GAMMA: {
         description: '傳回 γ 函數值',
-        abstract: '返回 γ 函數值',
+        abstract: '傳回 γ 函數值',
         links: [
             {
                 title: '教導',
@@ -654,8 +654,8 @@ export default {
         },
     },
     GAMMA_DIST: {
-        description: '返回 γ 分佈',
-        abstract: '返回 γ 分佈',
+        description: '傳回 γ 分佈',
+        abstract: '傳回 γ 分佈',
         links: [
             {
                 title: '教導',
@@ -1105,7 +1105,7 @@ export default {
     },
     PEARSON: {
         description: '傳回 Pearson 乘積矩相關係數',
-        abstract: '返回 Pearson 積矩相關係數',
+        abstract: '傳回 Pearson 乘積矩相關係數',
         links: [
             {
                 title: '教導',
@@ -1315,13 +1315,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '陣列1', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            array2: { name: '陣列2', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     SKEW: {
-        description: '傳回分佈的不對稱度',
-        abstract: '返回分佈的不對稱度',
+        description: '傳回分佈的偏斜度',
+        abstract: '傳回分佈的偏斜度',
         links: [
             {
                 title: '教導',
@@ -1329,13 +1329,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算偏斜度的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算偏斜度的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     SKEW_P: {
-        description: '返回一個分佈的不對稱度：用來體現某一分佈相對其平均值的不對稱程度',
-        abstract: '傳回一個分佈的不對稱度：用來反映某一分佈相對其平均值的不對稱程度',
+        description: '傳回基於樣本總體的分佈的偏斜度',
+        abstract: '傳回基於樣本總體的分佈的偏斜度',
         links: [
             {
                 title: '教導',
@@ -1343,13 +1343,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '數值 1', detail: '要計算偏斜度的第一個數字、儲存格參考或儲存格區域。 ' },
+            number2: { name: '數值 2', detail: '要計算偏斜度的其他數字、儲存格參考或儲存格區域，最多可包含 255 個。 ' },
         },
     },
     SLOPE: {
-        description: '返回線性迴歸線的斜率',
-        abstract: '返回線性迴歸線的斜率',
+        description: '傳回線性迴歸線的斜率',
+        abstract: '傳回線性迴歸線的斜率',
         links: [
             {
                 title: '教導',
@@ -1357,8 +1357,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '陣列_y', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            knownXs: { name: '陣列_x', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     SMALL: {
@@ -1385,8 +1385,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '這是您要找出常態化的數值。' },
+            mean: { name: '平均值', detail: '這是分佈的算術平均值。' },
+            standardDev: { name: '標準差', detail: '這是分佈的標準差。' },
         },
     },
     STDEV_P: {
@@ -1628,8 +1629,8 @@ export default {
         },
     },
     WEIBULL_DIST: {
-        description: '返回 Weibull 分佈',
-        abstract: '返回 Weibull 分佈',
+        description: '傳回 Weibull 分佈',
+        abstract: '傳回 Weibull 分佈',
         links: [
             {
                 title: '教導',

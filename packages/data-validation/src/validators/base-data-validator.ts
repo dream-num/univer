@@ -59,20 +59,18 @@ export interface IFormulaValidResult {
 
 export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
-
     abstract title: string;
-
     abstract operators: DataValidationOperator[];
-
     abstract scopes: string[] | string;
 
-    abstract formulaInput: string;
+    // #region UI related
 
+    formulaInput: string | undefined = undefined;
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
-
     dropdown: string | undefined = undefined;
-
     optionsInput: string | undefined = undefined;
+
+    // #endregion
 
     constructor(
         @Inject(LocaleService) readonly localeService: LocaleService,

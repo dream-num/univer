@@ -273,6 +273,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-data-validation-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation-ui
       '@univerjs/sheets-drawing':
         specifier: workspace:*
         version: link:../packages/sheets-drawing
@@ -2098,6 +2101,73 @@ importers:
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.78
+        version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/protocol':
+        specifier: 0.1.39-alpha.15
+        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../sheets-numfmt
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.2
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/sheets-data-validation-ui:
+    dependencies:
+      '@flatten-js/interval-tree':
+        specifier: ^1.1.3
+        version: 1.1.3
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../data-validation
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/docs-ui':
         specifier: workspace:*
         version: link:../docs-ui
@@ -2116,6 +2186,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../sheets-data-validation
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula

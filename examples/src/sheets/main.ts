@@ -32,6 +32,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
@@ -82,6 +83,7 @@ univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // filter plugin
 univer.registerPlugin(UniverSheetsFilterPlugin);
@@ -94,9 +96,7 @@ setTimeout(() => {
 
 // mock lazy load data validation
 setTimeout(() => {
-    univer.registerPlugin(UniverSheetsDataValidationPlugin, {
-        // showEditOnDropdown: false,
-    });
+    univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
 }, 500);
 
 // sort

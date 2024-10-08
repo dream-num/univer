@@ -4,11 +4,11 @@
 
 | Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
 | --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| `@univerjs/sheets-data-validation` | `UniverSheetsDataValidation` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ️❌ | ❌️ |
 
 ## Introduction
 
-> `@univerjs/sheets-data-validation` provides full capabilities for Univer Sheet data validation, including panel capabilities.
+> `@univerjs/sheets-data-validation` provides full capabilities for Univer Sheet data validation.
 
 ## Usage
 

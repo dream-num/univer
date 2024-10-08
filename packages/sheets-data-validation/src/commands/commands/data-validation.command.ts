@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
-import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, Injector, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import type { RangeMutation } from '../../models/rule-matrix';
+import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
+import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
-import { createDefaultNewRule } from '../../utils/create';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type CheckboxValidator } from '../../validators';
-import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
-import type { RangeMutation } from '../../models/rule-matrix';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
@@ -284,40 +282,6 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
 
         await sequenceExecuteAsync(redoMutations, commandService);
         return true;
-    },
-};
-
-export const AddSheetDataValidationAndOpenCommand: ICommand = {
-    type: CommandType.COMMAND,
-    id: 'data-validation.command.addRuleAndOpen',
-    async handler(accessor) {
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService);
-        if (!target) return false;
-
-        const { workbook, worksheet } = target;
-        const rule = createDefaultNewRule(accessor);
-        const commandService = accessor.get(ICommandService);
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
-
-        const addParams: IAddSheetDataValidationCommandParams = {
-            rule,
-            unitId,
-            subUnitId,
-        };
-
-        const res = await commandService.executeCommand(AddSheetDataValidationCommand.id, addParams);
-
-        if (res) {
-            commandService.executeCommand(OpenValidationPanelOperation.id, {
-                ruleId: rule.uid,
-                isAdd: true,
-            });
-
-            return true;
-        }
-        return false;
     },
 };
 

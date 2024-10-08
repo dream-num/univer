@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Range, UniverInstanceType } from '@univerjs/core';
 import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
+import { Range, UniverInstanceType } from '@univerjs/core';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {

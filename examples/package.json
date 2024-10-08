@@ -38,6 +38,7 @@
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
         "@univerjs/sheets-crosshair-highlight": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-data-validation-ui": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",

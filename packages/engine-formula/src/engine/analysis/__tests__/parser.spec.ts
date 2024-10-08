@@ -250,5 +250,23 @@ describe('Test indirect', () => {
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(10);
         });
+
+        it('test missing formula input handles gracefully', async () => {
+            const lexerNode = lexer.treeBuilder('=1/3+');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('test incomplete formula input', async () => {
+            const lexerNode = lexer.treeBuilder('=+');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('test formula input validation with function', async () => {
+            const lexerNode = lexer.treeBuilder('=sum(A1+)');
+
+            expect(lexerNode).toStrictEqual(ErrorType.VALUE);
+        });
     });
 });

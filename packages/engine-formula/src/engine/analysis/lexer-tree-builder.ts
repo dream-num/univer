@@ -76,6 +76,8 @@ export class LexerTreeBuilder extends Disposable {
 
     private _colonState = false; // :
 
+    private _formulaErrorCount = 0;
+
     private _tableBracketState = false; // Table3[[#All],[Column1]:[Column2]]
 
     override dispose(): void {
@@ -940,6 +942,14 @@ export class LexerTreeBuilder extends Disposable {
         this._tableBracketState = false;
     }
 
+    private _formalErrorOccurred() {
+        this._formulaErrorCount += 1;
+    }
+
+    private _hasFormalError() {
+        return this._formulaErrorCount > 0;
+    }
+
     private _getLastChildCurrentLexerNode() {
         const children = this._currentLexerNode.getChildren();
         if (children && children.length > 0) {
@@ -1065,6 +1075,21 @@ export class LexerTreeBuilder extends Disposable {
         children.splice(-1);
     }
 
+    /**
+     * fix univer-pro/issues/2447
+     * =1/3+
+     * =+
+     * =sum(A1+)
+     */
+    private _formulaErrorLastTokenCheck(formulaStringArray: string[], indexRaw: number) {
+        const lastToken = this._findPreviousToken(formulaStringArray, indexRaw) || '';
+        if (this._isOperatorToken(lastToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private _findPreviousToken(data: string[], indexRaw: number) {
         let index = indexRaw;
         while (index >= 0) {
@@ -1087,7 +1112,7 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    private _negativeZeroAddCondition(prevString: string) {
+    private _unexpectedEndingTokenExcludeOperator(prevString: string) {
         if (
             // OPERATOR_TOKEN_SET.has(prevString) ||
             prevString === matchToken.OPEN_BRACKET ||
@@ -1100,17 +1125,17 @@ export class LexerTreeBuilder extends Disposable {
         return false;
     }
 
-    private _negativePreCondition(prevString: string) {
+    private _unexpectedEndingToken(prevString: string) {
         if (
-            OPERATOR_TOKEN_SET.has(prevString) ||
-            this._negativeZeroAddCondition(prevString)
+            this._isOperatorToken(prevString) ||
+            this._unexpectedEndingTokenExcludeOperator(prevString)
         ) {
             return true;
         }
         return false;
     }
 
-    private _negativeNextCondition(prevString: string) {
+    private _isOperatorToken(prevString: string) {
         if (
             OPERATOR_TOKEN_SET.has(prevString)
         ) {
@@ -1161,6 +1186,10 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         if (this._doubleQuotationState > 0) {
+            return true;
+        }
+
+        if (this._hasFormalError()) {
             return true;
         }
 
@@ -1224,8 +1253,14 @@ export class LexerTreeBuilder extends Disposable {
 
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
+
         let cur = 0;
         this._resetTemp();
+
+        if (this._formulaErrorLastTokenCheck(formulaStringArray, formulaStringArrayCount - 1)) {
+            this._formalErrorOccurred();
+        }
+
         while (cur < formulaStringArrayCount) {
             const currentString = formulaStringArray[cur];
 
@@ -1300,6 +1335,10 @@ export class LexerTreeBuilder extends Disposable {
                 this.isSingleQuotationClose() &&
                 this.isDoubleQuotationClose()
             ) {
+                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                    this._formalErrorOccurred();
+                }
+
                 this._pushNodeToChildren(this._segment);
                 this._resetSegment();
                 const currentBracket = this._getCurrentBracket();
@@ -1408,6 +1447,10 @@ export class LexerTreeBuilder extends Disposable {
                 this.isBracesClose() &&
                 this.isSquareBracketClose()
             ) {
+                if (this._formulaErrorLastTokenCheck(formulaStringArray, cur - 1)) {
+                    this._formalErrorOccurred();
+                }
+
                 const currentBracket = this._getCurrentBracket();
                 /**
                  * Handle the occurrence of commas, where in the formula,
@@ -1589,14 +1632,14 @@ export class LexerTreeBuilder extends Disposable {
                     // negative number
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
                     const nextString = this._findNextToken(formulaStringArray, cur + 1) || '';
-                    if (this._negativeZeroAddCondition(prevString) && this._negativeNextCondition(nextString)) {
+                    if (this._unexpectedEndingTokenExcludeOperator(prevString) && this._isOperatorToken(nextString)) {
                         this._pushNodeToChildren('0');
                         this._pushNodeToChildren(operatorToken.MINUS);
                         this._addSequenceArray(sequenceArray, currentString, cur);
                         this._resetSegment();
                         cur++;
                         continue;
-                    } else if (this._negativePreCondition(prevString)) {
+                    } else if (this._unexpectedEndingToken(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
                         this._addSequenceArray(sequenceArray, currentString, cur);
                         cur++;

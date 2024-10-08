@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import type { CellValue, ICellRenderContext, IRange, Nullable } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
-import { bufferTime, debounceTime, filter } from 'rxjs';
-import type { CellValue, ICellRenderContext, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import { bufferTime, filter } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -52,7 +51,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         super();
 
         this._initMenu();
-        this._initSkeletonChange();
         this._initDropdown();
         this._initViewModelIntercept();
         this._initAutoHeight();
@@ -126,33 +124,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                 );
             }
         }));
-    }
-
-    private _initSkeletonChange() {
-        const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return;
-
-            const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-            if (!subUnitId) return;
-
-            const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService)
-                .getWorksheetSkeleton(subUnitId)
-                ?.skeleton;
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
-        };
-
-        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -301,36 +272,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     ) {
         super();
 
-        this._initSkeletonChange();
         this._initViewModelIntercept();
         this._initAutoHeight();
-    }
-
-    private _initSkeletonChange() {
-        const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return;
-
-            const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-            if (!subUnitId) return;
-
-            const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService)
-                .getWorksheetSkeleton(subUnitId)
-                ?.skeleton;
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
-        };
-
-        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function

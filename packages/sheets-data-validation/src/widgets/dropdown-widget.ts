@@ -252,7 +252,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const { l = DEFAULT_STYLES.pd.l, t = DEFAULT_STYLES.pd.t, r = DEFAULT_STYLES.pd.r, b = DEFAULT_STYLES.pd.b } = pd;
-            const realWidth = cellWidth - l - r - ICON_PLACE;
+            const realWidth = cellWidth - l - r - ICON_PLACE - 4;
             const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
 
             if (
@@ -299,7 +299,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.rect(0, 0, cellWidth, cellHeight);
             ctx.clip();
 
-            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
+            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE - 4;
             const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
             if (
                 tb === WrapStrategy.WRAP

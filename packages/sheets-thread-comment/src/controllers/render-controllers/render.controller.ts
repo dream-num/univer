@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
-import type { Workbook } from '@univerjs/core';
-import type { Spreadsheet } from '@univerjs/engine-render';
 
 @OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
@@ -69,28 +67,14 @@ export class SheetsThreadCommentRenderController extends Disposable {
         const markSkeletonDirty = () => {
             const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
-
             const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-            if (!subUnitId) {
-                // TODO@zhangw: handle this case
-                console.warn('No active sheet found');
-                return;
-            }
-
             const currentRender = this._renderManagerService.getRenderById(unitId);
-            const skeleton = currentRender?.with(SheetSkeletonManagerService).getOrCreateSkeleton({ sheetId: subUnitId });
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
+            currentRender?.mainComponent?.makeForceDirty();
         };
 
-        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.pipe(debounceTime(16)).subscribe((update) => {
+        this.disposeWithMe(this._sheetsThreadCommentModel.commentUpdate$.pipe(debounceTime(16)).subscribe(() => {
             markSkeletonDirty();
         }));
     }
 }
+

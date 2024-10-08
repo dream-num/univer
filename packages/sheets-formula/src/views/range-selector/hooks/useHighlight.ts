@@ -132,21 +132,22 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
         if (!body) {
             return;
         }
+        const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
-            body.textRuns = [];
+            cloneBody.textRuns = [];
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
-            body.textRuns = textRuns;
+            cloneBody.textRuns = textRuns;
             const text = sequenceNodes.reduce((pre, cur) => {
                 if (typeof cur === 'string') {
                     return `${pre}${cur}`;
                 }
                 return `${pre}${cur.token}`;
             }, '');
-            body.dataStream = `${text}\r\n`;
+            cloneBody.dataStream = `${text}\r\n`;
             rangesSet(refSelections);
         }
-        const cloneData = { ...data };
+        const cloneData = { ...data, body: cloneBody };
         editor.setDocumentData(cloneData);
     }, [editorId, sequenceNodes, colorMap]);
 

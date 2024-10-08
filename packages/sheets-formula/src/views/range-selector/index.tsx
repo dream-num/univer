@@ -21,21 +21,20 @@ import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
 
+import type { Editor } from '@univerjs/docs-ui';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import type { ReactNode } from 'react';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useResize } from './hooks/useResize';
-import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 
+import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import styles from './index.module.less';
-import { RANGE_SELECTOR_SYMBOLS } from './utils/isRangeSelector';
 import { rangePreProcess } from './utils/rangePreProcess';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
@@ -162,6 +161,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [sequenceNodes, onVerify]);
 
     useEffect(() => {
+        if (isFocus) {
+            sequenceNodesSet((pre) => [...pre]);
+        }
+    }, [isFocus]);
+
+    useEffect(() => {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
@@ -226,7 +231,15 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (containerRef.current) {
-            dispose = editorService.register({ editorUnitId: editorId, isSingle: true, isSheetEditor: true }, containerRef.current);
+            dispose = editorService.register({
+                editorUnitId: editorId,
+                isSingle: true,
+                initialSnapshot: {
+                    id: editorId,
+                    body: { dataStream: '\r\n' },
+                    documentStyle: {},
+                },
+            }, containerRef.current);
             const editor = editorService.getEditor(editorId)! as Editor;
             editorSet(editor);
         }

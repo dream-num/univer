@@ -12,6 +12,7 @@ importers:
         specifier: 3.7.3
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
 =======
         version: 3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
@@ -40,6 +41,9 @@ importers:
 >>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 =======
         version: 3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+=======
+        version: 3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
       '@commitlint/cli':
         specifier: ^19.5.0
         version: 19.5.0(@types/node@22.7.4)(typescript@5.6.2)
@@ -85,7 +89,7 @@ importers:
         version: 18.3.11
 =======
         specifier: 8.3.3
-        version: 8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+        version: 8.3.3(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@types/node':
         specifier: ^22.7.3
         version: 22.7.4
@@ -304,10 +308,10 @@ importers:
         version: 8.3.5(storybook@8.3.5)
 =======
         specifier: ^8.3.3
-        version: 8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+        version: 8.3.3(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/react-webpack5':
         specifier: ^8.3.3
-        version: 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+        version: 8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/types':
         specifier: ^8.3.3
         version: 8.3.4(storybook@8.3.4)
@@ -737,10 +741,17 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.1
+<<<<<<< HEAD
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+=======
+        version: 5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
 
   packages-experimental/action-recorder:
     dependencies:
@@ -6445,6 +6456,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/instrumenter@8.3.5':
     resolution: {integrity: sha512-NLDXai5y2t1ITgHVK9chyL0rMFZbICCOGcnTbyWhkLbiEWZKPJ8FuB8+g+Ba6zwtCve1A1Cnb4O2LOWy7TgWQw==}
     peerDependencies:
@@ -6460,6 +6472,8 @@ packages:
     peerDependencies:
       storybook: ^8.3.0
 
+=======
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
   '@storybook/instrumenter@8.3.4':
     resolution: {integrity: sha512-jVhfNOPekOyJmta0BTkQl9Z6rgRbFHlc0eV4z1oSrzaawSlc9TFzAeDCtCP57vg3FuBX8ydDYAvyZ7s4xPpLyg==}
     peerDependencies:
@@ -6593,11 +6607,6 @@ packages:
         optional: true
       typescript:
         optional: true
-
-  '@storybook/test@8.3.0':
-    resolution: {integrity: sha512-d8y8ST8YY/pSjTxBcWitKM7YbbupN8D0obVlciZRt6WW3o8WUz6iwMuzuJuiUVwtxiRtdKL9jygC5M+aaCpFYQ==}
-    peerDependencies:
-      storybook: ^8.3.0
 
   '@storybook/test@8.3.4':
     resolution: {integrity: sha512-HRiUenitln8QPHu6DEWUg9s9cEoiGN79lMykzXzw9shaUvdEIhWCsh82YKtmB3GJPj6qcc6dZL/Aio8srxyGAg==}
@@ -12517,6 +12526,7 @@ snapshots:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
@@ -12537,6 +12547,9 @@ snapshots:
 =======
   '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
 >>>>>>> bcfebd768 (fix(range-selector): some bugs)
+=======
+  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.2(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.11.1(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.11.1(jiti@1.21.6)))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -12545,7 +12558,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.8.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
       '@typescript-eslint/parser': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
-      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.11.1(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.11.1(jiti@1.21.6))
 <<<<<<< HEAD
@@ -14486,6 +14499,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/instrumenter@8.3.5(storybook@8.3.5)':
     dependencies:
       '@storybook/global': 5.0.0
@@ -14525,6 +14539,8 @@ snapshots:
       util: 0.12.5
     optional: true
 
+=======
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
   '@storybook/instrumenter@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/global': 5.0.0
@@ -14538,10 +14554,10 @@ snapshots:
 
   '@storybook/node-logger@8.1.6': {}
 
-  '@storybook/preset-react-webpack@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+  '@storybook/preset-react-webpack@8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
       '@storybook/core-webpack': 8.3.4(storybook@8.3.4)
-      '@storybook/react': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@storybook/react': 8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.6.2)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       '@types/node': 22.7.4
 >>>>>>> bcfebd768 (fix(range-selector): some bugs)
@@ -14624,11 +14640,11 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       storybook: 8.3.4
 
-  '@storybook/react-webpack5@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+  '@storybook/react-webpack5@8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
       '@storybook/builder-webpack5': 8.3.4(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.4)(typescript@5.6.2)
-      '@storybook/preset-react-webpack': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
-      '@storybook/react': 8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@storybook/preset-react-webpack': 8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
+      '@storybook/react': 8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)
       '@types/node': 22.7.4
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -14646,6 +14662,7 @@ snapshots:
       - webpack-cli
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   '@storybook/react@8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
       '@storybook/components': 8.3.5(storybook@8.3.5)
@@ -14659,6 +14676,9 @@ snapshots:
       '@types/node': 22.7.5
 =======
   '@storybook/react@8.3.3(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+=======
+  '@storybook/react@8.3.3(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
     dependencies:
       '@storybook/components': 8.3.4(storybook@8.3.4)
       '@storybook/global': 5.0.0
@@ -14690,6 +14710,7 @@ snapshots:
       util-deprecate: 1.0.2
     optionalDependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@storybook/test': 8.3.5(storybook@8.3.5)
       typescript: 5.6.3
 
@@ -14700,9 +14721,12 @@ snapshots:
       '@storybook/instrumenter': 8.3.5(storybook@8.3.5)
 =======
       '@storybook/test': 8.3.0(storybook@8.3.4)
+=======
+      '@storybook/test': 8.3.4(storybook@8.3.4)
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
       typescript: 5.6.2
 
-  '@storybook/react@8.3.4(@storybook/test@8.3.0(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
+  '@storybook/react@8.3.4(@storybook/test@8.3.4(storybook@8.3.4))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.4)(typescript@5.6.2)':
     dependencies:
       '@storybook/components': 8.3.4(storybook@8.3.4)
       '@storybook/global': 5.0.0
@@ -14728,9 +14752,10 @@ snapshots:
       type-fest: 2.19.0
       util-deprecate: 1.0.2
     optionalDependencies:
-      '@storybook/test': 8.3.0(storybook@8.3.4)
+      '@storybook/test': 8.3.4(storybook@8.3.4)
       typescript: 5.6.2
 
+<<<<<<< HEAD
   '@storybook/test@8.3.0(storybook@8.3.4)':
     dependencies:
       '@storybook/csf': 0.1.11
@@ -14758,6 +14783,8 @@ snapshots:
       util: 0.12.5
     optional: true
 
+=======
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
   '@storybook/test@8.3.4(storybook@8.3.4)':
     dependencies:
       '@storybook/csf': 0.1.11
@@ -15615,11 +15642,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+<<<<<<< HEAD
   '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
 >>>>>>> bcfebd768 (fix(range-selector): some bugs)
+=======
+  '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2))(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)(vitest@2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
     dependencies:
       eslint: 9.12.0(jiti@1.21.6)
     optionalDependencies:
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
       '@typescript-eslint/utils': 8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
@@ -15636,6 +15668,9 @@ snapshots:
 >>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
 =======
       '@typescript-eslint/utils': 8.5.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+=======
+      '@typescript-eslint/utils': 8.7.0(eslint@9.11.1(jiti@1.21.6))(typescript@5.6.2)
+>>>>>>> 6c12f666c (feat(range-selector): move isRangeSelector to sheet-ui from sheet-formula)
       typescript: 5.6.2
       vitest: 2.1.1(@types/node@22.7.4)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 >>>>>>> bcfebd768 (fix(range-selector): some bugs)

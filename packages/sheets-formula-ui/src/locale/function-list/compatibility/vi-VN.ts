@@ -407,8 +407,8 @@ export default {
         },
     },
     POISSON: {
-        description: 'Trả về phân phối Poisson',
-        abstract: 'Trả về phân phối Poisson',
+        description: 'Trả về phân bố Poisson.',
+        abstract: 'Trả về phân bố Poisson.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -416,13 +416,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì POISSON trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     QUARTILE: {
-        description: 'Trả về điểm phân vị của một tập dữ liệu',
-        abstract: 'Trả về điểm phân vị của một tập dữ liệu',
+        description: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -430,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Một mảng hoặc phạm vi dữ liệu yêu cầu giá trị tứ phân vị.' },
+            quart: { name: 'giá trị tứ phân', detail: 'Giá trị tứ phân vị cần trả về.' },
         },
     },
     RANK: {

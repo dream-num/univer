@@ -1209,6 +1209,62 @@ export default {
             order: { name: 'xếp hạng số', detail: 'Một con số chỉ rõ cách xếp hạng số. 0 hoặc bị bỏ qua đối với thứ tự giảm dần, khác 0 đối với thứ tự tăng dần.' },
         },
     },
+    RSQ: {
+        description: 'Trả về bình phương của hệ số tương quan thời điểm sản phẩm Pearson',
+        abstract: 'Trả về hệ số tương quan mô-men tích Pearson',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/rsq-%E5%87%BD%E6%95%B0-d7161715-250d-4a01-b80d-a8364f2be08f',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    SKEW: {
+        description: 'Trả về độ lệch của một phân bố.',
+        abstract: 'Trả về độ lệch của một phân bố.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/skew-%E5%87%BD%E6%95%B0-bdf49d86-b1ef-4804-a046-28eaea69c9fa',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô cần tính độ lệch.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính toán độ lệch.' },
+        },
+    },
+    SKEW_P: {
+        description: 'Trả về độ lệch của phân bố dựa trên tổng thể mẫu',
+        abstract: 'Trả về độ lệch của phân bố dựa trên tổng thể mẫu',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/skew-p-%E5%87%BD%E6%95%B0-76530a5c-99b9-48a1-8392-26632d542fcb',
+            },
+        ],
+        functionParameter: {
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô cần tính độ lệch.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính toán độ lệch.' },
+        },
+    },
+    SLOPE: {
+        description: 'Trả về độ dốc của đường hồi quy tuyến tính',
+        abstract: 'Trả về độ dốc của đường hồi quy tuyến tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/slope-%E5%87%BD%E6%95%B0-11fb8f97-3117-4813-98aa-61d7e01276b9',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
     SMALL: {
         description: 'Trả về giá trị nhỏ thứ k của tập dữ liệu.',
         abstract: 'Trả về giá trị nhỏ thứ k của tập dữ liệu.',
@@ -1221,6 +1277,21 @@ export default {
         functionParameter: {
             array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu dạng số mà bạn muốn xác định giá trị nhỏ thứ k của nó.' },
             k: { name: 'k', detail: 'Vị trí (từ giá trị nhỏ nhất) trong mảng hoặc phạm vi dữ liệu cần trả về.' },
+        },
+    },
+    STANDARDIZE: {
+        description: 'Trả về giá trị chuẩn hóa',
+        abstract: 'Trả về giá trị chuẩn hóa',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/standardize-%E5%87%BD%E6%95%B0-81d66554-2d54-40ec-ba83-6437108ee775',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị bạn muốn chuẩn hóa.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
     STDEV_P: {

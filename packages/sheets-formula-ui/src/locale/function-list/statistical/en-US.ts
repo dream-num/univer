@@ -1315,8 +1315,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The dependent array or range of data.' },
+            array2: { name: 'array2', detail: 'The independent array or range of data.' },
         },
     },
     SKEW: {
@@ -1329,13 +1329,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the skewness.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the skewness, up to a maximum of 255.' },
         },
     },
     SKEW_P: {
-        description: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
-        abstract: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
+        description: 'Returns the skewness of a distribution based on a population',
+        abstract: 'Returns the skewness of a distribution based on a population',
         links: [
             {
                 title: 'Instruction',
@@ -1343,8 +1343,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the skewness.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the skewness, up to a maximum of 255.' },
         },
     },
     SLOPE: {
@@ -1357,8 +1357,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     SMALL: {
@@ -1385,8 +1385,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value you want to normalize.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
         },
     },
     STDEV_P: {

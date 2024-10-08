@@ -1315,13 +1315,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数据1', detail: '代表因变量数据的数组或矩阵的范围。' },
+            array2: { name: '数据2', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     SKEW: {
-        description: '返回分布的不对称度',
-        abstract: '返回分布的不对称度',
+        description: '返回分布的偏斜度',
+        abstract: '返回分布的偏斜度',
         links: [
             {
                 title: '教学',
@@ -1329,13 +1329,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算偏斜度的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算偏斜度的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     SKEW_P: {
-        description: '返回一个分布的不对称度：用来体现某一分布相对其平均值的不对称程度',
-        abstract: '返回一个分布的不对称度：用来体现某一分布相对其平均值的不对称程度',
+        description: '返回基于样本总体的分布的偏斜度',
+        abstract: '返回基于样本总体的分布的偏斜度',
         links: [
             {
                 title: '教学',
@@ -1343,8 +1343,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要计算偏斜度的第一个数字、单元格引用或单元格区域。' },
+            number2: { name: '数值 2', detail: '要计算偏斜度的其他数字、单元格引用或单元格区域，最多可包含 255 个。' },
         },
     },
     SLOPE: {
@@ -1357,8 +1357,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     SMALL: {
@@ -1385,8 +1385,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其正态化的数值。' },
+            mean: { name: '平均值', detail: '分布的算术平均值。' },
+            standardDev: { name: '标准偏差', detail: '分布的标准偏差。' },
         },
     },
     STDEV_P: {

@@ -15,23 +15,23 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, Inject, Injector, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, IReorderRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
+import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
+import type { ICalculateUnit, IContext } from './calculate-unit/type';
+import { createInterceptorKey, Disposable, ICommandService, Inject, Injector, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
 import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
-import { CFRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '../base/const';
-import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
-import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
+import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
-import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
 import { iconSetCalculateUnit } from './calculate-unit/icon-set';
-import type { ICalculateUnit, IContext } from './calculate-unit/type';
 import { EMPTY_STYLE } from './calculate-unit/type';
 
 type ComputeStatus = 'computing' | 'end' | 'error';
@@ -72,7 +72,7 @@ export class ConditionalFormattingService extends Disposable {
         this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
         this._registerCalculationUnit(iconSetCalculateUnit);
-        this._calculateUnit$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
+        this._calculateUnit$.pipe(bufferTime(100), filter((list) => !!list.length), map((list) => {
             const createKey = (config: typeof list[0]) => `${config.unitId}_${config.subUnitId}_${config.rule.cfId}`;
             const result = list.reduce((a, b) => {
                 const key = createKey(b);

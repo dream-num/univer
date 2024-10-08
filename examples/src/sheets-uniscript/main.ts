@@ -21,14 +21,13 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-
-import { UNISCRIT_WORKBOOK_DATA_DEMO } from '../data/sheets/uniscript-data';
 import { enUS, ruRU, zhCN } from '../locales';
 
 // univer
@@ -62,7 +61,7 @@ univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverUniscriptPlugin, {
-    getWorkerUrl(moduleID: string, label: string) {
+    getWorkerUrl(_: string, label: string) {
         if (label === 'typescript' || label === 'javascript') {
             return '/vs/language/typescript/ts.worker.js';
         }

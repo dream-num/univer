@@ -14,7 +14,7 @@ runs:
 
         - name: Update Snapshots
           shell: bash
-          run: pnpm exec playwright test --update-snapshots
+          run: pnpm exec playwright test e2e/visual-comparison --update-snapshots
 
         - name: Commit Updated Snapshots
           shell: bash

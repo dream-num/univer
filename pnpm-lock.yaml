@@ -421,9 +421,6 @@ importers:
       '@univerjs/data-validation':
         specifier: workspace:*
         version: link:../packages/data-validation
-      '@univerjs/debugger':
-        specifier: workspace:*
-        version: link:../packages-experimental/debugger
       '@univerjs/design':
         specifier: workspace:*
         version: link:../packages/design

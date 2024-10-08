@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import { expect, test } from '@playwright/test';
-import { generateSnapshotName } from '../const';
+// eslint-disable-next-line node/prefer-global/process
+export const isCI = !!process.env.CI;
 
-test('diff default doc content', async ({ page }) => {
-    await page.goto('http://localhost:3000/docs/');
-    await page.waitForTimeout(2000);
-
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
-    await page.waitForTimeout(5000);
-
-    await expect(page).toHaveScreenshot(generateSnapshotName('default-doc'), { maxDiffPixels: 30 });
-});
+export function generateSnapshotName(name: string): string {
+    return isCI ? `${name}.ci.png` : `${name}.png`;
+}

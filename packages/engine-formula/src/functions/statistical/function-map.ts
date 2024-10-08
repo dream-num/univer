@@ -93,7 +93,12 @@ import { QuartileExc } from './quartile-exc';
 import { QuartileInc } from './quartile-inc';
 import { RankAvg } from './rank-avg';
 import { RankEq } from './rank-eq';
+import { Rsq } from './rsq';
+import { Skew } from './skew';
+import { SkewP } from './skew-p';
+import { Slope } from './slope';
 import { Small } from './small';
+import { Standardize } from './standardize';
 import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
@@ -184,7 +189,12 @@ export const functionStatistical = [
     [QuartileInc, FUNCTION_NAMES_STATISTICAL.QUARTILE_INC],
     [RankAvg, FUNCTION_NAMES_STATISTICAL.RANK_AVG],
     [RankEq, FUNCTION_NAMES_STATISTICAL.RANK_EQ],
+    [Rsq, FUNCTION_NAMES_STATISTICAL.RSQ],
+    [Skew, FUNCTION_NAMES_STATISTICAL.SKEW],
+    [SkewP, FUNCTION_NAMES_STATISTICAL.SKEW_P],
+    [Slope, FUNCTION_NAMES_STATISTICAL.SLOPE],
     [Small, FUNCTION_NAMES_STATISTICAL.SMALL],
+    [Standardize, FUNCTION_NAMES_STATISTICAL.STANDARDIZE],
     [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],

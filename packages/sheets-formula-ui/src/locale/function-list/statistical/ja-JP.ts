@@ -1278,8 +1278,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '配列 1', detail: '複数の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            array2: { name: '配列 2', detail: '複数の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     SKEW: {
@@ -1292,13 +1292,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '歪度を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '歪度を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     SKEW_P: {
-        description: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
-        abstract: '人口に基づく分布の歪度を返します。歪度とは、分布の平均値周辺での両側の非対称度を表す値です。',
+        description: 'サンプル母集団に基づいて分布の歪度を返します。',
+        abstract: 'サンプル母集団に基づいて分布の歪度を返します。',
         links: [
             {
                 title: '指導',
@@ -1306,8 +1306,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '歪度を求める 1 つ目の数値、セル参照、またはセル範囲を指定します。' },
+            number2: { name: '数値 2', detail: '歪度を求める追加の数値、セル参照、または範囲 (最大 255)。' },
         },
     },
     SLOPE: {
@@ -1320,8 +1320,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '既知の y', detail: '既知の従属変数の値が入力されているセル範囲または配列を指定します。' },
+            knownXs: { name: '既知の x', detail: '既知の独立変数の値が入力されているセル範囲または配列を指定します。' },
         },
     },
     SMALL: {
@@ -1348,8 +1348,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            standardDev: { name: '標準偏差', detail: '対象となる分布の標準偏差を指定します。' },
         },
     },
     STDEV_P: {

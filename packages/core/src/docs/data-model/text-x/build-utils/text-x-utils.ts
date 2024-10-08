@@ -15,26 +15,27 @@
  */
 
 import type { IAccessor } from '@wendellhu/redi';
-import { DataStreamTreeTokenType } from '../../types';
-import { TextXActionType } from '../action-types';
-import { TextX } from '../text-x';
-import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
-import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
 import type { Nullable } from '../../../../shared';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { IDeleteAction, IRetainAction } from '../action-types';
+import { DataStreamTreeTokenType } from '../../types';
+import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
+import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
 
 export interface IDeleteCustomRangeParam {
     rangeId: string;
     segmentId?: string;
     documentDataModel: DocumentDataModel;
     insert?: Nullable<IDocumentBody>;
+    textRange?: { startOffset: number; endOffset: number };
 }
 
 export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { rangeId, segmentId, documentDataModel, insert } = params;
+    const { rangeId, segmentId, documentDataModel, insert, textRange } = params;
 
     const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
@@ -60,6 +61,14 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         segmentId,
         line: 0,
     });
+    if (textRange) {
+        if (textRange.startOffset >= startIndex) {
+            textRange.startOffset--;
+        }
+        if (textRange.endOffset > startIndex) {
+            textRange.endOffset--;
+        }
+    }
 
     if (len - 2 > 0) {
         textX.push({
@@ -76,6 +85,15 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         line: 0,
     });
 
+    if (textRange) {
+        if (textRange.startOffset > endIndex) {
+            textRange.startOffset--;
+        }
+        if (textRange.endOffset > endIndex) {
+            textRange.endOffset--;
+        }
+    }
+
     if (insert) {
         textX.push({
             body: insert,
@@ -84,6 +102,15 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
             segmentId,
             line: 1,
         });
+
+        if (textRange) {
+            if (textRange.startOffset >= endIndex) {
+                textRange.startOffset += insert.dataStream.length;
+            }
+            if (textRange.endOffset > endIndex) {
+                textRange.endOffset += insert.dataStream.length;
+            }
+        }
     }
     return textX;
 }

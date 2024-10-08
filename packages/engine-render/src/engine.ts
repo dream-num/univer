@@ -807,7 +807,6 @@ export class Engine extends ThinEngine<Scene> {
             this._pointer[PointerInput.Vertical] = evt.clientY;
             this._pointer[PointerInput.DeltaHorizontal] = evt.movementX;
             this._pointer[PointerInput.DeltaVertical] = evt.movementY;
-            // console.log('pointerMoveEvent_1', previousHorizontal, evt.clientX, previousVertical, evt.clientY, this._pointer);
             const deviceEvent = evt as IPointerEvent;
             deviceEvent.deviceType = deviceType;
 

@@ -22,7 +22,7 @@ import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
-export class Kurt extends BaseFunction {
+export class SkewP extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 255;
@@ -62,7 +62,7 @@ export class Kurt extends BaseFunction {
             }
         }
 
-        if (values.length <= 3) {
+        if (values.length <= 2) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
@@ -79,7 +79,7 @@ export class Kurt extends BaseFunction {
             sum2 += (values[i] - mean) ** 2;
         }
 
-        const stdev = Math.sqrt(sum2 / (n - 1));
+        const stdev = Math.sqrt(sum2 / n);
 
         if (stdev === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
@@ -88,10 +88,10 @@ export class Kurt extends BaseFunction {
         let sum3 = 0;
 
         for (let i = 0; i < n; i++) {
-            sum3 += ((values[i] - mean) / stdev) ** 4;
+            sum3 += ((values[i] - mean) / stdev) ** 3;
         }
 
-        const result = n * (n + 1) / ((n - 1) * (n - 2) * (n - 3)) * sum3 - 3 * ((n - 1) ** 2) / ((n - 2) * (n - 3));
+        const result = sum3 / n;
 
         return NumberValueObject.create(result);
     }

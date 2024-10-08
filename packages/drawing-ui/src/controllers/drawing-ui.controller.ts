@@ -53,13 +53,22 @@ export class DrawingUIController extends Disposable {
     }
 
     private _initInputFocus() {
+        const isEditableElement = (element: EventTarget | null) => {
+            if (element instanceof HTMLElement) {
+                return element.isContentEditable
+                || element instanceof HTMLInputElement
+                || element instanceof HTMLTextAreaElement;
+            }
+
+            return false;
+        };
         const handleFocus = (event: FocusEvent) => {
-            if (event.target instanceof HTMLInputElement) {
+            if (isEditableElement(event.target)) {
                 this._contextService.setContextValue(EDITOR_ACTIVATED, true);
             }
         };
         const handleBlur = (event: FocusEvent) => {
-            if (event.target instanceof HTMLInputElement) {
+            if (isEditableElement(event.target)) {
                 this._contextService.setContextValue(EDITOR_ACTIVATED, false);
             }
         };

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.2.15",
+    "version": "0.3.0",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,13 +58,11 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
@@ -84,7 +82,7 @@
         "rc-util": "^5.43.0"
     },
     "optionalDependencies": {
-        "vue": "^3.5.9"
+        "vue": ">=3.0.0"
     },
     "devDependencies": {
         "@testing-library/react": "^16.0.1",

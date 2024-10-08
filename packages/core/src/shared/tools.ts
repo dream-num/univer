@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from './types';
-
 import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl } from '../common/url';
+
+import type { IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -269,7 +269,7 @@ export class Tools {
         }
 
         function diffArrays(oneArray: any[], towArray: any[]) {
-            if (one.length !== tow.length) {
+            if (oneArray.length !== towArray.length) {
                 return false;
             }
             for (let i = 0, len = oneArray.length; i < len; i++) {

@@ -5,5 +5,5 @@
         "allowArbitraryExtensions": true,
         "outDir": "local"
     },
-    "include": ["src"]
+    "include": ["src", "../mockdata/src/slides", "../mockdata/src/sheets", "../mockdata/src/docs", "../mockdata/src/index.ts"]
 }

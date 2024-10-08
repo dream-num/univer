@@ -26,8 +26,8 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
+import { DEFAULT_DOCUMENT_DATA_CN } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { enUS, ruRU, zhCN } from '../locales';
 
 /* eslint-disable node/prefer-global/process */

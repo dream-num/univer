@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+import type { FUniver } from '@univerjs/facade';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
@@ -30,9 +33,6 @@ import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
-import type { FUniver } from '@univerjs/facade';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { enUS } from '../locales';
 
 // univer

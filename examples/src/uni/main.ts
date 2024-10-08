@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -23,6 +26,7 @@ import { DocUIController, UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
+import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO1 } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
@@ -42,10 +46,6 @@ import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
 import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
-import type { Nullable } from '@univerjs/core';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
-import { DEFAULT_DOCUMENT_DATA_CN, DEFAULT_DOCUMENT_DATA_EN, DEFAULT_SLIDE_DATA, DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO1 } from '../data';
 import { enUS } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */

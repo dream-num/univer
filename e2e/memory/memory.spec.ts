@@ -16,8 +16,8 @@
 
 /* eslint-disable no-console */
 
-import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const MAX_MEMORY_OVERFLOW = 5_000_000; // 5MB
 

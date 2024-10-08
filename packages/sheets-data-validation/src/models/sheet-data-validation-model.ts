@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { isReferenceString } from '@univerjs/engine-formula';
-import { Subject } from 'rxjs';
-import type { ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
+import type { DataValidationType, ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
+import { RemoveSheetMutation } from '@univerjs/sheets';
+import { Subject } from 'rxjs';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -42,7 +42,8 @@ export class SheetDataValidationModel extends Disposable {
         @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(DataValidationCacheService) private _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService
+        @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initRuleUpdateListener();
@@ -51,6 +52,28 @@ export class SheetDataValidationModel extends Disposable {
             this._ruleChange$.complete();
             this._validStatusChange$.complete();
         });
+
+        this._initUniverInstanceListener();
+    }
+
+    private _initUniverInstanceListener() {
+        this.disposeWithMe(
+            this._univerInstanceService.unitDisposed$.subscribe((unit) => {
+                this._ruleMatrixMap.delete(unit.getUnitId());
+            })
+        );
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command) => {
+                if (command.id === RemoveSheetMutation.id) {
+                    const { unitId, subUnitId } = command.params as IRemoveSheetMutationParams;
+                    const subUnitMap = this._ruleMatrixMap.get(unitId);
+                    if (subUnitMap) {
+                        subUnitMap.delete(subUnitId);
+                    }
+                }
+            })
+        );
     }
 
     private _initRuleUpdateListener() {
@@ -90,10 +113,7 @@ export class SheetDataValidationModel extends Disposable {
 
     private _ensureRuleMatrix(unitId: string, subUnitId: string) {
         let unitMap = this._ruleMatrixMap.get(unitId);
-        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            throw new Error(`workbook not found, unitId: ${unitId}`);
-        }
+
         if (!unitMap) {
             unitMap = new Map();
             this._ruleMatrixMap.set(unitId, unitMap);
@@ -101,11 +121,7 @@ export class SheetDataValidationModel extends Disposable {
 
         let matrix = unitMap.get(subUnitId);
         if (!matrix) {
-            const worksheet = workbook.getSheetBySheetId(subUnitId);
-            if (!worksheet) {
-                throw new Error(`worksheet not found, unitId: ${unitId}, subUnitId: ${subUnitId}`);
-            }
-            matrix = new RuleMatrix(new Map(), worksheet);
+            matrix = new RuleMatrix(new Map(), unitId, subUnitId, this._univerInstanceService);
             unitMap.set(subUnitId, matrix);
         }
 
@@ -113,12 +129,6 @@ export class SheetDataValidationModel extends Disposable {
     }
 
     private _addRuleSideEffect(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
-            if (isReferenceString(rule.formula1 ?? '')) {
-                // polyfill old-version ref-string, transform to formula
-                rule.formula1 = `=${rule.formula1}`;
-            }
-        }
         const ruleMatrix = this._ensureRuleMatrix(unitId, subUnitId);
         ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(unitId, subUnitId, rule);

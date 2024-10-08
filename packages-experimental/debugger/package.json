@@ -51,14 +51,14 @@
     ],
     "scripts": {
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -70,12 +70,13 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
+        "@univerjs/mockdata": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/ui": "workspace:*"
     },
     "optionalDependencies": {
-        "vue": "^3.5.9"
+        "vue": ">=3.0.0"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

@@ -25,6 +25,13 @@ export interface IUniverSheetsUIConfig {
     menu?: MenuConfig;
     disableAutoFocus?: true;
     override?: DependencyOverride;
+
+    /**
+     * Whether to show the formula bar.
+     */
+    formulaBar?: boolean;
 }
 
-export const defaultPluginConfig: IUniverSheetsUIConfig = {};
+export const defaultPluginConfig: IUniverSheetsUIConfig = {
+    formulaBar: true,
+};

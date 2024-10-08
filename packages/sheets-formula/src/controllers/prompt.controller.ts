@@ -263,6 +263,8 @@ export class PromptController extends Disposable {
                 if (!editor
                     || editor.onlyInputContent()
                     || (editor.isSheetEditor() && !this._isFormulaEditorActivated())
+                    // Remove this latter.
+                    || editor.params.scrollBar
                 ) {
                     return;
                 }

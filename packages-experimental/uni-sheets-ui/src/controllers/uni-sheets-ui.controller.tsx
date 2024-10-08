@@ -15,13 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { connectInjector, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
+import { connectInjector, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
+import { SetBackgroundColorCommand } from '@univerjs/sheets';
+import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
 import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService, useObservable } from '@univerjs/ui';
 import { BuiltinUniToolbarItemId, generateCloneMutation, UniToolbarService, UniUIPart } from '@univerjs/uniui';
 import React from 'react';
-import { SetBackgroundColorCommand } from '@univerjs/sheets';
-import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
 import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
 import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID } from './menu';
 import { menuSchema } from './menu.schema';
@@ -36,6 +36,7 @@ export class UniSheetsUIController extends SheetUIController {
         @IShortcutService shortcutService: IShortcutService,
         @IMenuManagerService menuManagerService: IMenuManagerService,
         @IUIPartsService uiPartsService: IUIPartsService,
+        @IConfigService configService: IConfigService,
         @Inject(UniToolbarService) private readonly _toolbarService: UniToolbarService
     ) {
         super(
@@ -45,7 +46,8 @@ export class UniSheetsUIController extends SheetUIController {
             commandService,
             shortcutService,
             menuManagerService,
-            uiPartsService
+            uiPartsService,
+            configService
         );
         this._initUniMenus();
         this._initMutations();

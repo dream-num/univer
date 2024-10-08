@@ -843,7 +843,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
         // If neither the formula bar editor nor the cell editor has been edited,
         // it is considered that the content has not changed and returns directly.
         const editorIsDirty = this._editorBridgeService.getEditorDirty();
@@ -852,15 +851,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const workbook = this._context.unit;
-        let worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet();
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
-
-        // If the target cell does not exist, there is no need to execute setRangeValue
-        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
-        if (!setRangeValueTargetSheet) {
-            return;
-        }
 
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
@@ -876,6 +869,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
+        const { unitId, sheetId } = editCellState;
+
         /**
          * When closing the editor, switch to the current tab of the editor.
          */
@@ -887,12 +882,43 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
+        const documentDataModel = editCellState.documentLayoutObject.documentModel;
+
+        if (documentDataModel) {
+            await this._submitCellData(documentDataModel);
+        }
+
+        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+        this._moveCursor(keycode);
+    }
+
+    submitCellData(documentDataModel: DocumentDataModel) {
+        return this._submitCellData(documentDataModel);
+    }
+
+    private async _submitCellData(documentDataModel: DocumentDataModel) {
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (editCellState == null) {
+            return;
+        }
+
+        const { unitId, sheetId, row, column } = editCellState;
+
+        const workbook = this._context.unit;
+        let worksheet = workbook.getActiveSheet();
+
+        // If the target cell does not exist, there is no need to execute setRangeValue
+        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
+        if (!setRangeValueTargetSheet) {
+            return;
+        }
+
         worksheet = workbook.getActiveSheet();
 
         // If cross-sheet operation, switch current sheet first, then const cellData
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
-            documentLayoutObject,
+            documentDataModel,
             this._lexerTreeBuilder,
             (model) => model.getSnapshot(),
             this._localService,
@@ -900,7 +926,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         );
 
         if (!cellData) {
-            this._moveCursor(keycode);
             return;
         }
 
@@ -933,9 +958,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             },
             value: finalCell,
         });
-
-        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveCursor(keycode);
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
@@ -1042,7 +1064,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
 export function getCellDataByInput(
     cellData: ICellData,
-    documentLayoutObject: IDocumentLayoutObject,
+    documentDataModel: Nullable<DocumentDataModel>,
     lexerTreeBuilder: LexerTreeBuilder,
     getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
@@ -1050,12 +1072,11 @@ export function getCellDataByInput(
 ) {
     cellData = Tools.deepClone(cellData);
 
-    const { documentModel } = documentLayoutObject;
-    if (documentModel == null) {
+    if (documentDataModel == null) {
         return null;
     }
 
-    const snapshot = getSnapshot(documentModel);
+    const snapshot = getSnapshot(documentDataModel);
 
     const { body } = snapshot;
     if (body == null) {

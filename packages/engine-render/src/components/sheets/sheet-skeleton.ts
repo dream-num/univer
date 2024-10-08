@@ -14,34 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable no-param-reassign */
-import {
-    BooleanNumber,
-    BuildTextUtils,
-    CellValueType,
-    CustomRangeType,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DEFAULT_STYLES,
-    DocumentDataModel,
-    extractPureTextFromCell,
-    getColorStyle,
-    HorizontalAlign,
-    IContextService,
-    Inject,
-    isCellCoverable,
-    isNullCell,
-    isWhiteColor,
-    LocaleService,
-    ObjectMatrix,
-    searchArray,
-    TextX,
-    Tools,
-    VerticalAlign,
-    WrapStrategy,
-} from '@univerjs/core';
-import { distinctUntilChanged, startWith } from 'rxjs';
-
 import type {
     BorderStyleTypes,
     IBorderStyleData,
@@ -71,6 +43,37 @@ import type {
     TextDirection,
     Worksheet,
 } from '@univerjs/core';
+import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
+
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+/* eslint-disable max-lines-per-function */
+/* eslint-disable no-param-reassign */
+import {
+    BooleanNumber,
+    BuildTextUtils,
+    CellValueType,
+    CustomRangeType,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DEFAULT_STYLES,
+    DocumentDataModel,
+    extractPureTextFromCell,
+    getColorStyle,
+    HorizontalAlign,
+    IContextService,
+    Inject,
+    isCellCoverable,
+    isNullCell,
+    isWhiteColor,
+    LocaleService,
+    ObjectMatrix,
+    searchArray,
+    TextX,
+    Tools,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
+import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -86,9 +89,6 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -269,11 +269,11 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     /** A matrix to store if a (row, column) position has render cache. */
-    private _cellBgCacheMatrix = new ObjectMatrix<boolean>();
-    private _cellBorderCacheMatrix = new ObjectMatrix<boolean>();
+    private _handleBgMatrix = new ObjectMatrix<boolean>();
+    private _handleBorderMatrix = new ObjectMatrix<boolean>();
+    private _handleFontMatrix = new ObjectMatrix<boolean>();
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
-
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
 
@@ -381,8 +381,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._cellBgCacheMatrix.reset();
-        this._cellBorderCacheMatrix.reset();
+        this._handleBgMatrix.reset();
+        this._handleBorderMatrix.reset();
         this._overflowCache.reset();
 
         this._worksheetData = null as unknown as IWorksheetData;
@@ -1730,8 +1730,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             fontMatrix: new ObjectMatrix<IFontCacheItem>(),
             border: new ObjectMatrix<BorderCache>(),
         };
-        this._cellBgCacheMatrix.reset();
-        this._cellBorderCacheMatrix.reset();
+        this._handleBgMatrix.reset();
+        this._handleBorderMatrix.reset();
         this._overflowCache.reset();
     }
 
@@ -1744,13 +1744,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         mergeRange?: IRange;
         cacheItem?: ICacheItem;
     } | undefined) {
+        const handledThisCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+        if (handledThisCell) return;
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
         if (!cacheItem.border) return;
-        const handledThisCell = Tools.isDefine(this._cellBorderCacheMatrix.getValue(row, col));
-        if (handledThisCell) return;
 
-        this._cellBorderCacheMatrix.setValue(row, col, true);
+        this._handleBorderMatrix.setValue(row, col, true);
         if (style && style.bd) {
             const mergeRange = options?.mergeRange;
             if (mergeRange) {
@@ -1778,13 +1778,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         mergeRange?: IRange;
         cacheItem?: ICacheItem;
     } | undefined) {
+        const handledThisCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+        if (handledThisCell) return;
         // by default, style cache should includes border and background info.
         const cacheItem = options?.cacheItem || { bg: true, border: true };
         if (!cacheItem.bg) return;
-        const handledThisCell = Tools.isDefine(this._cellBgCacheMatrix.getValue(row, col));
-        if (handledThisCell) return;
 
-        this._cellBgCacheMatrix.setValue(row, col, true);
+        this._handleBgMatrix.setValue(row, col, true);
         if (style && style.bg && style.bg.rgb) {
             const rgb = style.bg.rgb;
             if (!this._stylesCache.background![rgb]) {
@@ -1798,8 +1798,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    _setFontStylesCache(cell: Nullable<ICellData>, row: number, col: number) {
+    _setFontStylesCache(row: number, col: number, cell: Nullable<ICellData>) {
         if (isNullCell(cell)) return;
+
+        this._handleFontMatrix.setValue(row, col, true);
         if (this._stylesCache.fontMatrix.getValue(row, col)) return;
 
         const modelObject = this._getCellDocumentModel(cell, {
@@ -1849,11 +1851,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        /**
-         * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
-         */
-        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        if (!cell) return;
+        const handledBgCell = Tools.isDefine(this._handleBgMatrix.getValue(row, col));
+        const handledBorderCell = Tools.isDefine(this._handleBorderMatrix.getValue(row, col));
+
+        // worksheet.getCell has significant performance overhead, if we had handled this cell then return first.
+        if (handledBgCell && handledBorderCell) {
+            return;
+        }
 
         if (!options) {
             options = { cacheItem: { bg: true, border: true } };
@@ -1877,10 +1881,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
+        const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
         const style = this._styles.getStyleByCell(cell);
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
-        this._setFontStylesCache(cell, row, col);
+        this._setFontStylesCache(row, col, cell);
     }
 
     private _updateConfigAndGetDocumentModel(

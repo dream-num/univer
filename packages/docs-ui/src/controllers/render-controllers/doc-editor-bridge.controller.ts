@@ -296,9 +296,14 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                         return;
                     }
 
-                    this._resize(unitId);
+                    const editor = this._editorService.getEditor(unitId);
 
-                    this._valueChange();
+                    // Only for Text editor?
+                    if (editor && !editor.params.scrollBar) {
+                        this._resize(unitId);
+
+                        this._valueChange();
+                    }
                 }
             })
         );

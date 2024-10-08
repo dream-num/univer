@@ -15,13 +15,13 @@
  */
 
 import type { IRange, IRangeWithCoord, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, Inject, Injector } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject, Injector } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {
-    unitId?: string;
+    unitId: string;
     sheetId: string;
     skeleton: SpreadsheetSkeleton;
     dirty: boolean;
@@ -112,6 +112,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
     private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const param = this._getSkeleton(searchParam);
+        const unitId = this._context.unitId;
         if (param != null) {
             this._reCalculate(param);
         } else {
@@ -124,6 +125,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
             const skeleton = this._buildSkeleton(worksheet);
             this._sheetSkeletonParam.push({
+                unitId,
                 sheetId,
                 skeleton,
                 dirty: false,
@@ -131,7 +133,6 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
         }
 
         this._currentSkeletonSearchParam = searchParam;
-        const unitId = this._context.unitId;
         const sheetId = this._currentSkeletonSearchParam.sheetId;
         const sheetSkeletonManagerParam = this.getUnitSkeleton(unitId, sheetId);
         this._currentSkeletonBefore$.next(sheetSkeletonManagerParam);
@@ -176,6 +177,7 @@ export class SheetSkeletonManagerService extends Disposable implements IRenderMo
 
         const newSkeleton = this._buildSkeleton(worksheet);
         this._sheetSkeletonParam.push({
+            unitId: this._context.unitId,
             sheetId: searchParam.sheetId,
             skeleton: newSkeleton,
             dirty: false,

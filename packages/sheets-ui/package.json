@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "0.2.15",
+    "version": "0.3.0",
     "private": false,
     "description": "UniverSheet normal ui-plugin-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,8 +58,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DocumentSkeletonPageType, getPageFromPath, GlyphType, Liquid } from '@univerjs/engine-render';
 import type { IPosition, ITextRange, Nullable } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonColumn, IDocumentSkeletonDivide, IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonSection, INodePosition, IPoint } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getPageFromPath, GlyphType, Liquid } from '@univerjs/engine-render';
 
 export enum NodePositionStateType {
     NORMAL,

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
-import { useEvent } from '@univerjs/ui';
 
+import { useEvent } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
-import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
 import { TextEditor } from '../editor/TextEditor';
@@ -44,17 +44,15 @@ export interface IRangeSelectorProps {
     className?: string;
     textEditorClassName?: string;
     onSelectorVisibleChange?: (visible: boolean) => void;
-    disableInput?: boolean;
+    dialogOnly?: boolean;
 }
 
-const disableInputStyle: React.CSSProperties = {
+const dialogOnlyInputStyle: React.CSSProperties = {
     pointerEvents: 'none',
-    cursor: 'not-allowed',
-    opacity: 0.5,
 };
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange, disableInput } = props;
+    const { dialogOnly, onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className, textEditorClassName, onSelectorVisibleChange: _onSelectorVisibleChange } = props;
     const onSelectorVisibleChange = useEvent(_onSelectorVisibleChange);
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -115,7 +113,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const isSingleChoiceRef = useRef<Nullable<boolean>>(isSingleChoice);
 
     const isReadonlyRef = useRef<Nullable<boolean>>(isReadonly);
-    const themeService = useDependency(ThemeService);
 
     useEffect(() => {
         const selector = selectorRef.current;
@@ -309,14 +306,24 @@ export function RangeSelector(props: IRangeSelectorProps) {
     } else if (size === 'large') {
         height = 32;
     }
-    const theme = themeService.getCurrentTheme();
     return (
         <>
-            <div className={sClassName} ref={selectorRef} style={{ width, height }}>
-                <TextEditor style={disableInput ? disableInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+            <div
+                className={sClassName}
+                ref={selectorRef}
+                style={{ width, height, cursor: dialogOnly ? 'pointer' : undefined }}
+                onClickCapture={(event) => {
+                    if (dialogOnly) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        handleOpenModal();
+                    }
+                }}
+            >
+                <TextEditor style={dialogOnly ? dialogOnlyInputStyle : undefined} placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                    <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
-                        <SelectRangeSingle style={disableInput ? { color: theme.primaryColor } : undefined} />
+                    <button type="button" className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
+                        <SelectRangeSingle />
                     </button>
                 </Tooltip>
             </div>

@@ -286,7 +286,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement;
+        const isFocusing = this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';

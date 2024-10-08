@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
 import { generateRandomId, Tools } from '../../../../shared';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../types';
-import type { ICustomRange, IDocumentBody, IParagraph } from '../../../../types/interfaces';
 
 const tags = [
     // DataStreamTreeTokenType.PARAGRAPH, // 段落
@@ -41,6 +41,14 @@ const tags = [
 export const getPlainText = (dataStream: string) => {
     const text = dataStream.endsWith('\r\n') ? dataStream.slice(0, -2) : dataStream;
     return tags.reduce((res, curr) => res.replaceAll(curr, ''), text);
+};
+
+export const isEmptyDocument = (dataStream?: string) => {
+    if (!dataStream) {
+        return true;
+    }
+    const text = getPlainText(dataStream).replaceAll('\r', '');
+    return text === '';
 };
 
 export const fromPlainText = (text: string): IDocumentBody => {

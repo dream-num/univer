@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
+import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelections } from '@univerjs/sheets';
 import { DisposableCollection, Inject, Injector, RANGE_TYPE, ThemeService, toDisposable } from '@univerjs/core';
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Viewport } from '@univerjs/engine-render';
-import type { ISelectionStyle, ISelectionWithCoordAndStyle, ISelectionWithStyle, SheetsSelectionsService, WorkbookSelections } from '@univerjs/sheets';
 
 /**
  * This service extends the existing `SelectionRenderService` to provide the rendering of prompt selections

@@ -96,6 +96,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
+
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';

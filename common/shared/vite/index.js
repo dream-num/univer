@@ -78,7 +78,6 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         ],
         define: {
             'process.env.NODE_ENV': JSON.stringify(mode),
-            'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
             'process.env.BUILD_TIMESTAMP': JSON.stringify(Number.parseInt(Date.now() / 1000)),
         },
         test: {

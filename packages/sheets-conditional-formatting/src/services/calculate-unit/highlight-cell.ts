@@ -84,8 +84,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     allValue.sort((a, b) => b - a);
                     const configRule = rule.rule as IRankHighlightCell;
                     const targetIndex = configRule.isPercent
-                        ? Math.round(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
-                        : Math.round(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
+                        ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
+                        : Math.floor(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
                     if (configRule.isBottom) {
                         return { rank: allValue[allValue.length - targetIndex - 1] };
                     } else {

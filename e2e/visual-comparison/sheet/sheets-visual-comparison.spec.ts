@@ -15,6 +15,7 @@
  */
 
 import { expect, test } from '@playwright/test';
+import { generateSnapshotName } from '../const';
 
 test('diff default sheet content', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
@@ -23,7 +24,7 @@ test('diff default sheet content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.waitForTimeout(5000);
 
-    await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
+    await expect(page).toHaveScreenshot(generateSnapshotName('default-sheet'), { maxDiffPixels: 5 });
 });
 
 test('diff demo sheet content', async ({ page }) => {
@@ -33,5 +34,5 @@ test('diff demo sheet content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
     await page.waitForTimeout(5000);
 
-    await expect(page).toHaveScreenshot({ maxDiffPixels: 5 });
+    await expect(page).toHaveScreenshot(generateSnapshotName('demo-sheet'), { maxDiffPixels: 5 });
 });

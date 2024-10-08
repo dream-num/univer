@@ -16,7 +16,7 @@
 
 import { isRealNum } from '@univerjs/core';
 import { erf, erfcINV } from './engineering';
-import { calculateCombin } from './math';
+import { calculateCombin, calculateFactorial } from './math';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 
@@ -654,6 +654,20 @@ export function normalPDF(x: number, mean: number, standardDev: number): number 
 export function normalINV(probability: number, mean: number, standardDev: number): number {
     // eslint-disable-next-line
     return -1.41421356237309505 * standardDev * erfcINV(2 * probability) + mean;
+}
+
+export function poissonCDF(x: number, mean: number): number {
+    let result = 0;
+
+    for (let i = 0; i <= x; i++) {
+        result += poissonPDF(i, mean);
+    }
+
+    return result;
+}
+
+export function poissonPDF(x: number, mean: number): number {
+    return Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
 }
 
 export function studentTINV(probability: number, degFreedom: number): number {

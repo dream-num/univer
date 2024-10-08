@@ -1189,8 +1189,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '関数に代入する値を指定します。' },
+            mean: { name: '平均', detail: '対象となる分布の算術平均 (相加平均) を指定します。' },
+            cumulative: { name: '累積', detail: '計算に使用する関数の形式を論理値で指定します。 関数形式に TRUE を指定すると累積分布関数の値が計算され、FALSE を指定すると確率密度関数の値が計算されます。' },
         },
     },
     PROB: {
@@ -1203,13 +1204,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xRange: { name: '数値', detail: 'それぞれの確率値を含む数値範囲。' },
+            probRange: { name: '確率', detail: '数値に関連付けられた確率値のセット。' },
+            lowerLimit: { name: '下限', detail: '確率が計算される数値の下限。' },
+            upperLimit: { name: '上限', detail: '確率が計算される数値の上限。' },
         },
     },
     QUARTILE_EXC: {
-        description: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
-        abstract: '0 より大きく 1 より小さい百分位値に基づいて、配列に含まれるデータから四分位数を返します。',
+        description: 'データセットの四分位数を返します (0と1は含まれません)。',
+        abstract: 'データセットの四分位数を返します (0と1は含まれません)。',
         links: [
             {
                 title: '指導',
@@ -1217,13 +1220,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '四分位値を必要とする配列またはデータ範囲。' },
+            quart: { name: '四分位値', detail: '返す四分位値。' },
         },
     },
     QUARTILE_INC: {
-        description: '配列に含まれるデータから四分位数を抽出します。',
-        abstract: '配列に含まれるデータから四分位数を抽出します。',
+        description: 'データセットの四分位数を返します (0と1が含まれています)。',
+        abstract: 'データセットの四分位数を返します (0と1が含まれています)。',
         links: [
             {
                 title: '指導',
@@ -1231,8 +1234,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '四分位値を必要とする配列またはデータ範囲。' },
+            quart: { name: '四分位値', detail: '返す四分位値。' },
         },
     },
     RANK_AVG: {

@@ -35,6 +35,8 @@ import { NormInv } from '../statistical/norm-inv';
 import { NormSInv } from '../statistical/norm-s-inv';
 import { PercentileInc } from '../statistical/percentile-inc';
 import { PercentrankInc } from '../statistical/percentrank-inc';
+import { PoissonDist } from '../statistical/poisson-dist';
+import { QuartileInc } from '../statistical/quartile-inc';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
@@ -74,6 +76,8 @@ export const functionCompatibility = [
     [NormSInv, FUNCTION_NAMES_COMPATIBILITY.NORMSINV],
     [PercentileInc, FUNCTION_NAMES_COMPATIBILITY.PERCENTILE],
     [PercentrankInc, FUNCTION_NAMES_COMPATIBILITY.PERCENTRANK],
+    [PoissonDist, FUNCTION_NAMES_COMPATIBILITY.POISSON],
+    [QuartileInc, FUNCTION_NAMES_COMPATIBILITY.QUARTILE],
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],

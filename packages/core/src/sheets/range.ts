@@ -15,10 +15,7 @@
  */
 
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import { ObjectMatrix, Tools } from '../shared';
-import { DEFAULT_STYLES } from '../types/const';
 import type { HorizontalAlign, VerticalAlign } from '../types/enum';
-import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
 import type {
     IBorderData,
     IDocumentBody,
@@ -30,8 +27,11 @@ import type {
 } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, IRange } from './typedef';
-import { RANGE_TYPE } from './typedef';
 import type { Worksheet } from './worksheet';
+import { ObjectMatrix, Tools } from '../shared';
+import { DEFAULT_STYLES } from '../types/const';
+import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * getObjectValues options type
@@ -123,19 +123,22 @@ export class Range {
     }
 
     static transformRange = (range: IRange, worksheet: Worksheet): IRange => {
+        const maxColumns = worksheet.getMaxColumns() - 1;
+        const maxRows = worksheet.getMaxRows() - 1;
+
         if (range.rangeType === RANGE_TYPE.ALL) {
             return {
                 startColumn: 0,
                 startRow: 0,
-                endColumn: worksheet.getMaxColumns() - 1,
-                endRow: worksheet.getMaxRows() - 1,
+                endColumn: maxColumns,
+                endRow: maxRows,
             };
         }
 
         if (range.rangeType === RANGE_TYPE.COLUMN) {
             return {
                 startRow: 0,
-                endRow: worksheet.getMaxRows() - 1,
+                endRow: maxRows,
                 startColumn: range.startColumn,
                 endColumn: range.endColumn,
             };
@@ -144,13 +147,18 @@ export class Range {
         if (range.rangeType === RANGE_TYPE.ROW) {
             return {
                 startColumn: 0,
-                endColumn: worksheet.getMaxColumns() - 1,
+                endColumn: maxColumns,
                 startRow: range.startRow,
                 endRow: range.endRow,
             };
         }
 
-        return range;
+        return {
+            startColumn: range.startColumn,
+            endColumn: Math.min(range.endColumn, maxColumns),
+            startRow: range.startRow,
+            endRow: Math.min(range.endRow, maxRows),
+        };
     };
 
     /**

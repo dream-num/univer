@@ -72,6 +72,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

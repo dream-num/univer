@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
-import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
-
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { ILayoutService, useScrollYOverContainer } from '@univerjs/ui';
-
-import get from 'lodash.get';
-import set from 'lodash.set';
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
-import stylesBase from '../index.module.less';
-
-import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
+import { createInternalEditorID, get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+
+import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { TextEditor } from '@univerjs/docs-ui';
+
+import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { ILayoutService, useScrollYOverContainer } from '@univerjs/ui';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+
+import stylesBase from '../index.module.less';
+import styles from './index.module.less';
 
 const getIcon = (iconType: string, iconId: string | number) => {
     const arr = iconMap[iconType] || [];

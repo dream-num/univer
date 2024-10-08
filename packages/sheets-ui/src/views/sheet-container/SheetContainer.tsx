@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
-import React, { useMemo } from 'react';
+import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ContextMenuPosition, IMenuManagerService, ToolbarItem, useObservable } from '@univerjs/ui';
+import React, { useMemo } from 'react';
 
+import { useActiveWorkbook } from '../../components/hook';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
 import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
-import { useActiveWorkbook } from '../../components/hook';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const menuManagerService = useDependency(IMenuManagerService);
+
     const workbook = useActiveWorkbook();
     const footerMenus = menuManagerService.getMenuByPositionKey(ContextMenuPosition.FOOTER_MENU);
 

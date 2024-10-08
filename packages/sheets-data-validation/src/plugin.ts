@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 import {
     DependentOn,
     ICommandService,
@@ -46,7 +47,6 @@ import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsNumfmtPlugin, UniverDataValidationPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
@@ -61,7 +61,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     ) {
         super();
 
-        // Manage the plugin configuration.
+        // Manage the plugin configuration..
         const { menu, ...rest } = this._config;
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });

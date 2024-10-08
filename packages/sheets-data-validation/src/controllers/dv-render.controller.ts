@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute, UniverInstanceType, WrapStrategy } from '@univerjs/core';
+import type { CellValue, ICellRenderContext, IRange, Nullable } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
-import { bufferTime, debounceTime, filter } from 'rxjs';
-import type { ICellDataForSheetInterceptor, ICellRenderContext, IRange, Workbook } from '@univerjs/core';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import { bufferTime, filter } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { menuSchema } from './menu.schema';
-import type { ListValidator } from '../validators';
 
 const INVALID_MARK = {
     tr: {
@@ -53,7 +51,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         super();
 
         this._initMenu();
-        this._initSkeletonChange();
         this._initDropdown();
         this._initViewModelIntercept();
         this._initAutoHeight();
@@ -129,33 +126,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         }));
     }
 
-    private _initSkeletonChange() {
-        const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return;
-
-            const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-            if (!subUnitId) return;
-
-            const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService)
-                .getWorksheetSkeleton(subUnitId)
-                ?.skeleton;
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
-        };
-
-        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-    }
-
     // eslint-disable-next-line max-lines-per-function
     private _initViewModelIntercept() {
         this.disposeWithMe(
@@ -165,11 +135,10 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                     effect: InterceptorEffectEnum.Style,
                     // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
-                    // eslint-disable-next-line complexity
+                    // eslint-disable-next-line max-lines-per-function, complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
-                        const styleMap = workbook.getStyles();
-                        const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+
                         const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
@@ -180,9 +149,22 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         }
                         const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                        const cellOrigin = worksheet.getCellRaw(row, col);
-                        const cellValue = getCellValueOrigin(cellOrigin);
-                        const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
+                        const cellOrigin = pos.rawData;
+                        let cache: Nullable<CellValue>;
+                        const cellValue = {
+                            get value() {
+                                if (cache !== undefined) {
+                                    return cache;
+                                }
+                                cache = getCellValueOrigin(cellOrigin) ?? null;
+                                return cache;
+                            },
+                        };
+                        const valueStr = {
+                            get value() {
+                                return `${cellValue.value ?? ''}`;
+                            },
+                        };
 
                         return next({
                             ...cell,
@@ -202,11 +184,16 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                             ],
                             fontRenderExtension: {
                                 ...cell?.fontRenderExtension,
-                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender(rule, cellValue, pos),
+                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue.value, pos),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,
-                                ...validator?.getExtraStyle(rule, valueStr, { style: defaultStyle }),
+                                ...validator?.getExtraStyle(rule, valueStr.value, {
+                                    get style() {
+                                        const styleMap = workbook.getStyles();
+                                        return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+                                    },
+                                }),
                             },
                             interceptorAutoHeight: () => {
                                 const skeleton = this._renderManagerService.getRenderById(unitId)
@@ -285,36 +272,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
     ) {
         super();
 
-        this._initSkeletonChange();
         this._initViewModelIntercept();
         this._initAutoHeight();
-    }
-
-    private _initSkeletonChange() {
-        const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            if (!workbook) return;
-
-            const unitId = workbook.getUnitId();
-            const subUnitId = workbook.getActiveSheet()?.getSheetId();
-            if (!subUnitId) return;
-
-            const skeleton = this._renderManagerService.getRenderById(unitId)
-                ?.with(SheetSkeletonManagerService)
-                .getWorksheetSkeleton(subUnitId)
-                ?.skeleton;
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-
-            skeleton?.makeDirty(true);
-            skeleton?.calculate();
-
-            if (currentRender) {
-                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
-            }
-        };
-
-        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
-        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(() => markSkeletonDirty()));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -324,27 +283,17 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     effect: InterceptorEffectEnum.Style,
+                    // must be after numfmt
                     priority: InterceptCellContentPriority.DATA_VALIDATION,
-                    // eslint-disable-next-line max-lines-per-function, complexity
+                    // eslint-disable-next-line complexity
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId, workbook, worksheet } = pos;
 
-                        const skeleton = this._renderManagerService.getRenderById(unitId)
-                            ?.with(SheetSkeletonManagerService)
-                            .getWorksheetSkeleton(subUnitId)
-                            ?.skeleton;
-                        if (!skeleton) {
-                            return next(cell);
-                        }
-
-                        const styleMap = pos.workbook.getStyles();
-                        const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                         const ruleId = this._sheetDataValidationModel.getRuleIdByLocation(unitId, subUnitId, row, col);
                         if (!ruleId) {
                             return next(cell);
                         }
                         const rule = this._sheetDataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-
                         if (!rule) {
                             return next(cell);
                         }
@@ -352,47 +301,10 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = worksheet.getCellRaw(row, col);
                         const cellValue = getCellValueOrigin(cellOrigin);
-
-                        let extra: ICellDataForSheetInterceptor = {};
-                        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
-                            extra = {
-                                interceptorStyle: {
-                                    ...cell?.interceptorStyle,
-                                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP,
-                                },
-                            };
-                        }
-
-                        if (rule.type === DataValidationType.CHECKBOX) {
-                            extra = {
-
-                                interceptorStyle: {
-                                    ...cell?.interceptorStyle,
-                                    tb: WrapStrategy.CLIP,
-                                },
-                            };
-                        }
-
-                        if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
-                            const colorMap = (validator as ListValidator).getListWithColorMap(rule);
-                            const valueStr = `${getCellValueOrigin(cellOrigin) ?? ''}`;
-                            const color = colorMap[valueStr];
-                            if (color) {
-                                extra = {
-                                    ...extra,
-                                    interceptorStyle: {
-                                        ...extra.interceptorStyle,
-                                        bg: {
-                                            rgb: color,
-                                        },
-                                    },
-                                };
-                            }
-                        }
+                        const valueStr = `${cellValue ?? ''}`;
 
                         return next({
                             ...cell,
-                            ...extra,
                             dataValidation: {
                                 ruleId,
                                 validStatus,
@@ -407,21 +319,27 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                 ...(cell?.customRender ?? []),
                                 ...(validator?.canvasRender ? [validator.canvasRender] : []),
                             ],
-                            // @ts-ignore
                             fontRenderExtension: {
-                                // @ts-ignore
                                 ...cell?.fontRenderExtension,
-                                isSkip: validator?.skipDefaultFontRender(rule, cellValue, pos),
+                                isSkip: cell?.fontRenderExtension?.isSkip || validator?.skipDefaultFontRender?.(rule, cellValue, pos),
                             },
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,
-                                ...extra.interceptorStyle,
+                                ...validator?.getExtraStyle(rule, valueStr, {
+                                    get style() {
+                                        const styleMap = workbook.getStyles();
+                                        return (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+                                    },
+                                }),
                             },
                             interceptorAutoHeight: () => {
-                                // const mergeCell = skeleton.mergeData.find((range) => {
-                                //     const { startColumn, startRow, endColumn, endRow } = range;
-                                //     return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
-                                // });
+                                const skeleton = this._renderManagerService.getRenderById(unitId)
+                                    ?.with(SheetSkeletonManagerService)
+                                    .getWorksheetSkeleton(subUnitId)
+                                    ?.skeleton;
+                                if (!skeleton) {
+                                    return undefined;
+                                }
                                 const mergeCell = skeleton.worksheet.getMergedCell(row, col);
 
                                 const info: ICellRenderContext = {
@@ -440,11 +358,12 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                                     subUnitId,
                                     row,
                                     col,
-                                    worksheet,
                                     workbook,
+                                    worksheet,
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },
+                            coverable: (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE),
                         });
                     },
                 }

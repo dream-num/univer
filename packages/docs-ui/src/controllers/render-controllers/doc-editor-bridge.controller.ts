@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { checkForSubstrings, Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import { SetEditorResizeOperation } from '@univerjs/ui';
 import { fromEvent } from 'rxjs';
-import type { DocumentDataModel, ICommandInfo, Nullable, Workbook } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { CoverContentCommand } from '../../commands/commands/replace-content.command';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -296,9 +296,14 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                         return;
                     }
 
-                    this._resize(unitId);
+                    const editor = this._editorService.getEditor(unitId);
 
-                    this._valueChange();
+                    // Only for Text editor?
+                    if (editor && !editor.params.scrollBar) {
+                        this._resize(unitId);
+
+                        this._valueChange();
+                    }
                 }
             })
         );

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
-import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { LIST_DROPDOWN_KEY } from '../views';
@@ -105,9 +105,9 @@ export class ListValidator extends BaseDataValidator {
 
     override optionsInput: string | undefined = ListRenderModeInput.componentKey;
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule) {
+    override skipDefaultFontRender = (rule: ISheetDataValidationRule) => {
         return rule.renderMode !== DataValidationRenderMode.TEXT;
-    }
+    };
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);

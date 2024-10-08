@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-crosshair-highlight",
-    "version": "0.2.15",
+    "version": "0.3.0",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -18,9 +18,6 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": [],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
@@ -86,7 +83,7 @@
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",
-        "vite": "^5.4.7",
+        "vite": "^5.4.8",
         "vitest": "^2.1.1"
     },
     "univerSpace": {

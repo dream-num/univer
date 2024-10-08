@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { IKeyValue } from './types';
 import { customAlphabet, nanoid } from 'nanoid';
 
-import mergeWith from 'lodash.mergewith';
 import { isLegalUrl, normalizeUrl } from '../common/url';
-import type { IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;
@@ -270,7 +269,7 @@ export class Tools {
         }
 
         function diffArrays(oneArray: any[], towArray: any[]) {
-            if (one.length !== tow.length) {
+            if (oneArray.length !== towArray.length) {
                 return false;
             }
             for (let i = 0, len = oneArray.length; i < len; i++) {
@@ -681,29 +680,6 @@ export class Tools {
         return !containsInvalidChars && isValidLength;
     }
 
-    /**
-     * As lodash set, via a path string to set value to deep property
-     * set(obj, 'xx.yy', val)
-     * @param data
-     * @param propertyPath
-     * @param value
-     */
-    static set(data: Record<string, any>, propertyPath: string, value: any) {
-        const paths = propertyPath.split('.');
-        const key = paths.pop();
-
-        paths.forEach((prop) => {
-            if (!data[prop]) {
-                data[prop] = {};
-            }
-            data = data[prop];
-        });
-
-        if (key) {
-            data[key] = value;
-        }
-    }
-
     static clamp(value: number, min: number, max: number) {
         return Math.max(min, Math.min(max, value));
     }
@@ -713,18 +689,6 @@ export class Tools {
             return performance.now();
         }
         return Date.now();
-    }
-
-    /**
-     * @static
-     * @param {unknown} object Modify the property while leaving the reference unchanged.
-     * @param {unknown} source The source  being merged in object.
-     * @param {(value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}} [customizer]
-     * @return {*}
-     * @memberof Tools
-     */
-    static mergeWith(object: unknown, source: unknown, customizer?: (value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}) {
-        return mergeWith(object, source, customizer);
     }
 }
 

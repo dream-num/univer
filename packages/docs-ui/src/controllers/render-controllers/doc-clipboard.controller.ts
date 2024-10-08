@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+
 import {
     ICommandService,
     IContextService,
@@ -21,11 +24,9 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import { takeUntil } from 'rxjs';
-
-import type { DocumentDataModel } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { whenDocOrEditor, whenFocusEditor } from '../../commands/commands/clipboard.command';
+import { whenDocOrEditor } from '../../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../../services/clipboard/clipboard.service';
+import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocClipboardController extends RxDisposable implements IRenderModule {
@@ -34,7 +35,8 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
         @ICommandService private readonly _commandService: ICommandService,
         @IDocClipboardService private readonly _docClipboardService: IDocClipboardService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -59,7 +61,9 @@ export class DocClipboardController extends RxDisposable implements IRenderModul
             // TODO: @JOCS, work around to fix https://github.com/dream-num/univer-pro/issues/2006. and then when you paste it,
             // you need to distinguish between different editors,
             // because different editors have different pasting effects. For example, when editing a state, you can't paste a table
-            if (whenFocusEditor(this._contextService) && (htmlContent ?? '').indexOf('</table>') > -1) {
+            const editor = this._editorService.getEditor(this._context.unitId);
+
+            if (!!editor && (htmlContent ?? '').indexOf('</table>') > -1) {
                 htmlContent = '';
             }
 

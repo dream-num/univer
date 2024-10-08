@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    composeInterceptors,
-    Disposable,
-    DisposableCollection,
-    InterceptorEffectEnum,
-    IUniverInstanceService,
-    remove,
-    toDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     ICellData,
     ICellInterceptor,
@@ -35,6 +25,16 @@ import type {
     Nullable,
     Workbook,
     Worksheet,
+} from '@univerjs/core';
+import {
+    composeInterceptors,
+    Disposable,
+    DisposableCollection,
+    InterceptorEffectEnum,
+    IUniverInstanceService,
+    remove,
+    toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';
@@ -240,8 +240,9 @@ export class SheetInterceptorService extends Disposable {
 
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
+                        const rawData = worksheet.getCellRaw(row, col);
                         return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
-                            worksheet.getCellRaw(row, col),
+                            rawData,
                             {
                                 unitId,
                                 subUnitId,
@@ -249,6 +250,7 @@ export class SheetInterceptorService extends Disposable {
                                 col,
                                 worksheet,
                                 workbook,
+                                rawData,
                             }
                         );
                     },

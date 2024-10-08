@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
+import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
@@ -61,14 +61,14 @@ export class CheckboxValidator extends BaseDataValidator {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string }) {
+    override skipDefaultFontRender = (rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: { unitId: string; subUnitId: string }) => {
         const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
 
         const valueStr = `${cellValue ?? ''}`;
 
         const res = !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
         return res;
-    }
+    };
 
     override validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult {
         const { formula1, formula2 } = rule;

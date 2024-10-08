@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/docs-mention-ui",
-    "version": "0.2.15",
+    "version": "0.3.0",
     "private": true,
     "description": "Univer normal ui-plugin-docs",
     "author": "DreamNum <developer@univer.ai>",
@@ -19,9 +19,6 @@
     },
     "keywords": [
         "univer"
-    ],
-    "sideEffects": [
-        "**/*.css"
     ],
     "exports": {
         ".": "./src/index.ts",
@@ -59,8 +56,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -82,13 +78,13 @@
         "clsx": "^2.1.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.5",
+        "@types/react": "^18.3.9",
         "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",
-        "vite": "^5.4.7",
+        "vite": "^5.4.8",
         "vitest": "^2.1.1"
     },
     "univerSpace": {

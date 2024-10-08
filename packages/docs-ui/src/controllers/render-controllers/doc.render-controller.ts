@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
-import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '../../basics/docs-view-key';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -58,7 +58,9 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         skeleton.calculate();
 
-        if (this._editorService.isEditor(unitId)) {
+        // REFACTOR: @Jocs, should not use scroll bar to indicate a Zen Editor. refactor after support modern doc.
+        const editor = this._editorService.getEditor(unitId);
+        if (this._editorService.isEditor(unitId) && !editor?.params.scrollBar) {
             this._context.mainComponent?.makeDirty();
 
             return;
@@ -236,7 +238,10 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         docsComponent.resize(width, height);
         docBackground.resize(width, height);
 
-        if (!this._editorService.isEditor(unitId)) {
+        const editor = this._editorService.getEditor(unitId);
+
+        // REFACTOR: @JOCS show not use scrollBar to indicate it's a Zen Editor.
+        if (!this._editorService.isEditor(unitId) || editor?.params.scrollBar) {
             scene.resize(width, height);
         }
     }

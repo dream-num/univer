@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ColumnSeparatorType, PresetListType, SectionType } from '@univerjs/core';
 import type { IDocumentData } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, PresetListType, SectionType } from '@univerjs/core';
 
 export const PAGE5_RICHTEXT_1: IDocumentData = {
     id: 'd',

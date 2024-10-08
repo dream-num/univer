@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -32,7 +33,6 @@ import {
     WrapStrategy,
     WrapTextType,
 } from '@univerjs/core';
-import type { IDocumentData, IWorkbookData } from '@univerjs/core';
 
 const richTextTestFloat: IDocumentData = {
     id: 'd',

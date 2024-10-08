@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
 import type { IWorkbookData } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
 
 export const UNISCRIT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'uniscript-demo',

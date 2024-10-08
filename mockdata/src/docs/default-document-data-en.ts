@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '@univerjs/core';
 import {
     BooleanNumber,
     ColumnSeparatorType,
@@ -27,7 +28,6 @@ import {
     WrapTextType,
 } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
-import type { IDocumentData } from '@univerjs/core';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'd-en',

@@ -252,6 +252,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.78
         version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/mockdata':
+        specifier: workspace:*
+        version: link:../mockdata
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -406,6 +409,181 @@ importers:
       typescript:
         specifier: ^5.6.2
         version: 5.6.2
+
+  mockdata:
+    dependencies:
+      '@univerjs/action-recorder':
+        specifier: workspace:*
+        version: link:../packages-experimental/action-recorder
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../packages/data-validation
+      '@univerjs/debugger':
+        specifier: workspace:*
+        version: link:../packages-experimental/debugger
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../packages/design
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../packages/docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing
+      '@univerjs/docs-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing-ui
+      '@univerjs/docs-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-hyper-link-ui
+      '@univerjs/docs-mention-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-mention-ui
+      '@univerjs/docs-thread-comment-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-thread-comment-ui
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../packages/docs-ui
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../packages/drawing
+      '@univerjs/drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/drawing-ui
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../packages/engine-formula
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../packages/engine-render
+      '@univerjs/facade':
+        specifier: workspace:*
+        version: link:../packages/facade
+      '@univerjs/find-replace':
+        specifier: workspace:*
+        version: link:../packages/find-replace
+      '@univerjs/icons':
+        specifier: ^0.1.78
+        version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../packages/rpc
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../packages/sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-conditional-formatting-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting-ui
+      '@univerjs/sheets-crosshair-highlight':
+        specifier: workspace:*
+        version: link:../packages/sheets-crosshair-highlight
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing
+      '@univerjs/sheets-drawing-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing-ui
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter
+      '@univerjs/sheets-filter-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter-ui
+      '@univerjs/sheets-find-replace':
+        specifier: workspace:*
+        version: link:../packages/sheets-find-replace
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../packages/sheets-formula
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../packages/sheets-hyper-link
+      '@univerjs/sheets-hyper-link-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-hyper-link-ui
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../packages/sheets-numfmt
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort
+      '@univerjs/sheets-sort-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort-ui
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment
+      '@univerjs/sheets-thread-comment-base':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment-base
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-ui
+      '@univerjs/sheets-zen-editor':
+        specifier: workspace:*
+        version: link:../packages/sheets-zen-editor
+      '@univerjs/slides':
+        specifier: workspace:*
+        version: link:../packages/slides
+      '@univerjs/slides-ui':
+        specifier: workspace:*
+        version: link:../packages/slides-ui
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../packages/thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../packages/thread-comment-ui
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../packages/ui
+      '@univerjs/uni-docs-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-docs-ui
+      '@univerjs/uni-formula':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula
+      '@univerjs/uni-formula-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-formula-ui
+      '@univerjs/uni-sheets-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-sheets-ui
+      '@univerjs/uni-slides-ui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uni-slides-ui
+      '@univerjs/uniscript':
+        specifier: workspace:*
+        version: link:../packages/uniscript
+      '@univerjs/uniui':
+        specifier: workspace:*
+        version: link:../packages-experimental/uniui
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.6.2
+      vite:
+        specifier: ^5.4.1
+        version: 5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.1(@types/node@22.7.3)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
   packages-experimental/action-recorder:
     dependencies:

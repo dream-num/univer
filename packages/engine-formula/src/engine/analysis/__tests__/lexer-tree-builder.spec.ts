@@ -236,6 +236,11 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=   -A1') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["   -A1"]}');
         });
+
+        it('operator with concatenate test', () => {
+            const node = lexerTreeBuilder.treeBuilder('="a"&1+2') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["\\"a\\"","1","2","+","&"]}');
+        });
     });
 
     describe('check error', () => {

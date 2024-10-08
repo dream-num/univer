@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@univerjs/core';
-
-import { AstNodePromiseType } from '../../basics/common';
-import { ErrorType } from '../../basics/error-type';
 import type { BaseFunction } from '../../functions/base-function';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
@@ -30,11 +24,17 @@ import type {
     FunctionVariantType,
     NodeValueType,
 } from '../reference-object/base-reference-object';
+import { Inject, Injector } from '@univerjs/core';
+import { AstNodePromiseType } from '../../basics/common';
+import { ErrorType } from '../../basics/error-type';
+import { matchToken } from '../../basics/token';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IDefinedNamesService } from '../../services/defined-names.service';
+import { IFunctionService } from '../../services/function.service';
+import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
-import { prefixHandler } from '../utils/prefixHandler';
-import { IDefinedNamesService } from '../../services/defined-names.service';
-import { matchToken } from '../../basics/token';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';

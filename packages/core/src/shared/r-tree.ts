@@ -86,7 +86,10 @@ export class RTree {
 
     search(search: IUnitRange): Map<string, IRTreeItem> {
         const { unitId, sheetId: subUnitId, range } = search;
-        const tree = this.getTree(unitId, subUnitId);
+        const tree = this._tree.get(unitId)?.get(subUnitId);
+        if (!tree) {
+            return new Map();
+        }
         const result = new Map<string, IRTreeItem>();
         tree.search({
             minX: range.startColumn,

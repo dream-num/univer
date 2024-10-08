@@ -117,11 +117,11 @@ export class FormulaDependencyGenerator extends Disposable {
             recursionStack.add(node);
 
             // Recur for all the children of this node
-            for (let i = 0; i < node.children.length; i++) {
-                if (!visited.has(node.children[i]) && this._isCyclicUtil(node.children[i], visited, recursionStack)) {
+            for (const child of node.children) {
+                if (!visited.has(child) && this._isCyclicUtil(child, visited, recursionStack)) {
                     return true;
                 }
-                if (recursionStack.has(node.children[i])) {
+                if (recursionStack.has(child)) {
                     return true;
                 }
             }
@@ -582,10 +582,13 @@ export class FormulaDependencyGenerator extends Disposable {
             if (
                 (
                     forceCalculate ||
-                    tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) ||
-                    (this._isInDirtyRange(tree, this._currentConfigService.getDirtyRanges()) && !tree.isExcludeRange(this._currentConfigService.getExcludedRange())) ||
-                    this._includeTree(tree)
-                ) && !existTree.has(tree)
+                    tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) || //O(n) n=tree.rangeList.length
+                    (
+                        this._isInDirtyRange(tree, this._currentConfigService.getDirtyRanges()) // Rbush Average case is O(logN + k)
+                        && !tree.isExcludeRange(this._currentConfigService.getExcludedRange()) //worst O(n^2), best O(n)  n^2=tree.rangeList.length*excludedRange.length, excludedRange.length is usually small
+                    ) ||
+                    this._includeTree(tree) //O(n) n=tree.rangeList.length
+                ) && !existTree.has(tree) //O(1)
             ) {
                 newTreeList.push(tree);
                 existTree.add(tree);
@@ -635,9 +638,9 @@ export class FormulaDependencyGenerator extends Disposable {
                             featureTree = this._getFeatureFormulaTree(featureId, params);
                             newTreeList.push(featureTree);
                         }
-                        featureTree.parents = [];
+                        featureTree.parents = new Set<FormulaDependencyTree>();
                         intersectTrees.forEach((tree) => {
-                            if (tree.children.includes(featureTree!)) {
+                            if (tree.hasChildren(featureTree!)) {
                                 return;
                             }
                             tree.pushChildren(featureTree!);
@@ -656,25 +659,25 @@ export class FormulaDependencyGenerator extends Disposable {
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
         newTreeList.forEach((tree) => {
-            tree.children = tree.children.filter((child) => {
+            const newChildren = new Set<FormulaDependencyTree>();
+            for (const child of tree.children) {
                 if (!child.featureId) {
-                    return true;
+                    newChildren.add(child);
+                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
+                    newChildren.add(child);
                 }
-                if (featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
-                    return false;
-                }
-                return true;
-            });
+            }
+            tree.children = newChildren;
 
-            tree.parents = tree.parents.filter((parent) => {
+            const newParents = new Set<FormulaDependencyTree>();
+            for (const parent of tree.parents) {
                 if (!parent.featureId) {
-                    return true;
+                    newParents.add(parent);
+                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
+                    newParents.add(parent);
                 }
-                if (featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
-                    return false;
-                }
-                return true;
-            });
+            }
+            tree.parents = newParents;
         });
     }
 
@@ -688,19 +691,24 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
+    /**
+     * TODO @DR-Univer: The next step will be to try changing the incoming dirtyRanges to an array, thus avoiding conversion.
+     * @param dirtyRanges
+     * @returns
+     */
     private _convertDirtyRangesToUnitRange(dirtyRanges: IFeatureDirtyRangeType) {
         const unitRange: IUnitRange[] = [];
         for (const unitId in dirtyRanges) {
             const unitMap = dirtyRanges[unitId];
             for (const subUnitId in unitMap) {
                 const ranges = unitMap[subUnitId];
-                ranges.forEach((range) => {
+                for (const range of ranges) {
                     unitRange.push({
                         unitId,
                         sheetId: subUnitId,
                         range,
                     });
-                });
+                }
             }
         }
         return unitRange;
@@ -863,8 +871,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
             const cacheStack: FormulaDependencyTree[] = [];
 
-            for (let i = 0, len = tree.parents.length; i < len; i++) {
-                const parentTree = tree.parents[i];
+            for (const parentTree of tree.parents) {
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;
                 }

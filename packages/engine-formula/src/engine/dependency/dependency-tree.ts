@@ -47,9 +47,9 @@ export class FormulaDependencyTree extends Disposable {
 
     node: Nullable<BaseAstNode>;
 
-    children: FormulaDependencyTree[] = [];
+    children: Set<FormulaDependencyTree> = new Set();
 
-    parents: FormulaDependencyTree[] = [];
+    parents: Set<FormulaDependencyTree> = new Set();
 
     formula: string = '';
 
@@ -94,11 +94,11 @@ export class FormulaDependencyTree extends Disposable {
         //     tree.dispose();
         // });
 
-        this.children = [];
+        this.children = new Set();
 
         this.rangeList = [];
 
-        this.parents = [];
+        this.parents = new Set();
 
         this.node?.dispose();
     }
@@ -207,7 +207,7 @@ export class FormulaDependencyTree extends Disposable {
     }
 
     pushChildren(tree: FormulaDependencyTree) {
-        this.children.push(tree);
+        this.children.add(tree);
         tree._pushParent(this);
     }
 
@@ -220,7 +220,7 @@ export class FormulaDependencyTree extends Disposable {
     }
 
     hasChildren(tree: FormulaDependencyTree) {
-        return this.children.includes(tree);
+        return this.children.has(tree);
     }
 
     toRTreeItem(): IRTreeItem {
@@ -265,7 +265,7 @@ export class FormulaDependencyTree extends Disposable {
     }
 
     private _pushParent(tree: FormulaDependencyTree) {
-        this.parents.push(tree);
+        this.parents.add(tree);
     }
 }
 

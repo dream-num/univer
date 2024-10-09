@@ -133,6 +133,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
 }
 
 const createTest = (title: string, sheetData: IJsonObject, minFpsValue: number, deltaX = 0, deltaY = 0) => {
+    // Default Size Of browser: 1280x720 pixels. And default DPR is 1.
     test(title, async ({ page }) => {
         let port = 3000;
         if (!isCI) {

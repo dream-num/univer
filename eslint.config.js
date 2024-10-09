@@ -25,6 +25,9 @@ export default antfu({
         html: true,
     },
     rules: baseRules,
+    ignores: [
+        'mockdata/**/*.json',
+    ],
 }, {
     files: ['**/*.ts', '**/*.tsx'],
     ignores: [

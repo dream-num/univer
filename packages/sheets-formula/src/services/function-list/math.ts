@@ -789,7 +789,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MDETERM.functionParameter.array.name',
                 detail: 'formula.functionList.MDETERM.functionParameter.array.detail',
-                example: '{3,6,1;1,1,0;3,10,2}',
+                example: 'A1:C3',
                 require: 1,
                 repeat: 0,
             },
@@ -804,7 +804,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MINVERSE.functionParameter.array.name',
                 detail: 'formula.functionList.MINVERSE.functionParameter.array.detail',
-                example: '{3,6,1;1,1,0;3,10,2}',
+                example: 'A1:C3',
                 require: 1,
                 repeat: 0,
             },
@@ -1238,7 +1238,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SERIESSUM.functionParameter.coefficients.name',
                 detail: 'formula.functionList.SERIESSUM.functionParameter.coefficients.detail',
-                example: '{1,-0.5,0.041666667,-0.001388889}',
+                example: 'A1:A4',
                 require: 1,
                 repeat: 0,
             },

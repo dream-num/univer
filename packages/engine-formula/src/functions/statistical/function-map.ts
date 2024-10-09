@@ -109,10 +109,14 @@ import { TDist2t } from './t-dist-2t';
 import { TDistRt } from './t-dist-rt';
 import { TInv } from './t-inv';
 import { TInv2t } from './t-inv-2t';
+import { TTest } from './t-test';
+import { Trimmean } from './trimmean';
 import { VarP } from './var-p';
 import { VarS } from './var-s';
 import { Vara } from './vara';
 import { Varpa } from './varpa';
+import { WeibullDist } from './weibull-dist';
+import { ZTest } from './z-test';
 
 export const functionStatistical = [
     [Avedev, FUNCTION_NAMES_STATISTICAL.AVEDEV],
@@ -211,8 +215,12 @@ export const functionStatistical = [
     [TDistRt, FUNCTION_NAMES_STATISTICAL.T_DIST_RT],
     [TInv, FUNCTION_NAMES_STATISTICAL.T_INV],
     [TInv2t, FUNCTION_NAMES_STATISTICAL.T_INV_2T],
+    [TTest, FUNCTION_NAMES_STATISTICAL.T_TEST],
+    [Trimmean, FUNCTION_NAMES_STATISTICAL.TRIMMEAN],
     [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
     [Vara, FUNCTION_NAMES_STATISTICAL.VARA],
     [Varpa, FUNCTION_NAMES_STATISTICAL.VARPA],
+    [WeibullDist, FUNCTION_NAMES_STATISTICAL.WEIBULL_DIST],
+    [ZTest, FUNCTION_NAMES_STATISTICAL.Z_TEST],
 ];

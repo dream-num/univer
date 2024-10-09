@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
-
-import { AstNodePromiseType } from '../../basics/common';
 import type { ErrorType } from '../../basics/error-type';
+
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import { Disposable } from '@univerjs/core';
+import { AstNodePromiseType } from '../../basics/common';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
 
@@ -50,6 +50,8 @@ export class BaseAstNode extends Disposable {
 
     private _refOffsetY: number = 0;
 
+    private _isForcedCalculateFunction = false;
+
     constructor(private _token: string) {
         super();
     }
@@ -75,6 +77,10 @@ export class BaseAstNode extends Disposable {
         return this._address;
     }
 
+    isForcedCalculateFunction() {
+        return this._isForcedCalculateFunction;
+    }
+
     setAsync() {
         this._async = true;
     }
@@ -90,6 +96,10 @@ export class BaseAstNode extends Disposable {
     setParent(node: BaseAstNode) {
         this._parent = node;
         node.addChildren(this);
+    }
+
+    setForcedCalculateFunction() {
+        this._isForcedCalculateFunction = true;
     }
 
     getChildren() {

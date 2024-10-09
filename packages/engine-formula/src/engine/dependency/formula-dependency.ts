@@ -780,6 +780,32 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
+    private _detectForcedRecalculationNode(tree: FormulaDependencyTree) {
+        const node = tree.node;
+
+        if (node == null) {
+            return false;
+        }
+
+        return this._detectForcedRecalculationNodeRecursion(node);
+    }
+
+    private _detectForcedRecalculationNodeRecursion(node: BaseAstNode) {
+        if (node.isForcedCalculateFunction()) {
+            return true;
+        }
+
+        const children = node.getChildren();
+        for (let i = 0, len = children.length; i < len; i++) {
+            const child = children[i];
+            if (this._detectForcedRecalculationNodeRecursion(child)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Determine whether all ranges of the current node exist within the dirty area.
      * If they are within the dirty area, return true, indicating that this node needs to be calculated.
@@ -788,6 +814,13 @@ export class FormulaDependencyGenerator extends Disposable {
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
         const subUnitId = tree.subUnitId;
+
+        /**
+         * RAND, RANDBETWEEN, NOW, TODAY are volatile functions that are marked dirty and recalculated every time a calculation occurs.
+         */
+        if (this._detectForcedRecalculationNode(tree) === true) {
+            return true;
+        }
 
         if (this._includeTreeFeature(tree) === true) {
             return true;

@@ -26,6 +26,7 @@ import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
+    FORCED_RECALCULATION_FUNCTION_NAME,
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
@@ -297,9 +298,14 @@ export class AstTreeBuilder extends Disposable {
             switch (astNode.nodeType) {
                 // case NodeType.ERROR:
                 //     return astNode;
-                case NodeType.FUNCTION:
+                case NodeType.FUNCTION: {
+                    const token = astNode.getToken().trim().toUpperCase();
+                    if (FORCED_RECALCULATION_FUNCTION_NAME.has(token)) {
+                        astNode.setForcedCalculateFunction();
+                    }
                     calculateStack.push(astNode);
                     break;
+                }
                 case NodeType.LAMBDA:
                     calculateStack.push(astNode);
                     break;

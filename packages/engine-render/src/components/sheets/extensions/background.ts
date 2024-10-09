@@ -43,6 +43,7 @@ interface IRenderBGContext {
     scaleY: number;
     viewRanges: IRange[];
     diffRanges: IRange[];
+    cellInfo: ISelectionCellWithMergeInfo;
 }
 
 export class Background extends SheetExtension {
@@ -56,6 +57,7 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
@@ -93,12 +95,43 @@ export class Background extends SheetExtension {
 
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
-            // bgColorMatrix.forValue(renderBGByCell);
+
+            const mergeRanges: IRange[] = [];
             viewRanges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
+                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                    if (!cellInfo) return;
+                    if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
+                        // to check if mergeRanges has this merge range already. if not, push it.
+                        const f = mergeRanges.filter((r: IRange) => {
+                            return r.startRow === cellInfo.mergeInfo.startRow && r.startColumn === cellInfo.mergeInfo.startColumn;
+                        });
+                        if (f.length === 0) {
+                            mergeRanges.push(cellInfo.mergeInfo);
+                            return;
+                        }
+                    }
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
+                        renderBGContext.cellInfo = cellInfo;
                         this.renderBGByCell(renderBGContext, row, col);
+                    }
+                });
+            });
+            mergeRanges.forEach((range) => {
+                // draw once in each merge range.
+                // DO NOT use get topleft cell of bgColorMatrix, may be null(if you jump to bottom of merged cell)
+                // As we only need to draw merged cell once, so add a flag handled to break the loop.
+                let handled = false;
+                Range.foreach(range, (row, col) => {
+                    if (handled) return;
+                    const bgConfig = bgColorMatrix.getValue(row, col);
+                    if (bgConfig) {
+                        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                        if (!cellInfo) return;
+                        renderBGContext.cellInfo = cellInfo;
+                        this.renderBGByCell(renderBGContext, row, col);
+                        handled = true;
                     }
                 });
             });
@@ -111,40 +144,19 @@ export class Background extends SheetExtension {
     }
 
     renderBGByCell(bgContext: IRenderBGContext, row: number, col: number) {
-        const { spreadsheetSkeleton, backgroundPositions, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
-        // if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
-        //     return true;
-        // }
-
-        const cellInfo = backgroundPositions?.getValue(row, col);
-        if (cellInfo == null) {
-            return true;
-        }
+        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges, cellInfo } = bgContext;
 
         let { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
         const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
 
         // isMerged isMergedMainCell are mutually exclusive. isMerged true then isMergedMainCell false.
-        if (isMerged) {
-            startY = mergeInfo.startY;
-            endY = mergeInfo.endY;
-            startX = mergeInfo.startX;
-            endX = mergeInfo.endX;
-        }
+        // isMergedMainCell has draw all other merged cells, no need draw again.
         // For merged cells, and the current cell is the top-left cell in the merged region.
-        if (isMergedMainCell) {
-            startY = mergeInfo.startY;
-            endY = mergeInfo.endY;
-            startX = mergeInfo.startX;
-            endX = mergeInfo.endX;
-        }
-
-        // in merge range , but not top-left cell.
-        // if (isMerged) return true;
-
-        // const combineWithMergeRanges = mergeTo;
-        //expandRangeIfIntersects([...mergeTo], [mergeInfo]);
+        startY = mergeInfo.startY;
+        endY = mergeInfo.endY;
+        startX = mergeInfo.startX;
+        endX = mergeInfo.endX;
 
         // If curr cell is not in the viewrange (viewport + merged cells), exit early.
         if ((!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {

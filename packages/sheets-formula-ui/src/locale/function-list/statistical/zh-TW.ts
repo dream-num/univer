@@ -1456,13 +1456,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '陣列_y', detail: '代表因變數資料的陣列或矩陣的範圍。' },
+            knownXs: { name: '陣列_x', detail: '代表自變數資料的陣列或矩陣的範圍。' },
         },
     },
     T_DIST: {
-        description: '傳回學生 t-分佈的百分點（機率）',
-        abstract: '返回學生 t-分佈的百分點（機率）',
+        description: '傳回學生的 t 機率分佈',
+        abstract: '傳回學生的 t 機率分佈',
         links: [
             {
                 title: '教導',
@@ -1470,13 +1470,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要計算分佈的數值。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
+            cumulative: { name: '累積', detail: '這是決定函數形式的邏輯值。 如果為 TRUE，T.DIST 會傳回累積分佈函數；如果為 FALSE，則會傳回機率密度函數。' },
         },
     },
     T_DIST_2T: {
-        description: '傳回學生 t-分佈的百分點（機率）',
-        abstract: '返回學生 t-分佈的百分點（機率）',
+        description: '傳回學生的 t 機率分佈 (雙尾)',
+        abstract: '傳回學生的 t 機率分佈 (雙尾)',
         links: [
             {
                 title: '教導',
@@ -1484,13 +1485,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要計算分佈的數值。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_DIST_RT: {
-        description: '返回學生 t-分佈',
-        abstract: '返回學生 t-分佈',
+        description: '傳回學生的 t 機率分佈 (右尾)',
+        abstract: '傳回學生的 t 機率分佈 (右尾)',
         links: [
             {
                 title: '教導',
@@ -1498,13 +1499,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要計算分佈的數值。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_INV: {
-        description: '傳回作為機率和自由度函數的學生 t 分佈的 t 值',
-        abstract: '返回作為機率和自由度函數的學生 t 分佈的 t 值',
+        description: '傳回學生的 t 機率分佈的反函數',
+        abstract: '傳回學生的 t 機率分佈的反函數',
         links: [
             {
                 title: '教導',
@@ -1512,13 +1513,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
+            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_INV_2T: {
-        description: '傳回學生 t-分佈的反函數',
-        abstract: '傳回學生 t-分佈的反函數',
+        description: '傳回學生的 t 機率分佈的反函數 (雙尾)',
+        abstract: '傳回學生的 t 機率分佈的反函數 (雙尾)',
         links: [
             {
                 title: '教導',
@@ -1526,8 +1527,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
+            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     T_TEST: {

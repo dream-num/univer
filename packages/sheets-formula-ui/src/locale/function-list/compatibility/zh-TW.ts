@@ -167,8 +167,8 @@ export default {
         },
     },
     FDIST: {
-        description: '返回 F 機率分佈（右尾）',
-        abstract: '返回 F 機率分佈（右尾）',
+        description: '傳回 F 機率分佈（右尾）',
+        abstract: '傳回 F 機率分佈（右尾）',
         links: [
             {
                 title: '教導',
@@ -211,8 +211,8 @@ export default {
         },
     },
     GAMMADIST: {
-        description: '返回 γ 分佈',
-        abstract: '返回 γ 分佈',
+        description: '傳回 γ 分佈',
+        abstract: '傳回 γ 分佈',
         links: [
             {
                 title: '教導',
@@ -477,7 +477,7 @@ export default {
         },
     },
     TDIST: {
-        description: '返回學生 t-分佈',
+        description: '傳回學生的 t 機率分佈',
         abstract: '返回學生 t-分佈',
         links: [
             {
@@ -486,13 +486,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要計算分佈的數值。' },
+            degFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
+            tails: { name: '尾部特性', detail: '指定要傳回之分佈尾數。 如果 Tails = 1，TDIST 會傳回單尾分佈。 如果 Tails = 2，TDIST 會傳回雙尾分佈。' },
         },
     },
     TINV: {
-        description: '傳回學生 t-分佈的反函數',
-        abstract: '傳回學生 t-分佈的反函數',
+        description: '傳回學生的 t 機率分佈的反函數 (雙尾)',
+        abstract: '傳回學生的 t 機率分佈的反函數 (雙尾)',
         links: [
             {
                 title: '教導',
@@ -500,8 +501,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '機率', detail: '與學生的 t 分佈相關的機率。' },
+            dedegFreedom: { name: '自由度', detail: '一個表示自由度數的整數。' },
         },
     },
     TTEST: {
@@ -547,8 +548,8 @@ export default {
         },
     },
     WEIBULL: {
-        description: '返回 Weibull 分佈',
-        abstract: '返回 Weibull 分佈',
+        description: '傳回 Weibull 分佈',
+        abstract: '傳回 Weibull 分佈',
         links: [
             {
                 title: '教導',

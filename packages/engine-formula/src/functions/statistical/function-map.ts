@@ -103,6 +103,12 @@ import { StdevP } from './stdev-p';
 import { StdevS } from './stdev-s';
 import { Stdeva } from './stdeva';
 import { Stdevpa } from './stdevpa';
+import { Steyx } from './steyx';
+import { TDist } from './t-dist';
+import { TDist2t } from './t-dist-2t';
+import { TDistRt } from './t-dist-rt';
+import { TInv } from './t-inv';
+import { TInv2t } from './t-inv-2t';
 import { VarP } from './var-p';
 import { VarS } from './var-s';
 import { Vara } from './vara';
@@ -199,6 +205,12 @@ export const functionStatistical = [
     [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
     [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],
     [Stdevpa, FUNCTION_NAMES_STATISTICAL.STDEVPA],
+    [Steyx, FUNCTION_NAMES_STATISTICAL.STEYX],
+    [TDist, FUNCTION_NAMES_STATISTICAL.T_DIST],
+    [TDist2t, FUNCTION_NAMES_STATISTICAL.T_DIST_2T],
+    [TDistRt, FUNCTION_NAMES_STATISTICAL.T_DIST_RT],
+    [TInv, FUNCTION_NAMES_STATISTICAL.T_INV],
+    [TInv2t, FUNCTION_NAMES_STATISTICAL.T_INV_2T],
     [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
     [Vara, FUNCTION_NAMES_STATISTICAL.VARA],

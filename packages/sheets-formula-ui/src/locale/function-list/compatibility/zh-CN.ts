@@ -478,8 +478,8 @@ export default {
         },
     },
     TDIST: {
-        description: '返回学生 t-分布',
-        abstract: '返回学生 t-分布',
+        description: '返回学生的 t 概率分布',
+        abstract: '返回学生的 t 概率分布',
         links: [
             {
                 title: '教学',
@@ -487,13 +487,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
+            tails: { name: '尾部特性', detail: '指定返回的分布函数是单尾分布还是双尾分布。 如果 Tails = 1，则 TDIST 返回单尾分布。 如果Tails = 2，则 TDIST 返回双尾分布。' },
         },
     },
     TINV: {
-        description: '返回学生 t-分布的反函数',
-        abstract: '返回学生 t-分布的反函数',
+        description: '返回学生的 t 概率分布的反函数 (双尾)',
+        abstract: '返回学生的 t 概率分布的反函数 (双尾)',
         links: [
             {
                 title: '教学',
@@ -501,8 +502,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与学生的 t 分布相关的概率。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     TTEST: {

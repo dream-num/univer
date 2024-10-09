@@ -478,8 +478,8 @@ export default {
         },
     },
     TDIST: {
-        description: 'スチューデントの t 分布の値を返します。',
-        abstract: 'スチューデントの t 分布の値を返します。',
+        description: 'スチューデントの t 確率分布を返します。',
+        abstract: 'スチューデントの t 確率分布を返します。',
         links: [
             {
                 title: '指導',
@@ -487,13 +487,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '分布の数値を計算する必要があります。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
+            tails: { name: '尾部の特性', detail: '片側分布を計算するか、両側分布を計算するかを、数値で指定します。 尾部に 1 を指定すると片側分布の値が計算されます。 尾部に 2 を指定すると両側分布の値が計算されます。' },
         },
     },
     TINV: {
-        description: 'スチューデントの t 分布の逆関数値を返します。',
-        abstract: 'スチューデントの t 分布の逆関数値を返します。',
+        description: 'スチューデントの t 確率分布 (両側) の逆関数値を返します。',
+        abstract: 'スチューデントの t 確率分布 (両側) の逆関数値を返します。',
         links: [
             {
                 title: '指導',
@@ -501,8 +502,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '確率', detail: 'スチューデントの t 分布に従う確率を指定します。' },
+            degFreedom: { name: '自由度', detail: '自由度の数を表す整数。' },
         },
     },
     TTEST: {

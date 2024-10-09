@@ -39,6 +39,7 @@ import { PoissonDist } from '../statistical/poisson-dist';
 import { QuartileInc } from '../statistical/quartile-inc';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
+import { TInv2t } from '../statistical/t-inv-2t';
 import { VarP } from '../statistical/var-p';
 import { VarS } from '../statistical/var-s';
 import { Betadist } from './betadist';
@@ -48,6 +49,7 @@ import { Lognormdist } from './lognormdist';
 import { Negbinomdist } from './negbinomdist';
 import { Normsdist } from './normsdist';
 import { Rank } from './rank';
+import { Tdist } from './tdist';
 
 export const functionCompatibility = [
     [Betadist, FUNCTION_NAMES_COMPATIBILITY.BETADIST],
@@ -81,6 +83,8 @@ export const functionCompatibility = [
     [Rank, FUNCTION_NAMES_COMPATIBILITY.RANK],
     [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],
+    [Tdist, FUNCTION_NAMES_COMPATIBILITY.TDIST],
+    [TInv2t, FUNCTION_NAMES_COMPATIBILITY.TINV],
     [VarS, FUNCTION_NAMES_COMPATIBILITY.VAR],
     [VarP, FUNCTION_NAMES_COMPATIBILITY.VARP],
 ];

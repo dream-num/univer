@@ -14167,7 +14167,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                             },
                             body: {
                                 dataStream:
-                              '\u001Fhttps://univer-preview.vercel.app/sheets/\u001E\r12323\r\u001FA100\u001E\r\n',
+                                    '\u001Fhttps://univer-preview.vercel.app/sheets/\u001E\r12323\r\u001FA100\u001E\r\n',
                                 textRuns: [],
                                 paragraphs: [
                                     {
@@ -24028,6 +24028,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     ],
                 },
             }),
+        },
+        {
+            name: 'SHEET_RANGE_PROTECTION_PLUGIN',
+            data: '{"sheet-0011":[{"ranges":[{"startRow":26,"startColumn":6,"endRow":30,"endColumn":8,"rangeType":0,"unitId":"workbook-01","sheetId":"sheet-0011"}],"permissionId":"nLNP3ABg","id":"IYg5","name":"工作表11(G27:I31)","unitType":3,"unitId":"workbook-01","subUnitId":"sheet-0011"}]}',
         },
     ],
     // namedRanges: [

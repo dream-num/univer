@@ -1456,13 +1456,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     T_DIST: {
-        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
-        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        description: 'Returns the probability for the Student t-distribution',
+        abstract: 'Returns the probability for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1470,13 +1470,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, T.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     T_DIST_2T: {
-        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
-        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        description: 'Returns the probability for the Student t-distribution (two-tailed)',
+        abstract: 'Returns the probability for the Student t-distribution (two-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1484,13 +1485,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_DIST_RT: {
-        description: 'Returns the Student\'s t-distribution',
-        abstract: 'Returns the Student\'s t-distribution',
+        description: 'Returns the probability for the Student t-distribution (right-tailed)',
+        abstract: 'Returns the probability for the Student t-distribution (right-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1498,13 +1499,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_INV: {
-        description: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
-        abstract: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
+        description: 'Returns the inverse of the probability for the Student t-distribution',
+        abstract: 'Returns the inverse of the probability for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1512,13 +1513,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'The probability associated with the Student\'s t-distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_INV_2T: {
-        description: 'Returns the inverse of the Student\'s t-distribution',
-        abstract: 'Returns the inverse of the Student\'s t-distribution',
+        description: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
+        abstract: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1526,8 +1527,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'The probability associated with the Student\'s t-distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_TEST: {

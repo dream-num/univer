@@ -479,8 +479,8 @@ export default {
         },
     },
     TDIST: {
-        description: 'Trả về phân phối t-Student',
-        abstract: 'Trả về phân phối t-Student',
+        description: 'Trả về phân phối xác suất t-Student của Học sinh',
+        abstract: 'Trả về phân phối xác suất t-Student của Học sinh',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -488,13 +488,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số phần dư của phân bố được trả về. Nếu Tails = 1, hàm TDIST sẽ trả về phân bố một phía. Nếu Tails = 2, hàm TDIST sẽ trả về phân bố hai phía.' },
         },
     },
     TINV: {
-        description: 'Trả về hàm nghịch đảo phân phối t-Student',
-        abstract: 'Trả về hàm nghịch đảo phân phối t-Student',
+        description: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
+        abstract: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -502,8 +503,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối t-Student của Sinh viên.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
         },
     },
     TTEST: {

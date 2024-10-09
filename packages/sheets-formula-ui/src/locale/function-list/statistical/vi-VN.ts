@@ -1435,6 +1435,36 @@ export default {
             degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
         },
     },
+    T_TEST: {
+        description: 'Trả về xác suất kết hợp với Phép thử t-Student.',
+        abstract: 'Trả về xác suất kết hợp với Phép thử t-Student.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-test-%E5%87%BD%E6%95%B0-d4e08ec3-c545-485f-962e-276f7cbed055',
+            },
+        ],
+        functionParameter: {
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, T.TEST sử dụng phân phối một phía. Nếu đuôi = 2, T.TEST sử dụng phân phối hai phía.' },
+            type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
+        },
+    },
+    TRIMMEAN: {
+        description: 'Trả về trung bình của phần trong một tập dữ liệu.',
+        abstract: 'Trả về trung bình của phần trong một tập dữ liệu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/trimmean-%E5%87%BD%E6%95%B0-d90c9878-a119-4746-88fa-63d988f511d3',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi giá trị cần cắt bớt và tính trung bình.' },
+            percent: { name: 'tỷ lệ loại trừ', detail: 'Tỷ lệ các điểm dữ liệu cần loại bỏ ra khỏi việc tính toán.' },
+        },
+    },
     VAR_P: {
         description: 'Tính toán phương sai dựa trên toàn bộ tập hợp (bỏ các giá trị lô-gic và văn bản trong tập hợp).',
         abstract: 'Tính toán phương sai dựa trên toàn bộ tập hợp',
@@ -1489,6 +1519,37 @@ export default {
         functionParameter: {
             value1: { name: 'giá trị 1', detail: 'Đối số dạng số đầu tiên tương ứng với tổng thể.' },
             value2: { name: 'giá trị 2', detail: 'Là các đối số dạng số từ 2 đến 254 tương ứng với một tập hợp.' },
+        },
+    },
+    WEIBULL_DIST: {
+        description: 'Trả về phân bố Weibull.',
+        abstract: 'Trả về phân bố Weibull.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/weibull-dist-%E5%87%BD%E6%95%B0-4e783c39-9325-49be-bbc9-a83ef82b45db',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm WEIBULL.DIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    Z_TEST: {
+        description: 'Trả về giá trị xác suất một phía của kiểm tra z.',
+        abstract: 'Trả về giá trị xác suất một phía của kiểm tra z.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/z-test-%E5%87%BD%E6%95%B0-d633d5a3-2031-4614-a016-92180ad82bee',
+            },
+        ],
+        functionParameter: {
+            array: { name: 'mảng', detail: 'Mảng hay khoảng dữ liệu để kiểm tra x.' },
+            x: { name: 'x', detail: 'Giá trị cần kiểm tra.' },
+            sigma: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn tổng thể (đã biết). Nếu bỏ qua, độ lệch chuẩn mẫu sẽ được dùng.' },
         },
     },
 };

@@ -516,8 +516,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: '数组1', detail: '第一个数据数组或数据范围。' },
+            array2: { name: '数组2', detail: '第二个数据数组或数据范围。' },
+            tails: { name: '尾部特性', detail: '指定分布尾数。 如果 tails = 1，则 TTEST 使用单尾分布。 如果 tails = 2，则 TTEST 使用双尾分布。' },
+            type: { name: '检验类型', detail: '要执行的 t 检验的类型。' },
         },
     },
     VAR: {
@@ -558,8 +560,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算其分布的数值。' },
+            alpha: { name: 'alpha', detail: '分布的第一个参数。' },
+            beta: { name: 'beta', detail: '分布的第二个参数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。如果为TRUE，则 WEIBULL 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     ZTEST: {
@@ -572,8 +576,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '用来检验 x 的数组或数据区域。' },
+            x: { name: 'x', detail: '要测试的值。' },
+            sigma: { name: '标准偏差', detail: '总体（已知）标准偏差。 如果省略，则使用样本标准偏差。' },
         },
     },
 };

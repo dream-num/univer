@@ -564,6 +564,28 @@ describe('lexer nodeMaker test', () => {
                 ]
             );
         });
+
+        it('test tow minus for range ref', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=  --A1:A10')).toStrictEqual(
+                [
+                    ' ',
+                    ' ',
+                    '-',
+                    {
+                        endIndex: 3,
+                        nodeType: 0,
+                        startIndex: 3,
+                        token: '-',
+                    },
+                    {
+                        endIndex: 9,
+                        nodeType: 4,
+                        startIndex: 4,
+                        token: 'A1:A10',
+                    },
+                ]
+            );
+        });
     });
 
     describe('convertRefersToAbsolute', () => {

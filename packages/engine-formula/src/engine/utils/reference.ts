@@ -19,6 +19,7 @@ import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
 import { isReferenceString, UNIT_NAME_REGEX } from '../../basics/regex';
+import { prefixToken, SPACE_TOKEN } from '../../basics/token';
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
@@ -299,15 +300,17 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
 const EXCEPTION_REF_STRINGS = ['LOG10'];
 
 export function isReferenceStringWithEffectiveColumn(refString: string) {
-    if (!isReferenceString(refString)) {
+    const noPrefixRefString = replaceRefPrefixString(refString);
+
+    if (!isReferenceString(noPrefixRefString)) {
         return false;
     }
 
-    if (EXCEPTION_REF_STRINGS.includes(refString.toUpperCase().trim())) {
+    if (EXCEPTION_REF_STRINGS.includes(noPrefixRefString.toUpperCase().trim())) {
         return false;
     }
 
-    const { range } = deserializeRangeWithSheet(refString);
+    const { range } = deserializeRangeWithSheet(noPrefixRefString);
 
     /**
      * As of the latest information I have, which is up to the end of 2023,
@@ -321,6 +324,23 @@ export function isReferenceStringWithEffectiveColumn(refString: string) {
     }
 
     return true;
+}
+
+export function replaceRefPrefixString(token: string) {
+    const tokenArray = [];
+    let isNotPreFix = false;
+    for (let i = 0, len = token.length; i < len; i++) {
+        const char = token[i];
+        if (char === SPACE_TOKEN && !isNotPreFix) {
+            tokenArray.push(char);
+        } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS)) {
+            continue;
+        } else {
+            tokenArray.push(char);
+            isNotPreFix = true;
+        }
+    }
+    return tokenArray.join('');
 }
 
 /**

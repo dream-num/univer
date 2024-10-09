@@ -28,7 +28,6 @@ import {
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
-    SPACE_TOKEN,
     SUFFIX_TOKEN_SET,
     suffixToken,
 } from '../../basics/token';
@@ -39,7 +38,7 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRangeToRefString } from '../utils/reference';
+import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
 
@@ -82,6 +81,7 @@ export class LexerTreeBuilder extends Disposable {
 
     override dispose(): void {
         this._resetTemp();
+
         this._currentLexerNode.dispose();
 
         FormulaLexerNodeCache.clear();
@@ -447,7 +447,7 @@ export class LexerTreeBuilder extends Disposable {
 
             const preSegmentTrim = preSegment.trim();
 
-            const preSegmentNotPrefixToken = this._replacePrefixString(preSegmentTrim);
+            const preSegmentNotPrefixToken = replaceRefPrefixString(preSegmentTrim);
 
             if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION && preSegmentTrim[0] !== matchToken.OPEN_BRACES) {
                 maybeString = false;
@@ -608,23 +608,6 @@ export class LexerTreeBuilder extends Disposable {
     ) {
         const segmentCount = deleteEndIndex - node.startIndex + 1;
         sequenceNodes.splice(sequenceNodes.length - segmentCount, segmentCount, node);
-    }
-
-    private _replacePrefixString(token: string) {
-        const tokenArray = [];
-        let isNotPreFix = false;
-        for (let i = 0, len = token.length; i < len; i++) {
-            const char = token[i];
-            if (char === SPACE_TOKEN && !isNotPreFix) {
-                tokenArray.push(char);
-            } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS)) {
-                continue;
-            } else {
-                tokenArray.push(char);
-                isNotPreFix = true;
-            }
-        }
-        return tokenArray.join('');
     }
 
     nodeMakerTest(formulaString: string) {
@@ -1199,6 +1182,8 @@ export class LexerTreeBuilder extends Disposable {
         this._lambdaState = false; // Lambda
 
         this._colonState = false; // :
+
+        this._formulaErrorCount = 0;
     }
 
     private _checkErrorState(): boolean {

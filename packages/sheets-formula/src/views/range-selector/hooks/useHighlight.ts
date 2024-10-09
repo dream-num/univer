@@ -136,6 +136,7 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             cloneBody.textRuns = [];
+            rangesSet([]);
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
             cloneBody.textRuns = textRuns;

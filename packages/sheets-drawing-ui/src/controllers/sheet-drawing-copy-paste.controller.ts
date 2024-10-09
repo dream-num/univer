@@ -114,6 +114,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
                             unitId,
                             drawings: [drawing],
                         };
+                        // Delete the drawing when it is cut
                         this._commandService.executeCommand(RemoveSheetDrawingCommand.id, params);
                     }
 
@@ -137,7 +138,7 @@ export class SheetsDrawingCopyPasteController extends Disposable {
 
                     this._copyInfo = newCopyInfo;
                 } else {
-                    // handle drawings in range copy
+                    // handle copy range that contained drawings
                     const newCopyInfo = this._createDrawingsCopyInfoByRange(unitId, subUnitId, range);
                     this._copyInfo = newCopyInfo;
                 }

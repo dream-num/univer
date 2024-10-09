@@ -30,8 +30,9 @@ import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
-import { useResize } from './hooks/useResize';
+import { useRefactorEffect } from './hooks/useRefactorEffect';
 
+import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import styles from './index.module.less';
 import { rangePreProcess } from './utils/rangePreProcess';
@@ -169,6 +170,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useSheetHighlight(!rangeDialogVisible && isFocus, unitId, subUnitId, sheetHighlightRanges);
 
     useSheetSelectionChange(!rangeDialogVisible && isFocus, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
+
+    useRefactorEffect(!rangeDialogVisible && isFocus, unitId);
 
     useEffect(() => {
         if (onVerify) {

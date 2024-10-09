@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
+import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
+import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
+import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
+import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
+
 import {
     Direction,
     Disposable,
@@ -25,18 +32,11 @@ import {
     RANGE_TYPE, toDisposable } from '@univerjs/core';
 import { IRenderManagerService, PointerInput, RENDER_CLASS_TYPE, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSelectionsService, ScrollToCellOperation, SetSelectionsOperation } from '@univerjs/sheets';
-import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
-import type { ISetSelectionsOperationParams, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { ScrollCommand, SetScrollRelativeCommand } from '../../commands/commands/set-scroll.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SheetScrollManagerService } from '../../services/scroll-manager.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
-import type { IExpandSelectionCommandParams } from '../../commands/commands/set-selection.command';
-import type { IScrollState, IScrollStateSearchParam, IViewportScrollState } from '../../services/scroll-manager.service';
-import type { ISheetSkeletonManagerParam } from '../../services/sheet-skeleton-manager.service';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
 
@@ -475,7 +475,7 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         }
 
         const bounds = viewport.getBounding();
-        return skeleton.getRowColumnSegment(bounds);
+        return skeleton.getRowColumnSegmentByViewBound(bounds.viewBound);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

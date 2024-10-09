@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { IStyleBase } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
-import dayjs from 'dayjs';
 import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import dayjs from 'dayjs';
+import type { IStyleBase } from '@univerjs/core';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
-import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
-import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
+import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
+import type { ICalculateUnit } from './type';
 
 export const highlightCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.highlightCell,
@@ -82,10 +84,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     allValue.sort((a, b) => b - a);
                     const configRule = rule.rule as IRankHighlightCell;
                     const targetIndex = configRule.isPercent
-                        ? Math.round(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
-                        : Math.round(Math.max(Math.min(configRule.value, allValue.length), 0));
+                        ? Math.floor(Math.max(Math.min(configRule.value, 100), 0) / 100 * allValue.length)
+                        : Math.floor(Math.max(Math.min(configRule.isBottom ? (configRule.value - 1) : configRule.value, allValue.length), 0));
                     if (configRule.isBottom) {
-                        return { rank: allValue[allValue.length - targetIndex] };
+                        return { rank: allValue[allValue.length - targetIndex - 1] };
                     } else {
                         return { rank: allValue[Math.max(targetIndex - 1, 0)] };
                     }
@@ -106,6 +108,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
             }
         };
         const cache = getCache();
+
+        // eslint-disable-next-line complexity
         const check = (row: number, col: number) => {
             const cellValue = worksheet?.getCellRaw(row, col);
             switch (ruleConfig.subType) {

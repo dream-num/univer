@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { ISelectProps } from '@univerjs/design';
+import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
+import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
+
 import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useMemo } from 'react';
-import type { ISelectProps } from '@univerjs/design';
-
 import { FilterConditionItems } from '../../models/conditions';
-import styles from './index.module.less';
-import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
+import styles from './index.module.less';
 
 /**
  * Filter by conditions.

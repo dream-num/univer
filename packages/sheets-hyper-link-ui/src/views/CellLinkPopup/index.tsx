@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IHyperLinkPopup } from '../../services/popup.service';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
@@ -28,7 +29,6 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
-import type { IHyperLinkPopup } from '../../services/popup.service';
 
 const iconsMap = {
     [SheetHyperLinkType.URL]: <LinkSingle />,

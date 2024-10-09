@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, ICommand, IDocumentBody, IDocumentData, IMutationInfo, ITextRange, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { BuildTextUtils, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../util';
 
 interface IReplaceSnapshotCommandParams {

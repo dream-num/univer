@@ -15,6 +15,7 @@
  */
 
 import { expect, test } from '@playwright/test';
+import { generateSnapshotName } from '../const';
 
 test('diff default doc content', async ({ page }) => {
     await page.goto('http://localhost:3000/docs/');
@@ -23,5 +24,5 @@ test('diff default doc content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultDoc());
     await page.waitForTimeout(5000);
 
-    await expect(page).toHaveScreenshot({ maxDiffPixels: 30 });
+    await expect(page).toHaveScreenshot(generateSnapshotName('default-doc'), { maxDiffPixels: 30 });
 });

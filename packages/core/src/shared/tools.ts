@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { customAlphabet, nanoid } from 'nanoid';
-import { isLegalUrl, normalizeUrl } from '../common/url';
-
 import type { IKeyValue } from './types';
+import { customAlphabet, nanoid } from 'nanoid';
+
+import { isLegalUrl, normalizeUrl } from '../common/url';
 
 const rmsPrefix = /^-ms-/;
 const rDashAlpha = /-([a-z])/g;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ISheetSelectionRenderService } from '../selection/base-selection-render.service';
 import { SELECTION_SHAPE_DEPTH } from '../selection/const';

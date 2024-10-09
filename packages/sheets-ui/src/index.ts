@@ -107,6 +107,7 @@ export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/sel
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 
 export { menuSchema } from './controllers/menu.schema';
+export { getCellRealRange } from './common/utils';
 
 // #region - all commands
 export { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';

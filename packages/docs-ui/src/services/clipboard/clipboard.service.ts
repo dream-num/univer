@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
-
 import type { IDisposable, IDocumentBody, IDocumentData, Nullable } from '@univerjs/core';
 import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, DOC_RANGE_TYPE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, getBodySlice, ICommandService, ILogService, Inject, IUniverInstanceService, normalizeBody, SliceBodyType, toDisposable, Tools, UniverInstanceType } from '@univerjs/core';
+
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
 import { getCursorWhenDelete } from '../../commands/commands/delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';

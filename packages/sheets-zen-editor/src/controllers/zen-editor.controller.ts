@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '@univerjs/core';
+import type { IDocObjectParam } from '@univerjs/docs-ui';
+import type { Viewport } from '@univerjs/engine-render';
 import {
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     LifecycleStages,
@@ -23,11 +26,8 @@ import {
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocBackScrollRenderController } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getEditorObject } from '@univerjs/sheets-ui';
-import { takeUntil } from 'rxjs';
-import type { ITextRange } from '@univerjs/core';
-import type { IDocObjectParam } from '@univerjs/docs-ui';
 
-import type { Viewport } from '@univerjs/engine-render';
+import { takeUntil } from 'rxjs';
 import { IZenEditorManagerService } from '../services/zen-editor.service';
 
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)

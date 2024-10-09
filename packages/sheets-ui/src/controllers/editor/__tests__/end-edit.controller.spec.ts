@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
 import { CellValueType, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
 import { normalizeString } from '../../utils/char-tools';
 import { getCellDataByInput, isRichText } from '../editing.render-controller';
 import { createTestBed } from './create-test-bed';

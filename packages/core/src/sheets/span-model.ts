@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IRange } from './typedef';
 import { LRUMap, Rectangle, Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
 import { RANGE_TYPE } from './typedef';
-import type { IRange } from './typedef';
 
 export class SpanModel extends Disposable {
     /**

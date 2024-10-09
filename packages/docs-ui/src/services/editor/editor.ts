@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
-import { merge, type Observable, Subject } from 'rxjs';
 import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle, IPosition, IUndoRedoService, IUniverInstanceService, Nullable } from '@univerjs/core';
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
+import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
+import { merge, type Observable, Subject } from 'rxjs';
 import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
 

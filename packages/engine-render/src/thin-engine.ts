@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, EventSubject } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
-
-import { RENDER_CLASS_TYPE } from './basics/const';
 import type { CURSOR_TYPE } from './basics/const';
+
 import type { IEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
 import type { Canvas } from './canvas';
+import { Disposable, EventSubject } from '@univerjs/core';
+import { RENDER_CLASS_TYPE } from './basics/const';
 
 // FIXME: ThinEngine and ThinScene should be removed
 

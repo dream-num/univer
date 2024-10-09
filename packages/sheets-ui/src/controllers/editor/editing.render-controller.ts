@@ -636,9 +636,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
         } else if (eventType === DeviceInputEventType.Dblclick) {
             // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-
-            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+            const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+            viewMain?.scrollToViewportPos({
                 viewportScrollX: Number.POSITIVE_INFINITY,
+                viewportScrollY: Number.POSITIVE_INFINITY,
             });
 
             this._textSelectionManagerService.replaceTextRanges([

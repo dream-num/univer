@@ -972,6 +972,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
         this._cellEditorManagerService.setState({
             show: param.visible,
         });
+        const editorObject = this._getEditorObject();
+        editorObject?.scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+            viewportScrollX: 0,
+            viewportScrollY: 0,
+        });
         const editorUnitId = this._editorBridgeService.getCurrentEditorId();
         if (editorUnitId == null || !this._editorService.isSheetEditor(editorUnitId)) {
             return;

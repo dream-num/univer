@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { createInternalEditorID, debounce, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
@@ -22,13 +25,9 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { IDisposable, IUnitRangeName } from '@univerjs/core';
-
-import type { Editor } from '@univerjs/docs-ui';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { ReactNode } from 'react';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useResize } from './hooks/useResize';
@@ -50,10 +49,14 @@ interface IRangeSelectorProps {
     errorText?: string | ReactNode;
     onVerify?: (res: boolean, result: string) => void;
     placeholder?: string;
+    isFocus?: boolean;
+    actions?: {
+        handleOutClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => void;
+    };
 };
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { initValue, unitId, subUnitId, onChange, onVerify, errorText, placeholder } = props;
+    const { initValue, unitId, subUnitId, onChange, onVerify, errorText, placeholder, isFocus: _isFocus = true, actions } = props;
 
     const editorService = useDependency(IEditorService);
     const localeService = useDependency(LocaleService);
@@ -61,11 +64,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const commandService = useDependency(ICommandService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
+    const rangeSelectorWrapRef = useRef<HTMLDivElement>(null);
     const [rangeDialogVisible, rangeDialogVisibleSet] = useState(false);
-    const [isFocus, isFocusSet] = useState(false);
+    const [isFocus, isFocusSet] = useState(_isFocus);
     const editorId = useMemo(() => createInternalEditorID(`${RANGE_SELECTOR_SYMBOLS}-${generateRandomId(4)}`), []);
     const [editor, editorSet] = useState<Editor>();
-    const docSelectionRef = useRef<ITextRangeWithStyle>();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const [rangeString, rangeStringSet] = useState(() => {
@@ -75,6 +78,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
         }
     });
+
+    // init actions
+    if (actions) {
+        actions.handleOutClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => {
+            if (rangeSelectorWrapRef.current) {
+                const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
+                cb(isContain);
+            }
+        };
+    }
 
     const ranges = useMemo(() => {
         return rangeString.split(RANGE_SPLIT_STRING).filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
@@ -120,13 +133,15 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
     };
 
-    const focus = () => {
-        if (editor) {
-            setTimeout(() => {
-                editor.focus();
-            }, 30);
-        }
-    };
+    const focus = useMemo(() => {
+        return () => {
+            if (editor) {
+                setTimeout(() => {
+                    editor.focus();
+                }, 30);
+            }
+        };
+    }, [editor]);
     const { checkScrollBar } = useResize(editor);
 
     const handleSheetSelectionChange = useMemo(() => {
@@ -149,9 +164,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeString);
     const sheetHighlightRanges = useDocHight(editorId, sequenceNodes);
-    useSheetHighlight(!rangeDialogVisible, unitId, subUnitId, sheetHighlightRanges);
+    useSheetHighlight(!rangeDialogVisible && isFocus, unitId, subUnitId, sheetHighlightRanges);
 
-    useSheetSelectionChange(!rangeDialogVisible, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
+    useSheetSelectionChange(!rangeDialogVisible && isFocus, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
 
     useEffect(() => {
         if (onVerify) {
@@ -159,12 +174,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
             onVerify(result, sequenceNodeToText(sequenceNodes));
         }
     }, [sequenceNodes, onVerify]);
-
-    useEffect(() => {
-        if (isFocus) {
-            sequenceNodesSet((pre) => [...pre]);
-        }
-    }, [isFocus]);
 
     useEffect(() => {
         if (editor) {
@@ -180,24 +189,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [editor]);
 
     useEffect(() => {
-        if (editor) {
-            const d1 = editor.focus$.subscribe(() => {
-                isFocusSet(true);
-            });
-            const d2 = editor.blur$.subscribe(() => {
-                isFocusSet(false);
-            });
-            return () => {
-                d1.unsubscribe();
-                d2.unsubscribe();
-            };
-        }
-    }, [editor]);
-
-    useEffect(() => {
         const d1 = commandService.beforeCommandExecuted((info) => {
             if (info.id === SetWorksheetActiveOperation.id) {
-                docSelectionRef.current = undefined;
                 isFocusSet(false);
                 // Refresh the component
                 sequenceNodesSet((pre) => [...pre]);
@@ -206,7 +199,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
         const d2 = commandService.onCommandExecuted((info) => {
             if (info.id === SetCellEditVisibleOperation.id) {
                 rangeDialogVisibleSet(false);
-                docSelectionRef.current = undefined;
                 isFocusSet(false);
             }
         });
@@ -215,6 +207,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d2.dispose();
         };
     }, []);
+
+    useEffect(() => {
+        isFocusSet(_isFocus);
+        if (_isFocus) {
+            focus();
+        }
+    }, [_isFocus, focus]);
 
     useEffect(() => {
         if (editor && rangeDialogVisible) {
@@ -249,7 +248,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [containerRef.current]);
 
     return (
-        <div className={styles.sheetRangeSelector}>
+        <div className={styles.sheetRangeSelector} ref={rangeSelectorWrapRef}>
             <div className={cl(styles.sheetRangeSelectorTextWrap, {
                 [styles.sheetRangeSelectorActive]: isFocus && !isError,
                 [styles.sheetRangeSelectorError]: isError,

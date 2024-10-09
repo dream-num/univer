@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { isFormulaId, isFormulaString } from '@univerjs/core';
 import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IFormulaDataItem } from '../../basics/common';
+import { cellToRange, isFormulaId, isFormulaString, Rectangle } from '@univerjs/core';
 
 export interface IFormulaIdMap {
     f: string;
@@ -101,10 +101,38 @@ export function clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix: ObjectM
         return true;
     }
 
+    const intersection: IRange[] = [];
+    arrayFormulaRangeMatrix.forValue((rangeRow, rangeCol, range) => {
+        // skip the current range
+        if (rangeRow === r && rangeCol === c) {
+            return;
+        }
+
+        if (Rectangle.intersects(range, arrayFormulaRangeValue)) {
+            intersection.push(range);
+        }
+    });
+
     const { startRow, startColumn, endRow, endColumn } = arrayFormulaRangeValue;
-    for (let r = startRow; r <= endRow; r++) {
-        for (let c = startColumn; c <= endColumn; c++) {
-            arrayFormulaCellDataMatrix.realDeleteValue(r, c);
+
+    for (let row = startRow; row <= endRow; row++) {
+        for (let col = startColumn; col <= endColumn; col++) {
+            let isOverlapping = false;
+            const currentCell = cellToRange(row, col);
+
+            // Check if the cell is part of any other range in arrayFormulaRangeMatrix
+            intersection.some((range) => {
+                if (Rectangle.contains(range, currentCell)) {
+                    isOverlapping = true;
+                    return true;
+                }
+                return false;
+            });
+
+            // If the cell is not part of any other range, delete its value
+            if (!isOverlapping) {
+                arrayFormulaCellDataMatrix.realDeleteValue(row, col);
+            }
         }
     }
 }

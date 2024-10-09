@@ -163,6 +163,7 @@ export interface IUnitExcludedCell {
 export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
+    arrayFormulaRange: IArrayFormulaRangeType;
     forceCalculate: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;

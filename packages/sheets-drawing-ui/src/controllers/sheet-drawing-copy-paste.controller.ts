@@ -17,7 +17,8 @@
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import type { ISheetDrawing, ISheetImage } from '@univerjs/sheets-drawing';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
-import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import type { IDeleteDrawingCommandParams } from '../commands/commands/interfaces';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { DrawingTypeEnum, type IDrawingJsonUndo1, IDrawingManagerService, ImageSourceType } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DrawingApplyType, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
@@ -25,6 +26,7 @@ import { COPY_TYPE, discreteRangeToRange, ISheetClipboardService, ISheetSelectio
 import { IClipboardInterfaceService } from '@univerjs/ui';
 import { transformToDrawingPosition } from '../basics/transform-position';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
+import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 
 const IMAGE_PNG_MIME_TYPE = 'image/png';
 
@@ -86,7 +88,8 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IDrawingManagerService private readonly _drawingService: IDrawingManagerService,
-        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService
+        @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._initCopyPaste();
@@ -100,14 +103,22 @@ export class SheetsDrawingCopyPasteController extends Disposable {
         this._sheetClipboardService.addClipboardHook({
             id: 'SHEET_IMAGE_UI_PLUGIN',
 
-            onBeforeCopy: (unitId, subUnitId, range) => {
+            onBeforeCopy: (unitId, subUnitId, range, copyType) => {
                 const focusDrawings = this._focusedDrawings;
                 if (focusDrawings.length > 0) {
                     // handle single drawing copy
                     const [drawing] = focusDrawings;
 
+                    if (copyType === COPY_TYPE.CUT) {
+                        const params: IDeleteDrawingCommandParams = {
+                            unitId,
+                            drawings: [drawing],
+                        };
+                        this._commandService.executeCommand(RemoveSheetDrawingCommand.id, params);
+                    }
+
                     setTimeout(() => {
-                        // Rewrite the clipboard content to prevent the default copy behavior
+                        // Rewrite the clipboard content to prevent the default copy behavior, prevent to call the 'onPasteCells'
                         const dispose = focusDocument();
                         if (drawing.drawingType === DrawingTypeEnum.DRAWING_IMAGE
                             && (drawing as ISheetImage).imageSourceType === ImageSourceType.BASE64) {

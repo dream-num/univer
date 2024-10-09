@@ -89,7 +89,7 @@ export interface ISheetClipboardHook {
      * The callback would be called after the clipboard service has decided what region need to be copied.
      * Features could use this hook to build copying cache or any other pre-copy jobs.
      */
-    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange): void;
+    onBeforeCopy?(unitId: string, subUnitId: string, range: IRange, copyType: COPY_TYPE): void;
     /**
      *
      * @param row

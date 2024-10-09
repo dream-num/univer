@@ -52,6 +52,11 @@ export class RTree {
 
     insert(item: IRTreeItem) {
         const { unitId, sheetId: subUnitId, range, id } = item;
+
+        if (!unitId || unitId.length === 0) {
+            return;
+        }
+
         const tree = this.getTree(unitId, subUnitId);
 
         let { startRow: rangeStartRow, endRow: rangeEndRow, startColumn: rangeStartColumn, endColumn: rangeEndColumn } = range;
@@ -122,6 +127,14 @@ export class RTree {
             items.clear();
         }
         return result;
+    }
+
+    removeById(unitId: string, subUnitId?: string) {
+        if (subUnitId) {
+            this._tree.get(unitId)?.delete(subUnitId);
+        } else {
+            this._tree.delete(unitId);
+        }
     }
 
     remove(search: IRTreeItem) {

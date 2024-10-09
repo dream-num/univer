@@ -81,6 +81,25 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const otherFormulaData = this._otherFormulaManagerService.getOtherFormulaData();
 
+        const clearDependencyTreeCache = this._currentConfigService.getClearDependencyTreeCache();
+
+        if (clearDependencyTreeCache != null) {
+            Object.keys(clearDependencyTreeCache).forEach((unitId) => {
+                if (unitId == null) {
+                    return;
+                }
+                Object.keys(clearDependencyTreeCache[unitId]!).forEach((subUnitId) => {
+                    if (subUnitId == null) {
+                        return;
+                    }
+
+                    this._dependencyManagerService.clearOtherFormulaDependency(unitId, subUnitId);
+                    this._dependencyManagerService.clearFeatureFormulaDependency(unitId, subUnitId);
+                    this._dependencyManagerService.clearFormulaDependency(unitId, subUnitId);
+                });
+            });
+        }
+
         const unitData = this._currentConfigService.getUnitData();
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
@@ -557,6 +576,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const allTree: FormulaDependencyTree[] = this._dependencyManagerService.buildDependencyTree(treeList);
 
+        const dirtyRanges = this._currentConfigService.getDirtyRanges();
+        const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
+
         for (let i = 0, len = allTree.length; i < len; i++) {
             const tree = allTree[i];
 
@@ -585,7 +607,7 @@ export class FormulaDependencyGenerator extends Disposable {
                     forceCalculate ||
                     tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) || //O(n) n=tree.rangeList.length
                     (
-                        this._isInDirtyRange(tree, this._currentConfigService.getDirtyRanges()) // Rbush Average case is O(logN + k)
+                        treeIds.has(tree.treeId)// O(1)
                         && !tree.isExcludeRange(this._currentConfigService.getExcludedRange()) //worst O(n^2), best O(n)  n^2=tree.rangeList.length*excludedRange.length, excludedRange.length is usually small
                     ) ||
                     this._includeTree(tree) //O(n) n=tree.rangeList.length
@@ -597,21 +619,6 @@ export class FormulaDependencyGenerator extends Disposable {
         }
 
         return newTreeList;
-    }
-
-    private _isInDirtyRange(tree: FormulaDependencyTree, dirtyRanges: IUnitRange[] = []) {
-        // const dirtyRanges = this._currentConfigService.getDirtyRanges();
-        const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges);
-        if (treeIds.has(tree.treeId)) {
-            return true;
-        }
-        // for (let i = 0, len = treeIds.length; i < len; i++) {
-        //     const treeId = treeIds[i].id;
-        //     if (treeId === tree.treeId) {
-        //         return true;
-        //     }
-        // }
-        return false;
     }
 
     private _dependencyFeatureCalculation(newTreeList: FormulaDependencyTree[]) {
@@ -717,12 +724,13 @@ export class FormulaDependencyGenerator extends Disposable {
 
     private _intersectFeatureCalculation(dirtyRanges: IUnitRange[], newTreeList: FormulaDependencyTree[], param: IFeatureFormulaParam) {
         const dependencyTree = [];
+        const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges);
         for (let i = 0, len = newTreeList.length; i < len; i++) {
             const tree = newTreeList[i];
             if (tree.unitId === param.unitId && tree.subUnitId === param.subUnitId && tree.featureId === param.featureId) {
                 continue;
             }
-            const isAdded = this._isInDirtyRange(tree, dirtyRanges);
+            const isAdded = treeIds.has(tree.treeId);
             if (isAdded) {
                 dependencyTree.push(tree);
             }

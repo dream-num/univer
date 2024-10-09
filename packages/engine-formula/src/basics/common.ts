@@ -169,6 +169,7 @@ export interface IFormulaDatasetConfig {
     dirtyDefinedNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
+    clearDependencyTreeCache?: IUnitSheetIdToNameMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;
     unitStylesData?: IUnitStylesData;

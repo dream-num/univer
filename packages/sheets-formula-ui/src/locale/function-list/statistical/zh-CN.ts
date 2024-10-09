@@ -1456,13 +1456,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: '数据_y', detail: '代表因变量数据的数组或矩阵的范围。' },
+            knownXs: { name: '数据_x', detail: '代表自变量数据的数组或矩阵的范围。' },
         },
     },
     T_DIST: {
-        description: '返回学生 t-分布的百分点（概率）',
-        abstract: '返回学生 t-分布的百分点（概率）',
+        description: '返回学生的 t 概率分布',
+        abstract: '返回学生的 t 概率分布',
         links: [
             {
                 title: '教学',
@@ -1470,13 +1470,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
+            cumulative: { name: '累积', detail: '决定函数形式的逻辑值。 如果为 TRUE，则 T.DIST 返回累积分布函数；如果为 FALSE，则返回概率密度函数。' },
         },
     },
     T_DIST_2T: {
-        description: '返回学生 t-分布的百分点（概率）',
-        abstract: '返回学生 t-分布的百分点（概率）',
+        description: '返回学生的 t 概率分布 (双尾)',
+        abstract: '返回学生的 t 概率分布 (双尾)',
         links: [
             {
                 title: '教学',
@@ -1484,13 +1485,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     T_DIST_RT: {
-        description: '返回学生 t-分布',
-        abstract: '返回学生 t-分布',
+        description: '返回学生的 t 概率分布 (右尾)',
+        abstract: '返回学生的 t 概率分布 (右尾)',
         links: [
             {
                 title: '教学',
@@ -1498,13 +1499,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: '需要计算分布的数值。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     T_INV: {
-        description: '返回作为概率和自由度函数的学生 t 分布的 t 值',
-        abstract: '返回作为概率和自由度函数的学生 t 分布的 t 值',
+        description: '返回学生的 t 概率分布的反函数',
+        abstract: '返回学生的 t 概率分布的反函数',
         links: [
             {
                 title: '教学',
@@ -1512,13 +1513,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与学生的 t 分布相关的概率。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     T_INV_2T: {
-        description: '返回学生 t-分布的反函数',
-        abstract: '返回学生 t-分布的反函数',
+        description: '返回学生的 t 概率分布的反函数 (双尾)',
+        abstract: '返回学生的 t 概率分布的反函数 (双尾)',
         links: [
             {
                 title: '教学',
@@ -1526,8 +1527,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: '概率', detail: '与学生的 t 分布相关的概率。' },
+            degFreedom: { name: '自由度', detail: '一个表示自由度数的整数。' },
         },
     },
     T_TEST: {

@@ -670,6 +670,18 @@ export function poissonPDF(x: number, mean: number): number {
     return Math.exp(-mean) * (mean ** x) / calculateFactorial(x);
 }
 
+export function studentTCDF(x: number, degFreedom: number): number {
+    const sqrt = Math.sqrt(x ** 2 + degFreedom);
+
+    return incompleteBetaFunction((x + sqrt) / (2 * sqrt), degFreedom / 2, degFreedom / 2);
+}
+
+export function studentTPDF(x: number, degFreedom: number): number {
+    const pow = (1 + (x ** 2) / degFreedom) ** (-(degFreedom + 1) / 2);
+
+    return 1 / (Math.sqrt(degFreedom) * betaFunction(0.5, degFreedom / 2)) * pow;
+}
+
 export function studentTINV(probability: number, degFreedom: number): number {
     let x = betaINV(2 * Math.min(probability, 1 - probability), 0.5 * degFreedom, 0.5);
     x = Math.sqrt(degFreedom * (1 - x) / x);

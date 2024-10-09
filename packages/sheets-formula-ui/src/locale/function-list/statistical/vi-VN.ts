@@ -1350,6 +1350,91 @@ export default {
             value2: { name: 'giá trị 2', detail: 'Đối số dạng số từ 2 đến 254 tương ứng với tổng thể. Bạn cũng có thể sử dụng một mảng đơn hay tham chiếu tới một mảng thay thế cho các đối số được phân tách bởi dấu phẩy.' },
         },
     },
+    STEYX: {
+        description: 'Trả về sai số chuẩn của giá trị y dự đoán cho mỗi giá trị x trong hồi quy.',
+        abstract: 'Trả về sai số chuẩn của giá trị y dự đoán cho mỗi giá trị x trong hồi quy.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/steyx-%E5%87%BD%E6%95%B0-6ce74b2c-449d-4a6e-b9ac-f9cef5ba48ab',
+            },
+        ],
+        functionParameter: {
+            knownYs: { name: 'mảng _y', detail: 'Mảng phụ thuộc của mảng hoặc phạm vi dữ liệu.' },
+            knownXs: { name: 'mảng _x', detail: 'Mảng độc lập của mảng hoặc phạm vi dữ liệu.' },
+        },
+    },
+    T_DIST: {
+        description: 'Trả về phân phối xác suất t-Student của Học sinh',
+        abstract: 'Trả về phân phối xác suất t-Student của Học sinh',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-dist-%E5%87%BD%E6%95%B0-4329459f-ae91-48c2-bba8-1ead1c6c21b2',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì T.DIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
+        },
+    },
+    T_DIST_2T: {
+        description: 'Trả về phân phối xác suất t-Student của Học sinh (hai đuôi)',
+        abstract: 'Trả về phân phối xác suất t-Student của Học sinh (hai đuôi)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-dist-2t-%E5%87%BD%E6%95%B0-198e9340-e360-4230-bd21-f52f22ff5c28',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+        },
+    },
+    T_DIST_RT: {
+        description: 'Trả về phân phối xác suất t-Student của Học sinh (đuôi bên phải)',
+        abstract: 'Trả về phân phối xác suất t-Student của Học sinh (đuôi bên phải)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-dist-rt-%E5%87%BD%E6%95%B0-20a30020-86f9-4b35-af1f-7ef6ae683eda',
+            },
+        ],
+        functionParameter: {
+            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+        },
+    },
+    T_INV: {
+        description: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh',
+        abstract: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-inv-%E5%87%BD%E6%95%B0-2908272b-4e61-4942-9df9-a25fec9b0e2e',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối t-Student của Sinh viên.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+        },
+    },
+    T_INV_2T: {
+        description: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
+        abstract: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-inv-2t-%E5%87%BD%E6%95%B0-ce72ea19-ec6c-4be7-bed2-b9baf2264f17',
+            },
+        ],
+        functionParameter: {
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối t-Student của Sinh viên.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+        },
+    },
     VAR_P: {
         description: 'Tính toán phương sai dựa trên toàn bộ tập hợp (bỏ các giá trị lô-gic và văn bản trong tập hợp).',
         abstract: 'Tính toán phương sai dựa trên toàn bộ tập hợp',

@@ -16,13 +16,14 @@
 
 /* eslint-disable max-lines-per-function */
 
-import { debounce, DisposableCollection, IContextService, IUniverInstanceService, useDependency } from '@univerjs/core';
-
+import { debounce, DisposableCollection, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, type ISequenceNode, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DISABLE_NORMAL_SELECTIONS } from '@univerjs/sheets';
+import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useRef } from 'react';
+import type { Workbook } from '@univerjs/core';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { RANGE_SPLIT_STRING } from '../index';
 import { rangePreProcess } from '../utils/rangePreProcess';
@@ -38,6 +39,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
     const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const sheetsSelectionsService = useDependency(SheetsSelectionsService);
 
     const isScalingRef = useRef(false);
 
@@ -54,6 +56,10 @@ export const useSheetSelectionChange = (isNeed: boolean,
 
     // TODO: 拆除 prompt后，这段代码就不用了
     useEffect(() => {
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const sheet = workbook?.getActiveSheet();
+        const selections = [...sheetsSelectionsService.getCurrentSelections()];
+
         const d1 = refSelectionsRenderService?.enableSelectionChanging();
         contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
         editorBridgeService.enableForceKeepVisible();
@@ -69,6 +75,11 @@ export const useSheetSelectionChange = (isNeed: boolean,
             d2.unsubscribe();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
             editorBridgeService.disableForceKeepVisible();
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const currentSheet = workbook?.getActiveSheet();
+            if (currentSheet?.getSheetId() === sheet?.getSheetId()) {
+                sheetsSelectionsService.setSelections(selections);
+            }
         };
     }, []);
 

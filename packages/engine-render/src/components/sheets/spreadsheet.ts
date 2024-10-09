@@ -16,11 +16,14 @@
 
 import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
+
 import type { Canvas } from '../../canvas';
+
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
+import type { IDrawInfo } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -131,7 +134,8 @@ export class Spreadsheet extends SheetComponent {
                 viewRanges,
                 checkOutOfViewBound: true,
                 viewportKey: viewportInfo.viewportKey,
-            });
+                viewBound: viewportInfo.cacheBound,
+            } as IDrawInfo);
             this.addRenderFrameTimeMetricToScene(timeKey, Tools.now() - st, scene);
         }
     }

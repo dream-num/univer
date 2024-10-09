@@ -564,6 +564,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 
+        this._editorBridgeService.refreshEditCellState();
+
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;

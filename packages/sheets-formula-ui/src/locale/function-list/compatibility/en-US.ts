@@ -516,8 +516,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The first array or range of data.' },
+            array2: { name: 'array2', detail: 'The second array or range of data.' },
+            tails: { name: 'tails', detail: 'Specifies the number of distribution tails. If tails = 1, TTEST uses the one-tailed distribution. If tails = 2, TTEST uses the two-tailed distribution.' },
+            type: { name: 'type', detail: 'The kind of t-Test to perform.' },
         },
     },
     VAR: {
@@ -558,8 +560,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, WEIBULL returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     ZTEST: {
@@ -572,8 +576,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data against which to test x.' },
+            x: { name: 'x', detail: 'The value to test.' },
+            sigma: { name: 'sigma', detail: 'The population (known) standard deviation. If omitted, the sample standard deviation is used.' },
         },
     },
 };

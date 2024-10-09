@@ -79,13 +79,13 @@ export default {
         ],
         functionParameter: {
             logicalTest: { name: '布尔表达式', detail: '要测试的条件。' },
-            valueIfTrue: { name: '如果值为 true', detail: 'logical_test 的结果为 TRUE 时，您希望返回的值。' },
-            valueIfFalse: { name: '如果值为 false', detail: 'logical_test 的结果为 FALSE 时，您希望返回的值。' },
+            valueIfTrue: { name: '如果值为 true', detail: 'logical_test 的结果为 TRUE 时，希望返回的值。' },
+            valueIfFalse: { name: '如果值为 false', detail: 'logical_test 的结果为 FALSE 时，希望返回的值。' },
         },
     },
     IFERROR: {
-        description: '如果公式的计算结果错误，则返回您指定的值；否则返回公式的结果',
-        abstract: '如果公式的计算结果错误，则返回您指定的值；否则返回公式的结果',
+        description: '如果公式的计算结果错误，则返回指定的值；否则返回公式的结果',
+        abstract: '如果公式的计算结果错误，则返回指定的值；否则返回公式的结果',
         links: [
             {
                 title: '教学',
@@ -98,8 +98,8 @@ export default {
         },
     },
     IFNA: {
-        description: '如果表达式的结果为 #N/A，则返回您指定的值，否则返回表达式的结果',
-        abstract: '如果表达式的结果为 #N/A，则返回您指定的值，否则返回表达式的结果',
+        description: '如果表达式的结果为 #N/A，则返回指定的值，否则返回表达式的结果',
+        abstract: '如果表达式的结果为 #N/A，则返回指定的值，否则返回表达式的结果',
         links: [
             {
                 title: '教学',
@@ -208,7 +208,7 @@ export default {
             },
         ],
         functionParameter: {
-            logical: { name: '逻辑表达式', detail: '您要反转逻辑的条件，可评估为 TRUE 或 FALSE。' },
+            logical: { name: '逻辑表达式', detail: '要反转逻辑的条件，可评估为 TRUE 或 FALSE。' },
         },
     },
     OR: {

@@ -508,8 +508,8 @@ export default {
         },
     },
     TTEST: {
-        description: 'Trả về xác suất liên quan đến kiểm định t-Student',
-        abstract: 'Trả về xác suất liên quan đến kiểm định t-Student',
+        description: 'Trả về xác suất kết hợp với Phép thử t-Student.',
+        abstract: 'Trả về xác suất kết hợp với Phép thử t-Student.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -517,8 +517,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, TTEST sử dụng phân phối một phía. Nếu đuôi = 2, TTEST sử dụng phân phối hai phía.' },
+            type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
         },
     },
     VAR: {
@@ -550,8 +552,8 @@ export default {
         },
     },
     WEIBULL: {
-        description: 'Trả về phân phối Weibull',
-        abstract: 'Trả về phân phối Weibull',
+        description: 'Trả về phân bố Weibull.',
+        abstract: 'Trả về phân bố Weibull.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -559,13 +561,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm WEIBULL trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     ZTEST: {
-        description: 'Trả về giá trị xác suất đuôi đơn của kiểm định z',
-        abstract: 'Trả về giá trị xác suất đuôi đơn của kiểm định z',
+        description: 'Trả về giá trị xác suất một phía của kiểm tra z.',
+        abstract: 'Trả về giá trị xác suất một phía của kiểm tra z.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -573,8 +577,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hay khoảng dữ liệu để kiểm tra x.' },
+            x: { name: 'x', detail: 'Giá trị cần kiểm tra.' },
+            sigma: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn tổng thể (đã biết). Nếu bỏ qua, độ lệch chuẩn mẫu sẽ được dùng.' },
         },
     },
 

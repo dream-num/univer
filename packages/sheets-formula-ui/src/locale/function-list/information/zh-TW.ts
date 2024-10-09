@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            infoType: { name: '資訊類型', detail: '這是指定所要傳回何種儲存格資訊類型的文字值。' },
-            reference: { name: '參考', detail: '這是您要取得其相關資訊的儲存格。' },
+            infoType: { name: '資訊類型', detail: '指定所要傳回何種儲存格資訊類型的文字值。' },
+            reference: { name: '參考', detail: '要取得其相關資訊的儲存格。' },
         },
     },
     ERROR_TYPE: {
@@ -39,7 +39,7 @@ export default {
             },
         ],
         functionParameter: {
-            errorVal: { name: '錯誤值', detail: '這是您要尋找之識別數字的錯誤值。' },
+            errorVal: { name: '錯誤值', detail: '要尋找之識別數字的錯誤值。' },
         },
     },
     INFO: {
@@ -118,7 +118,7 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: '參照', detail: '是您要測試之儲存格的參照。' },
+            reference: { name: '參照', detail: '是要測試之儲存格的參照。' },
         },
     },
     ISLOGICAL: {
@@ -235,7 +235,7 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: '值', detail: '這是要轉換的值。' },
+            value: { name: '值', detail: '要轉換的值。' },
         },
     },
     NA: {

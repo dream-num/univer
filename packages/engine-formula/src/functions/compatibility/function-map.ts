@@ -40,8 +40,11 @@ import { QuartileInc } from '../statistical/quartile-inc';
 import { StdevP } from '../statistical/stdev-p';
 import { StdevS } from '../statistical/stdev-s';
 import { TInv2t } from '../statistical/t-inv-2t';
+import { TTest } from '../statistical/t-test';
 import { VarP } from '../statistical/var-p';
 import { VarS } from '../statistical/var-s';
+import { WeibullDist } from '../statistical/weibull-dist';
+import { ZTest } from '../statistical/z-test';
 import { Betadist } from './betadist';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
 import { Hypgeomdist } from './hypgeomdist';
@@ -85,6 +88,9 @@ export const functionCompatibility = [
     [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],
     [Tdist, FUNCTION_NAMES_COMPATIBILITY.TDIST],
     [TInv2t, FUNCTION_NAMES_COMPATIBILITY.TINV],
+    [TTest, FUNCTION_NAMES_COMPATIBILITY.TTEST],
     [VarS, FUNCTION_NAMES_COMPATIBILITY.VAR],
     [VarP, FUNCTION_NAMES_COMPATIBILITY.VARP],
+    [WeibullDist, FUNCTION_NAMES_COMPATIBILITY.WEIBULL],
+    [ZTest, FUNCTION_NAMES_COMPATIBILITY.ZTEST],
 ];

@@ -286,9 +286,9 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: '這是包含您想擷取之字元的文字字串。' },
-            startNum: { name: 'start_num', detail: ' 這是要在文字中擷取之第一個字元的位置。 文字中的第一個字元start_num 1，依此類文字。\n如果start_num大於文字的長度，MID/MIDB 會傳回 “” (空白文字) 。\n如果start_num小於文字的長度，但start_num加上num_chars超過文字的長度，MID/MIDB 會傳回文字結尾的字元。\n如果 start_num 小於 1，MID/MIDB 會傳回 #VALUE！ 錯誤值。' },
-            numChars: { name: 'num_chars', detail: '指定您要 MID 從文字傳回的字元數。\n如果 num_chars 為負數，MID 會傳回 #VALUE! 的錯誤值。' },
+            text: { name: 'text', detail: '包含想擷取之字元的文字字串。' },
+            startNum: { name: 'start_num', detail: ' 要在文字中擷取之第一個字元的位置。 文字中的第一個字元start_num 1，依此類文字。\n如果start_num大於文字的長度，MID/MIDB 會傳回 “” (空白文字) 。\n如果start_num小於文字的長度，但start_num加上num_chars超過文字的長度，MID/MIDB 會傳回文字結尾的字元。\n如果 start_num 小於 1，MID/MIDB 會傳回 #VALUE！ 錯誤值。' },
+            numChars: { name: 'num_chars', detail: '指定要 MID 從文字傳回的字元數。\n如果 num_chars 為負數，MID 會傳回 #VALUE! 的錯誤值。' },
         },
     },
     MIDB: {
@@ -427,8 +427,8 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '這是要重複的文字。' },
-            numberTimes: { name: '重複次數', detail: '這是指定文字重複次數的正數。' },
+            text: { name: '文字', detail: '要重複的文字。' },
+            numberTimes: { name: '重複次數', detail: '指定文字重複次數的正數。' },
         },
     },
     RIGHT: {
@@ -540,7 +540,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
             matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },
@@ -558,7 +558,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: '文字', detail: '您在此搜尋的文字。不允許萬用字元。' },
+            text: { name: '文字', detail: '在此搜尋的文字。不允許萬用字元。' },
             delimiter: { name: '分隔符號', detail: '標記要擷取之點之後的文字。' },
             instanceNum: { name: '實例編號', detail: '要解壓縮文字的分隔符號實例。' },
             matchMode: { name: '匹配模式', detail: '判斷文字搜尋是否區分大小寫。預設值會區分大小寫。' },

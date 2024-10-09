@@ -927,7 +927,7 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.TEXTSPLIT.functionParameter.text.name',
                 detail: 'formula.functionList.TEXTSPLIT.functionParameter.text.detail',
-                example: '{1,2,3;4,5,6}',
+                example: 'A1:C2',
                 require: 1,
                 repeat: 0,
             },

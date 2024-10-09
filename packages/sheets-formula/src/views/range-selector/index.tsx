@@ -113,6 +113,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 const result = sequenceNodeToText(preNodes);
                 onChange(result);
             }
+        } else {
+            rangeStringSet('');
         }
     }, 30), []);
 

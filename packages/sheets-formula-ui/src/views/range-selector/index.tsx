@@ -290,7 +290,7 @@ function RangeSelectorDialog(props: {
     unitId: string;
     subUnitId: string;
 }) {
-    const { handleConfirm, handleClose, visible, initValue, unitId, subUnitId } = props;
+    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId } = props;
 
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -304,11 +304,18 @@ function RangeSelectorDialog(props: {
     const colorMap = useColor();
 
     const rangeText = useMemo(() => ranges.join(matchToken.COMMA), [ranges]);
-    const { sequenceNodes } = useFormulaToken(rangeText);
+    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeText);
 
     const refSelections = useMemo(() => buildTextRuns(descriptionService, colorMap, sequenceNodes).refSelections, [sequenceNodes]);
-    useSheetHighlight(true, unitId, subUnitId, refSelections);
+    useSheetHighlight(visible, unitId, subUnitId, refSelections);
 
+    const handleClose = () => {
+        // remove
+        sequenceNodesSet([]);
+        setTimeout(() => {
+            _handleClose();
+        }, 30);
+    };
     const handleRangeInput = (index: number, value: string) => {
         rangesSet((v) => {
             const result = [...v];

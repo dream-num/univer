@@ -21,6 +21,7 @@ import { deserializeRangeWithSheet, type ISequenceNode, matchToken, sequenceNode
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
+import { distinctUntilChanged, map } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { rangePreProcess } from '../utils/rangePreProcess';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
@@ -134,6 +135,12 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     controls.forEach((control, index) => {
                         disposableCollection.add(control.selectionScaling$.subscribe((e) => {
                             const rangeText = serializeRange(e);
+                            handleSequenceNodeReplace(rangeText, index);
+                            setIsScaling();
+                        }));
+                        disposableCollection.add(control.selectionMoving$.pipe(map((e) => {
+                            return serializeRange(e);
+                        }), distinctUntilChanged()).subscribe((rangeText) => {
                             handleSequenceNodeReplace(rangeText, index);
                             setIsScaling();
                         }));

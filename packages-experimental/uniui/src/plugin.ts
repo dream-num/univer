@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
 import { DependentOn, IContextService, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin, Tools } from '@univerjs/core';
-import { EditorService, IEditorService, IRangeSelectorService, RangeSelectorService } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import {
     BrowserClipboardService,
@@ -28,6 +29,7 @@ import {
     DesktopDialogService,
     DesktopGlobalZoneService,
     DesktopLayoutService,
+    DesktopLocalFileService,
     DesktopLocalStorageService,
     DesktopMessageService,
     DesktopNotificationService,
@@ -44,6 +46,7 @@ import {
     IGlobalZoneService,
     ILayoutService,
     ILeftSidebarService,
+    ILocalFileService,
     IMenuManagerService,
     IMenuService,
     IMessageService,
@@ -67,8 +70,6 @@ import {
     UNIVER_UI_PLUGIN_NAME,
     ZIndexManager,
 } from '@univerjs/ui';
-import type { Dependency } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import { UniverUniUIController } from './controllers/uniui-desktop.controller';
 import { UniuiFlowController } from './controllers/uniui-flow.controller';
 import { UniuiLeftSidebarController } from './controllers/uniui-leftsidebar.controller';
@@ -126,8 +127,7 @@ export class UniverUniUIPlugin extends Plugin {
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
-            [IEditorService, { useClass: EditorService }],
-            [IRangeSelectorService, { useClass: RangeSelectorService }],
+            [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],

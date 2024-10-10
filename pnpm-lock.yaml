@@ -2195,6 +2195,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
@@ -2945,6 +2948,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
       '@univerjs/telemetry':
         specifier: workspace:*
         version: link:../telemetry

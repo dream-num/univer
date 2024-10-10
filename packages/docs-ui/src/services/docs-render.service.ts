@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel } from '@univerjs/core';
+import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
-import type { DocumentDataModel } from '@univerjs/core';
 
-@OnLifecycle(LifecycleStages.Ready, DocsRenderService)
 export class DocsRenderService extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,

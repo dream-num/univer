@@ -68,5 +68,13 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingUpdateRenderController],
             [DocDrawingTransformUpdateController],
         ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
+
+        this._injector.get(DocDrawingAddRemoveController);
+        this._injector.get(DocDrawingUIController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(DocDrawingTransformUpdateController);
+        this._injector.get(DocDrawingPopupMenuController);
     }
 }

@@ -15,9 +15,9 @@
  */
 
 import type { ICellDataForSheetInterceptor, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { ISheetClipboardService } from '../../services/clipboard/clipboard.service';
 import { virtualizeDiscreteRanges } from '../utils/range-tools';
 import { SheetPermissionInterceptorBaseController } from './sheet-permission-interceptor-base.controller';
@@ -25,7 +25,6 @@ import { SheetPermissionInterceptorBaseController } from './sheet-permission-int
 type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorClipboardController)
 export class SheetPermissionInterceptorClipboardController extends Disposable {
     disposableCollection = new DisposableCollection();
 

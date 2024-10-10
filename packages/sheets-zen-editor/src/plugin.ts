@@ -53,4 +53,12 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }
+
+    override onReady(): void {
+        this._injector.get(ZenEditorUIController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(ZenEditorController);
+    }
 }

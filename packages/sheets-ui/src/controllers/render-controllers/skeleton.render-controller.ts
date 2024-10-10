@@ -15,22 +15,17 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IRenderContext } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject } from '@univerjs/core';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, SheetSkeletonRenderController)
-export class SheetSkeletonRenderController extends Disposable {
+export class SheetSkeletonRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
-        this._initRemoveSheet();
-    }
-
-    private _initRemoveSheet() {
         this.disposeWithMe(this._context.unit.sheetDisposed$.subscribe((sheet) => {
             this._sheetSkeletonManagerService.disposeSkeleton({
                 sheetId: sheet.getSheetId(),

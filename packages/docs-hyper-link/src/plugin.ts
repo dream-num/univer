@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
+import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddHyperLinkMuatation, DeleteHyperLinkMuatation, UpdateHyperLinkMuatation } from './commands/mutations/hyper-link.mutation';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DOC_HYPER_LINK_PLUGIN, DocHyperLinkResourceController } from './controllers/resource.controller';
-import type { IUniverDocsHyperLinkConfig } from './controllers/config.schema';
 
 export class UniverDocsHyperLinkPlugin extends Plugin {
     static override pluginName = DOC_HYPER_LINK_PLUGIN;
@@ -39,16 +39,13 @@ export class UniverDocsHyperLinkPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        const deps: Dependency[] = [
-            [DocHyperLinkResourceController],
-        ];
-
-        deps.forEach((dep) => {
-            this._injector.add(dep);
-        });
+        const deps: Dependency[] = [[DocHyperLinkResourceController]];
+        deps.forEach((dep) => this._injector.add(dep));
 
         [AddHyperLinkMuatation, DeleteHyperLinkMuatation, UpdateHyperLinkMuatation].forEach((mutation) => {
             this.disposeWithMe(this._commandService.registerCommand(mutation));
         });
+
+        this._injector.get(DocHyperLinkResourceController);
     }
 }

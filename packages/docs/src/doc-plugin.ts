@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Dependency, ICommand } from '@univerjs/core';
+import type { IUniverDocsConfig } from './controllers/config.schema';
 import {
     ICommandService,
     IConfigService,
@@ -21,7 +23,6 @@ import {
     Injector,
     Plugin,
 } from '@univerjs/core';
-import type { Dependency, ICommand } from '@univerjs/core';
 import { RichTextEditingMutation } from './commands/mutations/core-editing.mutation';
 import { DocsRenameMutation } from './commands/mutations/docs-rename.mutation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
@@ -29,7 +30,6 @@ import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.sch
 import { DocCustomRangeController } from './controllers/custom-range.controller';
 import { DocSelectionManagerService } from './services/doc-selection-manager.service';
 import { DocStateEmitService } from './services/doc-state-emit.service';
-import type { IUniverDocsConfig } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DOCS_PLUGIN';
 
@@ -47,9 +47,10 @@ export class UniverDocsPlugin extends Plugin {
         // Manage the plugin configuration.
         const { ...rest } = this._config;
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+    }
 
-        this._initializeDependencies(_injector);
-
+    override onStarting(): void {
+        this._initializeDependencies();
         this._initializeCommands();
     }
 
@@ -65,16 +66,17 @@ export class UniverDocsPlugin extends Plugin {
         });
     }
 
-    private _initializeDependencies(docInjector: Injector) {
+    private _initializeDependencies() {
         (
             [
-                // services
                 [DocSelectionManagerService],
                 [DocStateEmitService],
-                // controllers
                 [DocCustomRangeController],
-
             ] as Dependency[]
-        ).forEach((d) => docInjector.add(d));
+        ).forEach((d) => this._injector.add(d));
+    }
+
+    override onReady(): void {
+        this._injector.get(DocCustomRangeController);
     }
 }

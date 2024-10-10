@@ -15,13 +15,13 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, merge, of, skip } from 'rxjs';
 import type { DependencyIdentifier } from '../../common/di';
+import { BehaviorSubject, merge, of, skip } from 'rxjs';
 import { Inject, Injector } from '../../common/di';
 
 import { Disposable } from '../../shared/lifecycle';
-import { ILogService } from '../log/log.service';
 import { takeAfter } from '../../shared/rxjs';
+import { ILogService } from '../log/log.service';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
 /**

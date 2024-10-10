@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, Inject, IPermissionService, IUniverInstanceService, Optional, RANGE_TYPE, Rectangle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UnitAction } from '@univerjs/protocol';
 
 import { getSheetCommandTarget, RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission } from '@univerjs/sheets';
@@ -30,7 +30,6 @@ type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?:
 
 export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Steady, SheetPermissionInterceptorCanvasRenderController)
 export class SheetPermissionInterceptorCanvasRenderController extends RxDisposable implements IRenderModule {
     disposableCollection = new DisposableCollection();
 
@@ -51,7 +50,6 @@ export class SheetPermissionInterceptorCanvasRenderController extends RxDisposab
         this._initHeaderResizePermissionInterceptor();
         this._initRangeFillPermissionInterceptor();
         this._initRangeMovePermissionInterceptor();
-        // this._initFreezePermissionInterceptor();
     }
 
     private _initHeaderMovePermissionInterceptor() {

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
+import type { Dependency, Workbook } from '@univerjs/core';
+import type { IUniverUIConfig } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+
 import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-
 import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
-import type { Dependency, Workbook } from '@univerjs/core';
-import type { IUniverUIConfig } from '@univerjs/ui';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -84,7 +85,7 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+import { SheetPermissionPanelList } from './views/permission';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -149,6 +150,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInitController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
+
+        this._injector.get(SheetPermissionPanelModel);
     }
 
     override onReady(): void {
@@ -157,12 +160,29 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._registerRenderBasics();
+
+        this._injector.get(SheetUIController);
+        this._injector.get(SheetsRenderService);
+        this._injector.get(ActiveWorksheetController);
+        this._injector.get(SheetPermissionInterceptorBaseController);
     }
 
     override onRendered(): void {
         this._registerRenderModules();
 
+        this._injector.get(SheetPermissionInitController);
         this._injector.get(SheetPermissionRenderManagerController);
+        this._injector.get(SheetClipboardController);
+        this._injector.get(FormulaEditorController);
+        this._injector.get(SheetsDefinedNameController);
+        this._injector.get(StatusBarController);
+        this._injector.get(AutoHeightController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(FormatPainterController);
+        this._injector.get(AutoFillController);
+        this._injector.get(SheetPermissionInterceptorClipboardController);
     }
 
     private _registerRenderBasics(): void {

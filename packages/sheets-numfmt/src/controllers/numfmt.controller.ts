@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDisposable, IRange, Workbook } from '@univerjs/core';
+import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
+import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
+import type { ISheetNumfmtPanelProps } from '../components/index';
+import type { INumfmtController } from './type';
 import {
     CellValueType,
     Disposable,
@@ -22,9 +27,7 @@ import {
     Inject,
     InterceptorEffectEnum,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
-    OnLifecycle,
     Range,
     ThemeService,
     toDisposable,
@@ -39,13 +42,11 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
-import type { IDisposable, IRange, Workbook } from '@univerjs/core';
-
-import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
@@ -56,11 +57,7 @@ import { CloseNumfmtPanelOperator } from '../commands/operations/close.numfmt.pa
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { SheetNumfmtPanel } from '../components/index';
 import { getPatternPreviewIgnoreGeneral, getPatternType } from '../utils/pattern';
-import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
-import type { ISheetNumfmtPanelProps } from '../components/index';
-import type { INumfmtController } from './type';
 
-@OnLifecycle(LifecycleStages.Rendered, NumfmtController)
 export class NumfmtController extends Disposable implements INumfmtController {
     /**
      * If _previewPattern is null ,the realTimeRenderingInterceptor will skip and if it is '',realTimeRenderingInterceptor will clear numfmt.

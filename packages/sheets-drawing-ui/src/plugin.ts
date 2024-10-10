@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
     IConfigService,
@@ -22,22 +24,20 @@ import {
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Dependency } from '@univerjs/core';
-import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
-import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
-import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
-import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
-import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
-import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
-import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
-import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
-import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
-import type { IUniverSheetsDrawingUIConfig } from './controllers/config.schema';
+import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { SheetsDrawingRenderController } from './controllers/render-controllers/sheet-drawing.render-controller';
+import { SheetDrawingUIController } from './controllers/sheet-drawing.controller';
+import { SheetsDrawingCopyPasteController } from './controllers/sheet-drawing-copy-paste.controller';
+import { SheetDrawingPermissionController } from './controllers/sheet-drawing-permission.controller';
+import { SheetDrawingPrintingController } from './controllers/sheet-drawing-printing.controller';
+import { SheetDrawingTransformAffectedController } from './controllers/sheet-drawing-transform-affected.controller';
+import { SheetDrawingUpdateController } from './controllers/sheet-drawing-update.controller';
+import { SheetCanvasFloatDomManagerService } from './services/canvas-float-dom-manager.service';
 
 const PLUGIN_NAME = 'SHEET_IMAGE_UI_PLUGIN';
 
@@ -64,10 +64,24 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
 
     override onStarting(): void {
         this._initDependencies();
+
+        this._injector.get(SheetCanvasFloatDomManagerService);
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetsDrawingCopyPasteController);
     }
 
     override onRendered(): void {
         this._registerRenderModules();
+
+        this._injector.get(SheetDrawingPermissionController);
+        this._injector.get(SheetDrawingPrintingController);
+        this._injector.get(SheetDrawingUIController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(DrawingPopupMenuController);
     }
 
     private _initDependencies(): void {
@@ -79,6 +93,7 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
         ];
+
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 

@@ -125,5 +125,14 @@ export class UniverUIPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
 
         this._injector.get(IUIController);
+        this._injector.get(ErrorController);
+    }
+
+    override onReady(): void {
+        this._injector.get(SharedController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(ShortcutPanelController);
     }
 }

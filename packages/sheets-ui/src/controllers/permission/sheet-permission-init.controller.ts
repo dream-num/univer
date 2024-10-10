@@ -16,19 +16,13 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, ISetWorksheetPermissionPointsMutationParams, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
-
-import { Disposable, IAuthzIoService, ICommandService, Inject, InterceptorEffectEnum, IPermissionService, IUndoRedoService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { Disposable, IAuthzIoService, ICommandService, Inject, InterceptorEffectEnum, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
 
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRenderModel, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
-
-import { IDialogService } from '@univerjs/ui';
-
-@OnLifecycle(LifecycleStages.Rendered, SheetPermissionInitController)
 export class SheetPermissionInitController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IDialogService private readonly _dialogService: IDialogService,
         @IPermissionService private _permissionService: IPermissionService,
         @IAuthzIoService private _authzIoService: IAuthzIoService,
         @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
@@ -36,7 +30,6 @@ export class SheetPermissionInitController extends Disposable {
         @Inject(UserManagerService) private _userManagerService: UserManagerService,
         @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointRuleModel: WorksheetProtectionPointModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(RangeProtectionRenderModel) private _selectionProtectionRenderModel: RangeProtectionRenderModel,
         @Inject(IUndoRedoService) private _undoRedoService: IUndoRedoService,
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(RangeProtectionCache) private _rangeProtectionCache: RangeProtectionCache

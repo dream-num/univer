@@ -15,15 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, Inject, isRealNum, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { HoverManagerService } from '../services/hover-manager.service';
+import { CellValueType, Disposable, Inject, isRealNum, LocaleService } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
+import { HoverManagerService } from '../services/hover-manager.service';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 
-@OnLifecycle(LifecycleStages.Rendered, ForceStringAlertRenderController)
 export class ForceStringAlertRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,

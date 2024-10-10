@@ -15,27 +15,26 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
 import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import type { IAllRuntimeData } from '../services/runtime.service';
+import { Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { convertRuntimeToUnitData } from '../basics/runtime';
+import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
-import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
-import { convertRuntimeToUnitData } from '../basics/runtime';
 
-@OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -57,7 +56,7 @@ export class CalculateController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._calculateFormulaService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {

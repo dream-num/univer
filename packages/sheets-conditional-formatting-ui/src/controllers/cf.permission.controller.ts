@@ -15,14 +15,12 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
-
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import type { IAddCfCommandParams } from '../commands/commands/add-cf.command';
+import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
+import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { AddCfCommand } from '../commands/commands/add-cf.command';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingPermissionController)
 export class ConditionalFormattingPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,

@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-import { Inject, IPermissionService, LifecycleStages, LRUMap, OnLifecycle, Range } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import type { UnitAction } from '@univerjs/protocol';
+import type { getDefaultRangePermission, IRangePermissionPoint } from '../services/permission/range-permission/util';
+import { Inject, IPermissionService, LRUMap, Range } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { filter, map } from 'rxjs/operators';
-import type { IRange } from '@univerjs/core';
-
-import type { UnitAction } from '@univerjs/protocol';
 import { getAllRangePermissionPoint } from '../services/permission/range-permission/util';
 import { RangeProtectionRuleModel } from './range-protection-rule.model';
 
-import type { getDefaultRangePermission, IRangePermissionPoint } from '../services/permission/range-permission/util';
-
 export type ICellPermission = Record<UnitAction, boolean> & { ruleId?: string; ranges?: IRange[] };
 
-@OnLifecycle(LifecycleStages.Ready, RangeProtectionRenderModel)
 export class RangeProtectionRenderModel {
     private _cache = new LRUMap<string, ICellPermission[]>(10000);
     constructor(

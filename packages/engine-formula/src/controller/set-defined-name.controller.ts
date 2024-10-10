@@ -15,16 +15,15 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
 import type {
     ISetDefinedNameMutationParam,
     ISetDefinedNameMutationSearchParam,
 } from '../commands/mutations/set-defined-name.mutation';
+
+import { Disposable, ICommandService } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import { IDefinedNamesService } from '../services/defined-names.service';
 
-@OnLifecycle(LifecycleStages.Ready, SetDefinedNameController)
 export class SetDefinedNameController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

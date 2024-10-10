@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import type { ICommandInfo } from '@univerjs/core';
+import type {
+    IRemoveFeatureCalculationMutationParam,
+    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
+import { Disposable, ICommandService, ObjectMatrix } from '@univerjs/core';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
@@ -25,13 +30,7 @@ import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.m
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
-import type {
-    IRemoveFeatureCalculationMutationParam,
-    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
-import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
-import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 
-@OnLifecycle(LifecycleStages.Ready, SetDependencyController)
 export class SetDependencyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

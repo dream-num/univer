@@ -15,33 +15,32 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
-
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IDirtyUnitSheetNameMap, IFeatureDirtyRangeType, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
 import type { ErrorType } from '../../basics/error-type';
-import { ERROR_TYPE_SET } from '../../basics/error-type';
-import { prefixToken, suffixToken } from '../../basics/token';
 import type { IFormulaDirtyData } from '../../services/current-data.service';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
-import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
-import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { Lexer } from '../analysis/lexer';
 import type { LexerNode } from '../analysis/lexer-node';
-import { AstTreeBuilder } from '../analysis/parser';
 import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
+import type { PreCalculateNodeType } from '../utils/node-type';
+import type { IUnitRangeWithToken } from './dependency-tree';
+import { Disposable, Inject, ObjectMatrix } from '@univerjs/core';
+import { FormulaAstLRU } from '../../basics/cache-lru';
+import { ERROR_TYPE_SET } from '../../basics/error-type';
+import { prefixToken, suffixToken } from '../../basics/token';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IDependencyManagerService } from '../../services/dependency-manager.service';
+import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
+import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
+import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { Lexer } from '../analysis/lexer';
+import { AstTreeBuilder } from '../analysis/parser';
 import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
-import type { PreCalculateNodeType } from '../utils/node-type';
 import { serializeRangeToRefString } from '../utils/reference';
-import { IDependencyManagerService } from '../../services/dependency-manager.service';
-import type { IUnitRangeWithToken } from './dependency-tree';
 import { FormulaDependencyTree, FormulaDependencyTreeCache } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
@@ -52,7 +51,6 @@ interface IFeatureFormulaParam {
     featureId: string;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaDependencyGenerator)
 export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 

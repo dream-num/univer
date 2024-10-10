@@ -15,24 +15,20 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
-
-import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
+import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
+import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingAutoFillController)
 export class ConditionalFormattingAutoFillController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IAutoFillService) private _autoFillService: IAutoFillService,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel,
-
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel
-
     ) {
         super();
 

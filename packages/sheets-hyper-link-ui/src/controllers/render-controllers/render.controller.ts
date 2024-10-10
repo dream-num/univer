@@ -16,7 +16,7 @@
 
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { HyperLinkModel } from '@univerjs/sheets-hyper-link';
 import { debounceTime } from 'rxjs';
@@ -41,7 +41,6 @@ export class SheetsHyperLinkRenderController extends Disposable implements IRend
     }
 }
 
-@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRenderManagerController)
 export class SheetsHyperLinkRenderManagerController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,

@@ -15,9 +15,9 @@
  */
 
 import type { IRange, Nullable } from '@univerjs/core';
+import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import { LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
-import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_RANGE_RULE: IRangeProtectionRule = {

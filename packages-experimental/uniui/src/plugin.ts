@@ -143,4 +143,10 @@ export class UniverUniUIPlugin extends Plugin {
 
         this._injector.get(IUIController);
     }
+
+    override onReady(): void {
+        this._injector.get(UniuiFlowController);
+        this._injector.get(UniuiLeftSidebarController);
+        this._injector.get(UniuiToolbarController);
+    }
 }

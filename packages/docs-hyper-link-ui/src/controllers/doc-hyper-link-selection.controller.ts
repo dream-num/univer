@@ -15,12 +15,11 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISetTextSelectionsOperationParams } from '@univerjs/docs';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetTextSelectionsOperation } from '@univerjs/docs';
 import { DocHyperLinkPopupService } from '../services/hyper-link-popup.service';
 
-@OnLifecycle(LifecycleStages.Ready, DocHyperLinkSelectionController)
 export class DocHyperLinkSelectionController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

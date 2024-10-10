@@ -21,7 +21,6 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { debounceTime } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsThreadCommentRenderController)
 export class SheetsThreadCommentRenderController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,

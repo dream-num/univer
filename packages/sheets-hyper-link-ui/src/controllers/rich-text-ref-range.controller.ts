@@ -15,13 +15,12 @@
  */
 
 import type { IDisposable, IDocumentData, IRange, Nullable, Workbook } from '@univerjs/core';
-import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRichTextRefRangeController)
 export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
     private _refRangeMap: Map<string, Map<string, ObjectMatrix<IDisposable>>> = new Map();
     constructor(

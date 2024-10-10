@@ -15,15 +15,14 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { DEFAULT_DOC_SUBUNIT_ID } from '../../common/const';
 
-@OnLifecycle(LifecycleStages.Starting, DocThreadCommentRenderController)
 export class DocThreadCommentRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,

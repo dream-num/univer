@@ -18,20 +18,18 @@ import type {
     ICommandInfo,
     Nullable,
 } from '@univerjs/core';
+import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
+import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
+import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
 import {
     checkIfMove,
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { BaseObject, Image, IShapeProps, Scene, Shape } from '@univerjs/engine-render';
-import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
-import type { DrawingTypeEnum, IDrawingGroupUpdateParam, IDrawingOrderMapParam, IDrawingParam, IDrawingSearch, ITransformState } from '@univerjs/drawing';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
-import type { ISetDrawingAlignOperationParams } from '../commands/operations/drawing-align.operation';
+import { DRAWING_OBJECT_LAYER_INDEX, Group, IRenderManagerService, RENDER_CLASS_TYPE } from '@univerjs/engine-render';
 import { AlignType, SetDrawingAlignOperation } from '../commands/operations/drawing-align.operation';
 import { CloseImageCropOperation } from '../commands/operations/image-crop.operation';
 import { getUpdateParams } from '../utils/get-update-params';
@@ -45,7 +43,6 @@ interface IDrawingTransformCache {
     transform: ITransformState;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, DrawingUpdateController)
 export class DrawingUpdateController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,

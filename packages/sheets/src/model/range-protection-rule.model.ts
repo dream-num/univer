@@ -16,7 +16,7 @@
 
 import type { IRange } from '@univerjs/core';
 import type { UnitObject } from '@univerjs/protocol';
-import { LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Tools } from '@univerjs/core';
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -43,7 +43,6 @@ export interface IRuleChange {
 }
 
 type IRuleChangeType = 'add' | 'set' | 'delete';
-@OnLifecycle(LifecycleStages.Starting, RangeProtectionRuleModel)
 
 export class RangeProtectionRuleModel {
     /**

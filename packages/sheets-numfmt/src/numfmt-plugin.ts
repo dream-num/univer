@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
 
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsNumfmtCellContentController } from './controllers/numfmt.cell-content.controller';
 import { NumfmtController } from './controllers/numfmt.controller';
+import { NumfmtCurrencyController } from './controllers/numfmt.currency.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
 import { NumfmtI18nController } from './controllers/numfmt.i18n.controller';
 import { NumfmtMenuController } from './controllers/numfmt.menu.controller';
-import { NumfmtCurrencyController } from './controllers/numfmt.currency.controller';
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
 import { MenuCurrencyService } from './service/menu.currency.service';
-import type { IUniverSheetsNumfmtConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsPlugin, UniverSheetsUIPlugin)
 export class UniverSheetsNumfmtPlugin extends Plugin {
@@ -56,9 +56,16 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
         this._injector.add([NumfmtEditorController]);
         this._injector.add([UserHabitController]);
         this._injector.add([SheetsNumfmtCellContentController]);
-        this._injector.add([NumfmtI18nController]);
         this._injector.add([MenuCurrencyService]);
         this._injector.add([NumfmtCurrencyController]);
         this._injector.add([NumfmtMenuController]);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsNumfmtCellContentController);
+        this._injector.get(NumfmtController);
+        this._injector.get(NumfmtCurrencyController);
+        this._injector.get(NumfmtEditorController);
+        this._injector.get(NumfmtMenuController);
     }
 }

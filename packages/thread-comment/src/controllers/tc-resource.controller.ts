@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IResourceManagerService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IThreadComment } from '../types/interfaces/i-thread-comment';
+import { Disposable, Inject, IResourceManagerService } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 import { ThreadCommentModel } from '../models/thread-comment.model';
-import { TC_PLUGIN_NAME } from '../types/const';
-import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
+import { TC_PLUGIN_NAME } from '../types/const';
 
 export type UnitThreadCommentJSON = Record<string, IThreadComment[]>;
 
-@OnLifecycle(LifecycleStages.Starting, ThreadCommentResourceController)
 export class ThreadCommentResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,

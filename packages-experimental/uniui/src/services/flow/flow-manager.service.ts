@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type {
-    ReactFlowInstance,
-} from '@xyflow/react';
+import type { ReactFlowInstance } from '@xyflow/react';
+import { Disposable } from '@univerjs/core';
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -27,7 +25,6 @@ export interface IFlowViewport {
     y: number;
 }
 
-@OnLifecycle(LifecycleStages.Ready, FlowManagerService)
 export class FlowManagerService extends Disposable {
     private readonly _viewportChanged$ = new BehaviorSubject<IFlowViewport | null>(null);
     readonly viewportChanged$ = this._viewportChanged$.asObservable();

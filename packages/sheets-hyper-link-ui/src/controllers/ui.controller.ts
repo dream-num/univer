@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { LinkSingle } from '@univerjs/icons';
-import { CellLinkPopup } from '../views/CellLinkPopup';
-import { CellLinkEdit } from '../views/CellLinkEdit';
-import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
-import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
-import { menuSchema } from './menu.schema';
+import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
+import { CloseHyperLinkPopupOperation, InsertHyperLinkOperation, InsertHyperLinkToolbarOperation, OpenHyperLinkEditPanelOperation } from '../commands/operations/popup.operations';
+import { CellLinkEdit } from '../views/CellLinkEdit';
+import { CellLinkPopup } from '../views/CellLinkPopup';
 import { InsertLinkShortcut } from './menu';
+import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkUIController)
 export class SheetsHyperLinkUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,

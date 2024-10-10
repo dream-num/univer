@@ -15,6 +15,10 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { RenderManagerService } from '@univerjs/engine-render';
+import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import type { Observable } from 'rxjs';
+import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
 import { createIdentifier, Direction,
     Disposable,
     ICommandService,
@@ -22,23 +26,18 @@ import { createIdentifier, Direction,
     Injector,
     IUndoRedoService,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
 
-import type { RenderManagerService } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { discreteRangeToRange } from '../../controllers/utils/range-tools';
+import { SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetRowAutoHeightMutation, SetWorksheetRowAutoHeightMutationFactory, SheetsSelectionsService } from '@univerjs/sheets';
+import { BehaviorSubject } from 'rxjs';
 import { AFFECT_LAYOUT_STYLES } from '../../controllers/auto-height.controller';
+import { discreteRangeToRange } from '../../controllers/utils/range-tools';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import {
     chnNumberRule,
@@ -50,7 +49,6 @@ import {
     numberRule,
     otherRule,
 } from './rules';
-import type { IAutoFillLocation, IAutoFillRule, ISheetAutoFillHook } from './type';
 import { APPLY_TYPE, AutoFillHookType } from './type';
 
 export interface IAutoFillService {
@@ -90,7 +88,6 @@ export interface IApplyMenuItem {
     disable: boolean;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, AutoFillService)
 export class AutoFillService extends Disposable implements IAutoFillService {
     private _rules: IAutoFillRule[] = [];
     private _hooks: ISheetAutoFillHook[] = [];

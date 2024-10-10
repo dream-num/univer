@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/config.schema';
 import {
     DependentOn,
     ICommandService,
@@ -39,8 +40,8 @@ import { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.
 import { DeleteCfCommand } from './commands/commands/delete-cf.command';
 import { MoveCfCommand } from './commands/commands/move-cf.command';
 import { SetCfCommand } from './commands/commands/set-cf.command';
-import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 
+import { OpenConditionalFormattingOperator } from './commands/operations/open-conditional-formatting-panel';
 import { ConditionalFormattingAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 import { ConditionalFormattingCopyPasteController } from './controllers/cf.copy-paste.controller';
@@ -53,7 +54,6 @@ import { ConditionalFormattingPermissionController } from './controllers/cf.perm
 import { SheetsCfRefRangeController } from './controllers/cf.ref-range.controller';
 import { SheetsCfRenderController } from './controllers/cf.render.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import type { IUniverSheetsConditionalFormattingUIConfig } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsConditionalFormattingPlugin)
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
@@ -88,6 +88,26 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         this._injector.add([ConditionalFormattingEditorController]);
         this._injector.add([ConditionalFormattingClearController]);
         this._injector.add([ConditionalFormattingPainterController]);
+    }
+
+    override onStarting(_injector?: Injector): void {
+        this._injector.get(SheetsCfRenderController);
+    }
+
+    override onReady(): void {
+        this._injector.get(ConditionalFormattingMenuController);
+        this._injector.get(ConditionalFormattingPanelController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(ConditionalFormattingAutoFillController);
+        this._injector.get(ConditionalFormattingClearController);
+        this._injector.get(ConditionalFormattingCopyPasteController);
+        this._injector.get(ConditionalFormattingEditorController);
+        this._injector.get(ConditionalFormattingI18nController);
+        this._injector.get(ConditionalFormattingPainterController);
+        this._injector.get(ConditionalFormattingPermissionController);
+        this._injector.get(SheetsCfRefRangeController);
     }
 
     private _initCommand() {

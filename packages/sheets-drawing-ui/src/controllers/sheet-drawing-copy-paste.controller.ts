@@ -15,15 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetDrawing } from '@univerjs/sheets-drawing';
-import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import { Disposable, Tools } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation, SheetDrawingAnchorType } from '@univerjs/sheets-drawing';
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME, SheetSkeletonManagerService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsDrawingCopyPasteController)
 export class SheetsDrawingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         drawings: ISheetDrawing[];

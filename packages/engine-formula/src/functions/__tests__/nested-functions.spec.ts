@@ -15,42 +15,42 @@
  */
 
 import type { Injector, IWorkbookData } from '@univerjs/core';
-import { beforeEach, describe, expect, it } from 'vitest';
+import type { LexerNode } from '../../engine/analysis/lexer-node';
 
+import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { LocaleType } from '@univerjs/core';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { ErrorType } from '../../basics/error-type';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
-import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../engine/interpreter/interpreter';
-import { Iferror } from '../logical/iferror';
-import { Xlookup } from '../lookup/xlookup';
-import { Max } from '../statistical/max';
-import { Sumifs } from '../math/sumifs';
-import { Edate } from '../date/edate';
-import { Today } from '../date/today';
-import { Day } from '../date/day';
-import { Address } from '../lookup/address';
-import { Xmatch } from '../lookup/xmatch';
-import { Min } from '../statistical/min';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { Plus } from '../meta/plus';
+import { Day } from '../date/day';
+import { Edate } from '../date/edate';
+import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { Today } from '../date/today';
+import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
+import { Iferror } from '../logical/iferror';
+import { Address } from '../lookup/address';
+import { Choose } from '../lookup/choose';
+import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { Xlookup } from '../lookup/xlookup';
+import { Xmatch } from '../lookup/xmatch';
+import { FUNCTION_NAMES_MATH } from '../math/function-names';
+import { Sum } from '../math/sum';
+import { Sumifs } from '../math/sumifs';
+import { Divided } from '../meta/divided';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
 import { Minus } from '../meta/minus';
-import { Concatenate } from '../text/concatenate';
-import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
-import { FUNCTION_NAMES_MATH } from '../math/function-names';
-import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { Plus } from '../meta/plus';
 import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
-import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { Max } from '../statistical/max';
+import { Min } from '../statistical/min';
+import { Concatenate } from '../text/concatenate';
 import { FUNCTION_NAMES_TEXT } from '../text/function-names';
-import { IFunctionService } from '../../services/function.service';
-import type { LexerNode } from '../../engine/analysis/lexer-node';
-import { Choose } from '../lookup/choose';
-import { Sum } from '../math/sum';
-import { ErrorType } from '../../basics/error-type';
 import { Len } from '../text/len';
-import { Divided } from '../meta/divided';
 import { createFunctionTestBed, getObjectValue } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {
@@ -279,6 +279,7 @@ describe('Test nested functions', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},

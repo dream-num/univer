@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
 import type { DependencyOverride } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
 import type { ILayout } from '../basics';
 import { DefaultDocContainerConfig, DefaultToolbarConfig } from '../basics';
 

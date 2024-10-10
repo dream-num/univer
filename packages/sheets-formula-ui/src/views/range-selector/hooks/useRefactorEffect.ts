@@ -35,22 +35,14 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
-    // TODO@ggg: 拆除 prompt后，这段代码就不用了
     useEffect(() => {
         if (isNeed) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             editorBridgeService.enableForceKeepVisible();
-            const d2 = contextService.subscribeContextValue$(DISABLE_NORMAL_SELECTIONS).subscribe((e) => {
-                if (!e) {
-                    refSelectionsRenderService?.enableSelectionChanging();
-                    contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
-                    editorBridgeService.enableForceKeepVisible();
-                }
-            });
+
             return () => {
                 d1?.dispose();
-                d2.unsubscribe();
                 contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
                 editorBridgeService.disableForceKeepVisible();
             };
@@ -80,6 +72,13 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
             return () => {
                 contextMenuService.enable();
             };
+        }
+    }, [isNeed]);
+
+    // reset setSkipLastEnabled
+    useEffect(() => {
+        if (isNeed) {
+            refSelectionsRenderService?.setSkipLastEnabled(false);
         }
     }, [isNeed]);
 };

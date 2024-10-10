@@ -63,7 +63,7 @@ test('diff merged cells rendering', async () => {
     await page.waitForTimeout(2000);
 
     await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot(generateSnapshotName('mergedCellsRendering'), { maxDiffPixels: 5 });
 

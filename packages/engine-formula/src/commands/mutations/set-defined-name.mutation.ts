@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { IAccessor, IMutation } from '@univerjs/core';
+import { IDefinedNamesService } from '../../services/defined-names.service';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;
@@ -29,6 +30,28 @@ export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSea
     localSheetId?: string;
     hidden?: boolean;
 }
+
+/**
+ * Generate undo mutation of a `SetDefinedNameMutation`
+ * @param accessor
+ * @param params
+ * @returns
+ */
+export const SetDefinedNameMutationFactory = (
+    accessor: IAccessor,
+    params: ISetDefinedNameMutationParam
+): ISetDefinedNameMutationParam => {
+    const { unitId, id } = params;
+    const definedNamesService = accessor.get(IDefinedNamesService);
+
+    const definedName = definedNamesService.getValueById(unitId, id);
+
+    return {
+        ...definedName,
+        unitId,
+    };
+};
+
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.
  * It requires setting local to true during execution.

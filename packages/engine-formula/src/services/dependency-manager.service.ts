@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
-import { FormulaDependencyTreeCache } from '../engine/dependency/dependency-tree';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
+import { createIdentifier, Disposable, ObjectMatrix } from '@univerjs/core';
+import { FormulaDependencyTreeCache } from '../engine/dependency/dependency-tree';
 
 export interface IOtherFormulaDependencyParam {
     [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Nullable<FormulaDependencyTree> } }>;
@@ -59,6 +59,8 @@ export interface IDependencyManagerService {
     addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: FormulaDependencyTree): void;
 
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
+
+    removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
 
     hasFormulaDependency(unitId: string, sheetId: string, row: number, column: number): boolean;
 
@@ -313,6 +315,19 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     hasFormulaDependency(unitId: string, sheetId: string, row: number, column: number) {
         return this._formulaData[unitId]?.[sheetId]?.getValue(row, column) != null;
+    }
+
+    removeFormulaDependencyByDefinedName(unitId: string, definedName: string) {
+        if (this._formulaData[unitId]) {
+            Object.values(this._formulaData[unitId]!).forEach((sheet) => {
+                sheet.forValue((row, column, tree) => {
+                    if (tree?.node?.hasDefinedName(definedName)) {
+                        this.clearDependencyForTree(tree);
+                        sheet.realDeleteValue(row, column);
+                    }
+                });
+            });
+        }
     }
 }
 

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 import type { Nullable } from '@univerjs/core';
 import type { IDocumentSkeletonCached, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable } from '@univerjs/engine-render';
+import { DocumentSkeletonPageType, getLastLine, lineIterator } from '@univerjs/engine-render';
 
 export function firstLineInTable(table: IDocumentSkeletonTable) {
     const firstRow = table.rows[0];
@@ -84,17 +84,36 @@ export function findBellowCell(cell: IDocumentSkeletonPage) {
     const row = cell.parent as IDocumentSkeletonRow;
     const table = row?.parent as IDocumentSkeletonTable;
 
+    const tableId = table?.tableId;
+
     if (row == null || table == null) {
         return;
     }
 
+    const col = row.cells.indexOf(cell);
+
     const bellowRow = table.rows[table.rows.indexOf(row) + 1];
 
     if (bellowRow == null) {
+        if (tableId.indexOf('#-#')) {
+            const [id, index] = tableId.split('#-#');
+            const pages = (table.parent?.parent as IDocumentSkeletonCached)?.pages;
+            const nextTableId = `${id}#-#${Number.parseInt(index) + 1}`;
+
+            if (pages) {
+                for (const page of pages) {
+                    const { skeTables } = page;
+                    if (skeTables.has(nextTableId)) {
+                        const nextTable = skeTables.get(nextTableId);
+                        if (nextTable?.rows.length) {
+                            return nextTable.rows[0].cells[col];
+                        }
+                    }
+                }
+            }
+        }
         return;
     }
-
-    const col = row.cells.indexOf(cell);
 
     return bellowRow.cells[col];
 }
@@ -109,11 +128,27 @@ export function findAboveCell(cell: IDocumentSkeletonPage) {
 
     const aboveRow = table.rows[table.rows.indexOf(row) - 1];
 
+    const col = row.cells.indexOf(cell);
+
     if (aboveRow == null) {
+        if (table.tableId.indexOf('#-#')) {
+            const [id, index] = table.tableId.split('#-#');
+            const pages = (table.parent?.parent as IDocumentSkeletonCached)?.pages;
+            const nextTableId = `${id}#-#${Number.parseInt(index) - 1}`;
+            if (pages) {
+                for (const page of pages) {
+                    const { skeTables } = page;
+                    if (skeTables.has(nextTableId)) {
+                        const nextTable = skeTables.get(nextTableId);
+                        if (nextTable?.rows.length) {
+                            return nextTable.rows[nextTable.rows.length - 1].cells[col];
+                        }
+                    }
+                }
+            }
+        }
         return;
     }
-
-    const col = row.cells.indexOf(cell);
 
     return aboveRow.cells[col];
 }

@@ -21,8 +21,6 @@ import {
     Disposable,
     Inject,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
 import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
@@ -31,7 +29,6 @@ import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOff
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
 import { getReferenceMoveParams } from './utils/ref-range-param';
 
-@OnLifecycle(LifecycleStages.Ready, UpdateDefinedNameController)
 export class UpdateDefinedNameController extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,

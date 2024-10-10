@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
-import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { getFormulaCellData } from '../utils/formula';
 
@@ -32,7 +31,6 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override title: string = 'dataValidation.custom.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-    override formulaInput: string = CUSTOM_FORMULA_INPUT_NAME;
 
     private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 

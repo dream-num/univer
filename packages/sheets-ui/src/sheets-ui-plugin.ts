@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
-
-import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
-import { filter } from 'rxjs/operators';
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
+import type { IUniverSheetsUIConfig } from './controllers/config.schema';
+
+import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
+import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
+import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -84,7 +85,6 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { SheetsRenderService } from './services/sheets-render.service';
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
-import type { IUniverSheetsUIConfig } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsUIPlugin extends Plugin {
@@ -119,6 +119,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ICellEditorManagerService, { useClass: CellEditorManagerService }],
             [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
+            [IRefSelectionsService, { useClass: RefSelectionsService }],
             [IAutoFillService, { useClass: AutoFillService }],
             [SheetPrintInterceptorService],
             [IStatusBarService, { useClass: StatusBarService }],

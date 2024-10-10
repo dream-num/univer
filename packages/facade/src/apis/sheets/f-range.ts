@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandService, Inject, Injector, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
-import { FormulaDataModel } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import {
-    addMergeCellsUtil,
-    getAddMergeMutationRangeByType,
-    RemoveWorksheetMergeCommand,
-    SetHorizontalTextAlignCommand,
-    SetRangeValuesCommand,
-    SetStyleCommand,
-    SetTextWrapCommand,
-    SetVerticalTextAlignCommand,
-} from '@univerjs/sheets';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
-import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link-ui';
-import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { getDT } from '@univerjs/thread-comment-ui';
-import { ComponentManager } from '@univerjs/ui';
 import type {
     CellValue,
     DataValidationStatus,
@@ -66,6 +44,29 @@ import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-
 import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link-ui';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
+import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
+import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandService, Inject, Injector, Tools, UserManagerService, WrapStrategy } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import {
+    addMergeCellsUtil,
+    getAddMergeMutationRangeByType,
+    RemoveWorksheetMergeCommand,
+    SetHorizontalTextAlignCommand,
+    SetRangeValuesCommand,
+    SetStyleCommand,
+    SetTextWrapCommand,
+    SetVerticalTextAlignCommand,
+} from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
+import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link-ui';
+import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { getDT } from '@univerjs/thread-comment-ui';
+import { ComponentManager } from '@univerjs/ui';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
 import { FThreadComment } from './f-thread-comment';
@@ -79,7 +80,6 @@ import {
     transformFacadeHorizontalAlignment,
     transformFacadeVerticalAlignment,
 } from './utils';
-import type { FHorizontalAlignment, FVerticalAlignment, IFComponentKey } from './utils';
 
 export type FontLine = 'none' | 'underline' | 'line-through';
 export type FontStyle = 'normal' | 'italic';

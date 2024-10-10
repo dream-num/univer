@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { CellValueType } from '@univerjs/protocol';
-import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IBaseDataValidationWidget } from './base-widget';
+import { DataValidationOperator, Inject, Injector, LocaleService, Tools } from '@univerjs/core';
+import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -59,20 +59,18 @@ export interface IFormulaValidResult {
 
 export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
-
     abstract title: string;
-
     abstract operators: DataValidationOperator[];
-
     abstract scopes: string[] | string;
 
-    abstract formulaInput: string;
+    // #region UI related
 
+    formulaInput: string | undefined = undefined;
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
-
     dropdown: string | undefined = undefined;
-
     optionsInput: string | undefined = undefined;
+
+    // #endregion
 
     constructor(
         @Inject(LocaleService) readonly localeService: LocaleService,

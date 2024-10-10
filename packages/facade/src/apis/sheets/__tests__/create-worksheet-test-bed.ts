@@ -16,6 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -44,8 +45,8 @@ import {
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
 import { ConditionalFormattingFormulaService, ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel } from '@univerjs/sheets-conditional-formatting';
-import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 
+import { DataValidationCacheService, DataValidationCustomFormulaService, DataValidationFormulaService, SheetDataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import {
     DescriptionService,
@@ -54,11 +55,10 @@ import {
     RegisterFunctionService,
     RegisterOtherFormulaService,
 } from '@univerjs/sheets-formula';
-import enUS from '@univerjs/sheets-formula/locale/en-US';
-import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
+import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
+import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import type { Dependency, IWorkbookData, UnitModel } from '@univerjs/core';
 import { FUniver } from '../../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {

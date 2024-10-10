@@ -21,6 +21,8 @@ export { InsertFunctionOperation } from './commands/operations/insert-function.o
 export { MoreFunctionsOperation } from './commands/operations/more-functions.operation';
 export { ReferenceAbsoluteOperation } from './commands/operations/reference-absolute.operation';
 export { SearchFunctionOperation } from './commands/operations/search-function.operation';
+export { RangeSelector } from './views/range-selector/index';
+export { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
 
 // #region - all commands
 

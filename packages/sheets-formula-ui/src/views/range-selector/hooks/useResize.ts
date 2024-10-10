@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { debounce } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { type Editor, VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { ScrollBar } from '@univerjs/engine-render';
 import { useEffect, useMemo } from 'react';
-import type { Nullable } from '@univerjs/core';
 
 export const useResize = (editor?: Editor) => {
     const resize = () => {

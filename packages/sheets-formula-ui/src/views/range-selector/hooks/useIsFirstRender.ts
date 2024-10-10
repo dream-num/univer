@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { useEffect, useState } from 'react';
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import { useLayoutEffect, useRef } from 'react';
 
-export const useFormulaToken = (text: string) => {
-    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-
-    const [sequenceNodes, sequenceNodesSet] = useState<(string | ISequenceNode)[]>([]);
-
-    useEffect(() => {
-        sequenceNodesSet(lexerTreeBuilder.sequenceNodesBuilder(text) ?? []);
-    }, [text]);
-
-    return {
-        sequenceNodes,
-        sequenceNodesSet,
-    };
+export const useIsFirstRender = () => {
+    const isFirstRef = useRef(true);
+    useLayoutEffect(() => {
+        isFirstRef.current = false;
+    }, []);
+    return isFirstRef;
 };

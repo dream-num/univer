@@ -70,7 +70,11 @@ describe('Test char function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(number2);
-            expect(getObjectValue(result2)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result2)).toStrictEqual('˒');
+
+            const number3 = NumberValueObject.create(28);
+            const result3 = testFunction.calculate(number3);
+            expect(getObjectValue(result3)).toStrictEqual('');
         });
     });
 });

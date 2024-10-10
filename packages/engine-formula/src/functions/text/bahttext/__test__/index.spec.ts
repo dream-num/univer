@@ -72,5 +72,25 @@ describe('Test bahttext function', () => {
             const result2 = testFunction.calculate(number2);
             expect(getObjectValue(result2)).toStrictEqual('หนึ่งพันสองร้อยสามสิบสี่ล้านห้าแสนหกหมื่นเจ็ดพันแปดร้อยเก้าสิบบาทถ้วน');
         });
+
+        it('More test', () => {
+            const number = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.123, 1111111],
+                    [10000000, 11],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(number);
+            expect(getObjectValue(result)).toStrictEqual([
+                ['สิบสองสตางค์', 'หนึ่งล้านหนึ่งแสนหนึ่งหมื่นหนึ่งพันหนึ่งร้อยสิบเอ็ดบาทถ้วน'],
+                ['สิบล้านบาทถ้วน', 'สิบเอ็ดบาทถ้วน'],
+            ]);
+        });
     });
 });

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { CellValueType, isNullCell, moveRangeByOffset } from '@univerjs/core';
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
+import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
+import { CellValueType, isNullCell, moveRangeByOffset } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -31,7 +32,6 @@ import {
     NumberValueObject,
     StringValueObject,
 } from '../value-object/primitive-object';
-import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 
 export type NodeValueType = BaseValueObject | BaseReferenceObject | AsyncObject | AsyncArrayObject;
 
@@ -472,7 +472,9 @@ export class BaseReferenceObject extends ObjectClassType {
         return getRuntimeFeatureCell(row, column, this.getSheetId(), this.getUnitId(), this._runtimeFeatureCellData);
     }
 
-    getCellByPosition(row?: number, column?: number) {
+    getCellByPosition(rowRaw?: number, columnRaw?: number) {
+        let row = rowRaw;
+        let column = columnRaw;
         if (!row) {
             row = this._rangeData.startRow;
         }

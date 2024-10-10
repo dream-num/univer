@@ -63,6 +63,7 @@ export class TriggerCalculationController extends Disposable {
         dirtyDefinedNameMap: {},
         dirtyUnitFeatureMap: {},
         dirtyUnitOtherFormulaMap: {},
+        clearDependencyTreeCache: {},
     };
 
     private _setTimeoutKey: NodeJS.Timeout | number = -1;
@@ -148,6 +149,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
+        const allClearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
 
         // const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
 
@@ -160,7 +162,7 @@ export class TriggerCalculationController extends Disposable {
 
             const params = conversion.getDirtyData(command);
 
-            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
+            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
 
             if (dirtyRanges != null) {
                 allDirtyRanges.push(...dirtyRanges);
@@ -181,6 +183,10 @@ export class TriggerCalculationController extends Disposable {
             if (dirtyUnitOtherFormulaMap != null) {
                 this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyUnitOtherFormulaMap);
             }
+
+            if (clearDependencyTreeCache != null) {
+                this._mergeDirtyNameMap(allClearDependencyTreeCache, clearDependencyTreeCache);
+            }
         }
 
         return {
@@ -190,6 +196,8 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: false,
+            clearDependencyTreeCache: allClearDependencyTreeCache,
+            // numfmtItemMap,
         };
     }
 
@@ -199,11 +207,13 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = { ...dirtyData1.dirtyDefinedNameMap };
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = { ...dirtyData1.dirtyUnitFeatureMap };
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = { ...dirtyData1.dirtyUnitOtherFormulaMap };
+        const allClearDependencyTreeCache: IDirtyUnitSheetNameMap = { ...dirtyData1.clearDependencyTreeCache };
 
         this._mergeDirtyNameMap(allDirtyNameMap, dirtyData2.dirtyNameMap);
         this._mergeDirtyNameMap(allDirtyDefinedNameMap, dirtyData2.dirtyDefinedNameMap);
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitFeatureMap, dirtyData2.dirtyUnitFeatureMap);
         this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyData2.dirtyUnitOtherFormulaMap);
+        this._mergeDirtyNameMap(allClearDependencyTreeCache, dirtyData2.clearDependencyTreeCache);
 
         return {
             dirtyRanges: allDirtyRanges,
@@ -212,6 +222,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             forceCalculation: false,
+            clearDependencyTreeCache: allClearDependencyTreeCache,
         };
     }
 
@@ -223,9 +234,6 @@ export class TriggerCalculationController extends Disposable {
 
             Object.keys(dirtyNameMap[unitId]!).forEach((sheetId) => {
                 if (dirtyNameMap[unitId]?.[sheetId]) {
-                    if (allDirtyNameMap[unitId] == null) {
-                        allDirtyNameMap[unitId] = {};
-                    }
                     allDirtyNameMap[unitId]![sheetId] = dirtyNameMap[unitId]![sheetId];
                 }
             });
@@ -408,6 +416,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
             forceCalculation: false,
+            clearDependencyTreeCache: {},
         };
     }
 

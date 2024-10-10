@@ -39,13 +39,13 @@ export enum compareToken {
 }
 
 export const OPERATOR_TOKEN_PRIORITY = new Map([
-    [operatorToken.NOT_EQUAL as string, 3],
-    [operatorToken.LESS_THAN as string, 3],
-    [operatorToken.GREATER_THAN_OR_EQUAL as string, 3],
-    [operatorToken.EQUALS as string, 3],
-    [operatorToken.GREATER_THAN as string, 3],
-    [operatorToken.LESS_THAN_OR_EQUAL as string, 3],
-    [operatorToken.CONCATENATE as string, 2],
+    [operatorToken.NOT_EQUAL as string, 4],
+    [operatorToken.LESS_THAN as string, 4],
+    [operatorToken.GREATER_THAN_OR_EQUAL as string, 4],
+    [operatorToken.EQUALS as string, 4],
+    [operatorToken.GREATER_THAN as string, 4],
+    [operatorToken.LESS_THAN_OR_EQUAL as string, 4],
+    [operatorToken.CONCATENATE as string, 3],
     [operatorToken.PLUS as string, 2],
     [operatorToken.MINUS as string, 2],
     [operatorToken.DIVIDED as string, 1],

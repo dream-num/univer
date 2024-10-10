@@ -26,6 +26,7 @@ export interface IDirtyConversionManagerParams {
         dirtyDefinedNameMap?: IDirtyUnitSheetDefinedNameMap;
         dirtyUnitFeatureMap?: IDirtyUnitFeatureMap;
         dirtyUnitOtherFormulaMap?: IDirtyUnitOtherFormulaMap;
+        clearDependencyTreeCache?: IDirtyUnitSheetNameMap;
     };
 }
 

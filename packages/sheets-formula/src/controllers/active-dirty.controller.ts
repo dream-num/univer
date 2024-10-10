@@ -18,6 +18,8 @@ import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnit
 import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
+    IInsertColMutationParams,
+    IInsertRowMutationParams,
     IInsertSheetMutationParams,
     IMoveColumnsMutationParams,
     IMoveRangeMutationParams,
@@ -38,6 +40,8 @@ import {
 } from '@univerjs/core';
 import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
+    InsertColMutation,
+    InsertRowMutation,
     InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
@@ -101,6 +105,12 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveRangeMutationParams;
                 return {
                     dirtyRanges: this._getMoveRangeMutationDirtyRange(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.to.subUnitId]: '1',
+                            [params.from.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -111,6 +121,11 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveRowsMutationParams;
                 return {
                     dirtyRanges: this._getMoveRowsMutationDirtyRange(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -121,6 +136,11 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IMoveColumnsMutationParams;
                 return {
                     dirtyRanges: this._getMoveRowsMutationDirtyRange(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -131,6 +151,11 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IReorderRangeMutationParams;
                 return {
                     dirtyRanges: this._getReorderRangeMutationDirtyRange(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -143,6 +168,11 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IRemoveRowsMutationParams;
                 return {
                     dirtyRanges: this._getRemoveRowOrColumnMutation(params, true),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -153,6 +183,39 @@ export class ActiveDirtyController extends Disposable {
                 const params = command.params as IRemoveColMutationParams;
                 return {
                     dirtyRanges: this._getRemoveRowOrColumnMutation(params, false),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+
+        this._activeDirtyManagerService.register(InsertColMutation.id, {
+            commandId: InsertColMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as IInsertColMutationParams;
+                return {
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
+            },
+        });
+
+        this._activeDirtyManagerService.register(InsertRowMutation.id, {
+            commandId: InsertRowMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as IInsertRowMutationParams;
+                return {
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
                 };
             },
         });
@@ -163,7 +226,14 @@ export class ActiveDirtyController extends Disposable {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IRemoveSheetMutationParams;
-                return { dirtyNameMap: this._getRemoveSheetMutation(params) };
+                return {
+                    dirtyNameMap: this._getRemoveSheetMutation(params),
+                    clearDependencyTreeCache: {
+                        [params.unitId]: {
+                            [params.subUnitId]: '1',
+                        },
+                    },
+                };
             },
         });
 
@@ -171,7 +241,9 @@ export class ActiveDirtyController extends Disposable {
             commandId: InsertSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
                 const params = command.params as IInsertSheetMutationParams;
-                return { dirtyNameMap: this._getInsertSheetMutation(params) };
+                return {
+                    dirtyNameMap: this._getInsertSheetMutation(params),
+                };
             },
         });
     }

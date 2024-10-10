@@ -15,21 +15,20 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Inject, Tools } from '@univerjs/core';
+import type { LambdaPrivacyVarType } from './base-ast-node';
 
+import { Inject, Tools } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
-    DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER,
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { Interpreter } from '../interpreter/interpreter';
-import { isFirstChildParameter } from '../utils/function-definition';
+import { updateLambdaStatement } from '../utils/update-lambda-statement';
 import { LambdaValueObjectObject } from '../value-object/lambda-value-object';
-import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -162,35 +161,6 @@ export class LambdaNodeFactory extends BaseAstNodeFactory {
         lambdaId: string,
         currentLambdaPrivacyVar: LambdaPrivacyVarType
     ) {
-        this._updateTree(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
-    }
-
-    private _updateTree(
-        functionStatementNode: LexerNode,
-        lambdaId: string,
-        currentLambdaPrivacyVar: LambdaPrivacyVarType
-    ) {
-        const children = functionStatementNode.getChildren();
-        const childrenCount = children.length;
-        const firstChild = children[0];
-        for (let i = 0; i < childrenCount; i++) {
-            const node = children[i];
-            if (isFirstChildParameter(firstChild) && i !== 0) {
-                continue;
-            }
-            if (node instanceof LexerNode) {
-                this._updateTree(node, lambdaId, currentLambdaPrivacyVar);
-            } else {
-                const token = node.trim();
-                if (currentLambdaPrivacyVar.has(token)) {
-                    const newNode = new LexerNode();
-                    newNode.setToken(DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER);
-                    newNode.setLambdaId(lambdaId);
-                    newNode.setLambdaPrivacyVar(currentLambdaPrivacyVar);
-                    newNode.setLambdaParameter(token);
-                    children[i] = newNode;
-                }
-            }
-        }
+        updateLambdaStatement(functionStatementNode, lambdaId, currentLambdaPrivacyVar);
     }
 }

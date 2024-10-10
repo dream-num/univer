@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-export const DEFAULT_TOKEN_TYPE_PARAMETER = 'P_1';
+import type { IDependencyManagerService } from '../../services/dependency-manager.service';
+import { generateRandomId } from '@univerjs/core';
 
-export const DEFAULT_TOKEN_TYPE_ROOT = 'R_1';
-
-export const DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER = 'L_1';
-
-export const DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER = 'LR_1';
-
-export const DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER = 'LO_1';
-
-export const DEFAULT_TOKEN_LET_FUNCTION_NAME = 'LET';
-
-export const DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME = 'LAMBDA';
-
-export const DEFAULT_TOKEN_CUBE_FUNCTION_NAME = 'CUBE';
-
-export const FORCED_RECALCULATION_FUNCTION_NAME = new Set<string>(['RAND', 'RANDBETWEEN', 'NOW', 'TODAY']);
+export function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): string {
+    let idLength = 4;
+    let id = generateRandomId(idLength);
+    while (dependencyManagerService.hasTreeIdInCache(id)) {
+        id = generateRandomId(++idLength);
+    }
+    return id;
+}

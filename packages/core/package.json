@@ -70,11 +70,13 @@
         "nanoid": "5.0.7",
         "numeral": "^2.0.6",
         "numfmt": "^2.5.2",
-        "ot-json1": "^1.0.2"
+        "ot-json1": "^1.0.2",
+        "rbush": "^4.0.1"
     },
     "devDependencies": {
         "@types/lodash-es": "^4.17.12",
         "@types/numeral": "^2.0.5",
+        "@types/rbush": "^4.0.0",
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.2",

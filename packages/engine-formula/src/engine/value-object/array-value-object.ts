@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
+import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 
+import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
@@ -25,7 +26,6 @@ import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
-import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 
 enum BatchOperatorType {
     MINUS,
@@ -1909,8 +1909,10 @@ export class ValueObjectFactory {
             if (isRealNum(rawValue)) {
                 return NumberValueObject.create(Number(rawValue));
             }
-            if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue.replace(/\n/g, '').replace(/\r/g, ''))) {
-                return ArrayValueObject.create(rawValue.replace(/\n/g, '').replace(/\r/g, ''));
+
+            const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');
+            if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValueSingleLine)) {
+                return ArrayValueObject.create(rawValueSingleLine);
             }
 
             return createStringValueObjectByRawValue(rawValue);
@@ -1920,4 +1922,9 @@ export class ValueObjectFactory {
         }
         return ErrorValueObject.create(ErrorType.VALUE);
     }
+}
+
+function isStringWrappedByDoubleQuotes(input: string) {
+    const trimmedInput = input.trim();
+    return trimmedInput.startsWith('"') && trimmedInput.endsWith('"');
 }

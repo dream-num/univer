@@ -16,13 +16,14 @@
 
 import type { Injector, Nullable } from '@univerjs/core';
 import type { IFunctionService } from '../../services/function.service';
-import { PrefixNode } from '../ast-node/prefix-node';
 import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { PrefixNode } from '../ast-node/prefix-node';
 
-export function prefixHandler(tokenTrim: string, functionService: IFunctionService, injector: Injector) {
+export function prefixHandler(tokenTrimParam: string, functionService: IFunctionService, injector: Injector) {
     let minusPrefixNode: Nullable<PrefixNode>;
     let atPrefixNode: Nullable<PrefixNode>;
+    let tokenTrim = tokenTrimParam;
     const prefix = tokenTrim.slice(0, 2);
     let sliceLength = 0;
     if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {

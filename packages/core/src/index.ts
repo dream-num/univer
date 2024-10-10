@@ -183,5 +183,6 @@ export * from './types/interfaces';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
+export { type IRTreeItem, RTree } from './shared/r-tree';
 
 export { Univer } from './univer';

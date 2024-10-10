@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, IFreeze, IObjectArrayPrimitiveType, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColumnCustomCommand, SetColWidthCommand, SetFrozenCommand, SetRowCustomCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -602,6 +602,24 @@ export class FWorksheet {
         return this;
     }
 
+    /**
+     * Set custom properties for given rows.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await this._commandService.executeCommand(SetRowCustomCommand.id, {
+            unitId,
+            subUnitId,
+            custom,
+        });
+
+        return this;
+    }
+
     // #endregion
 
     // #region Column
@@ -887,6 +905,24 @@ export class FWorksheet {
             subUnitId,
             ranges,
             value: width,
+        });
+
+        return this;
+    }
+
+    /**
+     * Set custom properties for given columns.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await this._commandService.executeCommand(SetColumnCustomCommand.id, {
+            unitId,
+            subUnitId,
+            custom,
         });
 
         return this;

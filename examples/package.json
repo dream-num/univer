@@ -67,6 +67,7 @@
         "@univerjs/uni-slides-ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@univerjs/uniui": "workspace:*",
+        "@univerjs/watermark": "workspace:*",
         "clsx": "^2.1.1",
         "monaco-editor": "0.52.0",
         "react": "18.3.1",

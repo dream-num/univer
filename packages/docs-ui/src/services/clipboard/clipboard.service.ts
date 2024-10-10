@@ -373,6 +373,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
                 const { spanEntireRow } = range as IRectRangeWithStyle;
                 let bodySlice: IDocumentBody;
+
                 if (!spanEntireRow) {
                     bodySlice = getTableSlice(body, startOffset, endOffset);
                 } else {

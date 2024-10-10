@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Numbervalue extends BaseFunction {
     override minParams = 1;
@@ -30,27 +30,27 @@ export class Numbervalue extends BaseFunction {
 
     override calculate(text: BaseValueObject, decimalSeparator?: BaseValueObject, groupSeparator?: BaseValueObject): BaseValueObject {
         const _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
-        const _groupSeparator = groupSeparator ?? StringValueObject.create(',');
+        // const _groupSeparator = groupSeparator ?? StringValueObject.create(',');
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
             _decimalSeparator.isArray() ? (_decimalSeparator as ArrayValueObject).getRowCount() : 1,
-            _groupSeparator.isArray() ? (_groupSeparator as ArrayValueObject).getRowCount() : 1
+            groupSeparator?.isArray() ? (groupSeparator as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
             _decimalSeparator.isArray() ? (_decimalSeparator as ArrayValueObject).getColumnCount() : 1,
-            _groupSeparator.isArray() ? (_groupSeparator as ArrayValueObject).getColumnCount() : 1
+            groupSeparator?.isArray() ? (groupSeparator as ArrayValueObject).getColumnCount() : 1
         );
 
         const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, ErrorValueObject.create(ErrorType.NA));
         const decimalSeparatorArray = expandArrayValueObject(maxRowLength, maxColumnLength, _decimalSeparator, ErrorValueObject.create(ErrorType.NA));
-        const groupSeparatorArray = expandArrayValueObject(maxRowLength, maxColumnLength, _groupSeparator, ErrorValueObject.create(ErrorType.NA));
+        const groupSeparatorArray = groupSeparator ? expandArrayValueObject(maxRowLength, maxColumnLength, groupSeparator, ErrorValueObject.create(ErrorType.NA)) : undefined;
 
         const resultArray = textArray.mapValue((textObject, rowIndex, columnIndex) => {
             const decimalSeparatorObject = decimalSeparatorArray.get(rowIndex, columnIndex) as BaseValueObject;
-            const groupSeparatorObject = groupSeparatorArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const groupSeparatorObject = groupSeparator ? (groupSeparatorArray as ArrayValueObject).get(rowIndex, columnIndex) as BaseValueObject : undefined;
 
             if (textObject.isError()) {
                 return textObject;
@@ -60,11 +60,11 @@ export class Numbervalue extends BaseFunction {
                 return decimalSeparatorObject;
             }
 
-            if (groupSeparatorObject.isError()) {
+            if (groupSeparatorObject?.isError()) {
                 return groupSeparatorObject;
             }
 
-            if (decimalSeparatorObject.isNull() || groupSeparatorObject.isNull()) {
+            if (decimalSeparatorObject.isNull() || groupSeparatorObject?.isNull()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
@@ -82,7 +82,8 @@ export class Numbervalue extends BaseFunction {
         return resultArray;
     }
 
-    private _handleSingleObject(text: BaseValueObject, decimalSeparator: BaseValueObject, groupSeparator: BaseValueObject): BaseValueObject {
+    // eslint-disable-next-line
+    private _handleSingleObject(text: BaseValueObject, decimalSeparator: BaseValueObject, groupSeparator: BaseValueObject | undefined): BaseValueObject {
         let textValue = `${text.getValue()}`;
         textValue = textValue.replace(/\s+/g, '');
 
@@ -94,16 +95,20 @@ export class Numbervalue extends BaseFunction {
 
         decimalSeparatorValue = decimalSeparatorValue.charAt(0);
 
-        let groupSeparatorValue = `${groupSeparator.getValue()}`;
+        let groupSeparatorValue: string | undefined;
 
-        if (groupSeparator.isBoolean()) {
-            groupSeparatorValue = groupSeparatorValue.toLocaleUpperCase();
-        }
+        if (groupSeparator) {
+            groupSeparatorValue = `${groupSeparator.getValue()}`;
 
-        groupSeparatorValue = groupSeparatorValue.charAt(0);
+            if (groupSeparator.isBoolean()) {
+                groupSeparatorValue = groupSeparatorValue.toLocaleUpperCase();
+            }
 
-        if (decimalSeparatorValue === groupSeparatorValue) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            groupSeparatorValue = groupSeparatorValue.charAt(0);
+
+            if (decimalSeparatorValue === groupSeparatorValue) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
         }
 
         if (textValue.trim() === '') {
@@ -120,11 +125,19 @@ export class Numbervalue extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        let integerPart = splitText[0].split(groupSeparatorValue).join('');
+        let integerPart = splitText[0].replace(/,/g, '');
+
+        if (groupSeparator) {
+            integerPart = integerPart.split(groupSeparatorValue as string).join('');
+        }
 
         let result = 0;
 
         if (splitText.length === 1) {
+            if (decimalSeparatorValue === ',') {
+                integerPart = integerPart.replace(/\./g, '');
+            }
+
             if (integerPart.endsWith('%')) {
                 integerPart = integerPart.slice(0, -1);
                 result = +integerPart / 100;

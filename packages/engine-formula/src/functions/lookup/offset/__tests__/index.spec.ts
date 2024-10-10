@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+import type { Injector, IWorkbookData } from '@univerjs/core';
+import type { LexerNode } from '../../../../engine/analysis/lexer-node';
+
+import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { CellValueType, LocaleType } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { Injector, IWorkbookData } from '@univerjs/core';
 import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
@@ -28,8 +30,6 @@ import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Offset } from '../index';
-import type { LexerNode } from '../../../../engine/analysis/lexer-node';
-import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -158,6 +158,7 @@ describe('Test offset', () => {
         formulaCurrentConfigService.load({
             formulaData: {},
             arrayFormulaCellData: {},
+            arrayFormulaRange: {},
             forceCalculate: false,
             dirtyRanges: [],
             dirtyNameMap: {},

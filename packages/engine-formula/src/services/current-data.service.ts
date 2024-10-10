@@ -15,9 +15,8 @@
  */
 
 import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-
 import type {
+    IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetDefinedNameMap,
@@ -32,6 +31,8 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
+
+import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
@@ -79,6 +80,8 @@ export interface IFormulaCurrentConfigService {
 
     getArrayFormulaCellData(): IRuntimeUnitDataType;
 
+    getArrayFormulaRange(): IArrayFormulaRangeType;
+
     getSheetName(unitId: string, sheetId: string): string;
 
     getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
@@ -98,6 +101,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _unitStylesData: IUnitStylesData = {};
 
     private _arrayFormulaCellData: IRuntimeUnitDataType = {};
+
+    private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
     private _formulaData: IFormulaData = {};
 
@@ -131,6 +136,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._unitStylesData = {};
         this._formulaData = {};
         this._arrayFormulaCellData = {};
+        this._arrayFormulaRange = {};
         this._sheetNameMap = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
@@ -175,6 +181,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getArrayFormulaCellData() {
         return this._arrayFormulaCellData;
+    }
+
+    getArrayFormulaRange() {
+        return this._arrayFormulaRange;
     }
 
     getSheetNameMap() {
@@ -231,6 +241,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._formulaData = config.formulaData;
 
         this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
+
+        this._arrayFormulaRange = config.arrayFormulaRange;
 
         this._forceCalculate = config.forceCalculate;
 

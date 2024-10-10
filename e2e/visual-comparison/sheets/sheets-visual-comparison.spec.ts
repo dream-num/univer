@@ -26,6 +26,7 @@ test('diff default sheet content', async ({ page }) => {
 
     await expect(page).toHaveScreenshot(generateSnapshotName('default-sheet'), { maxDiffPixels: 5 });
 });
+const isCI = !!process.env.CI;
 
 test('diff demo sheet content', async ({ page }) => {
     let errored = false;
@@ -42,6 +43,7 @@ test('diff demo sheet content', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot(generateSnapshotName('demo-sheet'), { maxDiffPixels: 5 });
+    await page.waitForTimeout(2000);
     expect(errored).toBeFalsy();
 });
 
@@ -50,11 +52,11 @@ test('diff demo sheet content', async ({ page }) => {
  */
 test('diff merged cells rendering', async () => {
     const browser = await chromium.launch({
-        headless: true, //!!CI, // Set to false to see the browser window
+        headless: !!isCI, // Set to false to see the browser window
     });
     const context = await browser.newContext({
         viewport: { width: 1280, height: 1280 },
-        deviceScaleFactor: 1, // Set your desired DPR
+        deviceScaleFactor: 2, // Set your desired DPR
     });
     const page = await context.newPage();
     await page.goto('http://localhost:3000/sheets/');
@@ -65,16 +67,16 @@ test('diff merged cells rendering', async () => {
 
     await expect(page).toHaveScreenshot(generateSnapshotName('mergedCellsRendering'), { maxDiffPixels: 5 });
 
+    await page.waitForTimeout(2000);
     await browser.close();
 });
-const isCI = !!process.env.CI;
-test('diff merged cells rendering after scrolling', async ({}) => {
+test('diff merged cells rendering after scrolling', async () => {
     const browser = await chromium.launch({
-        headless: true, //!!isCI, // Set to false to see the browser window in local
+        headless: !!isCI, // Set to false to see the browser window in local
     });
     const context = await browser.newContext({
         viewport: { width: 1280, height: 1280 },
-        deviceScaleFactor: 1, // Set your desired DPR
+        deviceScaleFactor: 2, // Set your desired DPR
     });
     const page = await context.newPage();
     await page.goto('http://localhost:3000/sheets/');
@@ -123,9 +125,10 @@ test('diff merged cells rendering after scrolling', async ({}) => {
         await dispatchWheelEvent(0, 100, element);
         await dispatchWheelEvent(0, -100, element);
     });
-    await page.waitForTimeout(4000);
+    await page.waitForTimeout(2000);
 
     await expect(page).toHaveScreenshot(generateSnapshotName('mergedCellsRenderingScrolling'), { maxDiffPixels: 5 });
 
+    await page.waitForTimeout(2000);
     await browser.close();
 });

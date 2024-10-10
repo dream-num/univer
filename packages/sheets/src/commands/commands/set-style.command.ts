@@ -26,6 +26,9 @@ import type {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     BooleanNumber,
     CommandType,
@@ -38,22 +41,18 @@ import {
     sequenceExecute,
     Tools,
 } from '@univerjs/core';
-
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getSheetCommandTarget } from './utils/target-util';
 import { createRangeIteratorWithSkipFilteredRows } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
     value: T | T[][];
 }
 
-interface ISetStyleCommonParams {
-    subUnitId?: string;
-    unitId?: string;
+interface ISetStyleCommonParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
 }
 
@@ -72,7 +71,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const target = getSheetCommandTarget(univerInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
         const { unitId, subUnitId, worksheet } = target;
@@ -136,7 +135,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
 
         if (setRangeValuesResult && result.result) {
             undoRedoService.pushUndoRedo({
-                unitID: unitId,
+                unitID: setRangeValuesMutationParams.unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams }, ...undos],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams }, ...redos],
             });
@@ -230,7 +229,8 @@ export const SetUnderlineCommand: ICommand = {
         if (selection.primary) {
             currentlyUnderline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getUnderline().s;
+                .getUnderline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -265,7 +265,8 @@ export const SetStrikeThroughCommand: ICommand = {
         if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
                 .getRange(selection.primary.actualRow, selection.primary.actualColumn)
-                .getStrikeThrough().s;
+                .getStrikeThrough()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {
@@ -297,7 +298,8 @@ export const SetOverlineCommand: ICommand = {
         if (selection.primary) {
             currentlyOverline = !!worksheet
                 .getRange(selection.primary.startRow, selection.primary.startColumn)
-                .getOverline().s;
+                .getOverline()
+                .s;
         }
 
         const setStyleParams: ISetStyleCommandParams<{ s: number }> = {

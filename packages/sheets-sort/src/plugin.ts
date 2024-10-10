@@ -49,6 +49,5 @@ export class UniverSheetsSortPlugin extends Plugin {
 
     override onReady(): void {
         this._injector.get(SheetsSortController);
-        this._injector.get(SheetsSortService);
     }
 }

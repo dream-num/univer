@@ -15,10 +15,10 @@
  */
 
 import type { ICellData, Injector, Nullable, Univer, Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import type { ISortRangeCommandParams } from '../sheets-sort.command';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ReorderRangeCommand, ReorderRangeMutation, SetSelectionsOperation } from '@univerjs/sheets';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SortRangeCommand } from '../sheets-sort.command';
 import { createCommandTestBed } from './create-command-test-bed';
 

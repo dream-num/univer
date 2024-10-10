@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { Dependency, IOperation, IWorkbookData } from '@univerjs/core';
+import type { Dependency, IOperation, IWorkbookData, Workbook } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
+import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
+import type { IFilterConditionFormParams } from '../../models/conditions';
 import { CommandType, ICommandService, Inject, Injector, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
-import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
-import type { IOpenFilterPanelOperationParams } from '../../commands/operations/sheets-filter.operation';
-import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { E_ITEMS, ITEMS, WithCustomFilterModelFactory, WithMergedCellFilterFactory, WithMultiEmptyCellsModelFactory, WithTwoFilterColumnsFactory, WithValuesAndEmptyFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
-import type { IFilterConditionFormParams } from '../../models/conditions';
+import { SetSheetsFilterCriteriaCommand } from '../../commands/commands/sheets-filter.command';
+import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/operations/sheets-filter.operation';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
-import { SetSheetsFilterCriteriaCommand } from '../../commands/commands/sheets-filter.command';
+import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
 
 const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
@@ -65,11 +65,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     univer.registerPlugin(UniverSheetsFilterPlugin);
     univer.registerPlugin(SheetsFilterPanelTestPlugin);
 
-    univer.createUniverSheet(workbookData);
-
-    // It should be registered later in avoid of time sequence problem.
-    // injector.add([ISnapshotPersistenceService, { useClass: LocalSnapshotService }]);
-    // injector.get(ISnapshotPersistenceService);
+    univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, workbookData);
 
     const commandService = get(ICommandService);
 

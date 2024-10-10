@@ -15,27 +15,25 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
-import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 
 export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
+
 /**
  * header highlight
  * column menu: show, hover and mousedown event
  */
-@OnLifecycle(LifecycleStages.Rendered, DefinedNameController)
 export class DefinedNameController extends Disposable {
     private _preUnitId: Nullable<string> = null;
 

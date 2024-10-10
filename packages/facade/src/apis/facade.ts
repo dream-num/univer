@@ -14,29 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BorderStyleTypes,
-    debounce,
-    ICommandService,
-    Inject,
-    Injector,
-    IUniverInstanceService,
-    Quantity,
-    RedoCommand,
-    toDisposable,
-    UndoCommand,
-    Univer,
-    UniverInstanceType,
-    WrapStrategy,
-} from '@univerjs/core';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { ISocketService, WebSocketService } from '@univerjs/network';
-import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
-import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-
-import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
-import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import type {
     CommandListener,
     Dependency,
@@ -59,6 +36,29 @@ import type {
 import type { ISocket } from '@univerjs/network';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
+import {
+    BorderStyleTypes,
+    debounce,
+    ICommandService,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    Quantity,
+    RedoCommand,
+    toDisposable,
+    UndoCommand,
+    Univer,
+    UniverInstanceType,
+    WrapStrategy,
+} from '@univerjs/core';
+
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { ISocketService, WebSocketService } from '@univerjs/network';
+import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
+import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';

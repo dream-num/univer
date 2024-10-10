@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type { Ctor, DependencyIdentifier } from '../../common/di';
-
 /**
  * This enum defines multiple lifecycle stages in Univer SDK.
  */
@@ -48,59 +46,3 @@ export const LifecycleNameMap = {
     [LifecycleStages.Rendered]: 'Rendered',
     [LifecycleStages.Steady]: 'Steady',
 };
-
-export const LifecycleToModules = new Map<LifecycleStages, Array<DependencyIdentifier<unknown>>>();
-
-/**
- * Register the decorated class to be automatically instantiated when Univer progresses to the certain lifecycle stage.
- *
- * @param lifecycleStage The lifecycle stage to instantiate this class.
- * @param identifier The dependency identifier of the class. Usually, it is the class itself unless you bind this class
- * with another injection identifier.
- *
- * @deprecated This API does not work as expected and will be removed in future versions. Please call
- * `this._injector.get(YourDependency)` in plugins' lifecycle hooks instead.
- *
- * @example
- * // Ignore the `\` below. This is JSDoc's bug.
- * \@OnLifecycle(LifecycleStages.Ready, MyService)
- * class MyService {
- * }
- *
- * @example
- * // Ignore the `\` below. This is JSDoc's bug.
- * \@OnLifecycle(LifecycleStages.Rendered, IMyService)
- * class MyService implements IMyService {
- * }
- */
-export function OnLifecycle(lifecycleStage: LifecycleStages, identifier: DependencyIdentifier<unknown>) {
-    const decorator = function decorator(_: Ctor<unknown>) {
-        runOnLifecycle(lifecycleStage, identifier);
-    };
-
-    return decorator;
-}
-
-/**
- * Register a dependency to be automatically instantiated when Univer progresses to the certain lifecycle stage.
- *
- * @param lifecycleStage The lifecycle stage to instantiate this dependency.
- * @param identifier The dependencies' identifier. **Beware** that if the dependency (e.g. a class) is bound to an
- * identifier, you should register the identifier instead of the dependency itself.
- *
- * @deprecated This API does not work as expected and will be removed in future versions. Please call
- * `this._injector.get(YourDependency)` in plugins' lifecycle hooks instead.
- *
- * @example
- * runOnLifecycle(LifecycleStages.Ready, MyService);
- *
- * @example
- * runOnLifecycle(LifecycleStages.Rendered, IMyService);
- */
-export function runOnLifecycle(lifecycleStage: LifecycleStages, identifier: DependencyIdentifier<unknown>) {
-    if (!LifecycleToModules.has(lifecycleStage)) {
-        LifecycleToModules.set(lifecycleStage, []);
-    }
-
-    LifecycleToModules.get(lifecycleStage)!.push(identifier);
-}

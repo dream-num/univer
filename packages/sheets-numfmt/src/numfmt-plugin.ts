@@ -25,7 +25,6 @@ import { SheetsNumfmtCellContentController } from './controllers/numfmt.cell-con
 import { NumfmtController } from './controllers/numfmt.controller';
 import { NumfmtCurrencyController } from './controllers/numfmt.currency.controller';
 import { NumfmtEditorController } from './controllers/numfmt.editor.controller';
-import { NumfmtI18nController } from './controllers/numfmt.i18n.controller';
 import { NumfmtMenuController } from './controllers/numfmt.menu.controller';
 import { INumfmtController } from './controllers/type';
 import { UserHabitController } from './controllers/user-habit.controller';
@@ -62,8 +61,8 @@ export class UniverSheetsNumfmtPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        this._injector.get(INumfmtController);
         this._injector.get(SheetsNumfmtCellContentController);
-        this._injector.get(NumfmtController);
         this._injector.get(NumfmtCurrencyController);
         this._injector.get(NumfmtEditorController);
         this._injector.get(NumfmtMenuController);

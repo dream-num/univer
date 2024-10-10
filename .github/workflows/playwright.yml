@@ -36,6 +36,13 @@ jobs:
                   vercel-org-id: ${{ secrets.ORG_ID }}
                   vercel-project-id: ${{ secrets.PROJECT_ID_E2E }}
 
+            - name: Generate Playwright Report
+              uses: daun/playwright-report-summary@v3
+              if: always()
+              with:
+                  report-file: playwright-report.json
+                  custom-info: 'For more information, [see full report](${{ steps.vercel-e2e-report.outputs.preview-url }})'
+
             - name: Upload Artifact
               uses: actions/upload-artifact@v4
               if: ${{ !cancelled() }}
@@ -43,10 +50,3 @@ jobs:
                   name: playwright-report
                   path: playwright-report/
                   retention-days: 30
-
-            - name: Generate Playwright Report
-              uses: daun/playwright-report-summary@v3
-              if: always()
-              with:
-                  report-file: playwright-report.json
-                  custom-info: 'For more information, [see full report](${{ steps.vercel-e2e-report.outputs.preview-url }})'

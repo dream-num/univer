@@ -28,6 +28,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, IOtherFormulaManagerService, ISuperTableService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SuffixNodeFactory, SuperTableService, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
@@ -36,10 +37,9 @@ import {
     IRegisterFunctionService,
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
-import enUS from '@univerjs/sheets-formula/locale/en-US';
-import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
+import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { FUniver } from '../../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {

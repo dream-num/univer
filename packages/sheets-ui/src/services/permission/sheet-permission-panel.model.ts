@@ -16,7 +16,6 @@
 
 import type { IRange, Nullable } from '@univerjs/core';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
-import { LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { BehaviorSubject } from 'rxjs';
 
@@ -44,7 +43,6 @@ type IPermissionPanelBaseRule = IRangeProtectionRule | IWorksheetProtectionRule;
 
 export type IPermissionPanelRule = IPermissionPanelBaseRule & { viewStatus?: viewState; editStatus?: editState; ranges: IRange[] };
 
-@OnLifecycle(LifecycleStages.Starting, SheetPermissionPanelModel)
 export class SheetPermissionPanelModel {
     private _rule: IPermissionPanelRule = DEFAULT_RANGE_RULE;
     private _rule$ = new BehaviorSubject(this._rule);

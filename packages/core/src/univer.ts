@@ -37,7 +37,7 @@ import { ContextService, IContextService } from './services/context/context.serv
 import { ErrorService } from './services/error/error.service';
 import { IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
 import { LifecycleStages } from './services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from './services/lifecycle/lifecycle.service';
+import { LifecycleService } from './services/lifecycle/lifecycle.service';
 import { LocaleService } from './services/locale/locale.service';
 import { DesktopLogService, ILogService } from './services/log/log.service';
 import { PermissionService } from './services/permission/permission.service';
@@ -180,7 +180,6 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [LocaleService],
         [ThemeService],
         [LifecycleService],
-        [LifecycleInitializerService],
         [PluginService],
         [UserManagerService],
 
@@ -204,6 +203,6 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
 }
 
 function inintialzeStaringModules(injector: Injector): void {
-    injector.get(LifecycleService);
     injector.get(UserManagerService);
+    injector.get(IResourceLoaderService);
 }

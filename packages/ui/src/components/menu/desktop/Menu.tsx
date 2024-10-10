@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-import { isRealNum, useDependency } from '@univerjs/core';
+import type {
+    IDisplayMenuItem,
+    IMenuButtonItem,
+    IMenuItem,
+    IMenuSelectorItem,
+    IValueOption,
+    MenuItemDefaultValueType,
+} from '../../../services/menu/menu';
 
+import { isRealNum, useDependency } from '@univerjs/core';
 import {
     Menu as DesignMenu,
     MenuItem as DesignMenuItem,
@@ -25,8 +33,8 @@ import {
 import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useMemo, useState } from 'react';
-import { combineLatest, isObservable, map } from 'rxjs';
 
+import { combineLatest, isObservable, map, Observable } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -34,14 +42,6 @@ import { CustomLabel } from '../../custom-label/CustomLabel';
 import { useScrollYOverContainer } from '../../hooks/layout';
 import { useObservable } from '../../hooks/observable';
 import styles from './index.module.less';
-import type {
-    IDisplayMenuItem,
-    IMenuButtonItem,
-    IMenuItem,
-    IMenuSelectorItem,
-    IValueOption,
-    MenuItemDefaultValueType,
-} from '../../../services/menu/menu';
 
 // TODO: @jikkai disabled and hidden are not working
 
@@ -74,7 +74,7 @@ function MenuWrapper(props: IBaseMenuProps) {
             if (!item.children) return item;
 
             let hasChildren = false;
-            const hiddenObservables = item.children?.map((item) => item.item?.hidden$).filter((item) => !!item);
+            const hiddenObservables = item.children?.map((item) => item.item?.hidden$ ?? new Observable<boolean>((n) => n.next(false)));
 
             combineLatest(hiddenObservables)
                 .pipe(

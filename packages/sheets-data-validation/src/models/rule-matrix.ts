@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
 import IntervalTree from '@flatten-js/interval-tree';
 import { debounce, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import type { IRange, ISheetDataValidationRule, IUniverInstanceService, Workbook } from '@univerjs/core';
 
 interface IRuleItem {
     ruleId: string;

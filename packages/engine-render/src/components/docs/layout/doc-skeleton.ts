@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
-import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import { Skeleton } from '../../skeleton';
-import { Liquid } from '../liquid';
-import { DocumentEditArea } from '../view-model/document-view-model';
-import { dealWithSection } from './block/section';
-import { Hyphen } from './hyphenation/hyphen';
-import { LanguageDetector } from './hyphenation/language-detector';
-import { createSkeletonPage } from './model/page';
-import { createSkeletonSection } from './model/section';
-import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -37,6 +25,18 @@ import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../.
 import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
+import { PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { DocumentSkeletonPageType, GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import { Skeleton } from '../../skeleton';
+import { Liquid } from '../liquid';
+import { DocumentEditArea } from '../view-model/document-view-model';
+import { dealWithSection } from './block/section';
+import { Hyphen } from './hyphenation/hyphen';
+import { LanguageDetector } from './hyphenation/language-detector';
+import { createSkeletonPage } from './model/page';
+import { createSkeletonSection } from './model/section';
+import { getLastPage, getNullSkeleton, getPageFromPath, prepareSectionBreakConfig, resetContext, setPageParent, updateBlockIndex, updateInlineDrawingCoords } from './tools';
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',

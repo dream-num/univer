@@ -21,7 +21,7 @@ import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/s
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -39,7 +39,6 @@ export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
@@ -138,7 +137,7 @@ export class CalculateController extends Disposable {
                 case FormulaExecutedStateType.STOP_EXECUTION:
                     break;
                 case FormulaExecutedStateType.SUCCESS:
-                    this._applyFormula(data);
+                    this._applyResult(data);
                     break;
                 case FormulaExecutedStateType.INITIAL:
                     break;
@@ -173,7 +172,7 @@ export class CalculateController extends Disposable {
         });
     }
 
-    private async _applyFormula(data: IAllRuntimeData) {
+    private async _applyResult(data: IAllRuntimeData) {
         const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
@@ -181,16 +180,11 @@ export class CalculateController extends Disposable {
             return;
         }
 
-        // const deleteMutationInfo = this._deletePreviousArrayFormulaValue(arrayFormulaRange);
-
         if (arrayFormulaRange) {
             this._formulaDataModel.clearPreviousArrayFormulaCellData(clearArrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaCellData(arrayFormulaCellData);
-
             this._formulaDataModel.mergeArrayFormulaRange(arrayFormulaRange);
 
-            // Synchronous to the main thread
             this._commandService.executeCommand(
                 SetArrayFormulaDataMutation.id,
                 {

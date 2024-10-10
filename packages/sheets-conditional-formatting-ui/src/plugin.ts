@@ -90,7 +90,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         this._injector.add([ConditionalFormattingPainterController]);
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting(): void {
         this._injector.get(SheetsCfRenderController);
     }
 

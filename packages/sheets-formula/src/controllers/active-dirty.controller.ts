@@ -34,9 +34,7 @@ import {
     Disposable,
     Inject,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
 } from '@univerjs/core';
 import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
@@ -53,7 +51,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 
-@OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
 export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier, Disposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 
 export interface IProgressCount {
@@ -32,14 +32,17 @@ export interface IProgressService {
     progressVisible$: Observable<boolean>;
 
     /**
-     * Append subtask quantity during loading, when the number of added subtasks reaches the total number of tasks, the loading is completed.
+     * Append subtask quantity during loading, when the number of added subtasks reaches the total number
+     * of tasks, the loading is completed.
      * @param task
      */
     pushTask(task: IProgressCount): void;
 
     /**
-     * Insert a new number of tasks, do not set the start loading mechanism, when insertTaskCount finds that the original number of tasks is 0, it starts loading
+     * Insert a new number of tasks, do not set the start loading mechanism, when insertTaskCount finds that the
+     * original number of tasks is 0, it starts loading
      * @param count
+        this._progress$.complete();
      */
     insertTaskCount(count: number): void;
 

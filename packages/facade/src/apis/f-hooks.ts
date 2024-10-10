@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@univerjs/core';
+import { Inject, Injector, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { filter } from 'rxjs';
 import { FClipboardHooks } from './hooks/f-clipboard-hooks';
 import { FUndoRedoHooks } from './hooks/f-undoredo-hooks';

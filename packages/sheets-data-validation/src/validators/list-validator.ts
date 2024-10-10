@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, numfmt, Rectangle, Tools, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IRange, ISheetDataValidationRule, IStyleData, Nullable, Workbook } from '@univerjs/core';
-import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
-import { LIST_DROPDOWN_KEY } from '../views';
-import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { ListRenderModeInput } from '../views/render-mode';
-import { DropdownWidget } from '../widgets/dropdown-widget';
 import { deserializeListOptions } from './util';
 
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
@@ -97,13 +93,6 @@ export class ListValidator extends BaseDataValidator {
     title: string = 'dataValidation.list.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = LIST_FORMULA_INPUT_NAME;
-
-    override canvasRender: Nullable<IBaseDataValidationWidget> = this.injector.createInstance(DropdownWidget);
-
-    override dropdown: string | undefined = LIST_DROPDOWN_KEY;
-
-    override optionsInput: string | undefined = ListRenderModeInput.componentKey;
 
     override skipDefaultFontRender = (rule: ISheetDataValidationRule) => {
         return rule.renderMode !== DataValidationRenderMode.TEXT;

@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    composeInterceptors,
-    Disposable,
-    DisposableCollection,
-    InterceptorEffectEnum,
-    IUniverInstanceService,
-    remove,
-    toDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     ICellData,
     ICellInterceptor,
@@ -35,6 +25,16 @@ import type {
     Nullable,
     Workbook,
     Worksheet,
+} from '@univerjs/core';
+import {
+    composeInterceptors,
+    Disposable,
+    DisposableCollection,
+    InterceptorEffectEnum,
+    IUniverInstanceService,
+    remove,
+    toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 
 import { INTERCEPTOR_POINT } from './interceptor-const';

@@ -14,24 +14,45 @@
  * limitations under the License.
  */
 
+import type {
+    ICommandInfo,
+    IExecutionOptions,
+    IRange,
+    IUnitRange,
+    Nullable,
+    Workbook } from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type {
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IInsertSheetMutationParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommandParams,
+    IRemoveRowColCommandParams,
+    IRemoveSheetCommandParams,
+    IRemoveSheetMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetNameCommandParams,
+} from '@univerjs/sheets';
+
 import {
     Direction,
     Disposable,
     ICommandService,
     Inject,
     Injector,
-    isInternalEditorID,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
-    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -44,6 +65,7 @@ import { deserializeRangeWithSheet,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import {
     ClearSelectionFormatCommand,
     DeleteRangeMoveLeftCommand,
@@ -78,39 +100,8 @@ import {
     SetStyleCommand,
     SetWorksheetNameCommand,
     SheetInterceptorService,
-    SheetsSelectionsService,
 } from '@univerjs/sheets';
-
-import { filter, map, merge } from 'rxjs';
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IExecutionOptions,
-    IRange,
-    IUnitRange,
-    Nullable,
-    SlideDataModel,
-    Workbook,
-} from '@univerjs/core';
-
-import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IInsertSheetMutationParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
-    IRemoveRowColCommandParams,
-    IRemoveSheetCommandParams,
-    IRemoveSheetMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetNameCommandParams,
-} from '@univerjs/sheets';
+import { map } from 'rxjs';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { formulaDataToCellData, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
 
@@ -159,13 +150,12 @@ enum OriginRangeEdgeType {
  *
  * 1. Command intercepts, converts the command information to adapt refRange, offsets the formula content, and obtains the formula that requires offset content.
  *
-   2. Use refRange to offset the formula position and return undo/redo data to setRangeValues mutation
-        - Redo data: Delete the old value at the old position on the match, and add the new value at the new position (the new value first checks whether the old position has offset content, if so, use the new offset content, if not, take the old value)
-        - Undo data: the old position on the match saves the old value, and the new position delete value. Using undos when undoing will operate the data after the offset position.
-
-   3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
+ * 2. Use refRange to offset the formula position and return undo/redo data to setRangeValues mutation
+ *      - Redo data: Delete the old value at the old position on the match, and add the new value at the new position (the new value first checks whether the old position has offset content, if so, use the new offset content, if not, take the old value)
+ *      - Undo data: the old position on the match saves the old value, and the new position delete value. Using undos when undoing will operate the data after the offset position.
+ *
+ * 3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
  */
-@OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -173,24 +163,17 @@ export class UpdateFormulaController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
-        @IEditorService private readonly _editorService: IEditorService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();
-        this._initialize();
-    }
 
-    private _initialize(): void {
         this._commandExecutedListener();
     }
 
     private _commandExecutedListener() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommand({
-                getMutations: (command) => this._getUpdateFormula(command),
-            })
-        );
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (command) => this._getUpdateFormula(command),
+        }));
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
@@ -210,38 +193,18 @@ export class UpdateFormulaController extends Disposable {
                     this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
                 } else if (command.id === RemoveSheetMutation.id) {
                     const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
-                    this._handleRemoveSheetMutation(unitId, sheetId);
+                    this._handleWorkbookDisposed(unitId, sheetId);
                 } else if (command.id === InsertSheetMutation.id) {
                     this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
             })
         );
 
-        // When a unit is added or removed, update the formula data
-        this.disposeWithMe(
-            toDisposable(
-                merge(
-                    this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET),
-                    this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
-                    this._univerInstanceService.getTypeOfUnitAdded$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
-                ).pipe(
-                    filter((unit) => this._editorService.getEditor(unit.getUnitId()) == null),
-                    filter((unit) => !isInternalEditorID(unit.getUnitId()))
-                ).subscribe((unit) => this._handleUnitAdded(unit))
-            )
-        );
-
-        this.disposeWithMe(
-            toDisposable(
-                merge(
-                    this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(map((sheet) => sheet.getUnitId())),
-                    this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(map((doc) => doc.getUnitId())),
-                    this._univerInstanceService.getTypeOfUnitDisposed$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).pipe(map((slide) => slide.getUnitId()))
-                ).pipe(
-                    filter((unitId) => this._editorService.getEditor(unitId) == null)
-                ).subscribe((id) => this._handleRemoveSheetMutation(id))
-            )
-        );
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .subscribe((unit) => this._handleWorkbookAdded(unit)));
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(map((unit) => unit.getUnitId()))
+            .subscribe((unitId) => this._handleWorkbookDisposed(unitId)));
     }
 
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams) {
@@ -299,7 +262,7 @@ export class UpdateFormulaController extends Disposable {
         );
     }
 
-    private _handleRemoveSheetMutation(unitId: string, sheetId?: string) {
+    private _handleWorkbookDisposed(unitId: string, sheetId?: string) {
         const formulaData = this._formulaDataModel.getFormulaData();
         const newFormulaData = removeFormulaData(formulaData, unitId, sheetId);
 
@@ -354,51 +317,23 @@ export class UpdateFormulaController extends Disposable {
         );
     }
 
-    private _handleUnitAdded(unit: Workbook | DocumentDataModel | SlideDataModel) {
+    private _handleWorkbookAdded(unit: Workbook) {
         const formulaData = this._formulaDataModel.getFormulaData();
         const unitId = unit.getUnitId();
-        const unitType = unit.type;
-        const newFormulaData: IFormulaData = {
-            [unitId]: {},
-        };
+        const newFormulaData: IFormulaData = { [unitId]: {} };
 
-        if (unitType === UniverInstanceType.UNIVER_SHEET) {
-            const worksheets = unit.getSheets();
-            worksheets.forEach((worksheet) => {
-                const cellMatrix = worksheet.getCellMatrix();
-                const sheetId = worksheet.getSheetId();
+        const worksheets = unit.getSheets();
+        worksheets.forEach((worksheet) => {
+            const cellMatrix = worksheet.getCellMatrix();
+            const sheetId = worksheet.getSheetId();
 
-                const currentSheetData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+            const currentSheetData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
 
-                newFormulaData[unitId]![sheetId] = currentSheetData[unitId]?.[sheetId];
-            });
-        } else if (unitType === UniverInstanceType.UNIVER_DOC) {
-            // TODO@Dushusir add doc formula data
-        } else if (unitType === UniverInstanceType.UNIVER_SLIDE) {
-            // TODO@Dushusir add slide formula data
-        }
+            newFormulaData[unitId]![sheetId] = currentSheetData[unitId]?.[sheetId];
+        });
 
-        this._commandService.executeCommand(
-            SetFormulaDataMutation.id,
-            {
-                formulaData: newFormulaData,
-            },
-            {
-                onlyLocal: true,
-            }
-        );
-
-        // start calculation
-        this._commandService.executeCommand(
-            SetFormulaCalculationStartMutation.id,
-            {
-                commands: [],
-                forceCalculation: true,
-            },
-            {
-                onlyLocal: true,
-            }
-        );
+        this._commandService.executeCommand(SetFormulaDataMutation.id, { formulaData: newFormulaData }, { onlyLocal: true });
+        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
     }
 
     private _getUpdateFormula(command: ICommandInfo) {

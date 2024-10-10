@@ -19,13 +19,12 @@ import { Injector } from '../../../common/di';
 
 import { DesktopLogService, ILogService } from '../../log/log.service';
 import { LifecycleStages } from '../lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../lifecycle.service';
+import { LifecycleService } from '../lifecycle.service';
 
 function createLifecycleTestBed() {
     const injector = new Injector();
 
     injector.add([ILogService, { useClass: DesktopLogService }]);
-    injector.add([LifecycleInitializerService]);
     injector.add([LifecycleService]);
 
     return {

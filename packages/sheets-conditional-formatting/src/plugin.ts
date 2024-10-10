@@ -68,7 +68,7 @@ export class UniverSheetsConditionalFormattingPlugin extends Plugin {
         });
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting(): void {
         this._injector.get(ConditionalFormattingService);
     }
 }

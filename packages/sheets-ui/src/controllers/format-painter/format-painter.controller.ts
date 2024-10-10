@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
+import type { ICellData, IMutationInfo, IObjectArrayPrimitiveType, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams, ISetWorksheetColWidthMutationParams } from '@univerjs/sheets';
+
+import type {
+    IApplyFormatPainterCommandParams } from '../../commands/commands/set-format-painter.command';
+import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 import {
+    BooleanNumber,
     Disposable,
     ICommandService,
     Inject,
@@ -23,14 +30,13 @@ import {
     LifecycleStages,
     ObjectMatrix,
     OnLifecycle,
+    RANGE_TYPE,
+    Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-
-import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import type { ICellData, IMutationInfo, IRange, IStyleData, Workbook } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { AddMergeUndoMutationFactory, AddWorksheetMergeMutation, getAddMergeMutationRangeByType, RemoveMergeUndoMutationFactory, RemoveWorksheetMergeMutation, SetColHiddenMutation, SetColVisibleMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetRowHiddenMutation, SetRowVisibleMutation, SetWorksheetColWidthMutation, SetWorksheetColWidthMutationFactory, SetWorksheetRowHeightMutation, SetWorksheetRowHeightMutationFactory, SetWorksheetRowIsAutoHeightMutation, SetWorksheetRowIsAutoHeightMutationFactory, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import {
     ApplyFormatPainterCommand,
     SetOnceFormatPainterCommand,
@@ -38,7 +44,6 @@ import {
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
-import type { IFormatPainterHook, ISelectionFormatInfo } from '../../services/format-painter/format-painter.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormatPainterController)
 export class FormatPainterController extends Disposable {
@@ -71,13 +76,8 @@ export class FormatPainterController extends Disposable {
                     this._commandService.executeCommand(ApplyFormatPainterCommand.id, {
                         unitId: this._univerInstanceService.getFocusedUnit()?.getUnitId() || '',
                         subUnitId: (this._univerInstanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId() || '',
-                        range: {
-                            startRow: rangeWithCoord.startRow,
-                            startColumn: rangeWithCoord.startColumn,
-                            endRow: rangeWithCoord.endRow,
-                            endColumn: rangeWithCoord.endColumn,
-                        },
-                    });
+                        range: rangeWithCoord,
+                    } as IApplyFormatPainterCommandParams);
 
                     // if once, turn off the format painter
                     if (this._formatPainterService.getStatus() === FormatPainterStatus.ONCE) {
@@ -136,32 +136,36 @@ export class FormatPainterController extends Disposable {
                 }
             }
         }
+
         return {
             styles: stylesMatrix,
             merges,
+            range,
         };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _getUndoRedoMutationInfo(unitId: string, subUnitId: string, originRange: IRange, format: ISelectionFormatInfo) {
         const sheetInterceptorService = this._sheetInterceptorService;
         const univerInstanceService = this._univerInstanceService;
 
-        const { merges, styles: stylesMatrix } = format;
-        if (!stylesMatrix) return { undos: [], redos: [] };
+        const { merges, styles: stylesMatrix, range: sourceRange } = format;
+        if (!stylesMatrix || !sourceRange) return { undos: [], redos: [] };
 
-        const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
+        const { startRow, startColumn, endRow, endColumn } = sourceRange;
         const styleRowsNum = endRow - startRow + 1;
         const styleColsNum = endColumn - startColumn + 1;
-        const range = (originRange.startRow === originRange.endRow && originRange.startColumn === originRange.endColumn)
+        const targetRange = (originRange.startRow === originRange.endRow && originRange.startColumn === originRange.endColumn)
             ? {
                 startRow: originRange.startRow,
                 startColumn: originRange.startColumn,
                 endRow: originRange.startRow + styleRowsNum - 1,
                 endColumn: originRange.startColumn + styleColsNum - 1,
+                rangeType: RANGE_TYPE.NORMAL,
             }
             : originRange;
-        const styleValues: ICellData[][] = Array.from({ length: range.endRow - range.startRow + 1 }, () =>
-            Array.from({ length: range.endColumn - range.startColumn + 1 }, () => ({}))
+        const styleValues: ICellData[][] = Array.from({ length: targetRange.endRow - targetRange.startRow + 1 }, () =>
+            Array.from({ length: targetRange.endColumn - targetRange.startColumn + 1 }, () => ({}))
         );
         const mergeRanges: IRange[] = [];
 
@@ -185,20 +189,28 @@ export class FormatPainterController extends Disposable {
                 endColumn: merge.endColumn - startColumn,
             };
             // merge will apply at least once
-            const rowRepeats = Math.max(1, Math.floor((range.endRow - range.startRow + 1) / styleRowsNum));
-            const colRepeats = Math.max(1, Math.floor((range.endColumn - range.startColumn + 1) / styleColsNum));
+            const rowRepeats = Math.max(1, Math.ceil((targetRange.endRow - targetRange.startRow + 1) / styleRowsNum));
+            const colRepeats = Math.max(1, Math.ceil((targetRange.endColumn - targetRange.startColumn + 1) / styleColsNum));
             for (let i = 0; i < rowRepeats; i++) {
                 for (let j = 0; j < colRepeats; j++) {
-                    mergeRanges.push({
-                        startRow: relatedRange.startRow + i * styleRowsNum + range.startRow,
-                        startColumn: relatedRange.startColumn + j * styleColsNum + range.startColumn,
-                        endRow: relatedRange.endRow + i * styleRowsNum + range.startRow,
-                        endColumn: relatedRange.endColumn + j * styleColsNum + range.startColumn,
-                    });
+                    const repeatStartRow = relatedRange.startRow + i * styleRowsNum + targetRange.startRow;
+                    const repeatStartColumn = relatedRange.startColumn + j * styleColsNum + targetRange.startColumn;
+                    if (repeatStartRow <= targetRange.endRow && repeatStartColumn <= targetRange.endColumn) {
+                        const repeatEndRow = Math.min(relatedRange.endRow + i * styleRowsNum + targetRange.startRow, targetRange.endRow);
+                        const repeatEndColumn = Math.min(relatedRange.endColumn + j * styleColsNum + targetRange.startColumn, targetRange.endColumn);
+                        if (repeatStartRow !== repeatEndRow || repeatStartColumn !== repeatEndColumn) {
+                            mergeRanges.push({
+                                startRow: repeatStartRow,
+                                startColumn: repeatStartColumn,
+                                endRow: repeatEndRow,
+                                endColumn: repeatEndColumn,
+                            });
+                        }
+                    }
                 }
             }
         });
-        const currentSelections = [range];
+        const currentSelections = [targetRange];
         const clearCellValue = new ObjectMatrix<ICellData>();
         const cellValue = new ObjectMatrix<ICellData>();
 
@@ -235,47 +247,52 @@ export class FormatPainterController extends Disposable {
         });
 
         // handle merge
-        const ranges = getAddMergeMutationRangeByType(mergeRanges);
-
+        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];
+        // Hole-to-hole means that the source range and target range are both merge range.
+        if (!this._isHoleToHole(worksheet, sourceRange, targetRange)) {
+            const ranges = getAddMergeMutationRangeByType(mergeRanges);
 
-        // First we should check if there are values in the going-to-be-merged cells.
-        const worksheet = (univerInstanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)!;
-        const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
+            // First we should check if there are values in the going-to-be-merged cells.
+            const willRemoveSomeCell = checkCellContentInRanges(worksheet, ranges);
 
-        // prepare redo mutations
-        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
-            unitId,
-            subUnitId,
-            ranges,
-        };
-        mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-        mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
+            // prepare redo mutations
+            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            const addMergeMutationParams: IAddWorksheetMergeMutationParams = {
+                unitId,
+                subUnitId,
+                ranges,
+            };
+            mergeRedos.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+            mergeRedos.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
 
         // prepare undo mutations
-        const undoRemoveMergeMutationParams = this._injector.invoke(
-            RemoveMergeUndoMutationFactory,
-            removeMergeMutationParams
-        );
-        const undoMutationParams = this._injector.invoke(
-            AddMergeUndoMutationFactory,
-            addMergeMutationParams
-        );
-        mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
-        mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+            const undoRemoveMergeMutationParams = this._injector.invoke(
+                RemoveMergeUndoMutationFactory,
+                removeMergeMutationParams
+            );
+            const undoMutationParams = this._injector.invoke(
+                AddMergeUndoMutationFactory,
+                addMergeMutationParams
+            );
+            mergeUndos.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
+            mergeUndos.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
 
-        // add set range values mutations to undo redo mutations
-        if (willRemoveSomeCell) {
-            const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
-            mergeRedos.unshift(...data.redos);
-            mergeUndos.push(...data.undos);
+            // add set range values mutations to undo redo mutations
+            if (willRemoveSomeCell) {
+                const data = this._injector.invoke((accessor) => getClearContentMutationParamsForRanges(accessor, unitId, worksheet, ranges));
+                mergeRedos.unshift(...data.redos);
+                mergeUndos.push(...data.undos);
+            }
         }
+
+        const { undos: rowUndos, redos: rowRedos } = this._getRowDataMutations(unitId, subUnitId, sourceRange, targetRange, worksheet);
+        const { undos: colUndos, redos: colRedos } = this._getColDataMutations(unitId, subUnitId, sourceRange, targetRange, worksheet);
 
         return {
             undos: [
@@ -283,13 +300,178 @@ export class FormatPainterController extends Disposable {
                 { id: SetRangeValuesMutation.id, params: undoSetRangeValuesMutationParams },
                 ...interceptorUndos,
                 ...mergeUndos,
+                ...rowUndos,
+                ...colUndos,
             ],
             redos: [
                 { id: SetRangeValuesMutation.id, params: clearStyleMutationParams },
                 { id: SetRangeValuesMutation.id, params: setRangeValuesMutationParams },
                 ...interceptorRedos,
                 ...mergeRedos,
+                ...rowRedos,
+                ...colRedos,
             ],
         };
+    }
+
+    private _getRowDataMutations(unitId: string, subUnitId: string, sourceRange: IRange, targetRange: IRange, worksheet: Worksheet) {
+        const rowUndos: IMutationInfo[] = [];
+        const rowRedos: IMutationInfo[] = [];
+
+        const styleRowsNum = sourceRange.endRow - sourceRange.startRow + 1;
+
+        if (targetRange.rangeType === RANGE_TYPE.ROW && sourceRange?.rangeType === RANGE_TYPE.ROW) {
+            const hidden = [];
+            const visible = [];
+            const heights: IObjectArrayPrimitiveType<Nullable<number>> = {};
+            const rowManager = worksheet.getRowManager();
+            for (let r = targetRange.startRow; r <= targetRange.endRow; r++) {
+                const sourceRow = sourceRange.startRow + (r - targetRange.startRow) % styleRowsNum;
+                const { h, hd } = rowManager.getRowOrCreate(sourceRow);
+                heights[r] = h;
+                if (hd !== rowManager.getRowOrCreate(r).hd) {
+                    if (hd) {
+                        hidden.push(r);
+                    } else {
+                        visible.push(r);
+                    }
+                }
+            }
+            if (hidden.length) {
+                const setRowHiddenParams = {
+                    unitId,
+                    subUnitId,
+                    ranges: hidden.map((r) => ({ startRow: r, endRow: r, startColumn: targetRange.startColumn, endColumn: targetRange.endColumn })),
+                };
+                rowRedos.push({
+                    id: SetRowHiddenMutation.id,
+                    params: setRowHiddenParams,
+                });
+                rowUndos.push({
+                    id: SetRowVisibleMutation.id,
+                    params: setRowHiddenParams,
+                });
+            }
+            if (visible.length) {
+                const setRowVisibleParams = {
+                    unitId,
+                    subUnitId,
+                    ranges: visible.map((r) => ({ startRow: r, endRow: r, startColumn: targetRange.startColumn, endColumn: targetRange.endColumn })),
+                };
+                rowRedos.push({ id: SetRowVisibleMutation.id, params: setRowVisibleParams });
+                rowUndos.push({ id: SetRowHiddenMutation.id, params: setRowVisibleParams });
+            }
+
+            const setWorksheetRowHeightParams = { unitId, subUnitId, ranges: [targetRange], rowHeight: heights };
+            const undoSetWorksheetRowHeightParams = SetWorksheetRowHeightMutationFactory(setWorksheetRowHeightParams, worksheet);
+
+            const setWorksheetAutoHeightParams = { unitId, subUnitId, ranges: [targetRange], autoHeightInfo: BooleanNumber.FALSE };
+            const undoSetWorksheetAutoHeightParams = SetWorksheetRowIsAutoHeightMutationFactory(setWorksheetAutoHeightParams, worksheet);
+            rowRedos.push({
+                id: SetWorksheetRowHeightMutation.id,
+                params: setWorksheetRowHeightParams,
+            });
+            rowRedos.push({
+                id: SetWorksheetRowIsAutoHeightMutation.id,
+                params: setWorksheetAutoHeightParams,
+            });
+
+            rowUndos.push({
+                id: SetWorksheetRowHeightMutation.id,
+                params: undoSetWorksheetRowHeightParams,
+            });
+            rowUndos.push({
+                id: SetWorksheetRowIsAutoHeightMutation.id,
+                params: undoSetWorksheetAutoHeightParams,
+            });
+        }
+
+        return {
+            undos: rowUndos,
+            redos: rowRedos,
+        };
+    }
+
+    private _getColDataMutations(unitId: string, subUnitId: string, sourceRange: IRange, targetRange: IRange, worksheet: Worksheet) {
+        const colUndos: IMutationInfo[] = [];
+        const colRedos: IMutationInfo[] = [];
+
+        const styleColsNum = sourceRange.endColumn - sourceRange.startColumn + 1;
+
+        if (targetRange.rangeType === RANGE_TYPE.COLUMN && sourceRange?.rangeType === RANGE_TYPE.COLUMN) {
+            const hidden = [];
+            const visible = [];
+            const widths: IObjectArrayPrimitiveType<Nullable<number>> = {};
+            const colManager = worksheet.getColumnManager();
+            for (let c = targetRange.startColumn; c <= targetRange.endColumn; c++) {
+                const sourceCol = sourceRange.startColumn + (c - targetRange.startColumn) % styleColsNum;
+                const { w, hd } = colManager.getColumnOrCreate(sourceCol);
+                widths[c] = w;
+                if (hd !== colManager.getColumnOrCreate(c).hd) {
+                    if (hd) {
+                        hidden.push(c);
+                    } else {
+                        visible.push(c);
+                    }
+                }
+            }
+            if (hidden.length) {
+                const setColHiddenParams = {
+                    unitId,
+                    subUnitId,
+                    ranges: hidden.map((c) => ({ startRow: targetRange.startRow, endRow: targetRange.endRow, startColumn: c, endColumn: c })),
+                };
+                colRedos.push({
+                    id: SetColHiddenMutation.id,
+                    params: setColHiddenParams,
+                });
+                colUndos.push({
+                    id: SetColVisibleMutation.id,
+                    params: setColHiddenParams,
+                });
+            }
+            if (visible.length) {
+                const setColVisibleParams = {
+                    unitId,
+                    subUnitId,
+                    ranges: visible.map((c) => ({ startRow: targetRange.startRow, endRow: targetRange.endRow, startColumn: c, endColumn: c })),
+                };
+                colRedos.push({
+                    id: SetColVisibleMutation.id,
+                    params: setColVisibleParams,
+                });
+                colUndos.push({
+                    id: SetColHiddenMutation.id,
+                    params: setColVisibleParams,
+                });
+            }
+
+            const setColWidthParams = {
+                unitId,
+                subUnitId,
+                ranges: [targetRange],
+                colWidth: widths,
+            } as ISetWorksheetColWidthMutationParams;
+            const undoSetColWidthParams = SetWorksheetColWidthMutationFactory(setColWidthParams, worksheet);
+
+            colRedos.push({
+                id: SetWorksheetColWidthMutation.id,
+                params: setColWidthParams,
+            });
+            colUndos.push({
+                id: SetWorksheetColWidthMutation.id,
+                params: undoSetColWidthParams,
+            });
+        }
+
+        return {
+            undos: colUndos,
+            redos: colRedos,
+        };
+    }
+
+    private _isHoleToHole(worksheet: Worksheet, range1: IRange, range2: IRange) {
+        const mergeData = worksheet.getConfig()?.mergeData || [];
+        return mergeData.some((merge) => Rectangle.equals(range1, merge)) && mergeData.some((merge) => Rectangle.equals(range2, merge));
     }
 }

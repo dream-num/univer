@@ -18,7 +18,7 @@ import type { IDisposable, UnitModel } from '@univerjs/core';
 import type { RenderUnit } from '@univerjs/engine-render';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
-import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, Optional, toDisposable } from '@univerjs/core';
+import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';

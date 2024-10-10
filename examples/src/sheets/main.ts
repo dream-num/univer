@@ -146,9 +146,9 @@ const userManagerService = injector.get(UserManagerService);
 userManagerService.setCurrentUser(mockUser);
 
 // create univer sheet instance
-// if (!IS_E2E) {
-univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-// }
+if (!IS_E2E) {
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+}
 
 setTimeout(() => {
     import('./lazy').then((lazy) => {

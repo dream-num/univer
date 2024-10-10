@@ -114,8 +114,8 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(TriggerCalculationController);
         this._injector.get(FormulaController);
+        this._injector.get(TriggerCalculationController);
         this._injector.get(ActiveDirtyController);
         this._injector.get(ArrayFormulaCellInterceptorController);
         this._injector.get(UpdateFormulaController);

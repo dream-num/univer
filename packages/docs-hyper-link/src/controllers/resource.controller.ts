@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICustomRange } from '@univerjs/core';
-import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { CustomRangeType, Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 
 export const DOC_HYPER_LINK_PLUGIN = 'DOC_HYPER_LINK_PLUGIN';
 
@@ -23,7 +23,6 @@ interface IDocHyperLinkJSON {
     links: { id: string; payload: string }[];
 }
 
-@OnLifecycle(LifecycleStages.Starting, DocHyperLinkResourceController)
 export class DocHyperLinkResourceController extends Disposable {
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,

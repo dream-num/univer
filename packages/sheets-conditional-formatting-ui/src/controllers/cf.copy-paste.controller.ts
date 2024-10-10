@@ -15,14 +15,14 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import type { IDiscreteRange } from '@univerjs/sheets-ui';
 import {
     Disposable,
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Range,
     Rectangle,
     Tools,
@@ -31,12 +31,9 @@ import {
 import {
     createTopMatrixFromMatrix, findAllRectangle,
 } from '@univerjs/sheets';
-import type { IDiscreteRange } from '@univerjs/sheets-ui';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingCopyPasteController)
 export class ConditionalFormattingCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         matrix: ObjectMatrix<string[]>;

@@ -82,5 +82,16 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+
+        this._injector.get(DataValidationRefRangeController);
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetDataValidationSheetController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(DataValidationController);
+        this._injector.get(DataValidationFormulaController);
     }
 }

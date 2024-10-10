@@ -116,6 +116,25 @@ export class UniverSheetsPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        this._injector.get(BasicWorksheetController);
         this._injector.get(MergeCellController);
+        this._injector.get(WorkbookPermissionService);
+        this._injector.get(WorksheetPermissionService);
+    }
+
+    override onRendered(): void {
+        this._injector.get(INumfmtService);
+    }
+
+    override onReady(): void {
+        if (!this._config?.notExecuteFormula) {
+            this._injector.get(CalculateResultApplyController);
+        }
+
+        this._injector.get(DefinedNameDataController);
+        this._injector.get(NumberCellDisplayController);
+        this._injector.get(RangeProtectionRenderModel);
+        this._injector.get(RangeProtectionRefRangeService);
+        this._injector.get(RefRangeService);
     }
 }

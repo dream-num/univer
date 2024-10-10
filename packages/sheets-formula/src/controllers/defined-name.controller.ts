@@ -21,8 +21,6 @@ import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -31,11 +29,11 @@ import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameComma
 import { IDescriptionService } from '../services/description.service';
 
 export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
+
 /**
  * header highlight
  * column menu: show, hover and mousedown event
  */
-@OnLifecycle(LifecycleStages.Rendered, DefinedNameController)
 export class DefinedNameController extends Disposable {
     private _preUnitId: Nullable<string> = null;
 

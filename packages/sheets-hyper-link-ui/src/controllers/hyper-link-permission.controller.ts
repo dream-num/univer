@@ -15,12 +15,11 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { InsertLinkShortcut } from './menu';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsHyperLinkPermissionController)
 export class SheetsHyperLinkPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,

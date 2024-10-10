@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
-import { fromEvent } from 'rxjs';
 import type { ContextService, IDisposable, Nullable } from '@univerjs/core';
+import { createIdentifier, Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, IUniverInstanceService, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import { fromEvent } from 'rxjs';
 
 type FocusHandlerFn = (unitId: string) => void;
 
@@ -58,7 +58,6 @@ export const ILayoutService = createIdentifier<ILayoutService>('ui.layout-servic
  * This service is responsible for storing layout information of the current
  * Univer application instance.
  */
-@OnLifecycle(LifecycleStages.Ready, ILayoutService)
 export class DesktopLayoutService extends Disposable implements ILayoutService {
     private _rootContainerElement: Nullable<HTMLElement> = null;
     private _isFocused = false;

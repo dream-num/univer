@@ -21,7 +21,7 @@ import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
@@ -174,7 +174,6 @@ export interface ISheetCanvasFloatDomHook {
     onGetFloatDomProps: (id: string) => Record<string, any>;
 }
 
-@OnLifecycle(LifecycleStages.Starting, SheetCanvasFloatDomManagerService)
 export class SheetCanvasFloatDomManagerService extends Disposable {
     private _domLayerMap: Map<string, Map<string, Map<string, { props?: any }>>> = new Map();
     private _domLayerInfoMap: Map<string, ICanvasFloatDomInfo> = new Map();

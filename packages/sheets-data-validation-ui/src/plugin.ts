@@ -84,4 +84,19 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
             this._commandService.registerCommand(command);
         });
     }
+
+    override onReady(): void {
+        this._injector.get(DataValidationCopyPasteController);
+        this._injector.get(DataValidationPermissionController);
+        this._injector.get(DataValidationRejectInputController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsDataValidationUIController);
+        this._injector.get(SheetsDataValidationRenderController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(DataValidationAutoFillController);
+    }
 }

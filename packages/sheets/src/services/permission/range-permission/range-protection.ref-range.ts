@@ -30,7 +30,7 @@ import type { IDeleteSelectionProtectionMutationParams } from '../../../commands
 import type { ISetRangeProtectionMutationParams } from '../../../commands/mutations/set-range-protection.mutation';
 import type { IRangeProtectionRule } from '../../../model/range-protection-rule.model';
 import type { EffectRefRangeParams } from '../../../services/ref-range/type';
-import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, Inject, IUniverInstanceService, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColCommand, InsertRowCommand } from '../../../commands/commands/insert-row-col.command';
 import {
     MoveColsCommand,
@@ -59,7 +59,6 @@ const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
 
 type IMoveRowsOrColsMutationParams = IMoveRowsMutationParams;
 
-@OnLifecycle(LifecycleStages.Ready, RangeProtectionRefRangeService)
 export class RangeProtectionRefRangeService extends Disposable {
     disposableCollection = new DisposableCollection();
 

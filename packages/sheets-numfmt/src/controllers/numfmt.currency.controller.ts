@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
-import { BehaviorSubject } from 'rxjs';
 import type { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
+import { Disposable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Rendered, NumfmtCurrencyController)
 export class NumfmtCurrencyController extends Disposable {
     private _currencySymbol$ = new BehaviorSubject<keyof typeof countryCurrencyMap>('US');
     public readonly currencySymbol$ = this._currencySymbol$.asObservable();
-
-    constructor(
-        @Inject(Injector) private _injector: Injector
-    ) {
-        super();
-    }
 
     /**
      * Set the currency symbol by setting the country code.

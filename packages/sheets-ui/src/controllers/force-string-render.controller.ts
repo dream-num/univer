@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { CellValueType, Inject, InterceptorEffectEnum, isRealNum, RxDisposable } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Rendered, ForceStringRenderController)
 export class ForceStringRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+    ) {
         super();
-        this._init();
-    }
 
-    private _init() {
         this._initViewModelIntercept();
     }
 

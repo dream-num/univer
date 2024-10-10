@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Inject, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 import type { Nullable } from '@univerjs/core';
 import type { Subscription } from 'rxjs';
+import { Inject, IUniverInstanceService, LifecycleService, LifecycleStages, RxDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
     private _initListener = false;
     private _containerElement!: HTMLDivElement;

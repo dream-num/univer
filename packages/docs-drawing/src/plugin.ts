@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DocDrawingController, DocDrawingLoadController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
-import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 import type { IUniverDocsDrawingConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DocDrawingController, DOCS_DRAWING_PLUGIN } from './controllers/doc-drawing.controller';
+import { DocDrawingService, IDocDrawingService } from './services/doc-drawing.service';
 
 export class UniverDocsDrawingPlugin extends Plugin {
     static override pluginName = DOCS_DRAWING_PLUGIN;
@@ -39,12 +39,13 @@ export class UniverDocsDrawingPlugin extends Plugin {
 
     override onStarting(): void {
         ([
-            [DocDrawingLoadController],
             [DocDrawingController],
             [DocDrawingService],
             [IDocDrawingService, { useClass: DocDrawingService }],
         ] as Dependency[
 
         ]).forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(DocDrawingController);
     }
 }

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetHyperLinkUrlController)
 export class SheetHyperLinkUrlController extends Disposable {
     constructor(
         @Inject(SheetsHyperLinkResolverService) private _resolverService: SheetsHyperLinkResolverService

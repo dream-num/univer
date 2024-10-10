@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
@@ -40,7 +40,6 @@ import {
     singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
 
-@OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

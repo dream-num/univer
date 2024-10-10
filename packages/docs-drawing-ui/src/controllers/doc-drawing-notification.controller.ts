@@ -17,21 +17,19 @@
 /* eslint-disable ts/no-explicit-any */
 
 import type { ICommandInfo, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
 import {
     Disposable,
     ICommandService,
     IUniverInstanceService,
     JSONX,
-    LifecycleStages,
-    OnLifecycle,
     RedoCommand,
     UndoCommand,
 } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { RichTextEditingMutation } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { IDocDrawingService } from '@univerjs/docs-drawing';
-import type { IDrawingJsonUndo1, IDrawingOrderMapParam, IDrawingSearch } from '@univerjs/drawing';
 import { IDrawingManagerService } from '@univerjs/drawing';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
@@ -117,7 +115,6 @@ function getReOrderedDrawings(actions: JSONXActions): number[] {
     return drawingIndexes;
 }
 
-@OnLifecycle(LifecycleStages.Ready, DocDrawingAddRemoveController)
 export class DocDrawingAddRemoveController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

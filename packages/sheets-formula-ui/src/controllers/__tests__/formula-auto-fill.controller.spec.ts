@@ -81,17 +81,22 @@ describe('Test auto fill with formula', () => {
             [RangeProtectionRenderModel],
             [SheetsRenderService, { useClass: mockSheetsRenderService }],
         ]);
+
         univer = testBed.univer;
         get = testBed.get;
+
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
+
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(AutoFillCommand);
+
+        get(FormulaAutoFillController);
 
         getValues = (
             startRow: number,

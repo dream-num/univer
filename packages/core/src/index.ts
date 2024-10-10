@@ -93,9 +93,8 @@ export { ContextService, IContextService } from './services/context/context.serv
 export { ErrorService, type IError } from './services/error/error.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { UniverInstanceService } from './services/instance/instance.service';
-export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
+export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
-export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';

@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { expect, test } from '@playwright/test';
 
-@OnLifecycle(LifecycleStages.Rendered, NumfmtI18nController)
-export class NumfmtI18nController extends Disposable {
-    constructor(@Inject(LocaleService) private _localeService: LocaleService) {
-        super();
-    }
-}
+test('ensure uni boots up without errors', async ({ page }) => {
+    let errored = false;
+
+    page.on('pageerror', (error) => {
+        console.error('Page error:', error);
+        errored = true;
+    });
+
+    await page.goto('http://localhost:3000/uni/');
+    await page.waitForTimeout(10000);
+
+    expect(errored).toBeFalsy();
+});

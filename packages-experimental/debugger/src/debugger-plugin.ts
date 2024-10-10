@@ -52,6 +52,14 @@ export class UniverDebuggerPlugin extends Plugin {
         this._injector.get(E2EController);
     }
 
+    override onReady(): void {
+        this._injector.get(DebuggerController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(PerformanceMonitorController);
+    }
+
     getDebuggerController() {
         this._debuggerController = this._injector.get(DebuggerController);
         return this._debuggerController;

@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, ICellRenderContext, IRange, Nullable } from '@univerjs/core';
-import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, ICommandService, Inject, InterceptorEffectEnum, IUniverInstanceService, Optional, RxDisposable, sequenceExecute } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -33,7 +33,6 @@ const INVALID_MARK = {
     },
 };
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationRenderController)
 export class SheetsDataValidationRenderController extends RxDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -258,7 +257,6 @@ export class SheetsDataValidationRenderController extends RxDisposable {
 }
 
 // The mobile version does not provide the ability to change data validation model.
-@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationMobileRenderController)
 export class SheetsDataValidationMobileRenderController extends RxDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

@@ -73,6 +73,10 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
             injector.get(SheetInterceptorService);
         }
+
+        override onRendered(): void {
+            this._injector.get(INumfmtService);
+        }
     }
 
     univer.registerPlugin(TestPlugin);

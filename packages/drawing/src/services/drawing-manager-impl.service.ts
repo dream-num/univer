@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { type Observable, Subject } from 'rxjs';
 import type { Nullable } from '@univerjs/core';
-import { sortRules, sortRulesByDesc } from '@univerjs/core';
 import type { JSONOp, JSONOpList } from 'ot-json1';
-import * as json1 from 'ot-json1';
 import type { IDrawingGroupUpdateParam, IDrawingMap, IDrawingMapItemData, IDrawingOrderMapParam, IDrawingOrderUpdateParam, IDrawingParam, IDrawingSearch, IDrawingSubunitMap, IDrawingVisibleParam, IUnitDrawingService } from './drawing-manager.service';
+import { sortRules, sortRulesByDesc } from '@univerjs/core';
+import * as json1 from 'ot-json1';
+import { type Observable, Subject } from 'rxjs';
 
 export interface IDrawingJsonUndo1 {
     undo: JSONOp;
@@ -137,7 +137,7 @@ export class UnitDrawingService<T extends IDrawingParam> implements IUnitDrawing
     }
 
     getDrawingDataForUnit(unitId: string) {
-        return this.drawingManagerData[unitId];
+        return this.drawingManagerData[unitId] || {};
     }
 
     removeDrawingDataForUnit(unitId: string) {

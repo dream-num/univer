@@ -25,9 +25,7 @@ import {
     isFormulaId,
     isFormulaString,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -37,7 +35,6 @@ import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univer
 
 export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 
-@OnLifecycle(LifecycleStages.Ready, FormulaClipboardController)
 export class FormulaClipboardController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,

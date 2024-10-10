@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Injector, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
@@ -280,12 +280,12 @@ describe('Test insert function operation', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<ICellData>>> | undefined;
-    let getCellData: () => IObjectMatrixPrimitiveType<Nullable<ICellData>> | undefined;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO(), [
             [UpdateFormulaController],
         ]);
+
         univer = testBed.univer;
         get = testBed.get;
 
@@ -334,14 +334,12 @@ describe('Test insert function operation', () => {
             endColumn: number
         ): Array<Array<Nullable<ICellData>>> | undefined =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test')
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
-        getCellData = () => {
-            return get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getCellMatrix().clone();
-        };
+        get(UpdateFormulaController);
     });
 
     afterEach(() => {

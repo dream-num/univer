@@ -80,6 +80,21 @@ export class FFormula {
         });
     }
 
+    onCalculationEnd(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                reject(new Error('Calculation end timeout'));
+            }, 30_000);
+
+            const disposable = this.calculationEnd(() => {
+                clearTimeout(timer);
+                disposable.dispose();
+
+                resolve();
+            });
+        });
+    }
+
     /**
      * Listening calculation processing.
      */

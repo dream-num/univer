@@ -18,8 +18,6 @@ import type { IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RxDisposable,
     toDisposable,
     UniverInstanceType,
@@ -30,7 +28,6 @@ import { distinctUntilChanged, takeUntil } from 'rxjs';
 /**
  * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
  */
-@OnLifecycle(LifecycleStages.Ready, SheetsRenderService)
 export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
 
@@ -76,7 +73,6 @@ export class SheetsRenderService extends RxDisposable {
                 // TODO when does this function get called?
                 this._createRenderer(workbook);
             });
-
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
 

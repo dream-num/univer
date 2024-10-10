@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, LifecycleStages, OnLifecycle, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
+import type { JSONXActions, Nullable } from '@univerjs/core';
+import { ICommandService, Inject, IUndoRedoService, IUniverInstanceService, JSONX, RedoCommandId, RxDisposable, UndoCommandId } from '@univerjs/core';
 import { DocStateEmitService, type IDocStateChangeParams, type IRichTextEditingMutationParams } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-import type { JSONXActions, Nullable } from '@univerjs/core';
 import { DocIMEInputManagerService } from './doc-ime-input-manager.service';
 
 type ChangeStateCacheType = 'history' | 'collaboration';
@@ -28,7 +28,6 @@ const DEBOUNCE_DELAY = 300;
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and
 // the collaboration module.
-@OnLifecycle(LifecycleStages.Ready, DocStateChangeManagerService)
 export class DocStateChangeManagerService extends RxDisposable {
     private readonly _docStateChange$ = new BehaviorSubject<Nullable<IDocStateChangeParams>>(null);
     readonly docStateChange$ = this._docStateChange$.asObservable();

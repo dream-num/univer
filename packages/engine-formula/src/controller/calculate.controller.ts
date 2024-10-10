@@ -21,7 +21,7 @@ import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/s
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IAllRuntimeData } from '../services/runtime.service';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
@@ -35,12 +35,10 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
 
-@OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
@@ -57,7 +55,7 @@ export class CalculateController extends Disposable {
 
     private _commandExecutedListener() {
         this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo, options) => {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStopMutation.id) {
                     this._calculateFormulaService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {

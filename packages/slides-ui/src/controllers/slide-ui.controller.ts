@@ -14,33 +14,32 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { AddImageSingle, GraphSingle, TextSingle } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
+import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { DeleteSlideElementOperation } from '../commands/operations/delete-element.operation';
 import { InsertSlideFloatImageCommand } from '../commands/operations/insert-image.operation';
 import { InsertSlideShapeRectangleCommand, InsertSlideShapeRectangleOperation, ToggleSlideEditSidebarOperation } from '../commands/operations/insert-shape.operation';
 import { SlideAddTextCommand, SlideAddTextOperation } from '../commands/operations/insert-text.operation';
 import { SetSlidePageThumbOperation } from '../commands/operations/set-thumb.operation';
 import { SetTextEditArrowOperation } from '../commands/operations/text-edit.operation';
-import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
-import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
-import { SlideEditorContainer } from '../views/editor-container';
-import { SlideSideBar } from '../components/slide-bar/SlideBar';
-import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
-import { AppendSlideOperation } from '../commands/operations/append-slide.operation';
 import { UpdateSlideElementOperation } from '../commands/operations/update-element.operation';
+import { COMPONENT_SLIDE_IMAGE_POPUP_MENU } from '../components/image-popup-menu/component-name';
+import { SlideImagePopupMenu } from '../components/image-popup-menu/ImagePopupMenu';
+import Sidebar, { COMPONENT_SLIDE_SIDEBAR } from '../components/sidebar/Sidebar';
+import { SlideSideBar } from '../components/slide-bar/SlideBar';
+import { SlideEditorContainer } from '../views/editor-container';
 import { IMAGE_UPLOAD_ICON } from './image.menu';
+import { menuSchema } from './menu.schema';
 import { GRAPH_SINGLE_ICON } from './shape.menu';
 import { EditorDeleteLeftShortcut, generateArrowSelectionShortCutItem } from './shortcuts/editor.shortcuts';
 import { TEXT_ICON_ID } from './text.menu';
-import { menuSchema } from './menu.schema';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
  */
-@OnLifecycle(LifecycleStages.Ready, SlidesUIController)
 export class SlidesUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

@@ -14,49 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BooleanNumber,
-    convertBodyToHtml,
-    DEFAULT_WORKSHEET_COLUMN_WIDTH,
-    DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
-    DEFAULT_WORKSHEET_ROW_HEIGHT,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-    extractPureTextFromCell,
-    handleStyleToString,
-    ICommandService,
-    IConfigService,
-    IContextService,
-    Inject,
-    Injector,
-    isFormulaString,
-    IUniverInstanceService,
-    LifecycleStages,
-    LocaleService,
-    ObjectMatrix,
-    OnLifecycle,
-    RxDisposable,
-    Tools,
-    UniverInstanceType,
-} from '@univerjs/core';
-import { MessageType } from '@univerjs/design';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-
-import {
-    InsertColMutation,
-    InsertRowMutation,
-    MAX_CELL_PER_SHEET_KEY,
-    RemoveColMutation,
-    RemoveRowMutation,
-    SetRangeValuesMutation,
-    SetRangeValuesUndoMutationFactory,
-    SetWorksheetColWidthMutation,
-    SetWorksheetRowHeightMutation,
-} from '@univerjs/sheets';
-
-import { IMessageService } from '@univerjs/ui';
-import { takeUntil } from 'rxjs';
-
 import type {
     ICellData,
     ICommandInfo,
@@ -77,6 +34,54 @@ import type {
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
+import type {
+    ICellDataWithSpanInfo,
+    IClipboardPropertyItem,
+    ICopyPastePayload,
+    ISheetClipboardHook,
+    ISheetDiscreteRangeLocation,
+} from '../../services/clipboard/type';
+import {
+    BooleanNumber,
+    convertBodyToHtml,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH,
+    DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
+    DEFAULT_WORKSHEET_ROW_HEIGHT,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    extractPureTextFromCell,
+    handleStyleToString,
+    ICommandService,
+    IConfigService,
+    IContextService,
+    Inject,
+    Injector,
+    isFormulaString,
+    IUniverInstanceService,
+    LocaleService,
+    ObjectMatrix,
+    RxDisposable,
+    Tools,
+    UniverInstanceType,
+} from '@univerjs/core';
+
+import { MessageType } from '@univerjs/design';
+
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+
+import {
+    InsertColMutation,
+    InsertRowMutation,
+    MAX_CELL_PER_SHEET_KEY,
+    RemoveColMutation,
+    RemoveRowMutation,
+    SetRangeValuesMutation,
+    SetRangeValuesUndoMutationFactory,
+    SetWorksheetColWidthMutation,
+    SetWorksheetRowHeightMutation,
+} from '@univerjs/sheets';
+import { IMessageService } from '@univerjs/ui';
+import { takeUntil } from 'rxjs';
 import { AddWorksheetMergeCommand } from '../../commands/commands/add-worksheet-merge.command';
 import {
     SheetCopyCommand,
@@ -99,19 +104,11 @@ import {
     getSetCellStyleMutations,
     getSetCellValueMutations,
 } from './utils';
-import type {
-    ICellDataWithSpanInfo,
-    IClipboardPropertyItem,
-    ICopyPastePayload,
-    ISheetClipboardHook,
-    ISheetDiscreteRangeLocation,
-} from '../../services/clipboard/type';
 
 /**
  * This controller add basic clipboard logic for basic features such as text color / BISU / row widths to the clipboard
  * service. You can create a similar clipboard controller to add logic for your own features.
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetClipboardController)
 export class SheetClipboardController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

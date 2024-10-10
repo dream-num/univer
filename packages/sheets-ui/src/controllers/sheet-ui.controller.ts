@@ -15,7 +15,7 @@
  */
 
 import type { IUniverSheetsUIConfig } from './config.schema';
-import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -158,7 +158,6 @@ import {
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
 
-@OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

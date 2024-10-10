@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
+import type { IUniverEngineFormulaConfig } from './controller/config.schema';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
 import { SetDefinedNameController } from './controller/set-defined-name.controller';
+import { SetDependencyController } from './controller/set-dependency.controller';
 import { SetFeatureCalculationController } from './controller/set-feature-calculation.controller';
 import { SetOtherFormulaController } from './controller/set-other-formula.controller';
 import { SetSuperTableController } from './controller/set-super-table.controller';
@@ -39,9 +41,11 @@ import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService } from './services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
+import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import {
     FeatureCalculationManagerService,
     IFeatureCalculationManagerService,
@@ -50,11 +54,6 @@ import { FunctionService, IFunctionService } from './services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
-import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
-import { SetDependencyController } from './controller/set-dependency.controller';
-import type { IUniverEngineFormulaConfig } from './controller/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
 
@@ -75,6 +74,26 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
     override onStarting(): void {
         this._initialize();
+    }
+
+    override onReady(): void {
+        this._injector.get(FormulaController);
+        this._injector.get(SetDefinedNameController);
+        this._injector.get(SetSuperTableController);
+
+        if (!this._config?.notExecuteFormula) {
+            this._injector.get(SetOtherFormulaController);
+            this._injector.get(SetFeatureCalculationController);
+            this._injector.get(SetDependencyController);
+            this._injector.get(CalculateController);
+        }
+    }
+
+    override onRendered(): void {
+        if (!this._config?.notExecuteFormula) {
+            this._injector.get(CalculateFormulaService);
+            this._injector.get(FormulaDependencyGenerator);
+        }
     }
 
     private _initialize() {

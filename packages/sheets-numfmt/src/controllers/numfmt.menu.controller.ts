@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 
 import { MORE_NUMFMT_TYPE_KEY, MoreNumfmtType, Options, OPTIONS_KEY } from '../components/more-numfmt-type/MoreNumfmtType';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Rendered, NumfmtMenuController)
 export class NumfmtMenuController extends Disposable {
     constructor(
-        @Inject(Injector) private _injector: Injector,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService
     ) {
         super();
+
         this._initMenu();
     }
 

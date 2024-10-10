@@ -27,9 +27,10 @@ import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingMobileUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDataValidationMobileUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFilterMobileUIPlugin } from '@univerjs/sheets-filter-ui';
-import { UniverSheetsFormulaMobilePlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
@@ -65,9 +66,10 @@ univer.registerPlugin(UniverSheetsMobileUIPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterMobileUIPlugin);
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(UniverSheetsFormulaMobilePlugin);
+univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingMobileUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationMobileUIPlugin);
 
 const mockUser = {
     userID: 'Owner_qxVnhPbQ',

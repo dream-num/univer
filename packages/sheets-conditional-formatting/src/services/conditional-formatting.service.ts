@@ -20,7 +20,7 @@ import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations
 import type { IConditionFormattingRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
 import type { ICalculateUnit, IContext } from './calculate-unit/type';
-import { createInterceptorKey, Disposable, ICommandService, Inject, Injector, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, Inject, Injector, InterceptorManager, IResourceManagerService, IUniverInstanceService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, ReorderRangeMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
@@ -39,7 +39,7 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 interface IComputeCache { status: ComputeStatus };
 
 const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }, undefined>('conditional-formatting-before-update-rule-result');
-@OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
+
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();

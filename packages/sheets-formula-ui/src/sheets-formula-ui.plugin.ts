@@ -74,6 +74,10 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         dependencies.forEach((dependency) => j.add(dependency));
     }
 
+    override onReady(): void {
+        this._injector.get(FormulaUIController);
+    }
+
     override onRendered(): void {
         ([
             [RefSelectionsRenderService],
@@ -81,5 +85,13 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         ] as Dependency[]).forEach((dep) => {
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SHEET, dep));
         });
+
+        this._injector.get(FormulaClipboardController);
+        this._injector.get(FormulaRenderManagerController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(FormulaAutoFillController);
+        this._injector.get(PromptController);
     }
 }

@@ -22,14 +22,11 @@ import {
     Inject,
     isFormulaId,
     isFormulaString,
-    LifecycleStages,
-    OnLifecycle,
     Tools,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Ready, FormulaAutoFillController)
 export class FormulaAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: AutoFillService,
@@ -37,10 +34,6 @@ export class FormulaAutoFillController extends Disposable {
     ) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
         this._registerAutoFill();
     }
 

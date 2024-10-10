@@ -47,12 +47,9 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
-
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -159,7 +156,6 @@ enum OriginRangeEdgeType {
  *
  * 3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
  */
-@OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

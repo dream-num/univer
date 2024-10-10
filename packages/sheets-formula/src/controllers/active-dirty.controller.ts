@@ -15,17 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, IRange, IUnitRange, Nullable } from '@univerjs/core';
-import {
-    Dimension,
-    Disposable,
-    Inject,
-    IUniverInstanceService,
-    LifecycleStages,
-    ObjectMatrix,
-    OnLifecycle,
-} from '@univerjs/core';
 import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
-import { FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
     IInsertSheetMutationParams,
@@ -40,6 +30,14 @@ import type {
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
+    Dimension,
+    Disposable,
+    Inject,
+    IUniverInstanceService,
+    ObjectMatrix,
+} from '@univerjs/core';
+import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import {
     InsertSheetMutation,
     MoveColsMutation,
     MoveRangeMutation,
@@ -53,14 +51,11 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 
-@OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
 export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
-
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -72,20 +67,6 @@ export class ActiveDirtyController extends Disposable {
     }
 
     private _initialConversion() {
-        // const updateCommandList = [
-        //     SetRangeValuesMutation.id,
-        //     MoveRangeMutation.id,
-        //     MoveRowsMutation.id,
-        //     MoveColsMutation.id,
-        //     DeleteRangeMutation.id,
-        //     InsertRangeMutation.id,
-        //     RemoveRowMutation.id,
-        //     RemoveColMutation.id,
-        //     RemoveSheetMutation.id,
-        //     InsertSheetMutation.id,
-        //     // SetWorksheetNameMutation.id,
-        // ];
-
         this._activeDirtyManagerService.register(SetRangeValuesMutation.id, {
             commandId: SetRangeValuesMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -111,17 +92,6 @@ export class ActiveDirtyController extends Disposable {
         this._initialSheet();
 
         this._initialDefinedName();
-
-        /**
-         * Changing the name of a sheet triggers an adjustment of the formula references, but does not trigger formula calculation; therefore, this logic has been removed.
-         */
-        // this._activeDirtyManagerService.register(SetWorksheetNameMutation.id, {
-        //     commandId: SetWorksheetNameMutation.id,
-        //     getDirtyData: (command: ICommandInfo) => {
-        //         const params = command.params as ISetWorksheetNameMutationParams;
-        //         return { dirtyNameMap: this._getRemoveSheetMutation(params, params.name) };
-        //     },
-        // });
     }
 
     private _initialMove() {

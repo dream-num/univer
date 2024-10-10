@@ -73,12 +73,26 @@ export class UniverSheetsHyperLinkUIPlugin extends Plugin {
             [SheetHyperLinkUrlController],
             [SheetsHyperLinkRichTextRefRangeController],
         ];
-
         dependencies.forEach((dep) => this._injector.add(dep));
+
+        this._injector.get(SheetsHyperLinkRenderManagerController);
+        this._injector.get(SheetsHyperLinkRichTextRefRangeController);
+        this._injector.get(SheetHyperLinkSetRangeController);
     }
 
     override onReady(): void {
         const renderManager = this._injector.get(IRenderManagerService);
         renderManager.registerRenderModule<Workbook>(UniverInstanceType.UNIVER_SHEET, [SheetsHyperLinkRenderController] as Dependency);
+
+        this._injector.get(SheetsHyperLinkAutoFillController);
+        this._injector.get(SheetsHyperLinkCopyPasteController);
+        this._injector.get(SheetsHyperLinkRemoveSheetController);
+        this._injector.get(SheetsHyperLinkUIController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsHyperLinkPermissionController);
+        this._injector.get(SheetHyperLinkUrlController);
+        this._injector.get(SheetsHyperLinkPopupController);
     }
 }

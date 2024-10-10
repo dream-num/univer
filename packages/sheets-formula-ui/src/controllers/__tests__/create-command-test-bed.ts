@@ -99,6 +99,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([IRefSelectionsService, { useClass: SheetsSelectionsService }]);
 
             dependencies?.forEach((d) => injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
 
         override onReady(): void {

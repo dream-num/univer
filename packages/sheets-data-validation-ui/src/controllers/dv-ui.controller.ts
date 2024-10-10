@@ -16,7 +16,7 @@
 
 import type { Ctor } from '@univerjs/core';
 import type { BaseSheetDataValidatorView } from '../views/validator-views/sheet-validator-view';
-import { Inject, Injector, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { Inject, Injector, RxDisposable } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
@@ -36,7 +36,6 @@ import { TextLengthValidatorView } from '../views/validator-views/text-length-va
 import { WholeValidatorView } from '../views/validator-views/whole-validator-view';
 import { DataValidationIcon } from './dv.menu';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidationUIController)
 export class SheetsDataValidationUIController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { connectInjector, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType, useDependency } from '@univerjs/core';
+import { connectInjector, ICommandService, IConfigService, Inject, Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { SetBackgroundColorCommand } from '@univerjs/sheets';
 import { IMAGE_MENU_ID as SheetsImageMenuId } from '@univerjs/sheets-drawing-ui';
 import { RenderSheetContent, SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand, SheetUIController } from '@univerjs/sheets-ui';
@@ -26,7 +26,6 @@ import { UniSheetBar } from '../views/uni-sheet-bar/UniSheetBar';
 import { SHEET_BOLD_MUTATION_ID, SHEET_ITALIC_MUTATION_ID, SHEET_STRIKE_MUTATION_ID, SHEET_UNDERLINE_MUTATION_ID } from './menu';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class UniSheetsUIController extends SheetUIController {
     constructor(
         @Inject(Injector) injector: Injector,

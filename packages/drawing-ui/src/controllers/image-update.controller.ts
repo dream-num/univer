@@ -15,28 +15,25 @@
  */
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
+import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
+import type { Image, Scene } from '@univerjs/engine-render';
 import {
     Disposable,
     ICommandService,
     Inject,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { Image, Scene } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
-import type { IDrawingSearch, IImageData } from '@univerjs/drawing';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService, IImageIoService } from '@univerjs/drawing';
+import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 import { IDialogService } from '@univerjs/ui';
-import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { ImageResetSizeOperation } from '../commands/operations/image-reset-size.operation';
 import { DrawingRenderService } from '../services/drawing-render.service';
+import { COMPONENT_IMAGE_VIEWER } from '../views/image-viewer/component-name';
 import { getCurrentUnitInfo } from './utils';
 
 const IMAGE_VIEWER_DROPDOWN_PADDING = 50;
 
-@OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
 export class ImageUpdateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

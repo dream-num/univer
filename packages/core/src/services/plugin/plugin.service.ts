@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { skip } from 'rxjs';
 import type { Ctor, IDisposable } from '../../common/di';
+import { skip } from 'rxjs';
 import { Inject, Injector } from '../../common/di';
-
-import { Disposable } from '../../shared/lifecycle';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
+import { Disposable } from '../../shared/lifecycle';
 import { LifecycleStages } from '../lifecycle/lifecycle';
-import { getLifecycleStagesAndBefore, LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
+import { getLifecycleStagesAndBefore, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
 import { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
@@ -189,8 +188,7 @@ export class PluginHolder extends Disposable {
         private _registerPlugin: <T extends PluginCtor>(plugin: T, config?: ConstructorParameters<T>[0]) => void,
         @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
-        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
-        @Inject(LifecycleInitializerService) protected readonly _lifecycleInitializerService: LifecycleInitializerService
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         super();
 
@@ -310,8 +308,5 @@ export class PluginHolder extends Disposable {
                     break;
             }
         });
-
-        // Plugins run first, and then we should run the modules.
-        this._lifecycleInitializerService.initModulesOnStage(stage);
     }
 }

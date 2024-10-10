@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, ICommandService, IContextService, Inject } from '@univerjs/core';
 import type { Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, ICommandService, IContextService, Inject, Optional } from '@univerjs/core';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
@@ -28,7 +28,7 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+        @Optional(IEditorBridgeService) private readonly _editorBridgeService?: IEditorBridgeService
     ) {
         super();
 
@@ -57,9 +57,11 @@ export class SheetsZoomRenderController extends Disposable implements IRenderMod
                     return;
                 }
 
-                const state = this._editorBridgeService.isVisible();
-                if ((state.unitId === this._context.unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) {
-                    return;
+                if (this._editorBridgeService) {
+                    const state = this._editorBridgeService.isVisible();
+                    if ((state.unitId === this._context.unitId || state.unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) && state.visible) {
+                        return;
+                    }
                 }
 
                 const deltaFactor = Math.abs(e.deltaX);

@@ -15,15 +15,14 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, isValidRange, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
+import { Disposable, ICommandService, Inject, isValidRange, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
+import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
 import { ERROR_RANGE } from '../types/const';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkRefRangeController)
 export class SheetsHyperLinkRefRangeController extends Disposable {
     private _disposableMap = new Map<string, IDisposable>();
     private _watchDisposableMap = new Map<string, IDisposable>();

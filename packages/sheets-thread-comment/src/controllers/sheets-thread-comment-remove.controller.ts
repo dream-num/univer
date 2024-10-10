@@ -15,13 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
-import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { AddCommentMutation, DeleteCommentMutation, IThreadCommentDataSourceService, ThreadCommentModel } from '@univerjs/thread-comment';
 
-@OnLifecycle(LifecycleStages.Ready, ThreadCommentRemoveSheetsController)
 export class ThreadCommentRemoveSheetsController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,

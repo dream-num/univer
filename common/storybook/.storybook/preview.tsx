@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import type { Preview } from '@storybook/react';
-import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
-import zhCN from '@univerjs/design/locale/zh-CN';
-import enUS from '@univerjs/design/locale/en-US';
 import {
     CommandService,
     ConfigService,
@@ -35,7 +31,6 @@ import {
     IResourceManagerService,
     IUndoRedoService,
     IUniverInstanceService,
-    LifecycleInitializerService,
     LifecycleService,
     LocaleService,
     LocaleType,
@@ -46,7 +41,11 @@ import {
     ThemeService,
     UniverInstanceService,
 } from '@univerjs/core';
+import { ConfigProvider, defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
+import enUS from '@univerjs/design/locale/en-US';
+import zhCN from '@univerjs/design/locale/zh-CN';
 import { DesktopLocalStorageService } from '@univerjs/ui';
+import React from 'react';
 
 export const themes: Record<string, Record<string, string>> = {
     default: defaultTheme,
@@ -94,7 +93,6 @@ const preview: Preview = {
             [LocaleService],
             [ThemeService],
             [LifecycleService],
-            [LifecycleInitializerService],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],

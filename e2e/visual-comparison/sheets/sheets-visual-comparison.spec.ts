@@ -28,6 +28,13 @@ test('diff default sheet content', async ({ page }) => {
 });
 
 test('diff demo sheet content', async ({ page }) => {
+    let errored = false;
+
+    page.on('pageerror', (error) => {
+        console.error('Page error:', error);
+        errored = true;
+    });
+
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
 
@@ -35,4 +42,5 @@ test('diff demo sheet content', async ({ page }) => {
     await page.waitForTimeout(5000);
 
     await expect(page).toHaveScreenshot(generateSnapshotName('demo-sheet'), { maxDiffPixels: 5 });
+    expect(errored).toBeFalsy();
 });

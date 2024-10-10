@@ -21,17 +21,20 @@ import { createInternalEditorID, debounce, generateRandomId, ICommandService, IU
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 
+import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
+import { useEditorInput } from './hooks/useEditorInput';
 import { useFormulaToken } from './hooks/useFormulaToken';
+
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
-
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import styles from './index.module.less';
@@ -174,6 +177,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useRefactorEffect(!rangeDialogVisible && isFocus, unitId);
 
+    useEditorInput(unitId, rangeString, editor);
+
     useEffect(() => {
         if (onVerify) {
             const result = verifyRange(sequenceNodes);
@@ -184,7 +189,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
-                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
+                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',');
                 rangeStringSet(text);
                 handleInputDebounce(text);
             });
@@ -296,6 +301,9 @@ function RangeSelectorDialog(props: {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const render = renderManagerService.getRenderById(unitId);
+    const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     const [ranges, rangesSet] = useState(() => unitRangesToText(initValue, unitId, subUnitId, univerInstanceService));
 
@@ -307,6 +315,7 @@ function RangeSelectorDialog(props: {
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(rangeText);
 
     const refSelections = useMemo(() => buildTextRuns(descriptionService, colorMap, sequenceNodes).refSelections, [sequenceNodes]);
+
     useSheetHighlight(visible, unitId, subUnitId, refSelections);
 
     const handleClose = () => {
@@ -317,6 +326,7 @@ function RangeSelectorDialog(props: {
         }, 30);
     };
     const handleRangeInput = (index: number, value: string) => {
+        refSelectionsRenderService?.setSkipLastEnabled(false);
         rangesSet((v) => {
             const result = [...v];
             result[index] = value;
@@ -325,6 +335,7 @@ function RangeSelectorDialog(props: {
     };
 
     const handleRangeRemove = (index: number) => {
+        refSelectionsRenderService?.setSkipLastEnabled(false);
         rangesSet((v) => {
             if (v.length === 1) {
                 return v;
@@ -340,19 +351,22 @@ function RangeSelectorDialog(props: {
     };
 
     const handleRangeAdd = () => {
+        refSelectionsRenderService?.setSkipLastEnabled(true);
         rangesSet((v) => {
-            v.push('A1');
+            v.push('');
             focusIndexSet(v.length - 1);
             return [...v];
         });
     };
 
     const handleSheetSelectionChange = useCallback((rangeText: string) => {
+        refSelectionsRenderService?.setSkipLastEnabled(false);
         rangesSet(rangeText.split(matchToken.COMMA).filter((e) => !!e));
     }, [focusIndex]);
 
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
     useRefactorEffect(focusIndex >= 0, unitId);
+
     return (
         <Dialog
             width="328px"

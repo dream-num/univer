@@ -636,8 +636,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            dataArray: { name: 'data_array', detail: 'An array of or reference to a set of values for which you want to count frequencies. If data_array contains no values, FREQUENCY returns an array of zeros.' },
+            binsArray: { name: 'bins_array', detail: 'An array of or reference to intervals into which you want to group the values in data_array. If bins_array contains no values, FREQUENCY returns the number of elements in data_array.' },
         },
     },
     GAMMA: {
@@ -650,8 +650,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Input value to the gamma function.' },
         },
     },
     GAMMA_DIST: {
@@ -664,8 +663,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, GAMMA.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     GAMMA_INV: {
@@ -678,8 +679,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability associated with the gamma distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
         },
     },
     GAMMALN: {
@@ -692,8 +694,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want to calculate GAMMALN.' },
         },
     },
     GAMMALN_PRECISE: {
@@ -706,8 +707,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want to calculate GAMMALN.PRECISE.' },
         },
     },
     GAUSS: {
@@ -720,8 +720,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            z: { name: 'z', detail: 'The value for which you want the distribution.' },
         },
     },
     GEOMEAN: {
@@ -734,8 +733,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the geometric mean.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the geometric mean, up to a maximum of 255.' },
         },
     },
     GROWTH: {
@@ -748,8 +747,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The set of y-values you already know in the relationship y = b*m^x.' },
+            knownXs: { name: "known_x's", detail: 'The set of x-values you already know in the relationship y = b*m^x.' },
+            newXs: { name: "new_x's", detail: 'Are new x-values for which you want GROWTH to return corresponding y-values.' },
+            constb: { name: 'const', detail: 'A logical value specifying whether to force the constant b to equal 1.' },
         },
     },
     HARMEAN: {
@@ -762,8 +763,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the harmonic mean.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the harmonic mean, up to a maximum of 255.' },
         },
     },
     HYPGEOM_DIST: {
@@ -776,8 +777,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            sampleS: { name: 'sample_s', detail: 'The number of successes in the sample.' },
+            numberSample: { name: 'number_sample', detail: 'The size of the sample.' },
+            populationS: { name: 'population_s', detail: 'The number of successes in the population.' },
+            numberPop: { name: 'number_pop', detail: 'The population size.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, HYPGEOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     INTERCEPT: {
@@ -804,8 +808,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the kurtosis.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the kurtosis, up to a maximum of 255.' },
         },
     },
     LARGE: {
@@ -818,8 +822,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want to determine the k-th largest value.' },
+            k: { name: 'k', detail: 'The position (from the largest) in the array or cell range of data to return.' },
         },
     },
     LINEST: {
@@ -860,8 +864,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, LOGNORM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     LOGNORM_INV: {
@@ -874,8 +880,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'A probability corresponding to the lognormal distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
         },
     },
     MAX: {
@@ -939,8 +946,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the given numbers.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the given numbers, up to a maximum of 255.' },
         },
     },
     MIN: {
@@ -1004,8 +1011,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want calculate the mode.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want calculate the mode, up to a maximum of 255.' },
         },
     },
     MODE_SNGL: {
@@ -1018,8 +1025,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want calculate the mode.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want calculate the mode, up to a maximum of 255.' },
         },
     },
     NEGBINOM_DIST: {
@@ -1032,8 +1039,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            numberF: { name: 'number_f', detail: 'The number of failures.' },
+            numberS: { name: 'number_s', detail: 'The threshold number of successes.' },
+            probabilityS: { name: 'probability_s', detail: 'The probability of a success.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, NEGBINOM.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     NORM_DIST: {
@@ -1104,13 +1113,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The dependent array or range of data.' },
+            array2: { name: 'array2', detail: 'The independent array or range of data.' },
         },
     },
     PERCENTILE_EXC: {
-        description: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
-        abstract: 'Returns the k-th percentile of values in a range, where k is in the range 0..1, exclusive',
+        description: 'Returns the k-th percentile of values in a data set (Excludes 0 and 1).',
+        abstract: 'Returns the k-th percentile of values in a data set (Excludes 0 and 1).',
         links: [
             {
                 title: 'Instruction',
@@ -1118,13 +1127,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            k: { name: 'k', detail: 'The percentile value in the range 0 and 1 (Excludes 0 and 1).' },
         },
     },
     PERCENTILE_INC: {
-        description: 'Returns the k-th percentile of values in a range',
-        abstract: 'Returns the k-th percentile of values in a range',
+        description: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
+        abstract: 'Returns the k-th percentile of values in a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1132,13 +1141,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            k: { name: 'k', detail: 'The percentile value in the range 0 and 1 (Includes 0 and 1).' },
         },
     },
     PERCENTRANK_EXC: {
-        description: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
-        abstract: 'Returns the rank of a value in a data set as a percentage (0..1, exclusive) of the data set',
+        description: 'Returns the percentage rank of a value in a data set (Excludes 0 and 1)',
+        abstract: 'Returns the percentage rank of a value in a data set (Excludes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1146,13 +1155,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            x: { name: 'x', detail: 'The value for which you want to know the rank.' },
+            significance: { name: 'significance', detail: 'A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK.EXC uses three digits (0.xxx).' },
         },
     },
     PERCENTRANK_INC: {
-        description: 'Returns the percentage rank of a value in a data set',
-        abstract: 'Returns the percentage rank of a value in a data set',
+        description: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
+        abstract: 'Returns the percentage rank of a value in a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1160,8 +1170,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data that defines relative standing.' },
+            x: { name: 'x', detail: 'The value for which you want to know the rank.' },
+            significance: { name: 'significance', detail: 'A value that identifies the number of significant digits for the returned percentage value. If omitted, PERCENTRANK.INC uses three digits (0.xxx).' },
         },
     },
     PERMUT: {
@@ -1174,8 +1185,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each permutations.' },
         },
     },
     PERMUTATIONA: {
@@ -1188,8 +1199,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number of items.' },
+            numberChosen: { name: 'number_chosen', detail: 'The number of items in each permutations.' },
         },
     },
     PHI: {
@@ -1202,8 +1213,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'X is the number for which you want the density of the standard normal distribution.' },
         },
     },
     POISSON_DIST: {
@@ -1216,8 +1226,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, POISSON.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     PROB: {
@@ -1230,13 +1241,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            xRange: { name: 'x_range', detail: 'The range of numeric values of x with which there are associated probabilities.' },
+            probRange: { name: 'prob_range', detail: 'A set of probabilities associated with values in x_range.' },
+            lowerLimit: { name: 'lower_limit', detail: 'The lower bound on the value for which you want a probability.' },
+            upperLimit: { name: 'upper_limit', detail: 'The upper bound on the value for which you want a probability.' },
         },
     },
     QUARTILE_EXC: {
-        description: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
-        abstract: 'Returns the quartile of the data set, based on percentile values from 0..1, exclusive',
+        description: 'Returns the quartile of a data set (Excludes 0 and 1)',
+        abstract: 'Returns the quartile of a data set (Excludes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1244,13 +1257,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want quartile values.' },
+            quart: { name: 'quart', detail: 'The quartile value to return.' },
         },
     },
     QUARTILE_INC: {
-        description: 'Returns the quartile of a data set',
-        abstract: 'Returns the quartile of a data set',
+        description: 'Returns the quartile of a data set (Includes 0 and 1)',
+        abstract: 'Returns the quartile of a data set (Includes 0 and 1)',
         links: [
             {
                 title: 'Instruction',
@@ -1258,8 +1271,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want quartile values.' },
+            quart: { name: 'quart', detail: 'The quartile value to return.' },
         },
     },
     RANK_AVG: {
@@ -1302,8 +1315,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The dependent array or range of data.' },
+            array2: { name: 'array2', detail: 'The independent array or range of data.' },
         },
     },
     SKEW: {
@@ -1316,13 +1329,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the skewness.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the skewness, up to a maximum of 255.' },
         },
     },
     SKEW_P: {
-        description: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
-        abstract: 'Returns the skewness of a distribution based on a population: a characterization of the degree of asymmetry of a distribution around its mean',
+        description: 'Returns the skewness of a distribution based on a population',
+        abstract: 'Returns the skewness of a distribution based on a population',
         links: [
             {
                 title: 'Instruction',
@@ -1330,8 +1343,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number, cell reference, or range for which you want the skewness.' },
+            number2: { name: 'number2', detail: 'Additional numbers, cell references or ranges for which you want the skewness, up to a maximum of 255.' },
         },
     },
     SLOPE: {
@@ -1344,8 +1357,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     SMALL: {
@@ -1358,8 +1371,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data for which you want to determine the k-th smallest value.' },
+            k: { name: 'k', detail: 'The position (from the smallest) in the array or cell range of data to return.' },
         },
     },
     STANDARDIZE: {
@@ -1372,8 +1385,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value you want to normalize.' },
+            mean: { name: 'mean', detail: 'The arithmetic mean of the distribution.' },
+            standardDev: { name: 'standard_dev', detail: 'The standard deviation of the distribution.' },
         },
     },
     STDEV_P: {
@@ -1442,13 +1456,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            knownYs: { name: "known_y's", detail: 'The dependent array or range of data.' },
+            knownXs: { name: "known_x's", detail: 'The independent array or range of data.' },
         },
     },
     T_DIST: {
-        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
-        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        description: 'Returns the probability for the Student t-distribution',
+        abstract: 'Returns the probability for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1456,13 +1470,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, T.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     T_DIST_2T: {
-        description: 'Returns the Percentage Points (probability) for the Student t-distribution',
-        abstract: 'Returns the Percentage Points (probability) for the Student t-distribution',
+        description: 'Returns the probability for the Student t-distribution (two-tailed)',
+        abstract: 'Returns the probability for the Student t-distribution (two-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1470,13 +1485,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_DIST_RT: {
-        description: 'Returns the Student\'s t-distribution',
-        abstract: 'Returns the Student\'s t-distribution',
+        description: 'Returns the probability for the Student t-distribution (right-tailed)',
+        abstract: 'Returns the probability for the Student t-distribution (right-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1484,13 +1499,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The numeric value at which to evaluate the distribution' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_INV: {
-        description: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
-        abstract: 'Returns the t-value of the Student\'s t-distribution as a function of the probability and the degrees of freedom',
+        description: 'Returns the inverse of the probability for the Student t-distribution',
+        abstract: 'Returns the inverse of the probability for the Student t-distribution',
         links: [
             {
                 title: 'Instruction',
@@ -1498,13 +1513,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'The probability associated with the Student\'s t-distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_INV_2T: {
-        description: 'Returns the inverse of the Student\'s t-distribution',
-        abstract: 'Returns the inverse of the Student\'s t-distribution',
+        description: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
+        abstract: 'Returns the inverse of the probability for the Student t-distribution (two-tailed)',
         links: [
             {
                 title: 'Instruction',
@@ -1512,8 +1527,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            probability: { name: 'probability', detail: 'The probability associated with the Student\'s t-distribution.' },
+            degFreedom: { name: 'degFreedom', detail: 'An integer indicating the number of degrees of freedom.' },
         },
     },
     T_TEST: {
@@ -1526,8 +1541,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array1: { name: 'array1', detail: 'The first array or range of data.' },
+            array2: { name: 'array2', detail: 'The second array or range of data.' },
+            tails: { name: 'tails', detail: 'Specifies the number of distribution tails. If tails = 1, T.TEST uses the one-tailed distribution. If tails = 2, T.TEST uses the two-tailed distribution.' },
+            type: { name: 'type', detail: 'The kind of t-Test to perform.' },
         },
     },
     TREND: {
@@ -1554,8 +1571,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of values to trim and average.' },
+            percent: { name: 'percent', detail: 'The fractional number of data points to exclude from the calculation.' },
         },
     },
     VAR_P: {
@@ -1624,8 +1641,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            x: { name: 'x', detail: 'The value for which you want the distribution.' },
+            alpha: { name: 'alpha', detail: 'A parameter of the distribution.' },
+            beta: { name: 'beta', detail: 'A parameter of the distribution.' },
+            cumulative: { name: 'cumulative', detail: 'A logical value that determines the form of the function. If cumulative is TRUE, WEIBULL.DIST returns the cumulative distribution function; if FALSE, it returns the probability density function.' },
         },
     },
     Z_TEST: {
@@ -1638,8 +1657,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array or range of data against which to test x.' },
+            x: { name: 'x', detail: 'The value to test.' },
+            sigma: { name: 'sigma', detail: 'The population (known) standard deviation. If omitted, the sample standard deviation is used.' },
         },
     },
 };

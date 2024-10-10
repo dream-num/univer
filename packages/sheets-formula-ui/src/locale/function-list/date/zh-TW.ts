@@ -42,7 +42,7 @@ export default {
         functionParameter: {
             startDate: { name: '開始日期', detail: '代表指定期間的第一個或開始日期的日期。' },
             endDate: { name: '結束日期', detail: '代表期間最後一個或結束日期的日期。' },
-            method: { name: '資訊類型', detail: '您要傳回的資訊類型' },
+            method: { name: '資訊類型', detail: '要傳回的資訊類型' },
         },
     },
     DATEVALUE: {
@@ -190,9 +190,9 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
-            endDate: { name: '結束日期', detail: '這是代表結束日期的日期。' },
-            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
+            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '代表結束日期的日期。' },
+            holidays: { name: '假日', detail: '要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     NETWORKDAYS_INTL: {
@@ -205,10 +205,10 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
-            endDate: { name: '結束日期', detail: '這是代表結束日期的日期。' },
+            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
+            endDate: { name: '結束日期', detail: '代表結束日期的日期。' },
             weekend: { name: '週末', detail: '是指定何時是週末的數字或字串。' },
-            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
+            holidays: { name: '假日', detail: '要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     NOW: {
@@ -261,7 +261,7 @@ export default {
             },
         ],
         functionParameter: {
-            timeText: { name: '時間文字', detail: '這是以任何一種時間格式表示的文字字串；例如，"6:45 PM" 和 "18:45"，引號中的文字字串表示時間。' },
+            timeText: { name: '時間文字', detail: '以任何一種時間格式表示的文字字串；例如，"6:45 PM" 和 "18:45"，引號中的文字字串表示時間。' },
         },
     },
     TODAY: {
@@ -285,8 +285,8 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序列值', detail: '這是代表要尋找之該天日期的序列值。' },
-            returnType: { name: '傳回值類型', detail: '這是決定傳回值類型的數字。' },
+            serialNumber: { name: '日期序列值', detail: '代表要尋找之該天日期的序列值。' },
+            returnType: { name: '傳回值類型', detail: '決定傳回值類型的數字。' },
         },
     },
     WEEKNUM: {
@@ -299,8 +299,8 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序列值', detail: '這是一週中的日期。' },
-            returnType: { name: '傳回值類型', detail: '這是決定一週從星期幾開始的數字。 預設值為 1。' },
+            serialNumber: { name: '日期序列值', detail: '一週中的日期。' },
+            returnType: { name: '傳回值類型', detail: '決定一週從星期幾開始的數字。 預設值為 1。' },
         },
     },
     WORKDAY: {
@@ -313,9 +313,9 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
-            days: { name: '天數', detail: '這是開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
-            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
+            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
+            days: { name: '天數', detail: '開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
+            holidays: { name: '假日', detail: '要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     WORKDAY_INTL: {
@@ -328,10 +328,10 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: '開始日期', detail: '這是代表開始日期的日期。' },
-            days: { name: '天數', detail: '這是開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
+            startDate: { name: '開始日期', detail: '代表開始日期的日期。' },
+            days: { name: '天數', detail: '開始日期之前或之後的非週末和非假日的天數。正值代表未來的日期；負值代表過去的日期。' },
             weekend: { name: '週末', detail: '是指定何時是週末的數字或字串。' },
-            holidays: { name: '假日', detail: '這是要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
+            holidays: { name: '假日', detail: '要從工作行事曆中排除之一個或多個日期的選擇性範圍。' },
         },
     },
     YEAR: {
@@ -357,9 +357,9 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: '开始日期', detail: '這是代表開始日期的日期。' },
-            endDate: { name: '结束日期', detail: '這是代表結束日期的日期。' },
-            basis: { name: '基礎類型', detail: '這是要使用的日計數基礎類型。' },
+            startDate: { name: '开始日期', detail: '代表開始日期的日期。' },
+            endDate: { name: '结束日期', detail: '代表結束日期的日期。' },
+            basis: { name: '基礎類型', detail: '要使用的日計數基礎類型。' },
         },
     },
 };

@@ -64,6 +64,22 @@ export class BinomDistRange extends BaseFunction {
             const numberSObject = numberSArray.get(rowIndex, columnIndex) as BaseValueObject;
             const numberS2Object = numberS2Array.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (trialsObject.isError()) {
+                return trialsObject;
+            }
+
+            if (probabilitySObject.isError()) {
+                return probabilitySObject;
+            }
+
+            if (numberSObject.isError()) {
+                return numberSObject;
+            }
+
+            if (numberS2Object.isError()) {
+                return numberS2Object;
+            }
+
             return this._handleSignleObject(trialsObject, probabilitySObject, numberSObject, numberS2Object);
         });
 

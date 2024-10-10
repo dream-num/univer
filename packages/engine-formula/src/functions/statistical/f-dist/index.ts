@@ -58,6 +58,22 @@ export class FDist extends BaseFunction {
             const degFreedom2Object = degFreedom2Array.get(rowIndex, columnIndex) as BaseValueObject;
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (degFreedom1Object.isError()) {
+                return degFreedom1Object;
+            }
+
+            if (degFreedom2Object.isError()) {
+                return degFreedom2Object;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(xObject, degFreedom1Object, degFreedom2Object, cumulativeObject);
         });
 

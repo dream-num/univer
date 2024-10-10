@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService } from '@univerjs/core';
 import { PREDEFINED_HOOK_NAME, SheetPasteCommand } from '@univerjs/sheets-ui';
-import type { ICommand } from '@univerjs/core';
 
 export const SheetOnlyPasteFormulaCommand: ICommand = {
     id: 'sheet.command.paste-formula',

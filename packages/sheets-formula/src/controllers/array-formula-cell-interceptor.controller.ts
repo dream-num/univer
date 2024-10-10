@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo } from '@univerjs/core';
+import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import type { ICommandInfo } from '@univerjs/core';
-import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaCellInterceptorController)
 export class ArrayFormulaCellInterceptorController extends Disposable {

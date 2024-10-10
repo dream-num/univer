@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IOperation } from '@univerjs/core';
 import type { DeviceInputEventType } from '@univerjs/engine-render';
 import type { KeyCode, MetaKeys } from '@univerjs/ui';
-
 import type { META_KEY_CTRL_AND_SHIFT } from '../../common/prompt';
+
+import { CommandType } from '@univerjs/core';
 
 export interface ISelectEditorFormulaOperationParam {
     eventType: DeviceInputEventType;

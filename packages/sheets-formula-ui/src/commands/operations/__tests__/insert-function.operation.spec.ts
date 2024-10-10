@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Injector, Univer } from '@univerjs/core';
+import type { IInsertFunctionOperationParams } from '../insert-function.operation';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     SetRangeValuesCommand,
@@ -21,10 +23,9 @@ import {
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
+
 import { InsertFunctionCommand } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import type { Injector, Univer } from '@univerjs/core';
 import {
     InsertFunctionOperation,
     isMultiRowsColumnsRange,
@@ -32,7 +33,6 @@ import {
     isSingleCell,
 } from '../insert-function.operation';
 import { createCommandTestBed } from './create-command-test-bed';
-import type { IInsertFunctionOperationParams } from '../insert-function.operation';
 
 describe('Test insert function operation', () => {
     let univer: Univer;

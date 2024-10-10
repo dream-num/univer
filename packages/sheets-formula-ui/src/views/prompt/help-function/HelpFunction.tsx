@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import { IUniverInstanceService, LocaleService, useDependency, useInjector } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import { IEditorService } from '@univerjs/docs-ui';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
+
 import { ILayoutService, ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-
 import { throttleTime } from 'rxjs';
-import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import { generateParam } from '../../../services/utils';
 import { useResizeScrollObserver } from '../resize-scroll-observer';
 import styles from './index.module.less';
-import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 
 export function HelpFunction() {
     const [visible, setVisible] = useState(false);

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 
-import type { Dependency } from '@univerjs/core';
+import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';

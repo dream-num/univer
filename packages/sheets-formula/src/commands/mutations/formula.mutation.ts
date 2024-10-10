@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 
 export interface IOtherFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
 

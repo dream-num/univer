@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IAccessor, ICommand } from '@univerjs/core';
-
-import { IFormulaPromptService } from '../../services/prompt.service';
 import type { ISearchFunctionOperationParams } from '../../services/prompt.service';
+
+import { CommandType } from '@univerjs/core';
+import { IFormulaPromptService } from '../../services/prompt.service';
 
 export const SearchFunctionOperation: ICommand = {
     id: 'formula-ui.operation.search-function',

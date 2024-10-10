@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuItem } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, IClipboardInterfaceService, MenuItemType } from '@univerjs/ui';
-import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
-import type { IAccessor, Workbook } from '@univerjs/core';
 
-import type { IMenuItem } from '@univerjs/ui';
+import { combineLatestWith, map, Observable, of, switchMap } from 'rxjs';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';

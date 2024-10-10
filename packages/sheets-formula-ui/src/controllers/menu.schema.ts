@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { MenuSchemaType } from '@univerjs/ui';
 import { PASTE_SPECIAL_MENU_ID } from '@univerjs/sheets-ui';
 import { RibbonStartGroup } from '@univerjs/ui';
-import type { MenuSchemaType } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionOperation } from '../commands/operations/insert-function.operation';
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';

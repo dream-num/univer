@@ -14,6 +14,32 @@
  * limitations under the License.
  */
 
+import type {
+    ICommandInfo,
+    IExecutionOptions,
+    IRange,
+    IUnitRange,
+    Nullable,
+    Workbook } from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
+import type {
+    IDeleteRangeMoveLeftCommandParams,
+    IDeleteRangeMoveUpCommandParams,
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
+    IInsertSheetMutationParams,
+    IMoveColsCommandParams,
+    IMoveRangeCommandParams,
+    IMoveRowsCommandParams,
+    InsertRangeMoveDownCommandParams,
+    InsertRangeMoveRightCommandParams,
+    IRemoveRowColCommandParams,
+    IRemoveSheetCommandParams,
+    IRemoveSheetMutationParams,
+    ISetRangeValuesMutationParams,
+    ISetWorksheetNameCommandParams,
+} from '@univerjs/sheets';
+
 import {
     Direction,
     Disposable,
@@ -42,6 +68,7 @@ import { deserializeRangeWithSheet,
     SetFormulaCalculationStartMutation,
     SetFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import {
     ClearSelectionFormatCommand,
     DeleteRangeMoveLeftCommand,
@@ -77,34 +104,7 @@ import {
     SetWorksheetNameCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-
 import { map } from 'rxjs';
-import type {
-    ICommandInfo,
-    IExecutionOptions,
-    IRange,
-    IUnitRange,
-    Nullable,
-    Workbook } from '@univerjs/core';
-
-import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import type {
-    IDeleteRangeMoveLeftCommandParams,
-    IDeleteRangeMoveUpCommandParams,
-    IInsertColCommandParams,
-    IInsertRowCommandParams,
-    IInsertSheetMutationParams,
-    IMoveColsCommandParams,
-    IMoveRangeCommandParams,
-    IMoveRowsCommandParams,
-    InsertRangeMoveDownCommandParams,
-    InsertRangeMoveRightCommandParams,
-    IRemoveRowColCommandParams,
-    IRemoveSheetCommandParams,
-    IRemoveSheetMutationParams,
-    ISetRangeValuesMutationParams,
-    ISetWorksheetNameCommandParams,
-} from '@univerjs/sheets';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { formulaDataToCellData, getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
 

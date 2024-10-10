@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, Inject, isICellData, LocaleService } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import type { Workbook } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { extractFormulaError } from './utils/utils';
 
 const ALERT_KEY = 'SHEET_FORMULA_ALERT';

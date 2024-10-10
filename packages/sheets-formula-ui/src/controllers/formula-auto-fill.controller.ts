@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
+import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import {
     Direction,
     Disposable,
@@ -26,8 +28,6 @@ import {
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
-import type { ICellData, Nullable } from '@univerjs/core';
-import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaAutoFillController)
 export class FormulaAutoFillController extends Disposable {

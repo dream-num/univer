@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
+import React, { useState } from 'react';
 
 import { FunctionHelp } from '../function-help/FunctionHelp';
 import { FunctionParams } from '../function-params/FunctionParams';

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import type { ISearchItem } from '@univerjs/sheets-formula';
+import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
+
 import { Direction, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-
 import { IEditorService } from '@univerjs/docs-ui';
 import React, { useEffect, useRef, useState } from 'react';
-import type { ISearchItem } from '@univerjs/sheets-formula';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';
-import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
 
 export function SearchFunction() {
     const [visible, setVisible] = useState(false);

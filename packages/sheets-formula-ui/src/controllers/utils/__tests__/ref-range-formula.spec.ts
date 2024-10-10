@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import type { IFormulaDataItem } from '@univerjs/engine-formula';
+
+import { describe, expect, it } from 'vitest';
 import { formulaDataItemToCellData, formulaDataToCellData, isFormulaDataItem } from '../ref-range-formula';
 
 describe('Ref range formula test', () => {

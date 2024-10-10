@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { createIdentifier, IContextService } from '@univerjs/core';
-import { type IFunctionInfo, type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
-import { Subject } from 'rxjs';
 import type { Direction, IDisposable } from '@univerjs/core';
 import type { ISearchItem } from '@univerjs/sheets-formula';
 import type { Observable } from 'rxjs';
+import { createIdentifier, IContextService } from '@univerjs/core';
+import { type IFunctionInfo, type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
+import { Subject } from 'rxjs';
 
 /** If the formula prompt is visible. */
 export const FORMULA_PROMPT_ACTIVATED = 'FORMULA_PROMPT_ACTIVATED';

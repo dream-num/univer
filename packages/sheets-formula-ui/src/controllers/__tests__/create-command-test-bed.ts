@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, Inject, Injector, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { EditorService, IEditorService } from '@univerjs/docs-ui';
@@ -21,7 +22,6 @@ import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigServi
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RangeProtectionRuleModel, SheetInterceptorService, SheetsSelectionsService, WorkbookPermissionService, WorksheetPermissionService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',

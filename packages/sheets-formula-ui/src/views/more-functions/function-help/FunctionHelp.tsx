@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React from 'react';
 import type { IFunctionParam } from '@univerjs/engine-formula';
+import React from 'react';
 import { generateParam } from '../../../services/utils';
 
 interface IFunctionHelpProps {

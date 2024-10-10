@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
+import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
 import { createIdentifier, IConfigService, Inject, LocaleService, toDisposable } from '@univerjs/core';
+
 import {
     functionArray,
     functionCompatibility,
@@ -36,13 +40,9 @@ import {
     IFunctionService,
     isReferenceStrings,
 } from '@univerjs/engine-formula';
-import type { IDisposable } from '@univerjs/core';
-import type { IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
-
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
 import { FUNCTION_LIST } from './function-list/function-list';
 import { getFunctionName } from './utils';
-import type { IUniverSheetsFormulaBaseConfig } from '../controllers/config.schema';
 
 export interface ISearchItem {
     name: string;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier, Disposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export interface IProgressCount {
     count: number;

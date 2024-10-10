@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { CellValueType, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
 import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
+
 import { UpdateFormulaController } from '@univerjs/sheets-formula';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import type { ICellData, Injector, IObjectMatrixPrimitiveType, IWorkbookData, Nullable, Univer } from '@univerjs/core';
-import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetRangeValuesCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({

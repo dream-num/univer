@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ColorKit, type ThemeService } from '@univerjs/core';
 import type { ISelectionStyle } from '@univerjs/sheets';
+import { ColorKit, type ThemeService } from '@univerjs/core';
 
 export const FORMULA_REF_SELECTION_PLUGIN_NAME = 'formula_reference_selection_plugin_name';
 

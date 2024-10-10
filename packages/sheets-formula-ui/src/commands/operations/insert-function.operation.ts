@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import {
     CellValueType,
     CommandType,
@@ -26,15 +27,14 @@ import {
 } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
+
 import {
     getCellAtRowCol,
     getSheetCommandTarget,
     SetSelectionsOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { type IInsertFunction, InsertFunctionCommand } from '@univerjs/sheets-formula';
-import type { IAccessor, ICellData, ICommand, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 
 export interface IInsertFunctionOperationParams {
     /**

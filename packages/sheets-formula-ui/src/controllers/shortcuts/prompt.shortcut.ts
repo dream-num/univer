@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IShortcutItem } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { whenFormulaEditorActivated } from '@univerjs/sheets-ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { IShortcutItem } from '@univerjs/ui';
 
 import { SelectEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
 import { ReferenceAbsoluteOperation } from '../../commands/operations/reference-absolute.operation';

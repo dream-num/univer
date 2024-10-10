@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -37,9 +38,8 @@ import {
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
-import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 
-import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { FUniver } from '../../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {

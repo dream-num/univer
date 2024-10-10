@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import type { Dependency } from '@univerjs/core';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginBaseConfig,
@@ -33,7 +34,6 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
-import type { IUniverSheetsFormulaBaseConfig } from './controllers/config.schema';
 
 /**
  * The configuration of the formula UI plugin.

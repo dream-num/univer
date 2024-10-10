@@ -523,8 +523,13 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
-                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
+                if (evt.ctrlKey) {
+                    // No need to add cursor when select multi text ranges by CTRL key.
+                    this._disposeScrollTimers();
+                    return;
+                }
 
+                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
                 for (const textRange of this._rangeListCache) {
@@ -551,11 +556,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._textSelectionInner$.next(selectionInfo);
 
-            this._scrollTimers.forEach((timer) => {
-                timer?.dispose();
-            });
-
-            this._scrollTimers = [];
+            this._disposeScrollTimers();
 
             this._updateInputPosition(true);
         }));
@@ -568,6 +569,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getActiveTextRange() {
         return this._getActiveRangeInstance();
+    }
+
+    private _disposeScrollTimers() {
+        this._scrollTimers.forEach((timer) => {
+            timer?.dispose();
+        });
+
+        this._scrollTimers = [];
     }
 
     private _setSystemHighlightColorToStyle() {

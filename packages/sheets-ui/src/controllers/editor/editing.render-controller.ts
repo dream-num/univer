@@ -68,6 +68,7 @@ import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
+import { ScrollToRangeOperation } from '../../commands/operations/scroll-to-range.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from '../../views/sheet-container/index.module.less';
@@ -564,9 +565,22 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 
-        this._editorBridgeService.refreshEditCellState();
+        let editCellState = this._editorBridgeService.getEditCellState();
+        if (editCellState == null) {
+            return;
+        }
 
-        const editCellState = this._editorBridgeService.getEditCellState();
+        this._commandService.syncExecuteCommand(ScrollToRangeOperation.id, {
+            range: {
+                startRow: editCellState.row,
+                startColumn: editCellState.column,
+                endRow: editCellState.row,
+                endColumn: editCellState.column,
+            },
+        });
+
+        this._editorBridgeService.refreshEditCellState();
+        editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
         }

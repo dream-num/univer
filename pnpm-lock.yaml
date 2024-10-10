@@ -3056,6 +3056,15 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+<<<<<<< HEAD
+=======
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
+>>>>>>> fe89bc4ed (feat(range-selector): support permission and data validation)
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
@@ -4117,6 +4126,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
       '@univerjs/telemetry':
         specifier: workspace:*
         version: link:../telemetry

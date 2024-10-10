@@ -74,6 +74,7 @@
         "@univerjs/icons": "^0.1.79",
         "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"

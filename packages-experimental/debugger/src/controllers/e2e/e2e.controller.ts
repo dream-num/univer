@@ -28,7 +28,8 @@ const AWAIT_DISPOSING_TIMEOUT = 5000;
 export interface IE2EControllerAPI {
     loadAndRelease(id: number, loadTimeout?: number, disposeTimeout?: number): Promise<void>;
     loadDefaultSheet(loadTimeout?: number): Promise<void>;
-    loadDemoSheet(): Promise<void>;
+    loadDemoSheet(loadTimeout?: number): Promise<void>;
+    loadMergeCellSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
@@ -64,6 +65,7 @@ export class E2EController extends Disposable {
             loadAndRelease: (id, loadTimeout, disposeTimeout) => this._loadAndRelease(id, loadTimeout, disposeTimeout),
             loadDefaultSheet: (loadTimeout) => this._loadDefaultSheet(loadTimeout),
             loadDemoSheet: () => this._loadDemoSheet(),
+            loadMergeCellSheet: () => this._loadMergeCellSheet(2000),
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._diposeDefaultSheetUnit(disposeTimeout),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
@@ -90,6 +92,16 @@ export class E2EController extends Disposable {
     private async _loadDemoSheet(): Promise<void> {
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
         await awaitTime(AWAIT_LOADING_TIMEOUT);
+    }
+
+    /**
+     * sheet-003 in default data
+     */
+    private async _loadMergeCellSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
+        const data = { ...DEFAULT_WORKBOOK_DATA_DEMO };
+        data.sheetOrder = ['sheet-0003'];
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, data);
+        await awaitTime(loadingTimeout);
     }
 
     private async _loadDefaultDoc(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {

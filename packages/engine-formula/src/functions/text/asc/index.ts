@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
-import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
 export class Asc extends BaseFunction {
     override minParams = 1;
@@ -48,14 +48,15 @@ export class Asc extends BaseFunction {
         let result = '';
 
         for (let i = 0; i < textValue.length; i++) {
-            let char = textValue.charCodeAt(i);
+            let charCode = textValue.charCodeAt(i);
 
-            if (char >= 0xFF00 && char <= 0xFFEF) {
-                // Full-width characters
-                char = 0xFF & (char + 0x20);
+            if (charCode === 12288) {
+                charCode = 32;
+            } else if (charCode >= 65281 && charCode <= 65374) {
+                charCode -= 65248;
             }
 
-            result += String.fromCharCode(char);
+            result += String.fromCharCode(charCode);
         }
 
         return StringValueObject.create(result);

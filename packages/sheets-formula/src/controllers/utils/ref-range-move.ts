@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
+import type {
+    IRange,
+    IUnitRange,
+    Nullable,
+} from '@univerjs/core';
 import {
     Direction,
     getIntersectRange,
     RANGE_TYPE,
     Rectangle,
 } from '@univerjs/core';
+
 import { ErrorType, serializeRangeToRefString } from '@univerjs/engine-formula';
 
 import {
@@ -37,12 +43,6 @@ import {
     handleMoveRows,
     runRefRangeMutations,
 } from '@univerjs/sheets';
-
-import type {
-    IRange,
-    IUnitRange,
-    Nullable,
-} from '@univerjs/core';
 import { checkIsSameUnitAndSheet, FormulaReferenceMoveType, type IFormulaReferenceMoveParam } from './ref-range-formula';
 
 export interface IUnitRangeWithOffset extends IUnitRange {
@@ -633,13 +633,13 @@ export function checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<
 
 // Helper functions to get start values, treating NaN as unbounded
 function getStartValue(value: number): number {
-        // If value is NaN, treat as -Infinity (unbounded start)
+    // If value is NaN, treat as -Infinity (unbounded start)
     return isNaN(value) ? -Infinity : value;
 }
 
 // Helper functions to get end values, treating NaN as unbounded
 function getEndValue(value: number): number {
-        // If value is NaN, treat as Infinity (unbounded end)
+    // If value is NaN, treat as Infinity (unbounded end)
     return isNaN(value) ? Infinity : value;
 }
 

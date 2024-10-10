@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ISectionBreak, ITextRun } from '../../../types/interfaces/i-document-data';
+import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ITextRun } from '../../../types/interfaces/i-document-data';
 import { DataStreamTreeTokenType } from '../types';
-import type { IRetainAction } from './action-types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 export enum SliceBodyType {
@@ -35,7 +35,7 @@ export function getBodySlice(
     returnEmptyTextRun = false,
     type = SliceBodyType.cut
 ): IDocumentBody {
-    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [], tables = [] } = body;
+    const { dataStream, textRuns = [], paragraphs = [], customBlocks = [], tables = [], sectionBreaks = [] } = body;
 
     const docBody: IDocumentBody = {
         dataStream: dataStream.slice(startOffset, endOffset),
@@ -119,6 +119,23 @@ export function getBodySlice(
             startIndex: p.startIndex - startOffset,
         }));
     }
+
+    const newSectionBreaks: ISectionBreak[] = [];
+
+    for (const sectionBreak of sectionBreaks) {
+        const { startIndex } = sectionBreak;
+        if (startIndex >= startOffset && startIndex <= endOffset) {
+            newSectionBreaks.push(Tools.deepClone(sectionBreak));
+        }
+    }
+
+    if (newSectionBreaks.length) {
+        docBody.sectionBreaks = newSectionBreaks.map((sb) => ({
+            ...sb,
+            startIndex: sb.startIndex - startOffset,
+        }));
+    }
+
     if (type === SliceBodyType.cut) {
         docBody.customDecorations = getCustomDecorationSlice(body, startOffset, endOffset);
     }

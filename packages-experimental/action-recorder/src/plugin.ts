@@ -45,11 +45,14 @@ export class UniverActionRecorderPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        ([
-            [ActionRecorderService],
-            [ActionReplayService],
-            [ActionRecorderController],
-        ] as Dependency[]).forEach((d) => this._injector.add(d));
+        const dependency = this._config.replayOnly
+            ? [[ActionReplayService]]
+            : [
+                [ActionRecorderService],
+                [ActionReplayService],
+                [ActionRecorderController],
+            ];
+        (dependency as Dependency[]).forEach((d) => this._injector.add(d));
     }
 
     override onSteady(): void {

@@ -91,6 +91,14 @@ describe('Test substitute function', () => {
             const instanceNum5 = NumberValueObject.create(2.5);
             const result5 = testFunction.calculate(text, oldText, newText, instanceNum5);
             expect(getObjectValue(result5)).toStrictEqual('Hello Univer');
+
+            const instanceNum6 = NumberValueObject.create(-1);
+            const result6 = testFunction.calculate(text, oldText, newText, instanceNum6);
+            expect(getObjectValue(result6)).toStrictEqual(ErrorType.VALUE);
+
+            const instanceNum7 = NumberValueObject.create(1);
+            const result7 = testFunction.calculate(text, oldText, newText, instanceNum7);
+            expect(getObjectValue(result7)).toStrictEqual('Hi Univer');
         });
 
         it('Value is array', () => {

@@ -556,6 +556,10 @@ export class SheetsScrollRenderController extends Disposable implements IRenderM
         if (startSheetViewRow === undefined && startSheetViewColumn === undefined) return false;
 
         const { offsetX, offsetY } = this._scrollManagerService.getCurrentScrollState() || {};
+
+        startSheetViewRow = startSheetViewRow ? Math.min(startSheetViewRow, row) : startSheetViewRow;
+        startSheetViewColumn = startSheetViewColumn ? Math.min(startSheetViewColumn, column) : startSheetViewColumn;
+
         return this._commandService.syncExecuteCommand(ScrollCommand.id, {
             sheetViewStartRow: startSheetViewRow,
             sheetViewStartColumn: startSheetViewColumn,

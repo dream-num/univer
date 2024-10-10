@@ -636,11 +636,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         } else if (eventType === DeviceInputEventType.Dblclick) {
             // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
-            const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
-            viewMain?.scrollToViewportPos({
-                viewportScrollX: Number.POSITIVE_INFINITY,
-                viewportScrollY: Number.POSITIVE_INFINITY,
-            });
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
@@ -650,6 +645,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
             ]);
         }
 
+        const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        // TODO@weird94, this should be optimized.
+        // currently, we must wait for the resize to complete before scrolling to the selection,
+        setTimeout(() => {
+            viewMain?.scrollToViewportPos({
+                viewportScrollX: Number.POSITIVE_INFINITY,
+                viewportScrollY: Number.POSITIVE_INFINITY,
+            });
+        }, 10);
         this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
     }
 

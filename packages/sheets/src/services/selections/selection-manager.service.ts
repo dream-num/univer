@@ -30,6 +30,10 @@ export enum SelectionMoveType {
     MOVE_START,
     MOVING,
     MOVE_END,
+    /**
+     * 通过走 api 设置的选区,不会触发 move_end 事件
+     */
+    ONLY_SET,
 }
 
 export class SheetsSelectionsService extends RxDisposable {
@@ -211,6 +215,9 @@ export class WorkbookSelections extends Disposable {
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
+    private readonly _selectionSet$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
+    readonly selectionSet$ = this._selectionSet$.asObservable();
+
     private readonly _beforeSelectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly beforeSelectionMoveEnd$ = this._beforeSelectionMoveEnd$.asObservable();
 
@@ -265,6 +272,10 @@ export class WorkbookSelections extends Disposable {
             case SelectionMoveType.MOVE_END:
                 this._emitOnEnd(selectionDatas);
                 break;
+            case SelectionMoveType.ONLY_SET: {
+                this._selectionSet$.next(selectionDatas);
+                break;
+            }
             default:
                 this._emitOnEnd(selectionDatas);
                 break;

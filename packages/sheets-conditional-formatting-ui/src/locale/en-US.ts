@@ -171,6 +171,7 @@ const locale: typeof zhCN = {
             errorMessage: {
                 notBlank: 'Condition can not be empty',
                 formulaError: 'Wrong formula',
+                rangeError: 'Bad selection',
             },
         },
     },

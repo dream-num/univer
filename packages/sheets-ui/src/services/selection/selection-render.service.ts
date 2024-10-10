@@ -18,7 +18,7 @@ import { ICommandService, IContextService, ILogService, Inject, Injector, RANGE_
 import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
-import { distinctUntilChanged, startWith } from 'rxjs';
+import { distinctUntilChanged, merge, startWith } from 'rxjs';
 import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
@@ -147,7 +147,7 @@ export class SheetSelectionRenderService extends BaseSelectionRenderService impl
 
     private _initSelectionChangeListener(): void {
         // When selection completes, we need to update the selections' rendering and clear event handlers.
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((params) => {
+        this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((params) => {
             this._reset();
             for (const selectionWithStyle of params) {
                 const selectionData = attachSelectionWithCoord(selectionWithStyle, this._skeleton);

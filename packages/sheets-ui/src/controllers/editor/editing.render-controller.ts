@@ -16,12 +16,6 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IEditorInputConfig } from '@univerjs/docs-ui';
-import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -61,10 +55,15 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IEditorInputConfig } from '@univerjs/docs-ui';
+
+import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+import type { WorkbookSelections } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
@@ -74,6 +73,8 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
+import { isRangeSelector } from './utils/isRangeSelector';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -751,7 +752,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
                 if (
                     !this._isCurrentSheetFocused() ||
-                    !this._editorService.isSheetEditor(commandUnitId)
+                    !this._editorService.isSheetEditor(commandUnitId) ||
+                    isRangeSelector(commandUnitId)
                 ) {
                     return;
                 }

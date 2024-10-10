@@ -64,10 +64,10 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": ">=2.0.0",
@@ -85,12 +85,14 @@
         "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
         "react-grid-layout": "^1.4.4",
         "react-resizable": "^3.0.5"
     },
+
     "devDependencies": {
         "@types/react-grid-layout": "^1.3.5",
         "@univerjs-infra/shared": "workspace:*",

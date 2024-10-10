@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IMessageOptions } from '@univerjs/design';
-import { createIdentifier } from '@univerjs/core';
+export const BORDER_Z_INDEX = 50;
+export const FONT_EXTENSION_Z_INDEX = 45;
+export const BG_Z_INDEX = 21;
+export const PRINTING_BG_Z_INDEX = 21;
 
-export const IMessageService = createIdentifier<IMessageService>('ui.message.service');
-
-export interface IMessageService {
-    show(options: IMessageOptions): IDisposable;
-
-    setContainer(container: HTMLElement): void;
-    getContainer(): HTMLElement | undefined;
-}
+export const EXPAND_SIZE_FOR_RENDER_OVERFLOW = 20;

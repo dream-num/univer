@@ -14,16 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BorderType,
-    CommandType,
-    ICommandService,
-    IUndoRedoService,
-    IUniverInstanceService,
-    ObjectMatrix,
-    Tools,
-} from '@univerjs/core';
-
 import type {
     BorderStyleTypes,
     IAccessor,
@@ -34,12 +24,22 @@ import type {
     IRange,
     IStyleData,
 } from '@univerjs/core';
+
+import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
+import type { IResult } from './utils/target-util';
+import {
+    BorderType,
+    CommandType,
+    ICommandService,
+    IUndoRedoService,
+    IUniverInstanceService,
+    ObjectMatrix,
+    Tools,
+} from '@univerjs/core';
 import { BorderStyleManagerService, type IBorderInfo } from '../../services/border-style-manager.service';
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
-import type { IResult } from './utils/target-util';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;

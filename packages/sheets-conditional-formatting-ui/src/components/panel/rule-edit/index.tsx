@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
-import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
-import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
-
-import type { IStyleEditorProps } from './type';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
+
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { IRange, Workbook } from '@univerjs/core';
+import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
+import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
-
 import { SetCfCommand } from '../../../commands/commands/set-cf.command';
 import styleBase from '../index.module.less';
 import { ColorScaleStyleEditor } from './colorScale';
+
 import { DataBarStyleEditor } from './dataBar';
 import { FormulaStyleEditor } from './formula';
 import { HighlightCellStyleEditor } from './highlightCell';
@@ -40,6 +37,9 @@ import { IconSet } from './iconSet';
 import styles from './index.module.less';
 import { RankStyleEditor } from './rank';
 import { beforeSubmit, submit } from './type';
+import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
+import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
+import type { IStyleEditorProps } from './type';
 
 interface IRuleEditProps {
     rule?: IConditionFormattingRule;

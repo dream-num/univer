@@ -15,8 +15,8 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import { ICommandService } from '@univerjs/core';
 import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { ICommandService } from '@univerjs/core';
 import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 /**
@@ -77,6 +77,21 @@ export class FFormula {
             if (params.functionsExecutedState !== undefined) {
                 callback(params.functionsExecutedState);
             }
+        });
+    }
+
+    onCalculationEnd(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                reject(new Error('Calculation end timeout'));
+            }, 30_000);
+
+            const disposable = this.calculationEnd(() => {
+                clearTimeout(timer);
+                disposable.dispose();
+
+                resolve();
+            });
         });
     }
 

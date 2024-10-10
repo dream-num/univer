@@ -78,8 +78,6 @@ import { FlowManagerService } from './services/flow/flow-manager.service';
 import { UniToolbarService } from './services/toolbar/uni-toolbar-service';
 import { IUnitGridService, UnitGridService } from './services/unit-grid/unit-grid.service';
 
-const UI_BOOTSTRAP_DELAY = 16;
-
 /**
  * This plugin enables the Uni Mode of Univer. It should replace
  * `UniverUIPlugin` when registered.
@@ -142,5 +140,7 @@ export class UniverUniUIPlugin extends Plugin {
             [UniuiFlowController],
         ], this._config.override);
         dependencies.forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(IUIController);
     }
 }

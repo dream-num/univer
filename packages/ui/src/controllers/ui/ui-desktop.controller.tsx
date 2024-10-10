@@ -15,6 +15,7 @@
  */
 
 import type { IDisposable, UnitModel } from '@univerjs/core';
+import type { RenderUnit } from '@univerjs/engine-render';
 import type { IUniverUIConfig } from '../config.schema';
 import type { IWorkbenchOptions } from './ui.controller';
 import { connectInjector, Disposable, Inject, Injector, isInternalEditorID, IUniverInstanceService, LifecycleService, LifecycleStages, Optional, toDisposable } from '@univerjs/core';
@@ -22,6 +23,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import React from 'react';
+import { filter, take } from 'rxjs';
 import { ILayoutService } from '../../services/layout/layout.service';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
 import { BuiltInUIPart, IUIPartsService } from '../../services/parts/parts.service';
@@ -34,6 +36,7 @@ const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable {
     private _steadyTimeout: NodeJS.Timeout;
+    private _renderTimeout: NodeJS.Timeout;
 
     constructor(
         private readonly _config: IUniverUIConfig,
@@ -49,8 +52,7 @@ export class DesktopUIController extends Disposable {
 
         this._initBuiltinComponents();
         this._initMenus();
-
-        Promise.resolve().then(() => this._bootstrapWorkbench());
+        this._bootstrapWorkbench();
     }
 
     private _initMenus(): void {
@@ -77,14 +79,23 @@ export class DesktopUIController extends Disposable {
                         if (isInternalEditorID(render.unitId)) return;
                         render.engine.setContainer(contentElement);
                     }
+                });
 
-                    if (this._lifecycleService.stage === LifecycleStages.Ready) {
+                this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Ready), take(1)).subscribe(() => {
+                    this._renderTimeout = setTimeout(() => {
+                        const allRenders = this._renderManagerService.getRenderAll();
+
+                        for (const [key, render] of allRenders) {
+                            if (isInternalEditorID(key) || !((render) as RenderUnit).isRenderUnit) continue;
+                            render.engine.setContainer(contentElement);
+                        }
+
                         this._lifecycleService.stage = LifecycleStages.Rendered;
                         this._steadyTimeout = setTimeout(() => {
                             this._lifecycleService.stage = LifecycleStages.Steady;
                         }, STEADY_TIMEOUT);
-                    }
-                });
+                    }, 300);
+                }));
             })
         );
     }

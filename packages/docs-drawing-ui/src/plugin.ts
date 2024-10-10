@@ -74,7 +74,6 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._injector.get(DocDrawingTransformUpdateController);
         this._injector.get(DocDrawingPopupMenuController);
     }
 }

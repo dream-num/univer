@@ -19,6 +19,7 @@ import { defaultTheme } from '@univerjs/design';
 
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -29,8 +30,8 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-import { enUS, ruRU, zhCN } from '../locales';
 
+import { enUS, ruRU, zhCN } from '../locales';
 import 'react-mosaic-component/react-mosaic-component.css';
 import './index.css';
 
@@ -47,6 +48,7 @@ function factory(id: string) {
             logLevel: LogLevel.VERBOSE,
         });
 
+        univer.registerPlugin(UniverFormulaEnginePlugin);
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container: id,

@@ -716,7 +716,7 @@ export class DocumentSkeleton extends Skeleton {
             && y <= pageBottom;
 
         // Handle the outmost page.
-        if (nestLevel === 0) {
+        if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
             const isFirstPage = pi === 0;
             const isLastPage = pi === pageLength - 1;
             // TODO: Use page margin top as page gap now, need to consider the page gap in the future.

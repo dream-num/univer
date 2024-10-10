@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
-import { type IDisposable, Inject } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
-import type { ForwardRefExoticComponent } from 'react';
-
-import { ComponentManager } from '../../common/component-manager';
+import type { ComponentType } from '../../common/component-manager';
 import type { IZenZoneService } from './zen-zone.service';
+import { toDisposable } from '@univerjs/core';
 
-export class DesktopZenZoneService implements IZenZoneService {
-    readonly visible$ = new Subject<boolean>();
-    readonly componentKey$ = new Subject<string>();
+import { type IDisposable, Inject } from '@univerjs/core';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ComponentManager } from '../../common/component-manager';
+
+export class DesktopZenZoneService implements IZenZoneService, IDisposable {
+    readonly visible$ = new BehaviorSubject<boolean>(false);
+    readonly componentKey$ = new ReplaySubject<string>();
 
     private readonly _temporaryHidden$ = new BehaviorSubject<boolean>(false);
     readonly temporaryHidden$ = this._temporaryHidden$.asObservable();
@@ -42,6 +42,13 @@ export class DesktopZenZoneService implements IZenZoneService {
         // super
     }
 
+    dispose(): void {
+        this.visible$.next(false);
+        this.visible$.complete();
+
+        this.componentKey$.complete();
+    }
+
     hide(): void {
         this._temporaryHidden$.next(true);
     }
@@ -50,7 +57,7 @@ export class DesktopZenZoneService implements IZenZoneService {
         this._temporaryHidden$.next(false);
     }
 
-    set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
+    set(key: string, component: ComponentType): IDisposable {
         this._componentManager.register(key, component);
         this.componentKey$.next(key);
 

@@ -16,13 +16,15 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { INode } from '../utils/filterReferenceNode';
 import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
-import { deserializeRangeWithSheet, type ISequenceNode, matchToken, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 
+import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { filterReferenceNode, isComma } from '../utils/filterReferenceNode';
 import { rangePreProcess } from '../utils/rangePreProcess';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
@@ -30,7 +32,7 @@ import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
 export const useSheetSelectionChange = (isNeed: boolean,
     unitId: string,
     subUnitId: string,
-    sequenceNodes: (string | ISequenceNode)[],
+    sequenceNodes: INode[],
     handleRangeChange: (refString: string, offset: number) => void) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -45,6 +47,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
+    const filterReferenceNodes = useMemo(() => filterReferenceNode(sequenceNodes), [sequenceNodes]);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
@@ -55,8 +58,22 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     return;
                 }
                 const cloneSelectionList = [...selections];
-                const newSequenceNodes = sequenceNodes.map((node) => {
+
+                const newSequenceNodes = filterReferenceNodes.map((node, index) => {
                     if (typeof node === 'string') {
+                        const preItem = filterReferenceNodes[index - 1];
+                        if (!preItem) {
+                            return null;
+                        }
+                        const nextItem = filterReferenceNodes[index + 1];
+                        if (isComma(node)) {
+                            if (isComma(nextItem)) {
+                                return null;
+                            }
+                            if (index === (filterReferenceNodes.length - 1)) {
+                                return null;
+                            }
+                        }
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
                         const unitRange = deserializeRangeWithSheet(node.token);
@@ -71,8 +88,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         }
                         return node;
                     }
-                    return node;
-                });
+                    return null;
+                }).filter((e) => !!e) as INode[];
                 const theLast = unitRangesToText(
                     cloneSelectionList.map((e) => ({
                         range: e.rangeWithCoord,
@@ -92,7 +109,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 dispose.unsubscribe();
             };
         }
-    }, [isNeed, sequenceNodes, refSelectionsRenderService]);
+    }, [isNeed, filterReferenceNodes, refSelectionsRenderService]);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
@@ -101,7 +118,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 let currentIndex = 0;
                 let offset = 0;
                 let isFinish = false;
-                const newSequenceNodes = sequenceNodes.map((node) => {
+                const newSequenceNodes = filterReferenceNodes.map((node) => {
                     if (typeof node === 'string') {
                         if (!isFinish) {
                             offset += node.length;
@@ -154,5 +171,5 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 clearTimeout(time);
             };
         }
-    }, [isNeed, refSelectionsRenderService, sequenceNodes]);
+    }, [isNeed, refSelectionsRenderService, filterReferenceNodes]);
 };

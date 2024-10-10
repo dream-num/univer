@@ -31,7 +31,7 @@ export interface IDeleteCustomRangeParam {
     segmentId?: string;
     documentDataModel: DocumentDataModel;
     insert?: Nullable<IDocumentBody>;
-    textRange?: { startOffset: number; endOffset: number };
+    textRange?: { index: number };
 }
 
 export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
@@ -62,11 +62,8 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         line: 0,
     });
     if (textRange) {
-        if (textRange.startOffset >= startIndex) {
-            textRange.startOffset--;
-        }
-        if (textRange.endOffset > startIndex) {
-            textRange.endOffset--;
+        if (textRange.index > startIndex) {
+            textRange.index--;
         }
     }
 
@@ -86,11 +83,8 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
     });
 
     if (textRange) {
-        if (textRange.startOffset > endIndex) {
-            textRange.startOffset--;
-        }
-        if (textRange.endOffset > endIndex) {
-            textRange.endOffset--;
+        if (textRange.index > endIndex) {
+            textRange.index--;
         }
     }
 
@@ -104,11 +98,8 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         });
 
         if (textRange) {
-            if (textRange.startOffset >= endIndex) {
-                textRange.startOffset += insert.dataStream.length;
-            }
-            if (textRange.endOffset > endIndex) {
-                textRange.endOffset += insert.dataStream.length;
+            if (textRange.index > endIndex) {
+                textRange.index += insert.dataStream.length;
             }
         }
     }

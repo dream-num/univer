@@ -124,7 +124,8 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
     if (!documentDataModel) {
         return false;
     }
-    const textRange = selection ? { startOffset: selection.startOffset, endOffset: selection.endOffset } : undefined;
+
+    const textRange = selection?.collapsed ? { index: selection.startOffset } : undefined;
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -150,6 +151,6 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
 
     const path = getRichTextEditPath(documentDataModel, segmentId);
     doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-    doMutation.params.textRanges = textRange ? [{ startOffset: textRange.startOffset, endOffset: textRange.endOffset, collapsed: textRange.startOffset === textRange.endOffset }] : undefined;
+    doMutation.params.textRanges = textRange ? [{ startOffset: textRange.index, endOffset: textRange.index, collapsed: true }] : undefined;
     return doMutation;
 }

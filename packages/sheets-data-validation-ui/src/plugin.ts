@@ -89,6 +89,7 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
         this._injector.get(DataValidationCopyPasteController);
         this._injector.get(DataValidationPermissionController);
         this._injector.get(DataValidationRejectInputController);
+        this._injector.get(DataValidationAlertController);
     }
 
     override onRendered(): void {

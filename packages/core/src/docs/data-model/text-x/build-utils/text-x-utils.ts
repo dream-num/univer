@@ -253,7 +253,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;
 
-    const paragraphInRange = paragraphs?.find(
+    const paragraphInRange = paragraphs?.findLast(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
     );
 

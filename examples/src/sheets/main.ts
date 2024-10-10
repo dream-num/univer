@@ -45,6 +45,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { UniverWatermarkPlugin } from '@univerjs/watermark';
 import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -85,6 +86,7 @@ univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
+univer.registerPlugin(UniverWatermarkPlugin);
 
 // filter plugin
 univer.registerPlugin(UniverSheetsFilterPlugin);

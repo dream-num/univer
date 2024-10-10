@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DocumentFlavor, IContextService, useDependency } from '@univerjs/core';
 import { IEditorService, TextEditor } from '@univerjs/docs-ui';
-import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { DISABLE_AUTO_FOCUS_KEY, useObservable } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import type { IDocumentData } from '@univerjs/core';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
 
@@ -43,7 +43,6 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
     });
-
     const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const editorService = useDependency(IEditorService);
     const contextService = useDependency(IContextService);
@@ -79,7 +78,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     };
 
     useEffect(() => {
-        cellEditorManagerService.state$.subscribe((param) => {
+        const sub = cellEditorManagerService.state$.subscribe((param) => {
             if (param == null) {
                 return;
             }
@@ -115,6 +114,9 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 cellEditorManagerService.setRect({ left, top, width, height });
             }
         });
+        return () => {
+            sub.unsubscribe();
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 

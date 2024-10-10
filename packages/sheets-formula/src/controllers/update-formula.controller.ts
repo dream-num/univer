@@ -36,8 +36,6 @@ import {
     Injector,
     IUniverInstanceService,
     ObjectMatrix,
-    RANGE_TYPE,
-    Rectangle,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';

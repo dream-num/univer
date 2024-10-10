@@ -15,11 +15,11 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, Inject, Injector } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter-ui';
+import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
-import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { FRange } from './f-range';
 
 /**

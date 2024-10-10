@@ -15,13 +15,11 @@
  */
 
 import { DataValidationType } from '@univerjs/core';
-import { DropdownMultipleWidget } from '../widgets/dropdown-multiple-widget';
 import { ListValidator } from './list-validator';
 
 export class ListMultipleValidator extends ListValidator {
     override id: string = DataValidationType.LIST_MULTIPLE;
     override title: string = 'dataValidation.listMultiple.title';
-    override canvasRender = this.injector.createInstance(DropdownMultipleWidget);
 
     override skipDefaultFontRender = () => {
         return true;

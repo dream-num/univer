@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import { createIdentifier, Disposable } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap } from '../basics/common';
 
 export interface IDirtyConversionManagerParams {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
-import type { IDisposable } from '../../common/di';
+import type { Observable } from 'rxjs';
 import { createIdentifier } from '../../common/di';
+import type { IDisposable } from '../../common/di';
 
 export type IResources = Array<{ id?: string; name: string; data: string }>;
 

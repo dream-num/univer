@@ -15,13 +15,12 @@
  */
 
 import type { DataValidationOperator, DataValidationType, IDataValidationRule, IDataValidationRuleOptions, IRange } from '@univerjs/core';
-import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
-
-import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
 import type { IRemoveSheetDataValidationCommandParams, IUpdateSheetDataValidationOptionsCommandParams, IUpdateSheetDataValidationRangeCommandParams, IUpdateSheetDataValidationSettingCommandParams } from '@univerjs/sheets-data-validation';
+import type { FWorksheet } from './f-worksheet';
+import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
+import { DataValidationModel, getRuleOptions } from '@univerjs/data-validation';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { FDataValidationBuilder } from './f-data-validation-builder';
-import type { FWorksheet } from './f-worksheet';
 import { FRange } from './f-range';
 
 export class FDataValidation {

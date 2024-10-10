@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
-import * as cjk from 'cjk-regex';
 import type {
     IRange,
     IRangeWithCoord,
@@ -26,11 +24,13 @@ import type {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-
-import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
-import { DEFAULT_FONTFACE_PLANE } from './const';
 import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 import type { IBoundRectNoAngle } from './vector2';
+
+import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, getCellInfoInMergeData, Rectangle, Tools } from '@univerjs/core';
+import * as cjk from 'cjk-regex';
+import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
+import { DEFAULT_FONTFACE_PLANE } from './const';
 
 const DEG180 = 180;
 
@@ -845,7 +845,7 @@ export function expandRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) 
     return mainRanges.concat(intersects); // do not use [...mainRanges, ...intersects], because concat is slightly faster than spread
 }
 
-export function clampRanges(range: IRange) {
+export function clampRange(range: IRange) {
     return {
         startRow: Math.max(0, range.startRow),
         startColumn: Math.max(0, range.startColumn),

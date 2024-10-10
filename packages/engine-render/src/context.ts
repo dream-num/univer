@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
@@ -21,6 +22,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
     private _system: string;
     private _browser: string;
+    private _transformCache: Nullable<DOMMatrix>;
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
@@ -288,7 +290,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     private _getScale() {
-        const m = this.getTransform();
+        const m = this._transformCache || this.getTransform();
+        if (!this._transformCache && m) this._transformCache = m;
         return {
             scaleX: m.a,
             scaleY: m.d,
@@ -346,6 +349,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     resetTransform() {
+        this._transformCache = null;
         this._context.resetTransform();
     }
 
@@ -360,6 +364,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     reset() {
+        this._transformCache = null;
         this._context.reset();
     }
 
@@ -895,6 +900,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
 
     setTransform(...args: [any]) {
+        this._transformCache = null;
         this._context.setTransform(...args);
     }
 
@@ -939,6 +945,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      */
     transform(a: number, b: number, c: number, d: number, e: number, f: number) {
         this._context.transform(a, b, c, d, e, f);
+        this._transformCache = null;
     }
 
     /**

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey } from '@univerjs/core';
 import type { ICellData, ICellDataForSheetInterceptor, ICellInterceptor, Nullable } from '@univerjs/core';
-
 import type { ISheetLocation, ISheetRowLocation } from './utils/interceptor';
+
+import { createInterceptorKey } from '@univerjs/core';
 
 const CELL_CONTENT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>('CELL_CONTENT') as ICellInterceptor<ICellDataForSheetInterceptor, ISheetLocation & { rawData: Nullable<ICellData> }>;
 const ROW_FILTERED = createInterceptorKey<boolean, ISheetRowLocation>('ROW_FILTERED');

@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ITextRange, Nullable } from '@univerjs/core';
 import type { Documents, INodePosition, IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Inject, RxDisposable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, Inject, RxDisposable } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { takeUntil } from 'rxjs';
 import { VIEWPORT_KEY } from '../../basics/docs-view-key';
@@ -47,6 +47,10 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
             const { isEditing, unitId } = params;
 
             if (unitId !== this._context.unitId || !isEditing) {
+                return;
+            }
+
+            if (this._context.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
                 return;
             }
 

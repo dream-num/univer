@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
-
-import { Subject } from 'rxjs';
 import type { IDocumentRenderConfig, IScale, Nullable } from '@univerjs/core';
-import { BORDER_TYPE, drawLineByBorderType } from '../../basics';
+
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
+import type { Transform } from '../../basics/transform';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
+import type { UniverRenderingContext } from '../../context';
+import type { Scene } from '../../scene';
+import type { ComponentExtension, IExtensionConfig } from '../extension';
+import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
+import { CellValueType, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Subject } from 'rxjs';
+import { BORDER_TYPE as BORDER_LTRB, drawLineByBorderType } from '../../basics';
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
@@ -28,14 +36,6 @@ import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
 import { Liquid } from './liquid';
-import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage, IDocumentSkeletonTable } from '../../basics/i-document-skeleton-cached';
-import type { Transform } from '../../basics/transform';
-import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { UniverRenderingContext } from '../../context';
-import type { Scene } from '../../scene';
-import type { ComponentExtension, IExtensionConfig } from '../extension';
-import type { IDocumentsConfig, IPageMarginLayout } from './doc-component';
-import type { DocumentSkeleton } from './layout/doc-skeleton';
 import './extensions';
 
 export interface IPageRenderConfig {
@@ -723,28 +723,28 @@ export class Documents extends DocComponent {
         x += marginLeft;
         y += marginTop;
 
-        drawLineByBorderType(ctx, BORDER_TYPE.LEFT, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.LEFT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.TOP, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.TOP, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.RIGHT, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.RIGHT, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,
             endY: y + pageHeight,
         });
 
-        drawLineByBorderType(ctx, BORDER_TYPE.BOTTOM, 0, {
+        drawLineByBorderType(ctx, BORDER_LTRB.BOTTOM, 0, {
             startX: x,
             startY: y,
             endX: x + pageWidth,

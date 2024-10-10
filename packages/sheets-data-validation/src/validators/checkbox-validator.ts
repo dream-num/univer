@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
-import { BaseDataValidator } from '@univerjs/data-validation';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, LocaleService, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
+import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
-import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { CheckboxRender } from '../widgets/checkbox-widget';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -55,9 +53,6 @@ export class CheckboxValidator extends BaseDataValidator {
     override title: string = 'dataValidation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-    override formulaInput: string = CHECKBOX_FORMULA_INPUT_NAME;
-
-    override canvasRender = this.injector.createInstance(CheckboxRender);
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 

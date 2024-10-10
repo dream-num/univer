@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
+import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
+import type { FilterModel } from '@univerjs/sheets-filter';
+
+import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
-
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CancelFrozenCommand } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
-import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
-import type { FilterModel } from '@univerjs/sheets-filter';
 import { FDataValidation } from './f-data-validation';
 import { FFilter } from './f-filter';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
 import { FThreadComment } from './f-thread-comment';
 import { covertToColRange, covertToRowRange, transformComponentKey } from './utils';
-import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 
 export class FWorksheet {
     constructor(

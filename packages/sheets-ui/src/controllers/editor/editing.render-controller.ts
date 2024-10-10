@@ -564,6 +564,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 
+        this._editorBridgeService.refreshEditCellState();
+
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -647,6 +649,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
             ]);
         }
 
+        const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        // TODO@weird94, this should be optimized.
+        // currently, we must wait for the resize to complete before scrolling to the selection,
+        setTimeout(() => {
+            viewMain?.scrollToViewportPos({
+                viewportScrollX: Number.POSITIVE_INFINITY,
+                viewportScrollY: Number.POSITIVE_INFINITY,
+            });
+        }, 10);
         this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
     }
 
@@ -968,6 +979,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._cellEditorManagerService.setState({
             show: param.visible,
+        });
+        const editorObject = this._getEditorObject();
+        editorObject?.scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+            viewportScrollX: 0,
+            viewportScrollY: 0,
         });
         const editorUnitId = this._editorBridgeService.getCurrentEditorId();
         if (editorUnitId == null || !this._editorService.isSheetEditor(editorUnitId)) {

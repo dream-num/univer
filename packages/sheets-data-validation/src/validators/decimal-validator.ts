@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 
 export function getCellValueNumber(cellValue: CellValue) {
     let str = cellValue;
@@ -53,8 +52,6 @@ export class DecimalValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = BASE_FORMULA_INPUT_NAME;
-    dropDownInput?: string;
 
     private _isFormulaOrNumber(formula: string) {
         return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula));

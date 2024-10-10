@@ -14,30 +14,30 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 
+import type { Canvas } from '../../canvas';
+
+import type { UniverRenderingContext2D } from '../../context';
+import type { Engine } from '../../engine';
+import type { Scene } from '../../scene';
+import type { SceneViewer } from '../../scene-viewer';
+import type { Background } from './extensions/background';
+import type { Border } from './extensions/border';
+import type { Font } from './extensions/font';
+import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
+
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
 import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 // import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
-import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
-import type { Canvas } from '../../canvas';
-import type { UniverRenderingContext2D } from '../../context';
-import type { Engine } from '../../engine';
-import type { Scene } from '../../scene';
-import type { SceneViewer } from '../../scene-viewer';
-
-import type { Background } from './extensions/background';
-import type { Border } from './extensions/border';
-import type { Font } from './extensions/font';
-import type { SpreadsheetSkeleton } from './sheet-skeleton';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -355,7 +355,7 @@ export class Spreadsheet extends SheetComponent {
         cacheCtx.restore();
 
         cacheCtx.save();
-        // 所以 cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
+        // cacheCtx.setTransform is rowHeaderWidth + viewport + scroll
         const m = mainCtx.getTransform();
         // cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
         cacheCtx.setTransform(m.a, m.b, m.c, m.d, 0, 0);

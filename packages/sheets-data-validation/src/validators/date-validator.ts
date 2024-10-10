@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DataValidationOperator, DataValidationType, isFormulaString, numfmt, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import dayjs from 'dayjs';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
-import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { getFormulaResult } from '../utils/formula';
-import { DATE_DROPDOWN_KEY } from '../views';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { DateShowTimeOption } from '../views/show-time';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -64,10 +61,6 @@ export class DateValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = BASE_FORMULA_INPUT_NAME;
-    override optionsInput = DateShowTimeOption.componentKey;
-    override dropdown = DATE_DROPDOWN_KEY;
-
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {

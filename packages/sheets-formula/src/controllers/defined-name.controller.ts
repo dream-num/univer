@@ -15,6 +15,8 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
 import {
     Disposable,
     ICommandService,
@@ -24,9 +26,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
-import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 

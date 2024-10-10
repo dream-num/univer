@@ -17,77 +17,55 @@
 import {
     DependentOn,
     ICommandService,
-    IConfigService,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
-import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, ClearRangeDataValidationCommand, RemoveSheetAllDataValidationCommand, RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from './commands/commands/data-validation.command';
-import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
+import {
+    AddSheetDataValidationCommand,
+    ClearRangeDataValidationCommand,
+    RemoveSheetAllDataValidationCommand,
+    RemoveSheetDataValidationCommand,
+    UpdateSheetDataValidationOptionsCommand,
+    UpdateSheetDataValidationRangeCommand,
+    UpdateSheetDataValidationSettingCommand,
+} from './commands/commands/data-validation.command';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DataValidationController } from './controllers/dv.controller';
-import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
-import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
-import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
-import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
 import { SheetDataValidationSheetController } from './controllers/dv-sheet.controller';
 import { SheetDataValidationModel } from './models/sheet-data-validation-model';
-import { DataValidationPanelService } from './services/data-validation-panel.service';
-import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
-import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 
-@DependentOn(UniverSheetsNumfmtPlugin, UniverDataValidationPlugin, UniverSheetsUIPlugin)
+@DependentOn(UniverSheetsNumfmtPlugin, UniverDataValidationPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsDataValidationConfig> = defaultPluginConfig,
+        _config = undefined,
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IConfigService private readonly _configService: IConfigService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
-
-        // Manage the plugin configuration..
-        const { menu, ...rest } = this._config;
-        if (menu) {
-            this._configService.setConfig('menu', menu, { merge: true });
-        }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {
         ([
-            [DataValidationPanelService],
             [DataValidationCacheService],
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
-            [DataValidationDropdownManagerService],
             [SheetsDataValidationValidatorService],
             [SheetDataValidationModel],
-            // controller
             [DataValidationController],
-            [SheetsDataValidationRenderController],
-            [DataValidationAlertController],
             [DataValidationRefRangeController],
-            [DataValidationPermissionController],
-            [DataValidationAutoFillController],
-            [DataValidationCopyPasteController],
             [DataValidationFormulaController],
-            [DataValidationRejectInputController],
             [SheetDataValidationSheetController],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
@@ -95,20 +73,12 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         [
             AddSheetDataValidationCommand,
-            AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
             UpdateSheetDataValidationSettingCommand,
             UpdateSheetDataValidationOptionsCommand,
             RemoveSheetDataValidationCommand,
             RemoveSheetAllDataValidationCommand,
             ClearRangeDataValidationCommand,
-
-             // operation
-            ShowDataValidationDropdown,
-            HideDataValidationDropdown,
-            CloseValidationPanelOperation,
-            OpenValidationPanelOperation,
-            ToggleValidationPanelOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
 import {
     ILogService,
     Inject,
@@ -28,9 +29,8 @@ import {
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
 import { DocIMEInputManagerService, DocsRenderService, DocStateChangeManagerService } from '@univerjs/docs-ui';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import enUS from '@univerjs/sheets-formula/locale/en-US';
-import zhCN from '@univerjs/sheets-formula/locale/zh-CN';
-import type { Dependency, DocumentDataModel, IDocumentData } from '@univerjs/core';
+import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
+import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 
 import { FUniver } from '../../facade';
 

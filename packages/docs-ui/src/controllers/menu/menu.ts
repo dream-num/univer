@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IAccessor, PresetListType } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
+import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
@@ -36,11 +39,8 @@ import {
     getMenuHiddenObservable,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatest, map, Observable } from 'rxjs';
-import type { IAccessor, PresetListType } from '@univerjs/core';
-import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 
-import type { Subscription } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header-footer.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
@@ -526,7 +526,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
     return {
         id: OpenHeaderFooterPanelCommand.id,
         type: MenuItemType.BUTTON,
-        icon: 'FreezeRowSingle',
+        icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;

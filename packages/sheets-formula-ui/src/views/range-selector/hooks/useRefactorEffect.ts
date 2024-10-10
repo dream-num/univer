@@ -71,7 +71,7 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
                 }
             };
         }
-    }, []);
+    }, [isNeed]);
 
     //right context controller
     useEffect(() => {
@@ -81,5 +81,5 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
                 contextMenuService.enable();
             };
         }
-    });
+    }, [isNeed]);
 };

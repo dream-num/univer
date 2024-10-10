@@ -215,6 +215,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, []);
 
     useEffect(() => {
+        isFocusSet(_isFocus);
+    }, [_isFocus]);
+
+    useEffect(() => {
         if (editor && rangeDialogVisible) {
             editor.blur();
             const d = editor.focus$.subscribe(() => {

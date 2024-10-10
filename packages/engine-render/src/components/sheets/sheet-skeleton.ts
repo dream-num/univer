@@ -1062,6 +1062,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * New merge info, but position without header.
+     * @param row
+     * @param column
+     * @returns {ISelectionCellWithMergeInfo} cellInfo with merge info
+     */
     getCellByIndexWithNoHeader(row: number, column: number): ISelectionCellWithMergeInfo {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 

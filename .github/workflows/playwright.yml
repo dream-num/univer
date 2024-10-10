@@ -26,7 +26,7 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
-              run: pnpm exec playwright test
+              run: pnpm exec playwright test --output=playwright-assets
 
             - name: 🚀 Deploy to Vercel
               uses: amondnet/vercel-action@v25

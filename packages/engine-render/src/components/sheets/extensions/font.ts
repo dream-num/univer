@@ -17,7 +17,7 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
-import type { ICellDataForSheetInterceptor, IRange, IScale, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IRange, IScale, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import type { IDrawInfo } from '../../extension';
@@ -51,6 +51,7 @@ interface IRenderFontContext {
     endY: number;
     startX: number;
     endX: number;
+    cellInfo: ISelectionCellWithMergeInfo;
 }
 
 export class Font extends SheetExtension {
@@ -103,11 +104,36 @@ export class Font extends SheetExtension {
         // fontMatrix.forValue((row: number, col: number, fontsConfig: IFontCacheItem) => {
         //     this.renderFontByCellMatrix(renderFontContext, row, col, fontsConfig);
         // });
+
+        const mergeRanges: IRange[] = [];
         viewRanges.forEach((range) => {
             range.startColumn -= EXPAND_SIZE_FOR_RENDER_OVERFLOW;
             range.endColumn += EXPAND_SIZE_FOR_RENDER_OVERFLOW;
             range = clampRange(range);
             Range.foreach(range, (row, col) => {
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                if (!cellInfo) return;
+
+                // put all merged cell to another pass to handle.
+                if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
+                    // to check if mergeRanges has this merge range already. if not, push it.
+                    const f = mergeRanges.filter((r: IRange) => {
+                        return r.startRow === cellInfo.mergeInfo.startRow && r.startColumn === cellInfo.mergeInfo.startColumn;
+                    });
+                    if (f.length === 0) {
+                        mergeRanges.push(cellInfo.mergeInfo);
+                        return;
+                    }
+                }
+
+                renderFontContext.cellInfo = cellInfo;
+                this.renderFontEachCell(renderFontContext, row, col, fontMatrix);
+            });
+        });
+        mergeRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                renderFontContext.cellInfo = cellInfo;
                 this.renderFontEachCell(renderFontContext, row, col, fontMatrix);
             });
         });
@@ -204,11 +230,11 @@ export class Font extends SheetExtension {
     }
 
     renderFontEachCell(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
-        const { ctx, viewRanges, diffRanges, spreadsheetSkeleton } = renderFontContext;
+        const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontContext;
 
         //#region merged cell
         // const calcHeader = false;
-        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+        // const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
         let { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 

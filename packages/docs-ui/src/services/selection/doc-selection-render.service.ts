@@ -479,7 +479,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangePosition(position);
-        } else if (!evt.ctrlKey && !this._isEmpty()) {
+        } else if (evt.ctrlKey) {
+            this._removeAllCollapsedTextRanges();
+        } else if (!this._isEmpty()) {
             this._removeAllRanges();
         }
 
@@ -533,7 +535,15 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
                 for (const textRange of this._rangeListCache) {
-                    this._addTextRange(textRange);
+                    if (evt.ctrlKey) {
+                        if (textRange.collapsed) {
+                            textRange.dispose();
+                        } else {
+                            this._addTextRange(textRange);
+                        }
+                    } else {
+                        this._addTextRange(textRange);
+                    }
                 }
 
                 this._addRectRanges(this._rectRangeListCache);
@@ -784,6 +794,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         });
 
         this._rectRangeList = [];
+    }
+
+    private _removeAllCollapsedTextRanges() {
+        for (const range of this._rangeList) {
+            if (range.collapsed) {
+                range.dispose();
+            }
+        }
     }
 
     private _deactivateAllTextRanges() {

@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';

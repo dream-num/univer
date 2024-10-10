@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { ConditionFormattingPanel } from '../components/panel';
 

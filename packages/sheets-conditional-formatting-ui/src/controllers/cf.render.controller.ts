@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
 import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';

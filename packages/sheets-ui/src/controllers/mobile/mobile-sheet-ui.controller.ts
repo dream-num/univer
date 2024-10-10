@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,

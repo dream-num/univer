@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
-import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
@@ -47,6 +47,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const {
             unitId,
@@ -95,7 +96,10 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                docSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
+                docSelectionManagerService.replaceDocRanges(textRanges, {
+                    unitId,
+                    subUnitId: unitId,
+                }, true, params.options);
             });
         }
 

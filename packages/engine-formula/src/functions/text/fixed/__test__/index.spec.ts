@@ -62,6 +62,10 @@ describe('Test fixed function', () => {
             const decimals4 = NumberValueObject.create(128);
             const result4 = testFunction.calculate(number, decimals4, noCommas);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
+
+            const decimals5 = NumberValueObject.create(-10);
+            const result5 = testFunction.calculate(number, decimals5, noCommas);
+            expect(getObjectValue(result5)).toStrictEqual('0');
         });
 
         it('NoCommas value test', () => {

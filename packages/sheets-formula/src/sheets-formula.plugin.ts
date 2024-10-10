@@ -125,38 +125,3 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         this._injector.get(DefinedNameController);
     }
 }
-
-// TODO@wzhudev: after I separate the sheets-formula-ui plugin,
-// I found out that `UniverSheetsFormulaPlugin` provides the same services as `UniverSheetsFormulaMobilePlugin`.
-// The the later on can be removed.
-
-export class UniverSheetsFormulaMobilePlugin extends Plugin {
-    static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER_SHEET;
-
-    constructor(
-        private readonly _config: undefined,
-        @Inject(Injector) override readonly _injector: Injector
-    ) {
-        super();
-    }
-
-    override onStarting(): void {
-        const dependencies: Dependency[] = [
-            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
-            [FormulaRefRangeService],
-            [RegisterOtherFormulaService],
-            [ArrayFormulaCellInterceptorController],
-            [TriggerCalculationController],
-            [UpdateFormulaController],
-            [ActiveDirtyController],
-            [DefinedNameController],
-        ];
-
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    override onReady(): void {
-        ([TriggerCalculationController]).forEach((module) => this._injector.get(module));
-    }
-}

@@ -109,5 +109,8 @@ export class UniverMobileUIPlugin extends Plugin {
         ], this._config.override);
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(IUIController);
+        this._injector.get(ErrorController);
     }
 }

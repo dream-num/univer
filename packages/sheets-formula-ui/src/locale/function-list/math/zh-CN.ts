@@ -106,8 +106,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '用引号括起来的字符串、 ("") 的空字符串或对包含文本的单元格的引用。' },
         },
     },
     ASIN: {
@@ -799,8 +798,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '需要转换的阿拉伯数字。' },
+            form: { name: '形式', detail: '指定所需罗马数字类型的数字。 罗马数字样式的范围从经典到简化，随着形式值的增加，会变得更加简洁。' },
         },
     },
     ROUND: {

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
 
+import { convertUnitDataToRuntime } from '../basics/runtime';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
@@ -32,7 +33,6 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
-import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
     forceCalculation: boolean;
@@ -90,6 +90,8 @@ export interface IFormulaCurrentConfigService {
     setExecuteSubUnitId(subUnitId: string): void;
 
     getDirtyData(): IFormulaDirtyData;
+
+    getLocale(): LocaleType;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -122,7 +124,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
 
-    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super();
     }
 
@@ -211,6 +216,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         }
 
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
+    }
+
+    getLocale() {
+        return this._localeService.getCurrentLocale();
     }
 
     load(config: IFormulaDatasetConfig) {

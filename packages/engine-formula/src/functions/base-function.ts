@@ -15,7 +15,7 @@
  */
 
 import { Disposable } from '@univerjs/core';
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, LocaleType, Nullable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
@@ -42,6 +42,7 @@ export class BaseFunction extends Disposable {
     private _row: number = -1;
     private _column: number = -1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
+    private _locale: LocaleType;
 
     /**
      * Whether the function needs to expand the parameters
@@ -52,6 +53,11 @@ export class BaseFunction extends Disposable {
      * Whether the function needs to pass in reference object
      */
     needsReferenceObject: boolean = false;
+
+    /**
+     * Whether the function needs handle locale
+     */
+    needsLocale: boolean = false;
 
     /**
      * Minimum number of parameters
@@ -105,6 +111,14 @@ export class BaseFunction extends Disposable {
 
     setDefinedNames(definedNames: IDefinedNameMapItem) {
         this._definedNames = definedNames;
+    }
+
+    getLocale() {
+        return this._locale;
+    }
+
+    setLocale(locale: LocaleType) {
+        this._locale = locale;
     }
 
     isAsync() {

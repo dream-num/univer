@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IAccessor, ICellData, ICommand, IMutationInfo, IRange, IStyleData, Nullable } from '@univerjs/core';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
@@ -127,6 +127,7 @@ export interface IRangeUnit {
     range: IRange;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getMoveRangeUndoRedoMutations(
     accessor: IAccessor,
     from: IRangeUnit,
@@ -152,9 +153,15 @@ export function getMoveRangeUndoRedoMutations(
 
         const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
         const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
+        const fromCellStyle = new ObjectMatrix<Nullable<IStyleData>>();
 
         Range.foreach(fromRange, (row, col) => {
-            fromCellValue.setValue(row, col, Tools.deepClone(fromCellMatrix.getValue(row, col)));
+            const cellData = fromCellMatrix.getValue(row, col);
+            fromCellValue.setValue(row, col, Tools.deepClone(cellData));
+            if (cellData) {
+                const style = workbook?.getStyles().get(cellData.s);
+                fromCellStyle.setValue(row, col, Tools.deepClone(style));
+            }
             newFromCellValue.setValue(row, col, null);
         });
         const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
@@ -168,7 +175,13 @@ export function getMoveRangeUndoRedoMutations(
             const cellRange = cellToRange(row, col);
             const relativeRange = Rectangle.getRelativeRange(cellRange, fromRange);
             const range = Rectangle.getPositionRange(relativeRange, toRange);
-            newToCellValue.setValue(range.startRow, range.startColumn, Tools.deepClone(fromCellMatrix.getValue(row, col)));
+
+            const styleValue = Tools.deepClone(fromCellStyle.getValue(row, col));
+            const cellValue = Tools.deepClone(fromCellValue.getValue(row, col));
+            if (cellValue && styleValue) {
+                cellValue.s = styleValue;
+            }
+            newToCellValue.setValue(range.startRow, range.startColumn, cellValue);
         });
 
         const doMoveRangeMutation: IMoveRangeMutationParams = {

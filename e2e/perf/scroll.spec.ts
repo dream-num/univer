@@ -52,7 +52,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
     const fpsCounterPromise = await page.evaluate(({ testDuration, deltaX, deltaY }: IMeasureFPSParam) => {
         let intervalID;
         // dispatch wheel event
-        const dispathWheelEvent = () => {
+        const dispatchWheelEvent = () => {
             const canvasElements = document.querySelectorAll('canvas.univer-render-canvas') as unknown as HTMLElement[];
             const filteredCanvasElements = Array.from(canvasElements).filter((canvas) => canvas.offsetHeight > 500);
 
@@ -95,7 +95,7 @@ async function measureFPS(page: Page, testDuration = 5, deltaX: number, deltaY: 
             return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
         };
 
-        dispathWheelEvent();
+        dispatchWheelEvent();
 
         let frameCount = 0;
         const frameTimes = [];

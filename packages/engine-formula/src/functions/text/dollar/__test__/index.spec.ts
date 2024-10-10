@@ -59,6 +59,10 @@ describe('Test dollar function', () => {
             const decimals4 = NumberValueObject.create(128);
             const result4 = testFunction.calculate(number, decimals4);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
+
+            const decimals5 = NumberValueObject.create(-10);
+            const result5 = testFunction.calculate(number, decimals5);
+            expect(getObjectValue(result5)).toStrictEqual('$0 ');
         });
 
         it('Value is normal string', () => {

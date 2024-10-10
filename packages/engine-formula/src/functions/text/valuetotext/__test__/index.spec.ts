@@ -52,6 +52,10 @@ describe('Test valuetotext function', () => {
             const format4 = ErrorValueObject.create(ErrorType.NAME);
             const result4 = testFunction.calculate(value, format4);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.NAME);
+
+            const format5 = NumberValueObject.create(2);
+            const result5 = testFunction.calculate(value, format5);
+            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Value is array', () => {

@@ -52,6 +52,20 @@ describe('Test dbcs function', () => {
                 ['１', '　', '１．２３', 'ＴＲＵＥ', 'ＦＡＬＳＥ', 0, 'Ｕｎｉｖｅｒ表格シート繁體한국인'],
                 ['０', '１００', 'ａｂｃ', 'ｔｅｓｔ', '－３', ErrorType.NAME, 0],
             ]);
+
+            const text2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['univer'],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(text2);
+            expect(getObjectValue(result2)).toStrictEqual('ｕｎｉｖｅｒ');
         });
     });
 });

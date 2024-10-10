@@ -59,7 +59,7 @@ describe('Test numbervalue function', () => {
 
             const decimalSeparator4 = BooleanValueObject.create(true);
             const result4 = testFunction.calculate(text, decimalSeparator4, groupSeparator);
-            expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result4)).toStrictEqual(250027);
         });
 
         it('GroupSeparator value test', () => {
@@ -116,6 +116,27 @@ describe('Test numbervalue function', () => {
                 [1, 0, 1.23, ErrorType.VALUE, ErrorType.VALUE, 0],
                 [0, 100, 2.34, ErrorType.VALUE, -3, ErrorType.NAME],
             ]);
+        });
+
+        it('More test', () => {
+            const text = StringValueObject.create('2.50,0,27');
+            const decimalSeparator = StringValueObject.create(',');
+            const groupSeparator = StringValueObject.create('.');
+            const result = testFunction.calculate(text, decimalSeparator, groupSeparator);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+
+            const text2 = StringValueObject.create('2.50,027%');
+            const decimalSeparator2 = StringValueObject.create('a');
+            const result2 = testFunction.calculate(text2, decimalSeparator2, groupSeparator);
+            expect(getObjectValue(result2)).toStrictEqual(2500.27);
+
+            const text3 = StringValueObject.create('2a.50027%');
+            const result3 = testFunction.calculate(text3, decimalSeparator, groupSeparator);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+
+            const text4 = StringValueObject.create('2a.50,027%');
+            const result4 = testFunction.calculate(text4, decimalSeparator, groupSeparator);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

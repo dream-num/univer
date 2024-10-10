@@ -34,26 +34,26 @@ describe('Test rightb function', () => {
             expect(getObjectValue(result)).toStrictEqual('r');
         });
 
-        it('NumChars value test', () => {
+        it('NumBytes value test', () => {
             const text = StringValueObject.create('Univer');
-            const numChars = NumberValueObject.create(-2);
-            const result = testFunction.calculate(text, numChars);
+            const numBytes = NumberValueObject.create(-2);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
 
-            const numChars2 = BooleanValueObject.create(false);
-            const result2 = testFunction.calculate(text, numChars2);
+            const numBytes2 = BooleanValueObject.create(false);
+            const result2 = testFunction.calculate(text, numBytes2);
             expect(getObjectValue(result2)).toStrictEqual('');
 
-            const numChars3 = NumberValueObject.create(6);
-            const result3 = testFunction.calculate(text, numChars3);
+            const numBytes3 = NumberValueObject.create(6);
+            const result3 = testFunction.calculate(text, numBytes3);
             expect(getObjectValue(result3)).toStrictEqual('Univer');
 
-            const numChars4 = ErrorValueObject.create(ErrorType.NAME);
-            const result4 = testFunction.calculate(text, numChars4);
+            const numBytes4 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(text, numBytes4);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.NAME);
 
-            const numChars5 = StringValueObject.create('test');
-            const result5 = testFunction.calculate(text, numChars5);
+            const numBytes5 = StringValueObject.create('test');
+            const result5 = testFunction.calculate(text, numBytes5);
             expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
         });
 
@@ -70,15 +70,15 @@ describe('Test rightb function', () => {
                 row: 0,
                 column: 0,
             });
-            const numChars = NumberValueObject.create(2);
-            const result = testFunction.calculate(text, numChars);
+            const numBytes = NumberValueObject.create(2);
+            const result = testFunction.calculate(text, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
                 ['1', ' ', '试', 'UE', 'SE', ''],
                 ['0', '00', '34', 'et', '-3', ErrorType.NAME],
             ]);
 
-            const numChars2 = NumberValueObject.create(3);
-            const result2 = testFunction.calculate(text, numChars2);
+            const numBytes2 = NumberValueObject.create(3);
+            const result2 = testFunction.calculate(text, numBytes2);
             expect(getObjectValue(result2)).toStrictEqual([
                 ['1', ' ', ' 试', 'RUE', 'LSE', ''],
                 ['0', '100', '.34', 'eet', '-3', ErrorType.NAME],

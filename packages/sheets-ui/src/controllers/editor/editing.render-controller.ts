@@ -789,6 +789,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
                 const { position, documentLayoutObject, canvasOffset, scaleX, scaleY } = param;
 
+                if (!this._editorBridgeService.isVisible().visible) {
+                    return;
+                }
+
                 this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
             }
         }));

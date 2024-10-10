@@ -403,4 +403,9 @@ export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.oper
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
+export { SetRowCustomCommand } from './commands/commands/set-row-custom.command';
+export { type ISetRowCustomMutationParams, SetRowCustomMutation } from './commands/mutations/set-row-custom.mutation';
+export { SetColumnCustomCommand } from './commands/commands/set-column-custom.command';
+export { type ISetColumnCustomMutationParams, SetColumnCustomMutation } from './commands/mutations/set-column-custom.mutation';
+
 // #endregion

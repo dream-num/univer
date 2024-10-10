@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, ICellData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
@@ -22,7 +22,7 @@ import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColumnCustomCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowCustomCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -687,6 +687,24 @@ export class FWorksheet {
         return this;
     }
 
+    /**
+     * Set custom properties for given rows.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await this._commandService.executeCommand(SetRowCustomCommand.id, {
+            unitId,
+            subUnitId,
+            custom,
+        });
+
+        return this;
+    }
+
     // #endregion
 
     // #region Column
@@ -972,6 +990,24 @@ export class FWorksheet {
             subUnitId,
             ranges,
             value: width,
+        });
+
+        return this;
+    }
+
+    /**
+     * Set custom properties for given columns.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        await this._commandService.executeCommand(SetColumnCustomCommand.id, {
+            unitId,
+            subUnitId,
+            custom,
         });
 
         return this;

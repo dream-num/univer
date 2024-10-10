@@ -57,11 +57,13 @@ import {
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../commands/commands/set-col-visible.command';
+import { SetColumnCustomCommand } from '../commands/commands/set-column-custom.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
+import { SetRowCustomCommand } from '../commands/commands/set-row-custom.command';
 import {
     SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
@@ -110,9 +112,12 @@ import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
+import { SetColumnCustomMutation } from '../commands/mutations/set-column-custom.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { SetRowCustomMutation } from '../commands/mutations/set-row-custom.mutation';
+
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
@@ -220,6 +225,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetColHiddenMutation,
                 SetColVisibleMutation,
                 SetColWidthCommand,
+                SetColumnCustomCommand,
+                SetColumnCustomMutation,
                 SetFrozenCancelCommand,
                 SetFrozenCommand,
                 SetFrozenMutation,
@@ -229,6 +236,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRowHiddenCommand,
                 SetRowHiddenMutation,
                 SetRowVisibleMutation,
+                SetRowCustomCommand,
+                SetRowCustomMutation,
                 SetSelectedColsVisibleCommand,
                 SetSelectedRowsVisibleCommand,
                 SetSpecificColsVisibleCommand,

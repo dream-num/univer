@@ -1994,9 +1994,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
-      '@univerjs/sheets-formula':
+      '@univerjs/sheets-formula-ui':
         specifier: workspace:*
-        version: link:../sheets-formula
+        version: link:../sheets-formula-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2550,6 +2550,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@types/react':
         specifier: ^18.3.5

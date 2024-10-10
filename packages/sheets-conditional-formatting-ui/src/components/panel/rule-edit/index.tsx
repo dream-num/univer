@@ -26,7 +26,7 @@ import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import { RangeSelector } from '@univerjs/sheets-formula';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 

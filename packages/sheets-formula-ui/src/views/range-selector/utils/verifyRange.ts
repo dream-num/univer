@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { type ISequenceNode, sequenceNodeType } from '@univerjs/engine-formula';
-import { RANGE_SPLIT_STRING } from '../index';
+import { type ISequenceNode, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
 /**
  * true 校验通过
@@ -25,7 +24,7 @@ import { RANGE_SPLIT_STRING } from '../index';
 export const verifyRange = (sequenceNodes: (string | ISequenceNode)[]) => {
     const isFail = sequenceNodes.some((item) => {
         if (typeof item === 'string') {
-            if (item !== RANGE_SPLIT_STRING) {
+            if (item !== matchToken.COMMA) {
                 return true;
             }
         } else {

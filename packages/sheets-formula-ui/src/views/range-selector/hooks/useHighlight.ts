@@ -22,9 +22,10 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
-import { IDescriptionService, RefSelectionsRenderService } from '@univerjs/sheets-formula';
+import { IDescriptionService } from '@univerjs/sheets-formula';
 import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { useEffect, useMemo, useState } from 'react';
+import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
 interface IRefSelection {
     refIndex: number;

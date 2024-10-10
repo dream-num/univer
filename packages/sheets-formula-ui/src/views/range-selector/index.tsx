@@ -20,7 +20,7 @@ import type { ReactNode } from 'react';
 import { createInternalEditorID, debounce, generateRandomId, ICommandService, IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
@@ -39,8 +39,6 @@ import { rangePreProcess } from './utils/rangePreProcess';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
 import { verifyRange } from './utils/verifyRange';
-
-export const RANGE_SPLIT_STRING = ',';
 
 interface IRangeSelectorProps {
     initValue: string | IUnitRangeName[];
@@ -76,7 +74,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         if (typeof initValue === 'string') {
             return initValue;
         } else {
-            return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
+            return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService).join(matchToken.COMMA);
         }
     });
 
@@ -91,7 +89,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     const ranges = useMemo(() => {
-        return rangeString.split(RANGE_SPLIT_STRING).filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
+        return rangeString.split(matchToken.COMMA).filter((e) => !!e).map((text) => deserializeRangeWithSheet(text));
     }, [rangeString]);
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
@@ -120,7 +118,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, 30), []);
 
     const handleConfirm = (ranges: IUnitRangeName[]) => {
-        const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
+        const text = unitRangesToText(ranges, unitId, subUnitId, univerInstanceService).join(matchToken.COMMA);
         rangeStringSet(text);
         onChange(text);
         rangeDialogVisibleSet(false);
@@ -137,14 +135,17 @@ export function RangeSelector(props: IRangeSelectorProps) {
     };
 
     const focus = useMemo(() => {
+        let time: NodeJS.Timeout = 0 as any;
         return () => {
+            clearTimeout(time);
             if (editor) {
-                setTimeout(() => {
+                time = setTimeout(() => {
                     editor.focus();
                 }, 30);
             }
         };
     }, [editor]);
+
     const { checkScrollBar } = useResize(editor);
 
     const handleSheetSelectionChange = useMemo(() => {
@@ -214,13 +215,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, []);
 
     useEffect(() => {
-        isFocusSet(_isFocus);
-        if (_isFocus) {
-            focus();
-        }
-    }, [_isFocus, focus]);
-
-    useEffect(() => {
         if (editor && rangeDialogVisible) {
             editor.blur();
             const d = editor.focus$.subscribe(() => {
@@ -236,6 +230,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         let dispose: IDisposable;
         if (containerRef.current) {
             dispose = editorService.register({
+                autofocus: true,
                 editorUnitId: editorId,
                 isSingle: true,
                 initialSnapshot: {
@@ -304,7 +299,7 @@ function RangeSelectorDialog(props: {
 
     const colorMap = useColor();
 
-    const rangeText = useMemo(() => ranges.join(RANGE_SPLIT_STRING), [ranges]);
+    const rangeText = useMemo(() => ranges.join(matchToken.COMMA), [ranges]);
     const { sequenceNodes } = useFormulaToken(rangeText);
 
     const refSelections = useMemo(() => buildTextRuns(descriptionService, colorMap, sequenceNodes).refSelections, [sequenceNodes]);
@@ -342,7 +337,7 @@ function RangeSelectorDialog(props: {
     };
 
     const handleSheetSelectionChange = useCallback((rangeText: string) => {
-        rangesSet(rangeText.split(RANGE_SPLIT_STRING).filter((e) => !!e));
+        rangesSet(rangeText.split(matchToken.COMMA).filter((e) => !!e));
     }, [focusIndex]);
 
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);

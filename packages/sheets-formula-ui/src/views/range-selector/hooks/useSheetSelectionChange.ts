@@ -17,12 +17,11 @@
 /* eslint-disable max-lines-per-function */
 
 import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
-import { deserializeRangeWithSheet, type ISequenceNode, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, type ISequenceNode, matchToken, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
-import { RANGE_SPLIT_STRING } from '../index';
 import { rangePreProcess } from '../utils/rangePreProcess';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
@@ -73,9 +72,18 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     }
                     return node;
                 });
-                const theLast = unitRangesToText(cloneSelectionList.map((e) => ({ range: e.rangeWithCoord, unitId: e.rangeWithCoord.unitId ?? '', sheetName: getSheetNameById(univerInstanceService, e.rangeWithCoord.unitId ?? '', e.rangeWithCoord.sheetId ?? '') })), unitId, subUnitId, univerInstanceService).join(RANGE_SPLIT_STRING);
+                const theLast = unitRangesToText(
+                    cloneSelectionList.map((e) => ({
+                        range: e.rangeWithCoord,
+                        unitId: e.rangeWithCoord.unitId ?? '',
+                        sheetName: getSheetNameById(univerInstanceService, e.rangeWithCoord.unitId ?? '', e.rangeWithCoord.sheetId ?? ''),
+                    })),
+                    unitId,
+                    subUnitId,
+                    univerInstanceService)
+                    .join(matchToken.COMMA);
                 const thePre = sequenceNodeToText(newSequenceNodes);
-                const result = `${thePre}${(thePre && theLast) ? RANGE_SPLIT_STRING : ''}${theLast}`;
+                const result = `${thePre}${(thePre && theLast) ? matchToken.COMMA : ''}${theLast}`;
                 const isScaling = isScalingRef.current;
                 handleRangeChange(result, isScaling ? -1 : result.length);
             });

@@ -15,11 +15,9 @@
  */
 
 import type {
-    DocumentDataModel,
     ICommandInfo,
     IExecutionOptions,
     Nullable,
-    SlideDataModel,
     Workbook,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IUnitSheetNameMap } from '@univerjs/engine-formula';
@@ -32,7 +30,6 @@ import type { IFormulaReferenceMoveParam } from './utils/ref-range-formula';
 
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
-    Direction,
     Disposable,
     ICommandService,
     Inject,
@@ -45,7 +42,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
@@ -62,27 +58,14 @@ import { deserializeRangeWithSheet,
 
 import {
     ClearSelectionFormatCommand,
-    EffectRefRangId,
-    handleDeleteRangeMoveLeft,
-    handleDeleteRangeMoveUp,
-    handleInsertCol,
-    handleInsertRangeMoveDown,
-    handleInsertRangeMoveRight,
-    handleInsertRow,
-    handleIRemoveCol,
-    handleIRemoveRow,
-    handleMoveCols,
-    handleMoveRange,
-    handleMoveRows,
     InsertSheetMutation,
     RemoveSheetMutation,
-    runRefRangeMutations,
     SetBorderCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { filter, map, merge } from 'rxjs';
+import { map } from 'rxjs';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { checkIsSameUnitAndSheet, formulaDataToCellData, FormulaReferenceMoveType, getFormulaReferenceMoveUndoRedo, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -106,7 +89,8 @@ export class UpdateFormulaController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) readonly _injector: Injector,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(Injector) readonly _injector: Injector
     ) {
         super();
 
@@ -280,15 +264,15 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getUpdateFormula(command: ICommandInfo) {
-        const { id } = command;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
-        // The impact of defined name changes on formula calculation
-        // 1. ref range only changes formulaOrRefString to trigger recalculation
-        // 2. set defined name command, change name to trigger formula update, otherwise trigger recalculation
-        // 3. remove defined name command, recalculate
-        // 4. insert defined name No processing required
+        if (!workbook) {
+            return {
+                undos: [],
+                redos: [],
+            };
+        }
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const result = getReferenceMoveParams(workbook, command);
 
         if (result) {
@@ -412,7 +396,6 @@ export class UpdateFormulaController extends Disposable {
                         } else if (nodeType !== sequenceNodeType.REFERENCE) {
                             continue;
                         }
-                        const { token } = node;
 
                         const sequenceGrid = deserializeRangeWithSheet(token);
 
@@ -421,22 +404,22 @@ export class UpdateFormulaController extends Disposable {
                         const mapUnitId =
                             sequenceUnitId == null || sequenceUnitId.length === 0 ? unitId : sequenceUnitId;
 
-                        const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName];
+                        const sequenceSheetId = unitSheetNameMap?.[mapUnitId]?.[sheetName] || '';
 
                         if (
-                            !this._checkIsSameUnitAndSheet(
+                            !checkIsSameUnitAndSheet(
                                 formulaReferenceMoveParam.unitId,
                                 formulaReferenceMoveParam.sheetId,
                                 unitId,
                                 sheetId,
                                 sequenceUnitId,
-                                sequenceSheetId || ''
+                                sequenceSheetId
                             )
                         ) {
                             continue;
                         }
 
-                        const sequenceUnitRangeWidthOffset = {
+                        const sequenceUnitRangeWidthOffset: IUnitRangeWithOffset = {
                             range,
                             sheetId: sequenceSheetId,
                             unitId: sequenceUnitId,
@@ -510,7 +493,7 @@ export class UpdateFormulaController extends Disposable {
                         return true;
                     }
 
-                    const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
+                    const newSequenceNodes = updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
                     newFormulaDataItem.setValue(row, column, {
                         f: `=${generateStringWithSequence(newSequenceNodes)}`,
@@ -524,607 +507,5 @@ export class UpdateFormulaController extends Disposable {
         }
 
         return { newFormulaData };
-    }
-
-    // eslint-disable-next-line
-    private _getNewRangeByMoveParam(
-        unitRangeWidthOffset: IUnitRangeWithOffset,
-        formulaReferenceMoveParam: IFormulaReferenceMoveParam,
-        currentFormulaUnitId: string,
-        currentFormulaSheetId: string
-    ) {
-        const { type, unitId: userUnitId, sheetId: userSheetId, range, from, to } = formulaReferenceMoveParam;
-
-        const {
-            range: unitRange,
-            sheetId: sequenceRangeSheetId,
-            unitId: sequenceRangeUnitId,
-            sheetName: sequenceRangeSheetName,
-            refOffsetX,
-            refOffsetY,
-        } = unitRangeWidthOffset;
-
-        if (
-            !this._checkIsSameUnitAndSheet(
-                userUnitId,
-                userSheetId,
-                currentFormulaUnitId,
-                currentFormulaSheetId,
-                sequenceRangeUnitId,
-                sequenceRangeSheetId
-            )
-        ) {
-            return;
-        }
-
-        const sequenceRange = Rectangle.moveOffset(unitRange, refOffsetX, refOffsetY);
-        let newRange: Nullable<IRange> = null;
-
-        if (type === FormulaReferenceMoveType.MoveRange) {
-            if (from == null || to == null) {
-                return;
-            }
-
-            const moveEdge = this._checkMoveEdge(sequenceRange, from);
-
-            const remainRange = Rectangle.getIntersects(sequenceRange, from);
-
-            if (remainRange == null || moveEdge !== OriginRangeEdgeType.ALL) {
-                return;
-            }
-
-            const operators = handleMoveRange(
-                { id: EffectRefRangId.MoveRangeCommandId, params: { toRange: to, fromRange: from } },
-                remainRange
-            );
-
-            const result = runRefRangeMutations(operators, remainRange);
-
-            if (result == null) {
-                return ErrorType.REF;
-            }
-
-            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
-        } else if (type === FormulaReferenceMoveType.MoveRows) {
-            if (from == null || to == null) {
-                return;
-            }
-
-            const moveEdge = this._checkMoveEdge(sequenceRange, from);
-
-            let remainRange = Rectangle.getIntersects(sequenceRange, from);
-
-            if (
-                remainRange == null &&
-                ((from.endRow < sequenceRange.startRow && to.endRow < sequenceRange.startRow) || (from.startRow > sequenceRange.endRow && to.startRow > sequenceRange.endRow))
-            ) {
-                return;
-            }
-
-            if (remainRange == null) {
-                remainRange = {
-                    startRow: sequenceRange.startRow,
-                    endRow: sequenceRange.endRow,
-                    startColumn: sequenceRange.startColumn,
-                    endColumn: sequenceRange.endColumn,
-                    rangeType: RANGE_TYPE.NORMAL,
-                };
-            }
-
-            const operators = handleMoveRows(
-                { id: EffectRefRangId.MoveRowsCommandId, params: { toRange: to, fromRange: from } },
-                remainRange
-            );
-
-            const result = runRefRangeMutations(operators, remainRange);
-
-            if (result == null) {
-                return ErrorType.REF;
-            }
-
-            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
-        } else if (type === FormulaReferenceMoveType.MoveCols) {
-            if (from == null || to == null) {
-                return;
-            }
-
-            const moveEdge = this._checkMoveEdge(sequenceRange, from);
-
-            let remainRange = Rectangle.getIntersects(sequenceRange, from);
-
-            if (
-                remainRange == null &&
-                ((from.endColumn < sequenceRange.startColumn && to.endColumn < sequenceRange.startColumn) || (from.startColumn > sequenceRange.endColumn && to.startColumn > sequenceRange.endColumn))
-            ) {
-                return;
-            }
-
-            if (remainRange == null) {
-                remainRange = {
-                    startRow: sequenceRange.startRow,
-                    endRow: sequenceRange.endRow,
-                    startColumn: sequenceRange.startColumn,
-                    endColumn: sequenceRange.endColumn,
-                    rangeType: RANGE_TYPE.NORMAL,
-                };
-            }
-
-            const operators = handleMoveCols(
-                { id: EffectRefRangId.MoveColsCommandId, params: { toRange: to, fromRange: from } },
-                remainRange
-            );
-
-            const result = runRefRangeMutations(operators, remainRange);
-
-            if (result == null) {
-                return ErrorType.REF;
-            }
-
-            newRange = this._getMoveNewRange(moveEdge, result, from, to, sequenceRange, remainRange);
-        }
-
-        if (range != null) {
-            if (type === FormulaReferenceMoveType.InsertRow) {
-                const operators = handleInsertRow(
-                    {
-                        id: EffectRefRangId.InsertRowCommandId,
-                        params: { range, unitId: '', subUnitId: '', direction: Direction.DOWN },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.InsertColumn) {
-                const operators = handleInsertCol(
-                    {
-                        id: EffectRefRangId.InsertColCommandId,
-                        params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.RemoveRow) {
-                const operators = handleIRemoveRow(
-                    {
-                        id: EffectRefRangId.RemoveRowCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return ErrorType.REF;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.RemoveColumn) {
-                const operators = handleIRemoveCol(
-                    {
-                        id: EffectRefRangId.RemoveColCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return ErrorType.REF;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.DeleteMoveLeft) {
-                const operators = handleDeleteRangeMoveLeft(
-                    {
-                        id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return ErrorType.REF;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.DeleteMoveUp) {
-                const operators = handleDeleteRangeMoveUp(
-                    {
-                        id: EffectRefRangId.DeleteRangeMoveUpCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return ErrorType.REF;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.InsertMoveDown) {
-                const operators = handleInsertRangeMoveDown(
-                    {
-                        id: EffectRefRangId.InsertRangeMoveDownCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
-                const operators = handleInsertRangeMoveRight(
-                    {
-                        id: EffectRefRangId.InsertRangeMoveRightCommandId,
-                        params: { range },
-                    },
-                    sequenceRange
-                );
-
-                const result = runRefRangeMutations(operators, sequenceRange);
-
-                if (result == null) {
-                    return;
-                }
-
-                newRange = {
-                    ...sequenceRange,
-                    ...result,
-                };
-            }
-        }
-
-        if (newRange == null) {
-            return;
-        }
-
-        return serializeRangeToRefString({
-            range: newRange,
-            sheetName: sequenceRangeSheetName,
-            unitId: sequenceRangeUnitId,
-        });
-    }
-
-    private _checkIsSameUnitAndSheet(
-        userUnitId: string,
-        userSheetId: string,
-        currentFormulaUnitId: string,
-        currentFormulaSheetId: string,
-        sequenceRangeUnitId: string,
-        sequenceRangeSheetId: string
-    ) {
-        if (
-            (sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
-            (sequenceRangeSheetId == null || sequenceRangeSheetId.length === 0)
-        ) {
-            if (userUnitId === currentFormulaUnitId && userSheetId === currentFormulaSheetId) {
-                return true;
-            }
-        } else if (
-            (userUnitId === sequenceRangeUnitId || sequenceRangeUnitId == null || sequenceRangeUnitId.length === 0) &&
-            userSheetId === sequenceRangeSheetId
-        ) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Update all ref nodes to the latest offset state.
-     */
-    private _updateRefOffset(
-        sequenceNodes: Array<string | ISequenceNode>,
-        refChangeIds: number[],
-        refOffsetX: number = 0,
-        refOffsetY: number = 0
-    ) {
-        const newSequenceNodes: Array<string | ISequenceNode> = [];
-        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
-            const node = sequenceNodes[i];
-            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE || refChangeIds.includes(i)) {
-                newSequenceNodes.push(node);
-                continue;
-            }
-
-            const { token } = node;
-
-            const sequenceGrid = deserializeRangeWithSheet(token);
-
-            const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
-
-            const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
-
-            newSequenceNodes.push({
-                ...node,
-                token: serializeRangeToRefString({
-                    range: newRange,
-                    unitId: sequenceUnitId,
-                    sheetName,
-                }),
-            });
-        }
-
-        return newSequenceNodes;
-    }
-
-    /**
-     * Determine the range of the moving selection,
-     * and check if it is at the edge of the reference range of the formula.
-     * @param originRange
-     * @param fromRange
-     */
-    // eslint-disable-next-line
-    private _checkMoveEdge(originRange: IRange, fromRange: IRange): Nullable<OriginRangeEdgeType> {
-        const { startRow, startColumn, endRow, endColumn } = originRange;
-
-        const {
-            startRow: fromStartRow,
-            startColumn: fromStartColumn,
-            endRow: fromEndRow,
-            endColumn: fromEndColumn,
-        } = fromRange;
-
-        if (
-            startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
-            startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn
-        ) {
-            return OriginRangeEdgeType.ALL;
-        }
-
-        if (
-            startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn &&
-            startRow >= fromStartRow &&
-            startRow <= fromEndRow &&
-            endRow > fromEndRow
-        ) {
-            return OriginRangeEdgeType.UP;
-        }
-
-        if (
-            startColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn &&
-            endRow >= fromStartRow &&
-            endRow <= fromEndRow &&
-            startRow < fromStartRow
-        ) {
-            return OriginRangeEdgeType.DOWN;
-        }
-
-        if (
-            startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
-            startColumn >= fromStartColumn &&
-            startColumn <= fromEndColumn &&
-            endColumn > fromEndColumn
-        ) {
-            return OriginRangeEdgeType.LEFT;
-        }
-
-        if (
-            startRow >= fromStartRow &&
-            endRow <= fromEndRow &&
-            endColumn >= fromStartColumn &&
-            endColumn <= fromEndColumn &&
-            startColumn < fromStartColumn
-        ) {
-            return OriginRangeEdgeType.RIGHT;
-        }
-    }
-
-    /**
-     *  Calculate the new ref information for the moving selection.
-     * @param moveEdge  the 'from' range lie on the edge of the original range, or does it completely cover the original range
-     * @param result The original range is divided by 'from' and moved to a new position range.
-     * @param from The initial range of the moving selection.
-     * @param to The result range after moving the initial range.
-     * @param origin The original target range.
-     * @param remain "The range subtracted from the initial range by 'from'.
-     * @returns
-     */
-    // eslint-disable-next-line
-    private _getMoveNewRange(
-        moveEdge: Nullable<OriginRangeEdgeType>,
-        result: IRange,
-        from: IRange,
-        to: IRange,
-        origin: IRange,
-        remain: IRange
-    ) {
-        const { startRow, endRow, startColumn, endColumn } = result;
-
-        const {
-            startRow: fromStartRow,
-            startColumn: fromStartColumn,
-            endRow: fromEndRow,
-            endColumn: fromEndColumn,
-            rangeType: fromRangeType = RANGE_TYPE.NORMAL,
-        } = from;
-
-        const { startRow: toStartRow, startColumn: toStartColumn, endRow: toEndRow, endColumn: toEndColumn } = to;
-
-        const {
-            startRow: remainStartRow,
-            endRow: remainEndRow,
-            startColumn: remainStartColumn,
-            endColumn: remainEndColumn,
-        } = remain;
-
-        const {
-            startRow: originStartRow,
-            endRow: originEndRow,
-            startColumn: originStartColumn,
-            endColumn: originEndColumn,
-        } = origin;
-
-        const newRange = { ...origin };
-
-        if (moveEdge === OriginRangeEdgeType.UP) {
-            if (startColumn === originStartColumn && endColumn === originEndColumn) {
-                if (startRow < originStartRow) {
-                    newRange.startRow = startRow;
-                } else if (startRow >= originEndRow) {
-                    newRange.endRow -= fromEndRow + 1 - originStartRow;
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        } else if (moveEdge === OriginRangeEdgeType.DOWN) {
-            if (startColumn === originStartColumn && endColumn === originEndColumn) {
-                if (endRow > originEndRow) {
-                    newRange.endRow = endRow;
-                } else if (endRow <= originStartRow) {
-                    newRange.startRow += originEndRow - fromStartRow + 1;
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        } else if (moveEdge === OriginRangeEdgeType.LEFT) {
-            if (startRow === originStartRow && endRow === originEndRow) {
-                if (startColumn < originStartColumn) {
-                    newRange.startColumn = startColumn;
-                } else if (startColumn >= originEndColumn) {
-                    newRange.endColumn -= fromEndColumn + 1 - originStartColumn;
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        } else if (moveEdge === OriginRangeEdgeType.RIGHT) {
-            if (startRow === originStartRow && endRow === originEndRow) {
-                if (endColumn > originEndColumn) {
-                    newRange.endColumn = endColumn;
-                } else if (endColumn <= originStartColumn) {
-                    newRange.startColumn += originEndColumn - fromStartColumn + 1;
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-        } else if (moveEdge === OriginRangeEdgeType.ALL) {
-            newRange.startRow = startRow;
-            newRange.startColumn = startColumn;
-            newRange.endRow = endRow;
-            newRange.endColumn = endColumn;
-        } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
-            if (from.endRow < originStartRow) {
-                if (toStartRow >= originStartRow) {
-                    newRange.startRow -= fromEndRow - fromStartRow + 1;
-                }
-                if (toStartRow >= originEndRow) {
-                    newRange.endRow -= fromEndRow - fromStartRow + 1;
-                }
-            } else if (from.startRow > originEndRow) {
-                if (toEndRow <= originEndRow) {
-                    newRange.endRow += fromEndRow - fromStartRow + 1;
-                }
-                if (toEndRow <= originStartRow) {
-                    newRange.startRow += fromEndRow - fromStartRow + 1;
-                }
-            }
-        } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
-            if (from.endColumn < originStartColumn) {
-                if (toStartColumn >= originStartColumn) {
-                    newRange.startColumn -= fromEndColumn - fromStartColumn + 1;
-                }
-                if (toStartColumn >= originEndColumn) {
-                    newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
-                }
-            } else if (from.startColumn > originEndColumn) {
-                if (toEndColumn <= originEndColumn) {
-                    newRange.endColumn += fromEndColumn - fromStartColumn + 1;
-                }
-                if (toEndColumn <= originStartColumn) {
-                    newRange.startColumn += fromEndColumn - fromStartColumn + 1;
-                }
-            }
-        } else if (
-            ((toStartColumn <= remainEndColumn + 1 && toEndColumn >= originEndColumn) ||
-                (toStartColumn <= originStartColumn && toEndColumn >= remainStartColumn - 1)) &&
-            toStartRow <= originStartRow &&
-            toEndRow >= originEndRow
-        ) {
-            newRange.startRow = startRow;
-            newRange.startColumn = startColumn;
-            newRange.endRow = endRow;
-            newRange.endColumn = endColumn;
-        } else if (
-            ((toStartRow <= remainEndRow + 1 && toEndRow >= originEndRow) ||
-                (toStartRow <= originStartRow && toEndRow >= remainStartRow - 1)) &&
-            toStartColumn <= originStartColumn &&
-            toEndColumn >= originEndColumn
-        ) {
-            newRange.startRow = startRow;
-            newRange.startColumn = startColumn;
-            newRange.endRow = endRow;
-            newRange.endColumn = endColumn;
-        }
-
-        return newRange;
-    }
-
-    private _getCurrentSheetInfo() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const unitId = workbook.getUnitId();
-        const sheetId = workbook.getActiveSheet()?.getSheetId() || '';
-
-        return {
-            unitId,
-            sheetId,
-        };
     }
 }

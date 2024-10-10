@@ -85,6 +85,7 @@ export class DefinedNameController extends Disposable {
                     this._unregisterDescriptionsForNotInSheetId();
                     this._registerDescriptions();
                 }
+                // Since command interception will supplement mutation, it is necessary to monitor mutation changes here
                 // SetDefinedNameMutation and RemoveDefinedNameMutation already cover all possible Defined Name updates
                 else if (command.id === SetDefinedNameMutation.id) {
                     const param = command.params as ISetDefinedNameMutationParam;

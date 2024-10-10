@@ -511,10 +511,11 @@ export class DocumentSkeleton extends Skeleton {
 
         const { pages, skeHeaders, skeFooters } = skeletonData;
         const editArea = this.findEditAreaByCoord(coord, pageLayoutType, pageMarginLeft, pageMarginTop).editArea;
+        const pageLength = pages.length;
 
         this._findLiquid.reset();
         if (restrictions == null) {
-            for (let pi = 0, len = pages.length; pi < len; pi++) {
+            for (let pi = 0; pi < pageLength; pi++) {
                 const page = pages[pi];
                 const { headerId, footerId, pageWidth } = page;
 
@@ -532,7 +533,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -547,7 +549,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
                 } else {
@@ -560,7 +563,8 @@ export class DocumentSkeleton extends Skeleton {
                         pi,
                         cache,
                         x,
-                        y
+                        y,
+                        pageLength
                     );
                 }
 
@@ -575,7 +579,7 @@ export class DocumentSkeleton extends Skeleton {
             let exactMatch = null;
 
             if (strict === false) {
-                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
                     const { headerId, footerId, pageWidth } = page;
 
@@ -591,7 +595,8 @@ export class DocumentSkeleton extends Skeleton {
                                 pi,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
 
@@ -606,7 +611,8 @@ export class DocumentSkeleton extends Skeleton {
                                 pi,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
                     } else {
@@ -619,7 +625,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -630,7 +637,7 @@ export class DocumentSkeleton extends Skeleton {
                     this._translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
                 }
             } else {
-                for (let pi = 0, len = pages.length; pi < len; pi++) {
+                for (let pi = 0; pi < pageLength; pi++) {
                     const page = pages[pi];
 
                     if (segmentId) {
@@ -651,7 +658,8 @@ export class DocumentSkeleton extends Skeleton {
                                 segmentPage,
                                 cache,
                                 x,
-                                y
+                                y,
+                                pageLength
                             );
                         }
                     } else {
@@ -664,7 +672,8 @@ export class DocumentSkeleton extends Skeleton {
                             pi,
                             cache,
                             x,
-                            y
+                            y,
+                            pageLength
                         );
                     }
 
@@ -689,6 +698,7 @@ export class DocumentSkeleton extends Skeleton {
         cache: INearestCache,
         x: number,
         y: number,
+        pageLength: number,
         nestLevel: number = 0
         // eslint-disable-next-line ts/no-explicit-any
     ): any {
@@ -700,10 +710,29 @@ export class DocumentSkeleton extends Skeleton {
         const pageTop = this._findLiquid.y + (pageType === DocumentSkeletonPageType.FOOTER ? page.pageHeight - segmentPage.pageHeight : 0);
         const pageBottom = pageTop + segmentPage.pageHeight;
 
-        const pointInPage = x >= pageLeft
+        let pointInPage = x >= pageLeft
             && x <= pageRight
             && y >= pageTop
             && y <= pageBottom;
+
+        // Handle the outmost page.
+        if (nestLevel === 0 && pageType === DocumentSkeletonPageType.BODY) {
+            const isFirstPage = pi === 0;
+            const isLastPage = pi === pageLength - 1;
+            // TODO: Use page margin top as page gap now, need to consider the page gap in the future.
+            const halfMarginTop = page.originMarginTop / 2;
+
+            // It's the only page, point always in page.
+            if (isFirstPage && isLastPage) {
+                pointInPage = true;
+            } else if (isFirstPage) {
+                pointInPage = y <= pageBottom + halfMarginTop;
+            } else if (isLastPage) {
+                pointInPage = y >= pageTop - halfMarginTop;
+            } else {
+                pointInPage = y >= pageTop - halfMarginTop && y <= pageBottom + halfMarginTop;
+            }
+        }
 
         switch (pageType) {
             case DocumentSkeletonPageType.HEADER: {
@@ -877,6 +906,7 @@ export class DocumentSkeleton extends Skeleton {
                             cache,
                             x,
                             y,
+                            pageLength,
                             nestLevel + 1
                         );
 

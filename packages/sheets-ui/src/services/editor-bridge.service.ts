@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import type { KeyCode } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import {
     CellValueType,
     createIdentifier,
@@ -30,18 +35,14 @@ import {
     makeCellToSelection,
     ThemeService,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject } from 'rxjs';
-import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { KeyCode } from '@univerjs/ui';
 
-import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -105,6 +106,8 @@ export interface IEditorBridgeService {
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
     getCurrentEditorId(): Nullable<string>;
+
+    beforeSetRangeValue(workbook: Workbook, worksheet: Worksheet, row: number, column: number, cellData: ICellData): Promise<Nullable<ICellData>>;
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
@@ -378,6 +381,28 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     getEditorDirty() {
         return this._editorIsDirty;
+    }
+
+    async beforeSetRangeValue(workbook: Workbook, worksheet: Worksheet, row: number, column: number, cellData: ICellData) {
+        const context = {
+            subUnitId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            workbook: workbook!,
+            worksheet,
+            row,
+            col: column,
+            origin: Tools.deepClone(cellData),
+        };
+        const cell = this.interceptor.fetchThroughInterceptors(
+            this.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+        )(cellData, context);
+
+        const finalCell = await this.interceptor.fetchThroughInterceptors(
+            this.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
+        )(Promise.resolve(cell), context);
+
+        // remove temp value
+        return finalCell;
     }
 }
 

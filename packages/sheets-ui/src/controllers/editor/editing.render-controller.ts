@@ -940,23 +940,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const context = {
-            subUnitId: sheetId,
-            unitId,
-            workbook: workbook!,
-            worksheet,
-            row,
-            col: column,
-            origin: Tools.deepClone(cellData),
-        };
-        const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
-            this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
-        )(cellData, context);
-
-        const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
-            this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
-        )(Promise.resolve(cell), context);
-        // remove temp value
+        const finalCell = await this._editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, cellData);
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,

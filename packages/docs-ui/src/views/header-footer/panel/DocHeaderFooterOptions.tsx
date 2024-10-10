@@ -18,6 +18,7 @@ import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, 
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import { ILayoutService } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 import { CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
@@ -34,6 +35,7 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const commandService = useDependency(ICommandService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
+    const layoutService = useDependency(ILayoutService);
     const { unitId } = props;
 
     const docSelectionRenderService = renderManagerService.getRenderById(unitId)!.with(DocSelectionRenderService)!;
@@ -107,6 +109,8 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 },
             });
         }
+
+        layoutService.focus();
     };
 
     const handleMarginChange = async (val: number, type: 'marginHeader' | 'marginFooter') => {

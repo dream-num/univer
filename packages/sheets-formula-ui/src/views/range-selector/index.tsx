@@ -345,7 +345,7 @@ function RangeSelectorDialog(props: {
     }, [focusIndex]);
 
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
-
+    useRefactorEffect(focusIndex >= 0, unitId);
     return (
         <Dialog
             width="328px"

@@ -88,6 +88,11 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocSkeletonManagerService] as Dependency);
             renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_DOC, [DocIMEInputManagerService] as Dependency);
         }
+
+        override onReady(): void {
+            this._injector.get(DocStateChangeManagerService);
+            this._injector.get(DocsRenderService);
+        }
     }
 
     injector.get(LocaleService).load({ zhCN, enUS });

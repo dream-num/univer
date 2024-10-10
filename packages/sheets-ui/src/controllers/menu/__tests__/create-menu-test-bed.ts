@@ -80,6 +80,10 @@ export function createMenuTestBed() {
             injector.add([RangeProtectionCache]);
             injector.add([RangeProtectionRuleModel]);
             injector.add([RangeProtectionService]);
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
     }
 

@@ -84,6 +84,10 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             injector.add([WorksheetProtectionRuleModel]);
 
             dependencies?.forEach((d) => injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
         }
     }
 

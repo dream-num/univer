@@ -204,6 +204,15 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
             });
 
             dependencies?.forEach((d) => injector.add(d));
+
+            this._injector.get(SheetInterceptorService);
+            this._injector.get(WorkbookPermissionService);
+            this._injector.get(WorksheetPermissionService);
+            this._injector.get(ConditionalFormattingService);
+        }
+
+        override onReady(): void {
+            this._injector.get(SheetsRenderService);
         }
     }
 

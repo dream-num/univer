@@ -16,6 +16,8 @@
 
 /* eslint-disable ts/no-explicit-any */
 
+import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import {
     BooleanNumber,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -31,11 +33,9 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitService } from '@univerjs/docs';
+
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-
-import type { Ctor, Dependency, DependencyIdentifier, DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
-import type { DocumentSkeleton, IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
 import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
@@ -123,6 +123,10 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
             injector.add([DocSelectionRenderService]);
 
             dependencies?.forEach((d) => injector.add(d));
+        }
+
+        override onReady(): void {
+            this._injector.get(DocStateChangeManagerService);
         }
     }
 

@@ -90,7 +90,7 @@ export class UniverSlidesUIPlugin extends Plugin {
         });
 
         this._injector.get(CanvasView);
-        this._injector.get(SlideRenderController);
+        this._injector.get(SlideRenderService);
     }
 
     override onRendered(): void {
@@ -99,7 +99,6 @@ export class UniverSlidesUIPlugin extends Plugin {
             // need TextSelectionRenderService which init by EditorContainer
             [SlideEditorBridgeRenderController],
             [SlideEditingRenderController],
-
         ] as Dependency[]).forEach((m) => {
             // find all renderMap and register module to each item in renderMap
             this.disposeWithMe(this._renderManagerService.registerRenderModule(UniverInstanceType.UNIVER_SLIDE, m));

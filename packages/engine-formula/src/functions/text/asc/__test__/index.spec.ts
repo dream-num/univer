@@ -36,7 +36,7 @@ describe('Test asc function', () => {
         it('Value is array', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
-                    [1, ' ', 1.23, true, false, null, 'Univer表格シート繁體한국인'],
+                    [1, '　', 1.23, true, false, null, 'Univer表格シート繁體한국인'],
                     [0, '１００', 'ａｂｃ', 'ｔｅｓｔ', -3, ErrorType.NAME, null],
                 ]),
                 rowCount: 2,
@@ -51,6 +51,26 @@ describe('Test asc function', () => {
                 [1, ' ', 1.23, true, false, 0, 'Univer表格シート繁體한국인'],
                 [0, '100', 'abc', 'test', -3, ErrorType.NAME, 0],
             ]);
+
+            const text2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['ｕｎｉｖｅｒ'],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(text2);
+            expect(getObjectValue(result2)).toStrictEqual('univer');
+        });
+
+        it('More test', () => {
+            const text = StringValueObject.create('！＠＃￥%＾&*()＿-+=');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual('!@#￥%^&*()_-+=');
         });
     });
 });

@@ -280,7 +280,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
             if (!skeleton) {
                 return;
             }
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY, () => {
+                this._textSelectionManagerService.refreshSelection({
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                });
+            });
         }
     }
 
@@ -338,7 +343,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject,
         scaleX: number = 1,
-        scaleY: number = 1
+        scaleY: number = 1,
+        callback?: () => void
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
         const documentDataModel = documentLayoutObject.documentModel;
@@ -391,7 +397,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY);
+        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY, callback);
     }
 
     /**
@@ -575,14 +581,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
 
             callback?.();
-            if (this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
-                return;
-            }
-
-            this._textSelectionManagerService.refreshSelection({
-                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            });
         }, 0);
 
         const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();

@@ -46,17 +46,9 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const dirname = process.cwd();
 
-    const esbuild = {};
-
-    // don't minify identifiers for univerjs packages
-    if (pkg.name.startsWith('@univerjs/')) {
-        esbuild.minifyIdentifiers = false;
-        esbuild.keepNames = true;
-    }
-
     /** @type {import('vite').UserConfig} */
     const originalConfig = {
-        esbuild,
+        esbuild: {},
         build: {
             target: 'chrome70',
             outDir: 'lib',
@@ -117,10 +109,16 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     if (process.env.APP_TYPE === 'staging') {
         originalConfig.build.sourcemap = true;
-    }
 
-    if (pkg.name.startsWith('@univerjs/')) {
-        originalConfig.plugins.push(obfuscator());
+        originalConfig.esbuild.minifyIdentifiers = false;
+        originalConfig.esbuild.keepNames = true;
+    } else {
+        if (pkg.name.startsWith('@univerjs/')) {
+            originalConfig.esbuild.minifyIdentifiers = false;
+            originalConfig.esbuild.keepNames = true;
+        } else {
+            originalConfig.plugins.push(obfuscator());
+        }
     }
 
     if (features) {

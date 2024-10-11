@@ -874,7 +874,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
                     return;
                 }
 
-                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                if (commandUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                    // FIXME: this should be fixed on next refactor
+                    // currently, we need to wait util content was synced to cell-editor, than fit size
+                    setTimeout(() => {
+                        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                    }, 0);
+                } else {
+                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                }
             }
         }));
 

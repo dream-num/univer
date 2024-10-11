@@ -17,7 +17,7 @@
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -28,7 +28,6 @@ import { DocSelectionRenderService } from '../../services/selection/doc-selectio
 export class DocRenderController extends RxDisposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
@@ -213,7 +212,16 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
-            const { pageWidth, pageHeight } = page;
+            let { pageWidth, pageHeight, marginLeft, marginRight, marginTop, marginBottom } = page;
+
+            // Mainly for modern mode, because pageHeight will be INFINITY in modern mode.
+            if (pageWidth === Number.POSITIVE_INFINITY) {
+                pageWidth = page.width + marginLeft + marginRight;
+            }
+
+            if (pageHeight === Number.POSITIVE_INFINITY) {
+                pageHeight = page.height + marginTop + marginBottom;
+            }
 
             if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
                 height += pageHeight;

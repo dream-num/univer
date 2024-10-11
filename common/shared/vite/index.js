@@ -73,7 +73,9 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
                 entryRoot: 'src',
                 outDir: 'lib/types',
             }),
-            obfuscator(),
+            ...(
+                pkg.name.startsWith('@univerjs/') ? [] : [obfuscator()]
+            ),
             buildPkg(),
         ],
         define: {

@@ -509,8 +509,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             Object.values(this._formulaData[unitId]).forEach((sheet) => {
                 sheet.forValue((row, column, tree) => {
                     if (tree?.node?.hasDefinedName(definedName)) {
+                        this._removeDependencyRTreeCache(tree);
                         this.clearDependencyForTree(tree);
                         sheet.realDeleteValue(row, column);
+                        this._removeTreeIdFromCache(tree);
                     }
                 });
             });

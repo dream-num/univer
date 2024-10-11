@@ -14,5 +14,12 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line no-console
-console.log('Univer node');
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { UniverInstanceType } from '@univerjs/core';
+import { createUniverOnNode } from '../sdk';
+
+const univer = createUniverOnNode();
+
+univer.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, {});
+
+// TODO: Facade API here

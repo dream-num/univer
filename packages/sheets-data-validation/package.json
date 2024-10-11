@@ -68,7 +68,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
         "clsx": ">=2.0.0",
         "dayjs": ">=1.11.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
@@ -86,7 +85,6 @@
         "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13"
     },

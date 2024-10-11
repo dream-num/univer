@@ -1,7 +1,6 @@
 import { execSync } from 'node:child_process';
 import process from 'node:process';
 import esbuild from 'esbuild';
-import copyPlugin from 'esbuild-plugin-copy';
 import minimist from 'minimist';
 import './scripts/generate-locales.mjs';
 
@@ -22,23 +21,12 @@ if (!args.watch) {
 
 const ctx = await esbuild[args.watch ? 'context' : 'build']({
     bundle: true,
-    format: 'esm',
-    splitting: true,
     color: true,
-    loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: args.watch,
-    minify: false,
+    minify: true,
     target: 'chrome70',
-    plugins: [
-        copyPlugin({
-            assets: {
-                from: ['./public/**/*'],
-                to: ['./'],
-            },
-        }),
-    ],
     entryPoints: [
-        './src/sdk/basic.ts',
+        './src/cases/basic.ts',
     ],
     outdir: './dist',
     define,

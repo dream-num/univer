@@ -137,9 +137,11 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
 
     private _addComponent() {
         const { scene, unit: documentModel, components } = this._context;
+        const DEFAULT_PAGE_MARGIN_LEFT = 20;
+        const DEFAULT_PAGE_MARGIN_TOP = 20;
         const config = {
-            pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
-            pageMarginTop: documentModel.documentStyle.marginTop || 0,
+            pageMarginLeft: DEFAULT_PAGE_MARGIN_LEFT,
+            pageMarginTop: DEFAULT_PAGE_MARGIN_TOP,
         };
 
         const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);

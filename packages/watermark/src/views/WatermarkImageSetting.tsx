@@ -14,18 +14,3 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuItemType } from '@univerjs/ui';
-import { OpenWatermarkPanelOperation } from '../commands/operations/OpenWatermarkPanelOperation';
-import { UNIVER_WATERMARK_MENU } from '../common/const';
-
-export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: OpenWatermarkPanelOperation.id,
-        title: 'watermark.title',
-        tooltip: 'watermark.title',
-        icon: UNIVER_WATERMARK_MENU,
-        type: MenuItemType.BUTTON,
-    };
-}

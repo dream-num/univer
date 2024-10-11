@@ -14,4 +14,25 @@
  * limitations under the License.
  */
 
+import type { ITextWatermarkConfig } from './type';
+
 export const UNIVER_WATERMARK_MENU = 'UNIVER_WATERMARK_MENU';
+
+export const WATERMARK_PANEL = 'WATERMARK_PANEL';
+
+export const WatermarkTextBaseConfig: ITextWatermarkConfig = {
+    content: '',
+    fontSize: 16,
+    color: 'rgb(0,0,0)',
+    bold: false,
+    italic: false,
+    direction: 'ltr',
+    x: 0,
+    y: 0,
+    repeat: true,
+    spacingX: 200,
+    spacingY: 100,
+    rotate: -120,
+    opacity: 0.5,
+};
+

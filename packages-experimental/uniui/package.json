@@ -72,7 +72,7 @@
     },
     "dependencies": {
         "@floating-ui/react-dom": "^2.1.1",
-        "@types/react": "^18.3.9",
+        "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.0",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -91,9 +91,9 @@
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.2",
+        "typescript": "^5.6.3",
         "vite": "^5.4.8",
-        "vitest": "^2.1.1"
+        "vitest": "^2.1.2"
     },
     "univerSpace": {
         ".": {

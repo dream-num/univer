@@ -15,8 +15,10 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, Inject, sortRules } from '@univerjs/core';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 
+import type { LambdaNode } from '../ast-node/lambda-node';
+import { Disposable, Inject, sortRules } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
@@ -24,13 +26,12 @@ import {
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
+    FORCED_RECALCULATION_FUNCTION_NAME,
 } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
-import { FunctionNodeFactory } from '../ast-node/function-node';
-import type { LambdaNode } from '../ast-node/lambda-node';
+import { ErrorFunctionNode, FunctionNodeFactory } from '../ast-node/function-node';
 import { LambdaNodeFactory } from '../ast-node/lambda-node';
 import { LambdaParameterNodeFactory } from '../ast-node/lambda-parameter-node';
 import { NodeType } from '../ast-node/node-type';
@@ -41,8 +42,9 @@ import { ReferenceNodeFactory } from '../ast-node/reference-node';
 import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
-import { isChildRunTimeParameter, isFirstChildParameter } from '../utils/function-definition';
 import { getAstNodeTopParent } from '../utils/ast-node-tool';
+import { isChildRunTimeParameter, isFirstChildParameter } from '../utils/function-definition';
+import { updateLambdaStatement } from '../utils/update-lambda-statement';
 import { LexerNode } from './lexer-node';
 
 export class AstTreeBuilder extends Disposable {
@@ -121,7 +123,15 @@ export class AstTreeBuilder extends Disposable {
             const item = children[i];
 
             if (item instanceof LexerNode) {
+                updateLambdaStatement(item, lambdaId, currentLambdaPrivacyVar);
+
                 this._parse(item, parentAstNode);
+
+                const parentChildren = parentAstNode.getChildren();
+                const valueNode = parentChildren[i];
+                if (valueNode != null) {
+                    currentLambdaPrivacyVar.set(currentLambdaPrivacyVarKeys[i], valueNode);
+                }
             } else {
                 return false;
             }
@@ -129,13 +139,13 @@ export class AstTreeBuilder extends Disposable {
             // astNode?.setParent(parentAstNode);
         }
 
-        const parentChildren = parentAstNode.getChildren();
-        const parentChildrenCount = parentChildren.length;
+        // const parentChildren = parentAstNode.getChildren();
+        // const parentChildrenCount = parentChildren.length;
 
-        for (let i = 0; i < parentChildrenCount; i++) {
-            const item = parentChildren[i];
-            currentLambdaPrivacyVar.set(currentLambdaPrivacyVarKeys[i], item);
-        }
+        // for (let i = 0; i < parentChildrenCount; i++) {
+        //     const item = parentChildren[i];
+        //     currentLambdaPrivacyVar.set(currentLambdaPrivacyVarKeys[i], item);
+        // }
 
         parentAstNode.setParent(parent);
 
@@ -286,11 +296,16 @@ export class AstTreeBuilder extends Disposable {
             }
             // console.log('bugfix1', astNode, astNode.nodeType, currentAstNode, lexerNode);
             switch (astNode.nodeType) {
-                case NodeType.ERROR:
-                    return astNode;
-                case NodeType.FUNCTION:
+                // case NodeType.ERROR:
+                //     return astNode;
+                case NodeType.FUNCTION: {
+                    const token = astNode.getToken().trim().toUpperCase();
+                    if (FORCED_RECALCULATION_FUNCTION_NAME.has(token)) {
+                        astNode.setForcedCalculateFunction();
+                    }
                     calculateStack.push(astNode);
                     break;
+                }
                 case NodeType.LAMBDA:
                     calculateStack.push(astNode);
                     break;
@@ -326,6 +341,7 @@ export class AstTreeBuilder extends Disposable {
                     calculateStack.push(astNode);
                     break;
                 case NodeType.PREFIX:
+                    this._setPrefixRefOffset(astNode);
                     calculateStack.push(astNode);
                     break;
                 case NodeType.SUFFIX:
@@ -344,6 +360,17 @@ export class AstTreeBuilder extends Disposable {
         return currentAstNode;
     }
 
+    private _setPrefixRefOffset(astNode: BaseAstNode) {
+        const children = astNode.getChildren();
+        const childrenCount = children.length;
+        for (let i = 0; i < childrenCount; i++) {
+            const item = children[i];
+            if (item.nodeType === NodeType.REFERENCE) {
+                item.setRefOffset(this._refOffsetX, this._refOffsetY);
+            }
+        }
+    }
+
     private _checkAstNode(item: LexerNode | string) {
         let astNode: Nullable<BaseAstNode> = null;
         const astNodeFactoryListCount = this._astNodeFactoryList.length;
@@ -354,6 +381,11 @@ export class AstTreeBuilder extends Disposable {
                 break;
             }
         }
+
+        if (astNode == null) {
+            return new ErrorFunctionNode();
+        }
+
         // console.log('astNode111', astNode, item);
         return astNode;
     }

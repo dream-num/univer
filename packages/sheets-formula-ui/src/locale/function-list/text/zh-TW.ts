@@ -351,6 +351,49 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    REGEXEXTRACT: {
+        description: '根據規則運算式擷取第一個符合規則的字串。',
+        abstract: '根據規則運算式擷取第一個符合規則的字串。',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=zh-Hant',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文字', detail: '輸入文字' },
+            regularExpression: { name: '規則運算式', detail: '指定規則運算式，系統就會傳回 text 中第一個符合此運算式的字串。' },
+        },
+    },
+    REGEXMATCH: {
+        description: '某段文字是否符合規則運算式。',
+        abstract: '某段文字是否符合規則運算式。',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=zh-Hant',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文字', detail: '系統會根據規則運算式測試此文字。' },
+            regularExpression: { name: '規則運算式', detail: '用來測試文字的規則運算式。' },
+        },
+    },
+    REGEXREPLACE: {
+        description: '利用規則運算式將文字字串的一部分取代成其他文字字串。',
+        abstract: '利用規則運算式將文字字串的一部分取代成其他文字字串。',
+        links: [
+            {
+                title: '教導',
+                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=zh-Hant',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文字', detail: '系統會取代這段文字的部分區段。' },
+            regularExpression: { name: '規則運算式', detail: '規則運算式。系統將替換 text 中所有相符的項目。' },
+            replacement: { name: '取代文字', detail: '系統會將這段文字插入原來的文字。' },
+        },
+    },
     REPLACE: {
         description: '替換文字中的字元',
         abstract: '替換文字中的字元',

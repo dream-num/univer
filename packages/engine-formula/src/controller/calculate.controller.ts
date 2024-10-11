@@ -69,9 +69,9 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
+                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
 
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap);
+                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache);
                     }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
@@ -95,7 +95,8 @@ export class CalculateController extends Disposable {
         dirtyNameMap: IDirtyUnitSheetNameMap = {},
         dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
         dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
-        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {}
+        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {},
+        clearDependencyTreeCache: IDirtyUnitSheetNameMap = {}
     ) {
         if (
             dirtyRanges.length === 0 &&
@@ -112,15 +113,20 @@ export class CalculateController extends Disposable {
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
+        // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
         this._calculateFormulaService.execute({
             formulaData,
             arrayFormulaCellData,
+            arrayFormulaRange,
             forceCalculate,
             dirtyRanges,
             dirtyNameMap,
             dirtyDefinedNameMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
+            clearDependencyTreeCache,
         });
     }
 

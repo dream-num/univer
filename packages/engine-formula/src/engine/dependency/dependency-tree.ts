@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
-
+import type { IRange, IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IDirtyUnitSheetNameMap,
     IFeatureDirtyRangeType,
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../../basics/common';
+
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import { Disposable, generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -33,21 +33,23 @@ export enum FDtreeStateType {
     SKIP,
 }
 
-export interface IUnitRangeWithToken {
-    gridRange: IUnitRange;
-    token: string;
-}
+// export interface IUnitRangeWithToken {
+//     gridRange: IUnitRange;
+//     token: string;
+// }
 
 /**
  * A dependency tree, capable of calculating mutual dependencies,
  * is used to determine the order of formula calculations.
  */
 export class FormulaDependencyTree extends Disposable {
+    treeId: string = '';
+
     node: Nullable<BaseAstNode>;
 
-    children: FormulaDependencyTree[] = [];
+    children: Set<FormulaDependencyTree> = new Set();
 
-    parents: FormulaDependencyTree[] = [];
+    parents: Set<FormulaDependencyTree> = new Set();
 
     formula: string = '';
 
@@ -63,18 +65,22 @@ export class FormulaDependencyTree extends Disposable {
 
     unitId: string = '';
 
-    rangeList: IUnitRangeWithToken[] = [];
+    rangeList: IUnitRange[] = [];
 
     formulaId: Nullable<string>;
 
     featureId: Nullable<string>;
 
-    isPassive: boolean = true;
+    isCache: boolean = false;
 
-    _childIds: Set<string> = new Set();
-
-    // the left top cell , which means the position of the FormulaDependencyTree
-    anchorToken: string = '';
+    constructor(treeId?: string) {
+        super();
+        if (treeId != null) {
+            this.treeId = treeId;
+        } else {
+            this.treeId = generateRandomId(8);
+        }
+    }
 
     getDirtyData: Nullable<
         (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
@@ -85,16 +91,6 @@ export class FormulaDependencyTree extends Disposable {
 
     private _state = FDtreeStateType.DEFAULT;
 
-    private _id: string;
-    constructor() {
-        super();
-        this._id = `${Math.random().toString(36).slice(3)}-${Math.random().toString(36).slice(3)}`;
-    }
-
-    get id() {
-        return this._id;
-    }
-
     override dispose(): void {
         super.dispose();
 
@@ -102,11 +98,11 @@ export class FormulaDependencyTree extends Disposable {
         //     tree.dispose();
         // });
 
-        this.children = [];
+        this.children = new Set();
 
         this.rangeList = [];
 
-        this.parents = [];
+        this.parents = new Set();
 
         this.node?.dispose();
     }
@@ -152,23 +148,14 @@ export class FormulaDependencyTree extends Disposable {
         return true;
     }
 
-    /**
-     * "Determine whether all ranges of the current node exist within the dirty area.
-     *  If they are within the dirty area, return true, indicating that this node needs to be calculated.
-     * @param dependencyRangeList
-     */
-    dependencyRange(
-        dependencyRangeList: Map<string, Map<string, IRange[]>>,
-        dirtyUnitSheetNameMap: IDirtyUnitSheetNameMap,
-        unitExcludedCell: Nullable<IUnitExcludedCell>
-    ) {
-        if (this.rangeList.length === 0) {
+    dependencySheetName(dirtyUnitSheetNameMap?: IDirtyUnitSheetNameMap) {
+        if (this.rangeList.length === 0 || dirtyUnitSheetNameMap == null) {
             return false;
         }
 
         for (let r = 0, len = this.rangeList.length; r < len; r++) {
             const unitRange = this.rangeList[r];
-            const { unitId, sheetId, range } = unitRange.gridRange;
+            const { unitId, sheetId } = unitRange;
 
             /**
              * When a worksheet is inserted or deleted,
@@ -177,17 +164,20 @@ export class FormulaDependencyTree extends Disposable {
             if (dirtyUnitSheetNameMap[unitId]?.[sheetId] != null) {
                 return true;
             }
+        }
 
-            if (!dependencyRangeList.has(unitId)) {
-                continue;
-            }
+        return false;
+    }
 
-            const sheetRangeMap = dependencyRangeList.get(unitId)!;
-            if (!sheetRangeMap.has(sheetId)) {
-                continue;
-            }
+    isExcludeRange(unitExcludedCell: Nullable<IUnitExcludedCell>) {
+        if (this.rangeList.length === 0) {
+            return false;
+        }
 
-            const dependencyRanges = sheetRangeMap.get(sheetId)!;
+        for (let r = 0, len = this.rangeList.length; r < len; r++) {
+            const unitRange = this.rangeList[r];
+            const { unitId, sheetId, range } = unitRange;
+
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
             let { startRow: rangeStartRow, endRow: rangeEndRow, startColumn: rangeStartColumn, endColumn: rangeEndColumn } = range;
 
@@ -204,49 +194,51 @@ export class FormulaDependencyTree extends Disposable {
                 rangeEndColumn = Number.POSITIVE_INFINITY;
             }
 
-            for (const dependencyRange of dependencyRanges) {
-                const { startRow, startColumn, endRow, endColumn } = dependencyRange;
+            let isInclude = false;
 
-                if (rangeStartRow > endRow || rangeEndRow < startRow || rangeStartColumn > endColumn || rangeEndColumn < startColumn) {
-                    continue;
-                } else {
-                    let isInclude = true;
-                    /**
-                     * The position of the primary cell in the array formula needs to be excluded when calculating the impact of the array formula on dependencies.
-                     * This is because its impact was already considered during the first calculation.
-                     */
-                    excludedCell?.forValue((row, column) => {
-                        if (row >= rangeStartRow && row <= rangeEndRow && column >= rangeStartColumn && column <= rangeEndColumn) {
-                            isInclude = false;
-                            return false;
-                        }
-                    });
-
-                    if (isInclude) {
-                        return true;
-                    }
+            excludedCell?.forValue((row, column) => {
+                if (row >= rangeStartRow && row <= rangeEndRow && column >= rangeStartColumn && column <= rangeEndColumn) {
+                    isInclude = true;
+                    return false;
                 }
+            });
+
+            if (isInclude) {
+                return true;
             }
         }
         return false;
     }
 
     pushChildren(tree: FormulaDependencyTree) {
-        this.children.push(tree);
+        this.children.add(tree);
         tree._pushParent(this);
-        this._childIds.add(tree.id);
-    }
-
-    hasChild(tree: FormulaDependencyTree) {
-        return this._childIds.has(tree.id);
     }
 
     /**
      * Add the range corresponding to the current ast node.
      * @param range
      */
-    pushRangeList(range: IUnitRangeWithToken) {
-        this.rangeList.push(range);
+    pushRangeList(ranges: IUnitRange[]) {
+        this.rangeList.push(...ranges);
+    }
+
+    hasChildren(tree: FormulaDependencyTree) {
+        return this.children.has(tree);
+    }
+
+    toRTreeItem(): IRTreeItem {
+        return {
+            unitId: this.unitId,
+            sheetId: this.subUnitId,
+            range: {
+                startRow: this.row,
+                startColumn: this.column,
+                endRow: this.row,
+                endColumn: this.column,
+            },
+            id: this.treeId,
+        };
     }
 
     /**
@@ -260,9 +252,9 @@ export class FormulaDependencyTree extends Disposable {
 
         for (let r = 0, len = this.rangeList.length; r < len; r++) {
             const unitRange = this.rangeList[r];
-            const unitId = unitRange.gridRange.unitId;
-            const sheetId = unitRange.gridRange.sheetId;
-            const range = unitRange.gridRange.range;
+            const unitId = unitRange.unitId;
+            const sheetId = unitRange.sheetId;
+            const range = unitRange.range;
 
             if (
                 dependenceTree.unitId === unitId &&
@@ -277,187 +269,86 @@ export class FormulaDependencyTree extends Disposable {
     }
 
     private _pushParent(tree: FormulaDependencyTree) {
-        this.parents.push(tree);
+        this.parents.add(tree);
     }
 }
 
-interface IFormulaDependencyTreeCacheItem {
-    unitRangeWithToken: IUnitRangeWithToken;
-    treeList: FormulaDependencyTree[];
-    ids: Set<string>;
-}
+// interface IFormulaDependencyTreeCacheItem {
+//     unitRangeWithToken: IUnitRangeWithToken;
+//     treeList: FormulaDependencyTree[];
+// }
 
-export class FormulaDependencyTreeCache extends Disposable {
-    private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
-    private _map = new Map<string, Map<string, Set<string>>>();
-    private _dependencyMap = new Map<string, FormulaDependencyTree>();
-    private _parentIdMap = new Map<string, string[]>();
-    // use for mark the first cell of the range
-    private _rangeTokens = new Set<string>();
+// export class FormulaDependencyTreeCache extends Disposable {
+//     private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
 
-    override dispose(): void {
-        this.clear();
-    }
+//     override dispose(): void {
+//         this.clear();
+//     }
 
-    size() {
-        return this._cacheItems.size;
-    }
+//     size() {
+//         return this._cacheItems.size;
+//     }
 
-    getDependencyMap() {
-        return this._dependencyMap;
-    }
+//     get length() {
+//         return this._cacheItems.size;
+//     }
 
-    getDependencyTree(id: string) {
-        return this._dependencyMap.get(id);
-    }
+//     add(unitRangeWithToken: IUnitRangeWithToken, tree: FormulaDependencyTree) {
+//         const { token } = unitRangeWithToken;
+//         if (!this._cacheItems.has(token)) {
+//             this._cacheItems.set(token, {
+//                 unitRangeWithToken,
+//                 treeList: [tree],
+//             });
+//             return;
+//         }
 
-    get length() {
-        return this._cacheItems.size;
-    }
+//         const cacheItem = this._cacheItems.get(token)!;
+//         cacheItem.treeList.push(tree);
+//     }
 
-    add(unitRangeWithToken: IUnitRangeWithToken, tree: FormulaDependencyTree) {
-        const { token } = unitRangeWithToken;
-        if (!this._cacheItems.has(token)) {
-            this._cacheItems.set(token, {
-                unitRangeWithToken,
-                treeList: [tree],
-                ids: new Set<string>([tree.id]),
-            });
-            return;
-        }
+//     clear() {
+//         this._cacheItems.clear();
+//     }
 
-        const cacheItem = this._cacheItems.get(token)!;
-        cacheItem.treeList.push(tree);
-        cacheItem.ids.add(tree.id);
+//     remove(token: string, tree: FormulaDependencyTree) {
+//         if (!this._cacheItems.has(token)) {
+//             return;
+//         }
 
-        const { gridRange } = unitRangeWithToken;
+//         const cacheItem = this._cacheItems.get(token)!;
+//         const index = cacheItem.treeList.indexOf(tree);
+//         if (index !== -1) {
+//             cacheItem.treeList.splice(index, 1);
+//         }
+//     }
 
-        const { range } = gridRange;
-        if (!(range.startRow === range.endRow && range.startColumn === range.endColumn)) {
-            this._rangeTokens.add(token);
-        }
-    }
+//     delete(token: string) {
+//         this._cacheItems.delete(token);
+//     }
 
-    addDependencyMap(tree: FormulaDependencyTree) {
-        this._dependencyMap.set(tree.id, tree);
-    }
+//     /**
+//      * Determine whether range is dependent on other trees.
+//      * @param dependenceTree
+//      */
+//     dependency(dependenceTree: FormulaDependencyTree) {
+//         this._cacheItems.forEach((cacheItem) => {
+//             const { unitRangeWithToken, treeList } = cacheItem;
+//             const { gridRange } = unitRangeWithToken;
+//             const { unitId, sheetId, range } = gridRange;
 
-    updateParent(tree: FormulaDependencyTree) {
-        const ids = new Set<string>();
-        const unitId = tree.unitId;
-        const sheetId = tree.subUnitId;
-        const testCacheItems = this._cacheItems.get(tree.anchorToken);
-
-        if (testCacheItems) {
-            this._parentIdMap.set(tree.id, [...testCacheItems.ids]);
-            return;
-        }
-        for (const token of this._rangeTokens) {
-            const cacheItem = this._cacheItems.get(token);
-            if (cacheItem) {
-                const { unitRangeWithToken, treeList } = cacheItem;
-                const { gridRange } = unitRangeWithToken;
-                if (gridRange.unitId === unitId && gridRange.sheetId === sheetId && tree.inRangeData(gridRange.range)) {
-                    for (const tree of treeList) {
-                        ids.add(tree.id);
-                    }
-                }
-            }
-        }
-        this._parentIdMap.set(tree.id, [...ids]);
-    }
-
-    clear() {
-        this._cacheItems.clear();
-        this._map.clear();
-        this._dependencyMap.clear();
-    }
-
-    remove(token: string, tree: FormulaDependencyTree) {
-        if (!this._cacheItems.has(token)) {
-            return;
-        }
-
-        const cacheItem = this._cacheItems.get(token)!;
-        const index = cacheItem.treeList.indexOf(tree);
-        if (index !== -1) {
-            cacheItem.treeList.splice(index, 1);
-        }
-    }
-
-    delete(token: string) {
-        this._cacheItems.delete(token);
-    }
-
-    getDependencyId(dependenceTree: FormulaDependencyTree, ids: Set<string>) {
-        const parentIdList = this._parentIdMap.get(dependenceTree.id);
-        if (parentIdList) {
-            const list = [...parentIdList];
-            for (const parentId of list) {
-                ids.add(parentId);
-                const tree = this._dependencyMap.get(parentId);
-                if (tree && parentId !== dependenceTree.id) {
-                    this.getDependencyId(tree, ids);
-                }
-            }
-        }
-    }
-
-    /**
-     * Determine whether range is dependent on other trees.
-     * @param dependenceTree
-     */
-
-    dependencyUseParentId(dependenceTree: FormulaDependencyTree) {
-        let ids = new Set<string>();
-
-        this.getDependencyId(dependenceTree, ids);
-        for (const parentId of ids) {
-            const tree = this._dependencyMap.get(parentId);
-            if (tree) {
-                const notExist = tree.hasChild(dependenceTree);
-                if (notExist && tree.rangeList) {
-                    for (const rangeItem of tree.rangeList) {
-                        if (rangeItem.gridRange.unitId === dependenceTree.unitId && rangeItem.gridRange.sheetId === dependenceTree.subUnitId) {
-                            tree.pushChildren(dependenceTree);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (tree && !tree.hasChild(dependenceTree)) {
-                tree.pushChildren(dependenceTree);
-            }
-        }
-        ids.clear();
-
-        // @ts-ignore
-        ids = null;
-    }
-
-    /**
-     * Determine whether range is dependent on other trees.
-     * @param dependenceTree
-     */
-    dependency(dependenceTree: FormulaDependencyTree) {
-        this._cacheItems.forEach((cacheItem) => {
-            const { unitRangeWithToken, treeList } = cacheItem;
-            const { gridRange } = unitRangeWithToken;
-            const { unitId, sheetId, range } = gridRange;
-
-            if (
-                dependenceTree.unitId === unitId &&
-                dependenceTree.subUnitId === sheetId &&
-                dependenceTree.inRangeData(range)
-            ) {
-                treeList.forEach((tree) => {
-                    if (tree === dependenceTree || tree.children.includes(dependenceTree)) {
-                        return true;
-                    }
-                    tree.pushChildren(dependenceTree);
-                });
-            }
-        });
-    }
-}
+//             if (
+//                 dependenceTree.unitId === unitId &&
+//                 dependenceTree.subUnitId === sheetId &&
+//                 dependenceTree.inRangeData(range)
+//             ) {
+//                 treeList.forEach((tree) => {
+//                     if (tree === dependenceTree || tree.children.includes(dependenceTree)) {
+//                         return true;
+//                     }
+//                     tree.pushChildren(dependenceTree);
+//                 });
+//             }
+//         });
+//     }
+// }

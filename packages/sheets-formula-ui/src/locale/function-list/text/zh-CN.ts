@@ -352,6 +352,49 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    REGEXEXTRACT: {
+        description: '根据正则表达式提取第一个匹配的字符串。',
+        abstract: '根据正则表达式提取第一个匹配的字符串。',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=zh-Hans',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文本', detail: '输入文本' },
+            regularExpression: { name: '正则表达式', detail: '此函数将返回 text 中符合此表达式的第一个字符串。' },
+        },
+    },
+    REGEXMATCH: {
+        description: '判断一段文本是否与正则表达式相匹配。',
+        abstract: '判断一段文本是否与正则表达式相匹配。',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=zh-Hans',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文本', detail: '要用正则表达式测试的文本。' },
+            regularExpression: { name: '正则表达式', detail: '用来测试文本的正则表达式。' },
+        },
+    },
+    REGEXREPLACE: {
+        description: '使用正则表达式将文本字符串中的一部分替换为其他文本字符串。',
+        abstract: '使用正则表达式将文本字符串中的一部分替换为其他文本字符串。',
+        links: [
+            {
+                title: '教学',
+                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=zh-Hans',
+            },
+        ],
+        functionParameter: {
+            text: { name: '文本', detail: '其中一部分将被替换的文本。' },
+            regularExpression: { name: '正则表达式', detail: '正则表达式。text 中所有匹配的实例都将被替换。' },
+            replacement: { name: '替换内容', detail: '要插入到原有文本中的文本。' },
+        },
+    },
     REPLACE: {
         description: '替换文本中的字符',
         abstract: '替换文本中的字符',

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency, Injector } from '@wendellhu/redi';
+import type { Dependency, DependencyIdentifier, Injector } from '@wendellhu/redi';
 
 export * from '@wendellhu/redi';
 export * from '@wendellhu/redi/react-bindings';
@@ -33,7 +33,7 @@ export function registerDependencies(injector: Injector, dependencies: Dependenc
  * @param injector The injector to touch the dependencies.
  * @param dependencies The dependencies to touch.
  */
-export function touchDependencies(injector: Injector, dependencies: Dependency[]): void {
+export function touchDependencies(injector: Injector, dependencies: [DependencyIdentifier<unknown>][]): void {
     dependencies.forEach(([d]) => {
         if (injector.has(d)) {
             injector.get(d);

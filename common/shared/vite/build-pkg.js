@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-const process = require('node:process');
 const fs = require('node:fs');
 const path = require('node:path');
+const process = require('node:process');
 const esbuild = require('esbuild');
 
 exports.buildPkg = function buildPkg() {
@@ -52,10 +52,10 @@ exports.buildPkg = function buildPkg() {
                 'univer',
             ];
 
-            pkg.exports = {
+            pkg.exports = Object.assign({
                 '.': './src/index.ts',
                 './*': './src/*',
-            };
+            }, pkg.exports);
             pkg.main = './lib/cjs/index.js';
             pkg.module = './lib/es/index.js';
             pkg.types = './lib/types/index.d.ts';

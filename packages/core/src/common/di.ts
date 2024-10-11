@@ -34,5 +34,9 @@ export function registerDependencies(injector: Injector, dependencies: Dependenc
  * @param dependencies The dependencies to touch.
  */
 export function touchDependencies(injector: Injector, dependencies: Dependency[]): void {
-    dependencies.forEach((d) => injector.get(d[0]));
+    dependencies.forEach(([d]) => {
+        if (injector.has(d)) {
+            injector.get(d);
+        }
+    });
 }

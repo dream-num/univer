@@ -15,6 +15,7 @@
  */
 
 import type { Ctor, IDisposable } from '../../common/di';
+import type { Plugin, PluginCtor } from './plugin';
 import { skip } from 'rxjs';
 import { Inject, Injector } from '../../common/di';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
@@ -22,7 +23,7 @@ import { Disposable } from '../../shared/lifecycle';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { getLifecycleStagesAndBefore, LifecycleService } from '../lifecycle/lifecycle.service';
 import { ILogService } from '../log/log.service';
-import { DependentOnSymbol, Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
+import { DependentOnSymbol, PluginRegistry, PluginStore } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
@@ -290,17 +291,7 @@ export class PluginHolder extends Disposable {
         plugins.forEach((p) => {
             switch (stage) {
                 case LifecycleStages.Starting:
-                    if (p.onStarting.length > 0 && p.onStarting !== Plugin.prototype.onStarting && !this._warnedAboutOnStartingDeprecation) {
-                        this._logService.warn(
-                            '[PluginService]',
-                            p.onStarting.length,
-                            `Plugin "${p.getPluginName()}" is using deprecated "onStarting" method with arguments. Please use "this._injector" instead.`
-                        );
-
-                        this._warnedAboutOnStartingDeprecation = true;
-                    }
-
-                    p.onStarting(this._injector);
+                    p.onStarting();
                     break;
                 case LifecycleStages.Ready:
                     p.onReady();

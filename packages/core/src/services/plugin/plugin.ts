@@ -36,7 +36,7 @@ export abstract class Plugin extends Disposable {
 
     protected abstract _injector: Injector;
 
-    onStarting(_injector?: Injector): void {
+    onStarting(): void {
         // empty
     }
 

@@ -17,9 +17,9 @@
 import { type IRange, RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
+import { matchToken } from '../../basics/token';
 import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class ColumnReferenceObject extends BaseReferenceObject {
@@ -63,6 +63,11 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         const newColumnRange = columnReferenceObject.getRangeData();
 
         const newColumn = newColumnRange.startColumn;
+
+        // if the column is already in the range, return the same object
+        if (newColumn >= currentRangeData.startColumn && newColumn <= currentRangeData.endColumn) {
+            return this;
+        }
 
         const column = currentRangeData.startColumn;
 

@@ -163,6 +163,16 @@ export class SpanModel extends Disposable {
         return null;
     }
 
+    /**
+     * Return index of merge data if (row,col) is in merge range. -1 means not in merge range.
+     * @param row
+     * @param column
+     * @returns {number} index of merge range.
+     */
+    public getMergeDataIndex(row: number, column: number) {
+        return this._getMergeDataIndex(row, column);
+    }
+
     public isRowContainsMergedCell(row: number) {
         if (this._hasAll) {
             return true;

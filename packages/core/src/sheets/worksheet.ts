@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { Styles } from './styles';
+import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils } from '../docs';
 import { ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
@@ -24,9 +27,6 @@ import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
 import { SheetViewModel } from './view-model';
-import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { Styles } from './styles';
-import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 
 /**
  * The model of a Worksheet.
@@ -249,7 +249,7 @@ export class Worksheet {
     }
 
     /**
-     *  Get the merged cell info list which has intersection with the given range.
+     * Get the merged cell info list which has intersection with the given range.
      * @param {number} startRow The start row index of the range
      * @param {number} startColumn The start column index of the range
      * @param {number} endRow The end row index of the range

@@ -88,6 +88,16 @@ export class Background extends SheetExtension {
             diffRanges,
             spreadsheetSkeleton,
         } as IRenderBGContext;
+
+        const mergeRanges: IRange[] = [];
+        // Currently, viewRanges has only one range.
+        viewRanges.forEach((range) => {
+            // For merge cell.
+            // The background extension is not as strict as the font extension; the font extension must never be redrawn. Therefore, it is not necessary to be that complex.
+            const intersectMergeRangesInViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+            mergeRanges.push(...intersectMergeRangesInViewRanges);
+        });
+
         const renderBGCore = (rgb: string) => {
             const bgColorMatrix = bgMatrixCacheByColor[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
@@ -96,42 +106,19 @@ export class Background extends SheetExtension {
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
 
-            const mergeRanges: IRange[] = [];
+            // Currently, viewRanges has only one range.
             viewRanges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
+                    const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
+                    if (index !== -1) {
+                        return;
+                    }
                     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
                     if (!cellInfo) return;
-                    if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
-                        // to check if mergeRanges has this merge range already. if not, push it.
-                        const f = mergeRanges.filter((r: IRange) => {
-                            return r.startRow === cellInfo.mergeInfo.startRow && r.startColumn === cellInfo.mergeInfo.startColumn;
-                        });
-                        if (f.length === 0) {
-                            mergeRanges.push(cellInfo.mergeInfo);
-                            return;
-                        }
-                    }
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
                         renderBGContext.cellInfo = cellInfo;
                         this.renderBGByCell(renderBGContext, row, col);
-                    }
-                });
-            });
-            mergeRanges.forEach((range) => {
-                // draw once in each merge range.
-                // DO NOT use get topleft cell of bgColorMatrix, may be null(if you jump to bottom of merged cell)
-                // As we only need to draw merged cell once, so add a flag handled to break the loop.
-                let handled = false;
-                Range.foreach(range, (row, col) => {
-                    if (handled) return;
-                    const bgConfig = bgColorMatrix.getValue(row, col);
-                    if (bgConfig) {
-                        const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
-                        if (!cellInfo) return;
-                        renderBGContext.cellInfo = cellInfo;
-                        this.renderBGByCell(renderBGContext, row, col);
-                        handled = true;
                     }
                 });
             });
@@ -139,7 +126,29 @@ export class Background extends SheetExtension {
             ctx.closePath();
         };
 
-        Object.keys(bgMatrixCacheByColor).forEach(renderBGCore);
+        const renderBGForMergedCells = (rgb: string) => {
+            const bgColorMatrix = bgMatrixCacheByColor[rgb];
+            ctx.fillStyle = rgb || getColor([255, 255, 255])!;
+            const backgroundPaths = new Path2D();
+            renderBGContext.backgroundPaths = backgroundPaths;
+            ctx.beginPath();
+            mergeRanges.forEach((range) => {
+                // bgConfig is requried to be checked in each color loop.
+                const bgConfig = bgColorMatrix.getValue(range.startRow, range.startColumn);
+                if (bgConfig) {
+                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+                    if (!cellInfo) return;
+                    renderBGContext.cellInfo = cellInfo;
+                    this.renderBGByCell(renderBGContext, range.startRow, range.startColumn);
+                }
+            });
+            ctx.fill(backgroundPaths);
+            ctx.closePath();
+        };
+        Object.keys(bgMatrixCacheByColor).forEach((rgb) => {
+            renderBGCore(rgb);
+            renderBGForMergedCells(rgb);
+        });
         ctx.restore();
     }
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { IAutoFilter } from '../models/types';
 import {
     CommandType, Disposable,
     fromCallback,
@@ -23,8 +25,6 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
-import type { Nullable, Workbook } from '@univerjs/core';
-
 import {
     ReCalcSheetsFilterMutation,
     RemoveSheetsFilterMutation,
@@ -32,7 +32,6 @@ import {
     SetSheetsFilterRangeMutation,
 } from '../commands/mutations/sheets-filter.mutation';
 import { FilterModel } from '../models/filter-model';
-import type { IAutoFilter } from '../models/types';
 
 export const FILTER_MUTATIONS = new Set([
     SetSheetsFilterRangeMutation.id,

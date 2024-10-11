@@ -574,23 +574,19 @@ export class DrawingUpdateController extends Disposable {
     private _insertDrawing(params: IDrawingSearch[]) {
         const sceneList: Scene[] = [];
         (params).forEach((param) => {
-            const { unitId, subUnitId, drawingId } = param;
+            const { unitId } = param;
 
             const drawingParam = this._drawingManagerService.getDrawingByParam(param) as IDrawingParam;
-
             if (drawingParam == null) {
                 return;
             }
 
-            const { transform, drawingType } = drawingParam;
-
             const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-
             if (renderObject == null) {
                 return;
             }
-            const { scene, transformer } = renderObject;
 
+            const { scene } = renderObject;
             if (!sceneList.includes(scene)) {
                 sceneList.push(scene);
             }

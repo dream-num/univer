@@ -71,4 +71,3 @@ export class SheetsDrawingLoadController extends Disposable {
         );
     }
 }
-

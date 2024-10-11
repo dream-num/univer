@@ -574,11 +574,18 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
 
+            callback?.();
+            if (
+                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
+                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
+            ) {
+                return;
+            }
+
             this._textSelectionManagerService.refreshSelection({
                 unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                 subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
             });
-            callback?.();
         }, 0);
 
         const contentBoundingRect = this._layoutService.getContentElement().getBoundingClientRect();

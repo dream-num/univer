@@ -660,7 +660,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             },
         });
 
-        this._editorBridgeService.refreshEditCellState();
+        this._editorBridgeService.refreshEditCellState(false, true);
         editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;

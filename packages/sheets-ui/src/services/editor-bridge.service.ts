@@ -92,11 +92,11 @@ export interface IEditorBridgeService {
         AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
     }>;
     dispose(): void;
-    refreshEditCellState(resetSizeOnly?: boolean): void;
+    refreshEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
-    getLatestEditCellState(resetSizeOnly?: boolean): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    getLatestEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
@@ -122,6 +122,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
     private _currentEditCellState: Nullable<IEditorBridgeServiceParam> = null;
+
+    // TODO: @weird94 this should split into to subjects, documentDataModel & position
     private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
     readonly currentEditCellState$ = this._currentEditCellState$.asObservable();
 
@@ -174,8 +176,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         });
     }
 
-    refreshEditCellState(resetSizeOnly?: boolean) {
-        const editCellState = this.getLatestEditCellState(resetSizeOnly);
+    refreshEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean) {
+        const editCellState = this.getLatestEditCellState(resetSizeOnly, tryKeepLastObject);
         this._currentEditCellState = editCellState;
 
         this._currentEditCellState$.next(editCellState);
@@ -214,7 +216,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
-    getLatestEditCellState(resetSizeOnly?: boolean) {
+    getLatestEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean) {
         const currentEditCell = this._currentEditCell;
         if (currentEditCell == null) {
             return;
@@ -274,11 +276,13 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             startY = this._currentEditCellState.position.startY;
         }
 
-        if (this._currentEditCellState &&
+        if (
+            this._currentEditCellState &&
+            tryKeepLastObject &&
             this._currentEditCellState.unitId === location.unitId &&
-                this._currentEditCellState.sheetId === location.subUnitId &&
-                this._currentEditCellState.row === location.row &&
-                this._currentEditCellState.column === location.col
+            this._currentEditCellState.sheetId === location.subUnitId &&
+            this._currentEditCellState.row === location.row &&
+            this._currentEditCellState.column === location.col
         ) {
             documentLayoutObject = this._currentEditCellState.documentLayoutObject;
         } else {

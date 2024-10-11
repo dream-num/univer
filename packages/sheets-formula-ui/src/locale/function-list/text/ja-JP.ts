@@ -353,6 +353,49 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    REGEXEXTRACT: {
+        description: '正規表現と最初に一致する部分文字列を抽出します。',
+        abstract: '正規表現と最初に一致する部分文字列を抽出します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=ja',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'テキスト', detail: '代入するテキストです。' },
+            regularExpression: { name: '正規表現', detail: 'この正規表現に一致する最初のテキスト部分が返されます。' },
+        },
+    },
+    REGEXMATCH: {
+        description: '正規表現に一致するテキストの一部を検索します。',
+        abstract: '正規表現に一致するテキストの一部を検索します。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=ja',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'テキスト', detail: '正規表現に対して検証するテキストです。' },
+            regularExpression: { name: '正規表現', detail: 'テキストを検証する正規表現です。' },
+        },
+    },
+    REGEXREPLACE: {
+        description: '正規表現を使用して、テキスト文字列の一部を別のテキスト文字列に置き換えます。',
+        abstract: '正規表現を使用して、テキスト文字列の一部を別のテキスト文字列に置き換えます。',
+        links: [
+            {
+                title: '指導',
+                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=ja',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'テキスト', detail: '一部を置換する対象のテキストです。' },
+            regularExpression: { name: '正規表現', detail: 'この正規表現に一致するテキスト内のすべてのインスタンスが置き換えられます。' },
+            replacement: { name: '置換', detail: '元のテキストに挿入されるテキストです。' },
+        },
+    },
     REPLACE: {
         description: '文字列中の指定された数の文字を他の文字に置き換えます。',
         abstract: '文字列中の指定された数の文字を他の文字に置き換えます。',

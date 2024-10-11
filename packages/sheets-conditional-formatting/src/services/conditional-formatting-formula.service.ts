@@ -15,21 +15,21 @@
  */
 
 import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, RefAlias, toDisposable, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
+import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
+import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, RefAlias, toDisposable, Tools } from '@univerjs/core';
+
 import {
     IActiveDirtyManagerService,
     RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation,
 } from '@univerjs/engine-formula';
-
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
-import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
 import { ConditionalFormattingFormulaMarkDirty } from '../commands/mutations/formula-mark-dirty.mutation';
-import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
+import { ConditionalFormattingViewModel } from '../models/conditional-formatting-view-model';
 import { ConditionalFormattingService } from './conditional-formatting.service';
 
 // eslint-disable-next-line ts/consistent-type-definitions

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IUniverDocsUIConfig } from './config.schema';
 import {
     connectInjector,
     Disposable,
@@ -22,12 +23,10 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { TodoList } from '@univerjs/icons';
 import { BuiltInUIPart, ComponentManager, ILayoutService, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { CoreHeaderFooterCommand, OpenHeaderFooterPanelCommand } from '../commands/commands/doc-header-footer.command';
@@ -60,10 +59,7 @@ import {
 import { DocFooter } from '../views/doc-footer';
 import { PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
-import type { IUniverDocsUIConfig } from './config.schema';
 
-// FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui plug-in can be added in LifecycleStages.Ready
-@OnLifecycle(LifecycleStages.Rendered, DocUIController)
 export class DocUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,

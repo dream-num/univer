@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsThreadCommentBasePlugin } from '@univerjs/sheets-thread-comment-base';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import type { Dependency } from '@univerjs/core';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';
@@ -28,7 +29,6 @@ import { SheetsThreadCommentPopupController } from './controllers/sheets-thread-
 import { ThreadCommentRemoveSheetsController } from './controllers/sheets-thread-comment-remove.controller';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 import { SHEETS_THREAD_COMMENT } from './types/const';
-import type { IUniverSheetsThreadCommentConfig } from './controllers/config.schema';
 
 @DependentOn(UniverThreadCommentUIPlugin, UniverSheetsThreadCommentBasePlugin)
 export class UniverSheetsThreadCommentPlugin extends Plugin {
@@ -67,5 +67,18 @@ export class UniverSheetsThreadCommentPlugin extends Plugin {
         [ShowAddSheetCommentModalOperation].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+
+        this._injector.get(SheetsThreadCommentController);
+    }
+
+    override onReady(): void {
+        this._injector.get(SheetsThreadCommentRenderController);
+        this._injector.get(ThreadCommentRemoveSheetsController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsThreadCommentCopyPasteController);
+        this._injector.get(SheetsThreadCommentHoverController);
+        this._injector.get(SheetsThreadCommentPopupController);
     }
 }

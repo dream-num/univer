@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
@@ -25,7 +25,6 @@ import { CustomFormulaValidator } from '../validators/custom-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { WholeValidator } from '../validators/whole-validator';
 
-@OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

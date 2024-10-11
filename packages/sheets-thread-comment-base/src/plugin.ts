@@ -41,5 +41,7 @@ export class UniverSheetsThreadCommentBasePlugin extends Plugin {
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
+
+        this._injector.get(SheetsThreadCommentRefRangeController);
     }
 }

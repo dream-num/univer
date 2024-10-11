@@ -16,11 +16,11 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { LambdaPrivacyVarType } from './base-ast-node';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import type { LambdaPrivacyVarType } from './base-ast-node';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -73,7 +73,7 @@ export class LambdaParameterNode extends BaseAstNode {
         if (!node) {
             const value = this.getValue();
             if (value == null || value.isError()) {
-                this.setValue(ErrorValueObject.create(ErrorType.SPILL));
+                this.setValue(ErrorValueObject.create(ErrorType.NAME));
             }
         } else {
             this.setValue(node.getValue());
@@ -92,7 +92,7 @@ export class LambdaParameterNodeFactory extends BaseAstNodeFactory {
         const lambdaParameter = param.getLambdaParameter();
 
         if (!currentLambdaPrivacyVar) {
-            return new ErrorNode(ErrorType.SPILL);
+            return new ErrorNode(ErrorType.NAME);
         }
 
         return new LambdaParameterNode(param.getToken(), lambdaParameter, currentLambdaPrivacyVar);

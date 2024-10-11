@@ -18,15 +18,12 @@ import {
     BuildTextUtils,
     Disposable,
     Inject,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
 
 import { ConditionalFormattingService } from '@univerjs/sheets-conditional-formatting';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingEditorController)
 export class ConditionalFormattingEditorController extends Disposable {
     constructor(
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,

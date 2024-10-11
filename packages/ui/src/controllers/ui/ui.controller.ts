@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier, LifecycleStages, runOnLifecycle } from '@univerjs/core';
+import { createIdentifier } from '@univerjs/core';
 
 export interface IWorkbenchOptions {
     container?: string | HTMLElement;
@@ -27,4 +27,3 @@ export interface IWorkbenchOptions {
 
 export interface IUIController {}
 export const IUIController = createIdentifier<IUIController>('univer.ui.ui-controller');
-runOnLifecycle(LifecycleStages.Ready, IUIController);

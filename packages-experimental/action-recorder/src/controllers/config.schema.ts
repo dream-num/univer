@@ -22,6 +22,7 @@ export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverActionRecorderConfig {
     menu?: MenuConfig;
+    replayOnly?: boolean;
 }
 
 export const defaultPluginConfig: IUniverActionRecorderConfig = {};

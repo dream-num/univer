@@ -15,11 +15,11 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, Inject, LifecycleStages, OnLifecycle, Range } from '@univerjs/core';
-import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
-import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
+import { Disposable, Inject, Range } from '@univerjs/core';
 import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
+import { AddCommentMutation, DeleteCommentMutation, type IThreadComment, IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 import { SHEETS_THREAD_COMMENT } from '../types/const';
 
 const transformRef = (ref: string, source: { row: number; column: number }, target: { row: number; column: number }) => {
@@ -35,7 +35,6 @@ const transformRef = (ref: string, source: { row: number; column: number }, targ
     return serializeRange(targetRange);
 };
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentCopyPasteController)
 export class SheetsThreadCommentCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         unitId: string;

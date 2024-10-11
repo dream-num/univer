@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Documents, DocumentSkeleton, INodePosition, IPoint, ITextSelectionStyle, ThinScene } from '@univerjs/engine-render';
+import type { IDocRange } from './range-interface';
 import { COLORS, DOC_RANGE_TYPE, type Nullable, RANGE_DIRECTION, Rectangle, Tools } from '@univerjs/core';
 import { getColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, RegularPolygon } from '@univerjs/engine-render';
-import type { Documents, DocumentSkeleton, INodePosition, IPoint, ITextSelectionStyle, ThinScene } from '@univerjs/engine-render';
 import { compareNodePositionInTable, NodePositionConvertToRectRange } from './convert-rect-range';
 import { TEXT_RANGE_LAYER_INDEX } from './text-range';
-import type { IDocRange } from './range-interface';
 
 const RECT_RANGE_KEY_PREFIX = '__DocTableRectRange__';
 const ID_LENGTH = 6;

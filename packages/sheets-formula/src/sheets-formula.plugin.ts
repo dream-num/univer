@@ -23,6 +23,7 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
+
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
@@ -36,6 +37,7 @@ import {
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
@@ -99,6 +101,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [ActiveDirtyController],
             [DefinedNameController],
+            [UpdateDefinedNameController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.
@@ -114,42 +117,15 @@ export class UniverSheetsFormulaPlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(TriggerCalculationController);
         this._injector.get(FormulaController);
-    }
-}
-
-// TODO@wzhudev: after I separate the sheets-formula-ui plugin,
-// I found out that `UniverSheetsFormulaPlugin` provides the same services as `UniverSheetsFormulaMobilePlugin`.
-// The the later on can be removed.
-
-export class UniverSheetsFormulaMobilePlugin extends Plugin {
-    static override pluginName = SHEETS_FORMULA_PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER_SHEET;
-
-    constructor(
-        private readonly _config: undefined,
-        @Inject(Injector) override readonly _injector: Injector
-    ) {
-        super();
+        this._injector.get(TriggerCalculationController);
+        this._injector.get(ActiveDirtyController);
+        this._injector.get(ArrayFormulaCellInterceptorController);
+        this._injector.get(UpdateFormulaController);
+        this._injector.get(UpdateDefinedNameController);
     }
 
-    override onStarting(): void {
-        const dependencies: Dependency[] = [
-            [IRegisterFunctionService, { useClass: RegisterFunctionService }],
-            [FormulaRefRangeService],
-            [RegisterOtherFormulaService],
-            [ArrayFormulaCellInterceptorController],
-            [TriggerCalculationController],
-            [UpdateFormulaController],
-            [ActiveDirtyController],
-            [DefinedNameController],
-        ];
-
-        dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    override onReady(): void {
-        ([TriggerCalculationController]).forEach((module) => this._injector.get(module));
+    override onRendered(): void {
+        this._injector.get(DefinedNameController);
     }
 }

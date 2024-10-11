@@ -16,12 +16,11 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import { Disposable, ICommandService, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, LocaleService } from '@univerjs/core';
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from '@univerjs/sheets-data-validation';
 import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationPermissionController)
 export class DataValidationPermissionController extends Disposable {
     constructor(
         @Inject(LocaleService) private _localeService: LocaleService,

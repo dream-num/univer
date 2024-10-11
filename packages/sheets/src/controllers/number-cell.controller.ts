@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, Inject, InterceptorEffectEnum } from '@univerjs/core';
 import { stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT } from '../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
 
-@OnLifecycle(LifecycleStages.Ready, NumberCellDisplayController)
 export class NumberCellDisplayController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService) {

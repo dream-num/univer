@@ -16,3 +16,4 @@
 
 export { DATE_DROPDOWN_KEY, LIST_DROPDOWN_KEY } from './views/components';
 export { UniverSheetsDataValidationUIPlugin } from './plugin';
+export { UniverSheetsDataValidationMobileUIPlugin } from './mobile-plugin';

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILocale } from './interface';
 import dajsZhCN from 'dayjs/locale/zh';
 import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
-import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {

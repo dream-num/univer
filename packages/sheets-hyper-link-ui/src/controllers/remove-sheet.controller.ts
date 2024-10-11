@@ -15,12 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkRemoveSheetController)
 export class SheetsHyperLinkRemoveSheetController extends Disposable {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,

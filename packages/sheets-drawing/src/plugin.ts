@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
 import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
-import type { Dependency } from '@univerjs/core';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SHEET_DRAWING_PLUGIN, SheetsDrawingLoadController } from './controllers/sheet-drawing.controller';
 import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
-import type { IUniverSheetsDrawingConfig } from './controllers/config.schema';
 
 @DependentOn(UniverDrawingPlugin)
 export class UniverSheetsDrawingPlugin extends Plugin {
@@ -44,5 +44,7 @@ export class UniverSheetsDrawingPlugin extends Plugin {
             [SheetsDrawingLoadController],
             [ISheetDrawingService, { useClass: SheetDrawingService }],
         ] as Dependency[]).forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(SheetsDrawingLoadController);
     }
 }

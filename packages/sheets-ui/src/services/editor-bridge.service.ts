@@ -93,11 +93,11 @@ export interface IEditorBridgeService {
         AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
     }>;
     dispose(): void;
-    refreshEditCellState(): void;
+    refreshEditCellState(resetSizeOnly?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
-    getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    getLatestEditCellState(resetSizeOnly?: boolean): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
@@ -177,8 +177,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         });
     }
 
-    refreshEditCellState() {
-        const editCellState = this.getLatestEditCellState();
+    refreshEditCellState(resetSizeOnly?: boolean) {
+        const editCellState = this.getLatestEditCellState(resetSizeOnly);
         this._currentEditCellState = editCellState;
 
         this._currentEditCellState$.next(editCellState);
@@ -216,8 +216,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         return this._currentEditCellState;
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    getLatestEditCellState() {
+    // eslint-disable-next-line max-lines-per-function, complexity
+    getLatestEditCellState(resetSizeOnly?: boolean) {
         const currentEditCell = this._currentEditCell;
         if (currentEditCell == null) {
             return;
@@ -264,49 +264,66 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             origin: worksheet.getCellRaw(startRow, startColumn),
         };
 
+        let documentLayoutObject: Nullable<IDocumentLayoutObject>;
         const cell = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT)(
             worksheet.getCell(startRow, startColumn),
             location
         );
 
-        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
-
-        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
-        const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
-        if (renderConfig != null) {
-            renderConfig.cellValueType = CellValueType.STRING;
+        if (resetSizeOnly && this._currentEditCellState) {
+            endX = endX - startX + this._currentEditCellState.position.startX;
+            endY = endY - startY + this._currentEditCellState.position.startY;
+            startX = this._currentEditCellState.position.startX;
+            startY = this._currentEditCellState.position.startY;
         }
 
-        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-            const blankModel = skeleton.getBlankCellDocumentModel(cell);
+        if (this._currentEditCellState &&
+            this._currentEditCellState.unitId === location.unitId &&
+                this._currentEditCellState.sheetId === location.subUnitId &&
+                this._currentEditCellState.row === location.row &&
+                this._currentEditCellState.column === location.col
+        ) {
+            documentLayoutObject = this._currentEditCellState.documentLayoutObject;
+        } else {
+            documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            if (documentLayoutObject != null) {
-                const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
-                const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
-                blankModel.documentModel!.documentStyle.renderConfig = {
-                    verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
-                };
+            // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+            const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
+            if (renderConfig != null) {
+                renderConfig.cellValueType = CellValueType.STRING;
             }
-            documentLayoutObject = blankModel;
-        }
-        // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
-        documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
-        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
-        if (cell?.isInArrayFormulaRange === true) {
-            const body = documentLayoutObject.documentModel?.getBody();
-            if (body) {
-                body.textRuns = [
-                    {
-                        st: 0,
-                        ed: body.dataStream.length - 2,
-                        ts: {
-                            cl: {
-                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
+            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+                const blankModel = skeleton.getBlankCellDocumentModel(cell);
+
+                if (documentLayoutObject != null) {
+                    const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
+                    const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
+                    blankModel.documentModel!.documentStyle.renderConfig = {
+                        verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
+                    };
+                }
+                documentLayoutObject = blankModel;
+            }
+            // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
+            documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
+            documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+
+            if (cell?.isInArrayFormulaRange === true) {
+                const body = documentLayoutObject.documentModel?.getBody();
+                if (body) {
+                    body.textRuns = [
+                        {
+                            st: 0,
+                            ed: body.dataStream.length - 2,
+                            ts: {
+                                cl: {
+                                    rgb: this._themeService.getCurrentTheme().textColorSecondary,
+                                },
                             },
                         },
-                    },
-                ];
+                    ];
+                }
             }
         }
 

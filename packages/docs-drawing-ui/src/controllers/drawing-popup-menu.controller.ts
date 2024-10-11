@@ -15,17 +15,16 @@
  */
 
 import type { DocumentDataModel, IDisposable, Nullable } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { BaseObject, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
-import { takeUntil } from 'rxjs';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { IDrawingManagerService } from '@univerjs/drawing';
+import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { takeUntil } from 'rxjs';
 import { RemoveDocDrawingCommand } from '../commands/commands/remove-doc-drawing.command';
 import { EditDocDrawingOperation } from '../commands/operations/edit-doc-drawing.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DocDrawingPopupMenuController)
 export class DocDrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 

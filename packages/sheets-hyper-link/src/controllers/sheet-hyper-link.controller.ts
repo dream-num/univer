@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
-import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands/mutations/update-hyper-link.mutation';
 import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
+import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands/mutations/update-hyper-link.mutation';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsHyperLinkController)
 export class SheetsHyperLinkController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService

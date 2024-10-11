@@ -15,13 +15,12 @@
  */
 
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { DataValidationType, Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Range, Rectangle } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
 // TODO: adjust imports
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationAutoFillController)
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager } from '@univerjs/ui';
+import { Disposable, Inject, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { ComponentManager } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
 import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
-import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
-import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
-import { AlertDialog } from '../../views/permission/error-msg-dialog';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
+import { AlertDialog } from '../../views/permission/error-msg-dialog';
+import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
 
@@ -132,21 +132,13 @@ export class WorksheetProtectionRenderController extends Disposable implements I
     }
 
     private _initRender() {
-        const register = (renderId: string) => {
-            const render = renderId && this._renderManagerService.getRenderById(renderId);
-            const spreadsheetRender = render && render.mainComponent as Spreadsheet;
-            if (spreadsheetRender) {
-                if (!spreadsheetRender.getExtensionByKey(worksheetProtectionKey)) {
-                    spreadsheetRender.register(this._worksheetProtectionRenderExtension);
-                }
+        const renderId = this._context.unitId;
+        const render = renderId && this._renderManagerService.getRenderById(renderId);
+        const spreadsheetRender = render && render.mainComponent as Spreadsheet;
+        if (spreadsheetRender) {
+            if (!spreadsheetRender.getExtensionByKey(worksheetProtectionKey)) {
+                spreadsheetRender.register(this._worksheetProtectionRenderExtension);
             }
-        };
-        this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((renderId) => {
-            renderId && register(renderId);
-        }));
-        const workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)!;
-        if (workbook) {
-            register(workbook.getUnitId());
         }
     }
 

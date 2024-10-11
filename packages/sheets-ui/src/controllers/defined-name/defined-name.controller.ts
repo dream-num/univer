@@ -15,13 +15,12 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, ThemeService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import { getNormalSelectionStyle, getPrimaryForRange, ScrollToCellOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { filter, merge } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsDefinedNameController)
 export class SheetsDefinedNameController extends Disposable {
     constructor(
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,

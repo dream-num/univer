@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { MenuConfig } from '@univerjs/ui';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { LinkSingle } from '@univerjs/icons';
-import { DocHyperLinkEdit } from '../views/hyper-link-edit';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddDocHyperLinkCommand } from '../commands/commands/add-link.command';
-import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { DeleteDocHyperLinkCommand } from '../commands/commands/delete-link.command';
+import { UpdateDocHyperLinkCommand } from '../commands/commands/update-link.command';
 import { ClickDocHyperLinkOperation, ShowDocHyperLinkEditPopupOperation, ToggleDocHyperLinkInfoPopupOperation } from '../commands/operations/popup.operation';
+import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
 import { addLinkShortcut, DOC_LINK_ICON } from './menu';
 import { menuSchema } from './menu.schema';
@@ -31,13 +31,11 @@ export interface IDocHyperLinkUIConfig {
     menu: MenuConfig;
 }
 
-@OnLifecycle(LifecycleStages.Starting, DocHyperLinkUIController)
 export class DocHyperLinkUIController extends Disposable {
     constructor(
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
         @IShortcutService private readonly _shortcutService: IShortcutService
     ) {
         super();

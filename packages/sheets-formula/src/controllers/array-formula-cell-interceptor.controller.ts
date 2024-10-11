@@ -16,11 +16,10 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, Inject, InterceptorEffectEnum } from '@univerjs/core';
 import { FormulaDataModel, SetArrayFormulaDataMutation, stripErrorMargin } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 
-@OnLifecycle(LifecycleStages.Ready, ArrayFormulaCellInterceptorController)
 export class ArrayFormulaCellInterceptorController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

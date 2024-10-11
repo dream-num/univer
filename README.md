@@ -74,6 +74,7 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Data Validation**: Supports restricting the type of data that can be entered into a cell.
 - **Conditional Formatting**: Supports applying formatting to cells based on specific criteria.
 - **Comments**: Enables adding comments to cells to provide additional information.
+- **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
 - **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
 - **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
@@ -104,6 +105,7 @@ Univer supports multiple languages, including:
 - `en-US`
 - `ru-RU`
 - `vi-VN`
+- `fa-IR`
 
 `zh-CN` and `en-US` are officially supported, while the others are contributed by the community.
 

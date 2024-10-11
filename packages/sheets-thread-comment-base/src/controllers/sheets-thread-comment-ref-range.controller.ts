@@ -15,16 +15,15 @@
  */
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
 import type { IAddCommentMutationParams, IUpdateCommentRefMutationParams } from '@univerjs/thread-comment';
-import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
-import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
 import type { ISheetThreadComment } from '../types/interfaces/i-sheet-thread-comment';
+import { Disposable, ICommandService, Inject, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
+import { serializeRange, singleReferenceToGrid } from '@univerjs/engine-formula';
+import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddCommentMutation, DeleteCommentMutation, ThreadCommentModel, UpdateCommentRefMutation } from '@univerjs/thread-comment';
 import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentRefRangeController)
 export class SheetsThreadCommentRefRangeController extends Disposable {
     private _disposableMap = new Map<string, IDisposable>();
     private _watcherMap = new Map<string, IDisposable>();

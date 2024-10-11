@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/operation';
+import { Disposable, ICommandService, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { IEditorService, InsertCommand } from '@univerjs/docs-ui';
 import { ISlideEditorBridgeService } from '@univerjs/slides-ui';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { AddSlideUniFormulaCommand } from '../commands/commands/slide.command';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
 import { UNI_FORMULA_EDITOR_ID } from '../views/components/DocFormulaPopup';
-import type { IShowFormulaPopupOperationParams, ISlidePopupPosition } from '../commands/operations/operation';
 
 const FORMULA_INPUT_TRIGGER_CHAR = '=';
 
-@OnLifecycle(LifecycleStages.Steady, SlideUniFormulaInputController)
 export class SlideUniFormulaInputController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

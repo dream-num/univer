@@ -16,11 +16,10 @@
 
 import type { IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IDiscreteRange } from '@univerjs/sheets-ui';
-import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, queryObjectMatrix, Rectangle } from '@univerjs/core';
+import { Disposable, Inject, Injector, ObjectMatrix, queryObjectMatrix, Rectangle } from '@univerjs/core';
 import { DATA_VALIDATION_PLUGIN_NAME, getDataValidationDiffMutations, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationCopyPasteController)
 export class DataValidationCopyPasteController extends Disposable {
     private _copyInfo: Nullable<{
         matrix: ObjectMatrix<string>;

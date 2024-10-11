@@ -15,7 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
+import type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
 import {
@@ -43,7 +43,7 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        private readonly _config: Partial<IUniverSheetsDataValidationConfig> = defaultPluginConfig,
+        private readonly _config: Partial<IUniverSheetsDataValidationUIConfig> = defaultPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IConfigService private readonly _configService: IConfigService
@@ -83,5 +83,21 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
+    }
+
+    override onReady(): void {
+        this._injector.get(DataValidationCopyPasteController);
+        this._injector.get(DataValidationPermissionController);
+        this._injector.get(DataValidationRejectInputController);
+        this._injector.get(DataValidationAlertController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(SheetsDataValidationUIController);
+        this._injector.get(SheetsDataValidationRenderController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(DataValidationAutoFillController);
     }
 }

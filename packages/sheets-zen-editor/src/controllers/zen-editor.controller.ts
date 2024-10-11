@@ -19,8 +19,6 @@ import type { IDocObjectParam } from '@univerjs/docs-ui';
 import type { Viewport } from '@univerjs/engine-render';
 import {
     DOCS_ZEN_EDITOR_UNIT_ID_KEY,
-    LifecycleStages,
-    OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocBackScrollRenderController } from '@univerjs/docs-ui';
@@ -30,7 +28,6 @@ import { getEditorObject } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
 import { IZenEditorManagerService } from '../services/zen-editor.service';
 
-@OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,

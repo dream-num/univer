@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { HoverManagerService, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { debounceTime } from 'rxjs';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentHoverController)
 export class SheetsThreadCommentHoverController extends Disposable {
     constructor(
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,

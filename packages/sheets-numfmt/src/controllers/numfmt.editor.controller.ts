@@ -15,25 +15,23 @@
  */
 
 import type { IRange, Nullable, Workbook } from '@univerjs/core';
-import {
-    CellValueType,
-    Disposable,
-    Inject,
-    Injector,
-    IUniverInstanceService,
-    LifecycleStages,
-    numfmt,
-    OnLifecycle,
-    Optional,
-    toDisposable,
-    UniverInstanceType,
-} from '@univerjs/core';
 import type {
     INumfmtItemWithCache,
     IRemoveNumfmtMutationParams,
     ISetCellsNumfmt,
     ISetNumfmtMutationParams,
 } from '@univerjs/sheets';
+import {
+    CellValueType,
+    Disposable,
+    Inject,
+    Injector,
+    IUniverInstanceService,
+    numfmt,
+    Optional,
+    toDisposable,
+    UniverInstanceType,
+} from '@univerjs/core';
 import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
@@ -69,7 +67,7 @@ const createCollectEffectMutation = () => {
         clean,
     };
 };
-@OnLifecycle(LifecycleStages.Rendered, NumfmtEditorController)
+
 export class NumfmtEditorController extends Disposable {
     // collect effect mutations when edit end and push this to  commands stack in next commands progress
     private _collectEffectMutation = createCollectEffectMutation();
@@ -160,7 +158,6 @@ export class NumfmtEditorController extends Disposable {
                             );
                             const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
                             const clean = () => {
-                                // eslint-disable-next-line ts/no-unused-expressions
                                 currentNumfmtValue &&
                                     this._collectEffectMutation.add(
                                         context.unitId,

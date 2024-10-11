@@ -47,8 +47,6 @@ import {
     Inject,
     isFormulaString,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
     ThemeService,
@@ -131,7 +129,6 @@ enum InputPanelState {
 
 const sheetEditorUnitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
-@OnLifecycle(LifecycleStages.Steady, PromptController)
 export class PromptController extends Disposable {
     private _listenInputCache: Set<string> = new Set();
     private _formulaRefColors: string[] = [];

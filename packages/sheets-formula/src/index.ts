@@ -16,6 +16,7 @@
 
 export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
+export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 // #region - all commands
 
 export { UpdateFormulaController } from './controllers/update-formula.controller';
@@ -27,6 +28,6 @@ export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { RegisterOtherFormulaService } from './services/register-other-formula.service';
 export { IRemoteRegisterFunctionService, RemoteRegisterFunctionService } from './services/remote/remote-register-function.service';
-export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaMobilePlugin, UniverSheetsFormulaPlugin } from './sheets-formula.plugin';
+export { UniverRemoteSheetsFormulaPlugin, UniverSheetsFormulaPlugin } from './sheets-formula.plugin';
 
 // #endregion

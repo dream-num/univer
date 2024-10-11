@@ -84,7 +84,7 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) =>
                         command.type === CommandType.MUTATION
-                        && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
+                        && (command.params as Partial<ISheetCommandSharedParams>)?.unitId === workbook.getUnitId()
                         && (FILTER_MUTATIONS.has(command.id) || command.id === SetRangeValuesMutation.id)
                     ),
                     throttleTime(20, undefined, { leading: false, trailing: true }),

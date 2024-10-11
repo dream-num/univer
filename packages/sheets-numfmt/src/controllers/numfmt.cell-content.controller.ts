@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import type {
+    ICellData,
+    ICellDataForSheetInterceptor,
+    Workbook,
+} from '@univerjs/core';
+import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     CellValueType,
     Disposable,
@@ -21,26 +27,17 @@ import {
     Inject,
     InterceptorEffectEnum,
     IUniverInstanceService,
-    LifecycleStages,
     LocaleService,
     ObjectMatrix,
-    OnLifecycle,
     Range,
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, INumfmtService, SetNumfmtMutation, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
-import { of, skip, switchMap } from 'rxjs';
-import type {
-    ICellData,
-    ICellDataForSheetInterceptor,
-    Workbook,
-} from '@univerjs/core';
 
-import type { ISetNumfmtMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { of, skip, switchMap } from 'rxjs';
 import { getPatternPreviewIgnoreGeneral } from '../utils/pattern';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsNumfmtCellContentController)
 export class SheetsNumfmtCellContentController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,

@@ -22,7 +22,7 @@ import type {
     ISetWorksheetActiveOperationParams,
     ISetWorksheetHideMutationParams,
 } from '@univerjs/sheets';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -36,7 +36,6 @@ import {
  * worksheet tab related mutations executes. We cannot write this logic in
  * commands because it does not take collaborative editing into consideration.
  */
-@OnLifecycle(LifecycleStages.Ready, ActiveWorksheetController)
 export class ActiveWorksheetController extends Disposable {
     private _previousSheetIndex = -1;
 

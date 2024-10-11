@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-
-@OnLifecycle(LifecycleStages.Rendered, NumfmtI18nController)
-export class NumfmtI18nController extends Disposable {
-    constructor(@Inject(LocaleService) private _localeService: LocaleService) {
-        super();
-    }
-}
+export default {
+    sheetThreadComment: {
+        menu: {
+            addComment: 'افزودن نظر',
+            commentManagement: 'مدیریت نظر',
+        },
+    },
+};

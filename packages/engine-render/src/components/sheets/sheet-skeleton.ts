@@ -251,7 +251,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     /**
      * Range of visible area(range in viewBounds)
      */
-    private _rowColumnSegment: IRowColumnRange = {
+    private _visibleRange: IRowColumnRange = {
         startRow: -1,
         endRow: -1,
         startColumn: -1,
@@ -327,7 +327,11 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Range of visible area(range in viewBounds)
      */
     get rowColumnSegment(): IRowColumnRange {
-        return this._rowColumnSegment;
+        return this._visibleRange;
+    }
+
+    get visibleArea(): IRowColumnRange {
+        return this._visibleRange;
     }
 
     // get dataMergeCache(): IRange[] {
@@ -367,7 +371,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._columnTotalWidth = 0;
         this._rowHeaderWidth = 0;
         this._columnHeaderHeight = 0;
-        this._rowColumnSegment = {
+        this._visibleRange = {
             startRow: -1,
             endRow: -1,
             startColumn: -1,
@@ -459,7 +463,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (bounds != null) {
-            this._rowColumnSegment = this.getRowColumnSegment(bounds);
+            this._visibleRange = this.getRowColumnSegment(bounds);
         }
 
         return true;
@@ -1062,6 +1066,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * New merge info, but position without header.
+     * @param row
+     * @param column
+     * @returns {ISelectionCellWithMergeInfo} cellInfo with merge info
+     */
     getCellByIndexWithNoHeader(row: number, column: number): ISelectionCellWithMergeInfo {
         const { rowHeightAccumulation, columnWidthAccumulation } = this;
 
@@ -1655,7 +1665,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     // }
 
     /**
-     * @deprecated use _getCellMergeInfo instead.
      * get the current row and column segment visible merge data
      * @returns {IRange} The visible merge data
      */
@@ -1677,27 +1686,25 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _calculateStylesCache(): void {
-        const rowColumnSegment = this._rowColumnSegment;
+        const rowColumnSegment = this._visibleRange;
         const columnWidthAccumulation = this.columnWidthAccumulation;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
 
         if (endColumn === -1 || endRow === -1) return;
 
-        // const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._rowColumnSegment);
-        // for (const mergeRange of mergeRanges) {
-        //     this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
-        //         mergeRange,
-        //     });
-        // }
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
+        for (const mergeRange of mergeRanges) {
+            this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
+                mergeRange,
+            });
+        }
 
         // const mergeRange = mergeRanges.length ? mergeRanges[0] : undefined;
         for (let r = startRow; r <= endRow; r++) {
             if (this.worksheet.getRowVisible(r) === false) continue;
 
             for (let c = startColumn; c <= endColumn; c++) {
-                this._setStylesCache(r, c, {
-                    cacheItem: { bg: true, border: true },
-                });
+                this._setStylesCache(r, c, { cacheItem: { bg: true, border: true } });
             }
 
             // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
@@ -1844,7 +1851,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param col {number}
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
-    private _setStylesCache(row: number, col: number, options?: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+    private _setStylesCache(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
         if (row === -1 || col === -1) {
             return;
         }
@@ -1862,13 +1869,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const { isMerged, isMergedMainCell, startRow, startColumn, endRow, endColumn } = this._getCellMergeInfo(row, col);
-        if (options) {
-            options.mergeRange = { startRow, startColumn, endRow, endColumn };
-        }
+        options.mergeRange = { startRow, startColumn, endRow, endColumn };
 
         const hidden = this.worksheet.getColVisible(col) === false || this.worksheet.getRowVisible(row) === false;
 
-        // hiddene and not in mergeRange return.
+        // hidden and not in mergeRange return.
         if (hidden) {
             // If the cell is merged and is not the main cell, the cell is not rendered.
             if (isMerged && !isMergedMainCell) {

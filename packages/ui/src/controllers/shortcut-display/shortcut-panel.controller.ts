@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
+import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import {
     ShortcutPanelComponentName,
     ToggleShortcutPanelOperation,
 } from '../../commands/operations/toggle-shortcut-panel.operation';
 import { ComponentManager } from '../../common/component-manager';
-import { ShortcutPanel } from '../../views/components/shortcut-panel/ShortcutPanel';
-import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
-import { IShortcutService } from '../../services/shortcut/shortcut.service';
-import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { IMenuManagerService } from '../../services/menu/menu-manager.service';
+import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
+import { IShortcutService } from '../../services/shortcut/shortcut.service';
+import { ShortcutPanel } from '../../views/components/shortcut-panel/ShortcutPanel';
 
 const ToggleShortcutPanelShortcut: IShortcutItem = {
     id: ToggleShortcutPanelOperation.id,
@@ -37,7 +36,6 @@ const ToggleShortcutPanelShortcut: IShortcutItem = {
 /**
  * This controller add a side panel to the application to display the shortcuts.
  */
-@OnLifecycle(LifecycleStages.Steady, ShortcutPanelController)
 export class ShortcutPanelController extends Disposable {
     constructor(
         @Inject(Injector) injector: Injector,

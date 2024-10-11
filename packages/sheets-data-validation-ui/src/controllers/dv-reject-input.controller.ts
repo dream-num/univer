@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, Inject, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { DataValidationErrorStyle, Disposable, Inject, LocaleService } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
@@ -22,7 +22,6 @@ import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationRejectInputController)
 export class DataValidationRejectInputController extends Disposable {
     constructor(
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,

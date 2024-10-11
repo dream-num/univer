@@ -115,6 +115,7 @@ export class UniverDocsUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
@@ -123,11 +124,23 @@ export class UniverDocsUIPlugin extends Plugin {
     override onReady(): void {
         this._initRenderBasics();
         this._markDocAsFocused();
+
+        this._injector.get(DocStateChangeManagerService);
+        this._injector.get(DocsRenderService);
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
+
+        this._injector.get(DocAutoFormatController);
+        this._injector.get(DocMoveCursorController);
+        this._injector.get(DocParagraphSettingController);
+        this._injector.get(DocTableController);
+
+        // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+        // plugin can be added in LifecycleStages.Ready
+        this._injector.get(DocUIController);
     }
 
     private _initCommand() {
@@ -220,18 +233,15 @@ export class UniverDocsUIPlugin extends Plugin {
     }
 
     private _initDependencies(injector: Injector) {
-        const dependencies: Dependency[] = [
+        const dependencies = mergeOverrideWithDependencies([
             [DocClipboardController],
             [DocEditorBridgeController],
-            // Controller
             [DocUIController],
             [DocAutoFormatController],
             [DocTableController],
             [DocMoveCursorController],
             [AppUIController],
             [DocParagraphSettingController],
-
-            // Services
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
@@ -239,11 +249,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocsRenderService],
             [DocStateChangeManagerService],
             [DocAutoFormatService],
-        ];
-
-        const dependency = mergeOverrideWithDependencies(dependencies, this._config.override);
-
-        dependency.forEach((d) => injector.add(d));
+        ], this._config.override);
+        dependencies.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {

@@ -70,9 +70,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
@@ -87,7 +85,6 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.78",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
@@ -95,15 +92,15 @@
         "@univerjs/ui": "workspace:*"
     },
     "devDependencies": {
-        "@types/react": "^18.3.5",
+        "@types/react": "^18.3.11",
         "@univerjs-infra/shared": "workspace:*",
-        "@vitejs/plugin-react": "^4.3.1",
+        "@vitejs/plugin-react": "^4.3.2",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.2",
+        "typescript": "^5.6.3",
         "vite": "^5.4.4",
-        "vitest": "^2.0.5"
+        "vitest": "^2.1.2"
     },
     "univerSpace": {
         ".": {

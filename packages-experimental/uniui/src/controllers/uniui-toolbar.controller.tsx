@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { DeleteSingle, DownloadSingle, LockSingle, PivotTableSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import type { MenuConfig } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { DeleteSingle, DownloadSingle, LockSingle, PivotTableSingle, PrintSingle, ShareSingle, ZenSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { DisposeUnitOperation } from '../commands/operations/uni.operation';
 import { UniToolbarService } from '../services/toolbar/uni-toolbar-service';
@@ -28,7 +28,6 @@ export interface IUniuiToolbarConfig {
 
 export const DefaultUniuiToolbarConfig = {};
 
-@OnLifecycle(LifecycleStages.Ready, UniuiToolbarController)
 export class UniuiToolbarController extends Disposable {
     constructor(
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,

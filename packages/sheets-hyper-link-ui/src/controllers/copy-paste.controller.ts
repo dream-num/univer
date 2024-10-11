@@ -15,15 +15,14 @@
  */
 
 import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
-import { Disposable, Inject, Injector, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools } from '@univerjs/core';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import type { IDiscreteRange, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
-import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 import { isLegalLink } from '../common/util';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
+import { SHEET_HYPER_LINK_UI_PLUGIN } from '../types/const';
 
-@OnLifecycle(LifecycleStages.Ready, SheetsHyperLinkCopyPasteController)
 export class SheetsHyperLinkCopyPasteController extends Disposable {
     private _plainTextFilter = new Set<(text: string) => boolean>();
 

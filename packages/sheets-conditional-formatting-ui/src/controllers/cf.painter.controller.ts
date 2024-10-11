@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
 import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { IAddConditionalRuleMutationParams, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 import type { IFormatPainterHook } from '@univerjs/sheets-ui';
+import { Disposable, Inject, Injector, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { createTopMatrixFromMatrix, findAllRectangle, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { FormatPainterStatus, IFormatPainterService } from '@univerjs/sheets-ui';
 
 const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
     const getRowLength = (range: IRange) => range.endRow - range.startRow + 1;
@@ -73,7 +73,6 @@ const repeatByRange = (sourceRange: IRange, targetRange: IRange) => {
     return repeatList;
 };
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingPainterController)
 export class ConditionalFormattingPainterController extends Disposable {
     private _painterConfig: Nullable<{ unitId: string; subUnitId: string; range: IRange }> = null;
     constructor(

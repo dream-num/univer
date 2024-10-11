@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
+import type { IUniverUniscriptConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { UniscriptController } from './controllers/uniscript.controller';
 import { ScriptEditorService } from './services/script-editor.service';
 import { IUniscriptExecutionService, UniscriptExecutionService } from './services/script-execution.service';
 import { ScriptPanelService } from './services/script-panel.service';
-import type { IUniverUniscriptConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_UNISCRIPT_PLUGIN';
 
@@ -55,6 +54,10 @@ export class UniverUniscriptPlugin extends Plugin {
         dependencies.forEach((d) => injector.add(d));
 
         this.registerExecution();
+    }
+
+    override onSteady(): void {
+        this._injector.get(UniscriptController);
     }
 
     /**

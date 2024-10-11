@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { BaseObject, Scene } from '@univerjs/engine-render';
+import { connectInjector, FOCUSING_COMMON_DRAWINGS, IContextService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DrawingTypeEnum, IDrawingManagerService } from '@univerjs/drawing';
 import { COMPONENT_IMAGE_POPUP_MENU, ImageCropperObject, ImageResetSizeOperation, OpenImageCropOperation } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, IUIPartsService } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-import type { IDisposable, Nullable, Workbook } from '@univerjs/core';
-import type { BaseObject, Scene } from '@univerjs/engine-render';
 
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
 import { UploadLoading } from '../views/upload-loading/UploadLoading';
 
-@OnLifecycle(LifecycleStages.Steady, DrawingPopupMenuController)
 export class DrawingPopupMenuController extends RxDisposable {
     private _initImagePopupMenu = new Set<string>();
 

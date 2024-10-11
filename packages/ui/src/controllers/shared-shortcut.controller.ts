@@ -15,13 +15,13 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { Disposable, FOCUSING_UNIVER_EDITOR, ICommandService, LifecycleStages, OnLifecycle, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 
+import { Disposable, FOCUSING_UNIVER_EDITOR, ICommandService, RedoCommand, UndoCommand } from '@univerjs/core';
+import { SetEditorResizeOperation } from '../commands/operations/editor/set-editor-resize.operation';
 import { CopyCommand, CutCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
-import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
-import { SetEditorResizeOperation } from '../commands/operations/editor/set-editor-resize.operation';
 
 // Not that the clipboard shortcut items would only be invoked when the browser fully supports clipboard API.
 // If not, the corresponding shortcut would not be triggered and we will perform clipboard operations
@@ -87,7 +87,6 @@ export const RedoShortcutItem: IShortcutItem = {
 /**
  * Define shared UI behavior across Univer business. Including undo / redo and clipboard operations.
  */
-@OnLifecycle(LifecycleStages.Ready, SharedController)
 export class SharedController extends Disposable {
     constructor(
         @IShortcutService private readonly _shortcutService: IShortcutService,

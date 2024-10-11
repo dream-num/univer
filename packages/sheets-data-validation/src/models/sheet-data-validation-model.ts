@@ -17,7 +17,7 @@
 import type { DataValidationType, ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
 import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
-import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
 import { RemoveSheetMutation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
@@ -27,7 +27,6 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { RuleMatrix } from './rule-matrix';
 
-@OnLifecycle(LifecycleStages.Starting, SheetDataValidationModel)
 export class SheetDataValidationModel extends Disposable {
     private readonly _ruleMatrixMap = new Map<string, Map<string, RuleMatrix>>();
     private readonly _validStatusChange$ = new Subject<IValidStatusChange>();

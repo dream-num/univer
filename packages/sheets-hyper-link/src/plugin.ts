@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
+import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
 import { SheetsHyperLinkController } from './controllers/sheet-hyper-link.controller';
+import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
 import { HyperLinkModel } from './models/hyper-link.model';
 import { SHEET_HYPER_LINK_PLUGIN } from './types/const';
-import { SheetsHyperLinkResourceController } from './controllers/sheet-hyper-link-resource.controller';
-import { SheetsHyperLinkRefRangeController } from './controllers/ref-range.controller';
-import type { IUniverSheetsHyperLinkConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 @DependentOn(UniverSheetsPlugin)
 export class UniverSheetsHyperLinkPlugin extends Plugin {
@@ -51,5 +51,9 @@ export class UniverSheetsHyperLinkPlugin extends Plugin {
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
+
+        this._injector.get(SheetsHyperLinkRefRangeController);
+        this._injector.get(SheetsHyperLinkResourceController);
+        this._injector.get(SheetsHyperLinkController);
     }
 }

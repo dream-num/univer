@@ -152,6 +152,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInitController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
+
+        this._injector.get(SheetPermissionPanelModel);
     }
 
     override onReady(): void {
@@ -160,12 +162,29 @@ export class UniverSheetsUIPlugin extends Plugin {
         }
 
         this._registerRenderBasics();
+
+        this._injector.get(SheetUIController);
+        this._injector.get(SheetsRenderService);
+        this._injector.get(ActiveWorksheetController);
+        this._injector.get(SheetPermissionInterceptorBaseController);
     }
 
     override onRendered(): void {
         this._registerRenderModules();
 
+        this._injector.get(SheetPermissionInitController);
         this._injector.get(SheetPermissionRenderManagerController);
+        this._injector.get(SheetClipboardController);
+        this._injector.get(FormulaEditorController);
+        this._injector.get(SheetsDefinedNameController);
+        this._injector.get(StatusBarController);
+        this._injector.get(AutoHeightController);
+    }
+
+    override onSteady(): void {
+        this._injector.get(FormatPainterController);
+        this._injector.get(AutoFillController);
+        this._injector.get(SheetPermissionInterceptorClipboardController);
     }
 
     private _registerRenderBasics(): void {

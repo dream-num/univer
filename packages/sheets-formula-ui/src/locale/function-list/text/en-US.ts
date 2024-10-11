@@ -352,6 +352,49 @@ export default {
             number2: { name: 'number2', detail: 'second' },
         },
     },
+    REGEXEXTRACT: {
+        description: 'Extracts the first matching substrings according to a regular expression.',
+        abstract: 'Extracts the first matching substrings according to a regular expression.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3098244?sjid=5628197291201472796-AP&hl=en',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'text', detail: 'The input text.' },
+            regularExpression: { name: 'regular_expression', detail: 'The first part of text that matches this expression will be returned.' },
+        },
+    },
+    REGEXMATCH: {
+        description: 'Whether a piece of text matches a regular expression.',
+        abstract: 'Whether a piece of text matches a regular expression.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3098292?sjid=5628197291201472796-AP&hl=en',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'text', detail: 'The text to be tested against the regular expression.' },
+            regularExpression: { name: 'regular_expression', detail: 'The regular expression to test the text against.' },
+        },
+    },
+    REGEXREPLACE: {
+        description: 'Replaces part of a text string with a different text string using regular expressions.',
+        abstract: 'Replaces part of a text string with a different text string using regular expressions.',
+        links: [
+            {
+                title: 'Instruction',
+                url: 'https://support.google.com/docs/answer/3098245?sjid=5628197291201472796-AP&hl=en',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'text', detail: 'The text, a part of which will be replaced.' },
+            regularExpression: { name: 'regular_expression', detail: 'The regular expression. All matching instances in text will be replaced.' },
+            replacement: { name: 'replacement', detail: 'The text which will be inserted into the original text.' },
+        },
+    },
     REPLACE: {
         description: 'Replaces characters within text',
         abstract: 'Replaces characters within text',

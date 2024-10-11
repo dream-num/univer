@@ -26,7 +26,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-import { enUS, ruRU, zhCN } from '../locales';
+import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 // univer
 const univer = new Univer({
@@ -36,6 +36,7 @@ const univer = new Univer({
         [LocaleType.ZH_CN]: zhCN,
         [LocaleType.EN_US]: enUS,
         [LocaleType.RU_RU]: ruRU,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

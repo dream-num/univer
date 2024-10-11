@@ -5,47 +5,47 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Doc (Chrome)",
+            "name": "Launch Sheet (Chrome)",
             "request": "launch",
             "type": "chrome",
-            "url": "http://localhost:3003",
-            "webRoot": "${workspaceFolder}/examples/docs/local/",
-            "presentation": {
-                "group": "0_example",
-                "order": 1
-            }
-        },
-        {
-            "name": "Launch Doc (Edge)",
-            "request": "launch",
-            "type": "msedge",
-            "url": "http://localhost:3003",
-            "webRoot": "${workspaceFolder}/examples/docs/local/",
+            "url": "http://localhost:3002/sheets/",
+            "webRoot": "${workspaceFolder}/examples/local/sheets",
             "presentation": {
                 "group": "0_example",
                 "order": 2
             }
         },
         {
-            "name": "Launch Sheet (Chrome)",
-            "request": "launch",
-            "type": "chrome",
-            "url": "http://localhost:3002",
-            "webRoot": "${workspaceFolder}/examples/sheets/local/",
-            "presentation": {
-                "group": "0_example",
-                "order": 3
-            }
-        },
-        {
             "name": "Launch Sheet (Edge)",
             "request": "launch",
             "type": "msedge",
-            "url": "http://localhost:3002",
+            "url": "http://localhost:3002/sheets",
             "webRoot": "${workspaceFolder}/examples/sheets/local/",
             "presentation": {
                 "group": "0_example",
+                "order": 1
+            }
+        },
+        {
+            "name": "Launch Doc (Chrome)",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/local/docs",
+            "presentation": {
+                "group": "0_example",
                 "order": 4
+            }
+        },
+        {
+            "name": "Launch Doc (Edge)",
+            "request": "launch",
+            "type": "msedge",
+            "url": "http://localhost:3002",
+            "webRoot": "${workspaceFolder}/examples/local/docs",
+            "presentation": {
+                "group": "0_example",
+                "order": 3
             }
         },
         {
@@ -56,7 +56,7 @@
             "webRoot": "${workspaceFolder}/examples/slides/local/",
             "presentation": {
                 "group": "0_example",
-                "order": 5
+                "order": 6
             }
         },
         {
@@ -67,7 +67,7 @@
             "webRoot": "${workspaceFolder}/examples/slides/local/",
             "presentation": {
                 "group": "0_example",
-                "order": 6
+                "order": 5
             }
         },
         {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILocale } from './interface';
 import dajsEnUS from 'dayjs/locale/en';
 import PickerEnUs from 'rc-picker/lib/locale/en_US';
-import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {

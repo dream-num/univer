@@ -46,10 +46,7 @@ import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
 import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
-import { enUS } from '../locales';
-
-/* eslint-disable-next-line node/prefer-global/process */
-const IS_E2E: boolean = !!process.env.IS_E2E;
+import { enUS, faIR } from '../locales';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
@@ -59,6 +56,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });
@@ -99,11 +97,9 @@ class CustomMentionDataService implements IThreadCommentMentionDataService {
 }
 
 // create univer instances
-if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
-    univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
-    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
-}
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_EN);
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO1);
 
 // debugger plugin
 univer.registerPlugin(UniverDebuggerPlugin);

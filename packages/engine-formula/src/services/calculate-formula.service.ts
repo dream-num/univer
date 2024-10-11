@@ -15,17 +15,6 @@
  */
 
 import type { IUnitRange } from '@univerjs/core';
-import {
-    Disposable,
-    IConfigService,
-    Inject,
-    LifecycleStages,
-    ObjectMatrix,
-    OnLifecycle,
-    requestImmediateMacroTask,
-} from '@univerjs/core';
-import { Subject } from 'rxjs';
-
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
@@ -33,17 +22,26 @@ import type {
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../basics/common';
+import type { LexerNode } from '../engine/analysis/lexer-node';
+
+import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
+import {
+    Disposable,
+    IConfigService,
+    Inject,
+    ObjectMatrix,
+    requestImmediateMacroTask,
+} from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { Lexer } from '../engine/analysis/lexer';
-import type { LexerNode } from '../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../engine/analysis/parser';
 import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { FormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
-import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
 
 export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
@@ -52,7 +50,6 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
-@OnLifecycle(LifecycleStages.Rendered, CalculateFormulaService)
 export class CalculateFormulaService extends Disposable {
     private readonly _executionStartListener$ = new Subject<boolean>();
 

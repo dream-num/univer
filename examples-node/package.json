@@ -17,6 +17,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/rpc": "workspace:*",
+        "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",

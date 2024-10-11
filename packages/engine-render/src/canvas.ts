@@ -40,6 +40,7 @@ interface ICanvasProps {
     height?: number;
     pixelRatio?: number;
     mode?: CanvasRenderMode;
+    id?: string;
 }
 
 /**
@@ -124,6 +125,10 @@ export class Canvas {
 
     getHeight() {
         return this._height;
+    }
+
+    setId(id: string) {
+        this._canvasEle!.id = id;
     }
 
     setSize(width?: number, height?: number, pixelRatioParam?: number) {

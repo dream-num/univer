@@ -83,6 +83,11 @@ export class SheetsRenderService extends RxDisposable {
 
     private _createRenderer(workbook: Workbook): void {
         const unitId = workbook.getUnitId();
+        this._renderManagerService.created$.subscribe((renderer) => {
+            if (renderer.unitId === unitId) {
+                renderer.engine.getCanvas().setId('univer-sheet-main-canvas');
+            }
+        });
         this._renderManagerService.createRender(unitId);
 
         // NOTE@wzhudev: maybe not in univer mode

@@ -102,6 +102,28 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 },
             });
         } else {
+            let needFocusSegmentId;
+            const segmentPageIndex = docSelectionRenderService.getSegmentPage();
+            const prevSegmentId = docSelectionRenderService.getSegment();
+
+            if (type === 'useFirstPageHeaderFooter') {
+                if (editArea === DocumentEditArea.HEADER) {
+                    needFocusSegmentId = val && segmentPageIndex === 0 ? documentStyle.firstPageHeaderId : documentStyle.defaultHeaderId;
+                } else if (editArea === DocumentEditArea.FOOTER) {
+                    needFocusSegmentId = val && segmentPageIndex === 0 ? documentStyle.firstPageFooterId : documentStyle.defaultFooterId;
+                }
+            } else if (type === 'evenAndOddHeaders') {
+                if (editArea === DocumentEditArea.HEADER) {
+                    needFocusSegmentId = val && segmentPageIndex % 2 === 1 ? documentStyle.evenPageHeaderId : documentStyle.defaultHeaderId;
+                } else if (editArea === DocumentEditArea.FOOTER) {
+                    needFocusSegmentId = val && segmentPageIndex % 2 === 1 ? documentStyle.evenPageFooterId : documentStyle.defaultFooterId;
+                }
+            }
+
+            if (needFocusSegmentId && needFocusSegmentId !== prevSegmentId) {
+                docSelectionRenderService.setSegment(needFocusSegmentId);
+            }
+
             commandService.executeCommand(CoreHeaderFooterCommandId, {
                 unitId,
                 headerFooterProps: {

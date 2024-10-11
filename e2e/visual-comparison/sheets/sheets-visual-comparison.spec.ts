@@ -17,6 +17,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
+const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas';
 test('diff default sheet content', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
@@ -24,17 +25,8 @@ test('diff default sheet content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.waitForTimeout(5000);
 
-    // await expect(page).toHaveScreenshot(generateSnapshotName('default-sheet'), { maxDiffPixels: 5 });
     const filename = generateSnapshotName('default-sheet');
-    // ignore DOM part when comparison
-    const screenshot = await page.screenshot({
-        clip: {
-            x: 0,
-            y: 92,
-            width: 1280,
-            height: 592, // 720 - 92(header) - 36(bottom)
-        },
-    });
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 });
 const isCI = !!process.env.CI;
@@ -53,18 +45,8 @@ test('diff demo sheet content', async ({ page }) => {
     await page.evaluate(() => window.E2EControllerAPI.loadDemoSheet());
     await page.waitForTimeout(2000);
 
-    // await expect(page).toHaveScreenshot(generateSnapshotName('demo-sheet'), { maxDiffPixels: 5 });
-
     const filename = generateSnapshotName('demo-sheet');
-    // ignore DOM part when comparison
-    const screenshot = await page.screenshot({
-        clip: {
-            x: 0,
-            y: 92,
-            width: 1280,
-            height: 592, // 720 - 92(header) - 36(bottom)
-        },
-    });
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
     await page.waitForTimeout(2000);
     expect(errored).toBeFalsy();
@@ -88,9 +70,8 @@ test('diff merged cells rendering', async () => {
     await page.evaluate(() => window.E2EControllerAPI.loadMergeCellSheet());
     await page.waitForTimeout(2000);
 
-    // await expect(page).toHaveScreenshot(generateSnapshotName('mergedCellsRendering'), { maxDiffPixels: 5 });
     const filename = generateSnapshotName('mergedCellsRendering');
-    const screenshot = await page.locator('#univer-sheet-main-canvas').screenshot();
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 
     await page.waitForTimeout(2000);
@@ -153,16 +134,8 @@ test('diff merged cells rendering after scrolling', async () => {
     });
     await page.waitForTimeout(2000);
 
-    // await expect(page).toHaveScreenshot(generateSnapshotName('mergedCellsRenderingScrolling'), { maxDiffPixels: 5 });
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
-    const screenshot = await page.screenshot({
-        clip: {
-            x: 0,
-            y: 92,
-            width: 1280,
-            height: 1152,
-        },
-    });
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 
     await page.waitForTimeout(2000);

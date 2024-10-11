@@ -87,6 +87,7 @@ export const SUFFIX_TOKEN_SET = new Set([suffixToken.PERCENTAGE as string, suffi
 export enum prefixToken {
     AT = '@',
     MINUS = '-',
+    PLUS = '+',
 }
 
 export const SPACE_TOKEN = ' ';

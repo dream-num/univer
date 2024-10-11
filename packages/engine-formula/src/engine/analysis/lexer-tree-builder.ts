@@ -555,16 +555,16 @@ export class LexerTreeBuilder extends Disposable {
      * =-A1  Separate the negative sign from the ref string.
      */
     private _minusSplitSequenceNode(sequenceNodes: Array<string | ISequenceNode>): (string | ISequenceNode)[] {
-        // After the while loop, process nodes to split '-A1:B10' into '-' and 'A1:B10'
+        // After the while loop, process nodes to split '-@A1:B10' or '@-A1:B10' into operators and 'A1:B10'
         const finalSequenceNodes: Array<string | ISequenceNode> = [];
         for (const node of sequenceNodes) {
             if (typeof node !== 'string') {
                 const token = node.token;
-                // Use a regular expression to match leading whitespace and '-'
-                const match = token.match(/^(\s*-\s*)(.*)$/); // Captures leading whitespace and '-', then the rest
+                // Use a regular expression to match leading whitespace and operators '-', '@'
+                const match = token.match(/^(\s*([-@+]\s*)+)(.*)$/); // Captures leading whitespace and operators, then the rest
                 if (match) {
-                    const operatorPart = match[1]; // Includes leading whitespace and '-'
-                    const referencePart = match[2]; // The rest of the token after '-'
+                    const operatorPart = match[1]; // Includes leading whitespace and operators
+                    const referencePart = match[3]; // The rest of the token after operators
 
                     if (isReferenceStringWithEffectiveColumn(referencePart.trim())) {
                         // The referencePart is a valid reference
@@ -575,7 +575,7 @@ export class LexerTreeBuilder extends Disposable {
 
                         // Create an operator node for operatorPart
                         const operatorNode: ISequenceNode = {
-                            nodeType: sequenceNodeType.NORMAL, // Adjust nodeType as needed
+                            nodeType: sequenceNodeType.NORMAL, // Use appropriate nodeType for operators
                             token: operatorPart,
                             startIndex: operatorStart,
                             endIndex: operatorEnd,
@@ -1654,10 +1654,19 @@ export class LexerTreeBuilder extends Disposable {
                         cur++;
                         continue;
                     } else if (this._unexpectedEndingToken(prevString)) {
-                        this._pushSegment(operatorToken.MINUS);
-                        this._addSequenceArray(sequenceArray, currentString, cur);
-                        cur++;
-                        continue;
+                        if (nextString === operatorToken.PLUS) {
+                            this._pushSegment(operatorToken.MINUS);
+                            // this._pushSegment(operatorToken.PLUS);
+                            this._addSequenceArray(sequenceArray, currentString, cur);
+                            this._addSequenceArray(sequenceArray, operatorToken.PLUS, cur + 1);
+                            cur += 2;
+                            continue;
+                        } else {
+                            this._pushSegment(operatorToken.MINUS);
+                            this._addSequenceArray(sequenceArray, currentString, cur);
+                            cur++;
+                            continue;
+                        }
                     }
                 } else if (this._segment.length > 0 && this._isScientificNotation(formulaStringArray, cur, currentString)) {
                     this._pushSegment(currentString);

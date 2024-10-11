@@ -333,7 +333,7 @@ export function replaceRefPrefixString(token: string) {
         const char = token[i];
         if (char === SPACE_TOKEN && !isNotPreFix) {
             tokenArray.push(char);
-        } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS)) {
+        } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS || char === prefixToken.PLUS)) {
             continue;
         } else {
             tokenArray.push(char);

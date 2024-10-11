@@ -241,6 +241,16 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('="a"&1+2') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["\\"a\\"","1","2","+","&"]}');
         });
+
+        it('test lexer ref with at and minus', () => {
+            const node = lexerTreeBuilder.treeBuilder('= --@A1:B10') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0",{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]},"-"]}');
+        });
+
+        it('test lexer ref with at and minus and plus', () => {
+            const node = lexerTreeBuilder.treeBuilder('= --+@A1:B10') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0",{"token":"-","st":-1,"ed":-1,"children":[{"token":"@","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]},"-"]}');
+        });
     });
 
     describe('check error', () => {
@@ -581,6 +591,28 @@ describe('lexer nodeMaker test', () => {
                         endIndex: 9,
                         nodeType: 4,
                         startIndex: 4,
+                        token: 'A1:A10',
+                    },
+                ]
+            );
+        });
+
+        it('test sequence ref with at and minus', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=  --@A1:A10')).toStrictEqual(
+                [
+                    ' ',
+                    ' ',
+                    '-',
+                    {
+                        endIndex: 4,
+                        nodeType: 0,
+                        startIndex: 3,
+                        token: '-@',
+                    },
+                    {
+                        endIndex: 10,
+                        nodeType: 4,
+                        startIndex: 5,
                         token: 'A1:A10',
                     },
                 ]

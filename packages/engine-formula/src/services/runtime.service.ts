@@ -540,6 +540,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                             cell.v = '';
                         }
                         runtimeArrayUnitData.setValue(currentRow, currentColumn, cell);
+                    } // To determine whether a cell has a value, in addition to cell != null, other array formulas may get undefined (displayed as 0). In this case, the value of the existing array formula cannot be modified.
+                    else if (this._isInOtherArrayFormulaRange(unitId, sheetId, row, column, currentRow, currentColumn)) {
+                        return true;
                     } else {
                         runtimeArrayUnitData.setValue(currentRow, currentColumn, { v: '' });
                     }
@@ -641,6 +644,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         };
     }
 
+    // eslint-disable-next-line complexity
     private _checkIfArrayFormulaRangeHasData(
         formulaUnitId: string,
         formulaSheetId: string,
@@ -651,6 +655,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         const { startRow, startColumn, endRow, endColumn } = arrayRange;
 
         const unitData = this._currentConfigService.getUnitData();
+        // this._runtimeArrayFormulaCellData data is incomplete, use the data on configService
+        const arrayData = this._currentConfigService.getArrayFormulaCellData();
 
         const unitArrayFormulaRange =
             this._unitArrayFormulaRange[formulaUnitId]?.[formulaSheetId]?.[formulaRow]?.[formulaColumn];
@@ -663,7 +669,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                 const cell = this._runtimeData?.[formulaUnitId]?.[formulaSheetId]?.getValue(r, c);
 
-                const arrayDataCell = this._runtimeArrayFormulaCellData?.[formulaUnitId]?.[formulaSheetId]?.getValue(
+                const arrayDataCell = arrayData?.[formulaUnitId]?.[formulaSheetId]?.getValue(
                     r,
                     c
                 );
@@ -671,9 +677,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
                 const featureCell = this._getRuntimeFeatureCellValue(r, c, formulaSheetId, formulaUnitId);
 
+                // arrayDataCell may display 0 as {v: null}. Although it is an empty cell, it is considered to have a value.
                 if (
                     !isNullCell(cell) ||
-                    (!isNullCell(arrayDataCell) && !this._isInArrayFormulaRange(unitArrayFormulaRange, r, c)) ||
+                    this._isInOtherArrayFormulaRange(formulaUnitId, formulaSheetId, formulaRow, formulaColumn, r, c) ||
                     !isNullCell(currentCell) ||
                     !isNullCell(featureCell)
                 ) {
@@ -687,6 +694,55 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _getRuntimeFeatureCellValue(row: number, column: number, sheetId: string, unitId: string) {
         return getRuntimeFeatureCell(row, column, sheetId, unitId, this._runtimeFeatureCellData);
+    }
+
+    private _arrayCellHasData(cell: Nullable<ICellData>) {
+        if (cell === null || cell === undefined) {
+            return false;
+        }
+
+        if (cell.v !== undefined) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * If the current array formula in the extended area intersects with the existing array formula, a #SPILL! error will be reported. Note that if other array formulas are already #SPILL!, they will not conflict with the current array formula
+     * @param formulaUnitId
+     * @param formulaSheetId
+     * @param formulaRow
+     * @param formulaColumn
+     * @param r
+     * @param c
+     * @returns
+     */
+    private _isInOtherArrayFormulaRange(formulaUnitId: string, formulaSheetId: string, formulaRow: number, formulaColumn: number, r: number, c: number) {
+        const arrayFormulaRange = this._currentConfigService.getArrayFormulaRange()[formulaUnitId]?.[formulaSheetId];
+
+        if (arrayFormulaRange == null) {
+            return false;
+        }
+
+        let isCellOverlapping = false;
+
+        const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
+        arrayFormulaRangeMatrix.forValue((rangeRow, rangeCol, range) => {
+            // skip the current range
+            if (rangeRow === formulaRow && rangeCol === formulaColumn) {
+                return;
+            }
+
+            // Check if the cell is part of any other range in arrayFormulaRangeMatrix, and value is not #SPILL!
+            const isOverlapping = this._isInArrayFormulaRange(range, r, c);
+            const cell = this._runtimeData[formulaUnitId]?.[formulaSheetId]?.getValue(rangeRow, rangeCol);
+            if (isOverlapping && cell?.v !== ErrorType.SPILL) {
+                isCellOverlapping = true;
+            }
+        });
+
+        return isCellOverlapping;
     }
 
     private _isInArrayFormulaRange(range: Nullable<IRange>, r: number, c: number) {

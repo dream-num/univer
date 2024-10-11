@@ -113,9 +113,13 @@ export class CalculateController extends Disposable {
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
+        // array formula range is used to check whether the newly added array formula conflicts with the existing array formula
+        const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+
         this._calculateFormulaService.execute({
             formulaData,
             arrayFormulaCellData,
+            arrayFormulaRange,
             forceCalculate,
             dirtyRanges,
             dirtyNameMap,

@@ -189,7 +189,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
-                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',');
+                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',').replaceAll(/(^,)|(,$)/g, '');
                 rangeStringSet(text);
                 handleInputDebounce(text);
             });
@@ -326,7 +326,11 @@ function RangeSelectorDialog(props: {
         }, 30);
     };
     const handleRangeInput = (index: number, value: string) => {
-        refSelectionsRenderService?.setSkipLastEnabled(false);
+        if (!value) {
+            refSelectionsRenderService?.setSkipLastEnabled(true);
+        } else {
+            refSelectionsRenderService?.setSkipLastEnabled(false);
+        }
         rangesSet((v) => {
             const result = [...v];
             result[index] = value;

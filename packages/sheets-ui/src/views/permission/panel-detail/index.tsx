@@ -22,9 +22,9 @@ import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-form
 
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { RangeSelector } from '@univerjs/sheets-formula-ui';
-import { IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
-import React, { useEffect, useRef, useState } from 'react';
+import { ComponentManager, IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -45,9 +45,12 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const sidebarService = useDependency(ISidebarService);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const worksheetRuleModel = useDependency(WorksheetProtectionRuleModel);
+    const componentManager = useDependency(ComponentManager);
+    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+
     const rangeErrorMsg = useObservable(sheetPermissionPanelModel.rangeErrorMsg$);
 
-    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
+    const rangeSelectorActionsRef = useRef<any>({});
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet()!;
@@ -56,7 +59,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-    // The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
+// The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
     const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(!!activeRule?.permissionId);
@@ -339,17 +342,18 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             </FormLayout> */}
             <Spin loading={loading}>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
-                    <RangeSelector
-                        unitId={unitId}
-                        errorText={rangeErrorMsg}
-                        subUnitId={subUnitId}
-                        initValue={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
-                        onChange={handleRangeChange}
+                    {RangeSelector && (
+                        <RangeSelector
+                            unitId={unitId}
+                            errorText={rangeErrorMsg}
+                            subUnitId={subUnitId}
+                            initValue={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
+                            onChange={handleRangeChange}
                     // onVerify={handleVerify}
-                        isFocus={isFocusRangeSelector}
-                        actions={rangeSelectorActionsRef.current}
-                    />
-
+                            isFocus={isFocusRangeSelector}
+                            actions={rangeSelectorActionsRef.current}
+                        />
+                    ) }
                 </FormLayout>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
                     <Input

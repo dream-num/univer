@@ -31,7 +31,7 @@ importers:
         version: 8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.8.2(typescript@5.6.3))
       '@storybook/react':
         specifier: 8.3.5
-        version: 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+        version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@types/node':
         specifier: ^22.7.5
         version: 22.7.5
@@ -151,10 +151,10 @@ importers:
         version: 1.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@storybook/react':
         specifier: ^8.3.5
-        version: 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+        version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@storybook/react-webpack5':
         specifier: ^8.3.5
-        version: 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+        version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@storybook/types':
         specifier: ^8.3.5
         version: 8.3.5(storybook@8.3.5)
@@ -2958,9 +2958,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-formula-ui':
-        specifier: workspace:*
-        version: link:../sheets-formula-ui
       '@univerjs/telemetry':
         specifier: workspace:*
         version: link:../telemetry
@@ -4974,11 +4971,6 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
 
-  '@storybook/instrumenter@8.3.4':
-    resolution: {integrity: sha512-jVhfNOPekOyJmta0BTkQl9Z6rgRbFHlc0eV4z1oSrzaawSlc9TFzAeDCtCP57vg3FuBX8ydDYAvyZ7s4xPpLyg==}
-    peerDependencies:
-      storybook: ^8.3.4
-
   '@storybook/instrumenter@8.3.5':
     resolution: {integrity: sha512-NLDXai5y2t1ITgHVK9chyL0rMFZbICCOGcnTbyWhkLbiEWZKPJ8FuB8+g+Ba6zwtCve1A1Cnb4O2LOWy7TgWQw==}
     peerDependencies:
@@ -5048,11 +5040,6 @@ packages:
         optional: true
       typescript:
         optional: true
-
-  '@storybook/test@8.3.4':
-    resolution: {integrity: sha512-HRiUenitln8QPHu6DEWUg9s9cEoiGN79lMykzXzw9shaUvdEIhWCsh82YKtmB3GJPj6qcc6dZL/Aio8srxyGAg==}
-    peerDependencies:
-      storybook: ^8.3.4
 
   '@storybook/test@8.3.5':
     resolution: {integrity: sha512-1BXWsUGWk9FiKKelZZ55FDJdeoL8uRBHbjTYBRM2xJLhdNSvGzI4Tb3bkmxPpGn72Ua6AyldhlTxr2BpUFKOHA==}
@@ -12248,14 +12235,6 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/instrumenter@8.3.4(storybook@8.3.5)':
-    dependencies:
-      '@storybook/global': 5.0.0
-      '@vitest/utils': 2.1.1
-      storybook: 8.3.5
-      util: 0.12.5
-    optional: true
-
   '@storybook/instrumenter@8.3.5(storybook@8.3.5)':
     dependencies:
       '@storybook/global': 5.0.0
@@ -12269,10 +12248,10 @@ snapshots:
 
   '@storybook/node-logger@8.1.6': {}
 
-  '@storybook/preset-react-webpack@8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
+  '@storybook/preset-react-webpack@8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
       '@storybook/core-webpack': 8.3.5(storybook@8.3.5)
-      '@storybook/react': 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+      '@storybook/react': 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.6.3)(webpack@5.94.0(@swc/core@1.7.5)(esbuild@0.23.1))
       '@types/node': 22.7.5
       '@types/semver': 7.5.8
@@ -12321,11 +12300,11 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       storybook: 8.3.5
 
-  '@storybook/react-webpack5@8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
+  '@storybook/react-webpack5@8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
       '@storybook/builder-webpack5': 8.3.5(@swc/core@1.7.5)(esbuild@0.23.1)(storybook@8.3.5)(typescript@5.6.3)
-      '@storybook/preset-react-webpack': 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
-      '@storybook/react': 8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+      '@storybook/preset-react-webpack': 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(@swc/core@1.7.5)(esbuild@0.23.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
+      '@storybook/react': 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
       '@types/node': 22.7.5
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -12341,7 +12320,7 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/react@8.3.5(@storybook/test@8.3.4(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
+  '@storybook/react@8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)':
     dependencies:
       '@storybook/components': 8.3.5(storybook@8.3.5)
       '@storybook/global': 5.0.0
@@ -12367,22 +12346,8 @@ snapshots:
       type-fest: 2.19.0
       util-deprecate: 1.0.2
     optionalDependencies:
-      '@storybook/test': 8.3.4(storybook@8.3.5)
+      '@storybook/test': 8.3.5(storybook@8.3.5)
       typescript: 5.6.3
-
-  '@storybook/test@8.3.4(storybook@8.3.5)':
-    dependencies:
-      '@storybook/csf': 0.1.11
-      '@storybook/global': 5.0.0
-      '@storybook/instrumenter': 8.3.4(storybook@8.3.5)
-      '@testing-library/dom': 10.4.0
-      '@testing-library/jest-dom': 6.5.0
-      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
-      '@vitest/expect': 2.0.5
-      '@vitest/spy': 2.0.5
-      storybook: 8.3.5
-      util: 0.12.5
-    optional: true
 
   '@storybook/test@8.3.5(storybook@8.3.5)':
     dependencies:

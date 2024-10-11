@@ -72,6 +72,9 @@ describe('Test update defined name', () => {
         univer = testBed.univer;
         get = testBed.get;
 
+        get(UpdateDefinedNameController);
+        get(SetDefinedNameController);
+
         commandService = get(ICommandService);
         commandService.registerCommand(MoveRangeCommand);
         commandService.registerCommand(MoveRangeMutation);

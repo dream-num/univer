@@ -122,6 +122,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         this._injector.get(ActiveDirtyController);
         this._injector.get(ArrayFormulaCellInterceptorController);
         this._injector.get(UpdateFormulaController);
+        this._injector.get(UpdateDefinedNameController);
     }
 
     override onRendered(): void {

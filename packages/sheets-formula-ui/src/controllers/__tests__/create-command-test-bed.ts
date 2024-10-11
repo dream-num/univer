@@ -104,6 +104,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
             this._injector.get(SheetInterceptorService);
             this._injector.get(WorkbookPermissionService);
             this._injector.get(WorksheetPermissionService);
+            this._injector.get(DefinedNameDataController);
         }
 
         override onReady(): void {

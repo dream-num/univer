@@ -43,6 +43,7 @@ interface IRenderBGContext {
     scaleY: number;
     viewRanges: IRange[];
     diffRanges: IRange[];
+    cellInfo: ISelectionCellWithMergeInfo;
 }
 
 export class Background extends SheetExtension {
@@ -56,6 +57,7 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override draw(
         ctx: UniverRenderingContext,
         _parentScale: IScale,
@@ -86,6 +88,16 @@ export class Background extends SheetExtension {
             diffRanges,
             spreadsheetSkeleton,
         } as IRenderBGContext;
+
+        const mergeRanges: IRange[] = [];
+        // Currently, viewRanges has only one range.
+        viewRanges.forEach((range) => {
+            // For merge cell.
+            // The background extension is not as strict as the font extension; the font extension must never be redrawn. Therefore, it is not necessary to be that complex.
+            const intersectMergeRangesInViewRanges = spreadsheetSkeleton.worksheet.getMergedCellRange(range.startRow, range.startColumn, range.endRow, range.endColumn);
+            mergeRanges.push(...intersectMergeRangesInViewRanges);
+        });
+
         const renderBGCore = (rgb: string) => {
             const bgColorMatrix = bgMatrixCacheByColor[rgb];
             ctx.fillStyle = rgb || getColor([255, 255, 255])!;
@@ -93,11 +105,19 @@ export class Background extends SheetExtension {
 
             renderBGContext.backgroundPaths = backgroundPaths;
             ctx.beginPath();
-            // bgColorMatrix.forValue(renderBGByCell);
+
+            // Currently, viewRanges has only one range.
             viewRanges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
+                    const index = spreadsheetSkeleton.worksheet.getSpanModel().getMergeDataIndex(row, col);
+                    if (index !== -1) {
+                        return;
+                    }
+                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(row, col);
+                    if (!cellInfo) return;
                     const bgConfig = bgColorMatrix.getValue(row, col);
                     if (bgConfig) {
+                        renderBGContext.cellInfo = cellInfo;
                         this.renderBGByCell(renderBGContext, row, col);
                     }
                 });
@@ -106,45 +126,46 @@ export class Background extends SheetExtension {
             ctx.closePath();
         };
 
-        Object.keys(bgMatrixCacheByColor).forEach(renderBGCore);
+        const renderBGForMergedCells = (rgb: string) => {
+            const bgColorMatrix = bgMatrixCacheByColor[rgb];
+            ctx.fillStyle = rgb || getColor([255, 255, 255])!;
+            const backgroundPaths = new Path2D();
+            renderBGContext.backgroundPaths = backgroundPaths;
+            ctx.beginPath();
+            mergeRanges.forEach((range) => {
+                // bgConfig is requried to be checked in each color loop.
+                const bgConfig = bgColorMatrix.getValue(range.startRow, range.startColumn);
+                if (bgConfig) {
+                    const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(range.startRow, range.startColumn);
+                    if (!cellInfo) return;
+                    renderBGContext.cellInfo = cellInfo;
+                    this.renderBGByCell(renderBGContext, range.startRow, range.startColumn);
+                }
+            });
+            ctx.fill(backgroundPaths);
+            ctx.closePath();
+        };
+        Object.keys(bgMatrixCacheByColor).forEach((rgb) => {
+            renderBGCore(rgb);
+            renderBGForMergedCells(rgb);
+        });
         ctx.restore();
     }
 
     renderBGByCell(bgContext: IRenderBGContext, row: number, col: number) {
-        const { spreadsheetSkeleton, backgroundPositions, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges } = bgContext;
-        // if (!checkOutOfViewBound && !inViewRanges(viewRanges, row, col)) {
-        //     return true;
-        // }
-
-        const cellInfo = backgroundPositions?.getValue(row, col);
-        if (cellInfo == null) {
-            return true;
-        }
+        const { spreadsheetSkeleton, backgroundPaths, scaleX, scaleY, viewRanges, diffRanges, cellInfo } = bgContext;
 
         let { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
         const renderRange = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
 
         // isMerged isMergedMainCell are mutually exclusive. isMerged true then isMergedMainCell false.
-        if (isMerged) {
-            startY = mergeInfo.startY;
-            endY = mergeInfo.endY;
-            startX = mergeInfo.startX;
-            endX = mergeInfo.endX;
-        }
+        // isMergedMainCell has draw all other merged cells, no need draw again.
         // For merged cells, and the current cell is the top-left cell in the merged region.
-        if (isMergedMainCell) {
-            startY = mergeInfo.startY;
-            endY = mergeInfo.endY;
-            startX = mergeInfo.startX;
-            endX = mergeInfo.endX;
-        }
-
-        // in merge range , but not top-left cell.
-        // if (isMerged) return true;
-
-        // const combineWithMergeRanges = mergeTo;
-        //expandRangeIfIntersects([...mergeTo], [mergeInfo]);
+        startY = mergeInfo.startY;
+        endY = mergeInfo.endY;
+        startX = mergeInfo.startX;
+        endX = mergeInfo.endX;
 
         // If curr cell is not in the viewrange (viewport + merged cells), exit early.
         if ((!isMerged && !isMergedMainCell) && !inViewRanges(renderRange!, row, col)) {

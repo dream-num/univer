@@ -74,7 +74,7 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
         super();
     }
 
-    override onStarting(_injector?: Injector): void {
+    override onStarting(): void {
         ([
             [DataSyncReplicaController],
             [IRPCChannelService, {

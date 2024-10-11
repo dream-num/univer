@@ -15,12 +15,24 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, LocaleService } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import { WATERMARK_PANEL } from '../../common/const';
 
 export const OpenWatermarkPanelOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'watermark.operation.open-watermark-panel',
     handler(accessor) {
+        const sidebarService = accessor.get(ISidebarService);
+        const localeService = accessor.get(LocaleService);
+
+        sidebarService.open({
+            header: { title: localeService.t('watermark') },
+            children: { label: WATERMARK_PANEL },
+            onClose: () => { },
+            width: 300,
+        });
+
         return true;
     },
 };

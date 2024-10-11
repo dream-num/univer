@@ -15,7 +15,8 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { ICommandService, IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { OpenWatermarkPanelOperation } from './commands/operations/OpenWatermarkPanelOperation';
 import { type IUniverWatermarkConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 
@@ -29,10 +30,12 @@ export class UniverWatermarkPlugin extends Plugin {
     constructor(
         private readonly _config: Partial<IUniverWatermarkConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
-        @IConfigService private readonly _configService: IConfigService
+        @IConfigService private readonly _configService: IConfigService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService
     ) {
         super();
         this._initDependencies();
+        this._initRegisterCommand();
 
         // Manage the plugin configuration.
         const { menu, ...rest } = this._config;
@@ -51,5 +54,11 @@ export class UniverWatermarkPlugin extends Plugin {
     override onStarting(): void {
         const injector = this._injector;
         this._dependencies.forEach((d) => injector.get(d));
+    }
+
+    private _initRegisterCommand(): void {
+        [
+            OpenWatermarkPanelOperation,
+        ].forEach((m) => this._commandService.registerCommand(m));
     }
 }

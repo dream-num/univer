@@ -664,6 +664,31 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
+  packages-experimental/rpc-node:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
+      rxjs:
+        specifier: '>=7.0.0'
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      typescript:
+        specifier: ^5.5.4
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.1
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
   packages-experimental/uni-docs-ui:
     dependencies:
       '@univerjs/core':

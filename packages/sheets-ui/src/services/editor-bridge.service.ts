@@ -272,6 +272,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             endY = endY - startY + this._currentEditCellState.position.startY;
             startX = this._currentEditCellState.position.startX;
             startY = this._currentEditCellState.position.startY;
+        }
+
+        if (this._currentEditCellState &&
+            this._currentEditCellState.unitId === location.unitId &&
+                this._currentEditCellState.sheetId === location.subUnitId &&
+                this._currentEditCellState.row === location.row &&
+                this._currentEditCellState.column === location.col
+        ) {
             documentLayoutObject = this._currentEditCellState.documentLayoutObject;
         } else {
             documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);

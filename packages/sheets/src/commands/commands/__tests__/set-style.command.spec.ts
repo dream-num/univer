@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IColorStyle, Injector, ITextDecoration, ITextRotation, Univer, Workbook } from '@univerjs/core';
+import type { ISetStyleCommandParams } from '../set-style.command';
 import {
     BooleanNumber,
     FontItalic,
@@ -28,9 +30,8 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IColorStyle, Injector, ITextDecoration, ITextRotation, Univer, Workbook } from '@univerjs/core';
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SheetsSelectionsService } from '../../../services/selections/selection-manager.service';
 import { InsertSheetMutation } from '../../mutations/insert-sheet.mutation';
 import { SetRangeValuesMutation } from '../../mutations/set-range-values.mutation';
@@ -52,7 +53,6 @@ import {
     SetVerticalTextAlignCommand,
 } from '../set-style.command';
 import { createCommandTestBed } from './create-command-test-bed';
-import type { ISetStyleCommandParams } from '../set-style.command';
 
 describe("Test commands used for updating cells' styles", () => {
     let univer: Univer;
@@ -764,10 +764,9 @@ describe("Test commands used for updating cells' styles", () => {
     describe('set style with specific range', () => {
         it('should use the correct unitId and subUnitId when range is provided', async () => {
             const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            if (!workbook) throw new Error('Workbook not found');
 
             // Insert a new sheet
-            expect(await commandService.executeCommand(InsertSheetCommand.id, {})).toBeTruthy();
+            expect(await commandService.executeCommand(InsertSheetCommand.id)).toBeTruthy();
 
             const newSheet = workbook.getSheets()[1]; // Get the newly inserted sheet
             const unitId = workbook.getUnitId();

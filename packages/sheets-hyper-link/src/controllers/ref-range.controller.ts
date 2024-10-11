@@ -16,11 +16,17 @@
 
 import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
-import type { IAddHyperLinkMutationParams, ICellHyperLink, IRemoveHyperLinkMutationParams, IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '@univerjs/sheets-hyper-link';
+import type { IAddHyperLinkMutationParams } from '../commands/mutations/add-hyper-link.mutation';
+import type { IRemoveHyperLinkMutationParams } from '../commands/mutations/remove-hyper-link.mutation';
+import type { IUpdateHyperLinkMutationParams, IUpdateHyperLinkRefMutationParams } from '../commands/mutations/update-hyper-link.mutation';
+import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
 import { Disposable, ICommandService, Inject, isValidRange, sequenceExecuteAsync, toDisposable } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { handleCommonRangeChangeWithEffectRefCommandsSkipNoInterests, handleDefaultRangeChangeWithEffectRefCommandsSkipNoInterests, RefRangeService, SheetsSelectionsService } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation, UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '@univerjs/sheets-hyper-link';
+import { AddHyperLinkMutation } from '../commands/mutations/add-hyper-link.mutation';
+import { RemoveHyperLinkMutation } from '../commands/mutations/remove-hyper-link.mutation';
+import { UpdateHyperLinkMutation, UpdateHyperLinkRefMutation } from '../commands/mutations/update-hyper-link.mutation';
+import { HyperLinkModel } from '../models/hyper-link.model';
 import { ERROR_RANGE } from '../types/const';
 
 export class SheetsHyperLinkRefRangeController extends Disposable {

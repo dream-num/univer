@@ -15,13 +15,15 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
+import type { ISetDefinedNameMutationParam } from '../commands/mutations/set-defined-name.mutation';
+
 import type {
     IRemoveFeatureCalculationMutationParam,
     ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
-
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { Disposable, ICommandService, ObjectMatrix } from '@univerjs/core';
+import { SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
@@ -36,8 +38,7 @@ export class SetDependencyController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
         @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
-        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
-    ) {
+        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService) {
         super();
 
         this._initialize();
@@ -127,8 +128,23 @@ export class SetDependencyController extends Disposable {
                             });
                         });
                     });
+                } else if (command.id === SetDefinedNameMutation.id) {
+                    this._handleSetDefinedName(command);
                 }
             })
         );
+    }
+
+    private _handleSetDefinedName(
+        command: ICommandInfo
+    ): void {
+        const params = command.params as ISetDefinedNameMutationParam;
+        if (params == null) {
+            return;
+        }
+
+        const { unitId, name } = params;
+
+        this._dependencyManagerService.removeFormulaDependencyByDefinedName(unitId, name);
     }
 }

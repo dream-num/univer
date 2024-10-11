@@ -23,6 +23,7 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
+
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { SHEETS_FORMULA_PLUGIN_NAME } from './common/plugin-name';
 import { ActiveDirtyController } from './controllers/active-dirty.controller';
@@ -36,6 +37,7 @@ import {
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaController } from './controllers/formula.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+import { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
@@ -99,6 +101,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [ActiveDirtyController],
             [DefinedNameController],
+            [UpdateDefinedNameController],
         ];
 
         // If the plugin do not execute formula, it should delegate a remote proxy.
@@ -119,6 +122,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         this._injector.get(ActiveDirtyController);
         this._injector.get(ArrayFormulaCellInterceptorController);
         this._injector.get(UpdateFormulaController);
+        this._injector.get(UpdateDefinedNameController);
     }
 
     override onRendered(): void {

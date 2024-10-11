@@ -78,7 +78,7 @@
         "@univerjs/icons": "^0.1.78",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
-        "rc-notification": "^5.6.1",
+        "rc-notification": "^5.6.2",
         "rc-util": "^5.43.0"
     },
     "optionalDependencies": {
@@ -87,7 +87,7 @@
     "devDependencies": {
         "@testing-library/react": "^16.0.1",
         "@testing-library/react-hooks": "^8.0.1",
-        "@types/react": "^18.3.9",
+        "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.0",
         "@types/react-transition-group": "^4.4.11",
         "@univerjs-infra/shared": "workspace:*",
@@ -95,10 +95,10 @@
         "react": "18.3.1",
         "react-dom": "18.3.1",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.2",
+        "typescript": "^5.6.3",
         "vite": "^5.4.8",
-        "vitest": "^2.1.1",
-        "vue": "^3.5.9"
+        "vitest": "^2.1.2",
+        "vue": "^3.5.11"
     },
     "univerSpace": {
         ".": {

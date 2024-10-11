@@ -21,6 +21,11 @@ exports.obfuscator = function obfuscator() {
         name: 'obfuscator',
         enforce: 'post',
         async generateBundle(_options, bundle) {
+            // debug mode
+            // eslint-disable-next-line node/prefer-global/process
+            if (process.env.NODE_ENV === 'development') {
+                return;
+            }
             for (const file in bundle) {
                 if (bundle[file].type === 'chunk' && /\.js$/.test(file)) {
                     const code = bundle[file].code;

@@ -49,7 +49,6 @@ import {
     RemoveRowMutation,
     RemoveSheetMutation,
     ReorderRangeMutation,
-    SetDefinedNameCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';

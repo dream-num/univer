@@ -575,10 +575,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             );
 
             callback?.();
-            if (
-                this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
-                this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
-            ) {
+            if (this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR)) {
                 return;
             }
 

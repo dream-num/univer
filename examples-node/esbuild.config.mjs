@@ -27,6 +27,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     target: 'chrome70',
     entryPoints: [
         './src/cases/basic.ts',
+        './src/cases/worker.ts',
     ],
     outdir: './dist',
     define,

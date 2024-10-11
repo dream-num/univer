@@ -15,8 +15,8 @@
  */
 
 import { LocaleType, numfmt } from '@univerjs/core';
-import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
+import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {
     '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',

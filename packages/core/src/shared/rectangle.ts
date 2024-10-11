@@ -109,6 +109,10 @@ export class Rectangle {
         return zx <= x && zy <= y;
     }
 
+    /**
+     *
+     * @deprecated use `getIntersectRange` instead. This method does not handle NaN and does not return the correct rangeType
+     */
     static getIntersects(src: IRange, target: IRange): Nullable<IRange> {
         const currentStartRow = src.startRow;
         const currentEndRow = src.endRow;

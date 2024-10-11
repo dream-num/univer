@@ -60,7 +60,6 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-hyper-link": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

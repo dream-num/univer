@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsConfig } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { BasicWorksheetController } from './controllers/basic-worksheet.controller';
 import { CalculateResultApplyController } from './controllers/calculate-result-apply.controller';
@@ -106,35 +106,38 @@ export class UniverSheetsPlugin extends Plugin {
             dependencies.push([CalculateResultApplyController]);
         }
 
-        mergeOverrideWithDependencies(dependencies, this._config?.override).forEach((d) => {
-            this._injector.add(d);
-        });
+        registerDependencies(this._injector, mergeOverrideWithDependencies(dependencies, this._config.override));
 
-        this._injector.get(SheetInterceptorService);
-        this._injector.get(RangeProtectionService);
-        this._injector.get(IExclusiveRangeService);
+        touchDependencies(this._injector, [
+            [SheetInterceptorService],
+            [RangeProtectionService],
+            [IExclusiveRangeService],
+        ]);
     }
 
     override onStarting(): void {
-        this._injector.get(BasicWorksheetController);
-        this._injector.get(MergeCellController);
-        this._injector.get(WorkbookPermissionService);
-        this._injector.get(WorksheetPermissionService);
+        touchDependencies(this._injector, [
+            [BasicWorksheetController],
+            [MergeCellController],
+            [WorkbookPermissionService],
+            [WorksheetPermissionService],
+        ]);
     }
 
     override onRendered(): void {
-        this._injector.get(INumfmtService);
+        touchDependencies(this._injector, [
+            [INumfmtService],
+        ]);
     }
 
     override onReady(): void {
-        if (!this._config?.notExecuteFormula) {
-            this._injector.get(CalculateResultApplyController);
-        }
-
-        this._injector.get(DefinedNameDataController);
-        this._injector.get(NumberCellDisplayController);
-        this._injector.get(RangeProtectionRenderModel);
-        this._injector.get(RangeProtectionRefRangeService);
-        this._injector.get(RefRangeService);
+        touchDependencies(this._injector, [
+            [CalculateResultApplyController],
+            [DefinedNameDataController],
+            [NumberCellDisplayController],
+            [RangeProtectionRenderModel],
+            [RangeProtectionRefRangeService],
+            [RefRangeService],
+        ]);
     }
 }

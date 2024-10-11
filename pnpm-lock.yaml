@@ -416,62 +416,29 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
-  mockdata:
+  examples-node:
     dependencies:
-      '@univerjs/action-recorder':
-        specifier: workspace:*
-        version: link:../packages-experimental/action-recorder
       '@univerjs/core':
         specifier: workspace:*
         version: link:../packages/core
       '@univerjs/data-validation':
         specifier: workspace:*
         version: link:../packages/data-validation
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../packages/design
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../packages/docs
       '@univerjs/docs-drawing':
         specifier: workspace:*
         version: link:../packages/docs-drawing
-      '@univerjs/docs-drawing-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-drawing-ui
-      '@univerjs/docs-hyper-link-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-hyper-link-ui
-      '@univerjs/docs-mention-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-mention-ui
-      '@univerjs/docs-thread-comment-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-thread-comment-ui
-      '@univerjs/docs-ui':
-        specifier: workspace:*
-        version: link:../packages/docs-ui
       '@univerjs/drawing':
         specifier: workspace:*
         version: link:../packages/drawing
-      '@univerjs/drawing-ui':
-        specifier: workspace:*
-        version: link:../packages/drawing-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../packages/engine-formula
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../packages/engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../packages/facade
-      '@univerjs/find-replace':
-        specifier: workspace:*
-        version: link:../packages/find-replace
-      '@univerjs/icons':
-        specifier: ^0.1.78
-        version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../packages/rpc
@@ -481,96 +448,100 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../packages/sheets-conditional-formatting
-      '@univerjs/sheets-conditional-formatting-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting-ui
-      '@univerjs/sheets-crosshair-highlight':
-        specifier: workspace:*
-        version: link:../packages/sheets-crosshair-highlight
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../packages/sheets-data-validation
       '@univerjs/sheets-drawing':
         specifier: workspace:*
         version: link:../packages/sheets-drawing
-      '@univerjs/sheets-drawing-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-drawing-ui
       '@univerjs/sheets-filter':
         specifier: workspace:*
         version: link:../packages/sheets-filter
-      '@univerjs/sheets-filter-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-filter-ui
-      '@univerjs/sheets-find-replace':
-        specifier: workspace:*
-        version: link:../packages/sheets-find-replace
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../packages/sheets-formula
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../packages/sheets-hyper-link
-      '@univerjs/sheets-hyper-link-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-hyper-link-ui
-      '@univerjs/sheets-numfmt':
-        specifier: workspace:*
-        version: link:../packages/sheets-numfmt
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
-      '@univerjs/sheets-sort-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-sort-ui
-      '@univerjs/sheets-thread-comment':
-        specifier: workspace:*
-        version: link:../packages/sheets-thread-comment
-      '@univerjs/sheets-thread-comment-base':
-        specifier: workspace:*
-        version: link:../packages/sheets-thread-comment-base
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../packages/sheets-ui
-      '@univerjs/sheets-zen-editor':
-        specifier: workspace:*
-        version: link:../packages/sheets-zen-editor
-      '@univerjs/slides':
-        specifier: workspace:*
-        version: link:../packages/slides
-      '@univerjs/slides-ui':
-        specifier: workspace:*
-        version: link:../packages/slides-ui
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../packages/thread-comment
-      '@univerjs/thread-comment-ui':
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
         specifier: workspace:*
-        version: link:../packages/thread-comment-ui
-      '@univerjs/ui':
+        version: link:../common/shared
+      esbuild:
+        specifier: ^0.24.0
+        version: 0.24.0
+      esbuild-plugin-clean:
+        specifier: ^1.0.1
+        version: 1.0.1(esbuild@0.24.0)
+      esbuild-plugin-copy:
+        specifier: ^2.1.1
+        version: 2.1.1(esbuild@0.24.0)
+      minimist:
+        specifier: ^1.2.8
+        version: 1.2.8
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
+  mockdata:
+    dependencies:
+      '@univerjs/core':
         specifier: workspace:*
-        version: link:../packages/ui
-      '@univerjs/uni-docs-ui':
+        version: link:../packages/core
+      '@univerjs/data-validation':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-docs-ui
-      '@univerjs/uni-formula':
+        version: link:../packages/data-validation
+      '@univerjs/docs':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-formula
-      '@univerjs/uni-formula-ui':
+        version: link:../packages/docs
+      '@univerjs/docs-drawing':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-formula-ui
-      '@univerjs/uni-sheets-ui':
+        version: link:../packages/docs-drawing
+      '@univerjs/drawing':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-sheets-ui
-      '@univerjs/uni-slides-ui':
+        version: link:../packages/drawing
+      '@univerjs/engine-render':
         specifier: workspace:*
-        version: link:../packages-experimental/uni-slides-ui
-      '@univerjs/uniscript':
+        version: link:../packages/engine-render
+      '@univerjs/sheets':
         specifier: workspace:*
-        version: link:../packages/uniscript
-      '@univerjs/uniui':
+        version: link:../packages/sheets
+      '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
-        version: link:../packages-experimental/uniui
+        version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../packages/sheets-formula
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../packages/sheets-hyper-link
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort
+      '@univerjs/sheets-thread-comment-base':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment-base
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../packages/thread-comment
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -683,6 +654,31 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages-experimental/rpc-node:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../../packages/rpc
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -1670,11 +1666,11 @@ importers:
   packages/engine-render:
     dependencies:
       '@floating-ui/dom':
-        specifier: ^1.6.10
-        version: 1.6.10
+        specifier: ^1.6.11
+        version: 1.6.11
       '@floating-ui/utils':
-        specifier: ^0.2.7
-        version: 0.2.7
+        specifier: ^0.2.8
+        version: 0.2.8
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -1754,9 +1750,6 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
-      '@univerjs/sheets-formula-ui':
-        specifier: workspace:*
-        version: link:../sheets-formula-ui
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
@@ -1785,6 +1778,9 @@ importers:
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
       jest-canvas-mock:
         specifier: ^2.5.2
         version: 2.5.2
@@ -2101,18 +2097,9 @@ importers:
       '@univerjs/data-validation':
         specifier: workspace:*
         version: link:../data-validation
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.1.78
         version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2125,12 +2112,6 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
-      '@univerjs/sheets-numfmt':
-        specifier: workspace:*
-        version: link:../sheets-numfmt
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -2141,9 +2122,6 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2195,9 +2173,6 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
@@ -2478,21 +2453,12 @@ importers:
         specifier: workspace:*
         version: link:../ui
     devDependencies:
-      '@types/react':
-        specifier: ^18.3.11
-        version: 18.3.11
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@vitejs/plugin-react':
-        specifier: ^4.3.2
-        version: 4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -2529,15 +2495,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.78
         version: 0.1.78(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@univerjs/rpc':
-        specifier: workspace:*
-        version: link:../rpc
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../sheets-filter
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
@@ -2593,9 +2553,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: 'link:'
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3386,6 +3343,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+      '@univerjs/sheets-data-validation-ui':
+        specifier: workspace:*
+        version: link:../sheets-data-validation-ui
       '@univerjs/sheets-drawing':
         specifier: workspace:*
         version: link:../sheets-drawing
@@ -3404,6 +3364,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
       '@univerjs/sheets-hyper-link':
         specifier: workspace:*
         version: link:../sheets-hyper-link
@@ -4354,8 +4317,8 @@ packages:
   '@floating-ui/core@1.6.4':
     resolution: {integrity: sha512-a4IowK4QkXl4SCWTGUR0INAfEOX3wtsYw3rKK5InQEHMGObkR8Xk44qYQD9P4r6HHw0iIfK6GUKECmY8sTkqRA==}
 
-  '@floating-ui/dom@1.6.10':
-    resolution: {integrity: sha512-fskgCFv8J8OamCmyun8MfjB1Olfn+uZKjOKZ0vhYF3gRmEUXcGOjxWL8bBr7i4kIuPZ2KD2S3EUIOxnjC8kl2A==}
+  '@floating-ui/dom@1.6.11':
+    resolution: {integrity: sha512-qkMCxSR24v2vGkhYDo/UzxfJN3D4syqSjyuTFz6C7XcpU1pASPRieNI0Kj5VP3/503mOfYiGY891ugBX1GlABQ==}
 
   '@floating-ui/dom@1.6.7':
     resolution: {integrity: sha512-wmVfPG5o2xnKDU4jx/m4w5qva9FWHcnZ8BvzEe90D/RpwsJaTAVYPEPdQ8sbr/N8zZTAHlZUTQdqg8ZUbzHmng==}
@@ -4366,8 +4329,8 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
-  '@floating-ui/utils@0.2.7':
-    resolution: {integrity: sha512-X8R8Oj771YRl/w+c1HqAC1szL8zWQRwFvgDwT129k9ACdBoud/+/rX9V0qiMl6LWUdP9voC2nDVZYPMQQsb6eA==}
+  '@floating-ui/utils@0.2.8':
+    resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
 
   '@grpc/grpc-js@1.10.9':
     resolution: {integrity: sha512-5tcgUctCG0qoNyfChZifz2tJqbRbXVO9J7X6duFcOjY3HUNCxg5D0ZCK7EP9vIcZ0zRpLU9bWkyCqVCLZ46IbQ==}
@@ -11600,17 +11563,17 @@ snapshots:
 
   '@floating-ui/core@1.6.4':
     dependencies:
-      '@floating-ui/utils': 0.2.7
+      '@floating-ui/utils': 0.2.8
 
-  '@floating-ui/dom@1.6.10':
+  '@floating-ui/dom@1.6.11':
     dependencies:
       '@floating-ui/core': 1.6.4
-      '@floating-ui/utils': 0.2.7
+      '@floating-ui/utils': 0.2.8
 
   '@floating-ui/dom@1.6.7':
     dependencies:
       '@floating-ui/core': 1.6.4
-      '@floating-ui/utils': 0.2.7
+      '@floating-ui/utils': 0.2.8
 
   '@floating-ui/react-dom@2.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -11618,7 +11581,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@floating-ui/utils@0.2.7': {}
+  '@floating-ui/utils@0.2.8': {}
 
   '@grpc/grpc-js@1.10.9':
     dependencies:

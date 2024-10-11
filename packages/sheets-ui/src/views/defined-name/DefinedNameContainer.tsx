@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import type { Nullable, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
-import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
-import clsx from 'clsx';
-import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SheetsSelectionsService } from '@univerjs/sheets';
+
 import { Confirm, Tooltip } from '@univerjs/design';
-import styles from './index.module.less';
-import { DefinedNameInput } from './DefinedNameInput';
+import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import clsx from 'clsx';
+import React, { useEffect, useState } from 'react';
+import type { Nullable, Workbook } from '@univerjs/core';
+import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
+import { DefinedNameInput } from './DefinedNameInput';
+import styles from './index.module.less';
 
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
@@ -73,9 +73,8 @@ export const DefinedNameContainer = () => {
             id = Tools.generateRandomId(10);
             commandService.executeCommand(InsertDefinedNameCommand.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
         } else {
-            const oldDefinedName = definedNamesService.getValueById(unitId, id);
-            const newDefinedName = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
-            commandService.executeCommand(SetDefinedNameCommand.id, { unitId, oldDefinedName: { ...oldDefinedName, unitId }, newDefinedName });
+            const newDefinedName: ISetDefinedNameMutationParam = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
+            commandService.executeCommand(SetDefinedNameCommand.id, newDefinedName);
         }
         setEditState(false);
         setEditorKey(null);
@@ -95,8 +94,20 @@ export const DefinedNameContainer = () => {
         setDeleteConformKey(null);
     }
 
-    const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
-        definedNamesService.focusRange(unitId, definedName.id);
+    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+        // The worksheet may be hidden, so we need to show it first
+        const { formulaOrRefString, id } = definedName;
+        const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);
+        if (!worksheet) {
+            return;
+        }
+
+        const isHidden = worksheet.isSheetHidden();
+        if (isHidden) {
+            await commandService.executeCommand(SetWorksheetShowCommand.id, { unitId, subUnitId: worksheet.getSheetId() });
+        }
+
+        definedNamesService.focusRange(unitId, id);
     };
 
     const getInsertDefinedName = () => {

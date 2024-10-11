@@ -59,6 +59,8 @@ export interface IDependencyManagerService {
 
     getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<FormulaDependencyTree>;
 
+    removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
+
     clearFormulaDependency(unitId: string, sheetId?: string): void;
 
     addDependencyRTreeCache(tree: FormulaDependencyTree): void;
@@ -500,6 +502,21 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 id: tree.treeId,
             };
         }));
+    }
+
+    removeFormulaDependencyByDefinedName(unitId: string, definedName: string) {
+        if (this._formulaData[unitId]) {
+            Object.values(this._formulaData[unitId]).forEach((sheet) => {
+                sheet.forValue((row, column, tree) => {
+                    if (tree?.node?.hasDefinedName(definedName)) {
+                        this._removeDependencyRTreeCache(tree);
+                        this.clearDependencyForTree(tree);
+                        sheet.realDeleteValue(row, column);
+                        this._removeTreeIdFromCache(tree);
+                    }
+                });
+            });
+        }
     }
 }
 

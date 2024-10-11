@@ -19,8 +19,10 @@ import {
     CommandType,
     ICommandService,
     IUndoRedoService,
+    sequenceExecute,
 } from '@univerjs/core';
 import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 
 /**
  * The command to remove new defined name
@@ -31,22 +33,35 @@ export const RemoveDefinedNameCommand: ICommand = {
     handler: (accessor: IAccessor, params?: ISetDefinedNameMutationParam) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         if (!params) return false;
 
-        // prepare do mutations
         const removeSheetMutationParams: ISetDefinedNameMutationParam = {
             ...params,
         };
 
-        // execute do mutations and add undo mutations to undo stack if completed
-        const result = commandService.syncExecuteCommand(RemoveDefinedNameMutation.id, removeSheetMutationParams);
+        const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: RemoveDefinedNameCommand.id, params });
+
+        const redos = [
+            ...(interceptorCommands.preRedos ?? []),
+            { id: RemoveDefinedNameMutation.id, params: removeSheetMutationParams },
+            ...interceptorCommands.redos,
+        ];
+
+        const undos = [
+            ...(interceptorCommands.preUndos ?? []),
+            { id: SetDefinedNameMutation.id, params: removeSheetMutationParams },
+            ...interceptorCommands.undos,
+        ];
+
+        const result = sequenceExecute(redos, commandService);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [{ id: SetDefinedNameMutation.id, params: removeSheetMutationParams }],
-                redoMutations: [{ id: RemoveDefinedNameMutation.id, params: removeSheetMutationParams }],
+                undoMutations: undos.filter(Boolean),
+                redoMutations: redos.filter(Boolean),
             });
 
             return true;

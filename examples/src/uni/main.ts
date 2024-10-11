@@ -46,7 +46,7 @@ import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';
 import { UniSlidesUIController } from '@univerjs/uni-slides-ui';
 import { UniverUniUIPlugin } from '@univerjs/uniui';
-import { enUS } from '../locales';
+import { enUS, faIR } from '../locales';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 4_000;
 
@@ -56,6 +56,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

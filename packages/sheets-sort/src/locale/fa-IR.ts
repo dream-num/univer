@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-/**
- * Built-in locales.
- */
-export enum LocaleType {
-    EN_US = 'enUS',
-    ZH_CN = 'zhCN',
-    RU_RU = 'ruRU',
-    ZH_TW = 'zhTW',
-    VI_VN = 'viVN',
-    FA_IR = 'faIR',
-}
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
+    sheetsSort: {
+        title: 'مرتب‌سازی',
+        toolbar: {
+            'sort-asc': 'ترتیب صعودی',
+            'sort-desc': 'ترتیب نزولی',
+            'sort-custom': 'ترتیب سفارشی',
+        },
+        'context-menu': {
+            'sort-asc': 'ترتیب صعودی',
+            'sort-desc': 'ترتیب نزولی',
+            'sort-custom': 'ترتیب سفارشی',
+        },
+    },
+};
+
+export default locale;

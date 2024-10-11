@@ -34,7 +34,7 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsMobileUIPlugin } from '@univerjs/sheets-ui';
 import { UniverMobileUIPlugin } from '@univerjs/ui';
-import { enUS } from '../locales';
+import { enUS, faIR } from '../locales';
 
 // univer
 const univer = new Univer({
@@ -42,6 +42,7 @@ const univer = new Univer({
     locale: LocaleType.EN_US,
     locales: {
         [LocaleType.EN_US]: enUS,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });

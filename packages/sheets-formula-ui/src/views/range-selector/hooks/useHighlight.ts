@@ -105,6 +105,10 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             }
         }
     }, [ranges, sheetSkeletonManagerService]);
+
+    useEffect(() => () => {
+        refSelectionsService.setSelections([]);
+    }, []);
 }
 
 export function useDocHight(editorId: string, sequenceNodes: (string | ISequenceNode)[]) {

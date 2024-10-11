@@ -177,8 +177,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         });
     }
 
-    refreshEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean) {
-        const editCellState = this.getLatestEditCellState(resetSizeOnly, tryKeepLastObject);
+    refreshEditCellState() {
+        const editCellState = this.getLatestEditCellState();
         this._currentEditCellState = editCellState;
 
         this._currentEditCellState$.next(editCellState);
@@ -332,15 +332,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             origin: worksheet.getCellRaw(startRow, startColumn),
         };
 
-        let documentLayoutObject: Nullable<IDocumentLayoutObject>;
         const cell = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT)(
             worksheet.getCell(startRow, startColumn),
             location
         );
 
-        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-            // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
         if (renderConfig != null) {
             renderConfig.cellValueType = CellValueType.STRING;
@@ -358,7 +357,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             }
             documentLayoutObject = blankModel;
         }
-            // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
+        // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
         documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 

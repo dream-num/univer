@@ -73,9 +73,6 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
                 entryRoot: 'src',
                 outDir: 'lib/types',
             }),
-            ...(
-                pkg.name.startsWith('@univerjs/') ? [] : [obfuscator()]
-            ),
             buildPkg(),
         ],
         define: {
@@ -117,6 +114,14 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             },
         },
     };
+
+    if (process.env.APP_TYPE === 'staging') {
+        originalConfig.build.sourcemap = true;
+    }
+
+    if (pkg.name.startsWith('@univerjs/')) {
+        originalConfig.plugins.push(obfuscator());
+    }
 
     if (features) {
         if (features.react) {

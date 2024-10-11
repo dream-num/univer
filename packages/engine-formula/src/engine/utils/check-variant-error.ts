@@ -39,6 +39,26 @@ export function checkVariantErrorIsArray(variant: BaseValueObject): BaseValueObj
     return _variant;
 }
 
+export function checkVariantsErrorIsArray(...variants: BaseValueObject[]) {
+    for (let i = 0; i < variants.length; i++) {
+        const variant = checkVariantErrorIsArray(variants[i]);
+
+        if (variant.isError()) {
+            return {
+                isError: true,
+                errorObject: variant,
+            };
+        }
+
+        variants[i] = variant;
+    }
+
+    return {
+        isError: false,
+        variants,
+    };
+}
+
 export function checkVariantsErrorIsArrayOrBoolean(...variants: BaseValueObject[]) {
     for (let i = 0; i < variants.length; i++) {
         const variant = checkVariantErrorIsArray(variants[i]);

@@ -18,7 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
-import type { IUniverSheetsDataValidationConfig } from '../../../controllers/config.schema';
+import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
 import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
@@ -56,7 +56,7 @@ const SelectList = (props: ISelectListProps) => {
     const lowerFilter = filter?.toLowerCase();
     const { row, col, unitId, subUnitId } = location;
     const filteredOptions = options.filter((item) => lowerFilter ? item.label.toLowerCase().includes(lowerFilter) : true);
-    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
+    const showEditOnDropdown = configService.getConfig<IUniverSheetsDataValidationUIConfig>(PLUGIN_CONFIG_KEY)?.showEditOnDropdown ?? true;
     const sheetPermissionInterceptorBaseController = useDependency(SheetPermissionInterceptorBaseController);
     const hasPermission = useMemo(() => sheetPermissionInterceptorBaseController.permissionCheckWithRanges(
         {

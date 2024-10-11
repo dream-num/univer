@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { IUniverSheetsDataValidationConfig } from './controllers/config.schema';
 import {
     DependentOn,
     ICommandService,
+    IConfigService,
     Plugin,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -32,6 +34,7 @@ import {
     UpdateSheetDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DataValidationController } from './controllers/dv.controller';
 import { DataValidationFormulaController } from './controllers/dv-formula.controller';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
@@ -48,11 +51,16 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        _config = undefined,
+        private readonly _config: Partial<IUniverSheetsDataValidationConfig> = defaultPluginConfig,
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super();
+
+        // Manage the plugin configuration..
+        const { ...rest } = this._config;
+        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
     }
 
     override onStarting() {

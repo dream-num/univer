@@ -92,11 +92,12 @@ export interface IEditorBridgeService {
         AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
     }>;
     dispose(): void;
-    refreshEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean): void;
+    refreshEditCellState(): void;
+    refreshEditCellPosition(resetSizeOnly?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
-    getLatestEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
     changeEditorDirty(dirtyStatus: boolean): void;
     getEditorDirty(): boolean;
@@ -183,6 +184,74 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         this._currentEditCellState$.next(editCellState);
     }
 
+    refreshEditCellPosition(resetSizeOnly?: boolean) {
+        const currentEditCell = this._currentEditCell;
+        if (currentEditCell == null) {
+            return;
+        }
+
+        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        if (!ru) return;
+
+        const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
+        const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        if (!skeleton) return;
+        if (!this._currentEditCellState) return;
+
+        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
+        const { startRow, startColumn } = primary;
+        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
+        if (primaryWithCoord == null) {
+            return;
+        }
+
+        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        const canvasOffset = getCanvasOffsetByEngine(engine);
+
+        let { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+
+        if (resetSizeOnly && this._currentEditCellState) {
+            endX = endX - startX + this._currentEditCellState.position.startX;
+            endY = endY - startY + this._currentEditCellState.position.startY;
+            startX = this._currentEditCellState.position.startX;
+            startY = this._currentEditCellState.position.startY;
+        }
+
+        this._editorService.setOperationSheetUnitId(unitId);
+
+        this._editorService.setOperationSheetSubUnitId(sheetId);
+
+        const editCellState = {
+            position: {
+                startX,
+                startY,
+                endX,
+                endY,
+            },
+            scaleX,
+            scaleY,
+            canvasOffset,
+            row: startRow,
+            column: startColumn,
+            unitId,
+            sheetId,
+            documentLayoutObject: this._currentEditCellState.documentLayoutObject,
+            editorUnitId: this._editorUnitId,
+            isInArrayFormulaRange: this._currentEditCellState?.isInArrayFormulaRange,
+        };
+
+        this._currentEditCellState = editCellState;
+        this._currentEditCellState$.next(editCellState);
+    }
+
     setEditCell(param: ICurrentEditCellParam) {
         this._currentEditCell = param;
 
@@ -215,8 +284,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         return this._currentEditCellState;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
-    getLatestEditCellState(resetSizeOnly?: boolean, tryKeepLastObject?: boolean) {
+    // eslint-disable-next-line max-lines-per-function
+    getLatestEditCellState() {
         const currentEditCell = this._currentEditCell;
         if (currentEditCell == null) {
             return;
@@ -269,62 +338,44 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             location
         );
 
-        if (resetSizeOnly && this._currentEditCellState) {
-            endX = endX - startX + this._currentEditCellState.position.startX;
-            endY = endY - startY + this._currentEditCellState.position.startY;
-            startX = this._currentEditCellState.position.startX;
-            startY = this._currentEditCellState.position.startY;
-        }
-
-        if (
-            this._currentEditCellState &&
-            tryKeepLastObject &&
-            this._currentEditCellState.unitId === location.unitId &&
-            this._currentEditCellState.sheetId === location.subUnitId &&
-            this._currentEditCellState.row === location.row &&
-            this._currentEditCellState.column === location.col
-        ) {
-            documentLayoutObject = this._currentEditCellState.documentLayoutObject;
-        } else {
-            documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
             // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
-            const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
-            if (renderConfig != null) {
-                renderConfig.cellValueType = CellValueType.STRING;
-            }
+        const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
+        if (renderConfig != null) {
+            renderConfig.cellValueType = CellValueType.STRING;
+        }
 
-            if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-                const blankModel = skeleton.getBlankCellDocumentModel(cell);
+        if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
+            const blankModel = skeleton.getBlankCellDocumentModel(cell);
 
-                if (documentLayoutObject != null) {
-                    const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
-                    const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
-                    blankModel.documentModel!.documentStyle.renderConfig = {
-                        verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
-                    };
-                }
-                documentLayoutObject = blankModel;
+            if (documentLayoutObject != null) {
+                const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
+                const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
+                blankModel.documentModel!.documentStyle.renderConfig = {
+                    verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
+                };
             }
+            documentLayoutObject = blankModel;
+        }
             // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
-            documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
-            documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
+        documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
+        documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
-            if (cell?.isInArrayFormulaRange === true) {
-                const body = documentLayoutObject.documentModel?.getBody();
-                if (body) {
-                    body.textRuns = [
-                        {
-                            st: 0,
-                            ed: body.dataStream.length - 2,
-                            ts: {
-                                cl: {
-                                    rgb: this._themeService.getCurrentTheme().textColorSecondary,
-                                },
+        if (cell?.isInArrayFormulaRange === true) {
+            const body = documentLayoutObject.documentModel?.getBody();
+            if (body) {
+                body.textRuns = [
+                    {
+                        st: 0,
+                        ed: body.dataStream.length - 2,
+                        ts: {
+                            cl: {
+                                rgb: this._themeService.getCurrentTheme().textColorSecondary,
                             },
                         },
-                    ];
-                }
+                    },
+                ];
             }
         }
 

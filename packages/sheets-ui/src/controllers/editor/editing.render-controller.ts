@@ -255,13 +255,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     resizeCellEditor() {
         const state = this._cellEditorManagerService.getState();
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!skeleton) return;
+
         if (!state) return;
         if (!this._editorBridgeService.isVisible().visible) return;
-        const latestEditCellState = this._editorBridgeService.getLatestEditCellState(true);
+        this._editorBridgeService.refreshEditCellPosition(true);
+        const latestEditCellState = this._editorBridgeService.getEditCellState();
         if (!latestEditCellState) return;
 
+        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(latestEditCellState.sheetId)?.skeleton;
+        if (!skeleton) return;
         const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = latestEditCellState;
         const maxSize = this._getEditorMaxSize(position, canvasOffset);
         if (!maxSize) return;
@@ -274,7 +276,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const currentWidth = state.endX! - state.startX!;
 
         if (currentHeight !== height || currentWidth !== width) {
-            this._editorBridgeService.refreshEditCellState(true);
+            this._editorBridgeService.refreshEditCellPosition(true);
 
             const skeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             if (!skeleton) {
@@ -660,7 +662,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             },
         });
 
-        this._editorBridgeService.refreshEditCellState(false, true);
+        this._editorBridgeService.refreshEditCellPosition(false);
         editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -945,6 +947,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
+        const editCellState = this._editorBridgeService.getEditCellState();
+
         let { keycode } = param;
         this._setOpenForCurrent(null, null);
 
@@ -952,7 +956,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._exitInput(param);
 
-        const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
         }

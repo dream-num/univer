@@ -22,7 +22,6 @@ import {
 } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import {
     AddSheetDataValidationCommand,
     ClearRangeDataValidationCommand,
@@ -43,7 +42,7 @@ import { DataValidationCustomFormulaService } from './services/dv-custom-formula
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { SheetsDataValidationValidatorService } from './services/dv-validator-service';
 
-@DependentOn(UniverSheetsNumfmtPlugin, UniverDataValidationPlugin)
+@DependentOn(UniverDataValidationPlugin)
 export class UniverSheetsDataValidationPlugin extends Plugin {
     static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
     static override type = UniverInstanceType.UNIVER_SHEET;

@@ -56,6 +56,20 @@ Please refer to the [architecture doc](https://github.com/dream-num/univer/wiki/
 
 ### Source code organization
 
+The structure of the repository is as follows:
+
+```
+.
+├── common/ shared configuration and utilities
+├── docs/ documentation
+├── e2e/ e2e test cases
+├── examples/ demos running on the web
+├── examples-node/ demos running on Node.js
+├── mockdata/ mock data for development
+├── packages/ Univer core and plugins
+├── packages-experimental/ experimental plugins (not published on npm.com)
+```
+
 The file structure of a plugin should be organized as follows:
 
 ```

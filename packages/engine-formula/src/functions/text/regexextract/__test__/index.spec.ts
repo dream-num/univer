@@ -16,12 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Regexextract } from '../index';
-import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test regexextract function', () => {
     const testFunction = new Regexextract(FUNCTION_NAMES_TEXT.REGEXEXTRACT);
@@ -31,45 +32,45 @@ describe('Test regexextract function', () => {
             const text = StringValueObject.create('abcdefg');
             const regularExpression = StringValueObject.create('c.*f');
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual('cdef');
+            expect(getObjectValue(result)).toStrictEqual('cdef');
         });
 
         it('RegularExpression is maybe backtrace', () => {
             const text = StringValueObject.create('https://www.example.com');
             const regularExpression = StringValueObject.create('^(https?://)?([a-z0-9.-]+).*');
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
         });
 
         it('Value is boolean', () => {
             const text = BooleanValueObject.create(true);
             const regularExpression = StringValueObject.create('c.*f');
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
 
             const text2 = StringValueObject.create('abcdefg');
             const regularExpression2 = BooleanValueObject.create(true);
             const result2 = testFunction.calculate(text2, regularExpression2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
         });
 
         it('Value is blank cell', () => {
             const text = StringValueObject.create('abcdefg');
             const regularExpression = NullValueObject.create();
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual('');
+            expect(getObjectValue(result)).toStrictEqual('');
 
             const text2 = NullValueObject.create();
             const regularExpression2 = StringValueObject.create('c.*f');
             const result2 = testFunction.calculate(text2, regularExpression2);
-            expect(result2.getValue()).toStrictEqual(ErrorType.NA);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NA);
         });
 
         it('Value is error', () => {
             const text = StringValueObject.create('abcdefg');
             const regularExpression = ErrorValueObject.create(ErrorType.NAME);
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -86,49 +87,56 @@ describe('Test regexextract function', () => {
             });
             const regularExpression = StringValueObject.create('c.*f');
             const result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
         });
 
         it('Result length > 1', () => {
-            let text = StringValueObject.create('我的生日20220104');
-            let regularExpression = StringValueObject.create('生日(2022\\d+)');
+            let text = StringValueObject.create('111aaa111');
+            let regularExpression = StringValueObject.create('(\\d+)([a-z]+)(\\d+)');
             let result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual('20220104');
-
-            regularExpression = StringValueObject.create('生日(?:2022)(\\d+)');
-            result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual('0104');
-
-            text = StringValueObject.create('111aaa111');
-            regularExpression = StringValueObject.create('(\\d+)([a-z]+)(\\d+)');
-            result = testFunction.calculate(text, regularExpression);
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['111', 'aaa', '111'],
             ]);
 
             text = StringValueObject.create('abcd');
             regularExpression = StringValueObject.create('((((a)b)c)d)');
             result = testFunction.calculate(text, regularExpression);
-            expect((result as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 ['abcd', 'abc', 'ab', 'a'],
             ]);
-
-            text = StringValueObject.create('Visit our website at https://www.example.com');
-            regularExpression = StringValueObject.create('https?://[^\s]+');
-            result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual('https://www.example.com');
         });
 
         it('Is not valid or safe RegExp', () => {
             let text = StringValueObject.create('');
             let regularExpression = StringValueObject.create('[a-Z]+');
             let result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
 
             text = StringValueObject.create('abcd');
             regularExpression = StringValueObject.create('((((a');
             result = testFunction.calculate(text, regularExpression);
-            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+        });
+
+        it('More test', () => {
+            let text = StringValueObject.create('我的生日20220104');
+            let regularExpression = StringValueObject.create('生日(2022\\d+)');
+            let result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual('20220104');
+
+            regularExpression = StringValueObject.create('生日(?:2022)(\\d+)');
+            result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual('0104');
+
+            text = StringValueObject.create('The total is 123.45 or € 987.65');
+            regularExpression = StringValueObject.create('[€]\d{1,3}(,\d{3})*(.\d{2})?');
+            result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+
+            text = StringValueObject.create('Visit our website at https://www.example.com');
+            regularExpression = StringValueObject.create('https?://[^\s]+');
+            result = testFunction.calculate(text, regularExpression);
+            expect(getObjectValue(result)).toStrictEqual('https://www.example.com');
         });
     });
 });

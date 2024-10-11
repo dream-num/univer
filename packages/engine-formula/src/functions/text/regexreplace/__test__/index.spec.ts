@@ -16,12 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Regexreplace } from '../index';
-import { BooleanValueObject, NullValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test regexreplace function', () => {
     const testFunction = new Regexreplace(FUNCTION_NAMES_TEXT.REGEXREPLACE);
@@ -32,7 +33,7 @@ describe('Test regexreplace function', () => {
             const regularExpression = StringValueObject.create('c.*f');
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual('abxyzg');
+            expect(getObjectValue(result)).toStrictEqual('abxyzg');
         });
 
         it('RegularExpression is maybe backtrace', () => {
@@ -40,7 +41,7 @@ describe('Test regexreplace function', () => {
             const regularExpression = StringValueObject.create('^(https?://)?([a-z0-9.-]+).*');
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual(ErrorType.REF);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
         });
 
         it('Value is boolean', () => {
@@ -48,16 +49,16 @@ describe('Test regexreplace function', () => {
             const regularExpression = StringValueObject.create('c.*f');
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual('TRUE');
+            expect(getObjectValue(result)).toStrictEqual('TRUE');
 
             const text2 = StringValueObject.create('abcdefg');
             const regularExpression2 = BooleanValueObject.create(true);
             const result2 = testFunction.calculate(text2, regularExpression2, replacement);
-            expect(result2.getValue()).toStrictEqual('abcdefg');
+            expect(getObjectValue(result2)).toStrictEqual('abcdefg');
 
             const replacement2 = BooleanValueObject.create(true);
             const result3 = testFunction.calculate(text2, regularExpression, replacement2);
-            expect(result3.getValue()).toStrictEqual('abTRUEg');
+            expect(getObjectValue(result3)).toStrictEqual('abTRUEg');
         });
 
         it('Value is blank cell', () => {
@@ -65,16 +66,16 @@ describe('Test regexreplace function', () => {
             const regularExpression = NullValueObject.create();
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual('xyzaxyzbxyzcxyzdxyzexyzfxyzgxyz');
+            expect(getObjectValue(result)).toStrictEqual('xyzaxyzbxyzcxyzdxyzexyzfxyzgxyz');
 
             const text2 = NullValueObject.create();
             const regularExpression2 = StringValueObject.create('c.*f');
             const result2 = testFunction.calculate(text2, regularExpression2, replacement);
-            expect(result2.getValue()).toStrictEqual('');
+            expect(getObjectValue(result2)).toStrictEqual('');
 
             const replacement2 = NullValueObject.create();
             const result3 = testFunction.calculate(text, regularExpression2, replacement2);
-            expect(result3.getValue()).toStrictEqual('abg');
+            expect(getObjectValue(result3)).toStrictEqual('abg');
         });
 
         it('Value is error', () => {
@@ -82,7 +83,7 @@ describe('Test regexreplace function', () => {
             const regularExpression = ErrorValueObject.create(ErrorType.NAME);
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual(ErrorType.NAME);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
         });
 
         it('Value is array', () => {
@@ -100,7 +101,21 @@ describe('Test regexreplace function', () => {
             const regularExpression = StringValueObject.create('c.*f');
             const replacement = StringValueObject.create('xyz');
             const result = testFunction.calculate(text, regularExpression, replacement);
-            expect(result.getValue()).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('More test', () => {
+            let text = StringValueObject.create('Sheets');
+            let regularExpression = StringValueObject.create('e{2}');
+            let replacement = StringValueObject.create('X');
+            let result = testFunction.calculate(text, regularExpression, replacement);
+            expect(getObjectValue(result)).toStrictEqual('ShXts');
+
+            text = StringValueObject.create('The event will be held on June 15, 2024.');
+            regularExpression = StringValueObject.create('\\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\s+\\d{1,2},\\s+\\d{4}\\b');
+            replacement = StringValueObject.create('[REDACTED]');
+            result = testFunction.calculate(text, regularExpression, replacement);
+            expect(getObjectValue(result)).toStrictEqual('The event will be held on [REDACTED].');
         });
     });
 });

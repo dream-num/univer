@@ -132,7 +132,7 @@ export const ConfirmZenEditCommand: ICommand = {
             if (editingRenderController) {
                 const snapshot = Tools.deepClone(editor.getDocumentData());
                 // Maybe we need a third Document flavor for sheet editor?
-                snapshot.documentStyle.documentFlavor = DocumentFlavor.TRADITIONAL;
+                snapshot.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
                 editingRenderController.submitCellData(new DocumentDataModel(snapshot));
             }
 

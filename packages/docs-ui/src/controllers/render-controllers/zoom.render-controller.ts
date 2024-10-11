@@ -136,7 +136,9 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
         const docObject = neoGetDocObject(this._context);
         docObject.scene.scale(zoomRatio, zoomRatio);
 
-        this._docPageLayoutService.calculatePagePosition();
+        if (!this._editorService.isEditor(this._context.unitId)) {
+            this._docPageLayoutService.calculatePagePosition();
+        }
 
         if (needRefreshSelection && !this._editorService.isEditor(this._context.unitId)) {
             this._textSelectionManagerService.refreshSelection();

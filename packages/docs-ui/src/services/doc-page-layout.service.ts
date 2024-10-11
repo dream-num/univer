@@ -36,6 +36,7 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
+
         if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;
         }

@@ -52,7 +52,7 @@ export function genSnapShotByValue(id = '', value = '') {
         },
         tableSource: {},
         documentStyle: {
-            documentFlavor: DocumentFlavor.MODERN,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
         },
     };
 

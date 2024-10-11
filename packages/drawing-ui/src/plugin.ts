@@ -49,8 +49,8 @@ export class UniverDrawingUIPlugin extends Plugin {
     }
 
     override onRendered(): void {
-        this._injector.get(DrawingUIController);
         this._injector.get(DrawingUpdateController);
+        this._injector.get(DrawingUIController);
         this._injector.get(ImageCropperController);
         this._injector.get(ImageUpdateController);
     }

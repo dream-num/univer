@@ -60,6 +60,8 @@ export class PluginService implements IDisposable {
             this._immediateInitPlugin.bind(this)
         );
 
+        this._pluginHoldersForTypes.set(UniverInstanceType.UNIVER_UNKNOWN, this._pluginHolderForUniver);
+
         this._pluginHolderForUniver.start();
     }
 
@@ -180,20 +182,23 @@ export class PluginHolder extends Disposable {
     protected readonly _pluginRegistry = new PluginRegistry();
     /** Stores initialized plugin instances. */
     protected readonly _pluginStore = new PluginStore();
-
-    private readonly _awaitingPlugins: Plugin[][] = [];
+    /** Plugins instances as they are registered in batches. */
+    private readonly _pluginsInBatches: Plugin[][] = [];
 
     constructor(
         private _checkPluginRegistered: (pluginCtor: PluginCtor) => boolean,
         private _registerPlugin: <T extends PluginCtor>(plugin: T, config?: ConstructorParameters<T>[0]) => void,
         @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
+
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         super();
 
         this.disposeWithMe(this._lifecycleService.lifecycle$.pipe(skip(1)).subscribe((stage) => {
-            this._awaitingPlugins.forEach((plugins) => this._runStage(plugins, stage));
+            // Lifecycle of plugins should be coordinated. For example, if a plugin A depends on another plugin B, B should go
+            // through the lifecycle first.  As a temporary solution, we make sure that plugin with type Common goes through the lifecycle first.
+            this._pluginsInBatches.forEach((plugins) => this._runStage(plugins, stage));
         }));
     }
 
@@ -205,7 +210,7 @@ export class PluginHolder extends Disposable {
 
         this._pluginRegistry.removePlugins();
 
-        this._awaitingPlugins.length = 0;
+        this._pluginsInBatches.length = 0;
     }
 
     register<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
@@ -278,7 +283,7 @@ export class PluginHolder extends Disposable {
         // Let plugins go through already reached lifecycle stages.
         getLifecycleStagesAndBefore(this._lifecycleService.stage).subscribe((stage) => this._runStage(plugins, stage));
         // Push to the queue for later lifecycle.
-        this._awaitingPlugins.push(plugins);
+        this._pluginsInBatches.push(plugins);
     }
 
     private _runStage(plugins: Plugin[], stage: LifecycleStages): void {
@@ -310,3 +315,4 @@ export class PluginHolder extends Disposable {
         });
     }
 }
+

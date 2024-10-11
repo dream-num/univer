@@ -15,8 +15,8 @@
  */
 
 import type { Ctor, Injector } from '../../common/di';
-import { Disposable } from '../../shared';
 import { UniverInstanceType } from '../../common/unit';
+import { Disposable } from '../../shared';
 
 export const DependentOnSymbol = Symbol('DependentOn');
 

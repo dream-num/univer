@@ -22,6 +22,8 @@ import {
     Inject,
     Injector,
     Plugin,
+    registerDependencies,
+    touchDependencies,
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDrawingPlugin } from '@univerjs/drawing';
@@ -63,38 +65,38 @@ export class UniverSheetsDrawingUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._initDependencies();
-
-        this._injector.get(SheetCanvasFloatDomManagerService);
-    }
-
-    override onReady(): void {
-        this._injector.get(SheetsDrawingCopyPasteController);
-    }
-
-    override onRendered(): void {
-        this._registerRenderModules();
-
-        this._injector.get(SheetDrawingPermissionController);
-        this._injector.get(SheetDrawingPrintingController);
-        this._injector.get(SheetDrawingUIController);
-    }
-
-    override onSteady(): void {
-        this._injector.get(DrawingPopupMenuController);
-    }
-
-    private _initDependencies(): void {
-        const dependencies: Dependency[] = [
+        registerDependencies(this._injector, [
             [SheetCanvasFloatDomManagerService],
             [SheetDrawingUIController],
             [DrawingPopupMenuController],
             [SheetDrawingPrintingController],
             [SheetDrawingPermissionController],
             [SheetsDrawingCopyPasteController],
-        ];
+        ]);
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
+        touchDependencies(this._injector, [
+            [SheetCanvasFloatDomManagerService],
+        ]);
+    }
+
+    override onReady(): void {
+        touchDependencies(this._injector, [
+            [SheetsDrawingCopyPasteController],
+        ]);
+    }
+
+    override onRendered(): void {
+        this._registerRenderModules();
+
+        touchDependencies(this._injector, [
+            [SheetDrawingPermissionController],
+            [SheetDrawingPrintingController],
+            [SheetDrawingUIController],
+        ]);
+    }
+
+    override onSteady(): void {
+        this._injector.get(DrawingPopupMenuController);
     }
 
     private _registerRenderModules(): void {

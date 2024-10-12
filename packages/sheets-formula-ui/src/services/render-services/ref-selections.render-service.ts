@@ -152,7 +152,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
             this._addSelectionControlBySelectionData(selectionData);
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-
+            const dispose = scene.onPointerUp$.subscribeEvent(() => {
+                dispose.unsubscribe();
+                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            });
             if (evt.button !== 2) {
                 state.stopPropagation();
             }

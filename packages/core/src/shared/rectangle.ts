@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable } from './types';
 import { AbsoluteRefType, type IRange, type IRectLTRB, RANGE_TYPE } from '../sheets/typedef';
 import { mergeRanges, multiSubtractSingleRange } from './range';
-import type { Nullable } from './types';
 
 /**
  * This class provides a set of methods to calculate `IRange`.

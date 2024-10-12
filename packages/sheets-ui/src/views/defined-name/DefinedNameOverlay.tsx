@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 
+import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import React, { useEffect, useState } from 'react';
-import type { Workbook } from '@univerjs/core';
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import styles from './index.module.less';
 

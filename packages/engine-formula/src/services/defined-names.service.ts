@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { IUnitRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { handleRefStringInfo, serializeRange } from '../engine/utils/reference';
 
 export interface IDefinedNamesServiceParam {

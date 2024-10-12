@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
-import { Rectangle } from './rectangle';
 import type { IRange } from '../sheets/typedef';
 import type { Nullable } from './types';
+import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
+import { Rectangle } from './rectangle';
 
 export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false): IRange {
     let newRange = { ...range };

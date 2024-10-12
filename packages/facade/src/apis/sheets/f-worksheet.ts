@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, Nullable, ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IDisposable, IFreeze, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
-import { Direction, ICommandService, Inject, Injector, RANGE_TYPE } from '@univerjs/core';
+import { Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -1033,5 +1034,43 @@ export class FWorksheet {
             return 0;
         }
         return freeze.startRow;
+    }
+
+    /**
+     * Subscribe to the cell data change event.
+     * @param callback - The callback function to be executed when the cell data changes.
+     * @returns - A disposable object to unsubscribe from the event.
+     */
+    onCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.onCommandExecuted((command) => {
+            if (command.id === SetRangeValuesMutation.id) {
+                const params = command.params as ISetRangeValuesMutationParams;
+                if (
+                    params.unitId === this._workbook.getUnitId() &&
+                    params.subUnitId === this._worksheet.getSheetId() &&
+                  params.cellValue
+                ) {
+                    callback(new ObjectMatrix(params.cellValue));
+                }
+            }
+        });
+    }
+
+    /**
+     * Subscribe to the cell data change event.
+     * @param callback - The callback function to be executed before the cell data changes.
+     * @returns - A disposable object to unsubscribe from the event.
+     */
+    onBeforeCellDataChange(callback: (cellValue: ObjectMatrix<Nullable<ICellData>>) => void): IDisposable {
+        const commandService = this._injector.get(ICommandService);
+        return commandService.beforeCommandExecuted((command) => {
+            if (command.id === SetRangeValuesMutation.id) {
+                const params = command.params as ISetRangeValuesMutationParams;
+                if (params.unitId === this._workbook.getUnitId() && params.subUnitId === this._worksheet.getSheetId() && params.cellValue) {
+                    callback(new ObjectMatrix(params.cellValue));
+                }
+            }
+        });
     }
 }

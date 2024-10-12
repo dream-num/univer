@@ -22,6 +22,7 @@ import type {
     IDocumentData,
     IExecutionOptions,
     IWorkbookData,
+    LifecycleStages,
     Nullable,
     Workbook,
 } from '@univerjs/core';
@@ -43,6 +44,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
+    LifecycleService,
     Quantity,
     RedoCommand,
     toDisposable,
@@ -311,6 +313,16 @@ export class FUniver {
 
     getFormula(): FFormula {
         return this._injector.createInstance(FFormula);
+    }
+
+    /**
+     * Get the current lifecycle stage.
+     *
+     * @returns {LifecycleStages} - The current lifecycle stage.
+     */
+    getCurrentLifecycleStage(): LifecycleStages {
+        const lifecycleService = this._injector.get(LifecycleService);
+        return lifecycleService.stage;
     }
 
     // #region

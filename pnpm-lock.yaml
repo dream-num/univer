@@ -1803,6 +1803,31 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
+  packages/facade-neo:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets-formula-ui':
+        specifier: workspace:*
+        version: link:../sheets-formula-ui
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
   packages/find-replace:
     dependencies:
       '@univerjs/core':

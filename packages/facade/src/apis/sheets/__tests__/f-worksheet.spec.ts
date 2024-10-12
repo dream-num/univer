@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
-import { CancelFrozenCommand } from '@univerjs/sheets-ui';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
-import { createWorksheetTestBed } from './create-worksheet-test-bed';
+import type { ICellData, Injector, Nullable, Workbook } from '@univerjs/core';
 import type { FUniver } from '../../facade';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { createWorksheetTestBed } from './create-worksheet-test-bed';
 
 describe('Test FWorksheet', () => {
     let get: Injector['get'];
@@ -33,12 +31,6 @@ describe('Test FWorksheet', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<ICellData>;
-    let getStyleByPosition: (
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    ) => Nullable<IStyleData>;
     let setSelection: (startRow: number, endRow: number, startColumn: number, endColumn: number) => void;
 
     beforeEach(() => {
@@ -103,23 +95,10 @@ describe('Test FWorksheet', () => {
             endColumn: number
         ): Nullable<ICellData> =>
             get(IUniverInstanceService)
-                .getUniverSheetInstance('test')
+                .getUnit<Workbook>('test')
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();
-
-        getStyleByPosition = (
-            startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number
-        ): Nullable<IStyleData> => {
-            const value = getValueByPosition(startRow, startColumn, endRow, endColumn);
-            const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
-            if (value && styles) {
-                return styles.getStyleByCell(value);
-            }
-        };
 
         setSelection = (startRow: number, endRow: number, startColumn: number, endColumn: number, rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL) => {
             const selectionManagerService = get(SheetsSelectionsService);

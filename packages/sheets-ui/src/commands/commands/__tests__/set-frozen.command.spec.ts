@@ -16,12 +16,11 @@
 
 import type { IFreeze, Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { SheetsSelectionsService } from '@univerjs/sheets';
+import { CancelFrozenCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,

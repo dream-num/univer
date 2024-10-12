@@ -61,7 +61,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
@@ -194,7 +193,6 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initCommands(): void {
         [
             AddWorksheetMergeAllCommand,
@@ -242,7 +240,6 @@ export class SheetUIController extends Disposable {
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
             ScrollToRangeOperation,
-            CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,

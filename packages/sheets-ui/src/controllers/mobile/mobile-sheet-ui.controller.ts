@@ -16,6 +16,7 @@
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import {
+    CancelFrozenCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -58,7 +59,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,

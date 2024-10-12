@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import type { MenuSchemaType } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
     AddWorksheetMergeHorizontalCommand,
     AddWorksheetMergeVerticalCommand,
+    CancelFrozenCommand,
     ClearSelectionAllCommand,
     ClearSelectionContentCommand,
     ClearSelectionFormatCommand, CopySheetCommand,
@@ -42,7 +44,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
-import type { MenuSchemaType } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     // SheetCutCommand,
@@ -78,7 +79,7 @@ import {
 import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/commands/remove-row-col-confirm.command';
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
-import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
     ChangeSheetProtectionFromSheetBarCommand,

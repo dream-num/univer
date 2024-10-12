@@ -57,12 +57,11 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {

@@ -61,11 +61,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "react-dom": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
@@ -75,7 +70,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "clsx": "^2.1.1",
         "localforage": "^1.10.0",
         "rc-notification": "^5.6.2",
@@ -88,7 +83,7 @@
         "@testing-library/react": "^16.0.1",
         "@testing-library/react-hooks": "^8.0.1",
         "@types/react": "^18.3.11",
-        "@types/react-dom": "^18.3.0",
+        "@types/react-dom": "^18.3.1",
         "@types/react-transition-group": "^4.4.11",
         "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.0",

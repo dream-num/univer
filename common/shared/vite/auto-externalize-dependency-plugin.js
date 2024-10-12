@@ -20,25 +20,11 @@ const { convertLibNameFromPackageName } = require('./utils');
 
 exports.autoExternalizeDependency = function autoExternalizeDependency() {
     const externals = new Set();
+    const peers = new Set();
     const globals = {};
     let hasCss = false;
 
-    const externalMap = {
-        clsx: {
-            global: 'clsx',
-            name: 'clsx',
-            version: '>=2.0.0',
-        },
-        dayjs: {
-            global: 'dayjs',
-            name: 'dayjs',
-            version: '>=1.11.0',
-        },
-        'monaco-editor': {
-            global: 'monaco',
-            name: 'monaco-editor',
-            version: '>=0.44.0',
-        },
+    const peerDepsMap = {
         react: {
             global: 'React',
             name: 'react',
@@ -77,9 +63,9 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                 hasCss = true;
             }
 
-            if (source in externalMap) {
-                externals.add(source);
-                globals[source] = externalMap[source].global;
+            if (source in peerDepsMap) {
+                peers.add(source);
+                globals[source] = peerDepsMap[source].global;
 
                 return { id: source, external: true };
             } else if (source.startsWith('@univerjs')) {
@@ -116,33 +102,53 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             const peerDependencies = {};
             let optionalDependencies;
 
-            Array.from(externals)
-                .sort()
-                .filter((ext) => {
-                    return !ext.endsWith('.less');
-                })
-                .forEach((ext) => {
-                    const { version, name, optional } = externalMap[ext] ?? {};
+            Array.from(peers).sort().forEach((key) => {
+                const { version, name, optional } = peerDepsMap[key] ?? {};
 
-                    if (version) {
-                        if (version !== name) {
-                            if (optional) {
-                                if (!optionalDependencies) {
-                                    optionalDependencies = {};
-                                }
-                                optionalDependencies[ext] = version;
-                            } else {
-                                peerDependencies[ext] = version;
+                if (version) {
+                    if (version !== name) {
+                        if (optional) {
+                            if (!optionalDependencies) {
+                                optionalDependencies = {};
                             }
+                            optionalDependencies[key] = version;
                         } else {
-                            if (!peerDependencies[version]) {
-                                peerDependencies[name] = externalMap[version].version;
-                            }
+                            peerDependencies[key] = version;
                         }
                     } else {
-                        peerDependencies[ext] = 'workspace:*';
+                        if (!peerDependencies[version]) {
+                            peerDependencies[name] = peerDepsMap[version].version;
+                        }
                     }
-                });
+                } else {
+                    peerDependencies[key] = 'workspace:*';
+                }
+            });
+            // Array.from(peers)
+            //     .sort()
+            //     .forEach((ext) => {
+            //     console.log(peers.);
+            //     const { version, name, optional } = peers[ext] ?? {};
+
+            //         if (version) {
+            //             if (version !== name) {
+            //                 if (optional) {
+            //                     if (!optionalDependencies) {
+            //                         optionalDependencies = {};
+            //                     }
+            //                     optionalDependencies[ext] = version;
+            //                 } else {
+            //                     peerDependencies[ext] = version;
+            //                 }
+            //             } else {
+            //                 if (!peerDependencies[version]) {
+            //                     peerDependencies[name] = peers[version].version;
+            //                 }
+            //             }
+            //         } else {
+            //             peerDependencies[ext] = 'workspace:*';
+            //         }
+            //     });
 
             if (Object.keys(peerDependencies).length) {
                 pkg.peerDependencies = peerDependencies;

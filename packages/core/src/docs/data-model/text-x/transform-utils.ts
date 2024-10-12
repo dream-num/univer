@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import type {
-    IDocumentBody,
-    IParagraph,
-    IParagraphStyle,
-    IRetainAction,
-    ITextRun,
-    ITextStyle,
-    Nullable,
-} from '@univerjs/core';
-import { normalizeTextRuns, Tools } from '@univerjs/core';
+import type { Nullable } from '../../../shared';
+import type { IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type { IRetainAction } from './action-types';
+import { Tools } from '../../../shared';
+import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {
     // The properties on the target are always retained, and the properties on the origin are ignored.

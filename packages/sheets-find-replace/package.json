@@ -61,11 +61,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/find-replace": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

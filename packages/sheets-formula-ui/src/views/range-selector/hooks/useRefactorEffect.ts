@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
-import type { Workbook } from '@univerjs/core';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
+export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRange: boolean) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);

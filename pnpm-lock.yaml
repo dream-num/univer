@@ -979,19 +979,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@xyflow/react':
-<<<<<<< HEAD
         specifier: ^12.3.2
         version: 12.3.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-=======
-        specifier: ^12.2.1
-        version: 12.2.1(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-<<<<<<< HEAD
-=======
-        version: 12.2.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1175,15 +1164,7 @@ importers:
     devDependencies:
       '@testing-library/react':
         specifier: ^16.0.1
-<<<<<<< HEAD
-<<<<<<< HEAD
         version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-=======
-<<<<<<< HEAD
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
-        version: 16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
       '@types/react':
         specifier: ^18.3.11
         version: 18.3.11
@@ -2186,15 +2167,9 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
-<<<<<<< HEAD
-=======
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../sheets-formula-ui
->>>>>>> fe89bc4ed (feat(range-selector): support permission and data validation)
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
@@ -2475,46 +2450,9 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
     devDependencies:
-<<<<<<< HEAD
-=======
-      '@types/react':
-        specifier: ^18.3.11
-        version: 18.3.11
-<<<<<<< HEAD
-=======
-        specifier: ^18.3.9
-        version: 18.3.10
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
       '@univerjs-infra/shared':
         specifier: workspace:*
         version: link:../../common/shared
-<<<<<<< HEAD
-=======
-      '@vitejs/plugin-react':
-        specifier: ^4.3.2
-        version: 4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-<<<<<<< HEAD
-=======
-        specifier: ^4.3.1
-<<<<<<< HEAD
-<<<<<<< HEAD
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.3)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
-=======
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.0)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> d2ba4d638 (feat(conditional-formatting): access the selection component)
->>>>>>> 474780635 (feat(conditional-formatting): access the selection component)
-<<<<<<< HEAD
->>>>>>> 43a6a6994 (feat(conditional-formatting): access the selection component)
-=======
-=======
-        version: 4.3.1(vite@5.4.8(@types/node@22.7.4)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -3701,17 +3639,6 @@ packages:
     resolution: {integrity: sha512-DSgLeL/FNcpXuzav5wfYvHCGvynXkJbn3Zvc3823AEe9nPwW9IK4UoCSS5yGymmQzN0pCPvivtgS6/8U2kkm1w==}
     engines: {node: '>=6.9.0'}
 
-<<<<<<< HEAD
-  '@babel/runtime@7.25.6':
-    resolution: {integrity: sha512-VBj9MYyDb9tuLq7yzqjgzt6Q+IBQLrGZfdjOekyEirZPHxXWoTSGUTMrpsfi58Up73d13NfYLv8HT9vmznjzhQ==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.25.7':
-    resolution: {integrity: sha512-FjoyLe754PMiYsFaN5C94ttGiOmBNYTf6pLr4xXHAT5uctHb092PBszndLDR5XA/jghQvn4n7JMHl7dmTgbm9w==}
-    engines: {node: '>=6.9.0'}
-
-=======
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
   '@babel/runtime@7.4.5':
     resolution: {integrity: sha512-TuI4qpWZP6lGOGIuGWtp9sPluqYICmbk8T/1vpSysqJxRPkudh/ofFWyqdcMsDf2s7KvDL4/YHgKyvcS3g9CJQ==}
 
@@ -10960,17 +10887,6 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.14.1
 
-<<<<<<< HEAD
-  '@babel/runtime@7.25.6':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-  '@babel/runtime@7.25.7':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
-=======
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
   '@babel/runtime@7.4.5':
     dependencies:
       regenerator-runtime: 0.13.11
@@ -12467,20 +12383,7 @@ snapshots:
       '@types/react': 18.3.11
       react-dom: 18.3.1(react@18.3.1)
 
-<<<<<<< HEAD
   '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.1)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-=======
-  '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-<<<<<<< HEAD
-=======
-      '@types/react': 18.3.10
-      react-dom: 18.3.1(react@18.3.1)
-
-  '@testing-library/react@16.0.1(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
     dependencies:
       '@babel/runtime': 7.25.4
       '@testing-library/dom': 10.4.0
@@ -12488,17 +12391,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
     optionalDependencies:
       '@types/react': 18.3.11
-<<<<<<< HEAD
-<<<<<<< HEAD
       '@types/react-dom': 18.3.1
-=======
-=======
-      '@types/react': 18.3.10
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
-=======
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
-      '@types/react-dom': 18.3.0
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
 
   '@testing-library/user-event@14.5.2(@testing-library/dom@10.4.0)':
     dependencies:
@@ -13093,19 +12986,7 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   '@xyflow/react@12.3.2(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-=======
-<<<<<<< HEAD
-  '@xyflow/react@12.2.1(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-=======
-  '@xyflow/react@12.2.1(@types/react@18.3.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
->>>>>>> bcfebd768 (fix(range-selector): some bugs)
->>>>>>> e41c20f72 (fix(range-selector): some bugs)
-=======
-  '@xyflow/react@12.2.1(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
->>>>>>> c66e0441d (fix(range-selector): the selection is not deleted when the content is deleted)
     dependencies:
       '@xyflow/system': 0.0.43
       classcat: 5.0.5
@@ -17401,7 +17282,7 @@ snapshots:
 
   rc-virtual-list@3.14.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.25.7
+      '@babel/runtime': 7.25.4
       classnames: 2.5.1
       rc-resize-observer: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rc-util: 5.43.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

@@ -15,7 +15,7 @@
  */
 
 import type { IUnitRangeName, IUniverInstanceService, Workbook } from '@univerjs/core';
-import { serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 
 export function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId: string, name: string) {
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(name)?.getSheetId() || '';
@@ -24,17 +24,15 @@ export function getSheetNameById(univerInstanceService: IUniverInstanceService, 
     return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(sheetId)?.getName() || '';
 }
 
-export const unitRangesToText = (ranges: IUnitRangeName[], unitId: string, subUnitId: string, univerInstanceService: IUniverInstanceService) => {
-    return ranges.map((item) => {
-        if (item.unitId === unitId || !item.unitId) {
-            const sheetId = getSheetIdByName(univerInstanceService, unitId, item.sheetName);
-            if (sheetId === subUnitId || !sheetId) {
-                return serializeRange(item.range);
-            } else {
+export const unitRangesToText = (ranges: IUnitRangeName[], isSupportAcrossSheet: boolean = false) => {
+    if (!isSupportAcrossSheet) {
+        return ranges.map((item) => serializeRange(item.range));
+    } else {
+        return ranges.map((item) => {
+            if (item.sheetName !== '') {
                 return serializeRangeWithSheet(item.sheetName, item.range);
             }
-        } else {
-            return serializeRangeWithSpreadsheet(item.unitId, item.sheetName, item.range);
-        }
-    });
+            return serializeRange(item.range);
+        });
+    }
 };

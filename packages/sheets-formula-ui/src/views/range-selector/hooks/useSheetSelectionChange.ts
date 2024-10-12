@@ -16,10 +16,11 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { Workbook } from '@univerjs/core';
 import type { INode } from '../utils/filterReferenceNode';
 import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 
-import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
@@ -33,13 +34,23 @@ export const useSheetSelectionChange = (isNeed: boolean,
     unitId: string,
     subUnitId: string,
     sequenceNodes: INode[],
+    isSupportAcrossSheet: boolean,
+    isOnlyOneRange: boolean,
     handleRangeChange: (refString: string, offset: number) => void) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const isScalingRef = useRef(false);
+
+    const sheetName = useMemo(() => {
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
+        const sheet = workbook?.getSheetBySheetId(subUnitId);
+        return sheet?.getName() || '';
+    }, [unitId, subUnitId]);
+
     const debounceReset = useMemo(() => debounce(() => {
         isScalingRef.current = false;
     }, 300), []);
+
     const setIsScaling = () => {
         isScalingRef.current = true;
         debounceReset();
@@ -77,12 +88,25 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
                         const unitRange = deserializeRangeWithSheet(node.token);
-                        if (!unitRange.unitId && !unitRange.sheetName) {
+                        unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
+                        unitRange.sheetName = unitRange.sheetName === '' ? sheetName : unitRange.sheetName;
+
+                        const { unitId: rangeUnitId, sheetName: rangeSubName } = unitRange;
+                        if (isOnlyOneRange) {
+                            if (rangeUnitId !== unitId || sheetName !== rangeSubName) {
+                                return null;
+                            }
+                        }
+                        if (rangeUnitId === unitId && sheetName === rangeSubName) {
                             const currentSelection = cloneSelectionList.shift();
-                            if (currentSelection) {
+                            if (currentSelection && getSheetNameById(univerInstanceService, unitId, currentSelection.rangeWithCoord.sheetId || '') === rangeSubName) {
                                 const cloneNode = { ...node };
                                 rangePreProcess(currentSelection.rangeWithCoord);
-                                cloneNode.token = serializeRange(currentSelection.rangeWithCoord);
+                                if (isSupportAcrossSheet) {
+                                    cloneNode.token = serializeRangeWithSheet(sheetName, currentSelection.rangeWithCoord);
+                                } else {
+                                    cloneNode.token = serializeRange(currentSelection.rangeWithCoord);
+                                }
                                 return cloneNode;
                             }
                         }
@@ -96,9 +120,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         unitId: e.rangeWithCoord.unitId ?? '',
                         sheetName: getSheetNameById(univerInstanceService, e.rangeWithCoord.unitId ?? '', e.rangeWithCoord.sheetId ?? ''),
                     })),
-                    unitId,
-                    subUnitId,
-                    univerInstanceService)
+                    isSupportAcrossSheet
+                )
                     .join(matchToken.COMMA);
                 const thePre = sequenceNodeToText(newSequenceNodes);
                 const result = `${thePre}${(thePre && theLast) ? matchToken.COMMA : ''}${theLast}`;
@@ -109,7 +132,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 dispose.unsubscribe();
             };
         }
-    }, [isNeed, filterReferenceNodes, refSelectionsRenderService]);
+    }, [isNeed, filterReferenceNodes, refSelectionsRenderService, isSupportAcrossSheet, isOnlyOneRange]);
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
@@ -128,16 +151,21 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         if (!isFinish) {
                             offset += node.token.length;
                         }
-                        const unitRange = deserializeRangeWithSheet(node.token);
-                        if (!unitRange.unitId && !unitRange.sheetName) {
-                            if (currentIndex === index) {
-                                isFinish = true;
-                                const cloneNode = { ...node, token };
-                                currentIndex++;
-                                return cloneNode;
+                        const unitRange = deserializeRangeWithSheet(token);
+                        unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
+                        unitRange.sheetName = unitRange.sheetName === '' ? sheetName : unitRange.sheetName;
+                        if (currentIndex === index) {
+                            isFinish = true;
+                            const cloneNode = { ...node, token };
+                            if (isSupportAcrossSheet) {
+                                cloneNode.token = serializeRangeWithSheet(unitRange.sheetName, unitRange.range);
+                            } else {
+                                cloneNode.token = serializeRange(unitRange.range);
                             }
                             currentIndex++;
+                            return cloneNode;
                         }
+                        currentIndex++;
                         return node;
                     }
                     return node;

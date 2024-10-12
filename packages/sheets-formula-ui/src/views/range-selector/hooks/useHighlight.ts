@@ -59,7 +59,6 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             return;
         }
         const currentSheetId = worksheet?.getSheetId();
-        const isCrossSheet = currentSheetId !== subUnitId;
         const getSheetIdByName = (name: string) => workbook?.getSheetBySheetName(name)?.getSheetId();
 
         for (let i = 0, len = refSelections.length; i < len; i++) {
@@ -74,7 +73,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
             const refSheetId = getSheetIdByName(sheetName);
 
-            if (isCrossSheet && refSheetId !== currentSheetId) {
+            if (refSheetId && refSheetId !== currentSheetId) {
                 continue;
             }
 
@@ -133,6 +132,7 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
         const cloneBody = { dataStream: '', ...data.body };
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             cloneBody.textRuns = [];
+            cloneBody.dataStream = '\r\n';
             rangesSet([]);
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);

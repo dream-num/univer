@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { isInternalEditorID, useDependency } from '@univerjs/core';
+import type { IDocumentData } from '@univerjs/core';
+import { fromEventSubject, isInternalEditorID, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
+import { IRenderManagerService, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import React, { useEffect, useRef } from 'react';
+import { filter, mergeMap } from 'rxjs';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
@@ -24,17 +27,21 @@ export interface ITextEditorProps {
     id: string; // unitId
     className?: string; // Parent class name.
     fontSize?: number;
+    snapshot: IDocumentData;
 }
 
 export function SheetsTextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onActive'>): JSX.Element | null {
     const {
         id,
         fontSize,
+        snapshot,
         className,
         ...extraProps
     } = props;
 
     const editorService = useDependency(IEditorService);
+    const renderManagerService = useDependency(IRenderManagerService);
+    const renderer = renderManagerService.getRenderById(id);
 
     const editorRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +55,7 @@ export function SheetsTextEditor(props: ITextEditorProps & Omit<MyComponentProps
         if (!editorDom) {
             return;
         }
-        const isSingle = true;
+        const isSingle = false;
         const isReadonly = false;
         const isFormulaEditor = false;
         const onlyInputFormula = false;
@@ -57,11 +64,11 @@ export function SheetsTextEditor(props: ITextEditorProps & Omit<MyComponentProps
         const isSingleChoice = false;
         const openForSheetUnitId = null;
         const openForSheetSubUnitId = null;
-        const isSheetEditor = false;
+        const isSheetEditor = true;
 
         const registerSubscription = editorService.register({
             editorUnitId: id,
-            initialSnapshot: undefined,
+            initialSnapshot: snapshot,
             cancelDefaultResizeListener: true,
             isSheetEditor,
             canvasStyle: { fontSize },
@@ -80,7 +87,21 @@ export function SheetsTextEditor(props: ITextEditorProps & Omit<MyComponentProps
         return () => {
             registerSubscription.dispose();
         };
-    }, [editorService, id]);
+    }, [editorService, id, renderer]);
+
+    useEffect(() => {
+        if (renderer) {
+            fromEventSubject(renderer.scene.onTransformChange$)
+                .pipe(filter((state) => state.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize))
+                .pipe(mergeMap(() => fromEventSubject(renderer.engine.onTransformChange$).pipe(filter((state) => state.type === TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize))))
+                .subscribe(() => {
+                    const width = renderer.engine.getCanvasElement().clientWidth;
+                    const height = renderer.engine.getCanvasElement().clientHeight;
+                    const sceneWidth = renderer.scene.width;
+                    const sceneHeight = renderer.scene.height;
+                });
+        }
+    }, [renderer]);
 
     return (
         <div {...extraProps} className={className} ref={editorRef} />

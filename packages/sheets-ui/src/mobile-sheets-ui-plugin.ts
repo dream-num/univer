@@ -112,7 +112,6 @@ export class UniverSheetsMobileUIPlugin extends Plugin {
                 [SheetsRenderService],
                 [SheetUIMobileController],
                 [StatusBarController],
-                [EditorDataSyncController],
 
                 // permission
                 [SheetPermissionPanelModel],

@@ -51,10 +51,12 @@ export function getTextRangeFromCharIndex(
     skeleton: DocumentSkeleton,
     style: ITextSelectionStyle,
     segmentId: string,
-    segmentPage: number
+    segmentPage: number,
+    startIsBack = true,
+    endIsBack = true
 ): Nullable<TextRange> {
-    const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, true, segmentId, segmentPage);
-    const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, true, segmentId, segmentPage);
+    const startNodePosition = skeleton.findNodePositionByCharIndex(startOffset, startIsBack, segmentId, segmentPage);
+    const endNodePosition = skeleton.findNodePositionByCharIndex(endOffset, endIsBack, segmentId, segmentPage);
 
     if (startNodePosition == null || endNodePosition == null) {
         return;

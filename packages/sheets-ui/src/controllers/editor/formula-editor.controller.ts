@@ -211,7 +211,7 @@ export class FormulaEditorController extends RxDisposable {
 
             const { engine } = editorObject;
             formulaEditorDataModel.updateDocumentDataPageSize(width);
-            // this._autoScroll();
+            this._autoScroll();
             this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
         });
     }

@@ -668,9 +668,9 @@ export class FRange {
      * @param rule data validation rule, build by `FUniver.newDataValidation`
      * @returns current range
      */
-    async setDataValidation(rule: Nullable<FDataValidation>): Promise<this> {
+    setDataValidation(rule: Nullable<FDataValidation>): this {
         if (!rule) {
-            this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
+            this._commandService.syncExecuteCommand(ClearRangeDataValidationCommand.id, {
                 unitId: this._workbook.getUnitId(),
                 subUnitId: this._worksheet.getSheetId(),
                 ranges: [this._range],
@@ -687,7 +687,7 @@ export class FRange {
             },
         };
 
-        await this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        this._commandService.syncExecuteCommand(AddSheetDataValidationCommand.id, params);
         return this;
     }
 

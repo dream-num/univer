@@ -24,7 +24,7 @@ import { OpenValidationPanelOperation } from '../operations/data-validation.oper
 export const AddSheetDataValidationAndOpenCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRuleAndOpen',
-    async handler(accessor) {
+    handler(accessor) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
@@ -41,10 +41,10 @@ export const AddSheetDataValidationAndOpenCommand: ICommand = {
             subUnitId,
         };
 
-        const res = await commandService.executeCommand(AddSheetDataValidationCommand.id, addParams);
+        const res = commandService.syncExecuteCommand(AddSheetDataValidationCommand.id, addParams);
 
         if (res) {
-            commandService.executeCommand(OpenValidationPanelOperation.id, {
+            commandService.syncExecuteCommand(OpenValidationPanelOperation.id, {
                 ruleId: rule.uid,
                 isAdd: true,
             });

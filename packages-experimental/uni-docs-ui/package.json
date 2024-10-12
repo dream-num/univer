@@ -57,21 +57,16 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-drawing-ui": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@univerjs/uniui": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/docs-drawing-ui": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons": "^0.1.79",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniui": "workspace:*",
         "clsx": "^2.1.1"

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { TextXAction } from '@univerjs/core';
-import { TextXActionType } from '@univerjs/core';
-import { describe, expect, it } from 'vitest';
+import type { TextXAction } from '../action-types';
 
+import { describe, expect, it } from 'vitest';
+import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 describe('transformPosition()', () => {

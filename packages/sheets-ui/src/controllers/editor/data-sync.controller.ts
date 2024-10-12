@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICommandInfo, IDocumentBody, IParagraph, Nullab
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
+import type { ICellEditorState } from '../../services/editor-bridge.service';
 import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
@@ -70,7 +70,7 @@ export class EditorDataSyncController extends Disposable {
     }
 
     // Sync cell content to formula editor bar when sheet selection changed or visible changed.
-    private _editorSyncHandler(param: IEditorBridgeServiceParam) {
+    private _editorSyncHandler(param: ICellEditorState) {
         let body = Tools.deepClone(param.documentLayoutObject.documentModel?.getBody());
 
         if (

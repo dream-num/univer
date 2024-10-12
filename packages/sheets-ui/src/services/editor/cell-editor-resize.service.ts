@@ -16,7 +16,7 @@
 
 import type { IPosition, Nullable, Workbook } from '@univerjs/core';
 import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, Inject, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DOCS_COMPONENT_MAIN_LAYER_INDEX } from '@univerjs/docs-ui';
 import { convertTextRotation, FIX_ONE_PIXEL_BLUR_OFFSET, fixLineWidthByScale, IRenderManagerService, Rect, ScrollBar } from '@univerjs/engine-render';
@@ -24,6 +24,7 @@ import { ILayoutService } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import styles from '../../views/sheet-container/index.module.less';
 import { IEditorBridgeService } from '../editor-bridge.service';
+import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { ICellEditorManagerService } from './cell-editor-manager.service';
 
 const EDITOR_INPUT_SELF_EXTEND_GAP = 5;
@@ -41,7 +42,8 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         @ILayoutService private readonly _layoutService: ILayoutService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
     }
@@ -168,7 +170,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         };
     }
 
-    getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset) {
+    private _getEditorMaxSize(position: IPosition, canvasOffset: ICanvasOffset) {
         const editorObject = this._getEditorObject();
         if (editorObject == null) {
             return;
@@ -235,7 +237,7 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
         const { document: documentComponent, scene: editorScene, engine: docEngine } = editorObject;
         const viewportMain = editorScene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
 
-        const info = this.getEditorMaxSize(actualRangeWithCoord, canvasOffset);
+        const info = this._getEditorMaxSize(actualRangeWithCoord, canvasOffset);
         if (!info) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = info;
 
@@ -341,6 +343,39 @@ export class SheetCellEditorResizeService extends Disposable implements IRenderM
                 width: editorWidth,
                 height: editorHeight,
             });
+        }
+    }
+
+    resizeCellEditor(callback?: () => void) {
+        const state = this._cellEditorManagerService.getState();
+
+        if (!state) return;
+        if (!this._editorBridgeService.isVisible().visible) return;
+        this._editorBridgeService.refreshEditCellPosition(true);
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (!editCellState) return;
+
+        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(editCellState.sheetId)?.skeleton;
+        if (!skeleton) return;
+        const { row, column, scaleX, scaleY, position, canvasOffset } = editCellState;
+        const maxSize = this._getEditorMaxSize(position, canvasOffset);
+        if (!maxSize) return;
+        const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
+
+        const cell = skeleton.getCellByIndex(row, column);
+        const height = Math.min((cell.mergeInfo.endY - cell.mergeInfo.startY) * scaleY, clientHeight) * scaleAdjust;
+        const width = Math.min((cell.mergeInfo.endX - cell.mergeInfo.startX) * scaleX, clientWidth) * scaleAdjust;
+        const currentHeight = state.endY! - state.startY!;
+        const currentWidth = state.endX! - state.startX!;
+
+        if (currentHeight !== height || currentWidth !== width) {
+            this._editorBridgeService.refreshEditCellPosition(true);
+
+            const docSkeleton = this._getEditorSkeleton();
+            if (!docSkeleton) {
+                return;
+            }
+            this.fitTextSize(callback);
         }
     }
 

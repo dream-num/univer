@@ -15,13 +15,16 @@
  */
 
 import type { ICommandInfo, IDisposable, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DisposableCollection, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { IRangeSelectorService } from '@univerjs/docs-ui';
-import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DisposableCollection, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionRenderService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
+    ClearSelectionFormatCommand,
+    SetRangeValuesMutation,
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -46,7 +49,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         // FIXME: should check if it is the current sheet, if it becomes the current sheet,
         // it should update cell params, otherwise it should do nothing.
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
-        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
+        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService,
+        @IContextService private readonly _contextService: IContextService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -66,6 +72,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         this._initSelectionChangeListener(d);
         this._initEventListener(d);
         this._commandExecutedListener(d);
+        this._initialKeyboardListener(d);
         return d;
     }
 
@@ -123,6 +130,62 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
         d.add(spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
         d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
+    }
+
+        /**
+         * Should activate the editor when the user inputs text.
+         * @param d DisposableCollection
+         */
+    private _initialKeyboardListener(d: DisposableCollection) {
+        const docSelectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+
+        if (docSelectionRenderService) {
+            d.add(docSelectionRenderService.onInputBefore$.subscribe((config) => {
+                if (!this._isCurrentSheetFocused()) {
+                    return;
+                }
+
+                const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+                const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+                    // TODO@Jocs: should get editor instead of current doc
+                const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
+                if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                    this._showEditorByKeyboard(config);
+                }
+            }));
+        }
+    }
+
+    private _commandExecutedListener(d: DisposableCollection) {
+        const refreshCommandSet = new Set([ClearSelectionFormatCommand.id, SetRangeValuesMutation.id, SetZoomRatioCommand.id]);
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (refreshCommandSet.has(command.id)) {
+                if (this._editorBridgeService.isVisible().visible) return;
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
+
+        d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+            if (options?.fromCollab) return;
+            if (command.id === SetWorksheetActiveOperation.id) {
+                this._tryHideEditor();
+            }
+        }));
+    }
+
+    private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
+        if (config == null) {
+            return;
+        }
+
+        const event = config.event as KeyboardEvent;
+
+        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+            visible: true,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode: event.which,
+            unitId: this._context.unitId,
+        });
     }
 
     private _tryHideEditor() {
@@ -199,24 +262,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         return getSheetObject(this._context.unit, this._context)!;
     }
 
-    private _commandExecutedListener(d: DisposableCollection) {
-        d.add(this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-            // When the zoom ratio is changed, the editor needs to be refreshed to get the latest cell size and position.
-            if (command.id === SetZoomRatioCommand.id) {
-                this._editorBridgeService.refreshEditCellState();
-            }
-
-            // if (options?.fromCollab) return;
-            // if (command.id !== SetWorksheetActiveOperation.id && COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
-            //     this._hideEditor();
-            // }
-        }));
-
-        d.add(this._commandService.beforeCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
-            if (options?.fromCollab) return;
-            if (command.id === SetWorksheetActiveOperation.id) {
-                this._tryHideEditor();
-            }
-        }));
+    private _isCurrentSheetFocused(): boolean {
+        return this._instanceSrv.getFocusedUnit()?.getUnitId() === this._context.unitId;
     }
 }

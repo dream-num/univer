@@ -51,7 +51,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const rangeErrorMsg = useObservable(sheetPermissionPanelModel.rangeErrorMsg$);
 
     const rangeSelectorActionsRef = useRef<any>({});
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet()!;
     const unitId = workbook.getUnitId();

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, ColorKit, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocBackScrollRenderController, DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
+
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -44,6 +46,7 @@ export const CellLinkEdit = () => {
     const [showLabel, setShowLabel] = useState(true);
     const [type, setType] = useState<SheetHyperLinkType | string>(SheetHyperLinkType.URL);
     const [payload, setPayload] = useState('');
+
     const localeService = useDependency(LocaleService);
     const definedNameService = useDependency(IDefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
@@ -62,6 +65,8 @@ export const CellLinkEdit = () => {
     const themeService = useDependency(ThemeService);
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
 
+    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
+
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -71,7 +76,17 @@ export const CellLinkEdit = () => {
 
     const [showError, setShowError] = useState(false);
 
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
+
     const setByPayload = useRef(false);
+
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
+
+    useEffect(() => {
+        isFocusRangeSelectorSet(false);
+    }, [subUnitId]);
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
@@ -131,21 +146,21 @@ export const CellLinkEdit = () => {
             const linkInfo = resolverService.parseHyperLink(link.payload);
             setType(linkInfo.type === SheetHyperLinkType.INVALID ? SheetHyperLinkType.RANGE : linkInfo.type);
             switch (linkInfo.type) {
-                case SheetHyperLinkType.URL:{
+                case SheetHyperLinkType.URL: {
                     setPayload(linkInfo.url);
                     if (linkInfo.url === link.display) {
                         setByPayload.current = true;
                     }
                     break;
                 }
-                case SheetHyperLinkType.RANGE:{
+                case SheetHyperLinkType.RANGE: {
                     const params = linkInfo.searchObj!;
                     const sheetName = params.gid ?
                         univerInstanceService
                             .getUnit<Workbook>(editing.unitId)
                             ?.getSheetBySheetId(params.gid)
                             ?.getName()
-                            ?? ''
+                        ?? ''
                         : '';
                     const payload = (serializeRangeWithSheet(sheetName, deserializeRangeWithSheet(params.range!).range));
                     setPayload(payload);
@@ -154,12 +169,12 @@ export const CellLinkEdit = () => {
                     }
                     break;
                 }
-                case SheetHyperLinkType.SHEET:{
+                case SheetHyperLinkType.SHEET: {
                     const params = linkInfo.searchObj!;
                     setPayload(params.gid!);
                     break;
                 }
-                case SheetHyperLinkType.DEFINE_NAME:{
+                case SheetHyperLinkType.DEFINE_NAME: {
                     const params = linkInfo.searchObj!;
                     setPayload(params.rangeid!);
                     break;
@@ -225,6 +240,13 @@ export const CellLinkEdit = () => {
         };
     }, [editorBridgeService, renderManagerService]);
 
+    useEffect(() => {
+        popupService.setIsKeepVisible(type === SheetHyperLinkType.RANGE);
+        return () => {
+            popupService.setIsKeepVisible(false);
+        };
+    }, [type]);
+
     const linkTypeOptions: Array<{
         label: string;
         value: SheetHyperLinkType | string;
@@ -248,10 +270,10 @@ export const CellLinkEdit = () => {
         ...sidePanelOptions,
     ];
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) {
         return;
     }
+
     const hiddens = workbook.getHiddenWorksheets();
     const sheetsOption = workbook.getSheets().map((sheet) => ({ label: sheet.getName(), value: sheet.getSheetId() })).filter((opt) => hiddens.indexOf(opt.value) === -1);
     const definedNames = Object.values(definedNameService.getDefinedNameMap(workbook.getUnitId()) ?? {}).map((value) => ({
@@ -275,7 +297,8 @@ export const CellLinkEdit = () => {
         return `#${type}=${payload}`;
     };
 
-    const handleRangeChange = useEvent((newValue: IUnitRangeWithName[]) => {
+    const handleRangeChange = useEvent((rangeText: string) => {
+        const newValue = rangeText.split(',').map(deserializeRangeWithSheet);
         const range = newValue[0];
         if (!range || !isValidRange(range.range)) {
             return;
@@ -352,13 +375,20 @@ export const CellLinkEdit = () => {
 
         commandService.executeCommand(CloseHyperLinkPopupOperation.id);
     };
+    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (type !== SheetHyperLinkType.RANGE) {
+            return;
+        }
+        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+    };
 
     if (!editing) {
         return null;
     }
 
     return (
-        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }}>
+        <div className={styles.cellLinkEdit} style={{ display: hide ? 'none' : 'block' }} onClick={handlePanelClick}>
             {showLabel
                 ? (
                     <FormLayout
@@ -418,13 +448,16 @@ export const CellLinkEdit = () => {
             {type === SheetHyperLinkType.RANGE && (
                 <FormLayout error={showError && !payload ? localeService.t('hyperLink.form.inputError') : ''}>
                     <RangeSelector
-                        openForSheetUnitId={workbook.getUnitId()}
-                        id={createInternalEditorID('hyper-link-edit')}
-                        isSingleChoice
-                        value={payloadInitial}
+                        unitId={workbook.getUnitId()}
+                        subUnitId={subUnitId}
+                        isOnlyOneRange
+                        isSupportAcrossSheet
+                        initValue={payloadInitial}
                         onChange={handleRangeChange}
-                        dialogOnly
-                        onSelectorVisibleChange={async (visible) => {
+                        isFocus={isFocusRangeSelector}
+                        onBlur={() => { isFocusRangeSelectorSet(false); }}
+                        actions={rangeSelectorActionsRef.current}
+                        onRangeSelectorDialogVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
                                     zenZoneService.hide();

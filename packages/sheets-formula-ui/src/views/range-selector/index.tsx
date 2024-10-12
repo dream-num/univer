@@ -55,10 +55,20 @@ interface IRangeSelectorProps {
     actions?: {
         handleOutClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => void;
     };
+
+    /**
+     * 是否只允许最多一个 range 区域,默认为 false。
+     * @type {boolean}
+     */
+    isOnlyOneRange?: boolean;
+
+    onRangeSelectorDialogVisibleChange?: (visible: boolean) => void;
 };
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { initValue, unitId, subUnitId, onChange, onVerify, errorText, placeholder, isFocus: _isFocus = true, actions } = props;
+    const { initValue, unitId, subUnitId, onChange, onVerify,
+            errorText, placeholder, isFocus: _isFocus = true,
+            actions, isOnlyOneRange = false, onRangeSelectorDialogVisibleChange } = props;
 
     const editorService = useDependency(IEditorService);
     const localeService = useDependency(LocaleService);
@@ -125,15 +135,18 @@ export function RangeSelector(props: IRangeSelectorProps) {
         rangeStringSet(text);
         onChange(text);
         rangeDialogVisibleSet(false);
+        onRangeSelectorDialogVisibleChange?.(false);
     };
 
     const handleClose = () => {
         rangeDialogVisibleSet(false);
+        onRangeSelectorDialogVisibleChange?.(false);
     };
 
     const handleOpenModal = () => {
         if (!isError) {
             rangeDialogVisibleSet(true);
+            onRangeSelectorDialogVisibleChange?.(true);
         }
     };
 
@@ -210,6 +223,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         const d2 = commandService.onCommandExecuted((info) => {
             if (info.id === SetCellEditVisibleOperation.id) {
                 rangeDialogVisibleSet(false);
+                onRangeSelectorDialogVisibleChange?.(false);
                 isFocusSet(false);
             }
         });
@@ -280,6 +294,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     subUnitId={subUnitId}
                     initValue={ranges}
                     visible={rangeDialogVisible}
+                    isOnlyOneRange={isOnlyOneRange}
                 >
                 </RangeSelectorDialog>
             )}
@@ -294,8 +309,9 @@ function RangeSelectorDialog(props: {
     initValue: IUnitRangeName[];
     unitId: string;
     subUnitId: string;
+    isOnlyOneRange: boolean;
 }) {
-    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId } = props;
+    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange } = props;
 
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -305,7 +321,17 @@ function RangeSelectorDialog(props: {
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
-    const [ranges, rangesSet] = useState(() => unitRangesToText(initValue, unitId, subUnitId, univerInstanceService));
+    const [ranges, rangesSet] = useState(() => {
+        if (isOnlyOneRange) {
+            const firstRange = initValue[0];
+            if (firstRange) {
+                return unitRangesToText([firstRange], unitId, subUnitId, univerInstanceService);
+            } else {
+                return [''];
+            }
+        }
+        return unitRangesToText(initValue, unitId, subUnitId, univerInstanceService);
+    });
 
     const [focusIndex, focusIndexSet] = useState(() => ranges.length - 1);
 
@@ -370,6 +396,12 @@ function RangeSelectorDialog(props: {
 
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, handleSheetSelectionChange);
     useRefactorEffect(focusIndex >= 0, unitId);
+    // 如果只有一个空 range,那么默认自动添加 range
+    useEffect(() => {
+        if (ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {
+            refSelectionsRenderService?.setSkipLastEnabled(true);
+        }
+    }, [ranges]);
 
     return (
         <Dialog
@@ -406,17 +438,19 @@ function RangeSelectorDialog(props: {
                             value={text}
                             onChange={(value) => handleRangeInput(index, value)}
                         />
-                        {ranges.length > 1 && <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />}
+                        {ranges.length > 1 && !isOnlyOneRange && <DeleteSingle className={styles.sheetRangeSelectorDialogItemDelete} onClick={() => handleRangeRemove(index)} />}
 
                     </div>
                 ))}
 
-                <div>
-                    <Button type="link" size="small" onClick={handleRangeAdd}>
-                        <IncreaseSingle />
-                        <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
-                    </Button>
-                </div>
+                {!isOnlyOneRange && (
+                    <div>
+                        <Button type="link" size="small" onClick={handleRangeAdd}>
+                            <IncreaseSingle />
+                            <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
+                        </Button>
+                    </div>
+                )}
             </div>
 
         </Dialog>

@@ -67,7 +67,7 @@ export function DataValidationDetail() {
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
 
     const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
 
     const sheetSelectionService = useDependency(SheetsSelectionsService);
 

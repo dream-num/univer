@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
 import type { IRange, Nullable } from '@univerjs/core';
+import type { IFunctionNames } from '../basics/function';
+
+import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 import { ErrorType } from '../basics/error-type';
-import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
+import { REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING, REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING, REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING } from '../basics/regex';
 import { compareToken } from '../basics/token';
 import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
@@ -30,13 +35,8 @@ import { serializeRangeToRefString } from '../engine/utils/reference';
 import { convertTonNumber } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
-import type { IFunctionNames } from '../basics/function';
-import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
-import type { ArrayBinarySearchType } from '../engine/utils/compare';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
-export class BaseFunction extends Disposable {
+export class BaseFunction {
     private _unitId: Nullable<string>;
     private _subUnitId: Nullable<string>;
     private _row: number = -1;
@@ -64,7 +64,7 @@ export class BaseFunction extends Disposable {
     maxParams: number = -1;
 
     constructor(private _name: IFunctionNames) {
-        super();
+
     }
 
     get name() {
@@ -85,6 +85,10 @@ export class BaseFunction extends Disposable {
 
     get column() {
         return this._column;
+    }
+
+    dispose() {
+
     }
 
     /**
@@ -508,11 +512,11 @@ export class BaseFunction extends Disposable {
 
         let referenceObject: BaseReferenceObject;
 
-        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(token)) {
+        if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(token)) {
             referenceObject = new CellReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(token)) {
+        } else if (REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING.test(token)) {
             referenceObject = new RowReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(token)) {
+        } else if (REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING.test(token)) {
             referenceObject = new ColumnReferenceObject(token);
         } else {
             referenceObject = new RangeReferenceObject(range, sheetId, unitId);

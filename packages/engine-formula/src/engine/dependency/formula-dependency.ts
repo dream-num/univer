@@ -894,8 +894,9 @@ export class FormulaDependencyGenerator extends Disposable {
      * @param treeList
      */
     private _calculateRunList(treeList: FormulaDependencyTree[]) {
-        let stack = treeList;
+        const stack = treeList;
         const formulaRunList = [];
+        const cacheStack: FormulaDependencyTree[] = [];
         while (stack.length > 0) {
             const tree = stack.pop();
 
@@ -911,7 +912,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 continue;
             }
 
-            const cacheStack: FormulaDependencyTree[] = [];
+            cacheStack.length = 0;
 
             for (const parentTree of tree.parents) {
                 if (parentTree.isAdded() || tree.isSkip()) {
@@ -925,8 +926,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 tree.setSkip();
             } else {
                 tree.setAdded();
-                stack.push(tree);
-                stack = stack.concat(cacheStack);
+                stack.push(tree, ...cacheStack);
             }
         }
 

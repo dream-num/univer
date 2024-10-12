@@ -76,12 +76,12 @@ export class DesktopLogService extends Disposable implements ILogService {
         method: typeof console.log | typeof console.error | typeof console.warn | typeof console.debug,
         ...args: ArgsType
     ): void {
-        const firstArg = args[0];
-        const withTag = /^\[(.*?)\]/g.test(firstArg);
-        if (withTag) {
-            method(`\x1B[97;104m${firstArg}\x1B[0m`, ...args.slice(1));
-        } else {
-            method(...args);
-        }
+        // const firstArg = args[0];
+        // const withTag = /^\[(.*?)\]/g.test(firstArg);
+        // if (withTag) {
+        //     method(`\x1B[97;104m${firstArg}\x1B[0m`, ...args.slice(1));
+        // } else {
+        //     method(...args);
+        // }
     }
 }

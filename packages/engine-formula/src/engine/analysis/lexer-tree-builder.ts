@@ -21,7 +21,7 @@ import { AbsoluteRefType, Disposable, isValidRange, moveRangeByOffset, Tools } f
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_COUNT_ARRAY, ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { isFormulaLexerToken, isTokenCannotBeAtEnd, isTokenCannotPrecedeSuffixToken } from '../../basics/match-token';
-import { REFERENCE_SINGLE_RANGE_REGEX } from '../../basics/regex';
+import { REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING } from '../../basics/regex';
 import {
     matchToken,
     OPERATOR_TOKEN_PRIORITY,
@@ -452,7 +452,7 @@ export class LexerTreeBuilder extends Disposable {
             if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION && preSegmentTrim[0] !== matchToken.OPEN_BRACES) {
                 maybeString = false;
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.STRING, preSegment, startIndex, endIndex, deleteEndIndex);
-            } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
+            } else if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(preSegmentNotPrefixToken) && isReferenceStringWithEffectiveColumn(preSegmentNotPrefixToken)) {
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.REFERENCE, preSegment, startIndex, endIndex, deleteEndIndex);
             } else if (Tools.isStringNumber(preSegmentTrim)) {
                 this._processPushSequenceNode(sequenceNodes, sequenceNodeType.NUMBER, preSegment, startIndex, endIndex, deleteEndIndex);

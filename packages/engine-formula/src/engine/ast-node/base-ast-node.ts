@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
 
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
-import { Disposable } from '@univerjs/core';
+
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
@@ -31,7 +31,7 @@ interface IAstNodeNodeJson {
 
 export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
-export class BaseAstNode extends Disposable {
+export class BaseAstNode {
     private _children: BaseAstNode[] = [];
 
     private _definedNames: Array<string> = [];
@@ -53,10 +53,10 @@ export class BaseAstNode extends Disposable {
     private _isForcedCalculateFunction = false;
 
     constructor(private _token: string) {
-        super();
+
     }
 
-    override dispose(): void {
+    dispose(): void {
         this._children.forEach((node) => {
             node.dispose();
         });

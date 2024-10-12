@@ -195,13 +195,30 @@ export function compareNumfmtPriority(oldPattern: string, pattern: string) {
     return oldPattern;
 }
 
+const numberFormatTypeCache = new Map<string, NumberFormatType>();
+
+function getNumberFormatType(pattern: string) {
+    if (numberFormatTypeCache.has(pattern)) {
+        return numberFormatTypeCache.get(pattern)!;
+    }
+
+    const type = getNumberFormatTypeRaw(pattern);
+    numberFormatTypeCache.set(pattern, type);
+
+    return type;
+}
+
+export function clearNumberFormatTypeCache() {
+    numberFormatTypeCache.clear();
+}
+
 /**
  * Get the type of the number format
  *
  * @param pattern
  * @returns
  */
-function getNumberFormatType(pattern: string): NumberFormatType {
+function getNumberFormatTypeRaw(pattern: string): NumberFormatType {
     if (isAccounting(pattern)) {
         return NumberFormatType.Accounting;
     }

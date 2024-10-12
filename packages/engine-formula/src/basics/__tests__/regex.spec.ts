@@ -15,39 +15,39 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isReferenceString, REFERENCE_MULTIPLE_RANGE_REGEX, REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX } from '../regex';
+import { isReferenceString, REFERENCE_REGEX_COLUMN_PRECOMPILING, REFERENCE_REGEX_ROW_PRECOMPILING, REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX } from '../regex';
 
 describe('Test ref regex', () => {
     it('Single range', () => {
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('Sheet1!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('[workbook]Sheet1!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('[workbook]\'Sheet-1\'!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('\'[workbook]Sheet1\'!A1')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('A1')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('Sheet1!A1')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('[workbook]Sheet1!A1')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('[workbook]\'Sheet-1\'!A1')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('\'[workbook]Sheet1\'!A1')).toBe(true);
     });
 
     it('Multiple range', () => {
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('Sheet1!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('[workbook]Sheet1!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('A1:B10')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('Sheet1!A1:B10')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('[workbook]Sheet1!A1:B10')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
+        expect(REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
     });
 
     it('Row range', () => {
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('Sheet1!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('[workbook]Sheet1!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('[workbook]\'Sheet-1\'!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('\'[workbook]Sheet1\'!1:10')).toBe(true);
+        expect(REFERENCE_REGEX_ROW_PRECOMPILING.test('1:10')).toBe(true);
+        expect(REFERENCE_REGEX_ROW_PRECOMPILING.test('Sheet1!1:10')).toBe(true);
+        expect(REFERENCE_REGEX_ROW_PRECOMPILING.test('[workbook]Sheet1!1:10')).toBe(true);
+        expect(REFERENCE_REGEX_ROW_PRECOMPILING.test('[workbook]\'Sheet-1\'!1:10')).toBe(true);
+        expect(REFERENCE_REGEX_ROW_PRECOMPILING.test('\'[workbook]Sheet1\'!1:10')).toBe(true);
     });
 
     it('Column range', () => {
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('Sheet1!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('[workbook]Sheet1!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('[workbook]\'Sheet-1\'!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('\'[workbook]Sheet1\'!A:B')).toBe(true);
+        expect(REFERENCE_REGEX_COLUMN_PRECOMPILING.test('A:B')).toBe(true);
+        expect(REFERENCE_REGEX_COLUMN_PRECOMPILING.test('Sheet1!A:B')).toBe(true);
+        expect(REFERENCE_REGEX_COLUMN_PRECOMPILING.test('[workbook]Sheet1!A:B')).toBe(true);
+        expect(REFERENCE_REGEX_COLUMN_PRECOMPILING.test('[workbook]\'Sheet-1\'!A:B')).toBe(true);
+        expect(REFERENCE_REGEX_COLUMN_PRECOMPILING.test('\'[workbook]Sheet1\'!A:B')).toBe(true);
     });
 
     it('Table single range', () => {

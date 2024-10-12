@@ -25,7 +25,7 @@ import type {
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
-import { Disposable, generateRandomId } from '@univerjs/core';
+import { generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -42,7 +42,7 @@ export enum FDtreeStateType {
  * A dependency tree, capable of calculating mutual dependencies,
  * is used to determine the order of formula calculations.
  */
-export class FormulaDependencyTree extends Disposable {
+export class FormulaDependencyTree {
     treeId: string = '';
 
     node: Nullable<BaseAstNode>;
@@ -74,7 +74,6 @@ export class FormulaDependencyTree extends Disposable {
     isCache: boolean = false;
 
     constructor(treeId?: string) {
-        super();
         if (treeId != null) {
             this.treeId = treeId;
         } else {
@@ -91,9 +90,7 @@ export class FormulaDependencyTree extends Disposable {
 
     private _state = FDtreeStateType.DEFAULT;
 
-    override dispose(): void {
-        super.dispose();
-
+    dispose(): void {
         // this.children.forEach((tree) => {
         //     tree.dispose();
         // });

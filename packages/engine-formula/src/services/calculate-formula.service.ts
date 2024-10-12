@@ -327,6 +327,8 @@ export class CalculateFormulaService extends Disposable {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
+        this._runtimeService.clearReferenceAndNumberformatCache();
+
         return this._runtimeService.getAllRuntimeData();
     }
 

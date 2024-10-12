@@ -133,6 +133,8 @@ export class Engine extends ThinEngine<Scene> {
 
     private _previousHeight = -1000;
 
+    private _unitId: string = ''; // unitId
+
     constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
         super();
         this._canvas = new Canvas({

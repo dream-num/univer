@@ -62,7 +62,7 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 
-import { ClearSelectionFormatCommand, COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -245,6 +245,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     private _initSkeletonListener(d: DisposableCollection) {
         const commandList = new Set(COMMAND_LISTENER_SKELETON_CHANGE);
+        commandList.delete(SetWorksheetActiveOperation.id);
+
         d.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (!commandList.has(commandInfo.id)) {
                 return;
@@ -259,12 +261,12 @@ export class EditingRenderController extends Disposable implements IRenderModule
         if (!state) return;
         if (!this._editorBridgeService.isVisible().visible) return;
         this._editorBridgeService.refreshEditCellPosition(true);
-        const latestEditCellState = this._editorBridgeService.getEditCellState();
-        if (!latestEditCellState) return;
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (!editCellState) return;
 
-        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(latestEditCellState.sheetId)?.skeleton;
+        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(editCellState.sheetId)?.skeleton;
         if (!skeleton) return;
-        const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = latestEditCellState;
+        const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = editCellState;
         const maxSize = this._getEditorMaxSize(position, canvasOffset);
         if (!maxSize) return;
         const { height: clientHeight, width: clientWidth, scaleAdjust } = maxSize;
@@ -278,11 +280,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
         if (currentHeight !== height || currentWidth !== width) {
             this._editorBridgeService.refreshEditCellPosition(true);
 
-            const skeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            if (!skeleton) {
+            const docSkeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+            if (!docSkeleton) {
                 return;
             }
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY, () => {
+            this._fitTextSize(position, canvasOffset, docSkeleton, documentLayoutObject, scaleX, scaleY, () => {
                 this._textSelectionManagerService.refreshSelection({
                     unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
                     subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -644,7 +646,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         // Change `CursorChange` to changed status, when formula bar clicked.
         this._cursorChange =
-            eventType === DeviceInputEventType.PointerDown
+            (eventType === DeviceInputEventType.PointerDown || eventType === DeviceInputEventType.Dblclick)
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 

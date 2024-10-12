@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import { Daverage } from './daverage';
-import { FUNCTION_NAMES_DATABASE } from './function-names';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
-export const functionDatabase = [
-    [Daverage, FUNCTION_NAMES_DATABASE.DAVERAGE],
-];
+export class Daverage extends BaseFunction {
+    override minParams = 3;
+
+    override maxParams = 3;
+
+    override calculate(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject) {
+        // return database.daverage(field, criteria);
+        return NumberValueObject.create(0);
+    }
+}

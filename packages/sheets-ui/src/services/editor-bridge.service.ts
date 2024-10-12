@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
+import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
+import type { KeyCode } from '@univerjs/ui';
+import type { Observable } from 'rxjs';
 import {
     CellValueType,
     createIdentifier,
@@ -35,13 +40,8 @@ import {
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject } from 'rxjs';
-import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
-import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
-import type { KeyCode } from '@univerjs/ui';
 
-import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -93,6 +93,7 @@ export interface IEditorBridgeService {
     }>;
     dispose(): void;
     refreshEditCellState(): void;
+    refreshEditCellPosition(resetSizeOnly?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
@@ -122,6 +123,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
     private _currentEditCellState: Nullable<IEditorBridgeServiceParam> = null;
+
+    // TODO: @weird94 this should split into to subjects, documentDataModel & position
     private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
     readonly currentEditCellState$ = this._currentEditCellState$.asObservable();
 
@@ -178,6 +181,74 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const editCellState = this.getLatestEditCellState();
         this._currentEditCellState = editCellState;
 
+        this._currentEditCellState$.next(editCellState);
+    }
+
+    refreshEditCellPosition(resetSizeOnly?: boolean) {
+        const currentEditCell = this._currentEditCell;
+        if (currentEditCell == null) {
+            return;
+        }
+
+        const ru = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_SHEET);
+        if (!ru) return;
+
+        const skeleton = ru.with(SheetSkeletonManagerService).getCurrentSkeleton();
+        const selectionRenderService = ru.with(ISheetSelectionRenderService);
+        if (!skeleton) return;
+        if (!this._currentEditCellState) return;
+
+        const { primary, unitId, sheetId, scene, engine } = currentEditCell;
+        const { startRow, startColumn } = primary;
+        const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
+        if (primaryWithCoord == null) {
+            return;
+        }
+
+        const actualRangeWithCoord = makeCellToSelection(primaryWithCoord);
+        const canvasOffset = getCanvasOffsetByEngine(engine);
+
+        let { startX, startY, endX, endY } = actualRangeWithCoord;
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scrollXY = scene.getViewportScrollXY(selectionRenderService.getViewPort());
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
+
+        if (resetSizeOnly && this._currentEditCellState) {
+            endX = endX - startX + this._currentEditCellState.position.startX;
+            endY = endY - startY + this._currentEditCellState.position.startY;
+            startX = this._currentEditCellState.position.startX;
+            startY = this._currentEditCellState.position.startY;
+        }
+
+        this._editorService.setOperationSheetUnitId(unitId);
+
+        this._editorService.setOperationSheetSubUnitId(sheetId);
+
+        const editCellState = {
+            position: {
+                startX,
+                startY,
+                endX,
+                endY,
+            },
+            scaleX,
+            scaleY,
+            canvasOffset,
+            row: startRow,
+            column: startColumn,
+            unitId,
+            sheetId,
+            documentLayoutObject: this._currentEditCellState.documentLayoutObject,
+            editorUnitId: this._editorUnitId,
+            isInArrayFormulaRange: this._currentEditCellState?.isInArrayFormulaRange,
+        };
+
+        this._currentEditCellState = editCellState;
         this._currentEditCellState$.next(editCellState);
     }
 

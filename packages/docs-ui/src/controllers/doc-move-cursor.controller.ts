@@ -295,8 +295,8 @@ export class DocMoveCursorController extends Disposable {
 
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    startOffset: cursor,
-                    endOffset: cursor,
+                    startOffset: Math.max(0, cursor),
+                    endOffset: Math.max(0, cursor),
                     style,
                 },
             ], false);
@@ -330,8 +330,8 @@ export class DocMoveCursorController extends Disposable {
 
                 this._textSelectionManagerService.replaceTextRanges([
                     {
-                        startOffset: cursor,
-                        endOffset: cursor,
+                        startOffset: Math.max(0, cursor),
+                        endOffset: Math.max(0, cursor),
                         style,
                     },
                 ], false);

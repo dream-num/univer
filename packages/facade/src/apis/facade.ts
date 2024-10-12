@@ -66,7 +66,7 @@ import { FFormula } from './sheets/f-formula';
 import { FPermission } from './sheets/f-permission';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 
-interface IFUniverBase {
+interface IFUniverLegacy {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      *
@@ -285,7 +285,7 @@ interface IFUniverBase {
     getPermission(): FPermission;
 }
 
-class FUniverBase extends FUniver implements IFUniverBase {
+class FUniverLegacy extends FUniver implements IFUniverLegacy {
     static BorderStyle = BorderStyleTypes;
 
     static WrapStrategy = WrapStrategy;
@@ -340,7 +340,7 @@ class FUniverBase extends FUniver implements IFUniverBase {
      */
     static override newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        const dependencies = FUniverBase.getDependencies(injector);
+        const dependencies = FUniverLegacy.getDependencies(injector);
         dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
     }
@@ -595,17 +595,16 @@ class FUniverBase extends FUniver implements IFUniverBase {
     }
 }
 
-FUniver.extend(FUniverBase);
+FUniver.extend(FUniverLegacy);
 
 export { FUniver };
 
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/no-namespace
     namespace FUniver {
-        function newAPI(wrapped: Univer | Injector): FUniver;
         function newDataValidation(): FDataValidationBuilder;
     }
 
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverBase {}
+    interface FUniver extends IFUniverLegacy {}
 }

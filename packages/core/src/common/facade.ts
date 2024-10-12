@@ -16,6 +16,7 @@
 
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
+import { Univer } from '../univer';
 import { Inject, Injector } from './di';
 
 /**
@@ -56,6 +57,19 @@ export abstract class FBase {
 }
 
 export class FUniver extends FBase {
+    /**
+     * Create an FUniver instance, if the injector is not provided, it will create a new Univer instance.
+     *
+     * @static
+     *
+     * @param {Univer | Injector} wrapped - The Univer instance or injector instance.
+     * @returns {FUniver} - The FUniver instance.
+     */
+    static newAPI(wrapped: Univer | Injector): FUniver {
+        const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
+        return injector.createInstance(FUniver);
+    }
+
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @ICommandService protected readonly _commandService: ICommandService,

@@ -489,3 +489,5 @@ declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
     interface FRange extends IFRangeLegacy { }
 }
+
+export { FRange };

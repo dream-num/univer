@@ -21,6 +21,7 @@ import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryS
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { RangeSelector } from '@univerjs/docs-ui';
 import { serializeRange } from '@univerjs/engine-formula';
+import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
 import { ComponentManager, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -56,6 +57,16 @@ export function DataValidationDetail() {
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
+    const sheetSelectionService = useDependency(SheetsSelectionsService);
+
+    useEffect(() => {
+        return () => {
+            const currentSelection = sheetSelectionService.getCurrentSelections();
+            if (currentSelection) {
+                sheetSelectionService.setSelections([...currentSelection]);
+            }
+        };
+    }, [sheetSelectionService]);
 
     useEffect(() => {
         commandService.onCommandExecuted((commandInfo) => {

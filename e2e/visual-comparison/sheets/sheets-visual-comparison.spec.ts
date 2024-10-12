@@ -21,7 +21,7 @@ const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas';
 const isCI = !!process.env.CI;
 test('diff default sheet toolbar', async () => {
     const browser = await chromium.launch({
-        headless: true, // Set to false to see the browser window
+        headless: !!isCI, // Set to false to see the browser window
     });
     const context = await browser.newContext({
         viewport: { width: 1280, height: 720 },
@@ -31,7 +31,7 @@ test('diff default sheet toolbar', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
 
     const filename = generateSnapshotName('default-sheet-fullpage');
     const screenshot = await page.screenshot({

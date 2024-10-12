@@ -65,6 +65,7 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
+import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 import {
     FormulaEditorManagerService,
     IFormulaEditorManagerService,
@@ -183,6 +184,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [StatusBarController],
             [AutoHeightController],
+            [EditorDataSyncController],
         ]);
     }
 
@@ -216,6 +218,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsScrollRenderController],
             [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
+            [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
             [CellAlertRenderController],

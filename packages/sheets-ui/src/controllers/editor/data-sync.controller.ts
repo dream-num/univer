@@ -19,7 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
-import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools, UniverInstanceType } from '@univerjs/core';
+import { BooleanNumber, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, HorizontalAlign, ICommandService, Inject, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
@@ -29,7 +29,6 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 /**
  * sync data between cell editor and formula editor
  */
-@OnLifecycle(LifecycleStages.Rendered, EditorDataSyncController)
 export class EditorDataSyncController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

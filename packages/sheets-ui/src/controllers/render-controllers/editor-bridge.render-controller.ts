@@ -132,10 +132,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
     }
 
-        /**
-         * Should activate the editor when the user inputs text.
-         * @param d DisposableCollection
-         */
+    /**
+     * Should activate the editor when the user inputs text.
+     * @param d DisposableCollection
+     */
     private _initialKeyboardListener(d: DisposableCollection) {
         const docSelectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
 

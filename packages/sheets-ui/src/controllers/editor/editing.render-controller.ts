@@ -406,18 +406,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             eventType === DeviceInputEventType.Keyboard ||
             (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
         ) {
-            const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
-            const documentViewModel = this._getEditorViewModel(editorUnitId);
-
-            if (documentViewModel == null) {
-                return;
-            }
-
-            this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
-
-            documentDataModel.reset(snapshot);
-            documentViewModel.reset(documentDataModel);
-
+            this._emptyDocumentDataModel(!!isInArrayFormulaRange);
             document.makeDirty();
 
             // @JOCS, Why calculate here?
@@ -691,45 +680,29 @@ export class EditingRenderController extends Disposable implements IRenderModule
         return this._renderManagerService.getRenderById(editorId)?.with(DocSkeletonManagerService).getViewModel();
     }
 
-    private _resetBodyStyle(body: IDocumentBody, removeStyle = false) {
-        body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
-
-        if (body.textRuns != null) {
-            if (body.textRuns.length === 1 && !removeStyle) {
-                body.textRuns[0].st = 0;
-                body.textRuns[0].ed = 1;
-            } else {
-                body.textRuns = undefined;
-            }
+    private _emptyDocumentDataModel(removeStyle: boolean) {
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (editCellState == null) {
+            return;
         }
 
-        if (body.paragraphs != null) {
-            if (body.paragraphs.length === 1) {
-                body.paragraphs[0].startIndex = 0;
-            } else {
-                body.paragraphs = [
-                    {
-                        startIndex: 0,
-                    },
-                ];
-            }
+        const { documentLayoutObject, editorUnitId } = editCellState;
+        const documentDataModel = documentLayoutObject.documentModel;
+        if (documentDataModel == null) {
+            return;
         }
 
-        if (body.sectionBreaks != null) {
-            body.sectionBreaks = undefined;
+        const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+        const documentViewModel = this._getEditorViewModel(editorUnitId);
+
+        if (documentViewModel == null) {
+            return;
         }
 
-        if (body.tables != null) {
-            body.tables = undefined;
-        }
+        resetBodyStyle(snapshot.body!, removeStyle);
 
-        if (body.customRanges != null) {
-            body.customRanges = undefined;
-        }
-
-        if (body.customBlocks != null) {
-            body.customBlocks = undefined;
-        }
+        documentDataModel.reset(snapshot);
+        documentViewModel.reset(documentDataModel);
     }
 }
 
@@ -861,4 +834,45 @@ export function getCellStyleBySnapshot(snapshot: IDocumentData): Nullable<IStyle
         return style;
     }
     return null;
+}
+
+function resetBodyStyle(body: IDocumentBody, removeStyle = false) {
+    body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
+
+    if (body.textRuns != null) {
+        if (body.textRuns.length === 1 && !removeStyle) {
+            body.textRuns[0].st = 0;
+            body.textRuns[0].ed = 1;
+        } else {
+            body.textRuns = undefined;
+        }
+    }
+
+    if (body.paragraphs != null) {
+        if (body.paragraphs.length === 1) {
+            body.paragraphs[0].startIndex = 0;
+        } else {
+            body.paragraphs = [
+                {
+                    startIndex: 0,
+                },
+            ];
+        }
+    }
+
+    if (body.sectionBreaks != null) {
+        body.sectionBreaks = undefined;
+    }
+
+    if (body.tables != null) {
+        body.tables = undefined;
+    }
+
+    if (body.customRanges != null) {
+        body.customRanges = undefined;
+    }
+
+    if (body.customBlocks != null) {
+        body.customBlocks = undefined;
+    }
 }

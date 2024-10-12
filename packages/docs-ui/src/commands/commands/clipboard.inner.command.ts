@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BuildTextUtils,
-    CommandType,
-    ICommandService,
-    IUniverInstanceService,
-    JSONX,
-    MemoryCursor,
-    TextX,
-    TextXActionType,
-    Tools,
-} from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type {
     DocumentDataModel,
     ICommand,
@@ -38,6 +26,18 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import {
+    BuildTextUtils,
+    CommandType,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    MemoryCursor,
+    TextX,
+    TextXActionType,
+    Tools,
+} from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 

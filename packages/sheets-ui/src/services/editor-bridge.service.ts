@@ -106,6 +106,8 @@ export interface IEditorBridgeService {
     refreshEditCellPosition(resetSizeOnly?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>>;
+    getEditLocation(): Readonly<Nullable<ICellEditorState>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
@@ -127,6 +129,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private _editorIsDirty: boolean = false;
 
+    private _isDisabled: boolean = false;
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
@@ -297,6 +300,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _clearCurrentEditCellState() {
         this._currentEditCellState = null;
         this._currentEditCellState$.next(null);
+        this._currentEditCellLayout = null;
+        this._currentEditCellLayout$.next(null);
     }
 
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
@@ -305,6 +310,14 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         return { ...this._currentEditCellState, ...this._currentEditCellLayout };
+    }
+
+    getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>> {
+        return this._currentEditCellLayout;
+    }
+
+    getEditLocation(): Readonly<Nullable<ICellEditorState>> {
+        return this._currentEditCellState;
     }
 
     // eslint-disable-next-line max-lines-per-function

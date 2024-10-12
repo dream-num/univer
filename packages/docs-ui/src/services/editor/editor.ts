@@ -81,7 +81,7 @@ export interface IEditorCanvasStyle {
 }
 
 export interface IEditorConfigParams {
-    initialSnapshot?: IDocumentData;
+    initialSnapshot: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     // A Boolean attribute which, if present, indicates that the editor should automatically have focus.

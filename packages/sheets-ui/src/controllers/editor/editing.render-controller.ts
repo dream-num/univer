@@ -348,7 +348,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 
-        let editCellState = this._editorBridgeService.getEditCellState();
+        const editCellState = this._editorBridgeService.getEditLocation();
         if (editCellState == null) {
             return;
         }
@@ -363,10 +363,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         });
 
         this._editorBridgeService.refreshEditCellPosition(false);
-        editCellState = this._editorBridgeService.getEditCellState();
-        if (editCellState == null) {
-            return;
-        }
 
         const {
             documentLayoutObject,

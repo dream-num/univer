@@ -126,10 +126,22 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             } as IEditorBridgeServiceVisibleParam);
         }));
 
-        d.add(spreadsheet.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
-        d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
-        d.add(spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
-        d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent(this._tryHideEditor.bind(this)));
+        d.add(spreadsheet.onPointerDown$.subscribeEvent({
+            next: this._tryHideEditor.bind(this),
+            priority: -1,
+        }));
+        d.add(spreadsheetColumnHeader.onPointerDown$.subscribeEvent({
+            next: this._tryHideEditor.bind(this),
+            priority: -1,
+        }));
+        d.add(spreadsheetLeftTopPlaceholder.onPointerDown$.subscribeEvent({
+            next: this._tryHideEditor.bind(this),
+            priority: -1,
+        }));
+        d.add(spreadsheetRowHeader.onPointerDown$.subscribeEvent({
+            next: this._tryHideEditor.bind(this),
+            priority: -1,
+        }));
     }
 
     /**
@@ -147,8 +159,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
 
                 const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
                 const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-                    // TODO@Jocs: should get editor instead of current doc
+                // TODO@Jocs: should get editor instead of current doc
                 const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
+                if (this._editorBridgeService.isVisible().visible) return;
+
                 if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
                     this._showEditorByKeyboard(config);
                 }
@@ -201,7 +215,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
     private _hideEditor() {
         if (this._editorBridgeService.isVisible().visible !== true) return;
 
-        this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
+        this._commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, {
             visible: false,
             eventType: DeviceInputEventType.PointerDown,
             unitId: this._context.unitId,

@@ -416,8 +416,13 @@ function RangeSelectorDialog(props: {
 
     const handleSheetSelectionChange = useCallback((rangeText: string) => {
         refSelectionsRenderService?.setSkipLastEnabled(false);
-        rangesSet(rangeText.split(matchToken.COMMA).filter((e) => !!e));
-    }, [focusIndex]);
+        const ranges = rangeText.split(matchToken.COMMA).filter((e) => !!e);
+        if (isOnlyOneRange) {
+            rangesSet([ranges[0] ?? '']);
+        } else {
+            rangesSet(ranges);
+        }
+    }, [focusIndex, isOnlyOneRange]);
 
     useSheetHighlight(visible, unitId, subUnitId, refSelections);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);

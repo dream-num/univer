@@ -226,7 +226,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         if (editor) {
             const dispose = editor.input$.subscribe((e) => {
-                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',').replaceAll(/(^,)|(,$)/g, '');
+                const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '').replaceAll(/,{2,}/g, ',').replaceAll(/(^,)/g, '');
                 rangeStringSet(text);
                 handleInputDebounce(text);
             });

@@ -80,6 +80,8 @@ export interface ISheetSelectionRenderService {
     getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithMergeInfo>; // drawing
 
     setSingleSelectionEnabled(enabled: boolean): void;
+
+    refreshSelectionMoveEnd(): void;
 }
 
 export const ISheetSelectionRenderService = createIdentifier<ISheetSelectionRenderService>('univer.sheet.selection-render-service');
@@ -145,10 +147,17 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     protected _singleSelectionEnabled: boolean = false;
     // #endregion
 
+    /**
+     * Mainly emit by pointerup (pointerup is handled in _onPointerdown)
+     */
     protected readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
     protected readonly _selectionMoving$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
+
+    /**
+     * Mainly emit by pointerdown
+     */
     protected readonly _selectionMoveStart$ = new Subject<ISelectionWithCoordAndStyle[]>();
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
@@ -413,11 +422,12 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
     // TODO: @wzhudev: refactor the method to make it more readable
 
     /**
-     *
-     * @param evt component point event
-     * @param style selection style, Styles for user-customized selectors
-     * @param _zIndex Stacking order of the selection object
-     * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
+     * Handle pointer down event, then trigger selectionMoveStart$.
+     * @param evt
+     * @param _zIndex
+     * @param rangeType
+     * @param viewport
+     * @param scrollTimerType
      */
     // eslint-disable-next-line max-lines-per-function, complexity
     protected _onPointerDown(
@@ -786,8 +796,10 @@ export class BaseSelectionRenderService extends Disposable implements ISheetSele
         const { scaleX, scaleY } = scene.getAncestorScale();
 
         if (rangeType === RANGE_TYPE.ROW) {
+            // eslint-disable-next-line no-param-reassign
             offsetX = Number.POSITIVE_INFINITY;
         } else if (rangeType === RANGE_TYPE.COLUMN) {
+            // eslint-disable-next-line no-param-reassign
             offsetY = Number.POSITIVE_INFINITY;
         }
 

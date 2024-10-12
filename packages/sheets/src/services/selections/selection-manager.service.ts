@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { ISelectionWithStyle } from '../../basics/selection';
+import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+
+import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 
 export interface ISelectionManagerSearchParam {
     unitId: string;
@@ -208,7 +208,7 @@ export class WorkbookSelections extends Disposable {
     private readonly _selectionMoving$ = new Subject<Nullable<ISelectionWithStyle[]>>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
 
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
+    readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
     private readonly _beforeSelectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);

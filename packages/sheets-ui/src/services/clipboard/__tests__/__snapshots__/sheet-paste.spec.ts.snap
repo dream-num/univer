@@ -24,6 +24,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                    background color                 
 ",
           "paragraphs": [
@@ -532,6 +533,7 @@ exports[`Test clipboard > Test paste > test convert util func from excel 1`] = `
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                    U                    N                    I                    V                    ER                                         UP                                         UP                                         UP                                     
 ",
           "paragraphs": [
@@ -3277,6 +3279,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                    UNIVER UP UP UP                
 ",
           "paragraphs": [
@@ -3564,6 +3567,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                                            text wrap wrap wrap wrap wrap wrap wrap wrap wrap                                    
 ",
           "paragraphs": [
@@ -4124,6 +4128,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                                                                                
 ",
           "paragraphs": [
@@ -4189,6 +4194,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 1,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                                            univer                                    
 ",
           "paragraphs": [
@@ -4668,6 +4674,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 2,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                                                                                
 ",
           "paragraphs": [
@@ -4733,6 +4740,7 @@ exports[`Test clipboard > Test paste > test convert util func from google 1`] = 
       "colSpan": 2,
       "p": {
         "body": {
+          "customRanges": [],
           "dataStream": "                                            univer                                    
 ",
           "paragraphs": [

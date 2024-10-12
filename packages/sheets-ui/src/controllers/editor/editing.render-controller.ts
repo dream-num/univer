@@ -255,13 +255,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
     resizeCellEditor() {
         const state = this._cellEditorManagerService.getState();
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!skeleton) return;
+
         if (!state) return;
         if (!this._editorBridgeService.isVisible().visible) return;
-        const latestEditCellState = this._editorBridgeService.getLatestEditCellState(true);
+        this._editorBridgeService.refreshEditCellPosition(true);
+        const latestEditCellState = this._editorBridgeService.getEditCellState();
         if (!latestEditCellState) return;
 
+        const skeleton = this._sheetSkeletonManagerService.getWorksheetSkeleton(latestEditCellState.sheetId)?.skeleton;
+        if (!skeleton) return;
         const { row, column, scaleX, scaleY, position, canvasOffset, documentLayoutObject } = latestEditCellState;
         const maxSize = this._getEditorMaxSize(position, canvasOffset);
         if (!maxSize) return;
@@ -274,13 +276,18 @@ export class EditingRenderController extends Disposable implements IRenderModule
         const currentWidth = state.endX! - state.startX!;
 
         if (currentHeight !== height || currentWidth !== width) {
-            this._editorBridgeService.refreshEditCellState(true);
+            this._editorBridgeService.refreshEditCellPosition(true);
 
             const skeleton = this._getEditorSkeleton(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
             if (!skeleton) {
                 return;
             }
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY, () => {
+                this._textSelectionManagerService.refreshSelection({
+                    unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                    subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+                });
+            });
         }
     }
 
@@ -338,7 +345,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         documentSkeleton: DocumentSkeleton,
         documentLayoutObject: IDocumentLayoutObject,
         scaleX: number = 1,
-        scaleY: number = 1
+        scaleY: number = 1,
+        callback?: () => void
     ) {
         const { startX, startY, endX, endY } = actualRangeWithCoord;
         const documentDataModel = documentLayoutObject.documentModel;
@@ -391,7 +399,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // re-calculate skeleton(viewModel for component)
         documentSkeleton.calculate();
 
-        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY);
+        this._editAreaProcessing(editorWidth, editorHeight, actualRangeWithCoord, canvasOffset, fill, scaleX, scaleY, callback);
     }
 
     /**
@@ -574,10 +582,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 fixLineWidthByScale(physicHeight, precisionScaleY)
             );
 
-            this._textSelectionManagerService.refreshSelection({
-                unitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-                subUnitId: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
-            });
             callback?.();
         }, 0);
 
@@ -658,7 +662,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             },
         });
 
-        this._editorBridgeService.refreshEditCellState();
+        this._editorBridgeService.refreshEditCellPosition(false);
         editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -876,19 +880,29 @@ export class EditingRenderController extends Disposable implements IRenderModule
                     return;
                 }
 
-                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                if (commandUnitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                    // FIXME: this should be fixed on next refactor
+                    // currently, we need to wait util content was synced to cell-editor, than fit size
+                    setTimeout(() => {
+                        this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                    }, 0);
+                } else {
+                    this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+                }
             }
         }));
 
         // Use fix https://github.com/dream-num/univer/issues/1231.
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === ClearSelectionFormatCommand.id) {
+                if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
             }
         }));
 
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === SetRangeValuesMutation.id) {
+                if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
             }
         }));
@@ -939,6 +953,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 
     private async _handleEditorInvisible(param: IEditorBridgeServiceVisibleParam) {
+        const editCellState = this._editorBridgeService.getEditCellState();
+
         let { keycode } = param;
         this._setOpenForCurrent(null, null);
 
@@ -946,7 +962,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._exitInput(param);
 
-        const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
         }

@@ -16,14 +16,15 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverDocsUIConfig } from './controllers/config.schema';
-import { DependentOn, ICommandService,
+import {
+    DependentOn, ICommandService,
     IConfigService,
     ILogService,
     Inject,
     Injector,
     IUniverInstanceService,
     mergeOverrideWithDependencies,
-    Plugin, UniverInstanceType,
+    Plugin, touchDependencies, UniverInstanceType,
 } from '@univerjs/core';
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
@@ -125,22 +126,26 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initRenderBasics();
         this._markDocAsFocused();
 
-        this._injector.get(DocStateChangeManagerService);
-        this._injector.get(DocsRenderService);
+        touchDependencies(this._injector, [
+            [DocStateChangeManagerService],
+            [DocsRenderService],
+        ]);
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
 
-        this._injector.get(DocAutoFormatController);
-        this._injector.get(DocMoveCursorController);
-        this._injector.get(DocParagraphSettingController);
-        this._injector.get(DocTableController);
+        touchDependencies(this._injector, [
+            [DocAutoFormatController],
+            [DocMoveCursorController],
+            [DocParagraphSettingController],
+            [DocTableController],
 
-        // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
-        // plugin can be added in LifecycleStages.Ready
-        this._injector.get(DocUIController);
+            // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+            // plugin can be added in LifecycleStages.Ready
+            [DocUIController],
+        ]);
     }
 
     private _initCommand() {
@@ -275,13 +280,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderBasics(): void {
         ([
-            // Services.
             [DocSkeletonManagerService],
             [DocSelectionRenderService],
             [DocInterceptorService],
             [DocPageLayoutService],
             [DocIMEInputManagerService],
-            // Controllers.
             [DocRenderController],
             [DocZoomRenderController],
         ] as Dependency[]).forEach((m) => {
@@ -291,9 +294,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initRenderModules(): void {
         ([
-            // Services
             [DocEventManagerService],
-            // Controllers.
             [DocBackScrollRenderController],
             [DocSelectionRenderController],
             [DocHeaderFooterController],

@@ -17,8 +17,7 @@
 import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverUIConfig } from '@univerjs/ui';
 import type { IUniverSheetsUIConfig } from './controllers/config.schema';
-
-import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, IUniverInstanceService, mergeOverrideWithDependencies, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, RefSelectionsService, UniverSheetsPlugin } from '@univerjs/sheets';
 import { PLUGIN_CONFIG_KEY as UI_PLUGIN_CONFIG_KEY } from '@univerjs/ui';
@@ -112,7 +111,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        mergeOverrideWithDependencies([
+        registerDependencies(this._injector, mergeOverrideWithDependencies([
             [ShortcutExperienceService],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
             [ISheetClipboardService, { useClass: SheetClipboardService }],
@@ -151,40 +150,48 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
             [SheetPermissionRenderManagerController],
-        ] as Dependency[], this._config.override).forEach((d) => this._injector.add(d));
+        ] as Dependency[], this._config.override));
 
-        this._injector.get(SheetPermissionPanelModel);
+        touchDependencies(this._injector, [
+            [SheetPermissionPanelModel],
+        ]);
     }
 
     override onReady(): void {
         if (!this._config.disableAutoFocus) {
-            this._markSheetAsFocused();
+            this._initAutoFocus();
         }
 
         this._registerRenderBasics();
 
-        this._injector.get(SheetUIController);
-        this._injector.get(SheetsRenderService);
-        this._injector.get(ActiveWorksheetController);
-        this._injector.get(SheetPermissionInterceptorBaseController);
+        touchDependencies(this._injector, [
+            [SheetUIController],
+            [SheetsRenderService],
+            [ActiveWorksheetController],
+            [SheetPermissionInterceptorBaseController],
+        ]);
     }
 
     override onRendered(): void {
         this._registerRenderModules();
 
-        this._injector.get(SheetPermissionInitController);
-        this._injector.get(SheetPermissionRenderManagerController);
-        this._injector.get(SheetClipboardController);
-        this._injector.get(FormulaEditorController);
-        this._injector.get(SheetsDefinedNameController);
-        this._injector.get(StatusBarController);
-        this._injector.get(AutoHeightController);
+        touchDependencies(this._injector, [
+            [SheetPermissionInitController],
+            [SheetPermissionRenderManagerController],
+            [SheetClipboardController],
+            [FormulaEditorController],
+            [SheetsDefinedNameController],
+            [StatusBarController],
+            [AutoHeightController],
+        ]);
     }
 
     override onSteady(): void {
-        this._injector.get(FormatPainterController);
-        this._injector.get(AutoFillController);
-        this._injector.get(SheetPermissionInterceptorClipboardController);
+        touchDependencies(this._injector, [
+            [FormatPainterController],
+            [AutoFillController],
+            [SheetPermissionInterceptorClipboardController],
+        ]);
     }
 
     private _registerRenderBasics(): void {
@@ -244,7 +251,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         });
     }
 
-    private _markSheetAsFocused(): void {
+    private _initAutoFocus(): void {
         const univerInstanceService = this._univerInstanceService;
         this.disposeWithMe(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(filter((v) => !!v))

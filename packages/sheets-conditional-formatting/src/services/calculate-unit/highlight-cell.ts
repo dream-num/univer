@@ -16,16 +16,16 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { IStyleBase } from '@univerjs/core';
+import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
+import type { ICalculateUnit } from './type';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import dayjs from 'dayjs';
-import type { IStyleBase } from '@univerjs/core';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { EMPTY_STYLE } from './type';
 import { compareWithNumber, filterRange, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
-import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
-import type { ICalculateUnit } from './type';
 
 export const highlightCellCalculateUnit: ICalculateUnit = {
     type: CFRuleType.highlightCell,

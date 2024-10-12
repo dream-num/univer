@@ -25,7 +25,7 @@ import type { ILocales } from './shared';
 import type { IWorkbookData } from './sheets/typedef';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData } from './types/interfaces';
-import { Injector } from './common/di';
+import { Injector, touchDependencies } from './common/di';
 import { UniverInstanceType } from './common/unit';
 import { DocumentDataModel } from './docs/data-model/document-data-model';
 import { AuthzIoLocalService } from './services/authz-io/authz-io-local.service';
@@ -197,12 +197,10 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
     ], override);
 
     const injector = parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
-    inintialzeStaringModules(injector);
+    touchDependencies(injector, [
+        [UserManagerService],
+        [IResourceLoaderService],
+    ]);
 
     return injector;
-}
-
-function inintialzeStaringModules(injector: Injector): void {
-    injector.get(UserManagerService);
-    injector.get(IResourceLoaderService);
 }

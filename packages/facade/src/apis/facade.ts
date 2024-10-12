@@ -39,7 +39,9 @@ import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheet
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import {
     BorderStyleTypes,
+
     debounce,
+    FUniver,
     ICommandService,
     Inject,
     Injector,
@@ -51,8 +53,7 @@ import {
     UndoCommand,
     Univer,
     UniverInstanceType,
-    WrapStrategy,
-} from '@univerjs/core';
+    WrapStrategy } from '@univerjs/core';
 
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -69,7 +70,7 @@ import { FPermission } from './sheets/f-permission';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 import { FWorkbook } from './sheets/f-workbook';
 
-export class FUniver {
+class FUniverBase {
     static BorderStyle = BorderStyleTypes;
 
     static WrapStrategy = WrapStrategy;
@@ -132,7 +133,7 @@ export class FUniver {
      */
     static newAPI(wrapped: Univer | Injector): FUniver {
         const injector = wrapped instanceof Univer ? wrapped.__getInjector() : wrapped;
-        const dependencies = FUniver.getDependencies(injector);
+        const dependencies = FUniverBase.getDependencies(injector);
         dependencies.forEach((dependency) => injector.add(dependency));
         return injector.createInstance(FUniver);
     }
@@ -535,5 +536,49 @@ export class FUniver {
      */
     getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
+    }
+}
+
+FUniver.extend(FUniverBase);
+
+export { FUniver };
+
+declare module '@univerjs/core' {
+      // eslint-disable-next-line ts/no-namespace
+    namespace FUniver {
+        function newAPI(wrapped: Univer | Injector): FUniver;
+
+        function newDataValidation(): FDataValidationBuilder;
+    }
+
+    interface FUniver {
+        createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
+        createUniverDoc(data: Partial<IDocumentData>): FDocument;
+        disposeUnit(unitId: string): boolean;
+        getUniverSheet(id: string): FWorkbook | null;
+        getUniverDoc(id: string): FDocument | null;
+        getActiveWorkbook(): FWorkbook | null;
+        getActiveDocument(): FDocument | null;
+        registerFunction(config: IRegisterFunctionParams): IDisposable;
+        registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+        registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+        registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+        getFormula(): FFormula;
+        getCurrentLifecycleStage(): LifecycleStages;
+        undo(): Promise<boolean>;
+        redo(): Promise<boolean>;
+        copy(): Promise<boolean>;
+        paste(): Promise<boolean>;
+        onBeforeCommandExecute(callback: CommandListener): IDisposable;
+        onCommandExecuted(callback: CommandListener): IDisposable;
+        executeCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): Promise<R>;
+        createSocket(url: string): ISocket;
+        getSHeetHooks(): FSheetHooks;
+        getHooks(): FHooks;
+        customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+        customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+        setCrosshairHighlightEnabled(enabled: boolean): void;
+        setCrosshairHighlightColor(color: string): void;
+        getPermission(): FPermission;
     }
 }

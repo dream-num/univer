@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType } from '@univerjs/core';
 import type { IOperation } from '@univerjs/core';
-
-import { getSelectionsService } from '../utils/selection-command-util';
 import type { ISelectionWithStyle } from '../../basics/selection';
 import type { SelectionMoveType } from '../../services/selections/selection-manager.service';
+import { CommandType } from '@univerjs/core';
+import { getSelectionsService } from '../utils/selection-command-util';
 
 export interface ISetSelectionsOperationParams {
     unitId: string;

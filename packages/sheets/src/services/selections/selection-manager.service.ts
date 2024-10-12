@@ -212,7 +212,7 @@ export class WorkbookSelections extends Disposable {
     private readonly _selectionMoving$ = new Subject<Nullable<ISelectionWithStyle[]>>();
     readonly selectionMoving$ = this._selectionMoving$.asObservable();
 
-    private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
+    readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithStyle[]>([]);
     readonly selectionMoveEnd$ = this._selectionMoveEnd$.asObservable();
 
     private readonly _selectionSet$ = new BehaviorSubject<ISelectionWithStyle[]>([]);

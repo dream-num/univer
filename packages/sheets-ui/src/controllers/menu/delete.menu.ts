@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
-import { MenuItemType } from '@univerjs/ui';
-
 import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+
 import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetDeleteColumnPermission, WorksheetDeleteRowPermission, WorksheetEditPermission } from '@univerjs/sheets';
+import { MenuItemType } from '@univerjs/ui';
 import { DeleteRangeMoveLeftConfirmCommand } from '../../commands/commands/delete-range-move-left-confirm.command';
 import { DeleteRangeMoveUpConfirmCommand } from '../../commands/commands/delete-range-move-up-confirm.command';
 import {
@@ -45,7 +45,7 @@ export function RemoveColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         icon: 'DeleteColumn',
         title: 'rightClick.deleteSelectedColumn',
-        hidden$: getDeleteMenuHidden$(accessor, 'col'),
+        hidden$: getObservableWithExclusiveRange$(accessor, getDeleteMenuHidden$(accessor, 'col')),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetDeleteColumnPermission] }),
     };
 }

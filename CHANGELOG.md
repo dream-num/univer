@@ -1,5 +1,16 @@
 
 
+# [0.4.0-alpha.1](https://github.com/dream-num/univer/compare/v0.4.0-alpha.0...v0.4.0-alpha.1) (2024-10-12)
+
+
+### Bug Fixes
+
+* **docs:** can not paste content when have both text range and rect range ([#3720](https://github.com/dream-num/univer/issues/3720)) ([3cfcf7e](https://github.com/dream-num/univer/commit/3cfcf7ec5e21583294e5c5ab9289f4761065f476))
+* **docs:** insert image after table ([#3719](https://github.com/dream-num/univer/issues/3719)) ([942dc4e](https://github.com/dream-num/univer/commit/942dc4e466faa6668c3821db83f1df26966e6766))
+* **docs:** selection offset is wrong when refresh ([#3724](https://github.com/dream-num/univer/issues/3724)) ([0babbab](https://github.com/dream-num/univer/commit/0babbabccd04ae65d1a6e23e21634b2ff2bb27da))
+* **formula:** fix some formula bugs ([#3722](https://github.com/dream-num/univer/issues/3722)) ([559825a](https://github.com/dream-num/univer/commit/559825aa850fb7544d7aeb50def690efa090bdb1))
+* **sheets-ui:** set focus editing mode when dbclick & error resize when change sub sheet ([#3725](https://github.com/dream-num/univer/issues/3725)) ([84ac33f](https://github.com/dream-num/univer/commit/84ac33f9a58ed2d1173b06fc811b54ead76653ca))
+
 # [0.4.0-alpha.0](https://github.com/dream-num/univer/compare/v0.3.0...v0.4.0-alpha.0) (2024-10-12)
 
 

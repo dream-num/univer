@@ -175,7 +175,7 @@ function RectPopup(props: IRectPopupProps) {
 
     useEffect(() => {
         const handleContextMenu = (e: MouseEvent) => {
-            if (e.ctrlKey) {
+            if (e.ctrlKey && e.button === 0) {
                 return;
             }
             contextMenuFn();

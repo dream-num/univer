@@ -20,6 +20,12 @@ import { awaitTime, Disposable, ICommandService, ILogService, IUniverInstanceSer
 import { MessageType } from '@univerjs/design';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
 
+export enum ReplayMode {
+    DEFAULT = 'default',
+    NAME = 'name',
+    ACTIVE = 'active',
+}
+
 /**
  * This service is for replaying user actions.
  */
@@ -37,13 +43,13 @@ export class ActionReplayService extends Disposable {
     /**
      * Read a local file and try to replay commands in this JSON.
      */
-    async replayLocalJSON(): Promise<boolean> {
+    async replayLocalJSON(mode: ReplayMode = ReplayMode.DEFAULT): Promise<boolean> {
         const files = await this._localFileService.openFile({ multiple: false, accept: '.json' });
         if (files.length !== 1) return false;
 
         const file = files[0];
         try {
-            return this.replayCommands(JSON.parse(await file.text()));
+            return this.replayCommands(JSON.parse(await file.text()), { mode });
         } catch {
             this._messageService.show({
                 type: MessageType.Error,
@@ -59,11 +65,13 @@ export class ActionReplayService extends Disposable {
      * @param commands - The commands to replay.
      * @returns If the replay is successful.
      */
-    async replayCommands(commands: ICommandInfo[], replaceId = false): Promise<boolean> {
+    async replayCommands(commands: ICommandInfo[], options?: { mode: ReplayMode }): Promise<boolean> {
         const focusedUnitId = this._instanceService.getFocusedUnit()?.getUnitId();
         if (!focusedUnitId) {
             this._logService.error('[ReplayService]', 'no focused unit to replay commands');
         }
+
+        const { mode } = options || {};
 
         for (const command of commands) {
             const { id, params } = command;
@@ -73,12 +81,21 @@ export class ActionReplayService extends Disposable {
                     commandParams.unitId = focusedUnitId!;
                 }
 
-                if (replaceId && commandParams.subUnitId !== 'undefined') {
+                if (mode === ReplayMode.NAME && commandParams.subUnitId !== 'undefined') {
                     const realSubUnitId = (this._instanceService.getFocusedUnit() as Workbook).getSheetBySheetName(commandParams.subUnitId)?.getSheetId();
                     if (realSubUnitId) {
                         commandParams.subUnitId = realSubUnitId;
                     } else {
                         this._logService.error('[ReplayService]', `failed to find subunit by subUnitName = ${commandParams.subUnitId}`);
+                    }
+                }
+
+                if (mode === ReplayMode.ACTIVE && commandParams.subUnitId !== 'undefined') {
+                    const realSubUnitId = (this._instanceService.getFocusedUnit() as Workbook).getActiveSheet()?.getSheetId();
+                    if (realSubUnitId) {
+                        commandParams.subUnitId = realSubUnitId;
+                    } else {
+                        this._logService.error('[ReplayService]', 'failed to find active subunit');
                     }
                 }
 

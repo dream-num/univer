@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { ISetColumnCustomMutationParams } from '../../mutations/set-column-custom.mutation';
+import type { ISetColCustomMutationParams } from '../../mutations/set-col-custom.mutation';
 import { ICommandService, type Injector, IUniverInstanceService, RedoCommand, UndoCommand, type Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetColumnCustomMutation } from '../../mutations/set-column-custom.mutation';
-import { SetColumnCustomCommand } from '../set-column-custom.command';
+import { SetColCustomMutation } from '../../mutations/set-col-custom.mutation';
+import { SetColCustomCommand } from '../set-col-custom.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('test set column custom commands', () => {
@@ -40,8 +40,8 @@ describe('test set column custom commands', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(SetColumnCustomCommand);
-        commandService.registerCommand(SetColumnCustomMutation);
+        commandService.registerCommand(SetColCustomCommand);
+        commandService.registerCommand(SetColCustomMutation);
     });
 
     afterEach(() => univer.dispose());
@@ -49,7 +49,7 @@ describe('test set column custom commands', () => {
     it('should set custom properties on columns', async () => {
         expect(getColumnCustom(1)).toBe(undefined);
 
-        const params: ISetColumnCustomMutationParams = {
+        const params: ISetColCustomMutationParams = {
             unitId: 'test',
             subUnitId: 'sheet1',
             custom: {
@@ -64,7 +64,7 @@ describe('test set column custom commands', () => {
                 },
             },
         };
-        await commandService.executeCommand(SetColumnCustomCommand.id, params);
+        await commandService.executeCommand(SetColCustomCommand.id, params);
 
         expect(getColumnCustom(1)).toEqual({ color: 'red' });
         expect(getColumnCustom(2)).toEqual({ color: 'green' });

@@ -17,16 +17,16 @@
 import { CommandType, type CustomData, type IMutation, type IObjectArrayPrimitiveType, IUniverInstanceService, type Nullable, type Worksheet } from '@univerjs/core';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
-export interface ISetColumnCustomMutationParams {
+export interface ISetColCustomMutationParams {
     unitId: string;
     subUnitId: string;
     custom: IObjectArrayPrimitiveType<Nullable<CustomData>>;
 }
 
-export const SetColumnCustomMutationFactory = (
-    params: ISetColumnCustomMutationParams,
+export const SetColCustomMutationFactory = (
+    params: ISetColCustomMutationParams,
     worksheet: Worksheet
-): ISetColumnCustomMutationParams => {
+): ISetColCustomMutationParams => {
     const { unitId, subUnitId, custom } = params;
 
     const oldCustom: IObjectArrayPrimitiveType<Nullable<CustomData>> = {};
@@ -50,8 +50,8 @@ export const SetColumnCustomMutationFactory = (
     };
 };
 
-export const SetColumnCustomMutation: IMutation<ISetColumnCustomMutationParams> = {
-    id: 'sheet.mutation.set-column-custom',
+export const SetColCustomMutation: IMutation<ISetColCustomMutationParams> = {
+    id: 'sheet.mutation.set-col-custom',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { custom } = params;

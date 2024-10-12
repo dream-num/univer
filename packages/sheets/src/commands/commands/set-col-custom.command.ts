@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetColumnCustomMutationParams } from '../mutations/set-column-custom.mutation';
+import type { ISetColCustomMutationParams } from '../mutations/set-col-custom.mutation';
 
 import {
     CommandType,
@@ -23,13 +23,13 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { SetColumnCustomMutation, SetColumnCustomMutationFactory } from '../mutations/set-column-custom.mutation';
+import { SetColCustomMutation, SetColCustomMutationFactory } from '../mutations/set-col-custom.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export const SetColumnCustomCommand: ICommand = {
+export const SetColCustomCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-column-custom',
-    handler: (accessor: IAccessor, params: ISetColumnCustomMutationParams) => {
+    id: 'sheet.command.set-col-custom',
+    handler: (accessor: IAccessor, params: ISetColCustomMutationParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -39,21 +39,21 @@ export const SetColumnCustomCommand: ICommand = {
 
         const { unitId, subUnitId, worksheet } = target;
 
-        const redoMutationParams: ISetColumnCustomMutationParams = {
+        const redoMutationParams: ISetColCustomMutationParams = {
             subUnitId,
             unitId,
             custom: params.custom,
         };
 
-        const undoMutationParams = SetColumnCustomMutationFactory(redoMutationParams, worksheet);
+        const undoMutationParams = SetColCustomMutationFactory(redoMutationParams, worksheet);
 
-        const result = commandService.syncExecuteCommand(SetColumnCustomMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetColCustomMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetColumnCustomMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: SetColumnCustomMutation.id, params: redoMutationParams }],
+                undoMutations: [{ id: SetColCustomMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetColCustomMutation.id, params: redoMutationParams }],
             });
 
             return true;

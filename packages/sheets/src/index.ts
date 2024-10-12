@@ -405,7 +405,7 @@ export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } 
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
 export { SetRowCustomCommand } from './commands/commands/set-row-custom.command';
 export { type ISetRowCustomMutationParams, SetRowCustomMutation } from './commands/mutations/set-row-custom.mutation';
-export { SetColumnCustomCommand } from './commands/commands/set-column-custom.command';
-export { type ISetColumnCustomMutationParams, SetColumnCustomMutation } from './commands/mutations/set-column-custom.mutation';
+export { SetColCustomCommand } from './commands/commands/set-col-custom.command';
+export { type ISetColCustomMutationParams, SetColCustomMutation } from './commands/mutations/set-col-custom.mutation';
 
 // #endregion

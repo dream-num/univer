@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/drawing",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -57,12 +57,11 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "ot-json1": "^1.0.2"
     },
     "devDependencies": {

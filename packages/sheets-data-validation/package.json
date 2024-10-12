@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "private": false,
     "description": "Data validation for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -60,12 +60,6 @@
         "lint:types": "tsc --noEmit"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/data-validation": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
-        "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -73,7 +67,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",

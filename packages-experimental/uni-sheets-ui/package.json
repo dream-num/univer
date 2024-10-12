@@ -57,15 +57,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-drawing-ui": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@univerjs/uniui": "workspace:*",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
@@ -74,8 +65,9 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniui": "workspace:*",

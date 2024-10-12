@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import type { BaseObject } from '../base-object';
+import type { DocComponent } from '../components/docs/doc-component';
 
+import type { SheetComponent } from '../components/sheets/sheet-component';
+import type { Slide } from '../components/slides/slide';
+import { createIdentifier, Disposable, Inject, Injector, IUniverInstanceService, remove, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Engine } from '../engine';
 import { Scene } from '../scene';
 import { type IRender, RenderUnit } from './render-unit';
-import type { BaseObject } from '../base-object';
-import type { DocComponent } from '../components/docs/doc-component';
-import type { SheetComponent } from '../components/sheets/sheet-component';
-import type { Slide } from '../components/slides/slide';
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
 

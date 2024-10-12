@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { DataStreamTreeTokenType, generateRandomId, Tools } from '@univerjs/core';
-import type { ICustomRange, ITextRange } from '@univerjs/core';
+import type { ITextRange } from '../../../../sheets/typedef';
+import type { ICustomRange } from '../../../../types/interfaces';
+import { generateRandomId, Tools } from '../../../../shared';
+import { DataStreamTreeTokenType } from '../../types';
 
 export function isCustomRangeSplitSymbol(text: string) {
     return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;

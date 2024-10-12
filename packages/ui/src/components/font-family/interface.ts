@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICustomComponentProps } from '@univerjs/ui';
+import type { ICustomComponentProps } from '../../services/menu/menu';
 
 export interface IFontFamilyProps extends ICustomComponentProps<string> {
     value: string;

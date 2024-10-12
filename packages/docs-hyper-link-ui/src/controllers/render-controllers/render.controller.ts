@@ -15,8 +15,8 @@
  */
 
 import type { DocumentDataModel } from '@univerjs/core';
-import { Disposable, Inject } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable, Inject } from '@univerjs/core';
 import { DOC_INTERCEPTOR_POINT, DocInterceptorService } from '@univerjs/docs';
 import { DocRenderController } from '@univerjs/docs-ui';
 import { distinctUntilChanged, pairwise } from 'rxjs';

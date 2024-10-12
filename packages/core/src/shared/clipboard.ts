@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BaselineOffset, BooleanNumber } from '../types/enum';
 import type { IDocumentBody, ITextRun } from '../types/interfaces';
+import { BaselineOffset, BooleanNumber } from '../types/enum';
 import { Tools } from './tools';
 
 export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {

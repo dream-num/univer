@@ -17,12 +17,12 @@
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
+import type { RectRange } from './rect-range';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
-import { RectRange } from './rect-range';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
 
@@ -161,7 +161,6 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._selectionStyle = style;
     }
 
-    // eslint-disable-next-line max-lines-per-function
     addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _currentSegmentId: segmentId,
@@ -174,42 +173,36 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         const docSkeleton = this._docSkeletonManagerService.getSkeleton();
 
         for (const range of ranges) {
-            const { startOffset, endOffset, rangeType } = range;
+            const { startOffset, endOffset, rangeType, startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
 
             if (rangeType === DOC_RANGE_TYPE.RECT) {
-                const { startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
-
-                const rectRange = startNodePosition && endNodePosition
-                    ? new RectRange(scene, document, docSkeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage)
-                    : getRectRangeFromCharIndex(
-                        startOffset,
-                        endOffset,
-                        scene,
-                        document,
-                        docSkeleton,
-                        style,
-                        segmentId,
-                        segmentPage
-                    );
+                const rectRange = getRectRangeFromCharIndex(
+                    startOffset,
+                    endOffset,
+                    scene,
+                    document,
+                    docSkeleton,
+                    style,
+                    segmentId,
+                    segmentPage
+                );
 
                 if (rectRange) {
                     this._addRectRanges([rectRange]);
                 }
             } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
-                const { startNodePosition, endNodePosition } = range as ITextRangeWithStyle;
-
-                const textRange = startNodePosition && endNodePosition
-                    ? new TextRange(scene, document, docSkeleton, startNodePosition, endNodePosition, style, segmentId, segmentPage)
-                    : getTextRangeFromCharIndex(
-                        startOffset,
-                        endOffset,
-                        scene,
-                        document,
-                        docSkeleton,
-                        style,
-                        segmentId,
-                        segmentPage
-                    );
+                const textRange = getTextRangeFromCharIndex(
+                    startNodePosition?.isBack ? startOffset : startOffset - 1,
+                    endNodePosition?.isBack ? endOffset : endOffset - 1,
+                    scene,
+                    document,
+                    docSkeleton,
+                    style,
+                    segmentId,
+                    segmentPage,
+                    startNodePosition?.isBack,
+                    endNodePosition?.isBack
+                );
 
                 if (textRange) {
                     this._addTextRange(textRange);

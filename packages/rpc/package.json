@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/rpc",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -55,7 +55,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

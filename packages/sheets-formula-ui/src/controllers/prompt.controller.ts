@@ -961,12 +961,12 @@ export class PromptController extends Disposable {
     }
 
     private _exceedCurrentRange(range: IRange, rowCount: number, columnCount: number) {
-        const { endRow, endColumn } = range;
-        if (endRow > rowCount) {
+        const { startRow, startColumn } = range;
+        if (startRow > rowCount - 1) {
             return true;
         }
 
-        if (endColumn > columnCount) {
+        if (startColumn > columnCount - 1) {
             return true;
         }
 

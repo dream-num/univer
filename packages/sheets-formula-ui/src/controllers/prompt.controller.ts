@@ -252,46 +252,55 @@ export class PromptController extends Disposable {
 
     private _initialCursorSync() {
         this.disposeWithMe(
-            this._docSelectionManagerService.textSelection$.subscribe((params) => {
-                if (params?.unitId == null) {
-                    return;
-                }
+            this._docSelectionManagerService.textSelection$
+                .pipe(
+                    distinctUntilChanged(
+                        (prev, curr) =>
+                            prev?.unitId === curr?.unitId &&
+                            prev?.segmentId === curr?.segmentId &&
+                            Boolean(prev?.textRanges.every((t, i) => t.startOffset === curr?.textRanges[i].startOffset && t.endOffset === curr?.textRanges[i].endOffset))
+                    )
+                )
+                .subscribe((params) => {
+                    if (params?.unitId == null) {
+                        return;
+                    }
 
-                const editor = this._editorService.getEditor(params.unitId);
-                if (!editor
+                    const editor = this._editorService.getEditor(params.unitId);
+                    if (!editor
                     || editor.onlyInputContent()
                     || (editor.isSheetEditor() && !this._isFormulaEditorActivated())
                     // Remove this latter.
                     || editor.params.scrollBar
-                ) {
-                    return;
-                }
+                    ) {
+                        return;
+                    }
 
-                const onlyInputRange = editor.onlyInputRange();
+                    const onlyInputRange = editor.onlyInputRange();
 
                 // @ts-ignore
-                if (params?.options?.fromSelection) {
-                    return;
-                } else {
-                    this._quitSelectingMode();
-                }
+                    if (params?.options?.fromSelection) {
+                        return;
+                    } else {
+                        this._quitSelectingMode();
+                    }
 
-                this._contextSwitch();
-                this._checkShouldEnterSelectingMode(onlyInputRange);
+                    this._contextSwitch();
+                    this._checkShouldEnterSelectingMode(onlyInputRange);
 
-                if (this._formulaPromptService.isLockedSelectionChange()) {
-                    return;
-                }
+                    if (this._formulaPromptService.isLockedSelectionChange()) {
+                        return;
+                    }
 
-                this._highlightFormula();
+                    this._highlightFormula();
 
-                if (onlyInputRange) {
-                    return;
-                }
+                    if (onlyInputRange) {
+                        return;
+                    }
 
                 // TODO@Dushusir: use real text info
-                this._changeFunctionPanelState();
-            })
+                    this._changeFunctionPanelState();
+                })
         );
     }
 

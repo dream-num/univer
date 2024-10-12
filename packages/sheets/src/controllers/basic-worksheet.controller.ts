@@ -59,7 +59,6 @@ import {
 } from '../commands/commands/set-col-visible.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
-import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import {
@@ -214,7 +213,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetColHiddenMutation,
                 SetColVisibleMutation,
                 SetColWidthCommand,
-                SetFrozenCancelCommand,
                 SetFrozenCommand,
                 SetFrozenMutation,
                 SetHorizontalTextAlignCommand,

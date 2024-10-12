@@ -19,8 +19,8 @@ import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
 import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter-ui';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
+import { FRange } from '@univerjs/sheets/facade';
 import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
-import { FRange } from './f-range';
 
 /**
  * This interface class provides methods to modify the filter settings of a worksheet.

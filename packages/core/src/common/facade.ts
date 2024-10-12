@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { ICommandService } from '../services/command/command.service';
+import { IUniverInstanceService } from '../services/instance/instance.service';
 import { Inject, Injector } from './di';
 
 /**
@@ -30,7 +32,7 @@ export abstract class FBase {
         });
     }
 
-    _initialize() {}
+    _initialize() { }
 
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
@@ -39,13 +41,14 @@ export abstract class FBase {
                     source.prototype._initialize.bind(this)
                 );
             } else if (name !== 'constructor') {
-            // @ts-ignore
+                // @ts-ignore
                 this.prototype[name] = source.prototype[name];
             }
         });
+
         Object.getOwnPropertyNames(source).forEach((name) => {
             if (name !== 'prototype' && name !== 'name' && name !== 'length') {
-            // @ts-ignore
+                // @ts-ignore
                 this[name] = source[name];
             }
         });
@@ -53,7 +56,11 @@ export abstract class FBase {
 }
 
 export class FUniver extends FBase {
-    constructor(@Inject(Injector) protected readonly _injector: Injector) {
+    constructor(
+        @Inject(Injector) protected readonly _injector: Injector,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
+    ) {
         super();
     }
 }

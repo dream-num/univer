@@ -237,8 +237,7 @@ export {
 } from './commands/commands/set-col-visible.command';
 
 export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
-export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
-export { SetFrozenCommand } from './commands/commands/set-frozen.command';
+export { CancelFrozenCommand, type ICancelFrozenCommandParams, type ISetFrozenCommandParams, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { SetHideGridlinesCommand } from './commands/commands/set-hide-gridlines.command';
 export { type ISetRangeProtectionCommandParams, SetRangeProtectionCommand } from './commands/commands/set-range-protection.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';

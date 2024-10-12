@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICommandInfo, Workbook } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { awaitTime, Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import type { ICommandInfo } from '@univerjs/core';
 
 /**
  * This service is for replaying user actions.
@@ -58,7 +59,7 @@ export class ActionReplayService extends Disposable {
      * @param commands - The commands to replay.
      * @returns If the replay is successful.
      */
-    async replayCommands(commands: ICommandInfo[]): Promise<boolean> {
+    async replayCommands(commands: ICommandInfo[], replaceId = false): Promise<boolean> {
         const focusedUnitId = this._instanceService.getFocusedUnit()?.getUnitId();
         if (!focusedUnitId) {
             this._logService.error('[ReplayService]', 'no focused unit to replay commands');
@@ -66,9 +67,19 @@ export class ActionReplayService extends Disposable {
 
         for (const command of commands) {
             const { id, params } = command;
-            if (params) {
-                if (typeof (params as ISharedCommandParams).unitId !== 'undefined') {
-                    (params as ISharedCommandParams).unitId = focusedUnitId;
+            const commandParams = params as ISheetCommandSharedParams;
+            if (commandParams) {
+                if (typeof commandParams.unitId !== 'undefined') {
+                    commandParams.unitId = focusedUnitId!;
+                }
+
+                if (replaceId && commandParams.subUnitId !== 'undefined') {
+                    const realSubUnitId = (this._instanceService.getFocusedUnit() as Workbook).getSheetBySheetName(commandParams.subUnitId)?.getSheetId();
+                    if (realSubUnitId) {
+                        commandParams.subUnitId = realSubUnitId;
+                    } else {
+                        this._logService.error('[ReplayService]', `failed to find subunit by subUnitName = ${commandParams.subUnitId}`);
+                    }
                 }
 
                 const result = await this._commandService.executeCommand(id, params);

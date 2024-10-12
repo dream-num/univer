@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.3.0-alpha.0",
+    "version": "0.3.0",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -58,8 +58,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
-        "build": "tsc && vite build",
-        "sync:cnpm": "cnpm sync"
+        "build": "tsc && vite build"
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -79,9 +78,9 @@
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
         "rxjs": "^7.8.1",
-        "typescript": "^5.6.2",
+        "typescript": "^5.6.3",
         "vite": "^5.4.8",
-        "vitest": "^2.1.1"
+        "vitest": "^2.1.2"
     },
     "univerSpace": {
         ".": {

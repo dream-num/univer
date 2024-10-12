@@ -38,9 +38,7 @@ import {
     Inject,
     Injector,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Rectangle,
     toDisposable,
     Tools,
@@ -82,7 +80,6 @@ import { ISheetSelectionRenderService } from '../services/selection/base-selecti
 import { SheetsRenderService } from '../services/sheets-render.service';
 import { discreteRangeToRange, generateNullCellValueRowCol, rangeToDiscreteRange } from './utils/range-tools';
 
-@OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
     private _currentLocation: Nullable<IAutoFillLocation> = null;

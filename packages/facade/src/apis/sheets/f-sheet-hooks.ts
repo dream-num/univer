@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
-
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
+
+import { ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 
 export class FSheetHooks {

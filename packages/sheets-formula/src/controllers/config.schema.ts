@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
-import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { Ctor } from '@univerjs/core';
+import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 
 /**
  * Base configuration for the plugin.
@@ -26,7 +25,6 @@ export const PLUGIN_CONFIG_KEY_BASE = 'sheets-formula.base.config';
 export const configSymbolBase = Symbol(PLUGIN_CONFIG_KEY_BASE);
 
 export interface IUniverSheetsFormulaBaseConfig {
-    menu?: MenuConfig;
     notExecuteFormula?: boolean;
     description?: IFunctionInfo[];
     function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
@@ -52,9 +50,3 @@ export const defaultPluginRemoteConfig: IUniverSheetsFormulaRemoteConfig = {};
 export const PLUGIN_CONFIG_KEY_MOBILE = 'sheets-formula.mobile.config';
 
 export const configSymbolMobile = Symbol(PLUGIN_CONFIG_KEY_MOBILE);
-
-export interface IUniverSheetsFormulaMobileConfig {
-    menu?: MenuConfig;
-}
-
-export const defaultPluginMobileConfig: IUniverSheetsFormulaMobileConfig = {};

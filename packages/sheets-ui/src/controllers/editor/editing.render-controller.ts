@@ -16,6 +16,12 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IEditorInputConfig } from '@univerjs/docs-ui';
+import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
+import type { WorkbookSelections } from '@univerjs/sheets';
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -55,15 +61,10 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
+
 import { ClearSelectionFormatCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IPosition, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IEditorInputConfig } from '@univerjs/docs-ui';
-
-import type { DocumentSkeleton, IDocumentLayoutObject, IRenderContext, IRenderModule, Scene } from '@univerjs/engine-render';
-import type { WorkbookSelections } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
 import { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
@@ -73,7 +74,6 @@ import styles from '../../views/sheet-container/index.module.less';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -564,6 +564,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 ? CursorChange.CursorChange
                 : CursorChange.StartEditor;
 
+        this._editorBridgeService.refreshEditCellState();
+
         const editCellState = this._editorBridgeService.getEditCellState();
         if (editCellState == null) {
             return;
@@ -635,10 +637,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
-            scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
-                viewportScrollX: Number.POSITIVE_INFINITY,
-            });
-
             this._textSelectionManagerService.replaceTextRanges([
                 {
                     startOffset: cursor,
@@ -647,6 +645,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
             ]);
         }
 
+        const viewMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
+        // TODO@weird94, this should be optimized.
+        // currently, we must wait for the resize to complete before scrolling to the selection,
+        setTimeout(() => {
+            viewMain?.scrollToViewportPos({
+                viewportScrollX: Number.POSITIVE_INFINITY,
+                viewportScrollY: Number.POSITIVE_INFINITY,
+            });
+        }, 10);
         this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
     }
 
@@ -843,7 +850,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const { unitId, sheetId, row, column, documentLayoutObject } = editCellState;
         // If neither the formula bar editor nor the cell editor has been edited,
         // it is considered that the content has not changed and returns directly.
         const editorIsDirty = this._editorBridgeService.getEditorDirty();
@@ -852,15 +858,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
         }
 
         const workbook = this._context.unit;
-        let worksheet = workbook.getActiveSheet();
+        const worksheet = workbook.getActiveSheet();
         const workbookId = this._context.unitId;
         const worksheetId = worksheet.getSheetId();
-
-        // If the target cell does not exist, there is no need to execute setRangeValue
-        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
-        if (!setRangeValueTargetSheet) {
-            return;
-        }
 
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
@@ -876,6 +876,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
+        const { unitId, sheetId } = editCellState;
+
         /**
          * When closing the editor, switch to the current tab of the editor.
          */
@@ -887,12 +889,43 @@ export class EditingRenderController extends Disposable implements IRenderModule
             });
         }
 
+        const documentDataModel = editCellState.documentLayoutObject.documentModel;
+
+        if (documentDataModel) {
+            await this._submitCellData(documentDataModel);
+        }
+
+        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+        this._moveCursor(keycode);
+    }
+
+    submitCellData(documentDataModel: DocumentDataModel) {
+        return this._submitCellData(documentDataModel);
+    }
+
+    private async _submitCellData(documentDataModel: DocumentDataModel) {
+        const editCellState = this._editorBridgeService.getEditCellState();
+        if (editCellState == null) {
+            return;
+        }
+
+        const { unitId, sheetId, row, column } = editCellState;
+
+        const workbook = this._context.unit;
+        let worksheet = workbook.getActiveSheet();
+
+        // If the target cell does not exist, there is no need to execute setRangeValue
+        const setRangeValueTargetSheet = workbook.getSheetBySheetId(sheetId);
+        if (!setRangeValueTargetSheet) {
+            return;
+        }
+
         worksheet = workbook.getActiveSheet();
 
         // If cross-sheet operation, switch current sheet first, then const cellData
         const cellData: Nullable<ICellData> = getCellDataByInput(
             worksheet.getCellRaw(row, column) || {},
-            documentLayoutObject,
+            documentDataModel,
             this._lexerTreeBuilder,
             (model) => model.getSnapshot(),
             this._localService,
@@ -900,7 +933,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
         );
 
         if (!cellData) {
-            this._moveCursor(keycode);
             return;
         }
 
@@ -933,9 +965,6 @@ export class EditingRenderController extends Disposable implements IRenderModule
             },
             value: finalCell,
         });
-
-        // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
-        this._moveCursor(keycode);
     }
 
     private _exitInput(param: IEditorBridgeServiceVisibleParam) {
@@ -946,6 +975,11 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         this._cellEditorManagerService.setState({
             show: param.visible,
+        });
+        const editorObject = this._getEditorObject();
+        editorObject?.scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN)?.scrollToViewportPos({
+            viewportScrollX: 0,
+            viewportScrollY: 0,
         });
         const editorUnitId = this._editorBridgeService.getCurrentEditorId();
         if (editorUnitId == null || !this._editorService.isSheetEditor(editorUnitId)) {
@@ -1042,7 +1076,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
 export function getCellDataByInput(
     cellData: ICellData,
-    documentLayoutObject: IDocumentLayoutObject,
+    documentDataModel: Nullable<DocumentDataModel>,
     lexerTreeBuilder: LexerTreeBuilder,
     getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
@@ -1050,12 +1084,11 @@ export function getCellDataByInput(
 ) {
     cellData = Tools.deepClone(cellData);
 
-    const { documentModel } = documentLayoutObject;
-    if (documentModel == null) {
+    if (documentDataModel == null) {
         return null;
     }
 
-    const snapshot = getSnapshot(documentModel);
+    const snapshot = getSnapshot(documentDataModel);
 
     const { body } = snapshot;
     if (body == null) {

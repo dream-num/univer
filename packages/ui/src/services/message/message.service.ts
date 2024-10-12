@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMessageOptions } from '@univerjs/design';
 import type { IDisposable } from '@univerjs/core';
+import type { IMessageOptions } from '@univerjs/design';
 import { createIdentifier } from '@univerjs/core';
 
 export const IMessageService = createIdentifier<IMessageService>('ui.message.service');

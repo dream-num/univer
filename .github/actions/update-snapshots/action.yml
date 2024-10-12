@@ -1,0 +1,17 @@
+name: 📸 Update Snapshots
+description: Update snapshots and push a new commit.
+
+runs:
+    using: composite
+    steps:
+        - name: Install Playwright Browsers
+          shell: bash
+          run: pnpm exec playwright install --with-deps chromium
+
+        - name: Build E2E Client
+          shell: bash
+          run: pnpm build:e2e
+
+        - name: Update Snapshots
+          shell: bash
+          run: pnpm exec playwright test e2e/visual-comparison --update-snapshots

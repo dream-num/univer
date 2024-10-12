@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { type Nullable, Tools } from '@univerjs/core';
 import { DocumentSkeletonPageType, getPageFromPath, getTableIdAndSliceIndex, Liquid } from '@univerjs/engine-render';
-import type { DocumentSkeleton, IDocumentOffsetConfig, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IDocumentSkeletonRow, IDocumentSkeletonTable, INodePosition, IPoint } from '@univerjs/engine-render';
 import { compareNodePositionLogic, pushToPoints } from './convert-text-range';
 
 // The anchor and focus need to be in the same table,
@@ -266,20 +266,23 @@ export class NodePositionConvertToRectRange {
             return;
         }
 
+        for (const table of tables) {
+            this._collectPositionGroup(table, nodePositionGroup, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, segmentPage, compare);
+        }
+
         const totalColumns = tables[0].rows[0].cells.length;
 
         // Span entires row.
         if (startColumnIndex === 0 && endColumnIndex === totalColumns - 1) {
+            const firstPosition = nodePositionGroup[0];
+            const lastPosition = nodePositionGroup[nodePositionGroup.length - 1];
+
+            nodePositionGroup.length = 0;
+
             nodePositionGroup.push({
-                anchor: anchorNodePosition,
-                focus: focusNodePosition,
+                anchor: compare ? firstPosition.anchor : lastPosition.anchor,
+                focus: compare ? lastPosition.focus : firstPosition.focus,
             });
-
-            return nodePositionGroup;
-        }
-
-        for (const table of tables) {
-            this._collectPositionGroup(table, nodePositionGroup, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, segmentPage, compare);
         }
 
         return nodePositionGroup;

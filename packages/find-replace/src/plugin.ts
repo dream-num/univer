@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IUniverFindReplaceConfig } from './controllers/config.schema';
 import { IConfigService, Plugin } from '@univerjs/core';
-import { type Dependency, Inject, Injector } from '@univerjs/core';
 
+import { type Dependency, Inject, Injector } from '@univerjs/core';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { FindReplaceController } from './controllers/find-replace.controller';
 import { FindReplaceService, IFindReplaceService } from './services/find-replace.service';
-import type { IUniverFindReplaceConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'UNIVER_FIND_REPLACE_PLUGIN';
 
@@ -43,10 +43,10 @@ export class UniverFindReplacePlugin extends Plugin {
         ([
             [FindReplaceController],
             [IFindReplaceService, { useClass: FindReplaceService }],
-        ] as Dependency[]).forEach(
-            (d) => {
-                this._injector.add(d);
-            }
-        );
+        ] as Dependency[]).forEach((d) => this._injector.add(d));
+    }
+
+    override onRendered(): void {
+        this._injector.get(FindReplaceController);
     }
 }

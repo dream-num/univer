@@ -31,18 +31,21 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/icons": "^0.1.78",
+        "@univerjs/mockdata": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
         "@univerjs/sheets-crosshair-highlight": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-data-validation-ui": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
@@ -72,7 +75,7 @@
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.9",
+        "@types/react": "^18.3.11",
         "@types/react-dom": "^18.3.0",
         "@univerjs-infra/shared": "workspace:*",
         "detect-port": "^1.6.1",
@@ -83,6 +86,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.6.2"
+        "typescript": "^5.6.3"
     }
 }

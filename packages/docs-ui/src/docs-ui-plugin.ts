@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverDocsUIConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService,
     IConfigService,
     ILogService,
@@ -26,7 +28,6 @@ import { DependentOn, ICommandService,
 import { DocInterceptorService, DocSkeletonManagerService } from '@univerjs/docs';
 import { IRenderManagerService, UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { IShortcutService } from '@univerjs/ui';
-import type { Dependency } from '@univerjs/core';
 import { DOC_UI_PLUGIN_NAME } from './basics/const/plugin-name';
 import { AfterSpaceCommand, EnterCommand, TabCommand } from './commands/commands/auto-format.command';
 import { BreakLineCommand } from './commands/commands/break-line.command';
@@ -39,7 +40,7 @@ import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
 import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
-import { CoverContentCommand, ReplaceContentCommand } from './commands/commands/replace-content.command';
+import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
@@ -92,7 +93,6 @@ import {
     SelectAllShortcut,
 } from './shortcuts/cursor.shortcut';
 import { ShiftTabShortCut } from './shortcuts/format.shortcut';
-import type { IUniverDocsUIConfig } from './controllers/config.schema';
 
 @DependentOn(UniverRenderEnginePlugin)
 export class UniverDocsUIPlugin extends Plugin {
@@ -115,6 +115,7 @@ export class UniverDocsUIPlugin extends Plugin {
             this._configService.setConfig('menu', menu, { merge: true });
         }
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
         this._initDependencies(_injector);
         this._initializeShortcut();
         this._initCommand();
@@ -123,11 +124,23 @@ export class UniverDocsUIPlugin extends Plugin {
     override onReady(): void {
         this._initRenderBasics();
         this._markDocAsFocused();
+
+        this._injector.get(DocStateChangeManagerService);
+        this._injector.get(DocsRenderService);
     }
 
     override onRendered(): void {
         this._initUI();
         this._initRenderModules();
+
+        this._injector.get(DocAutoFormatController);
+        this._injector.get(DocMoveCursorController);
+        this._injector.get(DocParagraphSettingController);
+        this._injector.get(DocTableController);
+
+        // FIXME: LifecycleStages.Rendered must be used, otherwise the menu cannot be added to the DOM, but the sheet ui
+        // plugin can be added in LifecycleStages.Ready
+        this._injector.get(DocUIController);
     }
 
     private _initCommand() {
@@ -185,6 +198,7 @@ export class UniverDocsUIPlugin extends Plugin {
             InnerPasteCommand,
             CutContentCommand,
             ReplaceContentCommand,
+            ReplaceSnapshotCommand,
             CoverContentCommand,
             SetDocZoomRatioCommand,
             SelectAllOperation,
@@ -219,18 +233,15 @@ export class UniverDocsUIPlugin extends Plugin {
     }
 
     private _initDependencies(injector: Injector) {
-        const dependencies: Dependency[] = [
+        const dependencies = mergeOverrideWithDependencies([
             [DocClipboardController],
             [DocEditorBridgeController],
-            // Controller
             [DocUIController],
             [DocAutoFormatController],
             [DocTableController],
             [DocMoveCursorController],
             [AppUIController],
             [DocParagraphSettingController],
-
-            // Services
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [IDocClipboardService, { useClass: DocClipboardService }],
@@ -238,11 +249,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocsRenderService],
             [DocStateChangeManagerService],
             [DocAutoFormatService],
-        ];
-
-        const dependency = mergeOverrideWithDependencies(dependencies, this._config.override);
-
-        dependency.forEach((d) => injector.add(d));
+        ], this._config.override);
+        dependencies.forEach((d) => injector.add(d));
     }
 
     private _markDocAsFocused() {

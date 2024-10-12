@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    DataStreamTreeTokenType,
-    Direction,
-    Disposable,
-    ICommandService,
-    Inject,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
-    RANGE_DIRECTION,
-} from '@univerjs/core';
-import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
 import type { ICommandInfo, Nullable } from '@univerjs/core';
 import type {
     DocumentSkeleton,
@@ -38,16 +25,26 @@ import type {
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
-
 import type { Subscription } from 'rxjs';
+import type { IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
+import {
+    DataStreamTreeTokenType,
+    Direction,
+    Disposable,
+    ICommandService,
+    Inject,
+    IUniverInstanceService,
+    RANGE_DIRECTION,
+} from '@univerjs/core';
+
+import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
+import { DocumentSkeletonPageType, IRenderManagerService } from '@univerjs/engine-render';
 import { getDocObject } from '../basics/component-tools';
 import { findAboveCell, findBellowCell, findLineBeforeAndAfterTable, findTableAfterLine, findTableBeforeLine, firstLineInCell, firstLineInTable, lastLineInCell, lastLineInTable } from '../basics/table';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
 import { NodePositionConvertToCursor } from '../services/selection/convert-text-range';
 import { DocBackScrollRenderController } from './render-controllers/back-scroll.render-controller';
-import type { IMoveCursorOperationParams } from '../commands/operations/doc-cursor.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, DocMoveCursorController)
 export class DocMoveCursorController extends Disposable {
     private _onInputSubscription: Nullable<Subscription>;
 

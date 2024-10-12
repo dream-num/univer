@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
+import type { IImageIoServiceParam } from '@univerjs/drawing';
+import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 import { BooleanNumber, Disposable, FOCUSING_COMMON_DRAWINGS, ICommandService, IContextService, Inject, LocaleService, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObjectLayoutType, WrapTextType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -21,18 +26,13 @@ import { IDocDrawingService } from '@univerjs/docs-drawing';
 import { docDrawingPositionToTransform, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { DRAWING_IMAGE_ALLOW_IMAGE_LIST, DRAWING_IMAGE_ALLOW_SIZE, DRAWING_IMAGE_COUNT_LIMIT, DRAWING_IMAGE_HEIGHT_LIMIT, DRAWING_IMAGE_WIDTH_LIMIT, DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, getImageSize, IDrawingManagerService, IImageIoService, ImageUploadStatusType } from '@univerjs/drawing';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import { ILocalFileService, IMessageService } from '@univerjs/ui';
-import type { DocumentDataModel, ICommandInfo, IDocDrawingPosition, Nullable } from '@univerjs/core';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
-import type { IImageIoServiceParam } from '@univerjs/drawing';
-import type { Documents, Image, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
+import { ILocalFileService, IMessageService } from '@univerjs/ui';
 import { GroupDocDrawingCommand } from '../../commands/commands/group-doc-drawing.command';
 import { InsertDocDrawingCommand } from '../../commands/commands/insert-doc-drawing.command';
 import { type ISetDrawingArrangeCommandParams, SetDocDrawingArrangeCommand } from '../../commands/commands/set-drawing-arrange.command';
 import { UngroupDocDrawingCommand } from '../../commands/commands/ungroup-doc-drawing.command';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
-import type { IInsertDrawingCommandParams } from '../../commands/commands/interfaces';
 
 export class DocDrawingUpdateRenderController extends Disposable implements IRenderModule {
     constructor(

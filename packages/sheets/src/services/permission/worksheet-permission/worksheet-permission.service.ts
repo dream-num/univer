@@ -15,21 +15,20 @@
  */
 
 import type { Workbook, Worksheet } from '@univerjs/core';
-import { Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { takeUntil } from 'rxjs/operators';
+import type { IObjectModel, IObjectPointModel } from '../type';
+import { Inject, Injector, IPermissionService, IResourceManagerService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { UniverType } from '@univerjs/protocol';
 
-import type { IObjectModel, IObjectPointModel } from '../type';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
+import { takeUntil } from 'rxjs/operators';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
-import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
+import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
+import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
 
 export const RULE_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_PLUGIN';
 export const POINT_MODEL_PLUGIN_NAME = 'SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Starting, WorksheetPermissionService)
 export class WorksheetPermissionService extends RxDisposable {
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,

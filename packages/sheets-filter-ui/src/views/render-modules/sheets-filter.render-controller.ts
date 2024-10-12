@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { IDisposable, IRange, Workbook } from '@univerjs/core';
 import type { IRenderContext, IRenderModule, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
-
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 import type { ISheetsFilterButtonShapeProps } from '../widgets/filter-button.shape';
+import { CommandType, fromCallback, ICommandService, Inject, Injector, InterceptorEffectEnum, RxDisposable, ThemeService } from '@univerjs/core';
+import { INTERCEPTOR_POINT, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
+
+import { getCoordByCell, ISheetSelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
+import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../widgets/filter-button.shape';
 
 const DEFAULT_Z_INDEX = 1000;
 
@@ -84,8 +84,8 @@ export class SheetsFilterRenderController extends RxDisposable implements IRende
                 return fromCallback(this._commandService.onCommandExecuted.bind(this._commandService)).pipe(
                     filter(([command]) =>
                         command.type === CommandType.MUTATION
-                        && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
-                        && FILTER_MUTATIONS.has(command.id)
+                        && (command.params as Partial<ISheetCommandSharedParams>)?.unitId === workbook.getUnitId()
+                        && (FILTER_MUTATIONS.has(command.id) || command.id === SetRangeValuesMutation.id)
                     ),
                     throttleTime(20, undefined, { leading: false, trailing: true }),
                     map(getParams),

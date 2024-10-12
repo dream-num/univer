@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { ISheetDataValidationRule } from '@univerjs/core';
+import { Disposable, Inject, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
 
 const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION_PLUGIN';
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationResourceController)
 export class DataValidationResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,

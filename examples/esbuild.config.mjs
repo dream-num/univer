@@ -138,6 +138,5 @@ if (args.watch) {
 
     const url = `http://localhost:${port}`;
 
-    // eslint-disable-next-line no-console
     console.log(`Local server: ${url}`);
 }

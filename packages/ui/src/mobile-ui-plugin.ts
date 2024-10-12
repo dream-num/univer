@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@univerjs/core';
+import type { IUniverUIConfig } from './controllers/config.schema';
 import { DependentOn, ILocalStorageService, Inject, Injector, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import type { Dependency } from '@univerjs/core';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
@@ -51,7 +52,6 @@ import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.servic
 import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
-import type { IUniverUIConfig } from './controllers/config.schema';
 
 export const UNIVER_MOBILE_UI_PLUGIN_NAME = 'UNIVER_MOBILE_UI_PLUGIN';
 
@@ -109,5 +109,8 @@ export class UniverMobileUIPlugin extends Plugin {
         ], this._config.override);
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
+
+        this._injector.get(IUIController);
+        this._injector.get(ErrorController);
     }
 }

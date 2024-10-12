@@ -50,6 +50,7 @@ export {
 export type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetDiscreteRangeLocation } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
+export { EditingRenderController } from './controllers/editor/editing.render-controller';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
 export { IFormulaEditorManagerService } from './services/editor/formula-editor-manager.service';
 export {
@@ -62,7 +63,7 @@ export { IMarkSelectionService } from './services/mark-selection/mark-selection.
 export { SheetSelectionRenderService } from './services/selection/selection-render.service';
 export { getAllSelection, getTopLeftSelection } from './services/selection/base-selection-render.service';
 export { BaseSelectionRenderService, ISheetSelectionRenderService } from './services/selection/base-selection-render.service';
-export { SelectionControl as SelectionShape } from './services/selection/selection-shape';
+export { SelectionControl as SelectionShape } from './services/selection/selection-control';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { attachRangeWithCoord, SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
@@ -106,6 +107,7 @@ export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/sel
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 
 export { menuSchema } from './controllers/menu.schema';
+export { getCellRealRange } from './common/utils';
 
 // #region - all commands
 export { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';

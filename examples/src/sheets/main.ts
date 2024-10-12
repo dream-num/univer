@@ -14,23 +14,29 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
+
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
@@ -39,11 +45,7 @@ import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import type { Nullable } from '@univerjs/core';
-import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
-import { enUS, ruRU, viVN, zhCN, zhTW } from '../locales';
+import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
@@ -60,6 +62,7 @@ const univer = new Univer({
         [LocaleType.RU_RU]: ruRU,
         [LocaleType.ZH_TW]: zhTW,
         [LocaleType.VI_VN]: viVN,
+        [LocaleType.FA_IR]: faIR,
     },
     logLevel: LogLevel.VERBOSE,
 });
@@ -80,19 +83,17 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
+univer.registerPlugin(UniverSheetsFormulaUIPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
+
 // filter plugin
 univer.registerPlugin(UniverSheetsFilterPlugin);
+
 // mock lazy load
 setTimeout(() => {
     // hyperlink
     univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);
-}, 500);
-
-// mock lazy load data validation
-setTimeout(() => {
-    univer.registerPlugin(UniverSheetsDataValidationPlugin, {
-        // showEditOnDropdown: false,
-    });
 }, 500);
 
 // sort

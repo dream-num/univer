@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, UniverInstanceType } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
+import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, Range, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, ConditionalFormattingService, ConditionalFormattingViewModel, DEFAULT_PADDING, DEFAULT_WIDTH } from '@univerjs/sheets-conditional-formatting';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { bufferTime, filter } from 'rxjs/operators';
-import type { ICellDataForSheetInterceptor, Workbook } from '@univerjs/core';
-import type { IConditionalFormattingCellData, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsCfRenderController)
 export class SheetsCfRenderController extends Disposable {
     /**
      * When a set operation is triggered multiple times over a short period of time, it may result in some callbacks not being disposed,and caused a render cache exception.

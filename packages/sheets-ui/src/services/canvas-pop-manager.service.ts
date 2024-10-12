@@ -29,7 +29,7 @@ import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
-export interface ICanvasPopup extends Pick<IPopup, 'direction' | 'excludeOutside' | 'componentKey' | 'offset' | 'onClickOutside' | 'hideOnInvisible' | 'hiddenType' | 'onClick'> {
+export interface ICanvasPopup extends Omit<IPopup, 'anchorRect' | 'anchorRect$' | 'unitId' | 'subUnitId' | 'canvasElement'> {
     mask?: boolean;
     extraProps?: Record<string, any>;
 }

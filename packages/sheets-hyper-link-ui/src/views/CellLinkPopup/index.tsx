@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React, { useEffect, useState } from 'react';
-import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
-import cs from 'clsx';
-import { MessageType, Tooltip } from '@univerjs/design';
-import { IMessageService } from '@univerjs/ui';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import type { IHyperLinkPopup } from '../../services/popup.service';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { MessageType, Tooltip } from '@univerjs/design';
+import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
+import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { IMessageService, IZenZoneService } from '@univerjs/ui';
+import cs from 'clsx';
+import React, { useEffect, useState } from 'react';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
+import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
-import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import styles from './index.module.less';
 
@@ -46,6 +46,8 @@ export const CellLinkPopup = () => {
     const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const zenZoneService = useDependency(IZenZoneService);
+    const visible = useObservable(zenZoneService.visible$);
 
     useEffect(() => {
         setCurrentPopup(popupService.currentPopup);
@@ -70,7 +72,15 @@ export const CellLinkPopup = () => {
 
     return (
         <div className={styles.cellLink} onClick={() => popupService.hideCurrentPopup()}>
-            <div className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })} onClick={linkObj.handler}>
+            <div
+                className={cs(styles.cellLinkContent, { [styles.cellLinkContentError]: isError })}
+                onClick={() => {
+                    if (zenZoneService.visible) {
+                        return;
+                    }
+                    linkObj.handler();
+                }}
+            >
                 <div className={styles.cellLinkType}>
                     {iconsMap[linkObj.type]}
                 </div>

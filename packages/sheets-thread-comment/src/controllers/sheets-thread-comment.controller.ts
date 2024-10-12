@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { Disposable, Inject } from '@univerjs/core';
 import { CommentSingle } from '@univerjs/icons';
 import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
-import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
+import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { AddCommentShortcut } from './menu';
 import { menuSchema } from './menu.schema';
 
-@OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
     constructor(
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,

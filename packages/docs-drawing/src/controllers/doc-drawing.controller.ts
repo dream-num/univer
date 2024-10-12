@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
-import { IDrawingManagerService } from '@univerjs/drawing';
 import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import type { IDrawingMapItem, IDrawingMapItemData } from '@univerjs/drawing';
+import { Disposable, IResourceManagerService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IDrawingManagerService } from '@univerjs/drawing';
 import { type IDocDrawing, IDocDrawingService } from '../services/doc-drawing.service';
 
 export const DOCS_DRAWING_PLUGIN = 'DOC_DRAWING_PLUGIN';
 export interface IDocDrawingModel { drawings?: IDocumentData['drawings']; drawingsOrder?: IDocumentData['drawingsOrder'] };
 
-@OnLifecycle(LifecycleStages.Starting, DocDrawingLoadController)
-export class DocDrawingLoadController extends Disposable {
-    constructor(
-        @ICommandService private readonly _commandService: ICommandService
-    ) {
-        super();
-    }
-}
-
-@OnLifecycle(LifecycleStages.Starting, DocDrawingController)
 export class DocDrawingController extends Disposable {
     constructor(
         @IDocDrawingService private readonly _docDrawingService: IDocDrawingService,

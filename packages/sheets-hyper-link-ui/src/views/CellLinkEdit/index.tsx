@@ -16,10 +16,10 @@
 
 import type { DocumentDataModel, IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, getOriginCellValue, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { BuildTextUtils, ColorKit, createInternalEditorID, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
+import { DocBackScrollRenderController, DocSelectionRenderService, RangeSelector } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -59,6 +59,9 @@ export const CellLinkEdit = () => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const textSelectionService = useDependency(DocSelectionManagerService);
     const contextService = useDependency(IContextService);
+    const themeService = useDependency(ThemeService);
+    const docSelectionManagerService = useDependency(DocSelectionManagerService);
+
     const customHyperLinkSidePanel = useMemo(() => {
         if (sidePanelService.isBuiltInLinkType(type)) {
             return;
@@ -88,8 +91,8 @@ export const CellLinkEdit = () => {
                     const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
                     const cell = worksheet?.getCellRaw(editing.row, editing.col);
                     const range = cell?.p?.body?.customRanges?.find((range) => range.rangeType === CustomRangeType.HYPERLINK && range.properties?.url);
-                    const cellValue = `${getOriginCellValue(cell) ?? ''}`;
-                    if (cell && (cell.p || cellValue)) {
+                    const cellValue = cell?.v;
+                    if (cell && (!BuildTextUtils.transform.isEmptyDocument(cell.p?.body?.dataStream) || cellValue)) {
                         setShowLabel(false);
                     }
                     link = {
@@ -170,9 +173,11 @@ export const CellLinkEdit = () => {
 
     useEffect(() => {
         let id: Nullable<string> = null;
-        if (editing && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
-            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetId(editing.subUnitId);
+        if (editing && !editing.customRangeId && editing.type === HyperLinkEditSourceType.VIEWING && Tools.isDefine(editing.row) && Tools.isDefine(editing.col)) {
+            const workbook = univerInstanceService.getUnit<Workbook>(editing.unitId, UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getSheetBySheetId(editing.subUnitId);
             const mergeInfo = worksheet?.getMergedCell(editing.row, editing.col);
+            const color = new ColorKit(themeService.getCurrentTheme().hyacinth500).toRgb();
             id = markSelectionService.addShape(
                 {
                     range: mergeInfo ?? {
@@ -183,7 +188,7 @@ export const CellLinkEdit = () => {
                     },
                     style: {
                         hasAutoFill: false,
-                        fill: 'rgb(255, 189, 55, 0.35)',
+                        fill: `rgb(${color.r}, ${color.g}, ${color.b}, 0.12)`,
                         strokeWidth: 1,
                         stroke: '#FFBD37',
                         widgets: {},
@@ -199,14 +204,13 @@ export const CellLinkEdit = () => {
                 markSelectionService.removeShape(id);
             }
         };
-    }, [editing, markSelectionService]);
+    }, [editing, markSelectionService, themeService, univerInstanceService]);
 
     const payloadInitial = useMemo(() => payload, [type]);
 
     useEffect(() => {
         const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
-
         if (render) {
             const selectionRenderService = render.with(DocSelectionRenderService);
             selectionRenderService.setReserveRangesStatus(true);
@@ -419,7 +423,7 @@ export const CellLinkEdit = () => {
                         isSingleChoice
                         value={payloadInitial}
                         onChange={handleRangeChange}
-                        disableInput={editing.type === HyperLinkEditSourceType.ZEN_EDITOR}
+                        dialogOnly
                         onSelectorVisibleChange={async (visible) => {
                             if (visible) {
                                 if (editing.type === HyperLinkEditSourceType.ZEN_EDITOR) {
@@ -441,6 +445,16 @@ export const CellLinkEdit = () => {
 
                                     zenZoneService.show();
                                     contextService.setContextValue(FOCUSING_SHEET, false);
+                                    const docBackScrollRenderController = renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY)?.with(DocBackScrollRenderController);
+                                    const range = docSelectionManagerService.getTextRanges({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY })?.[0];
+
+                                    if (docBackScrollRenderController && range) {
+                                        // TODO: this was hacking
+                                        setTimeout(() => {
+                                            docBackScrollRenderController.scrollToRange(range);
+                                            docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
+                                        }, 100);
+                                    }
                                 }
                                 editorBridgeService.disableForceKeepVisible();
                                 setHide(false);

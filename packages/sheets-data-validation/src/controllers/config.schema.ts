@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import type { MenuConfig } from '@univerjs/ui';
-
 export const PLUGIN_CONFIG_KEY = 'sheets-data-validation.config';
 
 export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverSheetsDataValidationConfig {
-    menu?: MenuConfig;
-
-    showEditOnDropdown?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsDataValidationConfig = {};

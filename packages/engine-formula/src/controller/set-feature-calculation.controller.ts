@@ -15,18 +15,17 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-
 import type {
     IRemoveFeatureCalculationMutationParam,
-    ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
+    ISetFeatureCalculationMutation,
+} from '../commands/mutations/set-feature-calculation.mutation';
+import { Disposable, ICommandService } from '@univerjs/core';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, SetFeatureCalculationController)
 export class SetFeatureCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

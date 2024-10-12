@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.3.0-alpha.0",
+    "version": "0.3.0",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -34,8 +34,7 @@
         "lib"
     ],
     "scripts": {
-        "build:umd": "node ./scripts/index.mjs",
-        "sync:cnpm": "cnpm sync"
+        "build:umd": "node ./scripts/index.mjs"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
@@ -63,12 +62,14 @@
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
         "@univerjs/sheets-crosshair-highlight": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-data-validation-ui": "workspace:*",
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-drawing-ui": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-filter-ui": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-hyper-link-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",

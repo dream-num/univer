@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-
+import type {
+    IUniverRPCMainThreadConfig,
+    IUniverRPCWorkerThreadConfig,
+} from './controllers/config.schema';
+import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import {
+    defaultPluginMainThreadConfig,
+    defaultPluginWorkerThreadConfig,
+    PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD,
+} from './controllers/config.schema';
 import { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 import { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
 import {
@@ -30,14 +38,6 @@ import {
     createWebWorkerMessagePortOnMain,
     createWebWorkerMessagePortOnWorker,
 } from './services/rpc/implementations/web-worker-rpc.service';
-import type {
-    IUniverRPCMainThreadConfig,
-    IUniverRPCWorkerThreadConfig } from './controllers/config.schema';
-import {
-    defaultPluginMainThreadConfig,
-    defaultPluginWorkerThreadConfig,
-    PLUGIN_CONFIG_KEY_MAIN_THREAD, PLUGIN_CONFIG_KEY_WORKER_THREAD,
-} from './controllers/config.schema';
 
 /**
  * This plugin is used to register the RPC services on the main thread. It

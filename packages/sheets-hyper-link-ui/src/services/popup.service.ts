@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
+import type { ISheetLocationBase } from '@univerjs/sheets';
+import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable, ITextRange, Nullable, Workbook } from '@univerjs/core';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
-import type { ISheetLocationBase } from '@univerjs/sheets';
-import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CellLinkPopup } from '../views/CellLinkPopup';
@@ -233,6 +233,9 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 if (this._rangeSelectorService.getCurrentSelectorId() === hyperLinkRangeSelectorId && this._rangeSelectorService.selectorModalVisible) {
                     return;
                 }
+                this.endEditing();
+            },
+            onContextMenu: () => {
                 this.endEditing();
             },
             hiddenType: 'hide',

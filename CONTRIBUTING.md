@@ -56,6 +56,20 @@ Please refer to the [architecture doc](https://github.com/dream-num/univer/wiki/
 
 ### Source code organization
 
+The structure of the repository is as follows:
+
+```
+.
+├── common/ shared configuration and utilities
+├── docs/ documentation
+├── e2e/ e2e test cases
+├── examples/ demos running on the web
+├── examples-node/ demos running on Node.js
+├── mockdata/ mock data for development
+├── packages/ Univer core and plugins
+├── packages-experimental/ experimental plugins (not published on npm.com)
+```
+
 The file structure of a plugin should be organized as follows:
 
 ```
@@ -182,6 +196,11 @@ and then run the following command to run E2E tests:
 ```shell
 pnpm test:e2e
 ```
+
+### Update Snapshots
+
+Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by commenting the PR with `/update-snapshots` like [this](https://github.com/dream-num/univer/pull/3655#issuecomment-2398951289), or you can run this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) manually.
+
 
 ### Clean code
 

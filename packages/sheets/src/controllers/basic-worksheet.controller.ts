@@ -15,15 +15,18 @@
  */
 
 import type { IDisposable, IMutation, IStyleData } from '@univerjs/core';
-import { Disposable, ICommandService, IConfigService, LifecycleStages, OnLifecycle, Optional } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 
+import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
 import { ClearSelectionAllCommand } from '../commands/commands/clear-selection-all.command';
 import { ClearSelectionContentCommand } from '../commands/commands/clear-selection-content.command';
 import { ClearSelectionFormatCommand } from '../commands/commands/clear-selection-format.command';
 import { CopySheetCommand } from '../commands/commands/copy-worksheet.command';
 import { DeleteRangeMoveLeftCommand } from '../commands/commands/delete-range-move-left.command';
 import { DeleteRangeMoveUpCommand } from '../commands/commands/delete-range-move-up.command';
+import { DeleteRangeProtectionCommand } from '../commands/commands/delete-range-protection.command';
+import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
 import { InsertRangeMoveDownCommand } from '../commands/commands/insert-range-move-down.command';
 import { InsertRangeMoveRightCommand } from '../commands/commands/insert-range-move-right.command';
 import {
@@ -37,9 +40,11 @@ import {
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
 import { MoveRangeCommand } from '../commands/commands/move-range.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
+import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { RemoveWorksheetMergeCommand } from '../commands/commands/remove-worksheet-merge.command';
+import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
 import {
     SetBorderBasicCommand,
     SetBorderColorCommand,
@@ -52,8 +57,10 @@ import {
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../commands/commands/set-col-visible.command';
+import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
+import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import {
     SetRowHiddenCommand,
@@ -72,17 +79,25 @@ import {
     SetVerticalTextAlignCommand,
 } from '../commands/commands/set-style.command';
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
+import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
 import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
+import { SetWorksheetPermissionPointsCommand } from '../commands/commands/set-worksheet-permission-points.command';
 import {
     DeltaRowHeightCommand,
     SetRowHeightCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
+import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
+import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
+import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
+import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
+import { EmptyMutation } from '../commands/mutations/empty.mutation';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
 import { InsertSheetMutation } from '../commands/mutations/insert-sheet.mutation';
 import { MoveRangeMutation } from '../commands/mutations/move-range.mutation';
@@ -91,47 +106,30 @@ import { RemoveNumfmtMutation, SetNumfmtMutation } from '../commands/mutations/n
 import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
+import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
+import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
+import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
+import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
-import { EmptyMutation } from '../commands/mutations/empty.mutation';
-import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
-import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
-import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
-import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
-import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
-import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
-import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
-import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
-import { DeleteWorksheetProtectionMutation } from '../commands/mutations/delete-worksheet-protection.mutation';
-import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
-import { SetWorksheetPermissionPointsCommand } from '../commands/commands/set-worksheet-permission-points.command';
-
-import { AddRangeProtectionCommand } from '../commands/commands/add-range-protection.command';
-import { DeleteRangeProtectionCommand } from '../commands/commands/delete-range-protection.command';
-import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
-
-import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
-import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
-import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
-import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
-import { ReorderRangeCommand } from '../commands/commands/reorder-range.command';
-import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
-import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 import { ONLY_REGISTER_FORMULA_RELATED_MUTATIONS_KEY } from './config';
+import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -141,7 +139,6 @@ export interface IStyleTypeValue<T> {
 /**
  * The controller to provide the most basic sheet CRUD methods to other modules of sheet modules.
  */
-@OnLifecycle(LifecycleStages.Starting, BasicWorksheetController)
 export class BasicWorksheetController extends Disposable implements IDisposable {
     // eslint-disable-next-line max-lines-per-function
     constructor(

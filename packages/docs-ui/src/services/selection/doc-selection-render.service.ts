@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
+import type { Subscription } from 'rxjs';
 import { DataStreamTreeTokenType, DOC_RANGE_TYPE, ILogService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, getSystemHighlightColor, NORMAL_TEXT_SELECTION_PLUGIN_STYLE, PageLayoutType, ScrollTimer, Vector2 } from '@univerjs/engine-render';
 import { ILayoutService } from '@univerjs/ui';
 import { BehaviorSubject, fromEvent, Subject, takeUntil } from 'rxjs';
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { Documents, Engine, IDocSelectionInnerParam, IFindNodeRestrictions, IMouseEvent, INodeInfo, INodePosition, IPointerEvent, IRenderContext, IRenderModule, IScrollObserverParam, ISuccinctDocRangeParam, ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
-import type { Subscription } from 'rxjs';
 import { RectRange } from './rect-range';
 import { getCanvasOffsetByEngine, getParagraphInfoByGlyph, getRangeListFromCharIndex, getRangeListFromSelection, getRectRangeFromCharIndex, getTextRangeFromCharIndex, serializeRectRange, serializeTextRange } from './selection-utils';
 import { TextRange } from './text-range';
@@ -286,7 +286,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
      * @deprecated
      */
     activate(x: number, y: number, force = false) {
-        const isFocusing = this._input === document.activeElement;
+        const isFocusing = this._input === document.activeElement || document.activeElement === document.body || document.activeElement === null;
         this._container.style.left = `${x}px`;
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
@@ -479,7 +479,9 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
         if (evt.shiftKey && this._getActiveRangeInstance()) {
             this._updateActiveRangePosition(position);
-        } else if (!evt.ctrlKey && !this._isEmpty()) {
+        } else if (evt.ctrlKey) {
+            this._removeAllCollapsedTextRanges();
+        } else if (!this._isEmpty()) {
             this._removeAllRanges();
         }
 
@@ -523,12 +525,25 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             // Add cursor.
             if (this._anchorNodePosition && !this._focusNodePosition) {
-                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
+                if (evt.ctrlKey) {
+                    // No need to add cursor when select multi text ranges by CTRL key.
+                    this._disposeScrollTimers();
+                    return;
+                }
 
+                const textRange = new TextRange(scene, mainComponent as Documents, skeleton, this._anchorNodePosition, undefined, this._selectionStyle, this._currentSegmentId, this._currentSegmentPage);
                 this._addTextRange(textRange);
             } else if (this._anchorNodePosition && this._focusNodePosition) {
                 for (const textRange of this._rangeListCache) {
-                    this._addTextRange(textRange);
+                    if (evt.ctrlKey) {
+                        if (textRange.collapsed) {
+                            textRange.dispose();
+                        } else {
+                            this._addTextRange(textRange);
+                        }
+                    } else {
+                        this._addTextRange(textRange);
+                    }
                 }
 
                 this._addRectRanges(this._rectRangeListCache);
@@ -551,11 +566,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
             this._textSelectionInner$.next(selectionInfo);
 
-            this._scrollTimers.forEach((timer) => {
-                timer?.dispose();
-            });
-
-            this._scrollTimers = [];
+            this._disposeScrollTimers();
 
             this._updateInputPosition(true);
         }));
@@ -568,6 +579,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
 
     getActiveTextRange() {
         return this._getActiveRangeInstance();
+    }
+
+    private _disposeScrollTimers() {
+        this._scrollTimers.forEach((timer) => {
+            timer?.dispose();
+        });
+
+        this._scrollTimers = [];
     }
 
     private _setSystemHighlightColorToStyle() {
@@ -775,6 +794,14 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         });
 
         this._rectRangeList = [];
+    }
+
+    private _removeAllCollapsedTextRanges() {
+        for (const range of this._rangeList) {
+            if (range.collapsed) {
+                range.dispose();
+            }
+        }
     }
 
     private _deactivateAllTextRanges() {

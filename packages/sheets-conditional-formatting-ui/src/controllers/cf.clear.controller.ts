@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, Inject, Injector, IUniverInstanceService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
-import type { IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormattingClearController)
 export class ConditionalFormattingClearController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,

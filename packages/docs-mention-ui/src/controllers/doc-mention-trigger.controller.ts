@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import type { IInsertCommandParams } from '@univerjs/docs-ui';
+import { Disposable, ICommandService, Inject, Tools } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DeleteLeftCommand, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
-import type { IInsertCommandParams } from '@univerjs/docs-ui';
 import { CloseMentionEditPopupOperation, ShowMentionEditPopupOperation } from '../commands/operations/mention-popup.operation';
 import { DocMentionService } from '../services/doc-mention.service';
 import { DocMentionPopupService } from '../services/doc-mention-popup.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DocMentionTriggerController)
 export class DocMentionTriggerController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

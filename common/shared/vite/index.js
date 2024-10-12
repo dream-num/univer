@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-const process = require('node:process');
 const { resolve } = require('node:path');
+const process = require('node:process');
 
-const { defineConfig, mergeConfig } = require('vitest/config');
-const { default: dts } = require('vite-plugin-dts');
 const react = require('@vitejs/plugin-react');
+const { default: dts } = require('vite-plugin-dts');
+const { defineConfig, mergeConfig } = require('vitest/config');
 const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
-const { obfuscator } = require('./obfuscator');
 const { buildPkg } = require('./build-pkg');
+const { obfuscator } = require('./obfuscator');
 const { convertLibNameFromPackageName } = require('./utils');
 
 /**
@@ -46,17 +46,9 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
 
     const dirname = process.cwd();
 
-    const esbuild = {};
-
-    // don't minify identifiers for univerjs packages
-    if (pkg.name.startsWith('@univerjs/')) {
-        esbuild.minifyIdentifiers = false;
-        esbuild.keepNames = true;
-    }
-
     /** @type {import('vite').UserConfig} */
     const originalConfig = {
-        esbuild,
+        esbuild: {},
         build: {
             target: 'chrome70',
             outDir: 'lib',
@@ -73,13 +65,11 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
                 entryRoot: 'src',
                 outDir: 'lib/types',
             }),
-            obfuscator(),
             buildPkg(),
         ],
         define: {
             'process.env.NODE_ENV': JSON.stringify(mode),
-            'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUNDLE_TYPE ?? ''),
-            'process.env.BUILD_TIMESTAMP': JSON.stringify(parseInt(Date.now() / 1000)),
+            'process.env.BUILD_TIMESTAMP': JSON.stringify(Number.parseInt(Date.now() / 1000)),
         },
         test: {
             css: {
@@ -116,6 +106,20 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             },
         },
     };
+
+    if (process.env.APP_TYPE === 'staging') {
+        originalConfig.build.sourcemap = true;
+
+        originalConfig.esbuild.minifyIdentifiers = false;
+        originalConfig.esbuild.keepNames = true;
+    } else {
+        if (pkg.name.startsWith('@univerjs/')) {
+            originalConfig.esbuild.minifyIdentifiers = false;
+            originalConfig.esbuild.keepNames = true;
+        } else {
+            originalConfig.plugins.push(obfuscator());
+        }
+    }
 
     if (features) {
         if (features.react) {

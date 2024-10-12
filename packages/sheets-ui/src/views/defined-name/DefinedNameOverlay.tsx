@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-
 import type { Workbook } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { SetWorksheetShowCommand } from '@univerjs/sheets';
+import React, { useEffect, useState } from 'react';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import styles from './index.module.less';
 
@@ -59,8 +60,20 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
         commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
 
-    const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
-        definedNamesService.focusRange(unitId, definedName.id);
+    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+        // The worksheet may be hidden, so we need to show it first
+        const { formulaOrRefString, id } = definedName;
+        const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);
+        if (!worksheet) {
+            return;
+        }
+
+        const isHidden = worksheet.isSheetHidden();
+        if (isHidden) {
+            await commandService.executeCommand(SetWorksheetShowCommand.id, { unitId, subUnitId: worksheet.getSheetId() });
+        }
+
+        definedNamesService.focusRange(unitId, id);
     };
 
     return (

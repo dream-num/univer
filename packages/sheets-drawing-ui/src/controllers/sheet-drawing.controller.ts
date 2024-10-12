@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
-
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { AddImageSingle } from '@univerjs/icons';
-import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
+
+import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
+import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
+import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
 import { InsertFloatImageCommand } from '../commands/commands/insert-image.command';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
+import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
 import { RemoveSheetDrawingCommand } from '../commands/commands/remove-sheet-drawing.command';
+import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
 import { SetSheetDrawingCommand } from '../commands/commands/set-sheet-drawing.command';
-import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
-import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
-
+import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
 import { EditSheetDrawingOperation } from '../commands/operations/edit-sheet-drawing.operation';
-import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
-import { UngroupSheetDrawingCommand } from '../commands/commands/ungroup-sheet-drawing.command';
 import { SidebarSheetDrawingOperation } from '../commands/operations/open-drawing-panel.operation';
-import { MoveDrawingsCommand } from '../commands/commands/move-drawings.command';
-import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
-import { SetDrawingArrangeCommand } from '../commands/commands/set-drawing-arrange.command';
-import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
+import { IMAGE_UPLOAD_ICON } from '../views/menu/image.menu';
+import { COMPONENT_SHEET_DRAWING_PANEL } from '../views/sheet-image-panel/component-name';
+import { SheetDrawingPanel } from '../views/sheet-image-panel/SheetDrawingPanel';
 import { menuSchema } from './menu.schema';
+import { DeleteDrawingsShortcutItem, MoveDrawingDownShortcutItem, MoveDrawingLeftShortcutItem, MoveDrawingRightShortcutItem, MoveDrawingUpShortcutItem } from './shortcuts/drawing.shortcut';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetDrawingUIController)
 export class SheetDrawingUIController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,

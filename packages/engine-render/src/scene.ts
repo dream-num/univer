@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-import { sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import type { IKeyValue, Nullable } from '@univerjs/core';
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
-import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
-import { precisionTo, requestNewFrame } from './basics/tools';
-import { Transform } from './basics/transform';
-import { Layer } from './layer';
-import { InputManager } from './scene.input-manager';
-import { Transformer } from './scene.transformer';
-import { ThinScene } from './thin-scene';
 import type { BaseObject } from './base-object';
 import type { IDragEvent, IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { IObjectFullState, ISceneTransformState, ITransformChangeState } from './basics/interfaces';
@@ -36,6 +26,16 @@ import type { Engine } from './engine';
 import type { SceneViewer } from './scene-viewer';
 import type { ThinEngine } from './thin-engine';
 import type { Viewport } from './viewport';
+import { sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
+import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
+import { precisionTo, requestNewFrame } from './basics/tools';
+import { Transform } from './basics/transform';
+import { Layer } from './layer';
+import { InputManager } from './scene.input-manager';
+import { Transformer } from './scene.transformer';
+import { ThinScene } from './thin-scene';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];
@@ -53,6 +53,10 @@ export class Scene extends ThinScene {
     private _beforeRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
 
     readonly beforeRender$ = this._beforeRender$.asObservable();
+
+    private _afterRender$ = new BehaviorSubject<Nullable<Canvas>>(null);
+
+    readonly afterRender$ = this._afterRender$.asObservable();
     /**
      * Transformer constructor.  Transformer is a special type of group that allow you transform
      * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -600,10 +604,12 @@ export class Scene extends ThinScene {
         !parentCtx && this.getEngine()?.clearCanvas();
 
         const layers = this._layers.sort(sortRules);
-        this._beforeRender$.next(this.getEngine()?.getCanvas());
+        const canvasInstance = this.getEngine()?.getCanvas();
+        this._beforeRender$.next(canvasInstance);
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
+        this._afterRender$.next(canvasInstance);
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {

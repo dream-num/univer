@@ -70,56 +70,13 @@ jobs:
 
             - name: 🐙 Publish
               run: |
-                  if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
-                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
-                  else
+                  if [[ ${{ needs.prepare.outputs.release_type }} == "stable" ]]; then
                       pnpm publish --access public -r --no-git-checks
+                  else
+                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-    release-verdaccio:
-        needs: [prepare]
-        if: github.repository == 'dream-num/univer'
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  ref: ${{ github.ref_name }}
-
-            - name: Install pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  run_install: false
-
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-
-            - name: 🚚 Install dependencies and build
-              run: |
-                  pnpm install
-                  pnpm build
-
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
-                  scope: '@univerjs'
-
-            - name: 🐙 Publish
-              run: |
-                  if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
-                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
-                  else
-                      pnpm publish --access public -r --no-git-checks
-                  fi
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
     build-demo:
         runs-on: ubuntu-latest
@@ -149,29 +106,8 @@ jobs:
               id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
-                  vercel-project-id: ${{ secrets.PROJECT_ID}}
-
-    sync-cnpm:
-        runs-on: ubuntu-latest
-        needs: [release-npm]
-
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v4
-
-            - name: Setup Node.js
-              uses: ./.github/actions/setup-node
-
-            - name: Install Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20
-            - name: 🚚 Install dependencies
-              run: pnpm install cnpm -g
-
-            - name: 🐙 Sync to cnpm
-              run: pnpm sync:cnpm
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID }}
 
     build-storybook:
         runs-on: ubuntu-latest
@@ -196,12 +132,12 @@ jobs:
               id: vercel-storybook
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
-                  vercel-org-id: ${{ secrets.ORG_ID}}
-                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK }}
                   vercel-args: --prod
 
     notify:
-        needs: [release-npm, release-verdaccio, build-demo, build-storybook]
+        needs: [release-npm, build-demo, build-storybook]
         runs-on: ubuntu-latest
 
         steps:

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
-import { DocMentionPopupService } from './services/doc-mention-popup.service';
-import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
-import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
-import { DocMentionService } from './services/doc-mention.service';
 import type { IUniverDocsMentionUIConfig } from './controllers/config.schema';
+import { IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { DocMentionTriggerController } from './controllers/doc-mention-trigger.controller';
+import { DocMentionUIController } from './controllers/doc-mention-ui.controller';
+import { DocMentionService } from './services/doc-mention.service';
+import { DocMentionPopupService } from './services/doc-mention-popup.service';
+import { DOC_MENTION_UI_PLUGIN } from './types/const/const';
 
 export class UniverDocsMentionUIPlugin extends Plugin {
     static override pluginName = DOC_MENTION_UI_PLUGIN;
@@ -44,15 +44,20 @@ export class UniverDocsMentionUIPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        const deps: Dependency[] = [
+        ([
             [DocMentionService],
             [DocMentionPopupService],
             [DocMentionUIController],
             [DocMentionTriggerController],
-        ];
-
-        deps.forEach((dep) => {
+        ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });
+
+        this._injector.get(DocMentionUIController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(DocMentionTriggerController);
+        this._injector.get(DocMentionPopupService);
     }
 }

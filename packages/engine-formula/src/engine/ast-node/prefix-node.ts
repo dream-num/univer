@@ -15,17 +15,17 @@
  */
 
 import type { IAccessor, Nullable } from '@univerjs/core';
-import { Inject, Injector } from '@univerjs/core';
+import type { BaseFunction } from '../../functions/base-function';
 
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
+import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { prefixToken } from '../../basics/token';
-import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -53,11 +53,10 @@ export class PrefixNode extends BaseAstNode {
             throw new Error('object is null');
         }
 
-        if (value.isReferenceObject()) {
-            value = (value as BaseReferenceObject).toArrayValueObject();
-        }
-
         if (this._operatorString === prefixToken.MINUS) {
+            if (value.isReferenceObject()) {
+                value = (value as BaseReferenceObject).toArrayValueObject();
+            }
             result = this._functionExecutor!.calculate(
                 NumberValueObject.create(0),
                 value as BaseValueObject
@@ -86,18 +85,27 @@ export class PrefixNode extends BaseAstNode {
         const currentRow = runtimeService.currentRow || 0;
         const currentColumn = runtimeService.currentColumn || 0;
 
-        // @ projection to current
-        if (currentValue.isRow()) {
-            return currentValue.getCellByColumn(currentColumn);
+        const rangePos = currentValue.getRangePosition();
+
+        const { startRow, startColumn, endRow, endColumn } = rangePos;
+
+        if (endColumn !== startColumn && endRow !== startRow) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
-        if (currentValue.isColumn()) {
+
+        if (startRow === endRow && startColumn === endColumn) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        // @ projection to current
+        if (endRow === startRow && currentColumn >= startColumn && currentColumn <= endColumn) {
+            return currentValue.getCellByColumn(currentColumn);
+        } else if (startColumn === endColumn && currentRow >= startRow && currentRow <= endRow) {
             return currentValue.getCellByRow(currentRow);
         }
-        if (currentValue.isRange()) {
-            return currentValue.getCellByPosition();
-        }
+
         if (currentValue.isTable()) {
-            return currentValue.getCellByPosition();
+            return currentValue.getCellByPosition(currentRow);
         }
 
         return ErrorValueObject.create(ErrorType.VALUE);

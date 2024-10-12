@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator, TextLengthErrorTitleMap } from '@univerjs/data-validation';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
-import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -41,7 +40,6 @@ export class TextLengthValidator extends BaseDataValidator<number> {
     ];
 
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 

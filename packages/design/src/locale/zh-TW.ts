@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILocale } from './interface';
 import dajsZhTw from 'dayjs/locale/zh-tw';
 import PickerZhTw from 'rc-picker/lib/locale/zh_TW';
-import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {

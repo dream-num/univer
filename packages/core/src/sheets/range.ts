@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix, Tools } from '../shared';
-import { DEFAULT_STYLES } from '../types/const';
-import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
-import { RANGE_TYPE } from './typedef';
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { HorizontalAlign, VerticalAlign } from '../types/enum';
 import type {
@@ -32,6 +28,10 @@ import type {
 import type { Styles } from './styles';
 import type { ICellData, IRange } from './typedef';
 import type { Worksheet } from './worksheet';
+import { ObjectMatrix, Tools } from '../shared';
+import { DEFAULT_STYLES } from '../types/const';
+import { BooleanNumber, FontItalic, FontWeight, WrapStrategy } from '../types/enum';
+import { RANGE_TYPE } from './typedef';
 
 /**
  * getObjectValues options type

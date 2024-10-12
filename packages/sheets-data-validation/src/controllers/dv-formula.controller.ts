@@ -15,12 +15,11 @@
  */
 
 import type { ICellDataForSheetInterceptor, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { Disposable, Inject, IPermissionService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
-import { type ICellPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { UnitAction } from '@univerjs/protocol';
+import { type ICellPermission, WorksheetViewPermission } from '@univerjs/sheets';
 
-@OnLifecycle(LifecycleStages.Rendered, DataValidationFormulaController)
 export class DataValidationFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

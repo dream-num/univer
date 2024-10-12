@@ -15,10 +15,10 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { IPermissionPoint, IPermissionService } from './type';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Disposable } from '../../shared';
-import type { IPermissionPoint, IPermissionService } from './type';
 import { PermissionStatus } from './type';
 
 export class PermissionService extends Disposable implements IPermissionService {

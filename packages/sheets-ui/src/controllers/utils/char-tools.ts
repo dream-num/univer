@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { LocaleType, numfmt } from '@univerjs/core';
 import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { LocaleType, numfmt } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
 const fullWidthToHalfWidthMap: { [key: string]: string } = {

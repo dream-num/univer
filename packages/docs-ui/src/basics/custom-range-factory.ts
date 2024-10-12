@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeTextXParam, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getRichTextEditPath } from '../commands/util';
 
 interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
@@ -117,11 +117,15 @@ export interface IDeleteCustomRangeFactoryParams {
 export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeFactoryParams) {
     const { unitId, segmentId, insert } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
+    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+    const selection = docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId })?.[0];
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
     if (!documentDataModel) {
         return false;
     }
+
+    const textRange = selection?.collapsed ? { index: selection.startOffset } : undefined;
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -138,6 +142,7 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
         rangeId: params.rangeId,
         insert,
         segmentId,
+        textRange,
     });
 
     if (!textX) {
@@ -146,5 +151,6 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
 
     const path = getRichTextEditPath(documentDataModel, segmentId);
     doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
+    doMutation.params.textRanges = textRange ? [{ startOffset: textRange.index, endOffset: textRange.index, collapsed: true }] : undefined;
     return doMutation;
 }

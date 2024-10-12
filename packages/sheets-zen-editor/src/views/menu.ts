@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
+import type { IAccessor } from '@univerjs/core';
 
+import { RangeProtectionPermissionEditPoint, WorkbookEditablePermission, WorksheetEditPermission, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentExclusiveRangeInterest$, getCurrentRangeDisable$ } from '@univerjs/sheets-ui';
 import { type IMenuButtonItem, MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
-import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
+import { OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 
 export function ZenEditorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: OpenZenEditorOperation.id,
+        id: OpenZenEditorCommand.id,
         type: MenuItemType.BUTTON,
         title: 'rightClick.zenEditor',
         icon: 'AmplifySingle',

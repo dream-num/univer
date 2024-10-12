@@ -15,13 +15,15 @@
  */
 
 import type { IRange, Workbook } from '@univerjs/core';
-import { Disposable, Inject, Injector, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowIsAutoHeightMutationParams,
 } from '@univerjs/sheets';
+import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
     SetStyleCommand,
@@ -31,17 +33,13 @@ import {
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import type { RenderManagerService } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
-@OnLifecycle(LifecycleStages.Ready, AutoHeightController)
 export class AutoHeightController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService

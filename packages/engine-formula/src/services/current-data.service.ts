@@ -15,9 +15,8 @@
  */
 
 import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
-import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-
 import type {
+    IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetDefinedNameMap,
@@ -32,6 +31,8 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
+
+import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
@@ -41,6 +42,7 @@ export interface IFormulaDirtyData {
     dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
+    clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
 }
 
 export interface IFormulaCurrentConfigService {
@@ -79,6 +81,8 @@ export interface IFormulaCurrentConfigService {
 
     getArrayFormulaCellData(): IRuntimeUnitDataType;
 
+    getArrayFormulaRange(): IArrayFormulaRangeType;
+
     getSheetName(unitId: string, sheetId: string): string;
 
     getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
@@ -90,6 +94,8 @@ export interface IFormulaCurrentConfigService {
     setExecuteSubUnitId(subUnitId: string): void;
 
     getDirtyData(): IFormulaDirtyData;
+
+    getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -99,11 +105,15 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _arrayFormulaCellData: IRuntimeUnitDataType = {};
 
+    private _arrayFormulaRange: IArrayFormulaRangeType = {};
+
     private _formulaData: IFormulaData = {};
 
     private _sheetNameMap: IUnitSheetNameMap = {};
 
     private _forceCalculate: boolean = false;
+
+    private _clearDependencyTreeCache: IDirtyUnitSheetNameMap = {};
 
     private _dirtyRanges: IUnitRange[] = [];
 
@@ -131,6 +141,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._unitStylesData = {};
         this._formulaData = {};
         this._arrayFormulaCellData = {};
+        this._arrayFormulaRange = {};
         this._sheetNameMap = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
@@ -177,6 +188,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._arrayFormulaCellData;
     }
 
+    getArrayFormulaRange() {
+        return this._arrayFormulaRange;
+    }
+
     getSheetNameMap() {
         return this._sheetNameMap;
     }
@@ -213,6 +228,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
     }
 
+    getClearDependencyTreeCache() {
+        return this._clearDependencyTreeCache;
+    }
+
     load(config: IFormulaDatasetConfig) {
         if (config.allUnitData && config.unitSheetNameMap && config.unitStylesData) {
             this._unitData = config.allUnitData;
@@ -232,7 +251,11 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._arrayFormulaCellData = convertUnitDataToRuntime(config.arrayFormulaCellData);
 
+        this._arrayFormulaRange = config.arrayFormulaRange;
+
         this._forceCalculate = config.forceCalculate;
+
+        this._clearDependencyTreeCache = config.clearDependencyTreeCache || {};
 
         this._dirtyRanges = config.dirtyRanges;
 
@@ -257,6 +280,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
             dirtyDefinedNameMap: this._dirtyDefinedNameMap,
             dirtyUnitFeatureMap: this._dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: this._dirtyUnitOtherFormulaMap,
+            clearDependencyTreeCache: this._clearDependencyTreeCache,
         };
     }
 

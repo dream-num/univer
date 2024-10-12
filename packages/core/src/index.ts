@@ -93,9 +93,8 @@ export { ContextService, IContextService } from './services/context/context.serv
 export { ErrorService, type IError } from './services/error/error.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { UniverInstanceService } from './services/instance/instance.service';
-export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
+export { LifecycleStages } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
-export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
 export { LocaleService } from './services/locale/locale.service';
 export { DesktopLogService, ILogService, LogLevel } from './services/log/log.service';
@@ -139,6 +138,7 @@ export { type IUser, UserManagerService } from './services/user-manager/user-man
 export * from './shared';
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
+export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
 export { fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime } from './shared/timer';
@@ -184,5 +184,6 @@ export * from './types/interfaces';
 export * from './types/interfaces';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
+export { type IRTreeItem, RTree } from './shared/r-tree';
 
 export { Univer } from './univer';

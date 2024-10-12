@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import type { FunctionNode, LambdaNode } from '../ast-node';
 
+import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { FunctionVariantType } from '../reference-object/base-reference-object';
+import type { PreCalculateNodeType } from '../utils/node-type';
+import { Disposable } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import type { FunctionNode, LambdaNode } from '../ast-node';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
-import type { FunctionVariantType } from '../reference-object/base-reference-object';
-import type { PreCalculateNodeType } from '../utils/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 
 export class Interpreter extends Disposable {
@@ -38,7 +38,7 @@ export class Interpreter extends Disposable {
         // }
 
         if (!node) {
-            return ErrorValueObject.create(ErrorType.VALUE);
+            return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
         await this._executeAsync(node);
@@ -46,7 +46,7 @@ export class Interpreter extends Disposable {
         const value = node.getValue();
 
         if (value == null) {
-            throw new Error('node value is null');
+            return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
         return Promise.resolve(value);
@@ -66,7 +66,7 @@ export class Interpreter extends Disposable {
         const value = node.getValue();
 
         if (value == null) {
-            throw new Error('node value is null');
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return value;

@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import { EventSubject, Tools } from '@univerjs/core';
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
+import type { BaseObject } from './base-object';
 
+import type { IWheelEvent } from './basics/i-events';
+import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
+import type { UniverRenderingContext } from './context';
+import type { BaseScrollBar } from './shape/base-scroll-bar';
+import type { ThinScene } from './thin-scene';
+import { EventSubject, Tools } from '@univerjs/core';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { PointerInput } from './basics/i-events';
 import { fixLineWidthByScale, toPx } from './basics/tools';
@@ -24,12 +30,6 @@ import { Transform } from './basics/transform';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
 import { Canvas as UniverCanvas } from './canvas';
-import type { BaseObject } from './base-object';
-import type { IWheelEvent } from './basics/i-events';
-import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
-import type { UniverRenderingContext } from './context';
-import type { BaseScrollBar } from './shape/base-scroll-bar';
-import type { ThinScene } from './thin-scene';
 
 interface IViewPosition {
     top?: number;
@@ -852,7 +852,7 @@ export class Viewport {
 
         let width = this._width;
         let height = this._height;
-        const size = this._getViewPortSize();
+        const size = this._calcViewPortSize();
 
         // if (m[0] > 1) {
         width = size.width;
@@ -1064,7 +1064,7 @@ export class Viewport {
         if (this.isActive === false) {
             return;
         }
-        const { width, height } = this._getViewPortSize();
+        const { width, height } = this._calcViewPortSize();
         // const pixelRatio = this.getPixelRatio();
         // coord = Transform.create([pixelRatio, 0, 0, pixelRatio, 0, 0]).applyPoint(
         //     coord
@@ -1120,7 +1120,7 @@ export class Viewport {
 
         scrollX = scrollX ?? this.scrollX;
         scrollY = scrollY ?? this.scrollY;
-        const { height, width } = this._getViewPortSize();
+        const { height, width } = this._calcViewPortSize();
         if (this._sceneWCurrVpAfterScale <= width) {
             scrollX = 0;
         }
@@ -1159,7 +1159,7 @@ export class Viewport {
      * @returns
      */
     _limitViewportScroll(viewportScrollX: number, viewportScrollY: number) {
-        const { width, height } = this._getViewPortSize();
+        const { width, height } = this._calcViewPortSize();
         // Not enough! freeze row & col should also take into consideration.
         const freezeHeight = this._paddingEndY - this._paddingStartY;
         const freezeWidth = this._paddingEndX - this._paddingStartX;
@@ -1206,7 +1206,7 @@ export class Viewport {
      * resize canvas & use viewportScrollXY to scrollTo
      */
     private _resizeCacheCanvas() {
-        const { width, height } = this._getViewPortSize();
+        const { width, height } = this._calcViewPortSize();
         this.width = width;
         this.height = height;
         const scaleX = this.scene.scaleX;
@@ -1228,7 +1228,7 @@ export class Viewport {
         // viewport width is negative when canvas container has not been set to engine.
         if (!this.width || this.width < 0) return;
         if (!this.height || this.height < 0) return;
-        const { width, height } = this._getViewPortSize();
+        const { width, height } = this._calcViewPortSize();
         const sceneWidthCurrVpAfterScale = (this._scene.width - this._paddingEndX) * this._scene.scaleX;
         const sceneHeightCurrVpAfterScale = (this._scene.height - this._paddingEndY) * this._scene.scaleY;
         this._sceneWCurrVpAfterScale = sceneWidthCurrVpAfterScale;
@@ -1248,11 +1248,9 @@ export class Viewport {
         this.markForceDirty(true);
     }
 
-    private _getViewPortSize() {
+    private _calcViewPortSize() {
         const parent = this._scene.getParent();
-
         const { width: parentWidth, height: parentHeight } = parent;
-
         const { scaleX = 1, scaleY = 1 } = this._scene;
 
         let width;
@@ -1264,7 +1262,7 @@ export class Viewport {
         this._left = left;
         this._top = top;
 
-        if (this._explicitViewportWidthSet) {
+        if (Tools.isDefine(this._widthOrigin) || this._explicitViewportWidthSet) {
             // viewMainLeft viewMainLeftTop ---> width is specific by freezeline
             width = (this._widthOrigin || 0) * scaleX;
         } else {
@@ -1272,7 +1270,7 @@ export class Viewport {
             width = parentWidth - (this._left + this._right);
         }
 
-        if (this._explicitViewportHeightSet) {
+        if (Tools.isDefine(this._heightOrigin) || this._explicitViewportHeightSet) {
             //viewMainLeftTop viewMainTop ---> height is specific by freezeline
             height = (this._heightOrigin || 0) * scaleY;
         } else {
@@ -1590,17 +1588,17 @@ export class Viewport {
             this.right = props.right;
         }
 
-        if (Tools.isDefine(props?.width) && this._explicitViewportWidthSet) {
+        if (Tools.isDefine(props?.width)) {
             this.width = props?.width;
-            this._widthOrigin = this.width;
+            this._widthOrigin = props?.width;
         } else {
             this.width = null;
             this._widthOrigin = null;
         }
 
-        if (Tools.isDefine(props?.height) && this._explicitViewportHeightSet) {
+        if (Tools.isDefine(props?.height)) {
             this.height = props?.height;
-            this._heightOrigin = this.height;
+            this._heightOrigin = props?.height;
         } else {
             this.height = null;
             this._heightOrigin = null;

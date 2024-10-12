@@ -235,7 +235,8 @@ export {
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from './commands/commands/set-col-visible.command';
-export { type ISetDefinedNameCommandParams, SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
+
+export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
 export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export { SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { SetHideGridlinesCommand } from './commands/commands/set-hide-gridlines.command';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../basics/error-type';
 import type { ArrayValueObject } from '../value-object/array-value-object';
+import { ErrorType } from '../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 
 export function checkVariantErrorIsArray(variant: BaseValueObject): BaseValueObject {
@@ -37,6 +37,26 @@ export function checkVariantErrorIsArray(variant: BaseValueObject): BaseValueObj
     }
 
     return _variant;
+}
+
+export function checkVariantsErrorIsArray(...variants: BaseValueObject[]) {
+    for (let i = 0; i < variants.length; i++) {
+        const variant = checkVariantErrorIsArray(variants[i]);
+
+        if (variant.isError()) {
+            return {
+                isError: true,
+                errorObject: variant,
+            };
+        }
+
+        variants[i] = variant;
+    }
+
+    return {
+        isError: false,
+        variants,
+    };
 }
 
 export function checkVariantsErrorIsArrayOrBoolean(...variants: BaseValueObject[]) {

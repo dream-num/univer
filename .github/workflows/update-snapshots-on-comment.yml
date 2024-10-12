@@ -1,0 +1,40 @@
+name: 📸 Update Snapshots on Comment
+
+on:
+    issue_comment:
+        types: [created]
+
+jobs:
+    udpate-snapshots:
+        if: contains(github.event.comment.body, '/update-snapshots')
+        runs-on: ubuntu-latest
+        env:
+            GH_TOKEN: ${{ github.token }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.event.issue.pull_request.head.ref }}
+                  fetch-depth: 0
+
+            - name: Get Branch Name
+              id: get_branch
+              run: echo "##[set-output name=branch;]${{ github.event.issue.pull_request.head.ref }}"
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Update Snapshots
+              uses: ./.github/actions/update-snapshots
+
+            - name: Commit Updated Snapshots
+              shell: bash
+              run: |
+                  git config --global user.email "actions@github.com"
+                  git config --global user.name "GitHub Actions"
+
+                  git checkout ${{ steps.get_branch.outputs.branch }}
+                  git add -A
+                  git commit -m "chore(snapshots): update snapshots" || exit 0
+                  git push

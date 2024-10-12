@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo, ICustomRange, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
+import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import {
     BooleanNumber,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -27,8 +32,6 @@ import {
     Inject,
     IUndoRedoService,
     IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RxDisposable,
     Tools,
     UniverInstanceType,
@@ -40,20 +43,14 @@ import {
 } from '@univerjs/docs';
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
+
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SetEditorResizeOperation } from '@univerjs/ui';
 import { takeUntil } from 'rxjs';
-import type { DocumentDataModel, ICommandInfo, ICustomRange, IParagraph, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-
-import type { DocumentViewModel, RenderComponentType } from '@univerjs/engine-render';
-import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 
-@OnLifecycle(LifecycleStages.Rendered, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
     private _loadedMap = new WeakSet<RenderComponentType>();
 

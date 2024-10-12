@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Observable } from 'rxjs';
 import type { UniverInstanceType } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import type { IDisposable } from '../../common/di';
 import { createIdentifier } from '../../common/di';
 

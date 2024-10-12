@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@univerjs/core';
-import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
-import { UniverDrawingPlugin } from '@univerjs/drawing';
+import type { IUniverDocsDrawingUIConfig } from './controllers/config.schema';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
+import { UniverDrawingPlugin } from '@univerjs/drawing';
+import { UniverDrawingUIPlugin } from '@univerjs/drawing-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { UniverUIPlugin } from '@univerjs/ui';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { DocDrawingUIController } from './controllers/doc-drawing.controller';
-import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
-import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
 import { DocDrawingAddRemoveController } from './controllers/doc-drawing-notification.controller';
 import { DocDrawingTransformerController } from './controllers/doc-drawing-transformer-update.controller';
+import { DocDrawingPopupMenuController } from './controllers/drawing-popup-menu.controller';
+import { DocDrawingTransformUpdateController } from './controllers/render-controllers/doc-drawing-transform-update.controller';
+import { DocDrawingUpdateRenderController } from './controllers/render-controllers/doc-drawing-update.render-controller';
 import { DocRefreshDrawingsService } from './services/doc-refresh-drawings.service';
-import type { IUniverDocsDrawingUIConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 
 const PLUGIN_NAME = 'DOC_DRAWING_UI_PLUGIN';
 
-@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin)
+@DependentOn(UniverDrawingUIPlugin, UniverDrawingPlugin, UniverDocsDrawingPlugin, UniverUIPlugin)
 export class UniverDocsDrawingUIPlugin extends Plugin {
     static override type = UniverInstanceType.UNIVER_DOC;
     static override pluginName = PLUGIN_NAME;
@@ -67,5 +68,13 @@ export class UniverDocsDrawingUIPlugin extends Plugin {
             [DocDrawingUpdateRenderController],
             [DocDrawingTransformUpdateController],
         ] as Dependency[]).forEach((m) => this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, m));
+
+        this._injector.get(DocDrawingAddRemoveController);
+        this._injector.get(DocDrawingUIController);
+        this._injector.get(DocDrawingTransformerController);
+    }
+
+    override onRendered(): void {
+        this._injector.get(DocDrawingPopupMenuController);
     }
 }

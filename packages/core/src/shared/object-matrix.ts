@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Tools } from './tools';
 import type { IRange } from '../sheets/typedef';
 import type { Nullable } from './types';
+import { Tools } from './tools';
 
 /**
  * Object Matrix Primitive Type

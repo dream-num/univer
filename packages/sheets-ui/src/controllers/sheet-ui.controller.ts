@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { connectInjector, Disposable, ICommandService, Inject, Injector, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { IUniverSheetsUIConfig } from './config.schema';
+import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -92,18 +93,19 @@ import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defi
 import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
+
 import {
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
     FontFamily,
     FontFamilyItem,
 } from '../components/font-family';
-
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
 import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
+import { PLUGIN_CONFIG_KEY } from './config.schema';
 import { menuSchema } from './menu.schema';
 import {
     EditorBreakLineShortcut,
@@ -156,7 +158,6 @@ import {
     ZoomOutShortcutItem,
 } from './shortcuts/view.shortcut';
 
-@OnLifecycle(LifecycleStages.Ready, SheetUIController)
 export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
@@ -165,7 +166,8 @@ export class SheetUIController extends Disposable {
         @ICommandService protected readonly _commandService: ICommandService,
         @IShortcutService protected readonly _shortcutService: IShortcutService,
         @IMenuManagerService protected readonly _menuManagerService: IMenuManagerService,
-        @IUIPartsService protected readonly _uiPartsService: IUIPartsService
+        @IUIPartsService protected readonly _uiPartsService: IUIPartsService,
+        @IConfigService protected readonly _configService: IConfigService
     ) {
         super();
 
@@ -342,7 +344,10 @@ export class SheetUIController extends Disposable {
         const uiController = this._uiPartsService;
         const injector = this._injector;
 
-        this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
+        const config = this._configService.getConfig<IUniverSheetsUIConfig>(PLUGIN_CONFIG_KEY);
+        if (config?.formulaBar !== false) {
+            this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
+        }
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
         this.disposeWithMe(uiController.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }

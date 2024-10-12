@@ -17,7 +17,7 @@
 import type { Nullable, Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
-import { Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleStages, OnLifecycle, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
@@ -34,7 +34,6 @@ interface ISelectionShapeInfo {
     commentId: string;
 }
 
-@OnLifecycle(LifecycleStages.Rendered, SheetsThreadCommentPopupController)
 export class SheetsThreadCommentPopupController extends Disposable {
     private _isSwitchToCommenting = false;
     private _selectionShapeInfo: Nullable<ISelectionShapeInfo> = null;

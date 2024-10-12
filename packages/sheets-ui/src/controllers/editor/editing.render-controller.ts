@@ -62,7 +62,7 @@ import {
     ScrollBar,
 } from '@univerjs/engine-render';
 
-import { ClearSelectionFormatCommand, COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { ClearSelectionFormatCommand, COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { ILayoutService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -891,6 +891,14 @@ export class EditingRenderController extends Disposable implements IRenderModule
         // Use fix https://github.com/dream-num/univer/issues/1231.
         d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === ClearSelectionFormatCommand.id) {
+                if (this._editorBridgeService.isVisible().visible) return;
+                this._editorBridgeService.refreshEditCellState();
+            }
+        }));
+
+        d.add(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetRangeValuesMutation.id) {
+                if (this._editorBridgeService.isVisible().visible) return;
                 this._editorBridgeService.refreshEditCellState();
             }
         }));

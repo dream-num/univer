@@ -16,6 +16,23 @@
 
 // FIXME: why so many calling to close the editor here?
 
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import {
     AbsoluteRefType,
     Direction,
@@ -68,6 +85,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
+
 import {
     ExpandSelectionCommand,
     getEditorObject,
@@ -77,24 +95,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    ITextRun,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
-
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import { distinctUntilChanged, distinctUntilKeyChanged, filter } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -103,7 +104,6 @@ import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
-import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 
 interface IRefSelection {
     refIndex: number;
@@ -253,6 +253,9 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             this._docSelectionManagerService.textSelection$
                 .pipe(
+                    filter((item) => {
+                        return !isRangeSelector(item.unitId);
+                    }),
                     distinctUntilChanged(
                         (prev, curr) =>
                             prev?.unitId === curr?.unitId &&
@@ -262,10 +265,6 @@ export class PromptController extends Disposable {
                 )
                 .subscribe((params) => {
                     if (params?.unitId == null) {
-                        return;
-                    }
-                    // ToDo: range
-                    if (isRangeSelector(params.unitId)) {
                         return;
                     }
                     const editor = this._editorService.getEditor(params.unitId);

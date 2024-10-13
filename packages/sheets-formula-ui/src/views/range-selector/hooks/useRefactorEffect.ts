@@ -81,4 +81,12 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             refSelectionsRenderService?.setSkipLastEnabled(false);
         }
     }, [isNeed]);
+
+    useEffect(() => {
+        if (isOnlyOneRange) {
+            refSelectionsRenderService?.setRemainLastEnabled(false);
+        } else {
+            refSelectionsRenderService?.setRemainLastEnabled(true);
+        }
+    }, [isOnlyOneRange]);
 };

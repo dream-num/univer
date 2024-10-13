@@ -32,7 +32,7 @@ import { getSheetNameById, unitRangesToText } from '../utils/unitRangesToText';
 
 export const useSheetSelectionChange = (isNeed: boolean,
     unitId: string,
-    subUnitId: string,
+    _subUnitId: string,
     sequenceNodes: INode[],
     isSupportAcrossSheet: boolean,
     isOnlyOneRange: boolean,
@@ -40,12 +40,6 @@ export const useSheetSelectionChange = (isNeed: boolean,
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const isScalingRef = useRef(false);
-
-    const sheetName = useMemo(() => {
-        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-        const sheet = workbook?.getSheetBySheetId(subUnitId);
-        return sheet?.getName() || '';
-    }, [unitId, subUnitId]);
 
     const debounceReset = useMemo(() => debounce(() => {
         isScalingRef.current = false;
@@ -69,7 +63,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     return;
                 }
                 const cloneSelectionList = [...selections];
-
+                const workbook = univerInstanceService.getUnit<Workbook>(unitId);
+                const currentSheetName = workbook?.getActiveSheet()?.getName() || '';
                 const newSequenceNodes = filterReferenceNodes.map((node, index) => {
                     if (typeof node === 'string') {
                         const preItem = filterReferenceNodes[index - 1];
@@ -89,21 +84,21 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
                         const unitRange = deserializeRangeWithSheet(node.token);
                         unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
-                        unitRange.sheetName = unitRange.sheetName === '' ? sheetName : unitRange.sheetName;
+                        unitRange.sheetName = unitRange.sheetName === '' ? currentSheetName : unitRange.sheetName;
 
                         const { unitId: rangeUnitId, sheetName: rangeSubName } = unitRange;
                         if (isOnlyOneRange) {
-                            if (rangeUnitId !== unitId || sheetName !== rangeSubName) {
+                            if (rangeUnitId !== unitId || currentSheetName !== rangeSubName) {
                                 return null;
                             }
                         }
-                        if (rangeUnitId === unitId && sheetName === rangeSubName) {
+                        if (rangeUnitId === unitId && currentSheetName === rangeSubName) {
                             const currentSelection = cloneSelectionList.shift();
                             if (currentSelection && getSheetNameById(univerInstanceService, unitId, currentSelection.rangeWithCoord.sheetId || '') === rangeSubName) {
                                 const cloneNode = { ...node };
                                 rangePreProcess(currentSelection.rangeWithCoord);
                                 if (isSupportAcrossSheet) {
-                                    cloneNode.token = serializeRangeWithSheet(sheetName, currentSelection.rangeWithCoord);
+                                    cloneNode.token = serializeRangeWithSheet(currentSheetName, currentSelection.rangeWithCoord);
                                 } else {
                                     cloneNode.token = serializeRange(currentSelection.rangeWithCoord);
                                 }
@@ -141,6 +136,8 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 let currentIndex = 0;
                 let offset = 0;
                 let isFinish = false;
+                const workbook = univerInstanceService.getUnit<Workbook>(unitId);
+                const currentSheetName = workbook?.getActiveSheet()?.getName() || '';
                 const newSequenceNodes = filterReferenceNodes.map((node) => {
                     if (typeof node === 'string') {
                         if (!isFinish) {
@@ -153,7 +150,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                         }
                         const unitRange = deserializeRangeWithSheet(token);
                         unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
-                        unitRange.sheetName = unitRange.sheetName === '' ? sheetName : unitRange.sheetName;
+                        unitRange.sheetName = unitRange.sheetName === '' ? currentSheetName : unitRange.sheetName;
                         if (currentIndex === index) {
                             isFinish = true;
                             const cloneNode = { ...node, token };

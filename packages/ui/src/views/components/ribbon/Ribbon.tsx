@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+import type { ComponentType } from 'react';
+import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 import { LocaleService, useDependency } from '@univerjs/core';
 import { MoreFunctionSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ComponentType } from 'react';
 
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
 import { MenuManagerPosition, RibbonPosition } from '../../../services/menu/types';
 import { ComponentContainer } from '../ComponentContainer';
@@ -27,7 +28,6 @@ import { ToolbarButton } from '../ribbon/Button/ToolbarButton';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
 import { DropdownWrapper, TooltipWrapper } from './TooltipButtonWrapper';
-import type { IMenuSchema } from '../../../services/menu/menu-manager.service';
 
 interface IRibbonProps {
     headerMenuComponents?: Set<ComponentType>;
@@ -117,6 +117,27 @@ export function Ribbon(props: IRibbonProps) {
         };
     }, [ribbon, category, collapsedIds]);
 
+    const fakeToolbarContent = useMemo(() => (
+        activeGroup.allGroups.map((groupItem) => (
+            <div key={groupItem.key} className={styles.toolbarGroup}>
+                {groupItem.children?.map((child) => (
+                    child.item && (
+                        <ToolbarItem
+                            key={child.key}
+                            ref={(ref) => {
+                                toolbarItemRefs.current[child.key] = {
+                                    el: ref?.nativeElement as HTMLDivElement,
+                                    key: child.key,
+                                };
+                            }}
+                            {...child.item}
+                        />
+                    )
+                ))}
+            </div>
+        ))
+    ), [activeGroup.allGroups]);
+
     return (
         <>
             {/* header */}
@@ -201,24 +222,7 @@ export function Ribbon(props: IRibbonProps) {
                     // opacity: 1,
                 }}
             >
-                {activeGroup.allGroups.map((groupItem) => (
-                    <div key={groupItem.key} className={styles.toolbarGroup}>
-                        {groupItem.children?.map((child) => (
-                            child.item && (
-                                <ToolbarItem
-                                    key={child.key}
-                                    ref={(ref) => {
-                                        toolbarItemRefs.current[child.key] = {
-                                            el: ref?.nativeElement as HTMLDivElement,
-                                            key: child.key,
-                                        };
-                                    }}
-                                    {...child.item}
-                                />
-                            )
-                        ))}
-                    </div>
-                ))}
+                {fakeToolbarContent}
             </div>
         </>
     );

@@ -23,8 +23,13 @@ import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
+<<<<<<< HEAD
 import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, SetColumnCustomCommand, SetRowCustomCommand} from '@univerjs/sheets';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+=======
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColCustomCommand, SetColWidthCommand, SetFrozenCommand, SetRowCustomCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+>>>>>>> ed84bbb2b (fix(sheet): rename command)
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
@@ -921,7 +926,7 @@ export class FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await this._commandService.executeCommand(SetColumnCustomCommand.id, {
+        await this._commandService.executeCommand(SetColCustomCommand.id, {
             unitId,
             subUnitId,
             custom,

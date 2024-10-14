@@ -16,16 +16,13 @@
 
 import type { Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
-import type { FilterModel } from '@univerjs/sheets-filter';
 import type { IFICanvasFloatDom } from './f-workbook';
 import { FWorksheet } from '@univerjs/sheets/facade';
 import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { FDataValidation } from '@univerjs/sheets-data-validation/facade';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ComponentManager } from '@univerjs/ui';
-import { FDataValidation } from './f-data-validation';
-import { FFilter } from './f-filter';
 import { FThreadComment } from './f-thread-comment';
 import { transformComponentKey } from './utils';
 
@@ -40,7 +37,6 @@ export interface IFWorksheetLegacy {
      * @returns matrix of validator status
      */
     getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>>;
-    getFilter(): FFilter | null;
     /**
      * Get all comments in the current sheet
      * @returns all comments in the current sheet
@@ -67,20 +63,6 @@ class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
     override getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>> {
         const validatorService = this._injector.get(SheetsDataValidationValidatorService);
         return validatorService.validatorWorksheet(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId()
-        );
-    }
-
-    override getFilter(): FFilter | null {
-        const filterModel = this._getFilterModel();
-        if (!filterModel) return null;
-
-        return this._injector.createInstance(FFilter, this._workbook, this._worksheet, filterModel);
-    }
-
-    private _getFilterModel(): Nullable<FilterModel> {
-        return this._injector.get(SheetsFilterService).getFilterModel(
             this._workbook.getUnitId(),
             this._worksheet.getSheetId()
         );

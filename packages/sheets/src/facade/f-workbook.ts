@@ -17,7 +17,7 @@
 import type { CommandListener, ICommandInfo, IDisposable, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '../commands/operations/selection.operation';
 import type { ISheetCommandSharedParams } from '../commands/utils/interface';
-import { FBase, FUniver, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import { FBase, ICommandService, ILogService, Inject, Injector, IPermissionService, IResourceLoaderService, IUniverInstanceService, mergeWorksheetSnapshotWithDefault, RedoCommand, toDisposable, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { InsertSheetCommand } from '../commands/commands/insert-sheet.command';
 import { RemoveSheetCommand } from '../commands/commands/remove-sheet.command';
 import { getPrimaryForRange } from '../commands/commands/utils/selection-utils';
@@ -27,19 +27,6 @@ import { WorkbookEditablePermission } from '../services/permission/permission-po
 import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
-
-declare module '@univerjs/core' {
-    // eslint-disable-next-line ts/naming-convention
-    interface FUniver {
-        createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
-    }
-}
-
-FUniver.prototype.createUniverSheet = function (data: Partial<IWorkbookData>): FWorkbook {
-    const instanceService = this._injector.get(IUniverInstanceService);
-    const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
-    return this._injector.createInstance(FWorkbook, workbook);
-};
 
 export class FWorkbook extends FBase {
     readonly id: string;

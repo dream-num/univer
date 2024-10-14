@@ -15,34 +15,23 @@
  */
 
 import type {
-    DataValidationStatus,
     IDisposable,
     IDocumentBody,
     ISelectionCellWithMergeInfo,
     Nullable,
 } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import type { IAddSheetDataValidationCommandParams, IClearRangeDataValidationCommandParams } from '@univerjs/sheets-data-validation';
-import type { FilterModel } from '@univerjs/sheets-filter';
-import type { ISetSheetFilterRangeCommandParams } from '@univerjs/sheets-filter-ui';
-import type { IAddHyperLinkCommandParams, ICancelHyperLinkCommandParams, IUpdateHyperLinkCommandParams } from '@univerjs/sheets-hyper-link-ui';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import type { ICanvasPopup, ICellAlert } from '@univerjs/sheets-ui';
 import type { IFComponentKey } from './utils';
-import { CustomRangeType, generateRandomId, ICommandService, Tools, UserManagerService } from '@univerjs/core';
+import { ICommandService, Tools, UserManagerService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { FRange } from '@univerjs/sheets/facade';
-import { AddSheetDataValidationCommand, ClearRangeDataValidationCommand, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
-import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
-import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link-ui';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { getDT } from '@univerjs/thread-comment-ui';
 import { ComponentManager } from '@univerjs/ui';
-import { FDataValidation } from './f-data-validation';
-import { FFilter } from './f-filter';
 import { FThreadComment } from './f-thread-comment';
 import { transformComponentKey } from './utils';
 
@@ -51,14 +40,6 @@ export type FontStyle = 'normal' | 'italic';
 export type FontWeight = 'normal' | 'bold';
 
 export interface IFCanvasPopup extends Omit<ICanvasPopup, 'componentKey'>, IFComponentKey { }
-
-export interface ICellHyperLink {
-    id: string;
-    startIndex: number;
-    endIndex: number;
-    url: string;
-    label: string;
-}
 
 interface IFRangeLegacy {
     /**
@@ -81,40 +62,7 @@ interface IFRangeLegacy {
      * Generate HTML content for the range.
      */
     generateHTML(this: FRange): string;
-    /**
-     * set a data validation rule to current range
-     * @param rule data validation rule, build by `FUniver.newDataValidation`
-     * @returns current range
-     */
-    setDataValidation(this: FRange, rule: Nullable<FDataValidation>): Promise<FRange>;
-    /**
-     * get first data validation rule in current range
-     * @returns data validation rule
-     */
-    getDataValidation(this: FRange): Nullable<FDataValidation>;
 
-    /**
-     * get all data validation rules in current range
-     * @returns all data validation rules
-     */
-    getDataValidations(this: FRange): FDataValidation[];
-    getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]>;
-    /**
-     * Create a filter for the current range. If the worksheet already has a filter, this method would return `null`.
-     *
-     * @async
-     *
-     * @return The interface class to handle the filter. If the worksheet already has a filter,
-     * this method would return `null`.
-     */
-    createFilter(this: FRange): Promise<FFilter | null>;
-    /**
-     * Get the filter for the current range's worksheet.
-     *
-     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
-     * this method would return `null`.
-     */
-    getFilter(): FFilter | null;
     /**
      * Attach a popup to the start cell of current range.
      * If current worksheet is not active, the popup will not be shown.
@@ -147,25 +95,7 @@ interface IFRangeLegacy {
      * @returns Whether the comment is cleared successfully.
      */
     clearComment(): Promise<boolean>;
-    /**
-     * Get all hyperlinks in the cell in the range.
-     * @returns hyperlinks
-     */
-    getHyperLinks(): ICellHyperLink[];
-    /**
-     * Update hyperlink in the cell in the range.
-     * @param id id of the hyperlink
-     * @param url url
-     * @param label optional, label of the url
-     * @returns success or not
-     */
-    updateHyperLink(id: string, url: string, label?: string): Promise<boolean>;
-    /**
-     * Cancel hyperlink in the cell in the range.
-     * @param id id of the hyperlink
-     * @returns success or not
-     */
-    cancelHyperLink(id: string): Promise<boolean>;
+
 }
 
 class FRangeLegacy extends FRange implements IFRangeLegacy {
@@ -206,105 +136,6 @@ class FRangeLegacy extends FRange implements IFRangeLegacy {
 
         return copyContent?.html ?? '';
     }
-
-    // #region DataValidation
-
-    override async setDataValidation(rule: Nullable<FDataValidation>): Promise<FRange> {
-        if (!rule) {
-            this._commandService.executeCommand(ClearRangeDataValidationCommand.id, {
-                unitId: this._workbook.getUnitId(),
-                subUnitId: this._worksheet.getSheetId(),
-                ranges: [this._range],
-            } as IClearRangeDataValidationCommandParams);
-
-            return this;
-        }
-
-        const params: IAddSheetDataValidationCommandParams = {
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            rule: {
-                ...rule.rule,
-                ranges: [this._range],
-            },
-        };
-
-        await this._commandService.executeCommand(AddSheetDataValidationCommand.id, params);
-        return this;
-    }
-
-    override getDataValidation(): Nullable<FDataValidation> {
-        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
-        const rule = validatorService.getDataValidation(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId(),
-            [this._range]
-        );
-
-        if (rule) {
-            return new FDataValidation(rule);
-        }
-
-        return rule;
-    }
-
-    override getDataValidations(): FDataValidation[] {
-        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
-        return validatorService.getDataValidations(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId(),
-            [this._range]
-        ).map((rule) => new FDataValidation(rule));
-    }
-
-    override async getValidatorStatus(): Promise<Promise<DataValidationStatus>[][]> {
-        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
-        return validatorService.validatorRanges(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId(),
-            [this._range]
-        );
-    }
-
-    // #endregion
-
-    // #region Filter
-
-    override async createFilter(): Promise<FFilter | null> {
-        if (this._getFilterModel()) return null;
-
-        const success = await this._commandService.executeCommand(SetSheetFilterRangeCommand.id, <ISetSheetFilterRangeCommandParams>{
-            unitId: this._workbook.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            range: this._range,
-        });
-
-        if (!success) return null;
-
-        return this.getFilter();
-    }
-
-    /**
-     * Get the filter for the current range's worksheet.
-     *
-     * @return {FFilter | null} The interface class to handle the filter. If the worksheet does not have a filter,
-     * this method would return `null`.
-     */
-    override getFilter(): FFilter | null {
-        const filterModel = this._getFilterModel();
-        if (!filterModel) return null;
-
-        return this._injector.createInstance(FFilter, this._workbook, this._worksheet, filterModel);
-    }
-
-    private _getFilterModel(): Nullable<FilterModel> {
-        return this._injector.get(SheetsFilterService).getFilterModel(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId()
-        );
-    }
-
-    // #endregion
 
     override attachPopup(popup: IFCanvasPopup): Nullable<IDisposable> {
         const { key, disposableCollection } = transformComponentKey(popup, this._injector.get(ComponentManager));
@@ -411,76 +242,6 @@ class FRangeLegacy extends FRange implements IFRangeLegacy {
 
         return Promise.resolve(true);
     }
-
-    // #region hyperlink
-
-    setHyperLink(url: string, label?: string): Promise<boolean> {
-        const params: IAddHyperLinkCommandParams = {
-            unitId: this.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            link: {
-                row: this._range.startRow,
-                column: this._range.startColumn,
-                payload: url,
-                display: label,
-                id: generateRandomId(),
-            },
-        };
-
-        return this._commandService.executeCommand(AddHyperLinkCommand.id, params);
-    }
-
-    override getHyperLinks(): ICellHyperLink[] {
-        const cellValue = this._worksheet.getCellRaw(this._range.startRow, this._range.startColumn);
-        if (!cellValue?.p) {
-            return [];
-        }
-
-        return cellValue.p.body?.customRanges
-            ?.filter((range) => range.rangeType === CustomRangeType.HYPERLINK)
-            .map((range) => ({
-                id: range.rangeId,
-                startIndex: range.startIndex,
-                endIndex: range.endIndex,
-                url: range.properties?.url ?? '',
-                label: cellValue.p?.body?.dataStream.slice(range.startIndex + 1, range.endIndex) ?? '',
-            })) ?? [];
-    }
-
-    override updateHyperLink(id: string, url: string, label?: string): Promise<boolean> {
-        const params: IUpdateHyperLinkCommandParams = {
-            unitId: this.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            row: this._range.startRow,
-            column: this._range.startColumn,
-            id,
-            payload: {
-                payload: url,
-                display: label,
-            },
-        };
-
-        return this._commandService.executeCommand(UpdateHyperLinkCommand.id, params);
-    }
-
-    /**
-     * Cancel hyperlink in the cell in the range.
-     * @param id id of the hyperlink
-     * @returns success or not
-     */
-    override cancelHyperLink(id: string): Promise<boolean> {
-        const params: ICancelHyperLinkCommandParams = {
-            unitId: this.getUnitId(),
-            subUnitId: this._worksheet.getSheetId(),
-            row: this._range.startRow,
-            column: this._range.startColumn,
-            id,
-        };
-
-        return this._commandService.executeCommand(CancelHyperLinkCommand.id, params);
-    }
-
-    // #endregion
 }
 
 FRange.extend(FRangeLegacy);

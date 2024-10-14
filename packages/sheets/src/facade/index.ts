@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './f-univer';
+
 export { FRange } from './f-range';
 export { FSelection } from './f-selection';
 export { FWorkbook } from './f-workbook';

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '../common/di';
+import type { CommandListener, IExecutionOptions } from '../services/command/command.service';
+import type { LifecycleStages } from '../services/lifecycle/lifecycle';
+import { Inject, Injector } from '../common/di';
 import { ICommandService } from '../services/command/command.service';
 import { IUniverInstanceService } from '../services/instance/instance.service';
+import { LifecycleService } from '../services/lifecycle/lifecycle.service';
+import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { Univer } from '../univer';
-import { Inject, Injector } from './di';
 
 /**
  * `FBase` is a base class for all facade classes.
@@ -76,5 +81,78 @@ export class FUniver extends FBase {
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
+    }
+
+    /**
+     * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
+     *
+     * @param unitId The unit id of the UniverSheet.
+     * @returns Whether the Univer instance is disposed successfully.
+     */
+    disposeUnit(unitId: string): boolean {
+        return this._univerInstanceService.disposeUnit(unitId);
+    }
+
+    getCurrentLifecycleStage(): LifecycleStages {
+        const lifecycleService = this._injector.get(LifecycleService);
+        return lifecycleService.stage;
+    }
+
+    /**
+     * Undo an editing on the currently focused document.
+     *
+     * @returns {Promise<boolean>} undo result
+     */
+    undo(): Promise<boolean> {
+        return this._commandService.executeCommand(UndoCommand.id);
+    }
+
+    /**
+     * Redo an editing on the currently focused document.
+     *
+     * @returns {Promise<boolean>} redo result
+     */
+    redo(): Promise<boolean> {
+        return this._commandService.executeCommand(RedoCommand.id);
+    }
+
+    /**
+     * Register a callback that will be triggered before invoking a command.
+     *
+     * @param {CommandListener} callback The callback.
+     * @returns {IDisposable} The disposable instance.
+     */
+    onBeforeCommandExecute(callback: CommandListener): IDisposable {
+        return this._commandService.beforeCommandExecuted((command, options?: IExecutionOptions) => {
+            callback(command, options);
+        });
+    }
+
+    /**
+     * Register a callback that will be triggered when a command is invoked.
+     *
+     * @param {CommandListener} callback The callback.
+     * @returns {IDisposable} The disposable instance.
+     */
+    onCommandExecuted(callback: CommandListener): IDisposable {
+        return this._commandService.onCommandExecuted((command, options?: IExecutionOptions) => {
+            callback(command, options);
+        });
+    }
+
+    /**
+     * Execute command
+     *
+     * @param {string} id Command ID
+     * @param {object} params Command parameters
+     * @param {IExecutionOptions} options Command execution options
+     * @returns {Promise<R>} Command execution result
+     */
+    executeCommand<P extends object = object, R = boolean>(
+        id: string,
+        params?: P,
+        options?: IExecutionOptions
+    ): Promise<R> {
+        return this._commandService.executeCommand(id, params, options);
     }
 }

@@ -20,7 +20,6 @@
     "keywords": [
         "univer"
     ],
-
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",

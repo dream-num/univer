@@ -14,17 +14,8 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
-export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
-export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
+import './f-filter';
+import './f-range';
+import './f-worksheet';
 
-// #region - all commands
-
-export {
-    ChangeFilterByOperation,
-    CloseFilterPanelOperation,
-    type IOpenFilterPanelOperationParams,
-    OpenFilterPanelOperation,
-} from './commands/operations/sheets-filter.operation';
-
-// #endregion
+export { FFilter } from './f-filter';

@@ -17,15 +17,14 @@
 import type { IDisposable, Nullable } from '@univerjs/core';
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
 
-import { ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
+import { Inject, Injector, toDisposable } from '@univerjs/core';
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 
 export class FSheetHooks {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
-        @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(DragManagerService) private readonly _dragManagerService: DragManagerService
     ) {
         // empty
     }

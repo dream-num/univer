@@ -15,66 +15,36 @@
  */
 
 import type {
-    CommandListener,
     Dependency,
     DocumentDataModel,
     IDisposable,
     IDocumentData,
-    IExecutionOptions,
     Injector,
-    IWorkbookData,
     LifecycleStages,
-    Nullable,
-
-    Workbook } from '@univerjs/core';
-import type {
-    IColumnsHeaderCfgParam,
-    IRowsHeaderCfgParam,
-    RenderComponentType,
-    SheetComponent,
-    SheetExtension, SpreadsheetColumnHeader,
-    SpreadsheetRowHeader,
-} from '@univerjs/engine-render';
+} from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
-import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import {
     BorderStyleTypes,
     debounce,
     FUniver,
-    LifecycleService,
     Quantity,
-    RedoCommand,
     toDisposable,
-    UndoCommand,
     Univer,
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { FWorkbook } from '@univerjs/sheets/facade';
-import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
-import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
 import { FFormula } from './sheets/f-formula';
 import { FPermission } from './sheets/f-permission';
 import { FSheetHooks } from './sheets/f-sheet-hooks';
 
 interface IFUniverLegacy {
-    /**
-     * Create a new spreadsheet and get the API handler of that spreadsheet.
-     *
-     * @param {Partial<IWorkbookData>} data The snapshot of the spreadsheet.
-     * @returns {FWorkbook} FWorkbook API instance.
-     */
-    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook;
-
     /**
      * Create a new document and get the API handler of that document.
      *
@@ -82,23 +52,6 @@ interface IFUniverLegacy {
      * @returns {FDocument} FDocument API instance.
      */
     createUniverDoc(data: Partial<IDocumentData>): FDocument;
-
-    /**
-     * Dispose the UniverSheet by the `unitId`. The UniverSheet would be unload from the application.
-     *
-     * @param unitId The unit id of the UniverSheet.
-     * @returns Whether the Univer instance is disposed successfully.
-     */
-    disposeUnit(unitId: string): boolean;
-
-    /**
-     * Get the spreadsheet API handler by the spreadsheet id.
-     *
-     * @param {string} id The spreadsheet id.
-     * @returns {FWorkbook | null} The spreadsheet API instance.
-     */
-    getUniverSheet(id: string): FWorkbook | null;
-
     /**
      * Get the document API handler by the document id.
      *
@@ -106,14 +59,6 @@ interface IFUniverLegacy {
      * @returns {FDocument | null} The document API instance.
      */
     getUniverDoc(id: string): FDocument | null;
-
-    /**
-     * Get the currently focused Univer spreadsheet.
-     *
-     * @returns {FWorkbook | null} The currently focused Univer spreadsheet.
-     */
-    getActiveWorkbook(): FWorkbook | null;
-
     /**
      * Get the currently focused Univer document.
      *
@@ -128,31 +73,8 @@ interface IFUniverLegacy {
      */
     registerFunction(config: IRegisterFunctionParams): IDisposable;
 
-    /**
-     * Register sheet row header render extensions.
-     *
-     * @param {string} unitId The unit id of the spreadsheet.
-     * @param {SheetExtension[]} extensions The extensions to register.
-     * @returns {IDisposable} The disposable instance.
-     */
-    registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+    // TODO: why is not registerFunction part of FFormula? @Dushusir
 
-    /**
-     * Register sheet column header render extensions.
-     *
-     * @param {string} unitId The unit id of the spreadsheet.
-     * @param {SheetExtension[]} extensions The extensions to register.
-     * @returns {IDisposable} The disposable instance.
-     */
-    registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
-    /**
-     * Register sheet main render extensions.
-     *
-     * @param {string} unitId The unit id of the spreadsheet.
-     * @param {SheetExtension[]} extensions The extensions to register.
-     * @returns {IDisposable} The disposable instance.
-     */
-    registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
     getFormula(): FFormula;
     /**
      * Get the current lifecycle stage.
@@ -161,60 +83,9 @@ interface IFUniverLegacy {
      */
     getCurrentLifecycleStage(): LifecycleStages;
     // #region
-
-    /**
-     * Undo an editing on the currently focused document.
-     *
-     * @returns {Promise<boolean>} undo result
-     */
-    undo(): Promise<boolean>;
-
-    /**
-     * Redo an editing on the currently focused document.
-     *
-     * @returns {Promise<boolean>} redo result
-     */
-    redo(): Promise<boolean>;
-
     copy(): Promise<boolean>;
-
     paste(): Promise<boolean>;
-
     // #endregion
-
-    // #region listeners
-
-    /**
-     * Register a callback that will be triggered before invoking a command.
-     *
-     * @param {CommandListener} callback The callback.
-     * @returns {IDisposable} The disposable instance.
-     */
-    onBeforeCommandExecute(callback: CommandListener): IDisposable;
-
-    /**
-     * Register a callback that will be triggered when a command is invoked.
-     *
-     * @param {CommandListener} callback The callback.
-     * @returns {IDisposable} The disposable instance.
-     */
-    onCommandExecuted(callback: CommandListener): IDisposable;
-
-    // #endregion
-
-    /**
-     * Execute command
-     *
-     * @param {string} id Command ID
-     * @param {object} params Command parameters
-     * @param {IExecutionOptions} options Command execution options
-     * @returns {Promise<R>} Command execution result
-     */
-    executeCommand<P extends object = object, R = boolean>(
-        id: string,
-        params?: P,
-        options?: IExecutionOptions
-    ): Promise<R>;
 
     /**
      * Set WebSocket URL for WebSocketService
@@ -238,43 +109,8 @@ interface IFUniverLegacy {
      */
     getHooks(): FHooks;
 
-    /**
-     * Customize the column header of the spreadsheet.
-     *
-     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
-     *
-     * @example
-     * ```typescript
-     * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
-     * ```
-     */
-    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
-
-    /**
-     * Customize the row header of the spreadsheet.
-     *
-     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
-     *
-     * @example
-     * ```typescript
-     * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
-     * ```
-     */
-    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
-
     // #region API applies to all workbooks
 
-    /**
-     * Enable or disable crosshair highlight.
-     * @param {boolean} enabled if crosshair highlight should be enabled
-     */
-    setCrosshairHighlightEnabled(enabled: boolean): void;
-
-    /**
-     * Set the color of the crosshair highlight.
-     * @param {string} color the color of the crosshair highlight
-     */
-    setCrosshairHighlightColor(color: string): void;
     // #endregion
 
     /**
@@ -289,6 +125,37 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
     static BorderStyle = BorderStyleTypes;
 
     static WrapStrategy = WrapStrategy;
+
+    override copy(): Promise<boolean> {
+        return this._commandService.executeCommand(CopyCommand.id);
+    }
+
+    override paste(): Promise<boolean> {
+        return this._commandService.executeCommand(PasteCommand.id);
+    }
+
+    override createUniverDoc(data: Partial<IDocumentData>): FDocument {
+        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
+        return this._injector.createInstance(FDocument, document);
+    }
+
+    override getActiveDocument(): FDocument | null {
+        const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        if (!document) {
+            return null;
+        }
+
+        return this._injector.createInstance(FDocument, document);
+    }
+
+    override getUniverDoc(id: string): FDocument | null {
+        const document = this._univerInstanceService.getUniverDocInstance(id);
+        if (!document) {
+            return null;
+        }
+
+        return this._injector.createInstance(FDocument, document);
+    }
 
     /**
      * Initialize the FUniver instance.
@@ -345,65 +212,10 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         return injector.createInstance(FUniver);
     }
 
-    static override newDataValidation(): FDataValidationBuilder {
-        return new FDataValidationBuilder();
-    }
-
     /**
      * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
      */
     private _debouncedFormulaCalculation: () => void;
-
-    override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
-        const workbook = this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
-        return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override createUniverDoc(data: Partial<IDocumentData>): FDocument {
-        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
-        return this._injector.createInstance(FDocument, document);
-    }
-
-    override disposeUnit(unitId: string): boolean {
-        return this._univerInstanceService.disposeUnit(unitId);
-    }
-
-    override getUniverSheet(id: string): FWorkbook | null {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(id);
-        if (!workbook) {
-            return null;
-        }
-
-        return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override getUniverDoc(id: string): FDocument | null {
-        const document = this._univerInstanceService.getUniverDocInstance(id);
-        if (!document) {
-            return null;
-        }
-
-        return this._injector.createInstance(FDocument, document);
-    }
-
-    override getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-        if (!workbook) {
-            return null;
-        }
-
-        return this._injector.createInstance(FWorkbook, workbook);
-    }
-
-    override getActiveDocument(): FDocument | null {
-        const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!document) {
-            return null;
-        }
-
-        return this._injector.createInstance(FDocument, document);
-    }
-
     override registerFunction(config: IRegisterFunctionParams): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
 
@@ -422,87 +234,8 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         });
     }
 
-    override registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
-        const registerDisposable = sheetComponent.register(...extensions);
-
-        return toDisposable(() => {
-            registerDisposable.dispose();
-            sheetComponent.makeDirty(true);
-        });
-    }
-
-    override registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
-        const registerDisposable = sheetComponent.register(...extensions);
-
-        return toDisposable(() => {
-            registerDisposable.dispose();
-            sheetComponent.makeDirty(true);
-        });
-    }
-
-    override registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
-        const registerDisposable = sheetComponent.register(...extensions);
-
-        return toDisposable(() => {
-            registerDisposable.dispose();
-            sheetComponent.makeDirty(true);
-        });
-    }
-
     override getFormula(): FFormula {
         return this._injector.createInstance(FFormula);
-    }
-
-    override getCurrentLifecycleStage(): LifecycleStages {
-        const lifecycleService = this._injector.get(LifecycleService);
-        return lifecycleService.stage;
-    }
-
-    // #region
-
-    override undo(): Promise<boolean> {
-        return this._commandService.executeCommand(UndoCommand.id);
-    }
-
-    override redo(): Promise<boolean> {
-        return this._commandService.executeCommand(RedoCommand.id);
-    }
-
-    override copy(): Promise<boolean> {
-        return this._commandService.executeCommand(CopyCommand.id);
-    }
-
-    override paste(): Promise<boolean> {
-        return this._commandService.executeCommand(PasteCommand.id);
-    }
-
-    // #endregion
-
-    // #region listeners
-
-    override onBeforeCommandExecute(callback: CommandListener): IDisposable {
-        return this._commandService.beforeCommandExecuted((command, options?: IExecutionOptions) => {
-            callback(command, options);
-        });
-    }
-
-    override onCommandExecuted(callback: CommandListener): IDisposable {
-        return this._commandService.onCommandExecuted((command, options?: IExecutionOptions) => {
-            callback(command, options);
-        });
-    }
-
-    // #endregion
-
-    override executeCommand<P extends object = object, R = boolean>(
-        id: string,
-        params?: P,
-        options?: IExecutionOptions
-    ): Promise<R> {
-        return this._commandService.executeCommand(id, params, options);
     }
 
     override createSocket(url: string): ISocket {
@@ -524,87 +257,13 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         return this._injector.createInstance(FHooks);
     }
 
-    /**
-     * Get sheet render component from render by unitId and view key.
-     *
-     * @private
-     *
-     * @param {string} unitId The unit id of the spreadsheet.
-     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
-     * @returns {Nullable<RenderComponentType>} The render component.
-     */
-    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
-        const renderManagerService = this._injector.get(IRenderManagerService);
-        const render = renderManagerService.getRenderById(unitId);
-        if (!render) {
-            throw new Error('Render not found');
-        }
-
-        const { components } = render;
-
-        const renderComponent = components.get(viewKey);
-        if (!renderComponent) {
-            throw new Error('Render component not found');
-        }
-
-        return renderComponent;
-    }
-
-    override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
-        const wb = this.getActiveWorkbook();
-        if (!wb) {
-            console.error('WorkBook not exist');
-            return;
-        }
-        const unitId = wb?.getId();
-        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
-        sheetColumn.setCustomHeader(cfg);
-    }
-
-    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
-        const wb = this.getActiveWorkbook();
-        if (!wb) {
-            console.error('WorkBook not exist');
-            return;
-        }
-        const unitId = wb?.getId();
-        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
-        sheetRow.setCustomHeader(cfg);
-    }
-
-    // #region API applies to all workbooks
-
-    override setCrosshairHighlightEnabled(enabled: boolean): void {
-        if (enabled) {
-            this._commandService.executeCommand(EnableCrosshairHighlightOperation.id);
-        } else {
-            this._commandService.executeCommand(DisableCrosshairHighlightOperation.id);
-        }
-    }
-
-    override setCrosshairHighlightColor(color: string): void {
-        this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
-            value: color,
-        } as ISetCrosshairHighlightColorOperationParams);
-    }
-
-    // #endregion
-
     override getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
     }
 }
 
 FUniver.extend(FUniverLegacy);
-
-export { FUniver };
-
 declare module '@univerjs/core' {
-    // eslint-disable-next-line ts/no-namespace
-    namespace FUniver {
-        function newDataValidation(): FDataValidationBuilder;
-    }
-
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverLegacy {}
 }

@@ -17,10 +17,9 @@
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterModel, IFilterColumn } from '@univerjs/sheets-filter';
-import type { ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter-ui';
 import { ICommandService, Inject, Injector } from '@univerjs/core';
 import { FRange } from '@univerjs/sheets/facade';
-import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
+import { ClearSheetsFilterCriteriaCommand, type ISetSheetsFilterCriteriaCommandParams, RemoveSheetFilterCommand, SetSheetsFilterCriteriaCommand } from '../commands/commands/sheets-filter.command';
 
 /**
  * This interface class provides methods to modify the filter settings of a worksheet.

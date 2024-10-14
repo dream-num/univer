@@ -16,19 +16,17 @@
 
 export type { FontLine, FontStyle, FontWeight } from './apis/sheets/f-range';
 
-export { FUniver } from './apis/facade';
-
+export { FUniver } from '@univerjs/core';
 export { FHooks } from './apis/f-hooks';
 
 // #region - Univer Sheet
 
-export { FFilter } from './apis/sheets/f-filter';
+export { FFilter } from '@univerjs/sheets-filter/facade';
 export { FFormula } from './apis/sheets/f-formula';
 export { FPermission } from './apis/sheets/f-permission';
 export { FRange } from './apis/sheets/f-range';
 export { FSheetHooks } from './apis/sheets/f-sheet-hooks';
-export { FDataValidation } from './apis/sheets/f-data-validation';
-export { FDataValidationBuilder } from './apis/sheets/f-data-validation-builder';
+export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
 export { FThreadComment } from './apis/sheets/f-thread-comment';
 
 // #endregion

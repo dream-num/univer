@@ -17,11 +17,9 @@
 import type { IAccessor, ICommand, IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, Quantity, sequenceExecute, UniverInstanceType } from '@univerjs/core';
-import { MessageType } from '@univerjs/design';
+import { CommandType, ErrorService, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import { expandToContinuousRange, getSheetCommandTarget, isSingleCellSelection, SheetsSelectionsService } from '@univerjs/sheets';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
-import { IMessageService } from '@univerjs/ui';
 
 /**
  * Parameters of command {@link SetSheetFilterRangeCommand}.
@@ -53,9 +51,9 @@ export const SetSheetFilterRangeCommand: ICommand<ISetSheetFilterRangeCommandPar
         if (filterModel) return false;
 
         if (range.endRow === range.startRow) {
-            const messageService = accessor.get(IMessageService, Quantity.OPTIONAL);
+            const errorService = accessor.get(ErrorService);
             const localeService = accessor.get(LocaleService);
-            messageService?.show({ type: MessageType.Warning, content: localeService.t('sheets-filter.command.not-valid-filter-range') });
+            errorService.emit(localeService.t('sheets-filter.command.not-valid-filter-range'));
             return false;
         }
 

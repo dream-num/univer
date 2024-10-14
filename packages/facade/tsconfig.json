@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src"]
+    "include": ["src", "../sheets-filter/src/facade/f-filter.ts", "../sheets-data-validation/src/facade/f-data-validation-builder.ts", "../sheets-data-validation/src/facade/f-data-validation.ts"]
 }

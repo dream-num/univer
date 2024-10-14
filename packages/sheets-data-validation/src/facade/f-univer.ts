@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-export { UniverSheetsFilterUIPlugin } from './filter-ui-desktop.plugin';
-export { UniverSheetsFilterMobileUIPlugin } from './filter-ui-mobile.plugin';
-export { UniverSheetsFilterUIWorkerPlugin } from './worker/plugin';
+import { FUniver } from '@univerjs/core';
+import { FDataValidationBuilder } from './f-data-validation-builder';
 
-// #region - all commands
+class FUnvierDataValidationMixin {
+    static newDataValidation(): FDataValidationBuilder {
+        return new FDataValidationBuilder();
+    }
+}
 
-export {
-    ChangeFilterByOperation,
-    CloseFilterPanelOperation,
-    type IOpenFilterPanelOperationParams,
-    OpenFilterPanelOperation,
-} from './commands/operations/sheets-filter.operation';
+FUniver.extend(FUnvierDataValidationMixin);
 
-// #endregion
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/no-namespace
+    namespace FUniver {
+        function newDataValidation(): FDataValidationBuilder;
+    }
+}

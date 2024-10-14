@@ -73,7 +73,7 @@ import {
     IUIPartsService,
 } from '@univerjs/ui';
 import { CompleteRecordingActionCommand, StartRecordingActionCommand, StopRecordingActionCommand } from '../commands/commands/record.command';
-import { ReplayLocalRecordCommand } from '../commands/commands/replay.command';
+import { ReplayLocalRecordCommand, ReplayLocalRecordOnActiveCommand, ReplayLocalRecordOnNamesakeCommand } from '../commands/commands/replay.command';
 import { CloseRecordPanelOperation, OpenRecordPanelOperation } from '../commands/operations/operation';
 import { ActionRecorderService } from '../services/action-recorder.service';
 import { RecorderPanel } from '../views/components/RecorderPanel';
@@ -104,6 +104,8 @@ export class ActionRecorderController extends Disposable {
             OpenRecordPanelOperation,
             CloseRecordPanelOperation,
             ReplayLocalRecordCommand,
+            ReplayLocalRecordOnNamesakeCommand,
+            ReplayLocalRecordOnActiveCommand,
         ]).forEach((command) => this._commandSrv.registerCommand(command));
     }
 

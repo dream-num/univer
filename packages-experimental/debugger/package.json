@@ -54,14 +54,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/mockdata": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-drawing-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },

@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-import {
-    BuildTextUtils,
-    CommandType,
-    ICommandService,
-    IUniverInstanceService,
-    JSONX,
-    MemoryCursor,
-    TextX,
-    TextXActionType,
-    Tools,
-} from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type {
     DocumentDataModel,
     ICommand,
@@ -38,6 +26,18 @@ import type {
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentViewModel, IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
+import {
+    BuildTextUtils,
+    CommandType,
+    ICommandService,
+    IUniverInstanceService,
+    JSONX,
+    MemoryCursor,
+    TextX,
+    TextXActionType,
+    Tools,
+} from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { getDeleteRowContentActionParams, getDeleteRowsActionsParams, getDeleteTableActionParams } from './table/table';
 
@@ -90,6 +90,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const originSelections = docSelectionManagerService.getTextRanges();
+        const rectRanges = docSelectionManagerService.getRectRanges();
         const { body, tableSource, drawings } = doc;
         if (!Array.isArray(originSelections) || originSelections.length === 0 || body == null) {
             return false;
@@ -132,6 +133,11 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         // TODO: @JOCS A feature that has not yet been implemented.
         // Can not paste tables into table cell now.
         if (hasTable && hasRangeInTable(selections)) {
+            return false;
+        }
+
+        // Can not paste content when doc selection has both text ranges and rect ranges.
+        if (selections.length && rectRanges?.length) {
             return false;
         }
 

@@ -15,9 +15,9 @@
  */
 
 import { LocaleService, useDependency } from '@univerjs/core';
-import { useObservable } from '@univerjs/ui';
 import React, { useCallback, useEffect } from 'react';
 
+import { useObservable } from '../../../components/hooks/observable';
 import { IShortcutService } from '../../../services/shortcut/shortcut.service';
 import styles from './index.module.less';
 

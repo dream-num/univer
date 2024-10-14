@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "private": false,
     "description": "UniverSheet normal base-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,11 +62,6 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

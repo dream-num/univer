@@ -16,11 +16,13 @@
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import type { ISearchItem } from '@univerjs/sheets-formula';
-import { LocaleService, useDependency } from '@univerjs/core';
+import type { ISidebarMethodOptions } from '@univerjs/ui';
+import { LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { Input, Select } from '@univerjs/design';
 import { FunctionType } from '@univerjs/engine-formula';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { IDescriptionService } from '@univerjs/sheets-formula';
+import { ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
 import { getFunctionTypeValues } from '../../../services/utils';
 import { FunctionHelp } from '../function-help/FunctionHelp';
@@ -42,6 +44,8 @@ export function SelectFunction(props: ISelectFunctionProps) {
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
     const descriptionService = useDependency(IDescriptionService);
     const localeService = useDependency(LocaleService);
+    const sidebarService = useDependency(ISidebarService);
+    const sidebarOptions = useObservable<ISidebarMethodOptions>(sidebarService.sidebarOptions$);
 
     const options = getFunctionTypeValues(FunctionType, localeService);
     options.unshift({
@@ -59,6 +63,19 @@ export function SelectFunction(props: ISelectFunctionProps) {
     useEffect(() => {
         setCurrentFunctionInfo(0);
     }, [selectList]);
+
+    // Reset data when the component enters again
+    useEffect(() => {
+        if (sidebarOptions?.visible) {
+            setSearchText('');
+            setSelectList([]);
+            setActive(0);
+            setTypeSelected(allTypeValue);
+            setNameSelected(0);
+            setFunctionInfo(null);
+            handleSelectChange(allTypeValue);
+        }
+    }, [sidebarOptions]);
 
     const highlightSearchText = (text: string) => {
         if (searchText.trim() === '') return text;

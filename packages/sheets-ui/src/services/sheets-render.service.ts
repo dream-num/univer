@@ -25,6 +25,7 @@ import {
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
 
+const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
 /**
  * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
  */
@@ -83,6 +84,11 @@ export class SheetsRenderService extends RxDisposable {
 
     private _createRenderer(workbook: Workbook): void {
         const unitId = workbook.getUnitId();
+        this._renderManagerService.created$.subscribe((renderer) => {
+            if (renderer.unitId === unitId) {
+                renderer.engine.getCanvas().setId(SHEET_MAIN_CANVAS_ID);
+            }
+        });
         this._renderManagerService.createRender(unitId);
 
         // NOTE@wzhudev: maybe not in univer mode

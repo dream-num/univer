@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import type {
+    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
+} from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BaselineOffset, BooleanNumber, CommandType,
     ICommandService, IUniverInstanceService,
@@ -21,11 +26,6 @@ import {
     TextX, TextXActionType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type {
-    ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
-} from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getRichTextEditPath } from '../util';
 
 function handleInlineFormat(

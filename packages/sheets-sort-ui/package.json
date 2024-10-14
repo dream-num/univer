@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-sort-ui",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "private": false,
     "description": "Univer Sheets Sort UI",
     "author": "DreamNum <developer@univer.ai>",
@@ -59,27 +59,21 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-sort": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.79",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
-        "rc-virtual-list": "^3.14.5"
+        "rc-virtual-list": "^3.14.8"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

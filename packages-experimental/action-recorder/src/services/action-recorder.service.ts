@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { CommandType, Disposable, ICommandService, ILogService } from '@univerjs/core';
+import type { ICommand, ICommandInfo, IDisposable, Nullable, Workbook } from '@univerjs/core';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
+import { CommandType, Disposable, ICommandService, ILogService, IUniverInstanceService } from '@univerjs/core';
 import { SetSelectionsOperation } from '@univerjs/sheets';
 import { ILocalFileService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';
-import type { ICommand, ICommandInfo, IDisposable, Nullable } from '@univerjs/core';
 
 /**
  * This service is for recording commands. What commands should be recorded can be configured by other
@@ -46,7 +47,8 @@ export class ActionRecorderService extends Disposable {
     constructor(
         @ICommandService private readonly _commandSrv: ICommandService,
         @ILogService private readonly _logService: ILogService,
-        @ILocalFileService private readonly _localFileService: ILocalFileService
+        @ILocalFileService private readonly _localFileService: ILocalFileService,
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService
     ) {
         super();
     }
@@ -62,11 +64,27 @@ export class ActionRecorderService extends Disposable {
         if (visible === false) this.stopRecording();
     }
 
-    startRecording(): void {
-        this._recorder = this._commandSrv.onCommandExecuted((commandInfo) => {
-            if (this._shouldRecordCommands.has(commandInfo.id)) {
+    startRecording(replaceId = false): void {
+        this._recorder = this._commandSrv.onCommandExecuted((rawCommandInfo) => {
+            if (this._shouldRecordCommands.has(rawCommandInfo.id)) {
                 const recorded = this._recorded;
                 const commands = this._recordedCommands;
+
+                let commandInfo = { ...rawCommandInfo };
+
+                const focusUnitId = this._instanceService.getFocusedUnit()?.getUnitId();
+                const { unitId = focusUnitId, subUnitId } = commandInfo?.params as ISheetCommandSharedParams;
+
+                if (replaceId && unitId && subUnitId) {
+                    const subUnitName = (this._instanceService.getUnit(unitId) as Workbook).getSheetBySheetId(subUnitId)?.getName();
+                    commandInfo = {
+                        ...commandInfo,
+                        params: {
+                            ...commandInfo.params,
+                            subUnitId: subUnitName,
+                        },
+                    };
+                }
 
                 if (
                     commandInfo.id === SetSelectionsOperation.id &&

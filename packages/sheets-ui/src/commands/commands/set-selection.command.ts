@@ -16,6 +16,8 @@
 
 import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+
 import {
     expandToContinuousRange,
     getCellAtRowCol,
@@ -24,9 +26,9 @@ import {
     SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { KeyCode } from '@univerjs/ui';
-
-import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
 import { SelectAllService } from '../../services/select-all/select-all.service';
+import { ISheetSelectionRenderService } from '../../services/selection/base-selection-render.service';
+import { ShortcutExperienceService } from '../../services/shortcut-experience.service';
 import {
     checkIfShrink,
     expandToNextCell,
@@ -54,8 +56,13 @@ export interface IMoveSelectionCommandParams {
     nextStep?: number;
 }
 
+export interface IMoveSelectionEnterAndTabCommandParams {
+    direction: Direction;
+    keycode: KeyCode;
+}
+
 /**
- * Move selection
+ * Move selection (Mainly by keyboard arrow keys, Tab and Enter key see MoveSelectionEnterAndTabCommand)
  */
 export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
     id: 'sheet.command.move-selection',
@@ -88,43 +95,43 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
         if (Rectangle.equals(destRange, startRange)) {
             return false;
         }
-
+        const unitId = workbook.getUnitId();
         // If there are changes to the selection, clear the start position saved by the tab.
         // This function works in conjunction with the enter and tab shortcuts.
         accessor.get(ShortcutExperienceService).remove({
-            unitId: workbook.getUnitId(),
+            unitId,
             sheetId: worksheet.getSheetId(),
             keycode: KeyCode.TAB,
         });
 
-        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        const selections = [
+            {
+                range: Rectangle.clone(destRange),
+                primary: {
+                    startRow: destRange.startRow,
+                    startColumn: destRange.startColumn,
+                    endRow: destRange.endRow,
+                    endColumn: destRange.endColumn,
+                    actualRow: next.startRow,
+                    actualColumn: next.startColumn,
+                    isMerged: destRange.isMerged,
+                    isMergedMainCell:
+                        destRange.startRow === next.startRow && destRange.startColumn === next.startColumn,
+                },
+            },
+        ];
+
+        const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
-
-            selections: [
-                {
-                    range: Rectangle.clone(destRange),
-                    primary: {
-                        startRow: destRange.startRow,
-                        startColumn: destRange.startColumn,
-                        endRow: destRange.endRow,
-                        endColumn: destRange.endColumn,
-                        actualRow: next.startRow,
-                        actualColumn: next.startColumn,
-                        isMerged: destRange.isMerged,
-                        isMergedMainCell:
-                            destRange.startRow === next.startRow && destRange.startColumn === next.startColumn,
-                    },
-                },
-            ],
+            selections,
         });
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
+        selectionService?.refreshSelectionMoveEnd();
+        return rs;
     },
 };
-
-export interface IMoveSelectionEnterAndTabCommandParams {
-    direction: Direction;
-    keycode: KeyCode;
-}
 
 /**
  * Move selection for enter and tab.
@@ -260,12 +267,16 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             };
         }
 
-        return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
+        const rs = accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
             unitId,
             subUnitId: sheetId,
 
             selections: [resultRange],
         });
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const selectionService = renderManagerService.getRenderById(unitId)?.with(ISheetSelectionRenderService);
+        selectionService?.refreshSelectionMoveEnd();
+        return rs;
     },
 };
 

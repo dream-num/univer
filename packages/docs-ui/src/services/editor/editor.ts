@@ -18,7 +18,9 @@ import type { DocumentDataModel, ICommandService, IDocumentData, IDocumentStyle,
 import type { DocSelectionManagerService } from '@univerjs/docs';
 import type { IDocSelectionInnerParam, IRender, ISuccinctDocRangeParam, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DEFAULT_STYLES, Disposable, UniverInstanceType } from '@univerjs/core';
+import { KeyCode } from '@univerjs/ui';
 import { merge, type Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { ReplaceSnapshotCommand } from '../../commands/commands/replace-content.command';
 import { DocSelectionRenderService, type IEditorInputConfig } from '../selection/doc-selection-render.service';
 
@@ -222,7 +224,13 @@ export class Editor extends Disposable implements IEditor {
         this.disposeWithMe(
             merge(
                 docSelectionRenderService.onInput$,
-                docSelectionRenderService.onKeydown$,
+                docSelectionRenderService.onKeydown$.pipe(filter((e) => {
+                    const event = e.event as KeyboardEvent;
+                    if (event.ctrlKey || event.metaKey) {
+                        return [KeyCode.X, KeyCode.V].includes(event.keyCode);
+                    }
+                    return [KeyCode.BACKSPACE].includes(event.keyCode);
+                })),
                 docSelectionRenderService.onCompositionupdate$,
                 docSelectionRenderService.onCompositionend$,
                 docSelectionRenderService.onPaste$

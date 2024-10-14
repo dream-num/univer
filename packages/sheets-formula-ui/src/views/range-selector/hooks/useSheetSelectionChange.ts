@@ -54,7 +54,18 @@ export const useSheetSelectionChange = (isNeed: boolean,
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-    const filterReferenceNodes = useMemo(() => filterReferenceNode(sequenceNodes), [sequenceNodes]);
+    const oldFilterReferenceNodes = useRef<INode[]>([]);
+    const filterReferenceNodes = useMemo(() => {
+        const newFilterReferenceNodes = filterReferenceNode(sequenceNodes);
+        const old = oldFilterReferenceNodes.current;
+        if (newFilterReferenceNodes.length === old.length) {
+            old.splice(0);
+            old.push(...newFilterReferenceNodes);
+            return old;
+        }
+        return newFilterReferenceNodes;
+    }, [sequenceNodes]);
+    oldFilterReferenceNodes.current = filterReferenceNodes;
 
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {

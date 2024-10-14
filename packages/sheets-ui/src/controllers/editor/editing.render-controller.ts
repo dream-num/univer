@@ -418,7 +418,10 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 },
             ]);
         } else if (eventType === DeviceInputEventType.Dblclick) {
-            // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
+            if (this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)) {
+                return;
+            }
+
             const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
 
             this._textSelectionManagerService.replaceDocRanges([

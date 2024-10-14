@@ -15,6 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type {
+    IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { RenderComponentType } from '@univerjs/engine-render';
 import {
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -32,10 +34,10 @@ import {
 import {
     DocSelectionManagerService,
     DocSkeletonManagerService,
+    RichTextEditingMutation,
 } from '@univerjs/docs';
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 
 import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -53,8 +55,6 @@ export class FormulaEditorController extends RxDisposable {
         @IContextService private readonly _contextService: IContextService,
         @IFormulaEditorManagerService private readonly _formulaEditorManagerService: IFormulaEditorManagerService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
-        @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
     ) {
         super();
@@ -65,6 +65,7 @@ export class FormulaEditorController extends RxDisposable {
     private _initialize() {
         this._syncEditorSize();
         this._listenFxBtnClick();
+        this._handleContentChange();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             this._create(unitId);
@@ -83,6 +84,20 @@ export class FormulaEditorController extends RxDisposable {
                 this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
         });
+    }
+
+    private _handleContentChange() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === RichTextEditingMutation.id) {
+                    const params = commandInfo.params as IRichTextEditingMutationParams;
+                    const { unitId } = params;
+                    if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+                        this.autoScroll();
+                    }
+                }
+            })
+        );
     }
 
     private _create(unitId: Nullable<string>) {
@@ -211,7 +226,7 @@ export class FormulaEditorController extends RxDisposable {
 
             const { engine } = editorObject;
             formulaEditorDataModel.updateDocumentDataPageSize(width);
-            this._autoScroll();
+            this.autoScroll();
             this._scheduledCallback = requestIdleCallback(() => engine.resizeBySize(width, height));
         });
     }
@@ -222,7 +237,7 @@ export class FormulaEditorController extends RxDisposable {
         this._scheduledCallback = -1;
     }
 
-    private _autoScroll() {
+    autoScroll() {
         const position = this._formulaEditorManagerService.getPosition();
 
         const skeleton = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY)?.with(DocSkeletonManagerService).getSkeleton();
@@ -246,7 +261,6 @@ export class FormulaEditorController extends RxDisposable {
 
         const { width, height } = position;
         const viewportMain = scene.getViewport(DOC_VIEWPORT_KEY.VIEW_MAIN);
-
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
         scene.transformByState({

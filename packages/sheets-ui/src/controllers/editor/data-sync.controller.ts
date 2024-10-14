@@ -25,6 +25,7 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import { MoveRangeMutation, RangeProtectionRuleModel, SetRangeValuesMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SetEditorResizeOperation } from '@univerjs/ui';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { FormulaEditorController } from './formula-editor.controller';
 
 /**
  * sync data between cell editor and formula editor
@@ -36,7 +37,8 @@ export class EditorDataSyncController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(RangeProtectionRuleModel) private readonly _rangeProtectionRuleModel: RangeProtectionRuleModel,
-        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel
+        @Inject(WorksheetProtectionRuleModel) private readonly _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(FormulaEditorController) private readonly _formulaEditorController: FormulaEditorController
     ) {
         super();
 
@@ -224,6 +226,10 @@ export class EditorDataSyncController extends Disposable {
 
         if (INCLUDE_LIST.includes(unitId)) {
             currentRender.mainComponent?.makeDirty();
+        }
+
+        if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            this._formulaEditorController.autoScroll();
         }
     }
 

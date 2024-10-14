@@ -16,13 +16,13 @@
 
 import '@univerjs/sheets/facade';
 import '@univerjs/ui/facade';
-import '@unvierjs/docs-ui/facade';
+import '@univerjs/docs-ui/facade';
 import '@univerjs/sheets-ui/facade';
 import '@univerjs/sheets-data-validation/facade';
 import '@univerjs/engine-formula/facade';
 import '@univerjs/sheets-filter/facade';
-import '@unvierjs/sheets-formula/facade';
-import '@unvierjs/sheets-numfmt/facade'; // TODO: extract
+import '@univerjs/sheets-formula/facade';
+import '@univerjs/sheets-numfmt/facade'; // TODO: extract
 import '@univerjs/sheets-hyper-link-ui/facade'; // TODO: extract
 
 export { FHooks, FUniver } from '@univerjs/core';

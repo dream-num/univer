@@ -93,7 +93,8 @@ import {
     isRangeSelector,
     JumpOver,
     MoveSelectionCommand,
-    SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+    SheetSkeletonManagerService,
+} from '@univerjs/sheets-ui';
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged, filter } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -255,13 +256,7 @@ export class PromptController extends Disposable {
                 .pipe(
                     filter((item) => {
                         return !isRangeSelector(item.unitId);
-                    }),
-                    distinctUntilChanged(
-                        (prev, curr) =>
-                            prev?.unitId === curr?.unitId &&
-                            prev?.segmentId === curr?.segmentId &&
-                            Boolean(prev?.textRanges.every((t, i) => t.startOffset === curr?.textRanges[i].startOffset && t.endOffset === curr?.textRanges[i].endOffset))
-                    )
+                    })
                 )
                 .subscribe((params) => {
                     if (params?.unitId == null) {

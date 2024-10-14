@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { ISidebarService } from '@univerjs/ui';
 import React from 'react';
@@ -24,6 +24,7 @@ import styles from './index.module.less';
 export const WatermarkPanelFooter: React.FC = () => {
     const sidebarService = useDependency(ISidebarService);
     const watermarkService = useDependency(UniverWatermarkService);
+    const localeService = useDependency(LocaleService);
 
     return (
         <div className={styles.watermarkPanelFooter}>
@@ -33,9 +34,9 @@ export const WatermarkPanelFooter: React.FC = () => {
                     watermarkService.deleteWatermarkConfig();
                 }}
             >
-                取消水印
+                {localeService.t('univer-watermark.cancel')}
             </div>
-            <Button onClick={() => sidebarService.close()}>关闭面板</Button>
+            <Button onClick={() => sidebarService.close()}>{localeService.t('univer-watermark.close')}</Button>
         </div>
     );
 };

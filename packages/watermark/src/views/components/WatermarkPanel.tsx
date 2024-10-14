@@ -15,7 +15,7 @@
  */
 
 import type { IWatermarkConfig, IWatermarkConfigWithType } from '../../common/type';
-import { ILocalStorageService, useDependency } from '@univerjs/core';
+import { ILocalStorageService, LocaleService, useDependency } from '@univerjs/core';
 import { Select } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../../common/const';
@@ -30,6 +30,7 @@ export const WatermarkPanel: React.FC = () => {
     const [config, setConfig] = useState<IWatermarkConfig>();
     const watermarkService = useDependency(UniverWatermarkService);
     const localStorageService = useDependency(ILocalStorageService);
+    const localeService = useDependency(LocaleService);
 
     function handleConfigChange(config: IWatermarkConfig, type?: IWatermarkTypeEnum) {
         setConfig(config);
@@ -52,7 +53,7 @@ export const WatermarkPanel: React.FC = () => {
 
     return (
         <div className={styles.watermarkPanel}>
-            <div className={styles.watermarkPanelTypeTitle}>水印类型</div>
+            <div className={styles.watermarkPanelTypeTitle}>{localeService.t('univer-watermark.type')}</div>
             <Select
                 value={watermarkType}
                 onChange={(v) => {
@@ -64,8 +65,8 @@ export const WatermarkPanel: React.FC = () => {
                     }
                 }}
                 options={[
-                    { label: '文本', value: IWatermarkTypeEnum.Text },
-                    { label: '图片', value: IWatermarkTypeEnum.Image },
+                    { label: localeService.t('univer-watermark.text'), value: IWatermarkTypeEnum.Text },
+                    { label: localeService.t('univer-watermark.image'), value: IWatermarkTypeEnum.Image },
                 ]}
                 className={styles.watermarkPanelTypeSelect}
             >

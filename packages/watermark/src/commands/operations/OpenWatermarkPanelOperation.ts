@@ -27,7 +27,7 @@ export const OpenWatermarkPanelOperation: ICommand = {
         const localeService = accessor.get(LocaleService);
 
         sidebarService.open({
-            header: { title: localeService.t('watermark') },
+            header: { title: localeService.t('univer-watermark.title') },
             children: { label: WATERMARK_PANEL },
             footer: { label: WATERMARK_PANEL_FOOTER },
             onClose: () => { },

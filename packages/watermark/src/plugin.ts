@@ -15,50 +15,71 @@
  */
 
 import type { Dependency } from '@univerjs/core';
-import { ICommandService, IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import type { IUniverWatermarkConfig } from './controllers/config.schema';
+import { ICommandService, IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { OpenWatermarkPanelOperation } from './commands/operations/OpenWatermarkPanelOperation';
-import { type IUniverWatermarkConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { UNIVER_WATERMARK_STORAGE_KEY } from './common/const';
+import { IWatermarkTypeEnum } from './common/type';
 import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
+import { WatermarkRenderController } from './controllers/watermark.render.controller';
+import { UniverWatermarkService } from './services/watermarkService';
 
 const PLUGIN_NAME = 'UNIVER_WATERMARK_PLUGIN';
 
 export class UniverWatermarkPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
-    private _dependencies = [UniverWatermarkMenuController];
-
     constructor(
         private readonly _config: Partial<IUniverWatermarkConfig> = {},
         @Inject(Injector) protected override _injector: Injector,
         @IConfigService private readonly _configService: IConfigService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
+        @Inject(ILocalStorageService) private readonly _localStorageService: ILocalStorageService
     ) {
         super();
-        this._initDependencies();
-        this._initRegisterCommand();
 
-        // Manage the plugin configuration.
         const { menu, ...rest } = this._config;
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
-        this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
+
+        if (rest.userWatermarkSettings) {
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: rest.userWatermarkSettings } });
+        }
+        this._initDependencies();
+        this._initRegisterCommand();
     }
 
     private _initDependencies(): void {
-        ([this._dependencies] as Dependency[]).forEach((d) => {
+        ([[UniverWatermarkService], [UniverWatermarkMenuController]] as Dependency[]).forEach((d) => {
             this._injector.add(d);
         });
     }
 
     override onStarting(): void {
         const injector = this._injector;
-        this._dependencies.forEach((d) => injector.get(d));
+        injector.get(UniverWatermarkService);
+        injector.get(UniverWatermarkMenuController);
     }
 
     private _initRegisterCommand(): void {
         [
             OpenWatermarkPanelOperation,
         ].forEach((m) => this._commandService.registerCommand(m));
+    }
+
+    override onRendered(): void {
+        this._initRenderDependencies();
+    }
+
+    private _initRenderDependencies(): void {
+        ([
+            [WatermarkRenderController],
+        ] as Dependency[]).forEach((d) => {
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_SHEET, d);
+            this._renderManagerSrv.registerRenderModule(UniverInstanceType.UNIVER_DOC, d);
+        });
     }
 }

@@ -14,24 +14,41 @@
  * limitations under the License.
  */
 
-import type { IWatermarkConfig } from '../common/type';
+import type { IWatermarkConfig, IWatermarkConfigWithType } from '../../common/type';
+import { ILocalStorageService, useDependency } from '@univerjs/core';
 import { Select } from '@univerjs/design';
-import React, { useState } from 'react';
-import { WatermarkTextBaseConfig } from '../common/const';
-import { IWatermarkTypeEnum } from '../common/type';
+import React, { useEffect, useState } from 'react';
+import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkTextBaseConfig } from '../../common/const';
+import { IWatermarkTypeEnum } from '../../common/type';
+import { UniverWatermarkService } from '../../services/watermarkService';
 import styles from './index.module.less';
+import { WatermarkImageSetting } from './WatermarkImageSetting';
 import { WatermarkTextSetting } from './WatermarkTextSetting';
 
 export const WatermarkPanel: React.FC = () => {
     const [watermarkType, setWatermarkType] = useState<IWatermarkTypeEnum>(IWatermarkTypeEnum.Text);
-    const [config, setConfig] = useState<IWatermarkConfig>({
-        text: WatermarkTextBaseConfig,
-    });
+    const [config, setConfig] = useState<IWatermarkConfig>();
+    const watermarkService = useDependency(UniverWatermarkService);
+    const localStorageService = useDependency(ILocalStorageService);
 
     function handleConfigChange(config: IWatermarkConfig) {
         setConfig(config);
-        // TODO: update service
+        watermarkService.updateWatermarkConfig({ type: watermarkType, config });
     }
+
+    useEffect(() => {
+        async function getWatermarkConfig() {
+            const watermarkConfig = await localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
+            if (watermarkConfig) {
+                setWatermarkType(watermarkConfig.type);
+                setConfig(watermarkConfig.config);
+            } else {
+                setConfig({ text: WatermarkTextBaseConfig });
+            }
+        }
+
+        getWatermarkConfig();
+    }, []);
 
     return (
         <div className={styles.watermarkPanel}>
@@ -47,8 +64,8 @@ export const WatermarkPanel: React.FC = () => {
             >
             </Select>
             <div className={styles.watermarkPanelSetting}>
-                {watermarkType === IWatermarkTypeEnum.Text && <WatermarkTextSetting config={config.text} onChange={(v) => handleConfigChange({ text: v })} />}
-                {watermarkType === IWatermarkTypeEnum.Image && <div>图片水印设置</div>}
+                {watermarkType === IWatermarkTypeEnum.Text && <WatermarkTextSetting config={config?.text} onChange={(v) => handleConfigChange({ text: v })} />}
+                {watermarkType === IWatermarkTypeEnum.Image && <WatermarkImageSetting config={config?.image} onChange={(v) => handleConfigChange({ image: v })} />}
             </div>
         </div>
     );

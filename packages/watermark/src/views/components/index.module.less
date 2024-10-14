@@ -25,7 +25,7 @@
         &-header {
             font-size: 15px;
             color: rgb(var(--text-color-secondary));
-            margin-top: 16px;
+            margin: 16px 0;
         }
 
         &-font {
@@ -33,7 +33,7 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin: 16px 0;
+                margin-bottom: 16px;
             }
 
             &-style-part {
@@ -51,8 +51,13 @@
         &-layout {
             &-font-wrapper {
                 width: calc(50% - 4px);
+                align-self: flex-start;
             }
         }
+    }
+
+    &-image-setting {
+        font-size: 14px;
     }
 
     &-input {

@@ -14,3 +14,12 @@
  * limitations under the License.
  */
 
+import React from 'react';
+
+export const WatermarkPanelFooter: React.FC = () => {
+    return (
+        <div>
+            WatermarkPanelFooter
+        </div>
+    );
+};

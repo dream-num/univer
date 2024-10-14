@@ -18,8 +18,8 @@ import type { ICommand } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, SheetsSelectionsService } from '@univerjs/sheets';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
-import { SheetsThreadCommentModel } from '../../../../sheets-thread-comment/src';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const ShowAddSheetCommentModalOperation: ICommand = {

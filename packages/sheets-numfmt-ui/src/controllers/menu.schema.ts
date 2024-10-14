@@ -15,12 +15,8 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
+import { AddDecimalCommand, OpenNumfmtPanelOperator, SetCurrencyCommand, SetPercentCommand, SubtractDecimalCommand } from '@univerjs/sheets-numfmt';
 import { RibbonStartGroup } from '@univerjs/ui';
-import { AddDecimalCommand } from '../../../sheets-numfmt/src/commands/commands/add-decimal.command';
-import { SetCurrencyCommand } from '../../../sheets-numfmt/src/commands/commands/set-currency.command';
-import { SetPercentCommand } from '../../../sheets-numfmt/src/commands/commands/set-percent.command';
-import { SubtractDecimalCommand } from '../../../sheets-numfmt/src/commands/commands/subtract-decimal.command';
-import { OpenNumfmtPanelOperator } from '../../../sheets-numfmt/src/commands/operations/open.numfmt.panel.operation';
 import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from './menu';
 
 export const menuSchema: MenuSchemaType = {

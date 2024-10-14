@@ -20,11 +20,11 @@ import type { IDeleteCommentMutationParams } from '@univerjs/thread-comment';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { RangeProtectionPermissionViewPoint, SetWorksheetActiveOperation, SheetsSelectionsService, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
+import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { DeleteCommentMutation } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { debounceTime } from 'rxjs';
-import { SheetsThreadCommentModel } from '../../../sheets-thread-comment/src';
 import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
 
 interface ISelectionShapeInfo {

@@ -18,7 +18,6 @@ export { ShowAddSheetCommentModalOperation } from './commands/operations/comment
 export { UniverSheetsThreadCommentUIPlugin } from './plugin';
 export { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 export { SHEETS_THREAD_COMMENT } from './types/const';
-export { SheetsThreadCommentModel } from '../../sheets-thread-comment/src';
 export { IThreadCommentDataSourceService } from '@univerjs/thread-comment';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';

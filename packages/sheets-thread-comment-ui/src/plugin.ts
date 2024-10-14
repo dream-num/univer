@@ -17,8 +17,8 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverSheetsThreadCommentUIConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-import { UniverSheetsThreadCommentPlugin } from '../../sheets-thread-comment/src';
 import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsThreadCommentRenderController } from './controllers/render-controllers/render.controller';

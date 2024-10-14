@@ -15,7 +15,7 @@
  */
 
 import './f-range';
-import './f-worbook';
+import './f-workbook';
 import './f-worksheet';
 
 export { FThreadComment } from './f-thread-comment';

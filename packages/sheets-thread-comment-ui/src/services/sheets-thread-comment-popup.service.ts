@@ -15,8 +15,8 @@
  */
 
 import type { IDisposable, Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import type { ISheetLocationBase } from '@univerjs/sheets';
+import { Disposable, DisposableCollection, Inject } from '@univerjs/core';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject } from 'rxjs';

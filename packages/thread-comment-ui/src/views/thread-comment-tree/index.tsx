@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
+import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, useDependency } from '@univerjs/core';
 import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Dropdown, Menu, MenuItem, Tooltip } from '@univerjs/design';
 import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingle, SolveSingle } from '@univerjs/icons';
-import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
-import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
-import { getDT } from '../../common/utils';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 import styles from './index.module.less';
-import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 
 export interface IThreadCommentTreeProps {
     id?: string;

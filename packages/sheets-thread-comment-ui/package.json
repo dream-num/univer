@@ -1,8 +1,8 @@
 {
-    "name": "@univerjs/sheets-thread-comment-base",
+    "name": "@univerjs/sheets-thread-comment-ui",
     "version": "0.4.0-alpha.1",
     "private": false,
-    "description": "Univer sheets thread comment base plugin",
+    "description": "Univer thread comment plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -20,7 +20,8 @@
     "keywords": [],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./locale/*": "./src/locale/*.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -40,7 +41,8 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*"
+            "./lib/*": "./lib/*",
+            "./locale/*": "./lib/locale/*.json"
         }
     },
     "directories": {
@@ -57,15 +59,23 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/icons": "^0.1.79",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-thread-comment": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/ui": "workspace:*"
+        "@univerjs/thread-comment-ui": "workspace:*",
+        "@univerjs/ui": "workspace:*",
+        "clsx": "^2.1.1"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -86,6 +96,7 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*"
+        "./lib/*": "./lib/*",
+        "./locale/*": "./lib/locale/*.json"
     }
 }

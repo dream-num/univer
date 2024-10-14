@@ -40,7 +40,7 @@ export function createUniverOnNode(): Univer {
     const univer = new Univer();
 
     registerBasicPlugins(univer);
-    reigsterSharedPlugins(univer);
+    registerSharedPlugins(univer);
     registerRPCPlugin(univer);
 
     registerDocPlugins(univer);
@@ -53,7 +53,7 @@ function registerBasicPlugins(univer: Univer): void {
     univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 }
 
-function reigsterSharedPlugins(univer: Univer): void {
+function registerSharedPlugins(univer: Univer): void {
     univer.registerPlugin(UniverThreadCommentPlugin);
     univer.registerPlugin(UniverDrawingPlugin);
 }

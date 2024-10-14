@@ -15,12 +15,15 @@
  */
 
 import type { IDisposable, IExecutionOptions } from '@univerjs/core';
-import type { IUpdateCommandParams } from '@univerjs/docs-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
 import { toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { filter } from 'rxjs';
+
+// FIXME@weird94: this plugin should not rely on docs-ui
+// eslint-disable-next-line ts/no-explicit-any
+type IUpdateCommandParams = any;
 
 interface IFWorkbookThreadCommentMixin {
     /**

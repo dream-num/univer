@@ -2,7 +2,7 @@
     "name": "@univerjs/sheets-thread-comment",
     "version": "0.4.0-alpha.1",
     "private": false,
-    "description": "Univer thread comment plugin",
+    "description": "Univer sheets thread comment base plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -21,7 +21,6 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
         "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
@@ -42,8 +41,7 @@
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
-            "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -60,23 +58,13 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-thread-comment-base": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/thread-comment": "workspace:*",
-        "@univerjs/thread-comment-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "clsx": "^2.1.1"
+        "@univerjs/thread-comment": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -97,7 +85,6 @@
             "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
-        "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./lib/*": "./lib/*"
     }
 }

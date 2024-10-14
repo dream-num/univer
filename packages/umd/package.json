@@ -76,7 +76,7 @@
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/sheets-sort-ui": "workspace:*",
         "@univerjs/sheets-thread-comment": "workspace:*",
-        "@univerjs/sheets-thread-comment-base": "workspace:*",
+        "@univerjs/sheets-thread-comment-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/sheets-zen-editor": "workspace:*",
         "@univerjs/slides": "workspace:*",

@@ -15,8 +15,8 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
+import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { threadCommentMenuFactory, threadPanelMenuFactory } from './menu';
 

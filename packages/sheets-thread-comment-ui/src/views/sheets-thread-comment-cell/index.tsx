@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
-import React from 'react';
-import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
 import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
 import { useObservable } from '@univerjs/ui';
-import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
+import React from 'react';
+import { SheetsThreadCommentModel } from '../../../../sheets-thread-comment/src';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentCell = () => {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionPermissionViewPoint, WorkbookCommentPermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { getMenuHiddenObservable, KeyCode, MenuItemType, MetaKeys } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
-import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
 import { COMMENT_SINGLE_ICON } from '../types/const';
 

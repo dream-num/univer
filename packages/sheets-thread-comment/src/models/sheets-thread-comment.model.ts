@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { CommentUpdate, IThreadComment } from '@univerjs/thread-comment';
-import { ThreadCommentModel } from '@univerjs/thread-comment';
+import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { Subject } from 'rxjs';
 
 export type SheetCommentUpdate = CommentUpdate & {

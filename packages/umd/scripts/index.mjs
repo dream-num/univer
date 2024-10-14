@@ -221,7 +221,7 @@ function buildJS() {
         '@univerjs/sheets-sort-ui',
         '@univerjs/thread-comment',
         '@univerjs/thread-comment-ui',
-        '@univerjs/sheets-thread-comment-base',
+        '@univerjs/sheets-thread-comment',
         '@univerjs/sheets-thread-comment',
         '@univerjs/docs-thread-comment-ui',
         '@univerjs/drawing',

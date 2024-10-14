@@ -18,8 +18,8 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, InterceptorEffectEnum, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment-base';
 import { debounceTime } from 'rxjs';
+import { SheetsThreadCommentModel } from '../../../../sheets-thread-comment/src';
 
 export class SheetsThreadCommentRenderController extends Disposable {
     constructor(

@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-export { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
-export { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
-export type { ISheetThreadComment } from './types/interfaces/i-sheet-thread-comment';
-export { UniverSheetsThreadCommentBasePlugin } from './plugin';
+import type { DependencyOverride } from '@univerjs/core';
+import type { MenuConfig } from '@univerjs/ui';
+
+export const PLUGIN_CONFIG_KEY = 'sheets-thread-comment.config';
+
+export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
+
+export interface IUniverSheetsThreadCommentUIConfig {
+    menu?: MenuConfig;
+    overrides?: DependencyOverride;
+}
+
+export const defaultPluginConfig: IUniverSheetsThreadCommentUIConfig = {};

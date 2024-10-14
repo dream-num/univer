@@ -28,6 +28,7 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { FUniver } from '@univerjs/facade';
 import { DEFAULT_DOCUMENT_DATA_CN } from '@univerjs/mockdata';
 import { UniverUIPlugin } from '@univerjs/ui';
+import { UniverWatermarkPlugin } from '@univerjs/watermark';
 import { enUS, faIR, ruRU, zhCN } from '../locales';
 
 /* eslint-disable node/prefer-global/process */
@@ -68,6 +69,7 @@ univer.registerPlugin(UniverDocsDrawingUIPlugin);
 univer.registerPlugin(UniverDocsThreadCommentUIPlugin);
 univer.registerPlugin(UniverDocsHyperLinkUIPlugin);
 univer.registerPlugin(UniverDocsMentionUIPlugin);
+univer.registerPlugin(UniverWatermarkPlugin);
 
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_DOC, DEFAULT_DOCUMENT_DATA_CN);

@@ -34,13 +34,6 @@ export interface IGeneralWatermarkConfig {
 
 }
 
-export interface IUserInfoWatermarkConfig extends IGeneralWatermarkConfig {
-    name: boolean;
-    email: boolean;
-    phone: boolean;
-    uid: boolean;
-}
-
 export interface ITextWatermarkConfig extends IGeneralWatermarkConfig {
     content?: string;
     fontSize: number;
@@ -51,9 +44,18 @@ export interface ITextWatermarkConfig extends IGeneralWatermarkConfig {
 }
 
 export interface IImageWatermarkConfig extends IGeneralWatermarkConfig {
-    url?: string;
+    url: string;
     width: number;
     height: number;
+    maintainAspectRatio: boolean;
+    originRatio: number;
+}
+
+export interface IUserInfoWatermarkConfig extends IGeneralWatermarkConfig, Omit<ITextWatermarkConfig, 'content'> {
+    name: boolean;
+    email: boolean;
+    phone: boolean;
+    uid: boolean;
 }
 
 export interface IWatermarkConfig {
@@ -61,3 +63,9 @@ export interface IWatermarkConfig {
     image?: IImageWatermarkConfig;
     userInfo?: IUserInfoWatermarkConfig;
 }
+
+export interface IWatermarkConfigWithType {
+    config: IWatermarkConfig;
+    type: IWatermarkTypeEnum;
+}
+

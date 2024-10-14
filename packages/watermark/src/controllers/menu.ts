@@ -17,8 +17,10 @@
 import type { IAccessor } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { MenuItemType } from '@univerjs/ui';
+import { map } from 'rxjs';
 import { OpenWatermarkPanelOperation } from '../commands/operations/OpenWatermarkPanelOperation';
 import { UNIVER_WATERMARK_MENU } from '../common/const';
+import { UniverWatermarkService } from '../services/watermarkService';
 
 export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
@@ -27,5 +29,11 @@ export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'watermark.title',
         icon: UNIVER_WATERMARK_MENU,
         type: MenuItemType.BUTTON,
+        hidden$: getWatermarkMenuHiddenObservable(accessor),
     };
+}
+
+function getWatermarkMenuHiddenObservable(accessor: IAccessor) {
+    const univerWatermarkService = accessor.get(UniverWatermarkService);
+    return univerWatermarkService.menuHidden$.pipe(map((hidden) => hidden));
 }

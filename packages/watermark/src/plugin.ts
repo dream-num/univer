@@ -15,6 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -40,16 +41,26 @@ export class UniverWatermarkPlugin extends Plugin {
     ) {
         super();
 
-        const { menu, ...rest } = this._config;
+        const { menu } = this._config;
         if (menu) {
             this._configService.setConfig('menu', menu, { merge: true });
         }
 
-        if (rest.userWatermarkSettings) {
-            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: rest.userWatermarkSettings } });
-        }
+        this._initWatermarkStorage();
         this._initDependencies();
         this._initRegisterCommand();
+    }
+
+    private async _initWatermarkStorage() {
+        const { menu, ...rest } = this._config;
+        if (rest.userWatermarkSettings) {
+            this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.UserInfo, config: { userInfo: rest.userWatermarkSettings } });
+        } else {
+            const config = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
+            if (config?.type === IWatermarkTypeEnum.UserInfo) {
+                this._localStorageService.removeItem(UNIVER_WATERMARK_STORAGE_KEY);
+            }
+        }
     }
 
     private _initDependencies(): void {

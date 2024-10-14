@@ -28,7 +28,7 @@ export class WatermarkLayer extends Layer {
     override render(ctx?: UniverRenderingContext, isMaxLayer = false) {
         super.render(ctx, isMaxLayer);
         const mainCtx = ctx || this.scene.getEngine()?.getCanvas().getContext();
-        if (mainCtx) {
+        if (mainCtx && mainCtx.getId()) {
             this._renderWatermark(mainCtx);
         }
         return this;

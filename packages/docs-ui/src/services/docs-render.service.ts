@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, Workbook } from '@univerjs/core';
 import { IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
+
+const DOC_MAIN_CANVAS_ID = 'univer-doc-main-canvas';
 
 export class DocsRenderService extends RxDisposable {
     constructor(
@@ -48,7 +50,13 @@ export class DocsRenderService extends RxDisposable {
 
     private _createRenderer(doc: DocumentDataModel) {
         const unitId = doc.getUnitId();
-
+        const workbookId = this._instanceSrv.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_DOC)?.getUnitId();
+        this._renderManagerService.created$.subscribe((renderer) => {
+            if (renderer.unitId === workbookId) {
+                renderer.engine.getCanvas().setId(DOC_MAIN_CANVAS_ID);
+                renderer.engine.getCanvas().getContext().setId(DOC_MAIN_CANVAS_ID);
+            }
+        });
         if (!this._renderManagerService.has(unitId)) {
             this._createRenderWithId(unitId);
 

@@ -87,11 +87,7 @@ univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
-univer.registerPlugin(UniverWatermarkPlugin, {
-    // userWatermarkSettings: {
-    //     ...WatermarkUserInfoBaseConfig,
-    // },
-});
+univer.registerPlugin(UniverWatermarkPlugin);
 
 // filter plugin
 univer.registerPlugin(UniverSheetsFilterPlugin);

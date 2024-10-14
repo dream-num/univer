@@ -15,8 +15,14 @@
  */
 
 import { Daverage } from './daverage';
+import { Dcount } from './dcount';
+import { Dcounta } from './dcounta';
+import { Dget } from './dget';
 import { FUNCTION_NAMES_DATABASE } from './function-names';
 
 export const functionDatabase = [
     [Daverage, FUNCTION_NAMES_DATABASE.DAVERAGE],
+    [Dcount, FUNCTION_NAMES_DATABASE.DCOUNT],
+    [Dcounta, FUNCTION_NAMES_DATABASE.DCOUNTA],
+    [Dget, FUNCTION_NAMES_DATABASE.DGET],
 ];

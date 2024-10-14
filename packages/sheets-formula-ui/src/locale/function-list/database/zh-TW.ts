@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '資料庫', detail: '組成清單或資料庫的儲存格範圍。' },
+            field: { name: '欄位', detail: '指出函數中所使用的欄。' },
+            criteria: { name: '條件', detail: '含有指定條件的儲存格範圍。' },
         },
     },
     DCOUNTA: {
@@ -54,8 +55,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '資料庫', detail: '組成清單或資料庫的儲存格範圍。' },
+            field: { name: '欄位', detail: '指出函數中所使用的欄。' },
+            criteria: { name: '條件', detail: '含有指定條件的儲存格範圍。' },
         },
     },
     DGET: {
@@ -68,8 +70,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '資料庫', detail: '組成清單或資料庫的儲存格範圍。' },
+            field: { name: '欄位', detail: '指出函數中所使用的欄。' },
+            criteria: { name: '條件', detail: '含有指定條件的儲存格範圍。' },
         },
     },
     DMAX: {

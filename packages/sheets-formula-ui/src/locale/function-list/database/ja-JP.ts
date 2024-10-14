@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'データベース', detail: 'リストまたはデータベースを構成するセル範囲を指定します。' },
+            field: { name: 'フィールド', detail: '関数の中で使用する列を指定します。' },
+            criteria: { name: '検索条件', detail: '指定した条件が設定されているセル範囲を指定します。' },
         },
     },
     DCOUNTA: {
@@ -54,8 +55,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'データベース', detail: 'リストまたはデータベースを構成するセル範囲を指定します。' },
+            field: { name: 'フィールド', detail: '関数の中で使用する列を指定します。' },
+            criteria: { name: '検索条件', detail: '指定した条件が設定されているセル範囲を指定します。' },
         },
     },
     DGET: {
@@ -68,8 +70,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'データベース', detail: 'リストまたはデータベースを構成するセル範囲を指定します。' },
+            field: { name: 'フィールド', detail: '関数の中で使用する列を指定します。' },
+            criteria: { name: '検索条件', detail: '指定した条件が設定されているセル範囲を指定します。' },
         },
     },
     DMAX: {

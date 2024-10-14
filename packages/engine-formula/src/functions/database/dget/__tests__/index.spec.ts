@@ -22,12 +22,12 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_DATABASE } from '../../function-names';
-import { Daverage } from '../index';
+import { Dget } from '../index';
 
-describe('Test daverage function', () => {
-    const testFunction = new Daverage(FUNCTION_NAMES_DATABASE.DAVERAGE);
+describe('Test dget function', () => {
+    const testFunction = new Dget(FUNCTION_NAMES_DATABASE.DGET);
 
-    describe('Daverage', () => {
+    describe('Dget', () => {
         it('Value is normal', () => {
             const database = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -50,7 +50,7 @@ describe('Test daverage function', () => {
             const criteria = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['树种', '高度'],
-                    ['苹果树', '>10'],
+                    ['苹果树', '>15'],
                 ]),
                 rowCount: 2,
                 columnCount: 2,
@@ -60,7 +60,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(12);
+            expect(getObjectValue(result)).toStrictEqual(14);
         });
 
         it('Database value test', () => {
@@ -129,7 +129,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(database3, field, criteria);
-            expect(getObjectValue(result3)).toStrictEqual(10);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NUM);
 
             const database4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -184,7 +184,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(12);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
 
             const field2 = NullValueObject.create();
             const result2 = testFunction.calculate(database, field2, criteria);
@@ -192,7 +192,7 @@ describe('Test daverage function', () => {
 
             const field3 = BooleanValueObject.create(true);
             const result3 = testFunction.calculate(database, field3, criteria);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NUM);
 
             const field4 = StringValueObject.create('test');
             const result4 = testFunction.calculate(database, field4, criteria);
@@ -239,7 +239,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(database, field, criteria);
-            expect(getObjectValue(result)).toStrictEqual(9.5);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
 
             const criteria2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -268,7 +268,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result3 = testFunction.calculate(database, field, criteria3);
-            expect(getObjectValue(result3)).toStrictEqual(ErrorType.DIV_BY_ZERO);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
 
             const criteria4 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -284,7 +284,7 @@ describe('Test daverage function', () => {
                 column: 0,
             });
             const result4 = testFunction.calculate(database, field, criteria4);
-            expect(getObjectValue(result4)).toStrictEqual(9.5);
+            expect(getObjectValue(result4)).toStrictEqual(ErrorType.NUM);
         });
     });
 });

@@ -215,6 +215,7 @@ export function isCriteriaMatch(criteria: DatabaseValueType[][], database: Datab
 
                     return `${value}`.toLocaleLowerCase() === `${criteriaTitleValue}`.toLocaleLowerCase();
                 });
+                criteriaTitleIndexCache[c] = criteriaTitleIndex;
             }
 
             if (criteriaTitleIndex === -1 && (typeof criteriaValue === 'string' || criteriaValue === 0)) {
@@ -222,6 +223,12 @@ export function isCriteriaMatch(criteria: DatabaseValueType[][], database: Datab
                 break;
             } else if (criteriaTitleIndex > -1) {
                 const databaseValue = database[databaseRowIndex][criteriaTitleIndex];
+
+                if (databaseValue === null) {
+                    isRowMatch = false;
+                    break;
+                }
+
                 const [compareToken, criteriaObject] = findCompareToken(`${criteriaValue}`);
                 const compareObject = ValueObjectFactory.create(`${databaseValue}`).compare(criteriaObject, compareToken);
                 const compareValue = compareObject.getValue();

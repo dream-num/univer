@@ -23,8 +23,10 @@ export abstract class FBase {
     private static _constructorQueue: Array<() => void> = [];
 
     constructor() {
-        FBase._constructorQueue.forEach((fn) => {
-            fn();
+        // eslint-disable-next-line ts/no-this-alias
+        const self = this;
+        FBase._constructorQueue.forEach(function (fn) {
+            fn.apply(self);
         });
     }
 
@@ -33,9 +35,7 @@ export abstract class FBase {
     static extend(source: any): void {
         Object.getOwnPropertyNames(source.prototype).forEach((name) => {
             if (name === '_initialize') {
-                FBase._constructorQueue.push(
-                    source.prototype._initialize.bind(this)
-                );
+                FBase._constructorQueue.push(source.prototype._initialize);
             } else if (name !== 'constructor') {
                 // @ts-ignore
                 this.prototype[name] = source.prototype[name];

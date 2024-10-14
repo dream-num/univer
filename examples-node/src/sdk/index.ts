@@ -18,7 +18,7 @@ import type { IMessageProtocol } from '@univerjs/rpc';
 import type { Serializable } from 'node:child_process';
 import { fork } from 'node:child_process';
 import path from 'node:path';
-import { Univer } from '@univerjs/core';
+import { ILogService, Univer } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
@@ -76,18 +76,24 @@ function registerSheetPlugins(univer: Univer): void {
 }
 
 function registerRPCPlugin(univer: Univer): void {
-    const childFork = fork(path.join(__dirname, '../sdk/worker.js'));
+    const childPath = path.join(__dirname, '../sdk/worker.js');
+    const logService = univer.__getInjector().get(ILogService);
+
+    const child = fork(childPath);
+    child.on('spawn', () => logService.log('Child computing process spawned!'));
+    child.on('error', (error) => logService.error(error));
+
     const messageProtocol: IMessageProtocol = {
         send(message: unknown): void {
-            childFork.send(message as Serializable);
+            child.send(message as Serializable);
         },
-        onMessage: new Observable<any>((subscriber) => {
+        onMessage: new Observable<unknown>((subscriber) => {
             const handler = (message: unknown) => {
                 subscriber.next(message);
             };
 
-            childFork.on('message', handler);
-            return () => childFork.off('message', handler);
+            child.on('message', handler);
+            return () => child.off('message', handler);
         }).pipe(shareReplay(1)),
     };
 

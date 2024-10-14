@@ -15,7 +15,6 @@
  */
 
 import './f-univer';
-import './f-worksheet';
 import './f-workbook';
 import './f-permission';
 

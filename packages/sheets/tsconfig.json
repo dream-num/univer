@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets-ui/src/facade/f-sheet-hooks.ts"]
+    "include": ["src"]
 }

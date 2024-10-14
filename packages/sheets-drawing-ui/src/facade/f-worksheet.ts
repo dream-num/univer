@@ -14,34 +14,15 @@
  * limitations under the License.
  */
 
-import type { Nullable, ObjectMatrix } from '@univerjs/core';
-import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
-import type { IFICanvasFloatDom } from './f-workbook';
+import type { Nullable } from '@univerjs/core';
 import { FWorksheet } from '@univerjs/sheets/facade';
-import { DataValidationModel, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
-import { FDataValidation } from '@univerjs/sheets-data-validation/facade';
-import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
-import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
+import { type IFComponentKey, transformComponentKey } from '@univerjs/sheets-ui/facade';
 import { ComponentManager } from '@univerjs/ui';
-import { FThreadComment } from './f-thread-comment';
-import { transformComponentKey } from './utils';
+import { type ICanvasFloatDom, SheetCanvasFloatDomManagerService } from '../services/canvas-float-dom-manager.service';
 
-export interface IFWorksheetLegacy {
-    /**
-     * get all data validation rules in current sheet
-     * @returns all data validation rules
-     */
-    getDataValidations(): FDataValidation[];
-    /**
-     * get data validation validator status for current sheet
-     * @returns matrix of validator status
-     */
-    getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>>;
-    /**
-     * Get all comments in the current sheet
-     * @returns all comments in the current sheet
-     */
-    getComments(): FThreadComment[];
+interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
+
+interface IFWorksheetLegacy {
     /**
      * add a float dom to position
      * @param layer float dom config
@@ -55,25 +36,6 @@ export interface IFWorksheetLegacy {
 }
 
 class FWorksheetLegacy extends FWorksheet implements IFWorksheetLegacy {
-    override getDataValidations(): FDataValidation[] {
-        const dataValidationModel = this._injector.get(DataValidationModel);
-        return dataValidationModel.getRules(this._workbook.getUnitId(), this._worksheet.getSheetId()).map((rule) => new FDataValidation(rule));
-    }
-
-    override getValidatorStatus(): Promise<ObjectMatrix<Nullable<IDataValidationResCache>>> {
-        const validatorService = this._injector.get(SheetsDataValidationValidatorService);
-        return validatorService.validatorWorksheet(
-            this._workbook.getUnitId(),
-            this._worksheet.getSheetId()
-        );
-    }
-
-    override getComments(): FThreadComment[] {
-        const sheetsTheadCommentModel = this._injector.get(SheetsThreadCommentModel);
-        const comments = sheetsTheadCommentModel.getSubUnitAll(this._workbook.getUnitId(), this._worksheet.getSheetId());
-        return comments.map((comment) => this._injector.createInstance(FThreadComment, comment));
-    }
-
     override addFloatDomToPosition(layer: IFICanvasFloatDom, id?: string): Nullable<{
         id: string;
         dispose: () => void;

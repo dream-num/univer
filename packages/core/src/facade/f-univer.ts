@@ -93,6 +93,11 @@ export class FUniver extends FBase {
         return this._univerInstanceService.disposeUnit(unitId);
     }
 
+    /**
+     * Get the current lifecycle stage.
+     *
+     * @returns {LifecycleStages} - The current lifecycle stage.
+     */
     getCurrentLifecycleStage(): LifecycleStages {
         const lifecycleService = this._injector.get(LifecycleService);
         return lifecycleService.stage;

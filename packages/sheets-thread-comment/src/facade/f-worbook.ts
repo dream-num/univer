@@ -14,46 +14,21 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IExecutionOptions, IRange } from '@univerjs/core';
+import type { IDisposable, IExecutionOptions } from '@univerjs/core';
 import type { IUpdateCommandParams } from '@univerjs/docs-ui';
-import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
-import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
-import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
-import type { IFComponentKey } from './utils';
 import { toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';
-import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import { IDialogService, ISidebarService } from '@univerjs/ui';
-
 import { filter } from 'rxjs';
 
-export interface IFICanvasFloatDom extends Omit<ICanvasFloatDom, 'componentKey' | 'unitId' | 'subUnitId'>, IFComponentKey {}
-
-interface IFWorkbookLegacy {
-
-    /**
-     * open a sidebar
-     * @param params the sidebar options
-     * @returns the disposable object
-     */
-    openSiderbar(this: FWorkbook, params: ISidebarMethodOptions): IDisposable;
-
-    /**
-     * open a dialog
-     * @param dialog the dialog options
-     * @returns the disposable object
-     */
-    openDialog(this: FWorkbook, dialog: IDialogPartMethodOptions): IDisposable;
-
-    // region ThreadCommentHooks
+interface IFWorkbookThreadCommentMixin {
     /**
      * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
      * @param callback Callback function that will be called when the event is fired
      * @returns A disposable object that can be used to unsubscribe from the event
      */
-    onThreadCommentChange(this: FWorkbook & FWorkbookLegacy, callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
+    onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable;
 
     /**
      * The onThreadCommentChange event is fired when the thread comment of this sheet is changed.
@@ -84,12 +59,9 @@ interface IFWorkbookLegacy {
         this: FWorkbook,
         callback: (params: IDeleteCommentCommandParams, options: IExecutionOptions | undefined) => void | false
     ): IDisposable;
-
-    // endregion
-
 }
 
-class FWorkbookLegacy extends FWorkbook implements IFWorkbookLegacy {
+class FWorkbookThreadCommentMixin extends FWorkbook implements IFWorkbookThreadCommentMixin {
     declare _threadCommentModel: ThreadCommentModel;
 
     override _initialize(): void {
@@ -98,26 +70,6 @@ class FWorkbookLegacy extends FWorkbook implements IFWorkbookLegacy {
                 return this._injector.get(ThreadCommentModel);
             },
         });
-    }
-
-    // #endregion
-
-    // TODO: why is this on `FWorkbook`?
-
-    override openSiderbar(params: ISidebarMethodOptions): IDisposable {
-        const sideBarService = this._injector.get(ISidebarService);
-        return sideBarService.open(params);
-    }
-
-    override openDialog(dialog: IDialogPartMethodOptions): IDisposable {
-        const dialogService = this._injector.get(IDialogService);
-        const disposable = dialogService.open({
-            ...dialog,
-            onClose: () => {
-                disposable.dispose();
-            },
-        });
-        return disposable;
     }
 
     override onThreadCommentChange(callback: (commentUpdate: CommentUpdate) => void | false): IDisposable {
@@ -167,31 +119,10 @@ class FWorkbookLegacy extends FWorkbook implements IFWorkbookLegacy {
             }
         }));
     }
-
-    override createSheetHyperlink(sheetId: string, range?: string | IRange): string {
-        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        return resolverService.buildHyperLink(this.getId(), sheetId, range);
-    }
-
-    /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
-     */
-    override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
-        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        return resolverService.parseHyperLink(hyperlink);
-    }
-
-    override navigateToSheetHyperlink(hyperlink: string): void {
-        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        const info = resolverService.parseHyperLink(hyperlink);
-        info.handler();
-    }
 }
 
-FWorkbook.extend(FWorkbookLegacy);
+FWorkbook.extend(FWorkbookThreadCommentMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookLegacy {}
+    interface FWorkbook extends IFWorkbookThreadCommentMixin {}
 }

@@ -24,9 +24,9 @@ export { FHooks } from './apis/f-hooks';
 export { FFilter } from '@univerjs/sheets-filter/facade';
 export { FFormula } from './apis/sheets/f-formula';
 export { FPermission } from './apis/sheets/f-permission';
-export { FRange } from './apis/sheets/f-range';
-export { FSheetHooks } from '@univerjs/sheets/facade/f-sheet-hooks.js';
+export { FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
+export { FSheetHooks } from '@univerjs/sheets-ui/facade';
 export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
-export { FThreadComment } from './apis/sheets/f-thread-comment';
+export { FThreadComment } from '@univerjs/sheets-thread-comment/facade';
 
 // #endregion

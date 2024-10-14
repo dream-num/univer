@@ -14,10 +14,3 @@
  * limitations under the License.
  */
 
-import './f-range';
-import './f-univer';
-import './f-workbook';
-import './f-worksheet';
-
-export { FDataValidation } from './f-data-validation';
-export { FDataValidationBuilder } from './f-data-validation-builder';

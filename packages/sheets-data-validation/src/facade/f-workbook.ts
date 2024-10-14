@@ -121,7 +121,7 @@ interface IFWorkbookDataValidationMixin {
     ): IDisposable;
 }
 
-export class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
+class FWorkbookDataValidationMixin extends FWorkbook implements IFWorkbookDataValidationMixin {
     declare _dataValidationModel: SheetDataValidationModel;
 
     override _initialize(): void {

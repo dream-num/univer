@@ -21,7 +21,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",
@@ -60,6 +61,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -74,6 +76,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/icons": "^0.1.78",
         "@univerjs/sheets-thread-comment-base": "workspace:*",

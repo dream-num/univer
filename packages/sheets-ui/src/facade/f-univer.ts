@@ -14,25 +14,150 @@
  * limitations under the License.
  */
 
-import { FUniver } from '@univerjs/core';
-import { FSheetHooks } from './f-sheet-hooks';
+import type { IDisposable, Nullable } from '@univerjs/core';
+import type {
+    IColumnsHeaderCfgParam,
+    IRowsHeaderCfgParam,
+    RenderComponentType,
+    SheetComponent,
+    SheetExtension,
+    SpreadsheetColumnHeader,
+    SpreadsheetRowHeader,
+} from '@univerjs/engine-render';
+import { FUniver, toDisposable } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SHEET_VIEW_KEY } from '../common/keys';
+import '@univerjs/sheets/facade';
 
 interface IFUniverSheetsUIMixin {
     /**
-     * Get sheet hooks.
+     * Customize the column header of the spreadsheet.
      *
-     * @returns {FSheetHooks} FSheetHooks instance
+     * @param {IColumnsHeaderCfgParam} cfg The configuration of the column header.
+     *
+     * @example
+     * ```typescript
+     * customizeColumnHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, columnsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * ```
      */
-    getSheetHooks(): FSheetHooks;
+    customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void;
+    /**
+     * Customize the row header of the spreadsheet.
+     *
+     * @param {IRowsHeaderCfgParam} cfg The configuration of the row header.
+     *
+     * @example
+     * ```typescript
+     * customizeRowHeader({ headerStyle: { backgroundColor: 'pink', fontSize: 9 }, rowsCfg: ['MokaII', undefined, null, { text: 'Size', textAlign: 'left' }] });
+     * ```
+     */
+    customizeRowHeader(cfg: IRowsHeaderCfgParam): void;
+    /**
+     * Register sheet row header render extensions.
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
+     */
+    registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+    /**
+     * Register sheet column header render extensions.
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
+     */
+    registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
+    /**
+     * Register sheet main render extensions.
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SheetExtension[]} extensions The extensions to register.
+     * @returns {IDisposable} The disposable instance.
+     */
+    registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable;
 }
 
-class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
-    override getSheetHooks(): FSheetHooks {
-        return this._injector.createInstance(FSheetHooks);
+export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMixin {
+    override customizeColumnHeader(cfg: IColumnsHeaderCfgParam): void {
+        const wb = this.getActiveWorkbook();
+        if (!wb) {
+            console.error('WorkBook not exist');
+            return;
+        }
+        const unitId = wb?.getId();
+        const sheetColumn = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        sheetColumn.setCustomHeader(cfg);
+    }
+
+    override customizeRowHeader(cfg: IRowsHeaderCfgParam): void {
+        const wb = this.getActiveWorkbook();
+        if (!wb) {
+            console.error('WorkBook not exist');
+            return;
+        }
+        const unitId = wb?.getId();
+        const sheetRow = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
+        sheetRow.setCustomHeader(cfg);
+    }
+
+    override registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
+        const registerDisposable = sheetComponent.register(...extensions);
+
+        return toDisposable(() => {
+            registerDisposable.dispose();
+            sheetComponent.makeDirty(true);
+        });
+    }
+
+    override registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+        const registerDisposable = sheetComponent.register(...extensions);
+
+        return toDisposable(() => {
+            registerDisposable.dispose();
+            sheetComponent.makeDirty(true);
+        });
+    }
+
+    override registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
+        const registerDisposable = sheetComponent.register(...extensions);
+
+        return toDisposable(() => {
+            registerDisposable.dispose();
+            sheetComponent.makeDirty(true);
+        });
+    }
+
+    /**
+     * Get sheet render component from render by unitId and view key.
+     *
+     * @private
+     *
+     * @param {string} unitId The unit id of the spreadsheet.
+     * @param {SHEET_VIEW_KEY} viewKey The view key of the spreadsheet.
+     * @returns {Nullable<RenderComponentType>} The render component.
+     */
+    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
+        const renderManagerService = this._injector.get(IRenderManagerService);
+        const render = renderManagerService.getRenderById(unitId);
+        if (!render) {
+            throw new Error('Render not found');
+        }
+
+        const { components } = render;
+
+        const renderComponent = components.get(viewKey);
+        if (!renderComponent) {
+            throw new Error('Render component not found');
+        }
+
+        return renderComponent;
     }
 }
 
-FUniver.extend(FUniverSheetsUIMixin);
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsUIMixin { }

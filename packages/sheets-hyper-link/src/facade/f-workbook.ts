@@ -39,7 +39,28 @@ interface IFWorkbookHyperlinkMixin {
     navigateToSheetHyperlink(this: FWorkbook, hyperlink: string): void;
 }
 
-class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHyperlinkMixin {}
+class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHyperlinkMixin {
+    override createSheetHyperlink(sheetId: string, range?: string | IRange): string {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        return resolverService.buildHyperLink(this.getId(), sheetId, range);
+    }
+
+    /**
+     * parse the hyperlink string to get the hyperlink info
+     * @param hyperlink the hyperlink string
+     * @returns the hyperlink info
+     */
+    override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        return resolverService.parseHyperLink(hyperlink);
+    }
+
+    override navigateToSheetHyperlink(hyperlink: string): void {
+        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
+        const info = resolverService.parseHyperLink(hyperlink);
+        info.handler();
+    }
+}
 
 FWorkbook.extend(FWorkbookHyperLinkMixin);
 declare module '@univerjs/sheets/facade' {

@@ -15,9 +15,7 @@
  */
 
 import './f-range';
-import './f-univer';
-import './f-workbook';
+import './f-worbook';
 import './f-worksheet';
 
-export { FDataValidation } from './f-data-validation';
-export { FDataValidationBuilder } from './f-data-validation-builder';
+export { FThreadComment } from './f-thread-comment';

@@ -20,7 +20,6 @@ import type {
     IDisposable,
     IDocumentData,
     Injector,
-    LifecycleStages,
 } from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
@@ -75,16 +74,9 @@ interface IFUniverLegacy {
     // TODO: why is not registerFunction part of FFormula? @Dushusir
 
     getFormula(): FFormula;
-    /**
-     * Get the current lifecycle stage.
-     *
-     * @returns {LifecycleStages} - The current lifecycle stage.
-     */
-    getCurrentLifecycleStage(): LifecycleStages;
-    // #region
+
     copy(): Promise<boolean>;
     paste(): Promise<boolean>;
-    // #endregion
 
     /**
      * Set WebSocket URL for WebSocketService
@@ -100,10 +92,6 @@ interface IFUniverLegacy {
      * @returns {FHooks} FHooks instance
      */
     getHooks(): FHooks;
-
-    // #region API applies to all workbooks
-
-    // #endregion
 
     /**
      * Get the PermissionInstance.

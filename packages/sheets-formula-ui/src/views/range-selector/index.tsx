@@ -37,13 +37,14 @@ import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks
 import { useRefactorEffect } from './hooks/useRefactorEffect';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
+import { useVerify } from './hooks/useVerify';
 import styles from './index.module.less';
 import { rangePreProcess } from './utils/rangePreProcess';
 import { sequenceNodeToText } from './utils/sequenceNodeToText';
 import { unitRangesToText } from './utils/unitRangesToText';
 import { verifyRange } from './utils/verifyRange';
 
-interface IRangeSelectorProps {
+export interface IRangeSelectorProps {
     initValue: string | IUnitRangeName[];
     onChange: (result: string) => void;
     unitId: string;
@@ -216,12 +217,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEditorInput(unitId, rangeString, editor);
 
-    useEffect(() => {
-        if (onVerify) {
-            const result = verifyRange(sequenceNodes);
-            onVerify(result, sequenceNodeToText(sequenceNodes));
-        }
-    }, [sequenceNodes, onVerify]);
+    useVerify(onVerify, sequenceNodes);
 
     useEffect(() => {
         if (editor) {

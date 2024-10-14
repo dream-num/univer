@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
+import { useDependency } from '@univerjs/core';
+import { Button } from '@univerjs/design';
+import { ISidebarService } from '@univerjs/ui';
 import React from 'react';
+import { UniverWatermarkService } from '../../services/watermarkService';
+import styles from './index.module.less';
 
 export const WatermarkPanelFooter: React.FC = () => {
+    const sidebarService = useDependency(ISidebarService);
+    const watermarkService = useDependency(UniverWatermarkService);
+
     return (
-        <div>
-            WatermarkPanelFooter
+        <div className={styles.watermarkPanelFooter}>
+            <div
+                className={styles.watermarkPanelFooterReset}
+                onClick={() => {
+                    watermarkService.deleteWatermarkConfig();
+                }}
+            >
+                取消水印
+            </div>
+            <Button onClick={() => sidebarService.close()}>关闭面板</Button>
         </div>
     );
 };

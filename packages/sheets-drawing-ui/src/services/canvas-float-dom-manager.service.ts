@@ -505,7 +505,6 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             data,
             rotateEnabled: false,
             allowTransform,
-           
         };
 
         this._commandService.executeCommand(InsertSheetDrawingCommand.id, {

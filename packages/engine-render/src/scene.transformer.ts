@@ -15,25 +15,25 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
-
-import { Subject, type Subscription } from 'rxjs';
 import type { BaseObject } from './base-object';
-import { CURSOR_TYPE } from './basics/const';
+
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+import type { ITransformerConfig } from './basics/transformer-config';
+import type { IPoint } from './basics/vector2';
+import type { Scene } from './scene';
+import type { IRectProps } from './shape/rect';
+import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
+import { Subject, type Subscription } from 'rxjs';
+import { CURSOR_TYPE } from './basics/const';
+import { offsetRotationAxis } from './basics/offset-rotation-axis';
+
 import { getCurrentScrollXY } from './basics/scroll-xy';
+import { degToRad, precisionTo, radToDeg } from './basics/tools';
+import { Vector2 } from './basics/vector2';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
-import type { IRectProps } from './shape/rect';
 import { Rect } from './shape/rect';
-
-import { degToRad, precisionTo, radToDeg } from './basics/tools';
-import type { Scene } from './scene';
-import type { IPoint } from './basics/vector2';
-import { Vector2 } from './basics/vector2';
-import type { ITransformerConfig } from './basics/transformer-config';
 import { type IRegularPolygonProps, RegularPolygon } from './shape/regular-polygon';
-import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -1564,8 +1564,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
-
-
 
                 const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                     zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,

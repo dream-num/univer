@@ -16,10 +16,10 @@
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
 
-import { ObjectType } from '../base-object';
-import { Shape } from './shape';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
+import { ObjectType } from '../base-object';
+import { Shape } from './shape';
 
 export interface IRectProps extends IShapeProps {
     radius?: number;
@@ -51,9 +51,9 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         if (props?.visualWidth) {
             this._visualWidth = props.visualWidth;
         }
-        if(props?.rotateEnabled !== undefined || props?.resizeEnabled !== undefined) {
-            const transformerConfig = this.transformerConfig||{};
-            this.transformerConfig = {...transformerConfig, rotateEnabled: props?.rotateEnabled, resizeEnabled: props?.resizeEnabled};
+        if (props?.rotateEnabled !== undefined || props?.resizeEnabled !== undefined) {
+            const transformerConfig = this.transformerConfig || {};
+            this.transformerConfig = { ...transformerConfig, rotateEnabled: props?.rotateEnabled, resizeEnabled: props?.resizeEnabled };
         }
     }
 

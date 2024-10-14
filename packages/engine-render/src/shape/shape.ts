@@ -27,6 +27,8 @@ export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
+    rotateEnabled?: boolean;
+    resizeEnabled?: boolean;
     hoverCursor?: Nullable<string>;
     moveCursor?: string | null;
     fillRule?: string;

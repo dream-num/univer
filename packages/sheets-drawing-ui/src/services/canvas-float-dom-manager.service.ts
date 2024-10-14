@@ -265,7 +265,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    const { transform, drawingType, data } = floatDomParam;
+                    const { transform, drawingType, data, rotateEnabled, resizeEnabled } = floatDomParam;
 
                     if (drawingType !== DrawingTypeEnum.DRAWING_DOM) {
                         return;
@@ -299,6 +299,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         width,
                         height,
                         zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
+                        rotateEnabled,
+                        resizeEnabled,
                     };
 
                     const rect = new Rect(rectShapeKey, imageConfig);
@@ -501,7 +503,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 height: initPosition.endY - initPosition.startY,
             },
             data,
+            rotateEnabled: false,
             allowTransform,
+           
         };
 
         this._commandService.executeCommand(InsertSheetDrawingCommand.id, {

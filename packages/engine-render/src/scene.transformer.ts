@@ -1535,7 +1535,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _createControl(applyObject: BaseObject, isSkipOnCropper = true) {
         const { left = 0, top = 0, height = 0, width = 0 } = applyObject.getState();
         const angle = applyObject.angle;
-        const { isCropper, resizeEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
+        const { isCropper, resizeEnabled, rotateEnabled, rotateAnchorOffset, rotateSize, rotateCornerRadius, borderEnabled, borderStroke, borderStrokeWidth, borderSpacing, enabledAnchors } = this._getConfig(applyObject);
         if (isSkipOnCropper && isCropper) {
             return;
         }
@@ -1555,23 +1555,26 @@ export class Transformer extends Disposable implements ITransformerConfig {
             const { left: lineLeft, top: lineTop } = this._getRotateAnchorPosition(
                 TransformerManagerType.ROTATE_LINE, height, width, applyObject
             );
+            if (rotateEnabled) {
+                const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
+                    zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
+                    strokeWidth: borderStrokeWidth, stroke: borderStroke,
+                });
 
-            const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
-                zIndex: zIndex - 1, evented: false, left: lineLeft, top: lineTop, height: rotateAnchorOffset, width: 1,
-                strokeWidth: borderStrokeWidth, stroke: borderStroke,
-            });
+                const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
-            const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
+                const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
 
-            const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
 
-            const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
-                zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
-                radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
-            });
-            this._attachEventToRotate(rotate, applyObject);
-            this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
-            groupElements.push(rotateLine, rotate);
+
+                const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
+                    zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
+                    radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
+                });
+                this._attachEventToRotate(rotate, applyObject);
+                this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
+                groupElements.push(rotateLine, rotate);
+            }
         }
         if (resizeEnabled) {
             for (let i = 0, len = enabledAnchors.length; i < len; i++) {

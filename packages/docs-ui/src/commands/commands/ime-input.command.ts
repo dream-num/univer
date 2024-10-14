@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICommand, ICommandInfo } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { ICommand, ICommandInfo } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { getRichTextEditPath } from '../util';
 

@@ -43,6 +43,7 @@ import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
@@ -199,6 +200,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ToggleCheckListCommand,
             QuickListCommand,
             IMEInputCommand,
+            SwitchDocModeCommand,
             DocParagraphSettingCommand,
             InnerPasteCommand,
             CutContentCommand,

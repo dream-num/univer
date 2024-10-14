@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix, Range } from '@univerjs/core';
 import type { CellValue, DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import { ObjectMatrix, Range } from '@univerjs/core';
 
 export interface IDataValidationResCache {
     value: Nullable<CellValue>;

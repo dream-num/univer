@@ -14,19 +14,101 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, Inject, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
-import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { IDataValidationRule, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IDataValidationResCache } from './dv-cache.service';
+import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
+import { bufferTime, bufferWhen, filter, Subject } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
-import type { IDataValidationResCache } from './dv-cache.service';
 
-export class SheetsDataValidationValidatorService {
+export class SheetsDataValidationValidatorService extends Disposable {
+    private _dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[]; tag: string }>();
+
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
+        super();
+        this._initDirtyRanges();
+        this._initRecalculate();
+    }
 
+    private _initDirtyRanges() {
+        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
+            if (ruleChange.type === 'add' || ruleChange.type === 'update') {
+                this._dirtyRanges$.next({
+                    unitId: ruleChange.unitId,
+                    subUnitId: ruleChange.subUnitId,
+                    ranges: ruleChange.rule.ranges,
+                    tag: ruleChange.type,
+                });
+            }
+        }));
+
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetRangeValuesMutation.id) {
+                const { cellValue, unitId, subUnitId } = commandInfo.params as ISetRangeValuesMutationParams;
+                if (cellValue) {
+                    const range = new ObjectMatrix(cellValue).getDataRange();
+                    if (range.endRow === -1) return;
+
+                    this._dirtyRanges$.next({
+                        unitId,
+                        subUnitId,
+                        ranges: [range],
+                        tag: 'set',
+                    });
+                }
+            }
+        }));
+    }
+
+    private _initRecalculate() {
+        const handleDirtyRanges = (ranges: { unitId: string; subUnitId: string; ranges: IRange[]; tag: string }[]) => {
+            if (ranges.length === 0) {
+                return;
+            }
+
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+
+            const map: Record<string, Record<string, IRange[]>> = {};
+
+            ranges.flat().forEach((range) => {
+                if (!map[range.unitId]) {
+                    map[range.unitId] = {};
+                }
+                if (!map[range.unitId][range.subUnitId]) {
+                    map[range.unitId][range.subUnitId] = [];
+                }
+                const workbook = this._univerInstanceService.getUnit<Workbook>(range.unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(range.subUnitId);
+                if (!worksheet) {
+                    return;
+                }
+                map[range.unitId][range.subUnitId].push(...range.ranges.map((range) => Range.transformRange(range, worksheet)));
+            });
+
+            Object.entries(map).forEach(([unitId, subUnitMap]) => {
+                Object.entries(subUnitMap).forEach(([subUnitId, ranges]) => {
+                    if (workbook?.getUnitId() === unitId && worksheet?.getSheetId() === subUnitId) {
+                        this.validatorRanges(unitId, subUnitId, ranges);
+                    } else {
+                        requestIdleCallback(() => {
+                            this.validatorRanges(unitId, subUnitId, ranges);
+                        });
+                    }
+                });
+            });
+        };
+
+        this.disposeWithMe(this._dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferTime(100)).subscribe(handleDirtyRanges));
     }
 
     async validatorCell(unitId: string, subUnitId: string, row: number, col: number) {
@@ -44,14 +126,15 @@ export class SheetsDataValidationValidatorService {
             throw new Error(`row or col is not defined, row: ${row}, col: ${col}`);
         }
 
-        const cell = worksheet.getCell(row, col);
         const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
         if (!rule) {
             return DataValidationStatus.VALID;
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            this._sheetDataValidationModel.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
+            this._sheetDataValidationModel.validator(rule, { unitId, subUnitId, row, col, worksheet, workbook }, (status) => {
+                resolve(status);
+            });
         });
     }
 

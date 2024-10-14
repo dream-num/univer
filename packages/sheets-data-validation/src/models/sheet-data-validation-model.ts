@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataValidationType, ICellDataForSheetInterceptor, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import type { DataValidationType, ISheetDataValidationRule } from '@univerjs/core';
 import type { IRuleChange, IUpdateRulePayload, IValidStatusChange } from '@univerjs/data-validation';
 import type { IRemoveSheetMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
@@ -180,7 +180,7 @@ export class SheetDataValidationModel extends Disposable {
         return this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
     }
 
-    validator(cell: Nullable<ICellDataForSheetInterceptor>, rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
+    validator(rule: ISheetDataValidationRule, pos: ISheetLocation, _onCompete?: (status: DataValidationStatus, changed: boolean) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId, worksheet } = pos;
         const ruleId = rule.uid;
         const onCompete = (status: DataValidationStatus, changed: boolean) => {
@@ -196,6 +196,8 @@ export class SheetDataValidationModel extends Disposable {
                 });
             }
         };
+
+        const cell = worksheet.getCellValueOnly(row, col);
         const validator = this.getValidator(rule.type);
         const cellRaw = worksheet.getCellRaw(row, col);
         const cellValue = getCellValueOrigin(cellRaw);

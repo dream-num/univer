@@ -15,26 +15,37 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { IValidStatusChange } from '@univerjs/data-validation';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
-import { Disposable, Inject } from '@univerjs/core';
+import { bufferDebounceTime, Disposable, Inject } from '@univerjs/core';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
-import { debounceTime } from 'rxjs';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export class SheetsDataValidationReRenderController extends Disposable implements IRenderModule {
     constructor(
         private readonly _context: IRenderContext<Workbook>,
-        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
         this._initSkeletonChange();
     }
 
     private _initSkeletonChange() {
-        const reRender = () => {
+        const reRender = (values: IValidStatusChange[]) => {
+            if (!values.length) {
+                return;
+            }
+            const sheetIds = new Set<string>();
+            values.forEach((value) => {
+                sheetIds.add(value.subUnitId);
+            });
+            sheetIds.forEach((sheetId) => {
+                this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.makeDirty(true);
+            });
             this._context.mainComponent?.makeForceDirty();
         };
 
-        // this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.pipe(debounceTime(16)).subscribe(reRender));
-        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(debounceTime(16)).subscribe(reRender));
+        this.disposeWithMe(this._sheetDataValidationModel.validStatusChange$.pipe(bufferDebounceTime(16)).subscribe(reRender));
     }
 }

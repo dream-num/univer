@@ -85,8 +85,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '数据库', detail: '构成列表或数据库的单元格区域。' },
+            field: { name: '字段', detail: '指定函数所使用的列。' },
+            criteria: { name: '条件', detail: '包含指定条件的单元格区域。' },
         },
     },
     DMIN: {
@@ -99,8 +100,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '数据库', detail: '构成列表或数据库的单元格区域。' },
+            field: { name: '字段', detail: '指定函数所使用的列。' },
+            criteria: { name: '条件', detail: '包含指定条件的单元格区域。' },
         },
     },
     DPRODUCT: {
@@ -113,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '数据库', detail: '构成列表或数据库的单元格区域。' },
+            field: { name: '字段', detail: '指定函数所使用的列。' },
+            criteria: { name: '条件', detail: '包含指定条件的单元格区域。' },
         },
     },
     DSTDEV: {
@@ -127,8 +130,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: '数据库', detail: '构成列表或数据库的单元格区域。' },
+            field: { name: '字段', detail: '指定函数所使用的列。' },
+            criteria: { name: '条件', detail: '包含指定条件的单元格区域。' },
         },
     },
     DSTDEVP: {

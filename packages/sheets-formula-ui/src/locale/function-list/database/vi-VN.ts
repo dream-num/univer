@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
+            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
         },
     },
     DCOUNTA: {
@@ -54,8 +55,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
+            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
         },
     },
     DGET: {
@@ -68,8 +70,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'Tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'Tham số thứ hai' },
+            database: { name: 'cơ sở dữ liệu', detail: 'là phạm vi ô tạo thành danh sách hoặc cơ sở dữ liệu.' },
+            field: { name: 'cánh đồng', detail: 'chỉ rõ cột nào được dùng trong hàm.' },
+            criteria: { name: 'tiêu chuẩn', detail: 'là phạm vi ô chứa các điều kiện mà bạn chỉ rõ.' },
         },
     },
     DMAX: {

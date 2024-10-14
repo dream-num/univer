@@ -18,7 +18,7 @@ import type { DocumentDataModel, ICustomRange, IDisposable, INeedCheckDisposable
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import type { ISheetLocationBase } from '@univerjs/sheets';
 import type { ICanvasPopup } from '@univerjs/sheets-ui';
-import { BuildTextUtils, createInternalEditorID, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
@@ -77,6 +77,8 @@ export class SheetsHyperLinkPopupService extends Disposable {
     private _currentEditing$ = new BehaviorSubject<(IHyperLinkEditing & { customRange?: ICustomRange; label?: string }) | null>(null);
     currentEditing$ = this._currentEditing$.asObservable();
 
+    private _isKeepVisible: boolean = false;
+
     get currentPopup() {
         return this._currentPopup;
     }
@@ -105,6 +107,14 @@ export class SheetsHyperLinkPopupService extends Disposable {
             this._currentEditing$.complete();
             this._currentPopup$.complete();
         });
+    }
+
+    public setIsKeepVisible(v: boolean) {
+        this._isKeepVisible = v;
+    }
+
+    public getIsKeepVisible() {
+        return this._isKeepVisible;
     }
 
     showPopup(location: IHyperLinkPopupOptions) {
@@ -226,17 +236,14 @@ export class SheetsHyperLinkPopupService extends Disposable {
             componentKey: CellLinkEdit.componentKey,
             direction: 'bottom',
             onClickOutside: () => {
-                const hyperLinkRangeSelectorId = createInternalEditorID('hyper-link-edit');
-                if (this._editorService.getFocusId() === hyperLinkRangeSelectorId) {
-                    return;
+                if (!this.getIsKeepVisible()) {
+                    this.endEditing();
                 }
-                if (this._rangeSelectorService.getCurrentSelectorId() === hyperLinkRangeSelectorId && this._rangeSelectorService.selectorModalVisible) {
-                    return;
-                }
-                this.endEditing();
             },
             onContextMenu: () => {
-                this.endEditing();
+                if (!this.getIsKeepVisible()) {
+                    this.endEditing();
+                }
             },
             hiddenType: 'hide',
         };

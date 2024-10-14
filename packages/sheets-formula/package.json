@@ -68,9 +68,7 @@
         "@univerjs/icons": "^0.1.79",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
-        "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*"
+        "@univerjs/sheets-numfmt": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

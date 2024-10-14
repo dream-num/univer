@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
+import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange, Workbook } from '@univerjs/core';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
-import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand, useDependency } from '@univerjs/core';
+import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
-import { RangeSelector } from '@univerjs/docs-ui';
-import { serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useEvent, useObservable } from '@univerjs/ui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
+
 import styles from './index.module.less';
 
 // debounce execute commands, for better redo-undo experience
@@ -39,7 +40,12 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     },
     1000
 );
-
+function getSheetIdByName(univerInstanceService: IUniverInstanceService, unitId: string, name: string) {
+    if (unitId) {
+        return univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetName(name)?.getSheetId() || '';
+    }
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
+}
 export function DataValidationDetail() {
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
@@ -47,6 +53,8 @@ export function DataValidationDetail() {
     const { unitId, subUnitId, rule } = activeRuleInfo || {};
     const ruleId = rule.uid;
     const validatorService = useDependency(DataValidatorRegistryService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const dataValidationModel = useDependency(DataValidationModel);
@@ -57,6 +65,9 @@ export function DataValidationDetail() {
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
+
+    const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
 
     const sheetSelectionService = useDependency(SheetsSelectionsService);
 
@@ -103,7 +114,18 @@ export function DataValidationDetail() {
         }
     };
 
-    const handleUpdateRuleRanges = useEvent((unitRanges: IUnitRange[]) => {
+    const handleUpdateRuleRanges = useEvent((rangeText: string) => {
+        const unitRanges = rangeText.split(',').map(deserializeRangeWithSheet).map((unitRange) => {
+            const sheetName = unitRange.sheetName;
+            if (sheetName) {
+                const sheetId = getSheetIdByName(univerInstanceService, unitRange.unitId, sheetName);
+                return { ...unitRange, sheetId };
+            }
+            return {
+                ...unitRange, sheetId: '',
+            };
+        });
+
         if (isUnitRangesEqual(unitRanges, localRanges)) {
             return;
         }
@@ -222,13 +244,27 @@ export function DataValidationDetail() {
             }
         );
     };
+
+    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+    };
+
     return (
-        <div className={styles.dataValidationDetail}>
+        <div className={styles.dataValidationDetail} onClick={handlePanelClick}>
             <FormLayout
                 label={localeService.t('dataValidation.panel.range')}
                 error={!localRule.ranges.length ? localeService.t('dataValidation.panel.rangeError') : ''}
             >
                 <RangeSelector
+                    unitId={unitId}
+                    subUnitId={subUnitId}
+                    initValue={rangeStr}
+                    onChange={handleUpdateRuleRanges}
+                    isFocus={isFocusRangeSelector}
+                    actions={rangeSelectorActionsRef.current}
+                />
+                {/* <RangeSelector
                     key={key}
                     className={styles.dataValidationDetailFormItem}
                     value={rangeStr}
@@ -243,7 +279,7 @@ export function DataValidationDetail() {
                         handleUpdateRuleRanges(newRange);
                     }}
 
-                />
+                /> */}
             </FormLayout>
             <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select

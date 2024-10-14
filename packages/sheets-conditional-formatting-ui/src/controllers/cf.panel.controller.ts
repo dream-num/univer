@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
+import type { IDisposable } from '@univerjs/core';
+import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { ConditionFormattingPanel } from '../components/panel';
 
 const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';
@@ -41,10 +41,20 @@ export class ConditionalFormattingPanelController extends Disposable {
                 if (!sheet) this._sidebarDisposable?.dispose();
             })
         );
+        this.disposeWithMe(this._sidebarService.sidebarOptions$.subscribe((info) => {
+            if (info.id === CF_PANEL_KEY) {
+                if (!info.visible) {
+                    setTimeout(() => {
+                        this._sidebarService.sidebarOptions$.next({ visible: false });
+                    });
+                }
+            }
+        }));
     }
 
     openPanel(rule?: IConditionFormattingRule) {
         const props = {
+            id: CF_PANEL_KEY,
             header: { title: this._localeService.t('sheet.cf.title') },
             children: {
                 label: CF_PANEL_KEY,

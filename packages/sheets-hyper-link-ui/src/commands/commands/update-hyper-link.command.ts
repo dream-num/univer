@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICellData, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import { CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellLinkContent, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { DocumentDataModel, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IUpdateHyperLinkCommandParams {
     unitId: string;
@@ -44,6 +44,8 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const hyperLinkModel = accessor.get(HyperLinkModel);
+        const editorBridgeService = accessor.get(IEditorBridgeService);
+
         const { unitId, subUnitId, payload: link, row, column, id } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const currentRender = renderManagerService.getRenderById(unitId);
@@ -105,6 +107,15 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             return false;
         }
         const newBody = TextX.apply(Tools.deepClone(snapshot.body!), replaceSelection.textX.serialize());
+        const newCellData: ICellData = {
+            p: {
+                ...snapshot,
+                body: newBody,
+            },
+            t: CellValueType.STRING,
+        };
+
+        const finalCellData = await editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, newCellData);
 
         const redo = {
             id: SetRangeValuesMutation.id,
@@ -113,13 +124,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
                 subUnitId,
                 cellValue: {
                     [row]: {
-                        [column]: {
-                            p: {
-                                ...snapshot,
-                                body: newBody,
-                            },
-                            t: CellValueType.STRING,
-                        },
+                        [column]: finalCellData,
                     },
                 },
             },

@@ -15,7 +15,7 @@
  */
 
 import type { Injector } from '@univerjs/core';
-import type { FUniver } from '../../facade';
+import type { FUniver } from '../../everything';
 import { DataValidationOperator, DataValidationType, ICommandService } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';

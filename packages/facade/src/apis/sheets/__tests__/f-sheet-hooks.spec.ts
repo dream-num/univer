@@ -18,12 +18,12 @@ import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@unive
 import type { IDragCellPosition, IHoverCellPosition } from '@univerjs/sheets-ui';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { FSheetHooks } from '@univerjs/sheets/facade/f-sheet-hooks.js';
 
 import { DragManagerService, HoverManagerService } from '@univerjs/sheets-ui';
 import { Subject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
+import { FSheetHooks } from '../../everything';
 
 class MockDataTransfer implements DataTransfer {
     effectAllowed: 'none' | 'copy' | 'link' | 'move' | 'all' | 'copyLink' | 'copyMove' | 'linkMove' | 'uninitialized';

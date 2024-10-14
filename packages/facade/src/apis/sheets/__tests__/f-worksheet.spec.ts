@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, Nullable, Workbook } from '@univerjs/core';
-import type { FUniver } from '../../facade';
+import type { Injector, Workbook } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createWorksheetTestBed } from './create-worksheet-test-bed';
-import '@univerjs/sheets/facade';
-import '@univerjs/sheets-filter/facade';
 
 describe('Test FWorksheet', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let univerAPI: FUniver;
-    let getValueByPosition: (
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    ) => Nullable<ICellData>;
+
     let setSelection: (startRow: number, endRow: number, startColumn: number, endColumn: number) => void;
 
     beforeEach(() => {
@@ -89,18 +82,6 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetFrozenCommand);
         commandService.registerCommand(SetFrozenMutation);
         commandService.registerCommand(CancelFrozenCommand);
-
-        getValueByPosition = (
-            startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number
-        ): Nullable<ICellData> =>
-            get(IUniverInstanceService)
-                .getUnit<Workbook>('test')
-                ?.getSheetBySheetId('sheet1')
-                ?.getRange(startRow, startColumn, endRow, endColumn)
-                .getValue();
 
         setSelection = (startRow: number, endRow: number, startColumn: number, endColumn: number, rangeType: RANGE_TYPE = RANGE_TYPE.NORMAL) => {
             const selectionManagerService = get(SheetsSelectionsService);

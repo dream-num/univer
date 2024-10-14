@@ -19,7 +19,7 @@ import { type Injector, IUndoRedoService, IUniverInstanceService, Univer, Univer
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 function createUnitTestBed(): {
     univer: Univer;

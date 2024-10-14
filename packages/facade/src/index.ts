@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 
-// Add mixins from other packages.
+import './apis/everything';
 
-import '@univerjs/sheets/facade';
-import '@univerjs/sheets-ui/facade';
-import '@univerjs/sheets-data-validation/facade';
-import '@univerjs/engine-formula/facade';
-import '@univerjs/sheets-filter/facade';
-import '@unvierjs/sheets-numfmt/facade'; // TODO: extract
-import '@univerjs/sheets-hyper-link-ui/facade'; // TODO: extract
-
-export { FHooks, FUniver } from '@univerjs/core';
-
-// #region - Univer Sheet
-
-export { FFilter } from '@univerjs/sheets-filter/facade';
-export { FFormula } from '@univerjs/engine-formula/facade';
-export { FPermission, FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
-export { FSheetHooks } from '@univerjs/sheets-ui/facade';
-export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
-export { FThreadComment } from '@univerjs/sheets-thread-comment/facade';
-
-// #endregion
+export * from './apis/everything';

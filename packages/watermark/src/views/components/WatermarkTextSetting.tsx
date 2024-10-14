@@ -15,6 +15,7 @@
  */
 
 import type { ITextWatermarkConfig } from '../../common/type';
+import { LocaleService, useDependency } from '@univerjs/core';
 import { Checkbox, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -28,20 +29,21 @@ interface IWatermarkTextSettingProps {
 
 export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props) => {
     const { config, onChange } = props;
+    const localeService = useDependency(LocaleService);
 
     if (!config) return null;
 
     return (
         <div className={styles.watermarkTextSetting}>
-            <div className={styles.watermarkTextSettingHeader}>样式设置</div>
+            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.style')}</div>
 
             <div className={styles.watermarkTextSettingFontContent}>
-                <div>内容</div>
+                <div>{localeService.t('univer-watermark.content')}</div>
                 <Input
                     value={config.content}
                     onChange={(val) => onChange({ ...config, content: val })}
                     className={styles.watermarkInputContent}
-                    placeholder="请输入内容"
+                    placeholder={localeService.t('univer-watermark.textPlaceholder')}
                 >
                 </Input>
             </div>
@@ -49,7 +51,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
             <div className={styles.watermarkTextSettingFontStyle}>
                 <div className={styles.watermarkTextSettingFontStylePart}>
                     <div>
-                        <div>字号</div>
+                        <div>{localeService.t('univer-watermark.fontSize')}</div>
                         <InputNumber
                             value={config.fontSize}
                             onChange={(val) => {
@@ -64,20 +66,20 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                     </div>
 
                     <div style={{ margin: '0 8px' }}>
-                        <div>方向</div>
+                        <div>{localeService.t('univer-watermark.direction')}</div>
                         <Select
                             value={config.direction}
                             onChange={(v) => onChange({ ...config, direction: v as 'ltr' | 'rtl' })}
                             options={[
-                                { label: 'ltr', value: 'ltr' },
-                                { label: 'rtl', value: 'rtl' },
+                                { label: localeService.t('univer-watermark.ltr'), value: 'ltr' },
+                                { label: localeService.t('univer-watermark.rtl'), value: 'rtl' },
                             ]}
                         >
                         </Select>
                     </div>
 
                     <div>
-                        <div>透明度</div>
+                        <div>{localeService.t('univer-watermark.opacity')}</div>
                         <InputNumber
                             value={config.opacity}
                             onChange={(val) => {
@@ -114,13 +116,13 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                 </div>
             </div>
 
-            <div className={styles.watermarkTextSettingHeader}>布局设置</div>
+            <div className={styles.watermarkTextSettingHeader}>{localeService.t('univer-watermark.layout')}</div>
 
             <div className={styles.watermarkTextSettingLayout}>
 
                 <div className={styles.watermarkTextSettingFontStylePart}>
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>旋转</div>
+                        <div>{localeService.t('univer-watermark.rotate')}</div>
                         <InputNumber
                             value={config.rotate}
                             onChange={(val) => {
@@ -134,7 +136,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         />
                     </div>
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>重复</div>
+                        <div>{localeService.t('univer-watermark.repeat')}</div>
                         <Checkbox
                             checked={config.repeat}
                             onChange={(val) => onChange({ ...config, repeat: val as boolean })}
@@ -145,7 +147,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                 </div>
                 <div className={styles.watermarkTextSettingFontStylePart}>
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>间距X</div>
+                        <div>{localeService.t('univer-watermark.spacingX')}</div>
                         <InputNumber
                             value={config.spacingX}
                             onChange={(val) => {
@@ -159,7 +161,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                     </div>
 
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>间距Y</div>
+                        <div>{localeService.t('univer-watermark.spacingY')}</div>
                         <InputNumber
                             value={config.spacingY}
                             onChange={(val) => {
@@ -175,7 +177,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                 <div className={styles.watermarkTextSettingFontStylePart}>
 
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>起始位置X</div>
+                        <div>{localeService.t('univer-watermark.startX')}</div>
                         <InputNumber
                             value={config.x}
                             onChange={(val) => {
@@ -189,7 +191,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                     </div>
 
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
-                        <div>起始位置Y</div>
+                        <div>{localeService.t('univer-watermark.startY')}</div>
                         <InputNumber
                             value={config.y}
                             onChange={(val) => {

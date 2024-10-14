@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 
+import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import type { Workbook } from '@univerjs/core';
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import { DEFINED_NAME_CONTAINER } from './component-name';
 import styles from './index.module.less';
@@ -60,9 +60,9 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
         };
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
-    // 关闭面板的时候,清除 react 缓存
+    // When closing the panel, clear the react cache
     useEffect(() => {
-        sidebarService.sidebarOptions$.subscribe((info) => {
+        const d = sidebarService.sidebarOptions$.subscribe((info) => {
             if (info.id === DEFINED_NAME_CONTAINER) {
                 if (!info.visible) {
                     setTimeout(() => {
@@ -71,6 +71,9 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
                 }
             }
         });
+        return () => {
+            d.unsubscribe();
+        };
     }, []);
 
     const openSlider = () => {

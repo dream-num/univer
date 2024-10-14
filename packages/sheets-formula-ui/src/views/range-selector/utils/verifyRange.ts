@@ -17,7 +17,6 @@
 import { type ISequenceNode, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
 /**
- * true 校验通过
  * @param {((string | ISequenceNode)[])} sequenceNodes
  * @return {*}
  */

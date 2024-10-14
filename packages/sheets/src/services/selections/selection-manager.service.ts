@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import type { DeepReadonly, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
 import type { ISelectionWithStyle } from '../../basics/selection';
+import { Disposable, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+
+import { BehaviorSubject, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 
 export interface ISelectionManagerSearchParam {
     unitId: string;
@@ -31,7 +31,7 @@ export enum SelectionMoveType {
     MOVING,
     MOVE_END,
     /**
-     * 通过走 api 设置的选区,不会触发 move_end 事件
+     * Events are not triggered by the API
      */
     ONLY_SET,
 }

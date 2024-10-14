@@ -42,7 +42,6 @@ import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
 import { FFormula } from './sheets/f-formula';
 import { FPermission } from './sheets/f-permission';
-import { FSheetHooks } from './sheets/f-sheet-hooks';
 
 interface IFUniverLegacy {
     /**
@@ -94,13 +93,6 @@ interface IFUniverLegacy {
      * @returns {ISocket} WebSocket instance
      */
     createSocket(url: string): ISocket;
-
-    /**
-     * Get sheet hooks
-     *
-     * @returns {FSheetHooks} FSheetHooks instance
-     */
-    getSheetHooks(): FSheetHooks;
 
     /**
      * Get hooks
@@ -247,10 +239,6 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         }
 
         return ws;
-    }
-
-    override getSheetHooks(): FSheetHooks {
-        return this._injector.createInstance(FSheetHooks);
     }
 
     override getHooks(): FHooks {

@@ -25,7 +25,7 @@ export { FFilter } from '@univerjs/sheets-filter/facade';
 export { FFormula } from './apis/sheets/f-formula';
 export { FPermission } from './apis/sheets/f-permission';
 export { FRange } from './apis/sheets/f-range';
-export { FSheetHooks } from './apis/sheets/f-sheet-hooks';
+export { FSheetHooks } from '@univerjs/sheets/facade/f-sheet-hooks.js';
 export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
 export { FThreadComment } from './apis/sheets/f-thread-comment';
 

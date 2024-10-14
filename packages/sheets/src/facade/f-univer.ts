@@ -18,7 +18,7 @@ import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { FUniver, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { FWorkbook } from './f-workbook';
 
-interface IFUniverSheetMixin {
+interface IFUniverSheetsMixin {
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
      *
@@ -39,9 +39,10 @@ interface IFUniverSheetMixin {
      * @returns {FWorkbook | null} The spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null;
+
 }
 
-export class FUniverSheetMixin extends FUniver {
+class FUniverSheetsMixin extends FUniver {
     override createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const instanceService = this._injector.get(IUniverInstanceService);
         const workbook = instanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
@@ -58,8 +59,8 @@ export class FUniverSheetMixin extends FUniver {
     }
 }
 
-FUniver.extend(FUniverSheetMixin);
+FUniver.extend(FUniverSheetsMixin);
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
-    interface FUniver extends IFUniverSheetMixin { }
+    interface FUniver extends IFUniverSheetsMixin { }
 }

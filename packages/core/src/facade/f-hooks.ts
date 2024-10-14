@@ -23,7 +23,7 @@ import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { IUndoRedoService, RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { toDisposable } from '../shared/lifecycle';
-import { FBase } from './f-univer';
+import { FBase } from './f-base';
 
 export class FHooks extends FBase {
     constructor(

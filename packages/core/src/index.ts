@@ -39,7 +39,8 @@ export { composeInterceptors, createInterceptorKey, InterceptorEffectEnum, Inter
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
-export { FBase, FUniver } from './facade/f-univer';
+export { FBase } from './facade/f-base';
+export { FUniver } from './facade/f-univer';
 export { FHooks } from './facade/f-hooks';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';

@@ -23,44 +23,8 @@ import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { Univer } from '../univer';
+import { FBase } from './f-base';
 import { FHooks } from './f-hooks';
-
-/**
- * `FBase` is a base class for all facade classes.
- * It provides a way to extend classes with static and instance methods.
- * The `_initialize` as a special method that will be called after the constructor. You should never call it directly.
- */
-export abstract class FBase {
-    private static _constructorQueue: Array<() => void> = [];
-
-    constructor() {
-        FBase._constructorQueue.forEach((fn) => {
-            fn();
-        });
-    }
-
-    _initialize() { }
-
-    static extend(source: any): void {
-        Object.getOwnPropertyNames(source.prototype).forEach((name) => {
-            if (name === '_initialize') {
-                FBase._constructorQueue.push(
-                    source.prototype._initialize.bind(this)
-                );
-            } else if (name !== 'constructor') {
-                // @ts-ignore
-                this.prototype[name] = source.prototype[name];
-            }
-        });
-
-        Object.getOwnPropertyNames(source).forEach((name) => {
-            if (name !== 'prototype' && name !== 'name' && name !== 'length') {
-                // @ts-ignore
-                this[name] = source[name];
-            }
-        });
-    }
-}
 
 export class FUniver extends FBase {
     /**

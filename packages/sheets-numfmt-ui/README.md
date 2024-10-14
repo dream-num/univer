@@ -5,7 +5,7 @@ sheets-numfmt
 
 | Package Name | UMD Namespace | Version | License | Downloads | Contains CSS | Contains i18n locales |
 | --- | --- | --- | --- | --- | :---: | :---: |
-| `@univerjs/sheets-numfmt-ui` | `UniverSheetsNumfmt` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
+| `@univerjs/sheets-numfmt-ui` | `UniverSheetsNumfmtUI` | [![][npm-version-shield]][npm-version-link] | ![][npm-license-shield] | ![][npm-downloads-shield] | ⭕️ | ⭕️ |
 
 ## Introduction
 
@@ -33,7 +33,7 @@ Import `@univerjs/sheets-numfmt-ui` at the entrance .
 ```typescript
 import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt-ui';
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 
 // univer
 const univer = new Univer({
@@ -45,7 +45,7 @@ const univer = new Univer({
 
 // ... Other plug-ins are registered
 
-univer.registerPlugin(UniverSheetsNumfmtPlugin);
+univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
 ```
 
 > [!NOTE]

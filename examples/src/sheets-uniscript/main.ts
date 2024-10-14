@@ -24,7 +24,6 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';

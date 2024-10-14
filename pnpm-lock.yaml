@@ -306,6 +306,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../packages/sheets-numfmt
+      '@univerjs/sheets-numfmt-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
@@ -1753,6 +1756,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-numfmt-ui':
+        specifier: workspace:*
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment
@@ -2431,9 +2437,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-numfmt':
+      '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../sheets-numfmt
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2489,9 +2495,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
-      '@univerjs/sheets-numfmt':
+      '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../sheets-numfmt
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2621,6 +2627,37 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/engine-numfmt':
+        specifier: workspace:*
+        version: link:../engine-numfmt
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/sheets-numfmt-ui:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
@@ -2639,6 +2676,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../sheets-numfmt
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -3355,9 +3395,9 @@ importers:
       '@univerjs/sheets-hyper-link-ui':
         specifier: workspace:*
         version: link:../sheets-hyper-link-ui
-      '@univerjs/sheets-numfmt':
+      '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../sheets-numfmt
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../sheets-sort

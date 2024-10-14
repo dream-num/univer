@@ -35,6 +35,7 @@ import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -167,6 +168,7 @@ function registerSheetPlugins(univer: Univer) {
         ],
     });
     univer.registerPlugin(UniverSheetsNumfmtPlugin);
+    univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
     univer.registerPlugin(UniverSheetsFormulaPlugin);
     univer.registerPlugin(UniverSheetsFindReplacePlugin);
     univer.registerPlugin(UniverSheetsHyperLinkUIPlugin);

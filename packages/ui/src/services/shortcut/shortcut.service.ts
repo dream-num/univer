@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
-import { Subject } from 'rxjs';
 import type { IDisposable } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-
+import type { KeyCode } from './keycode';
+import { createIdentifier, Disposable, ICommandService, IContextService, Optional, toDisposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { fromGlobalEvent } from '../../common/lifecycle';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCodeToChar, MetaKeys } from './keycode';
-import type { KeyCode } from './keycode';
 
 /**
  * A shortcut item that could be registered to the {@link IShortcutService}.

@@ -27,7 +27,6 @@ interface IFRangeSheetsNumfmtMixin {
      * @returns Execution result.
      */
     setNumberFormat(pattern: string): Promise<boolean>;
-
 }
 
 class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {

@@ -17,13 +17,15 @@
 /* eslint-disable max-lines-per-function */
 
 import type { Workbook } from '@univerjs/core';
+import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import type { INode } from '../utils/filterReferenceNode';
-import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 
+import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { filterReferenceNode, isComma } from '../utils/filterReferenceNode';
 import { rangePreProcess } from '../utils/rangePreProcess';
@@ -57,7 +59,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
     useEffect(() => {
         if (isNeed && refSelectionsRenderService) {
             let isFirst = true;
-            const dispose = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+            const handleSelectionsChange = (selections: ISelectionWithCoordAndStyle[]) => {
                 if (isFirst) {
                     isFirst = false;
                     return;
@@ -122,9 +124,18 @@ export const useSheetSelectionChange = (isNeed: boolean,
                 const result = `${thePre}${(thePre && theLast) ? matchToken.COMMA : ''}${theLast}`;
                 const isScaling = isScalingRef.current;
                 handleRangeChange(result, isScaling ? -1 : result.length);
+            };
+            const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
+                handleSelectionsChange(selections);
             });
+
+            const d2 = refSelectionsRenderService.selectionMoving$.pipe(throttleTime(50)).subscribe((selections) => {
+                handleSelectionsChange(selections);
+            });
+
             return () => {
-                dispose.unsubscribe();
+                d1.unsubscribe();
+                d2.unsubscribe();
             };
         }
     }, [isNeed, filterReferenceNodes, refSelectionsRenderService, isSupportAcrossSheet, isOnlyOneRange]);

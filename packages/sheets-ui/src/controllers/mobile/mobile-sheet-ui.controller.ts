@@ -16,7 +16,6 @@
 
 import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import {
-    CancelFrozenCommand,
     SetBoldCommand,
     SetFontFamilyCommand,
     SetFontSizeCommand,
@@ -235,7 +234,6 @@ export class SheetUIMobileController extends Disposable {
             SetSelectionFrozenCommand,
             SetRowFrozenCommand,
             SetColumnFrozenCommand,
-            CancelFrozenCommand,
             SetUnderlineCommand,
             SetZoomRatioCommand,
             SetZoomRatioOperation,

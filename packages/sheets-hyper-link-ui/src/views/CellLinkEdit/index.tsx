@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { BuildTextUtils, ColorKit, CustomRangeType, DisposableCollection, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_SHEET, generateRandomId, ICommandService, IContextService, isValidRange, IUniverInstanceService, LocaleService, ThemeService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
+
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
-
 import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { DocumentDataModel, Nullable, Workbook } from '@univerjs/core';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../../commands/commands/add-hyper-link.command';
 import { UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from '../../commands/commands/update-hyper-link.command';
 import { CloseHyperLinkPopupOperation } from '../../commands/operations/popup.operations';
@@ -246,6 +246,15 @@ export const CellLinkEdit = () => {
             popupService.setIsKeepVisible(false);
         };
     }, [type]);
+
+    useEffect(() => {
+        return () => {
+            if (zenZoneService.temporaryHidden) {
+                zenZoneService.show();
+                contextService.setContextValue(FOCUSING_SHEET, false);
+            }
+        };
+    }, [contextService, zenZoneService]);
 
     const linkTypeOptions: Array<{
         label: string;

@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DCOUNT: {

@@ -18,7 +18,7 @@ import type { IWatermarkConfig, IWatermarkConfigWithType } from '../../common/ty
 import { ILocalStorageService, useDependency } from '@univerjs/core';
 import { Select } from '@univerjs/design';
 import React, { useEffect, useState } from 'react';
-import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkTextBaseConfig } from '../../common/const';
+import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../../common/const';
 import { IWatermarkTypeEnum } from '../../common/type';
 import { UniverWatermarkService } from '../../services/watermarkService';
 import styles from './index.module.less';
@@ -31,9 +31,9 @@ export const WatermarkPanel: React.FC = () => {
     const watermarkService = useDependency(UniverWatermarkService);
     const localStorageService = useDependency(ILocalStorageService);
 
-    function handleConfigChange(config: IWatermarkConfig) {
+    function handleConfigChange(config: IWatermarkConfig, type?: IWatermarkTypeEnum) {
         setConfig(config);
-        watermarkService.updateWatermarkConfig({ type: watermarkType, config });
+        watermarkService.updateWatermarkConfig({ type: type ?? watermarkType, config });
     }
 
     useEffect(() => {
@@ -55,7 +55,14 @@ export const WatermarkPanel: React.FC = () => {
             <div className={styles.watermarkPanelTypeTitle}>水印类型</div>
             <Select
                 value={watermarkType}
-                onChange={(v) => setWatermarkType(v as IWatermarkTypeEnum)}
+                onChange={(v) => {
+                    setWatermarkType(v as IWatermarkTypeEnum);
+                    if (v === IWatermarkTypeEnum.Text) {
+                        handleConfigChange({ text: WatermarkTextBaseConfig }, IWatermarkTypeEnum.Text);
+                    } else if (v === IWatermarkTypeEnum.Image) {
+                        handleConfigChange({ image: WatermarkImageBaseConfig }, IWatermarkTypeEnum.Image);
+                    }
+                }}
                 options={[
                     { label: '文本', value: IWatermarkTypeEnum.Text },
                     { label: '图片', value: IWatermarkTypeEnum.Image },

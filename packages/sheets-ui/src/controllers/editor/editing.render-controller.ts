@@ -777,7 +777,7 @@ export function getCellDataByInput(
         cellData.t = CellValueType.NUMBER;
     } else {
         // If the data is empty, the data is set to null.
-        if ((newDataStream === cellData.v || (newDataStream === '' && cellData.v == null)) && cellData.p == null) {
+        if (newDataStream === '' && cellData.v == null && cellData.p == null) {
             return null;
         }
         cellData.v = newDataStream;

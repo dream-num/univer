@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ITextWatermarkConfig } from '../common/type';
+import type { ITextWatermarkConfig } from '../../common/type';
 import { Checkbox, ColorPicker, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { BoldSingle, FontColor, ItalicSingle } from '@univerjs/icons';
 import clsx from 'clsx';
@@ -119,16 +119,6 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
             <div className={styles.watermarkTextSettingLayout}>
 
                 <div className={styles.watermarkTextSettingFontStylePart}>
-                    <div>
-                        <div>重复</div>
-                        <Checkbox
-                            checked={config.repeat}
-                            onChange={(val) => onChange({ ...config, repeat: val as boolean })}
-                        >
-
-                        </Checkbox>
-                    </div>
-
                     <div className={styles.watermarkTextSettingLayoutFontWrapper}>
                         <div>旋转</div>
                         <InputNumber
@@ -138,8 +128,19 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                                     onChange({ ...config, rotate: Number.parseInt(val.toString()) });
                                 }
                             }}
+                            max={360}
+                            min={-360}
                             className={styles.watermarkInput}
                         />
+                    </div>
+                    <div className={styles.watermarkTextSettingLayoutFontWrapper}>
+                        <div>重复</div>
+                        <Checkbox
+                            checked={config.repeat}
+                            onChange={(val) => onChange({ ...config, repeat: val as boolean })}
+                        >
+
+                        </Checkbox>
                     </div>
                 </div>
                 <div className={styles.watermarkTextSettingFontStylePart}>

@@ -15,3 +15,4 @@
  */
 
 export { UniverWatermarkPlugin } from './plugin';
+export { WatermarkUserInfoBaseConfig } from './common/const';

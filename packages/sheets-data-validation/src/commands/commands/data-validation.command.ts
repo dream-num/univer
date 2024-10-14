@@ -18,7 +18,7 @@ import type { CellValue, IAccessor, ICellData, ICommand, IDataValidationRuleBase
 import type { DataValidationChangeSource, IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { RangeMutation } from '../../models/rule-matrix';
-import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, sequenceExecuteAsync, Tools } from '@univerjs/core';
+import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
 import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
@@ -202,7 +202,7 @@ export function getDataValidationDiffMutations(
 export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataValidationRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.updateDataValidationRuleRange',
-    async handler(accessor, params) {
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -225,7 +225,7 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             redoMutations,
             unitID: unitId,
         });
-        await sequenceExecuteAsync(redoMutations, commandService);
+        sequenceExecute(redoMutations, commandService);
         return true;
     },
 };
@@ -239,7 +239,7 @@ export interface IAddSheetDataValidationCommandParams {
 export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.addDataValidation',
-    async handler(accessor, params) {
+    handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -280,7 +280,7 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             undoMutations,
         });
 
-        await sequenceExecuteAsync(redoMutations, commandService);
+        sequenceExecute(redoMutations, commandService);
         return true;
     },
 };

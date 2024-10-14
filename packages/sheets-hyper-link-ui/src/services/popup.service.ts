@@ -236,6 +236,10 @@ export class SheetsHyperLinkPopupService extends Disposable {
                 this.endEditing();
             },
             onContextMenu: () => {
+                if (this._rangeSelectorService.selectorModalVisible) {
+                    return;
+                }
+
                 this.endEditing();
             },
             hiddenType: 'hide',

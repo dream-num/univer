@@ -40,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
+            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
+            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
         },
     },
     DCOUNTA: {
@@ -54,8 +55,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
+            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
+            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
         },
     },
     DGET: {
@@ -68,8 +70,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            database: { name: 'database', detail: 'The range of cells that makes up the list or database.' },
+            field: { name: 'field', detail: 'Indicates which column is used in the function.' },
+            criteria: { name: 'criteria', detail: 'The range of cells that contains the conditions you specify.' },
         },
     },
     DMAX: {

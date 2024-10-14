@@ -21,7 +21,7 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Dstdev extends BaseFunction {
+export class Dvarp extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
@@ -64,7 +64,7 @@ export class Dstdev extends BaseFunction {
             }
         }
 
-        if (count <= 1) {
+        if (count === 0) {
             return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
@@ -76,7 +76,7 @@ export class Dstdev extends BaseFunction {
             sumOfSquaresDifferences += (values[i] - mean) ** 2;
         }
 
-        const result = Math.sqrt(sumOfSquaresDifferences / (count - 1));
+        const result = sumOfSquaresDifferences / count;
 
         return NumberValueObject.create(result);
     }

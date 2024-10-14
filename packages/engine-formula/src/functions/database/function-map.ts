@@ -22,6 +22,10 @@ import { Dmax } from './dmax';
 import { Dmin } from './dmin';
 import { Dproduct } from './dproduct';
 import { Dstdev } from './dstdev';
+import { Dstdevp } from './dstdevp';
+import { Dsum } from './dsum';
+import { Dvar } from './dvar';
+import { Dvarp } from './dvarp';
 import { FUNCTION_NAMES_DATABASE } from './function-names';
 
 export const functionDatabase = [
@@ -33,4 +37,8 @@ export const functionDatabase = [
     [Dmin, FUNCTION_NAMES_DATABASE.DMIN],
     [Dproduct, FUNCTION_NAMES_DATABASE.DPRODUCT],
     [Dstdev, FUNCTION_NAMES_DATABASE.DSTDEV],
+    [Dstdevp, FUNCTION_NAMES_DATABASE.DSTDEVP],
+    [Dsum, FUNCTION_NAMES_DATABASE.DSUM],
+    [Dvar, FUNCTION_NAMES_DATABASE.DVAR],
+    [Dvarp, FUNCTION_NAMES_DATABASE.DVARP],
 ];

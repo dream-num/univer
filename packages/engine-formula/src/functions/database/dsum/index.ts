@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
-import { ErrorType } from '../../../basics/error-type';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Dstdev extends BaseFunction {
+export class Dsum extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
@@ -45,10 +43,7 @@ export class Dstdev extends BaseFunction {
             return criteriaErrorObject as ErrorValueObject;
         }
 
-        const values = [];
-
-        let sum = 0;
-        let count = 0;
+        let result = 0;
 
         for (let r = 1; r < databaseValues.length; r++) {
             const value = databaseValues[r][fieldIndex];
@@ -58,25 +53,9 @@ export class Dstdev extends BaseFunction {
             }
 
             if (isCriteriaMatch(criteriaValues, databaseValues, r)) {
-                values.push(value);
-                sum += value;
-                count++;
+                result += value;
             }
         }
-
-        if (count <= 1) {
-            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
-        }
-
-        const mean = sum / count;
-
-        let sumOfSquaresDifferences = 0;
-
-        for (let i = 0; i < count; i++) {
-            sumOfSquaresDifferences += (values[i] - mean) ** 2;
-        }
-
-        const result = Math.sqrt(sumOfSquaresDifferences / (count - 1));
 
         return NumberValueObject.create(result);
     }

@@ -14,10 +14,4 @@
  * limitations under the License.
  */
 
-import './f-univer';
-import './f-worksheet';
-import './f-workbook';
-import './f-permission';
-
-export { type IFComponentKey, transformComponentKey } from './f-range';
-export { FSheetHooks } from './f-sheet-hooks';
+import './f-range';

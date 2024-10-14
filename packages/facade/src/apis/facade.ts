@@ -16,68 +16,17 @@
 
 import type {
     Dependency,
-    DocumentDataModel,
-    IDisposable,
-    IDocumentData,
     Injector,
 } from '@univerjs/core';
 import type { ISocket } from '@univerjs/network';
-import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import {
-    BorderStyleTypes,
-    debounce,
     FUniver,
     Quantity,
-    toDisposable,
     Univer,
-    UniverInstanceType,
-    WrapStrategy,
 } from '@univerjs/core';
-import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import { CopyCommand, PasteCommand } from '@univerjs/ui';
-import { FDocument } from './docs/f-document';
-import { FHooks } from './f-hooks';
-import { FFormula } from './sheets/f-formula';
-import { FPermission } from './sheets/f-permission';
 
 interface IFUniverLegacy {
-    /**
-     * Create a new document and get the API handler of that document.
-     *
-     * @param {Partial<IDocumentData>} data The snapshot of the document.
-     * @returns {FDocument} FDocument API instance.
-     */
-    createUniverDoc(data: Partial<IDocumentData>): FDocument;
-    /**
-     * Get the document API handler by the document id.
-     *
-     * @param {string} id The document id.
-     * @returns {FDocument | null} The document API instance.
-     */
-    getUniverDoc(id: string): FDocument | null;
-    /**
-     * Get the currently focused Univer document.
-     *
-     * @returns {FDocument | null} The currently focused Univer document.
-     */
-    getActiveDocument(): FDocument | null;
-    /**
-     * Register a function to the spreadsheet.
-     *
-     * @param {IRegisterFunctionParams} config The configuration of the function.
-     * @returns {IDisposable} The disposable instance.
-     */
-    registerFunction(config: IRegisterFunctionParams): IDisposable;
-
-    // TODO: why is not registerFunction part of FFormula? @Dushusir
-
-    getFormula(): FFormula;
-
-    copy(): Promise<boolean>;
-    paste(): Promise<boolean>;
-
     /**
      * Set WebSocket URL for WebSocketService
      *
@@ -85,78 +34,9 @@ interface IFUniverLegacy {
      * @returns {ISocket} WebSocket instance
      */
     createSocket(url: string): ISocket;
-
-    /**
-     * Get hooks
-     *
-     * @returns {FHooks} FHooks instance
-     */
-    getHooks(): FHooks;
-
-    /**
-     * Get the PermissionInstance.
-     *
-     * @returns {FPermission} - The PermissionInstance.
-     */
-    getPermission(): FPermission;
 }
 
 class FUniverLegacy extends FUniver implements IFUniverLegacy {
-    static BorderStyle = BorderStyleTypes;
-
-    static WrapStrategy = WrapStrategy;
-
-    override copy(): Promise<boolean> {
-        return this._commandService.executeCommand(CopyCommand.id);
-    }
-
-    override paste(): Promise<boolean> {
-        return this._commandService.executeCommand(PasteCommand.id);
-    }
-
-    override createUniverDoc(data: Partial<IDocumentData>): FDocument {
-        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
-        return this._injector.createInstance(FDocument, document);
-    }
-
-    override getActiveDocument(): FDocument | null {
-        const document = this._univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-        if (!document) {
-            return null;
-        }
-
-        return this._injector.createInstance(FDocument, document);
-    }
-
-    override getUniverDoc(id: string): FDocument | null {
-        const document = this._univerInstanceService.getUniverDocInstance(id);
-        if (!document) {
-            return null;
-        }
-
-        return this._injector.createInstance(FDocument, document);
-    }
-
-    /**
-     * Initialize the FUniver instance.
-     *
-     * @private
-     */
-    override _initialize(): void {
-        this._debouncedFormulaCalculation = debounce(() => {
-            this._commandService.executeCommand(
-                SetFormulaCalculationStartMutation.id,
-                {
-                    commands: [],
-                    forceCalculation: true,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }, 10);
-    }
-
     /**
      * Get dependencies for FUniver, you can override newAPI to add more dependencies.
      *
@@ -192,32 +72,6 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         return injector.createInstance(FUniver);
     }
 
-    /**
-     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
-     */
-    private _debouncedFormulaCalculation: () => void;
-    override registerFunction(config: IRegisterFunctionParams): IDisposable {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
-
-        const functionsDisposable = registerFunctionService.registerFunctions(config);
-
-        // When the initialization workbook data already contains custom formulas, and then register the formula, you need to trigger a forced calculation to refresh the calculation results
-        this._debouncedFormulaCalculation();
-
-        return toDisposable(() => {
-            functionsDisposable.dispose();
-        });
-    }
-
-    override getFormula(): FFormula {
-        return this._injector.createInstance(FFormula);
-    }
-
     override createSocket(url: string): ISocket {
         const wsService = this._injector.get(ISocketService);
         const ws = wsService.createSocket(url);
@@ -227,14 +81,6 @@ class FUniverLegacy extends FUniver implements IFUniverLegacy {
         }
 
         return ws;
-    }
-
-    override getHooks(): FHooks {
-        return this._injector.createInstance(FHooks);
-    }
-
-    override getPermission(): FPermission {
-        return this._injector.createInstance(FPermission);
     }
 }
 

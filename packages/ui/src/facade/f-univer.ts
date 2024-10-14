@@ -18,10 +18,15 @@ import type { IDisposable } from '@univerjs/core';
 import type { IDialogPartMethodOptions } from '../views/components/dialog-part/interface';
 import type { ISidebarMethodOptions } from '../views/components/sidebar/interface';
 import { FUniver } from '@univerjs/core';
+import { CopyCommand, PasteCommand } from '../services/clipboard/clipboard.command';
 import { IDialogService } from '../services/dialog/dialog.service';
 import { ISidebarService } from '../services/sidebar/sidebar.service';
 
 interface IFUniverUIMixin {
+    copy(): Promise<boolean>;
+
+    paste(): Promise<boolean>;
+
     /**
      * Open a sidebar.
      * @param params the sidebar options
@@ -38,6 +43,14 @@ interface IFUniverUIMixin {
 }
 
 class FUniverUIMixin extends FUniver implements IFUniverUIMixin {
+    override copy(): Promise<boolean> {
+        return this._commandService.executeCommand(CopyCommand.id);
+    }
+
+    override paste(): Promise<boolean> {
+        return this._commandService.executeCommand(PasteCommand.id);
+    }
+
     override openSiderbar(params: ISidebarMethodOptions): IDisposable {
         const sideBarService = this._injector.get(ISidebarService);
         return sideBarService.open(params);

@@ -23,6 +23,7 @@ import { IUniverInstanceService } from '../services/instance/instance.service';
 import { LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { RedoCommand, UndoCommand } from '../services/undoredo/undoredo.service';
 import { Univer } from '../univer';
+import { FHooks } from './f-hooks';
 
 /**
  * `FBase` is a base class for all facade classes.
@@ -159,5 +160,14 @@ export class FUniver extends FBase {
         options?: IExecutionOptions
     ): Promise<R> {
         return this._commandService.executeCommand(id, params, options);
+    }
+
+    /**
+     * Get hooks.
+     *
+     * @returns {FHooks} FHooks instance
+     */
+    getHooks(): FHooks {
+        return this._injector.createInstance(FHooks);
     }
 }

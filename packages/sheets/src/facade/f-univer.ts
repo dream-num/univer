@@ -16,6 +16,7 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { FUniver, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { FPermission } from './f-permission';
 import { FWorkbook } from './f-workbook';
 
 interface IFUniverSheetsMixin {
@@ -39,7 +40,12 @@ interface IFUniverSheetsMixin {
      * @returns {FWorkbook | null} The spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null;
-
+    /**
+     * Get the PermissionInstance.
+     *
+     * @returns {FPermission} - The PermissionInstance.
+     */
+    getPermission(): FPermission;
 }
 
 class FUniverSheetsMixin extends FUniver {
@@ -56,6 +62,10 @@ class FUniverSheetsMixin extends FUniver {
         }
 
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    override getPermission(): FPermission {
+        return this._injector.createInstance(FPermission);
     }
 }
 

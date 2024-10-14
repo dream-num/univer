@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
 import { DOC_RANGE_TYPE, ICommandService,
     Inject,
     Injector,
@@ -23,9 +24,9 @@ import { DOC_RANGE_TYPE, ICommandService,
     UndoCommand,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DocSelectionRenderService, InsertCommand } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { DocumentDataModel, IDocumentData } from '@univerjs/core';
+import { InsertCommand } from '../commands/commands/core-editing.command';
+import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 
 export class FDocument {
     readonly id: string;
@@ -126,11 +127,4 @@ export class FDocument {
             , true
         );
     }
-
-    // setHyperLink(linkUrl: string): FDocument;
-    // setHyperLink(startOffset: number, endOffset: number, linkUrl: string | null): FDocument {
-    //     this._commandService.executeCommand(
-    //         AddDocHyperLinkCommand.id,
-    //     )
-    // }
 }

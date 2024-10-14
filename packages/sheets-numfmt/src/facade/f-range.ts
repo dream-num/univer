@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
+import type { ISetNumfmtCommandParams } from '../commands/commands/set-numfmt.command';
 import { FRange } from '@univerjs/sheets/facade';
-import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
+import { SetNumfmtCommand } from '../commands/commands/set-numfmt.command';
 
-export type FontLine = 'none' | 'underline' | 'line-through';
-export type FontStyle = 'normal' | 'italic';
-export type FontWeight = 'normal' | 'bold';
-
-interface IFRangeLegacy {
+interface IFRangeSheetsNumfmtMixin {
     // TODO@wzhudev: should separate numfmt package to two
 
     /**
@@ -34,7 +30,7 @@ interface IFRangeLegacy {
 
 }
 
-class FRangeLegacy extends FRange implements IFRangeLegacy {
+class FRangeLegacy extends FRange implements IFRangeSheetsNumfmtMixin {
     override setNumberFormat(pattern: string): Promise<boolean> {
         // TODO@Gggpound: the API should support other types of parameters
         const values: ISetNumfmtCommandParams['values'] = [];
@@ -51,5 +47,5 @@ class FRangeLegacy extends FRange implements IFRangeLegacy {
 FRange.extend(FRangeLegacy);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FRange extends IFRangeLegacy { }
+    interface FRange extends IFRangeSheetsNumfmtMixin { }
 }

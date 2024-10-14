@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
+import type { IAddHyperLinkCommandParams } from '../commands/commands/add-hyper-link.command';
+import type { ICancelHyperLinkCommandParams } from '../commands/commands/remove-hyper-link.command';
+import type { IUpdateHyperLinkCommandParams } from '../commands/commands/update-hyper-link.command';
 import { CustomRangeType, generateRandomId } from '@univerjs/core';
 import { FRange } from '@univerjs/sheets/facade';
+import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
+import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
+import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 
 // TODO@weird94: related methods should be moved from sheets-hyperlink-ui to sheets-hyperlink
+export interface ICellHyperLink {
+    id: string;
+    startIndex: number;
+    endIndex: number;
+    url: string;
+    label: string;
+}
 
 interface IFRangeHyperlinkMixin {
     /**

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-export type { FontLine, FontStyle, FontWeight } from './apis/sheets/f-range';
+// Add mixins from other packages.
 
-export { FUniver } from '@univerjs/core';
-export { FHooks } from './apis/f-hooks';
+import '@univerjs/sheets/facade';
+import '@univerjs/sheets-ui/facade';
+import '@univerjs/sheets-data-validation/facade';
+import '@univerjs/engine-formula/facade';
+import '@univerjs/sheets-filter/facade';
+import '@unvierjs/sheets-numfmt/facade'; // TODO: extract
+import '@univerjs/sheets-hyper-link-ui/facade'; // TODO: extract
+
+export { FHooks, FUniver } from '@univerjs/core';
 
 // #region - Univer Sheet
 
 export { FFilter } from '@univerjs/sheets-filter/facade';
-export { FFormula } from './apis/sheets/f-formula';
-export { FPermission } from './apis/sheets/f-permission';
-export { FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
+export { FFormula } from '@univerjs/engine-formula/facade';
+export { FPermission, FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 export { FSheetHooks } from '@univerjs/sheets-ui/facade';
 export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
 export { FThreadComment } from '@univerjs/sheets-thread-comment/facade';

@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-import './f-univer';
-import './f-worksheet';
-import './f-workbook';
-import './f-permission';
+import { FUniver } from '@univerjs/core';
+import { FFormula } from './f-formula';
 
-export { type IFComponentKey, transformComponentKey } from './f-range';
-export { FSheetHooks } from './f-sheet-hooks';
+interface IFUniverEngineFormulaMixin {
+    getFormula(): FFormula;
+}
+
+class FUniverEngineFormulaMixin extends FUniver implements IFUniverEngineFormulaMixin {
+    override getFormula(): FFormula {
+        return this._injector.createInstance(FFormula);
+    }
+}
+
+FUniver.extend(FUniverEngineFormulaMixin);
+declare module '@univerjs/core' {
+    // eslint-disable-next-line ts/naming-convention
+    interface FUniver extends IFUniverEngineFormulaMixin {}
+}

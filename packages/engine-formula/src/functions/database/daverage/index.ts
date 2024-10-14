@@ -15,6 +15,9 @@
  */
 
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { checkCriteria, checkDatabase, checkField, isCriteriaMatch } from '../../../basics/database';
+import { ErrorType } from '../../../basics/error-type';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -24,7 +27,44 @@ export class Daverage extends BaseFunction {
     override maxParams = 3;
 
     override calculate(database: BaseValueObject, field: BaseValueObject, criteria: BaseValueObject) {
-        // return database.daverage(field, criteria);
-        return NumberValueObject.create(0);
+        const { isError: databaseIsError, errorObject: databaseErrorObject, databaseValues } = checkDatabase(database);
+
+        if (databaseIsError) {
+            return databaseErrorObject as ErrorValueObject;
+        }
+
+        const { isError: fieldIsError, errorObject: filedErrorObject, fieldIndex } = checkField(field, databaseValues);
+
+        if (fieldIsError) {
+            return filedErrorObject as ErrorValueObject;
+        }
+
+        const { isError: criteriaIsError, errorObject: criteriaErrorObject, criteriaValues } = checkCriteria(criteria);
+
+        if (criteriaIsError) {
+            return criteriaErrorObject as ErrorValueObject;
+        }
+
+        let sum = 0;
+        let count = 0;
+
+        for (let r = 1; r < databaseValues.length; r++) {
+            const value = databaseValues[r][fieldIndex];
+
+            if (typeof value !== 'number') {
+                continue;
+            }
+
+            if (isCriteriaMatch(criteriaValues, databaseValues, r)) {
+                sum += value;
+                count++;
+            }
+        }
+
+        if (count === 0) {
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+        }
+
+        return NumberValueObject.create(sum / count);
     }
 }

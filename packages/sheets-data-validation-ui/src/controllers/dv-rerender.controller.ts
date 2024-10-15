@@ -15,8 +15,8 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IValidStatusChange } from '@univerjs/data-validation';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IValidStatusChange } from '@univerjs/sheets-data-validation';
 import { bufferDebounceTime, Disposable, Inject } from '@univerjs/core';
 import { SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';

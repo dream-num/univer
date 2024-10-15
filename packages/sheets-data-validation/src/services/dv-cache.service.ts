@@ -23,6 +23,8 @@ export interface IDataValidationResCache {
     status: DataValidationStatus;
     ruleId: string;
     temp?: boolean;
+    formula1: string;
+    formula2: string;
 }
 
 export class DataValidationCacheService {

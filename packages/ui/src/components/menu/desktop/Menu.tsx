@@ -34,7 +34,7 @@ import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useMemo, useState } from 'react';
 
-import { combineLatest, isObservable, map, Observable } from 'rxjs';
+import { combineLatest, isObservable, Observable } from 'rxjs';
 import { ILayoutService } from '../../../services/layout/layout.service';
 import { MenuItemType } from '../../../services/menu/menu';
 import { IMenuManagerService } from '../../../services/menu/menu-manager.service';
@@ -74,18 +74,19 @@ function MenuWrapper(props: IBaseMenuProps) {
             if (!item.children) return item;
 
             let hasChildren = false;
-            const hiddenObservables = item.children?.map((item) => item.item?.hidden$ ?? new Observable<boolean>((n) => n.next(false)));
+            const hiddenObservables = item.children?.map((subItem) => {
+                return subItem.item?.hidden$ ?? new Observable<boolean>((s) => {
+                    s.next(false);
+                    return s.unsubscribe();
+                });
+            });
+            combineLatest(hiddenObservables).subscribe((hiddenValues) => {
+                hasChildren = hiddenValues.every((hidden) => hidden === true);
 
-            combineLatest(hiddenObservables)
-                .pipe(
-                    map((hiddenValues) => hiddenValues.every((hidden) => hidden === true))
-                )
-                .subscribe((allHidden) => {
-                    if (!allHidden) {
-                        hasChildren = true;
-                    }
-                })
-                .unsubscribe();
+                if (!hasChildren) {
+                    hasChildren = true;
+                }
+            }).unsubscribe();
 
             return hasChildren;
         });

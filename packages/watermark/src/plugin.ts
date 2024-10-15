@@ -67,12 +67,6 @@ export class UniverWatermarkPlugin extends Plugin {
         });
     }
 
-    override onStarting(): void {
-        const injector = this._injector;
-        injector.get(UniverWatermarkService);
-        injector.get(UniverWatermarkMenuController);
-    }
-
     private _initRegisterCommand(): void {
         [
             OpenWatermarkPanelOperation,
@@ -80,6 +74,10 @@ export class UniverWatermarkPlugin extends Plugin {
     }
 
     override onRendered(): void {
+        const injector = this._injector;
+        injector.get(UniverWatermarkService);
+        injector.get(UniverWatermarkMenuController);
+
         this._initRenderDependencies();
     }
 

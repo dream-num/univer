@@ -55,7 +55,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.fontSize}
                             onChange={(val) => {
-                                if (val) {
+                                if (val != null) {
                                     onChange({ ...config, fontSize: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -83,7 +83,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.opacity}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, opacity: Number.parseFloat(val.toString()) });
                                 }
                             }}
@@ -126,7 +126,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.rotate}
                             onChange={(val) => {
-                                if (val) {
+                                if (val != null) {
                                     onChange({ ...config, rotate: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -151,7 +151,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.spacingX}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, spacingX: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -165,7 +165,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.spacingY}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, spacingY: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -181,7 +181,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.x}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, x: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -195,7 +195,7 @@ export const WatermarkTextSetting: React.FC<IWatermarkTextSettingProps> = (props
                         <InputNumber
                             value={config.y}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, y: Number.parseInt(val.toString()) });
                                 }
                             }}

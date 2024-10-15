@@ -24,6 +24,8 @@ import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UNISCRIT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
+import { UniverSheetsNumfmtUIPlugin } from '@univerjs/sheets-numfmt-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
@@ -58,6 +60,7 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
+univer.registerPlugin(UniverSheetsNumfmtUIPlugin);
 univer.registerPlugin(UniverDebuggerPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);

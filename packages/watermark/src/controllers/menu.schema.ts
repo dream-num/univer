@@ -20,7 +20,7 @@ import { OpenWatermarkPanelOperation } from '../commands/operations/OpenWatermar
 import { WatermarkMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {
-    [RibbonStartGroup.FORMAT]: {
+    [RibbonStartGroup.OTHERS]: {
         [OpenWatermarkPanelOperation.id]: {
             order: 0,
             menuItemFactory: WatermarkMenuItemFactory,

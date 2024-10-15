@@ -1518,6 +1518,10 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowPositions != null) {
                         rowPositions.forEach((row) => {
+                            if (row < startRow || row > startRow + rowCount - 1) {
+                                return;
+                            }
+
                             const r = row - startRow;
                             if (result[r] == null) {
                                 result[r] = [];

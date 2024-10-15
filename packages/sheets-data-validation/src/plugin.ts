@@ -90,6 +90,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             this._commandService.registerCommand(command);
         });
 
+        this._injector.get(DataValidationCacheService);
+        this._injector.get(SheetsDataValidationValidatorService);
         this._injector.get(DataValidationRefRangeController);
     }
 

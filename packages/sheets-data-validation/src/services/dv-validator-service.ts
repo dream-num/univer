@@ -14,19 +14,65 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, Inject, IUniverInstanceService, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
+import type { IDataValidationResCache } from './dv-cache.service';
+import { bufferDebounceTime, DataValidationStatus, Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { bufferWhen, filter } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
-import type { IDataValidationResCache } from './dv-cache.service';
 
-export class SheetsDataValidationValidatorService {
+export class SheetsDataValidationValidatorService extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
-        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
+        super();
+        this._initRecalculate();
+    }
 
+    private _initRecalculate() {
+        const handleDirtyRanges = (ranges: { unitId: string; subUnitId: string; ranges: IRange[] }[]) => {
+            if (ranges.length === 0) {
+                return;
+            }
+
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+            const worksheet = workbook?.getActiveSheet();
+
+            const map: Record<string, Record<string, IRange[]>> = {};
+
+            ranges.flat().forEach((range) => {
+                if (!map[range.unitId]) {
+                    map[range.unitId] = {};
+                }
+                if (!map[range.unitId][range.subUnitId]) {
+                    map[range.unitId][range.subUnitId] = [];
+                }
+                const workbook = this._univerInstanceService.getUnit<Workbook>(range.unitId, UniverInstanceType.UNIVER_SHEET);
+                const worksheet = workbook?.getSheetBySheetId(range.subUnitId);
+                if (!worksheet) {
+                    return;
+                }
+                map[range.unitId][range.subUnitId].push(...range.ranges.map((range) => Range.transformRange(range, worksheet)));
+            });
+
+            Object.entries(map).forEach(([unitId, subUnitMap]) => {
+                Object.entries(subUnitMap).forEach(([subUnitId, ranges]) => {
+                    if (workbook?.getUnitId() === unitId && worksheet?.getSheetId() === subUnitId) {
+                        this.validatorRanges(unitId, subUnitId, ranges);
+                    } else {
+                        requestIdleCallback(() => {
+                            this.validatorRanges(unitId, subUnitId, ranges);
+                        });
+                    }
+                });
+            });
+        };
+
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 
     async validatorCell(unitId: string, subUnitId: string, row: number, col: number) {
@@ -44,14 +90,15 @@ export class SheetsDataValidationValidatorService {
             throw new Error(`row or col is not defined, row: ${row}, col: ${col}`);
         }
 
-        const cell = worksheet.getCell(row, col);
         const rule = this._sheetDataValidationModel.getRuleByLocation(unitId, subUnitId, row, col);
         if (!rule) {
             return DataValidationStatus.VALID;
         }
 
         return new Promise<DataValidationStatus>((resolve) => {
-            this._sheetDataValidationModel.validator(cell, rule, { unitId, subUnitId, row, col, worksheet, workbook }, resolve);
+            this._sheetDataValidationModel.validator(rule, { unitId, subUnitId, row, col, worksheet, workbook }, (status) => {
+                resolve(status);
+            });
         });
     }
 

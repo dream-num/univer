@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { MenuSchemaType } from '@univerjs/ui';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -42,7 +43,6 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
-import type { MenuSchemaType } from '@univerjs/ui';
 import {
     SheetCopyCommand,
     // SheetCutCommand,

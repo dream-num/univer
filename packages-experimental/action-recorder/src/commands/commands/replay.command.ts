@@ -17,7 +17,7 @@
 import { CommandType, type ICommand } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import { IMessageService } from '@univerjs/ui';
-import { ActionReplayService } from '../../services/replay.service';
+import { ActionReplayService, ReplayMode } from '../../services/replay.service';
 
 export const ReplayLocalRecordCommand: ICommand = {
     id: 'action-recorder.command.replay-local-records',
@@ -25,6 +25,44 @@ export const ReplayLocalRecordCommand: ICommand = {
     handler: async (accessor) => {
         const replayService = accessor.get(ActionReplayService);
         const result = await replayService.replayLocalJSON();
+
+        if (result) {
+            const messageService = accessor.get(IMessageService);
+            messageService.show({
+                type: MessageType.Success,
+                content: 'Successfully replayed local records',
+            });
+        }
+
+        return result;
+    },
+};
+
+export const ReplayLocalRecordOnNamesakeCommand: ICommand = {
+    id: 'action-recorder.command.replay-local-records-name',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const replayService = accessor.get(ActionReplayService);
+        const result = await replayService.replayLocalJSON(ReplayMode.NAME);
+
+        if (result) {
+            const messageService = accessor.get(IMessageService);
+            messageService.show({
+                type: MessageType.Success,
+                content: 'Successfully replayed local records',
+            });
+        }
+
+        return result;
+    },
+};
+
+export const ReplayLocalRecordOnActiveCommand: ICommand = {
+    id: 'action-recorder.command.replay-local-records-active',
+    type: CommandType.COMMAND,
+    handler: async (accessor) => {
+        const replayService = accessor.get(ActionReplayService);
+        const result = await replayService.replayLocalJSON(ReplayMode.ACTIVE);
 
         if (result) {
             const messageService = accessor.get(IMessageService);

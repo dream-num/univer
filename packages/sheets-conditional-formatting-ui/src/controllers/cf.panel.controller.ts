@@ -41,10 +41,20 @@ export class ConditionalFormattingPanelController extends Disposable {
                 if (!sheet) this._sidebarDisposable?.dispose();
             })
         );
+        this.disposeWithMe(this._sidebarService.sidebarOptions$.subscribe((info) => {
+            if (info.id === CF_PANEL_KEY) {
+                if (!info.visible) {
+                    setTimeout(() => {
+                        this._sidebarService.sidebarOptions$.next({ visible: false });
+                    });
+                }
+            }
+        }));
     }
 
     openPanel(rule?: IConditionFormattingRule) {
         const props = {
+            id: CF_PANEL_KEY,
             header: { title: this._localeService.t('sheet.cf.title') },
             children: {
                 label: CF_PANEL_KEY,

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
 import type { DocumentDataModel } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { Disposable } from '@univerjs/core';
 import { neoGetDocObject } from '../basics/component-tools';
 import { VIEWPORT_KEY } from '../basics/docs-view-key';
 
@@ -75,8 +75,8 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         // the engine width is 1, when engine has no container.
         // Use to fix flickering issues into the page.
         if (engineWidth <= 1) {
-            docsLeft = Number.POSITIVE_INFINITY;
-            docsTop = Number.POSITIVE_INFINITY;
+            docsLeft = -10000;
+            docsTop = -10000;
         }
 
         docsComponent.translate(docsLeft, docsTop);

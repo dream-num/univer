@@ -174,9 +174,15 @@ function RectPopup(props: IRectPopupProps) {
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     useEffect(() => {
-        window.addEventListener('contextmenu', contextMenuFn);
+        const handleContextMenu = (e: MouseEvent) => {
+            if (e.ctrlKey && e.button === 0) {
+                return;
+            }
+            contextMenuFn();
+        };
+        window.addEventListener('contextmenu', handleContextMenu);
         return () => {
-            window.removeEventListener('contextmenu', contextMenuFn);
+            window.removeEventListener('contextmenu', handleContextMenu);
         };
     }, [contextMenuFn]);
 

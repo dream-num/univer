@@ -18,6 +18,7 @@ import type { IDataValidationRule, IDisposable, Nullable } from '@univerjs/core'
 import { Disposable, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { BehaviorSubject, distinctUntilChanged, filter } from 'rxjs';
+import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 
 export class DataValidationPanelService extends Disposable {
     private _open$ = new BehaviorSubject<boolean>(false);
@@ -49,6 +50,16 @@ export class DataValidationPanelService extends Disposable {
                     this.close();
                 })
         );
+
+        this.disposeWithMe(this._sidebarService.sidebarOptions$.subscribe((info) => {
+            if (info.id === DATA_VALIDATION_PANEL) {
+                if (!info.visible) {
+                    setTimeout(() => {
+                        this._sidebarService.sidebarOptions$.next({ visible: false });
+                    });
+                }
+            }
+        }));
     }
 
     override dispose(): void {

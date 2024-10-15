@@ -15,7 +15,7 @@
  */
 
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
-export { SheetDataValidationModel } from './models/sheet-data-validation-model';
+export { type IValidStatusChange, SheetDataValidationModel } from './models/sheet-data-validation-model';
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export { DataValidationCacheService } from './services/dv-cache.service';
 export type { IDataValidationResCache } from './services/dv-cache.service';
@@ -31,9 +31,6 @@ export { DateValidator } from './validators/date-validator';
 export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator, transformCheckboxValue } from './validators/checkbox-validator';
 export { ListMultipleValidator } from './validators/list-multiple-validator';
 export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
-
-// TODO: @jikkai: I think this is a mistake, it should be exported from here. @weird94
-export { DataValidationModel } from '@univerjs/data-validation';
 
 // #region - all commands
 

@@ -21,6 +21,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelections } from '@univerjs/sheets';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
+
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
@@ -67,6 +68,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
 import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 import { normalizeString } from '../utils/char-tools';
+import { isRangeSelector } from './utils/isRangeSelector';
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -298,7 +300,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
                 // Only when the sheet it attached to is focused. Maybe we should change it to the render unit sys.
                 if (
                     !this._isCurrentSheetFocused() ||
-                    !this._editorService.isSheetEditor(commandUnitId)
+                    !this._editorService.isSheetEditor(commandUnitId) ||
+                    isRangeSelector(commandUnitId)
                 ) {
                     return;
                 }

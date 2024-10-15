@@ -346,7 +346,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
                     {RangeSelector && (
                         <RangeSelector
-                            key={rangeStr}
                             unitId={unitId}
                             errorText={rangeErrorMsg}
                             subUnitId={subUnitId}

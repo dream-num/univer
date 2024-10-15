@@ -51,11 +51,10 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
         reader.onload = function (event) {
             if (event.target?.result) {
                 const base64String = event.target.result;
-                onChange({ ...config, url: base64String as string });
 
                 const img = new Image();
                 img.onload = function () {
-                    onChange({ ...config, width: img.width, height: img.height, originRatio: img.width / img.height });
+                    onChange({ ...config, url: base64String as string, width: img.width, height: img.height, originRatio: img.width / img.height });
                 };
 
                 img.src = base64String as string;

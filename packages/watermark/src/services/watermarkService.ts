@@ -26,6 +26,8 @@ export class UniverWatermarkService extends Disposable {
     public updateConfig$ = this._updateConfig$.asObservable();
     private _menuHidden$ = new BehaviorSubject<boolean>(false);
     public menuHidden$ = this._menuHidden$.asObservable();
+    private _refresh$ = new Subject<number>();
+    public refresh$ = this._refresh$.asObservable();
 
     constructor(
         @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService
@@ -43,6 +45,11 @@ export class UniverWatermarkService extends Disposable {
         }
     }
 
+    public async getWatermarkConfig() {
+        const res = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
+        return res;
+    }
+
     public updateWatermarkConfig(config: IWatermarkConfigWithType) {
         this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, config);
         this._updateConfig$.next(config);
@@ -51,5 +58,9 @@ export class UniverWatermarkService extends Disposable {
     public deleteWatermarkConfig() {
         this._localStorageService.removeItem(UNIVER_WATERMARK_STORAGE_KEY);
         this._updateConfig$.next(null);
+    }
+
+    public refresh() {
+        this._refresh$.next(Math.random());
     }
 }

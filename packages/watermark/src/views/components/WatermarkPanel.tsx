@@ -15,9 +15,9 @@
  */
 
 import type { IWatermarkConfig, IWatermarkConfigWithType } from '../../common/type';
-import { ILocalStorageService, LocaleService, useDependency } from '@univerjs/core';
+import { ILocalStorageService, LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { Select } from '@univerjs/design';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../../common/const';
 import { IWatermarkTypeEnum } from '../../common/type';
 import { UniverWatermarkService } from '../../services/watermarkService';
@@ -30,6 +30,7 @@ export const WatermarkPanel: React.FC = () => {
     const [config, setConfig] = useState<IWatermarkConfig>();
     const watermarkService = useDependency(UniverWatermarkService);
     const localStorageService = useDependency(ILocalStorageService);
+    const _refresh = useObservable(watermarkService.refresh$);
     const localeService = useDependency(LocaleService);
 
     function handleConfigChange(config: IWatermarkConfig, type?: IWatermarkTypeEnum) {
@@ -37,19 +38,19 @@ export const WatermarkPanel: React.FC = () => {
         watermarkService.updateWatermarkConfig({ type: type ?? watermarkType, config });
     }
 
-    useEffect(() => {
-        async function getWatermarkConfig() {
-            const watermarkConfig = await localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
-            if (watermarkConfig) {
-                setWatermarkType(watermarkConfig.type);
-                setConfig(watermarkConfig.config);
-            } else {
-                setConfig({ text: WatermarkTextBaseConfig });
-            }
+    const getWatermarkConfig = useCallback(async () => {
+        const watermarkConfig = await localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
+        if (watermarkConfig) {
+            setWatermarkType(watermarkConfig.type);
+            setConfig(watermarkConfig.config);
+        } else {
+            setConfig({ text: WatermarkTextBaseConfig });
         }
-
-        getWatermarkConfig();
     }, []);
+
+    useEffect(() => {
+        getWatermarkConfig();
+    }, [_refresh, getWatermarkConfig]);
 
     return (
         <div className={styles.watermarkPanel}>

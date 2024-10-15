@@ -237,12 +237,18 @@ export class EditingRenderController extends Disposable implements IRenderModule
     private _subscribeToCurrentCell(d: DisposableCollection) {
         // TODO: After the sheet dispose, recreate the sheet, the first cell edit may be unsuccessful,
         // it should be the editor initialization late, and we need to pay attention to this problem in the future.
-        d.add(this._editorBridgeService.currentEditCell$.subscribe((editCellState) => {
+        d.add(this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
             if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
                 return;
             }
 
-            const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
+            const state = this._editorBridgeService.getEditCellState();
+            if (state == null) {
+                return;
+            }
+
+            const { position, documentLayoutObject, scaleX, editorUnitId } = state;
+
             if (
                 this._contextService.getContextValue(FOCUSING_EDITOR_STANDALONE) ||
                 this._contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)

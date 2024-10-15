@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
 import type { ICommand, IParagraph } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 import { InsertCommand } from './core-editing.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
@@ -38,20 +38,10 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
         for (const paragraph of paragraphs) {
             if (prevParagraph.bullet) {
                 paragraph.bullet = Tools.deepClone(prevParagraph.bullet);
-                if (paragraph.bullet.listType === PresetListType.CHECK_LIST_CHECKED) {
-                    paragraph.bullet.listType = PresetListType.CHECK_LIST;
-                }
             }
 
             if (prevParagraph.paragraphStyle) {
                 paragraph.paragraphStyle = Tools.deepClone(prevParagraph.paragraphStyle);
-                if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
-                    if (paragraph.paragraphStyle?.textStyle) {
-                        paragraph.paragraphStyle.textStyle.st = {
-                            s: BooleanNumber.FALSE,
-                        };
-                    }
-                }
             }
         }
     }
@@ -97,49 +87,40 @@ export const BreakLineCommand: ICommand = {
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);
-        // line breaks to 2
-        if (prevParagraph && prevParagraph.startIndex > endOffset) {
-            const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
-            bodyAfter.customRanges = bodyAfter.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
-
-            const deleteRange = {
-                startOffset,
-                endOffset: prevParagraph.startIndex + 1,
-                collapsed: false,
-            };
-            updateAttributeByInsert(
-                bodyAfter,
-                {
-                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-                },
-                1,
-                0
-            );
-
-            const result = await commandService.executeCommand(InsertCommand.id, {
-                unitId,
-                body: bodyAfter,
-                range: deleteRange,
-                segmentId,
-                cursorOffset: 1,
-            });
-
-            return result;
-        } else {
-            // split paragraph into two.
-            const result = await commandService.executeCommand(InsertCommand.id, {
-                unitId,
-                body: {
-                    dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                    paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-                },
-                range: activeTextRange,
-                segmentId,
-            });
-
-            return result;
+        if (!prevParagraph) {
+            return false;
         }
+        // line breaks to 2
+        const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
+        bodyAfter.customRanges = bodyAfter.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
+        const deleteRange = {
+            startOffset,
+            endOffset: prevParagraph.startIndex + 1,
+            collapsed: false,
+        };
+
+        if (bodyAfter.paragraphs?.[0].bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
+            bodyAfter.paragraphs[0].bullet.listType = PresetListType.CHECK_LIST;
+        };
+
+        updateAttributeByInsert(
+            bodyAfter,
+            {
+                dataStream: DataStreamTreeTokenType.PARAGRAPH,
+                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+            },
+            1,
+            0
+        );
+        const result = await commandService.executeCommand(InsertCommand.id, {
+            unitId,
+            body: bodyAfter,
+            range: deleteRange,
+            segmentId,
+            cursorOffset: 1,
+        });
+
+        return result;
     },
 };
 

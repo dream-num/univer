@@ -51,7 +51,6 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         if (props?.visualWidth) {
             this._visualWidth = props.visualWidth;
         }
-       
     }
 
     get visualHeight(): Nullable<number> {

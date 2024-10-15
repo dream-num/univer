@@ -26,7 +26,6 @@ export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
-
 const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     rotateEnabled?: boolean;

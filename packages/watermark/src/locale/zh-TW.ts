@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'univer-watermark': {
         title: '浮水印',
         type: '類型',
@@ -44,6 +46,7 @@ const locale = {
 
         cancel: '取消浮水印',
         close: '關閉面板',
+        copy: '複製配置',
     },
 };
 

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'univer-watermark': {
         title: 'Hình mờ',
         type: 'Loại',
@@ -44,6 +46,7 @@ const locale = {
 
         cancel: 'Hủy hình mờ',
         close: 'Đóng bảng điều khiển',
+        copy: 'Sao chép cấu hình',
     },
 };
 

@@ -44,7 +44,7 @@ export const WatermarkPanelFooter: React.FC = () => {
                 {localeService.t('univer-watermark.cancel')}
             </div>
 
-            <div>
+            <div className={styles.watermarkPanelFooterButtonWrapper}>
                 <Button
                     style={{ marginRight: 8 }}
                     onClick={async () => {

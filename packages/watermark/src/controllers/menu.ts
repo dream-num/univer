@@ -25,8 +25,8 @@ import { UniverWatermarkService } from '../services/watermarkService';
 export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OpenWatermarkPanelOperation.id,
-        title: 'watermark.title',
-        tooltip: 'watermark.title',
+        title: 'univer-watermark.title',
+        tooltip: 'univer-watermark.title',
         icon: UNIVER_WATERMARK_MENU,
         type: MenuItemType.BUTTON,
         hidden$: getWatermarkMenuHiddenObservable(accessor),

@@ -84,7 +84,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.opacity}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, opacity: Number.parseFloat(val.toString()) });
                                 }
                             }}
@@ -120,7 +120,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.width}
                             onChange={(val) => {
-                                if (val) {
+                                if (val != null) {
                                     const newWidth = Number.parseInt(val.toString());
                                     if (config.maintainAspectRatio) {
                                         onChange({ ...config, width: newWidth, height: Math.round(newWidth / config.originRatio) });
@@ -139,7 +139,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.height}
                             onChange={(val) => {
-                                if (val) {
+                                if (val != null) {
                                     const newHeight = Number.parseInt(val.toString());
                                     if (config.maintainAspectRatio) {
                                         onChange({ ...config, height: newHeight, width: Math.round(newHeight * config.originRatio) });
@@ -190,7 +190,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.spacingX}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, spacingX: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -204,7 +204,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.spacingY}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, spacingY: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -220,7 +220,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.x}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, x: Number.parseInt(val.toString()) });
                                 }
                             }}
@@ -234,7 +234,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.y}
                             onChange={(val) => {
-                                if (val !== undefined && val !== null) {
+                                if (val != null) {
                                     onChange({ ...config, y: Number.parseInt(val.toString()) });
                                 }
                             }}

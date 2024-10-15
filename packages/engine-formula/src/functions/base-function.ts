@@ -21,7 +21,7 @@ import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '..
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
-
+import { Disposable } from '@univerjs/core';
 import { ErrorType } from '../basics/error-type';
 import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -313,7 +313,8 @@ export class BaseFunction {
         }
 
         if (resultValue.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            // return ErrorValueObject.create(ErrorType.NA);
+            return NumberValueObject.create(0);
         }
 
         return resultValue;

@@ -51,10 +51,7 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         if (props?.visualWidth) {
             this._visualWidth = props.visualWidth;
         }
-        if (props?.rotateEnabled !== undefined || props?.resizeEnabled !== undefined) {
-            const transformerConfig = this.transformerConfig || {};
-            this.transformerConfig = { ...transformerConfig, rotateEnabled: props?.rotateEnabled, resizeEnabled: props?.resizeEnabled };
-        }
+       
     }
 
     get visualHeight(): Nullable<number> {

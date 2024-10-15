@@ -26,6 +26,8 @@ export type LineJoin = 'round' | 'bevel' | 'miter';
 export type LineCap = 'butt' | 'round' | 'square';
 export type PaintFirst = 'fill' | 'stroke';
 
+
+const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     rotateEnabled?: boolean;
     resizeEnabled?: boolean;
@@ -361,7 +363,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
                 return true;
             }
 
-            if (BASE_OBJECT_ARRAY.indexOf(key) === -1) {
+            if (!BASE_OBJECT_ARRAY_Set.has(key)) {
                 (this as IKeyValue)[`_${key}`] = (props as IKeyValue)[key];
             }
         });
@@ -398,12 +400,18 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
 
         const transformState: IObjectFullState = {};
         let hasTransformState = false;
+
+        if (props?.rotateEnabled !== undefined || props?.resizeEnabled !== undefined) {
+            const transformerConfig = this.transformerConfig || {};
+            this.transformerConfig = { ...transformerConfig, rotateEnabled: props?.rotateEnabled, resizeEnabled: props?.resizeEnabled };
+        }
+
         themeKeys.forEach((key) => {
             if ((props as IKeyValue)[key] === undefined) {
                 return true;
             }
 
-            if (BASE_OBJECT_ARRAY.indexOf(key) > -1) {
+            if (BASE_OBJECT_ARRAY_Set.has(key)) {
                 transformState[key as keyof IObjectFullState] = (props as IKeyValue)[key];
                 hasTransformState = true;
             } else {

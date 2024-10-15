@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutation, IObjectMatrixPrimitiveType, IRange, IStyleData, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, IMutation, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export interface IMoveRangeMutationParams {
@@ -29,10 +29,6 @@ export interface IMoveRangeMutationParams {
         subUnitId: string;
         value: IObjectMatrixPrimitiveType<Nullable<ICellData>>;
     };
-}
-
-interface ICellStyleData {
-    s: Nullable<string | IStyleData>;
 }
 
 export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
@@ -61,28 +57,11 @@ export const MoveRangeMutation: IMutation<IMoveRangeMutationParams, boolean> = {
         const fromCellMatrix = fromWorksheet.getCellMatrix();
         const toCellMatrix = toWorksheet.getCellMatrix();
 
-        // let originStyleWhenCollab: ICellStyleData = { s: null };
         new ObjectMatrix<Nullable<ICellData>>(from.value).forValue((row, col, newVal) => {
-            // if (options?.fromCollab) {
-            //     const fromCellValue = fromCellMatrix.getValue(row, col);
-            //     originStyleWhenCollab = { s: fromCellValue?.s || null };
-            // }
             fromCellMatrix.setValue(row, col, newVal);
         });
 
-        // const workbookStyles = workbook.getStyles();
-
         new ObjectMatrix<Nullable<ICellData>>(to.value).forValue((row, col, newVal) => {
-            // if (newVal && newVal.s && options?.fromCollab) {
-            //     let styleHash = workbookStyles.search(newVal.s as IStyleData, JSON.stringify(newVal.s));
-            //     if (!styleHash) {
-            //         handleStyle(workbookStyles, originStyleWhenCollab, { s: newVal.s });
-            //         styleHash = workbookStyles.search(newVal.s as IStyleData, JSON.stringify(newVal.s));
-            //     }
-            //     if (styleHash) {
-            //         newVal.s = styleHash;
-            //     }
-            // }
             toCellMatrix.setValue(row, col, newVal);
         });
 

@@ -15,9 +15,9 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ptToPixel } from '../../../../basics/tools';
 import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
 import type { IOpenTypeGlyphInfo } from './text-shaping';
+import { ptToPixel } from '../../../../basics/tools';
 
 export const DEFAULT_MEASURE_TEXT = '0';
 

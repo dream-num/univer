@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { ICommand, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     CommandType,
     GridType,
@@ -31,9 +34,6 @@ import {
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCharSpaceApply, getNumberUnitValue } from '@univerjs/engine-render';
-import type { ICommand, IListData, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import { hasParagraphInTable } from '../../basics/paragraph';
 import { getRichTextEditPath } from '../util';
 
@@ -44,7 +44,7 @@ interface IListOperationCommandParams {
 export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     id: 'doc.command.list-operation',
     type: CommandType.COMMAND,
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params: IListOperationCommandParams) => {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -66,8 +66,6 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         if (paragraphs == null) {
             return false;
         }
-
-        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
 
         const currentParagraphs = getParagraphsInRanges(docRanges, paragraphs);
 
@@ -113,22 +111,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        const lists: Record<string, IListData> = {
-            ...PRESET_LIST_TYPE,
-            ...customLists,
-        };
-
-        const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
-
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-            const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -144,20 +128,13 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                     paragraphs: [
                         isAlreadyList
                             ? {
-                                paragraphStyle: {
-                                    ...paragraphStyle,
-                                    // hanging: undefined,
-                                    // indentStart: indentStart ? { v: Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + getNumberUnitValue(listHanging, charSpaceApply) - getNumberUnitValue(listIndentStart, charSpaceApply)) } : undefined,
-                                },
+                                paragraphStyle,
                                 startIndex: 0,
                             }
                             : {
                                 startIndex: 0,
                                 paragraphStyle: {
                                     ...paragraphStyle,
-                                    // indentFirstLine: undefined,
-                                    // hanging: listHanging,
-                                    // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
                                 },
                                 bullet: {
                                     nestingLevel: bullet?.nestingLevel ?? 0,
@@ -216,7 +193,6 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
             return false;
         }
 
-        const sectionBreaks = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.sectionBreaks ?? [];
         const currentParagraphs = getParagraphsRelative(activeRanges, paragraphs);
         const unitId = docDataModel.getUnitId();
         const ID_LENGTH = 6;
@@ -238,24 +214,8 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        // const customLists = docDataModel.getSnapshot().lists ?? {};
-
-        // const lists = {
-        //     ...PRESET_LIST_TYPE,
-        //     ...customLists,
-        // };
-
-        // const { defaultTabStop = 36 } = docDataModel.getSnapshot().documentStyle;
-
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {}, bullet } = paragraph;
-            // const { indentFirstLine, snapToGrid, indentStart } = paragraphStyle;
-            // const paragraphProperties = lists[listType].nestingLevel[0].paragraphProperties || {};
-            // const bulletParagraphTextStyle = paragraphProperties.textStyle;
-            // const { hanging: listHanging, indentStart: listIndentStart } = paragraphProperties;
-            // const { charSpace, gridType } = findNearestSectionBreak(startIndex, sectionBreaks) || { charSpace: 0, gridType: GridType.LINES };
-
-            // const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -271,12 +231,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                     paragraphs: [
                         {
                             startIndex: 0,
-                            paragraphStyle: {
-                                ...paragraphStyle,
-                                // indentFirstLine: undefined,
-                                // hanging: listHanging,
-                                // indentStart: { v: getNumberUnitValue(listIndentStart, charSpaceApply) - getNumberUnitValue(listHanging, charSpaceApply) + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply) },
-                            },
+                            paragraphStyle,
                             bullet: {
                                 nestingLevel: bullet?.nestingLevel ?? 0,
                                 textStyle: bullet?.listType === listType

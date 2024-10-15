@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type {
     IDocSelectionInnerParam,
@@ -24,6 +21,9 @@ import type {
     ISuccinctDocRangeParam,
     ITextRangeWithStyle,
 } from '@univerjs/engine-render';
+import { ICommandService, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '@univerjs/engine-render';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { SetTextSelectionsOperation } from '../commands/operations/text-selection.operation';
 
 interface IDocSelectionManagerSearchParam {
@@ -210,7 +210,6 @@ export class DocSelectionManagerService extends RxDisposable {
 
         // Remove all textRanges.
         // Add new textRanges.
-
         const { unitId, subUnitId } = params;
 
         this._refreshSelection$.next({

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
+
 import { Disposable, ICommandService, Inject, isInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, DocumentEditArea, PageLayoutType, Vector2 } from '@univerjs/engine-render';
-
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { IEditorService } from '../../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 export class DocSelectionRenderController extends Disposable implements IRenderModule {
     private _loadedMap = new WeakSet<RenderComponentType>();
@@ -76,7 +76,6 @@ export class DocSelectionRenderController extends Disposable implements IRenderM
                 if (unitId !== this._context.unitId) {
                     return;
                 }
-
                 this._docSelectionRenderService.removeAllRanges();
                 if (docRanges.length) {
                     this._docSelectionRenderService.addDocRanges(docRanges, isEditing, options);

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import type { Injector, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
+import { SheetsDataValidationValidatorService } from './dv-validator-service';
 
 interface IDataValidationFormula {
     ruleId: string;
@@ -68,7 +69,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @ILogService private readonly _logService: ILogService
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -77,6 +78,8 @@ export class DataValidationCustomFormulaService extends Disposable {
 
     private _initFormulaResultHandler() {
         this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
+            const dvValidatorService = this._injector.get(SheetsDataValidationValidatorService);
+
             for (const unitId in resultMap) {
                 const unitMap = resultMap[unitId];
 
@@ -93,10 +96,12 @@ export class DataValidationCustomFormulaService extends Disposable {
 
                         if (rule && ruleInfo && !ruleInfo.isTransformable) {
                             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                            dvValidatorService.markRangeDirty(unitId, subUnitId, rule.ranges);
                         }
 
                         if (cellInfo) {
                             this._dataValidationCacheService.markCellDirty(unitId, subUnitId, cellInfo.row, cellInfo.column);
+                            dvValidatorService.markRangeDirty(unitId, subUnitId, [{ startRow: cellInfo.row, startColumn: cellInfo.column, endRow: cellInfo.row, endColumn: cellInfo.column }]);
                         }
                     });
                 }

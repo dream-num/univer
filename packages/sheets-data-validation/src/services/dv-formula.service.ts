@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
-import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import type { Nullable } from '@univerjs/core';
 import type { IFormulaInfo, IOtherFormulaResult } from '@univerjs/sheets-formula';
+import { Disposable, Inject, Injector, isFormulaString, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DataValidationModel } from '@univerjs/data-validation';
+import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
+import { SheetsDataValidationValidatorService } from './dv-validator-service';
 
 type RuleId = string;
 type UnitId = string;
@@ -32,7 +33,8 @@ export class DataValidationFormulaService extends Disposable {
         @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._initFormulaResultHandler();
@@ -40,6 +42,7 @@ export class DataValidationFormulaService extends Disposable {
 
     private _initFormulaResultHandler() {
         this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
+            const dvValidatorService = this._injector.get(SheetsDataValidationValidatorService);
             for (const unitId in resultMap) {
                 const unitMap = resultMap[unitId];
 
@@ -54,6 +57,7 @@ export class DataValidationFormulaService extends Disposable {
                             const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, result.extra?.ruleId);
                             if (rule) {
                                 this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                                dvValidatorService.markRangeDirty(unitId, subUnitId, rule.ranges);
                             }
                         };
                     });

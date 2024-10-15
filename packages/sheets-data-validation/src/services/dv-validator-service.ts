@@ -111,6 +111,15 @@ export class SheetsDataValidationValidatorService extends Disposable {
         this.disposeWithMe(this._dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 
+    markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[]) {
+        this._dirtyRanges$.next({
+            unitId,
+            subUnitId,
+            ranges,
+            tag: 'mark',
+        });
+    }
+
     async validatorCell(unitId: string, subUnitId: string, row: number, col: number) {
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {

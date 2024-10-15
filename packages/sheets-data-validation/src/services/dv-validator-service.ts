@@ -17,9 +17,9 @@
 import type { IDataValidationRule, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from './dv-cache.service';
-import { DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { bufferDebounceTime, DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix, Range, Tools, UniverInstanceType } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { bufferTime, bufferWhen, filter, Subject } from 'rxjs';
+import { bufferWhen, filter, Subject } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
 
@@ -108,7 +108,7 @@ export class SheetsDataValidationValidatorService extends Disposable {
         };
 
         this.disposeWithMe(this._dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
-        this.disposeWithMe(this._dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferTime(100)).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 
     async validatorCell(unitId: string, subUnitId: string, row: number, col: number) {

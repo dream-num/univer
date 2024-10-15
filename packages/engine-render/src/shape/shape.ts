@@ -299,7 +299,7 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
     //     return { scaleX: 1, scaleY: 1 };
     // }
 
-    private static _removeShadow(ctx: UniverRenderingContext) {}
+    private static _removeShadow(ctx: UniverRenderingContext) { }
 
     private static _setFillStyles(ctx: UniverRenderingContext, props: IShapeProps) {
         ctx.fillStyle = props.fill!;
@@ -400,9 +400,17 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
         const transformState: IObjectFullState = {};
         let hasTransformState = false;
 
-        if (props?.rotateEnabled !== undefined || props?.resizeEnabled !== undefined) {
+        const hasRotateEnabled = props?.rotateEnabled !== undefined;
+        const hasResizeEnabled = props?.resizeEnabled !== undefined;
+        if (hasRotateEnabled || hasResizeEnabled) {
             const transformerConfig = this.transformerConfig || {};
-            this.transformerConfig = { ...transformerConfig, rotateEnabled: props?.rotateEnabled, resizeEnabled: props?.resizeEnabled };
+            if (hasRotateEnabled) {
+                transformerConfig.rotateEnabled = props?.rotateEnabled;
+            }
+            if (hasResizeEnabled) {
+                transformerConfig.resizeEnabled = props?.resizeEnabled;
+            }
+            this.transformerConfig = { ...transformerConfig };
         }
 
         themeKeys.forEach((key) => {

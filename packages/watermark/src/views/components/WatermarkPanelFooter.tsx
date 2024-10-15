@@ -16,7 +16,7 @@
 
 import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { ISidebarService } from '@univerjs/ui';
+import { IClipboardInterfaceService, ISidebarService } from '@univerjs/ui';
 import React from 'react';
 import { WatermarkTextBaseConfig } from '../../common/const';
 import { IWatermarkTypeEnum } from '../../common/type';
@@ -27,6 +27,7 @@ export const WatermarkPanelFooter: React.FC = () => {
     const sidebarService = useDependency(ISidebarService);
     const watermarkService = useDependency(UniverWatermarkService);
     const localeService = useDependency(LocaleService);
+    const clipboardService = useDependency(IClipboardInterfaceService);
 
     return (
         <div className={styles.watermarkPanelFooter}>
@@ -42,18 +43,36 @@ export const WatermarkPanelFooter: React.FC = () => {
             >
                 {localeService.t('univer-watermark.cancel')}
             </div>
-            <Button onClick={async () => {
-                const watermarkConfig = await watermarkService.getWatermarkConfig();
-                if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
-                    watermarkService.deleteWatermarkConfig();
-                } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
-                    watermarkService.deleteWatermarkConfig();
-                }
-                sidebarService.close();
-            }}
-            >
-                {localeService.t('univer-watermark.close')}
-            </Button>
+
+            <div>
+                <Button
+                    style={{ marginRight: 8 }}
+                    onClick={async () => {
+                        const watermarkConfig = await watermarkService.getWatermarkConfig();
+                        let config;
+                        if (watermarkConfig?.type === IWatermarkTypeEnum.Text) {
+                            config = watermarkConfig.config.text;
+                        } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image) {
+                            config = watermarkConfig.config.image;
+                        }
+                        clipboardService.writeText(JSON.stringify(config));
+                    }}
+                >
+                    {localeService.t('univer-watermark.copy')}
+                </Button>
+                <Button onClick={async () => {
+                    const watermarkConfig = await watermarkService.getWatermarkConfig();
+                    if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
+                        watermarkService.deleteWatermarkConfig();
+                    } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
+                        watermarkService.deleteWatermarkConfig();
+                    }
+                    sidebarService.close();
+                }}
+                >
+                    {localeService.t('univer-watermark.close')}
+                </Button>
+            </div>
         </div>
     );
 };

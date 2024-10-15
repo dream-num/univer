@@ -54,7 +54,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
 
                 const img = new Image();
                 img.onload = function () {
-                    onChange({ ...config, url: base64String as string, width: img.width, height: img.height, originRatio: img.width / img.height });
+                    onChange({ ...config, url: base64String as string, width: Math.max(20, img.width), height: Math.max(img.height, 20), originRatio: img.width / img.height });
                 };
 
                 img.src = base64String as string;
@@ -120,7 +120,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                             value={config.width}
                             onChange={(val) => {
                                 if (val != null) {
-                                    const newWidth = Number.parseInt(val.toString());
+                                    const newWidth = Math.max(20, Number.parseInt(val.toString()));
                                     if (config.maintainAspectRatio) {
                                         onChange({ ...config, width: newWidth, height: Math.round(newWidth / config.originRatio) });
                                     } else {
@@ -128,7 +128,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                                     }
                                 }
                             }}
-                            min={0}
+                            min={20}
                             className={styles.watermarkInput}
                         />
                     </div>
@@ -139,7 +139,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                             value={config.height}
                             onChange={(val) => {
                                 if (val != null) {
-                                    const newHeight = Number.parseInt(val.toString());
+                                    const newHeight = Math.max(20, Number.parseInt(val.toString()));
                                     if (config.maintainAspectRatio) {
                                         onChange({ ...config, height: newHeight, width: Math.round(newHeight * config.originRatio) });
                                     } else {
@@ -147,7 +147,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                                     }
                                 }
                             }}
-                            min={0}
+                            min={20}
                             className={styles.watermarkInput}
                         />
                     </div>
@@ -164,7 +164,7 @@ export const WatermarkImageSetting: React.FC<IWatermarkImageSettingProps> = ({ c
                         <InputNumber
                             value={config.rotate}
                             onChange={(val) => {
-                                if (val) {
+                                if (val != null) {
                                     onChange({ ...config, rotate: Number.parseInt(val.toString()) });
                                 }
                             }}

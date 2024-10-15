@@ -56,7 +56,6 @@ export interface IFloatDomData extends IDrawingParam {
     componentKey: string;
     data?: Serializable;
     allowTransform?: boolean;
-   
 }
 
 // TODO@wzhudev: this shouldn't be here. It should be in the sheets package

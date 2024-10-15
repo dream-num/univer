@@ -36,6 +36,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFacadeTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
 
+import '../everything';
+
 describe('Test FUniver', () => {
     let get: Injector['get'];
     let commandService: ICommandService;

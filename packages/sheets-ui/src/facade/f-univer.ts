@@ -158,6 +158,8 @@ export class FUniverSheetsUIMixin extends FUniver implements IFUniverSheetsUIMix
     }
 }
 
+FUniver.extend(FUniverSheetsUIMixin);
+
 declare module '@univerjs/core' {
     // eslint-disable-next-line ts/naming-convention
     interface FUniver extends IFUniverSheetsUIMixin { }

@@ -14,62 +14,26 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { IDataValidationRule, IRange, Nullable, ObjectMatrix, Workbook } from '@univerjs/core';
 import type { IDataValidationResCache } from './dv-cache.service';
-import { bufferDebounceTime, DataValidationStatus, Disposable, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, ObjectMatrix, Range, Tools, UniverInstanceType } from '@univerjs/core';
-import { SetRangeValuesMutation } from '@univerjs/sheets';
-import { bufferWhen, filter, Subject } from 'rxjs';
+import { bufferDebounceTime, DataValidationStatus, Disposable, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, Range, Tools, UniverInstanceType } from '@univerjs/core';
+import { bufferWhen, filter } from 'rxjs';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { DataValidationCacheService } from './dv-cache.service';
 
 export class SheetsDataValidationValidatorService extends Disposable {
-    private _dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[]; tag: string }>();
-
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         super();
-        this._initDirtyRanges();
         this._initRecalculate();
     }
 
-    private _initDirtyRanges() {
-        this.disposeWithMe(this._sheetDataValidationModel.ruleChange$.subscribe((ruleChange) => {
-            if (ruleChange.type === 'add' || ruleChange.type === 'update') {
-                this._dirtyRanges$.next({
-                    unitId: ruleChange.unitId,
-                    subUnitId: ruleChange.subUnitId,
-                    ranges: ruleChange.rule.ranges,
-                    tag: ruleChange.type,
-                });
-            }
-        }));
-
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetRangeValuesMutation.id) {
-                const { cellValue, unitId, subUnitId } = commandInfo.params as ISetRangeValuesMutationParams;
-                if (cellValue) {
-                    const range = new ObjectMatrix(cellValue).getDataRange();
-                    if (range.endRow === -1) return;
-
-                    this._dirtyRanges$.next({
-                        unitId,
-                        subUnitId,
-                        ranges: [range],
-                        tag: 'set',
-                    });
-                }
-            }
-        }));
-    }
-
     private _initRecalculate() {
-        const handleDirtyRanges = (ranges: { unitId: string; subUnitId: string; ranges: IRange[]; tag: string }[]) => {
+        const handleDirtyRanges = (ranges: { unitId: string; subUnitId: string; ranges: IRange[] }[]) => {
             if (ranges.length === 0) {
                 return;
             }
@@ -107,17 +71,8 @@ export class SheetsDataValidationValidatorService extends Disposable {
             });
         };
 
-        this.disposeWithMe(this._dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
-        this.disposeWithMe(this._dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
-    }
-
-    markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[]) {
-        this._dirtyRanges$.next({
-            unitId,
-            subUnitId,
-            ranges,
-            tag: 'mark',
-        });
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(bufferWhen(() => this._lifecycleService.lifecycle$.pipe(filter((stage) => stage === LifecycleStages.Rendered)))).subscribe(handleDirtyRanges));
+        this.disposeWithMe(this._dataValidationCacheService.dirtyRanges$.pipe(filter(() => this._lifecycleService.stage >= LifecycleStages.Rendered), bufferDebounceTime(20)).subscribe(handleDirtyRanges));
     }
 
     async validatorCell(unitId: string, subUnitId: string, row: number, col: number) {

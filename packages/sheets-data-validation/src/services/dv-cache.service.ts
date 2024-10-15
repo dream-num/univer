@@ -15,7 +15,9 @@
  */
 
 import type { CellValue, DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import { ObjectMatrix, Range } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, ObjectMatrix, Range } from '@univerjs/core';
+import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
+import { Subject } from 'rxjs';
 
 export interface IDataValidationResCache {
     value: Nullable<CellValue>;
@@ -27,8 +29,36 @@ export interface IDataValidationResCache {
     formula2: string;
 }
 
-export class DataValidationCacheService {
+export class DataValidationCacheService extends Disposable {
     private _cacheMatrix: Map<string, Map<string, ObjectMatrix<Nullable<IDataValidationResCache>>>> = new Map();
+    private _dirtyRanges$ = new Subject<{ unitId: string; subUnitId: string; ranges: IRange[] }>();
+
+    readonly dirtyRanges$ = this._dirtyRanges$.asObservable();
+
+    constructor(
+        @Inject(ICommandService) private readonly _commandService: ICommandService
+    ) {
+        super();
+        this._initDirtyRanges();
+    }
+
+    private _initDirtyRanges() {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetRangeValuesMutation.id) {
+                const { cellValue, unitId, subUnitId } = commandInfo.params as ISetRangeValuesMutationParams;
+                if (cellValue) {
+                    const range = new ObjectMatrix(cellValue).getDataRange();
+                    if (range.endRow === -1) return;
+
+                    this._dirtyRanges$.next({
+                        unitId,
+                        subUnitId,
+                        ranges: [range],
+                    });
+                }
+            }
+        }));
+    }
 
     private _ensureCache(unitId: string, subUnitId: string) {
         let unitMap = this._cacheMatrix.get(unitId);
@@ -88,6 +118,8 @@ export class DataValidationCacheService {
                 }
             });
         });
+
+        this._dirtyRanges$.next({ unitId, subUnitId, ranges: [...oldRanges, ...newRanges] });
     }
 
     markRangeDirty(unitId: string, subUnitId: string, ranges: IRange[]) {
@@ -97,11 +129,14 @@ export class DataValidationCacheService {
                 cache.setValue(row, col, undefined);
             });
         });
+
+        this._dirtyRanges$.next({ unitId, subUnitId, ranges });
     }
 
     markCellDirty(unitId: string, subUnitId: string, row: number, col: number) {
         const cache = this._ensureCache(unitId, subUnitId);
         cache.setValue(row, col, undefined);
+        this._dirtyRanges$.next({ unitId, subUnitId, ranges: [{ startRow: row, startColumn: col, endRow: row, endColumn: col }] });
     }
 
     private _deleteRange(unitId: string, subUnitId: string, ranges: IRange[]) {
@@ -111,6 +146,7 @@ export class DataValidationCacheService {
                 cache.realDeleteValue(row, col);
             });
         });
+        this._dirtyRanges$.next({ unitId, subUnitId, ranges });
     }
 
     getValue(unitId: string, subUnitId: string, row: number, col: number) {

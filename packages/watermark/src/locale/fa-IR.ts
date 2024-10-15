@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'univer-watermark': {
         title: 'علامت آب',
         type: 'نوع',
@@ -44,6 +46,7 @@ const locale = {
 
         cancel: 'لغو علامت آب',
         close: 'بستن پنل',
+        copy: 'کپی تنظیمات',
     },
 };
 

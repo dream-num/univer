@@ -31,7 +31,7 @@ export const OpenWatermarkPanelOperation: ICommand = {
             children: { label: WATERMARK_PANEL },
             footer: { label: WATERMARK_PANEL_FOOTER },
             onClose: () => { },
-            width: 300,
+            width: 330,
         });
 
         return true;

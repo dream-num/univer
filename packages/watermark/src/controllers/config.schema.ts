@@ -15,7 +15,7 @@
  */
 
 import type { MenuConfig } from '@univerjs/ui';
-import type { IUserInfoWatermarkConfig } from '../common/type';
+import type { IImageWatermarkConfig, ITextWatermarkConfig, IUserInfoWatermarkConfig } from '../common/type';
 
 export const PLUGIN_CONFIG_KEY = 'watermark.config';
 
@@ -23,7 +23,9 @@ export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
 export interface IUniverWatermarkConfig {
     menu?: MenuConfig;
-    userWatermarkSettings?: IUserInfoWatermarkConfig;
+    userWatermarkSettings?: Partial<IUserInfoWatermarkConfig>;
+    textWatermarkSettings?: Partial<ITextWatermarkConfig>;
+    imageWatermarkSettings?: Partial<IImageWatermarkConfig>;
 }
 
 export const defaultPluginConfig: IUniverWatermarkConfig = {};

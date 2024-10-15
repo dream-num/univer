@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'univer-watermark': {
         title: 'Watermark',
         type: 'Type',
@@ -44,6 +46,7 @@ const locale = {
 
         cancel: 'Cancel Watermark',
         close: 'Close Panel',
+        copy: 'Copy Config',
     },
 };
 

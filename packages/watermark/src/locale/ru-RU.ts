@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-const locale = {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     'univer-watermark': {
         title: 'Водяной знак',
         type: 'Тип',
@@ -44,6 +46,7 @@ const locale = {
 
         cancel: 'Отменить водяной знак',
         close: 'Закрыть панель',
+        copy: 'Копировать конфигурацию',
     },
 };
 

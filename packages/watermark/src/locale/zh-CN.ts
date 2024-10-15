@@ -44,6 +44,7 @@ const locale = {
 
         cancel: '取消水印',
         close: '关闭面板',
+        copy: '复制配置',
     },
 };
 

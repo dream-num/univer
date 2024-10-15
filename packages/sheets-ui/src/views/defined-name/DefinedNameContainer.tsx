@@ -177,7 +177,7 @@ export const DefinedNameContainer = () => {
                         <IncreaseSingle />
                         <span className={styles.definedNameContainerAddButtonText}>{localeService.t('definedName.addButton')}</span>
                     </div>
-                    <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />
+                    {editState && <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />}
                 </div>
 
                 {definedNames.map((definedName, index) => {
@@ -207,17 +207,20 @@ export const DefinedNameContainer = () => {
                             <Confirm visible={deleteConformKey === definedName.id} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
                                 {localeService.t('definedName.deleteConfirmText')}
                             </Confirm>
-                            <DefinedNameInput
-                                confirm={insertConfirm}
-                                cancel={closeInput}
-                                state={definedName.id === editorKey}
-                                id={definedName.id}
-                                inputId={definedName.id + index}
-                                name={definedName.name}
-                                formulaOrRefString={definedName.formulaOrRefString}
-                                comment={definedName.comment}
-                                localSheetId={definedName.localSheetId}
-                            />
+                            {definedName.id === editorKey && (
+                                <DefinedNameInput
+                                    confirm={insertConfirm}
+                                    cancel={closeInput}
+                                    state={definedName.id === editorKey}
+                                    id={definedName.id}
+                                    inputId={definedName.id + index}
+                                    name={definedName.name}
+                                    formulaOrRefString={definedName.formulaOrRefString}
+                                    comment={definedName.comment}
+                                    localSheetId={definedName.localSheetId}
+                                />
+                            )}
+
                         </div>
                     );
                 })}

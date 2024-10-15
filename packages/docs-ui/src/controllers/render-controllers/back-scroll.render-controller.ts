@@ -66,7 +66,7 @@ export class DocBackScrollRenderController extends RxDisposable implements IRend
         const { startOffset } = range;
         const anchorNodePosition = skeleton.findNodePositionByCharIndex(startOffset);
 
-        this.scrollToNode(anchorNodePosition);
+        anchorNodePosition && this.scrollToNode(anchorNodePosition);
     }
 
     scrollToNode(startNodePosition: Nullable<INodePosition>) {

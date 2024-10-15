@@ -90,13 +90,13 @@ import {
     ExpandSelectionCommand,
     getEditorObject,
     IEditorBridgeService,
+    isRangeSelector,
     JumpOver,
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
-import { distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs';
+import { distinctUntilChanged, distinctUntilKeyChanged, filter } from 'rxjs';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -254,31 +254,27 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             this._docSelectionManagerService.textSelection$
                 .pipe(
-                    distinctUntilChanged(
-                        (prev, curr) =>
-                            prev?.unitId === curr?.unitId &&
-                            prev?.segmentId === curr?.segmentId &&
-                            Boolean(prev?.textRanges.every((t, i) => t.startOffset === curr?.textRanges[i].startOffset && t.endOffset === curr?.textRanges[i].endOffset))
-                    )
+                    filter((item) => {
+                        return !isRangeSelector(item.unitId);
+                    })
                 )
                 .subscribe((params) => {
                     if (params?.unitId == null) {
                         return;
                     }
-
                     const editor = this._editorService.getEditor(params.unitId);
                     if (!editor
-                    || editor.onlyInputContent()
-                    || (editor.isSheetEditor() && !this._isFormulaEditorActivated())
-                    // Remove this latter.
-                    || editor.params.scrollBar
+                        || editor.onlyInputContent()
+                        || (editor.isSheetEditor() && !this._isFormulaEditorActivated())
+                        // Remove this latter.
+                        || editor.params.scrollBar
                     ) {
                         return;
                     }
 
                     const onlyInputRange = editor.onlyInputRange();
 
-                // @ts-ignore
+                    // @ts-ignore
                     if (params?.options?.fromSelection) {
                         return;
                     } else {
@@ -298,7 +294,7 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                // TODO@Dushusir: use real text info
+                    // TODO@Dushusir: use real text info
                     this._changeFunctionPanelState();
                 })
         );
@@ -311,6 +307,10 @@ export class PromptController extends Disposable {
             const unitId = documentDataModel?.getUnitId();
 
             if (unitId == null) {
+                return;
+            }
+
+            if (isRangeSelector(unitId)) {
                 return;
             }
 
@@ -385,6 +385,9 @@ export class PromptController extends Disposable {
 
                 const editorId = documentDataModel.getUnitId();
 
+                if (isRangeSelector(editorId)) {
+                    return;
+                }
                 if (!this._editorService.isEditor(editorId) || this._previousEditorUnitId === editorId) {
                     return;
                 }
@@ -1560,7 +1563,9 @@ export class PromptController extends Disposable {
         const nodeIndex = Number(id);
 
         const currentNode = this._formulaPromptService.getCurrentSequenceNodeByIndex(nodeIndex);
-
+        if (!currentNode) {
+            return;
+        }
         let refType: IAbsoluteRefTypeForRange = { startAbsoluteRefType: AbsoluteRefType.NONE };
         if (typeof currentNode !== 'string') {
             const token = (currentNode as ISequenceNode).token;

@@ -73,7 +73,7 @@ export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { DragRenderController } from './controllers/drag-render.controller';
-export { SHEET_VIEW_KEY } from './common/keys';
+export { RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
@@ -105,6 +105,7 @@ export { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from './components/
 export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
+export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
 
 export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';

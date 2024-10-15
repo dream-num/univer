@@ -78,8 +78,10 @@
         "@univerjs/protocol": "0.1.39-alpha.15",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
+
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13"

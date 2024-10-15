@@ -22,6 +22,7 @@ import { ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-r
 import { convertSelectionDataToRange, getNormalSelectionStyle, IRefSelectionsService, SelectionMoveType } from '@univerjs/sheets';
 import { attachSelectionWithCoord, BaseSelectionRenderService, checkInHeaderRanges, getAllSelection, getCoordByOffset, getSheetObject, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IShortcutService } from '@univerjs/ui';
+import { merge } from 'rxjs';
 
 /**
  * This service extends the existing `SelectionRenderService` to provide the rendering of prompt selections
@@ -71,6 +72,11 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         this._remainLastEnabled = enabled;
     }
 
+    /**
+     * This is set to true when you need to add a new selection.
+     * @param {boolean} enabled
+     * @memberof RefSelectionsRenderService
+     */
     setSkipLastEnabled(enabled: boolean): void {
         this._skipLastEnabled = enabled;
     }
@@ -146,7 +152,10 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
             const selectionData = this.attachSelectionWithCoord(selectionWithStyle);
             this._addSelectionControlBySelectionData(selectionData);
             this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
-
+            const dispose = scene.onPointerUp$.subscribeEvent(() => {
+                dispose.unsubscribe();
+                this._selectionMoveEnd$.next(this.getSelectionDataWithStyle());
+            });
             if (evt.button !== 2) {
                 state.stopPropagation();
             }
@@ -187,7 +196,7 @@ export class RefSelectionsRenderService extends BaseSelectionRenderService imple
         // Changing the selection area through the 8 control points of the ref selection will not trigger this subscriber.
 
         // beforeSelectionMoveEnd$ & selectionMoveEnd$ would triggered when change skeleton(change sheet).
-        this.disposeWithMe(this._workbookSelections.selectionMoveEnd$.subscribe((selectionsWithStyles) => {
+        this.disposeWithMe(merge(this._workbookSelections.selectionMoveEnd$, this._workbookSelections.selectionSet$).subscribe((selectionsWithStyles) => {
             this._reset();
 
             // The selections' style would be colorful here. PromptController would change the color of selections later.

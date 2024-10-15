@@ -20,6 +20,8 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
+import { RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
+import { ComponentManager } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
     defaultPluginBaseConfig,
@@ -34,6 +36,7 @@ import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { RefSelectionsRenderService } from './services/render-services/ref-selections.render-service';
+import { RangeSelector } from './views/range-selector';
 
 /**
  * The configuration of the formula UI plugin.
@@ -88,6 +91,10 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
 
         this._injector.get(FormulaClipboardController);
         this._injector.get(FormulaRenderManagerController);
+
+        const componentManager = this._injector.get(ComponentManager);
+
+        componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
     }
 
     override onSteady(): void {

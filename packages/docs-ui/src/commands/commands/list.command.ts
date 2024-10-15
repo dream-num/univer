@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IMutationInfo, IParagraph, IParagraphRange, ISectionBreak } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
@@ -30,6 +30,7 @@ import {
     TextX,
     TextXActionType,
     Tools,
+    UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
@@ -52,7 +53,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         let listType: string = params.listType;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const docRanges = docSelectionManagerService.getDocRanges() ?? [];
 
         if (docDataModel == null || docRanges.length === 0) {
@@ -157,10 +158,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -179,7 +177,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const { listType } = params;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRanges = docSelectionManagerService.getDocRanges();
         if (docDataModel == null || activeRanges == null || !activeRanges.length) {
             return false;
@@ -255,10 +253,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -287,7 +282,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;
@@ -381,10 +376,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -442,7 +434,6 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
     id: 'doc.command.toggle-check-list',
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         if (!params) {
             return false;
@@ -451,7 +442,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const { index, segmentId, textRanges } = params;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -518,10 +509,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },
@@ -566,7 +554,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const activeRange = docSelectionManagerService.getActiveTextRange();
         if (docDataModel == null || activeRange == null) {
             return false;
@@ -661,10 +649,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
 
-        const result = commandService.syncExecuteCommand<
-            IRichTextEditingMutationParams,
-            IRichTextEditingMutationParams
-        >(doMutation.id, doMutation.params);
+        const result = commandService.syncExecuteCommand(doMutation.id, doMutation.params);
 
         return Boolean(result);
     },

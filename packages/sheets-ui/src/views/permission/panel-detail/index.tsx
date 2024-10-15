@@ -59,7 +59,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-// The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
+    // The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
     const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(!!activeRule?.permissionId);
@@ -330,6 +330,61 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
     };
 
+    useLayoutEffect(() => {
+        const isEdit = activeRule?.permissionId;
+        if (isEdit) {
+            if (activeRule.unitType === UnitObject.Worksheet) {
+                sheetPermissionPanelModel.setRule({
+                    ranges: [{
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: worksheet.getRowCount() - 1,
+                        endColumn: worksheet.getColumnCount() - 1,
+                        rangeType: RANGE_TYPE.ALL,
+                    }],
+                });
+            }
+            return;
+        }
+        if (fromSheetBar) {
+            selectionManagerService.clearCurrentSelections();
+            selectionManagerService.addSelections([
+                {
+                    primary: null,
+                    style: null,
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: worksheet.getRowCount() - 1,
+                        endColumn: worksheet.getColumnCount() - 1,
+                        rangeType: RANGE_TYPE.ALL,
+                    },
+                },
+            ]);
+        }
+        const ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [];
+        const rangeErrorString = checkRangeValid(ranges);
+        sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
+        const rangeStr = ranges?.length
+            ? ranges.map((range) => {
+                const v = serializeRange(range);
+                return v === 'NaN' ? '' : v;
+            }).filter((r) => !!r).join(',')
+            : '';
+        const sheetName = worksheet.getName();
+        sheetPermissionPanelModel.setRule({
+            ranges,
+            name: fromSheetBar ? `${sheetName}` : `${sheetName}(${rangeStr})`,
+            unitId,
+            subUnitId,
+            unitType: fromSheetBar ? UnitObject.Worksheet : UnitObject.SelectRange,
+
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeRule?.permissionId, fromSheetBar, subUnitId, unitId, worksheet]);
+
+    const rangeStr = activeRule?.ranges?.map((i) => serializeRange(i)).join(',');
+
     return (
         <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
             {/* <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.name')}>
@@ -344,16 +399,17 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
                     {RangeSelector && (
                         <RangeSelector
+                            key={rangeStr}
                             unitId={unitId}
                             errorText={rangeErrorMsg}
                             subUnitId={subUnitId}
-                            initValue={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
+                            initValue={rangeStr}
                             onChange={handleRangeChange}
-                    // onVerify={handleVerify}
+                            // onVerify={handleVerify}
                             isFocus={isFocusRangeSelector}
                             actions={rangeSelectorActionsRef.current}
                         />
-                    ) }
+                    )}
                 </FormLayout>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
                     <Input

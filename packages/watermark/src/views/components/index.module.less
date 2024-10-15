@@ -24,8 +24,14 @@
             align-items: center;
             font-size: 12px;
 
+            &-button-wrapper {
+                display: flex;
+                align-items: center;
+            }
+
             &-reset {
                 cursor: pointer;
+                white-space: nowrap;
                 color: rgb(var(--primary-color));
                 border-bottom: 1px solid rgb(var(--primary-color));
             }
@@ -65,6 +71,7 @@
             &-font-wrapper {
                 width: calc(50% - 8px);
                 align-self: flex-start;
+                white-space: nowrap;
             }
         }
     }

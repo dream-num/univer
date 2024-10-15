@@ -15,6 +15,7 @@
  */
 
 import type { Dependency } from '@univerjs/core';
+import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -58,6 +59,11 @@ export class UniverWatermarkPlugin extends Plugin {
             this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Text, config: { text: { ...WatermarkTextBaseConfig, ...rest.textWatermarkSettings } } });
         } else if (rest.imageWatermarkSettings) {
             this._localStorageService.setItem(UNIVER_WATERMARK_STORAGE_KEY, { type: IWatermarkTypeEnum.Image, config: { image: { ...WatermarkImageBaseConfig, ...rest.imageWatermarkSettings } } });
+        } else {
+            const config = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
+            if (config?.type === IWatermarkTypeEnum.UserInfo) {
+                this._localStorageService.removeItem(UNIVER_WATERMARK_STORAGE_KEY);
+            }
         }
     }
 

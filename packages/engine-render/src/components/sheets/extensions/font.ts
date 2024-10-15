@@ -150,8 +150,8 @@ export class Font extends SheetExtension {
         ctx.restore();
     }
 
-    renderFontEachCell(renderFontContext: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
-        const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontContext;
+    renderFontEachCell(renderFontCtx: IRenderFontContext, row: number, col: number, fontMatrix: ObjectMatrix<IFontCacheItem>) {
+        const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontCtx;
 
         //#region merged cell
         let { startY, endY, startX, endX } = cellInfo;
@@ -203,17 +203,17 @@ export class Font extends SheetExtension {
         ctx.beginPath();
 
         //#region text overflow
-        renderFontContext.overflowRectangle = overflowRange;
-        renderFontContext.cellData = cellData;
-        renderFontContext.startX = startX;
-        renderFontContext.startY = startY;
-        renderFontContext.endX = endX;
-        renderFontContext.endY = endY;
-        this._clipTextOverflow(renderFontContext, row, col, fontMatrix);
+        renderFontCtx.overflowRectangle = overflowRange;
+        renderFontCtx.cellData = cellData;
+        renderFontCtx.startX = startX;
+        renderFontCtx.startY = startY;
+        renderFontCtx.endX = endX;
+        renderFontCtx.endY = endY;
+        this._clipTextOverflow(renderFontCtx, row, col, fontMatrix);
         //#endregion
 
         ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
-        this._renderDocuments(ctx, fontsConfig, startX, startY, endX, endY, row, col, spreadsheetSkeleton.overflowCache);
+        this._renderDocuments(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY, row, col, spreadsheetSkeleton.overflowCache);
 
         ctx.closePath();
         ctx.restore();
@@ -305,6 +305,10 @@ export class Font extends SheetExtension {
             // for normal cell, forbid text overflow cellarea
             ctx.clip();
         }
+        renderFontContext.startX = startX;
+        renderFontContext.startY = startY;
+        renderFontContext.endX = endX;
+        renderFontContext.endY = endY;
     }
 
     private _renderDocuments(

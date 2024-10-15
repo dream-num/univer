@@ -18,6 +18,8 @@ import { LocaleService, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import { ISidebarService } from '@univerjs/ui';
 import React from 'react';
+import { WatermarkTextBaseConfig } from '../../common/const';
+import { IWatermarkTypeEnum } from '../../common/type';
 import { UniverWatermarkService } from '../../services/watermarkService';
 import styles from './index.module.less';
 
@@ -31,12 +33,27 @@ export const WatermarkPanelFooter: React.FC = () => {
             <div
                 className={styles.watermarkPanelFooterReset}
                 onClick={() => {
-                    watermarkService.deleteWatermarkConfig();
+                    watermarkService.updateWatermarkConfig({
+                        type: IWatermarkTypeEnum.Text,
+                        config: { text: WatermarkTextBaseConfig },
+                    });
+                    watermarkService.refresh();
                 }}
             >
                 {localeService.t('univer-watermark.cancel')}
             </div>
-            <Button onClick={() => sidebarService.close()}>{localeService.t('univer-watermark.close')}</Button>
+            <Button onClick={async () => {
+                const watermarkConfig = await watermarkService.getWatermarkConfig();
+                if (watermarkConfig?.type === IWatermarkTypeEnum.Text && !watermarkConfig.config.text?.content) {
+                    watermarkService.deleteWatermarkConfig();
+                } else if (watermarkConfig?.type === IWatermarkTypeEnum.Image && !watermarkConfig.config.image?.url) {
+                    watermarkService.deleteWatermarkConfig();
+                }
+                sidebarService.close();
+            }}
+            >
+                {localeService.t('univer-watermark.close')}
+            </Button>
         </div>
     );
 };

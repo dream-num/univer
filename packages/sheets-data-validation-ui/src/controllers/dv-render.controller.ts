@@ -19,7 +19,7 @@ import { DataValidationStatus, DataValidationType, ICommandService, Inject, Inte
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { InterceptCellContentPriority, INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
+import { DataValidationCacheService, getCellValueOrigin, SheetDataValidationModel } from '@univerjs/sheets-data-validation';
 import { AutoHeightController, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IMenuManagerService } from '@univerjs/ui';
 import { bufferTime, filter } from 'rxjs';
@@ -44,6 +44,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
         @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @Optional(IEditorBridgeService) private readonly _editorBridgeService?: IEditorBridgeService
     ) {
         super();
@@ -145,7 +146,7 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
+                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col)?.status ?? DataValidationStatus.VALID;
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = pos.rawData;
                         let cache: Nullable<CellValue>;
@@ -264,7 +265,8 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
         @Inject(AutoHeightController) private readonly _autoHeightController: AutoHeightController,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
         super();
 
@@ -293,7 +295,7 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._sheetDataValidationModel.validator(cell, rule, pos);
+                        const validStatus = this._dataValidationCacheService.getValue(unitId, subUnitId, row, col)?.status ?? DataValidationStatus.VALID;
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellOrigin = worksheet.getCellRaw(row, col);
                         const cellValue = getCellValueOrigin(cellOrigin);

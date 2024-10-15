@@ -161,6 +161,7 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
         this._selectionStyle = style;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     addDocRanges(ranges: ISuccinctDocRangeParam[], isEditing = true, options?: { [key: string]: boolean }) {
         const {
             _currentSegmentId: segmentId,
@@ -191,18 +192,33 @@ export class DocSelectionRenderService extends RxDisposable implements IRenderMo
                     this._addRectRanges([rectRange]);
                 }
             } else if (rangeType === DOC_RANGE_TYPE.TEXT) {
-                const textRange = getTextRangeFromCharIndex(
-                    startNodePosition?.isBack ? startOffset : startOffset - 1,
-                    endNodePosition?.isBack ? endOffset : endOffset - 1,
-                    scene,
-                    document,
-                    docSkeleton,
-                    style,
-                    segmentId,
-                    segmentPage,
-                    startNodePosition?.isBack,
-                    endNodePosition?.isBack
-                );
+                let textRange: Nullable<TextRange> = null;
+
+                if (startNodePosition && endNodePosition) {
+                    textRange = getTextRangeFromCharIndex(
+                        startNodePosition.isBack ? startOffset : startOffset - 1,
+                        endNodePosition.isBack ? endOffset : endOffset - 1,
+                        scene,
+                        document,
+                        docSkeleton,
+                        style,
+                        segmentId,
+                        segmentPage,
+                        startNodePosition.isBack,
+                        endNodePosition.isBack
+                    );
+                } else {
+                    textRange = getTextRangeFromCharIndex(
+                        startOffset,
+                        endOffset,
+                        scene,
+                        document,
+                        docSkeleton,
+                        style,
+                        segmentId,
+                        segmentPage
+                    );
+                }
 
                 if (textRange) {
                     this._addTextRange(textRange);

@@ -15,10 +15,10 @@
  */
 
 import type { IAccessor, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable, IConfigService, Inject, Injector, Tools } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
 import type { IMenuItem } from '../menu/menu';
+import { createIdentifier, Disposable, IConfigService, Inject, Injector, Tools } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import { mergeMenuConfigs } from '../../common/menu-merge-configs';
 import { ContextMenuGroup, ContextMenuPosition, MenuManagerPosition, RibbonDataGroup, RibbonFormulasGroup, RibbonInsertGroup, RibbonOthersGroup, RibbonPosition, RibbonStartGroup, RibbonViewGroup } from './types';
 

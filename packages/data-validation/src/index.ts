@@ -20,7 +20,7 @@ export {
 } from './common/util';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 
-export { type DataValidationChangeSource, DataValidationModel, type IRuleChange, type IValidStatusChange } from './models/data-validation-model';
+export { type DataValidationChangeSource, DataValidationModel, type IRuleChange } from './models/data-validation-model';
 
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryScope, DataValidatorRegistryService } from './services/data-validator-registry.service';

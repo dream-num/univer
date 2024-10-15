@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IRectRangeWithStyle } from '@univerjs/engine-render';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
-import type { IRectRangeWithStyle } from '@univerjs/engine-render';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from '../../commands/commands/clipboard.command';
 import { DeleteLeftCommand } from '../../commands/commands/delete.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from '../../commands/commands/table/doc-table-delete.command';
@@ -84,6 +84,8 @@ const getDisableWhenSelectionNotInTableObservable = (accessor: IAccessor) => {
 
             subscriber.next(true);
         });
+
+        subscriber.next(true);
 
         return () => observable.unsubscribe();
     });

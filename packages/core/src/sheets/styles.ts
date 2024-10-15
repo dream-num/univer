@@ -71,7 +71,6 @@ export class Styles {
         const id = Tools.generateRandomId(6);
         this._styles[id] = data;
         // update cache
-
         this._cacheMap.set(styleObject, id);
 
         return id;

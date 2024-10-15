@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationType, Disposable, ILogService, Inject, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
+import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
+import { DataValidationType, Disposable, Inject, Injector, isFormulaString, IUniverInstanceService, ObjectMatrix, Range, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
@@ -68,7 +68,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
-        @ILogService private readonly _logService: ILogService
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 

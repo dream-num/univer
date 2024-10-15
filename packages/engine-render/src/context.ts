@@ -34,6 +34,16 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this.canvas = context.canvas;
     }
 
+    private _id: string;
+
+    getId() {
+        return this._id;
+    }
+
+    setId(id: string) {
+        this._id = id;
+    }
+
     isContextLost(): boolean {
         // @ts-ignore
         return this._context.isContextLost();
@@ -993,15 +1003,6 @@ export class UniverRenderingContextWebGL { }
 export class UniverRenderingContextWebGPU { }
 
 export class UniverRenderingContext extends UniverRenderingContext2D {
-    private _id: string;
-
-    getId() {
-        return this._id;
-    }
-
-    setId(id: string) {
-        this._id = id;
-    }
 }
 
 export class UniverPrintingContext extends UniverRenderingContext2D {

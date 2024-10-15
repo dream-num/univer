@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
-import { Avatar, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { RangeSelector } from '@univerjs/docs-ui';
-import { serializeRange } from '@univerjs/engine-formula';
-import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
-import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
-import clsx from 'clsx';
-import React, { useEffect, useState } from 'react';
 import type { IRange, Workbook } from '@univerjs/core';
 import type { ICollaborator, IUser } from '@univerjs/protocol';
+import { IAuthzIoService, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
+import { Avatar, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
+
+import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
+import { RangeProtectionRuleModel, setEndForRange, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { ComponentManager, IDialogService, ISidebarService, useObservable } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { RANGE_SELECTOR_COMPONENT_KEY } from '../../../common/keys';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
@@ -45,8 +45,13 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const sidebarService = useDependency(ISidebarService);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const worksheetRuleModel = useDependency(WorksheetProtectionRuleModel);
+    const componentManager = useDependency(ComponentManager);
+    const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
+
     const rangeErrorMsg = useObservable(sheetPermissionPanelModel.rangeErrorMsg$);
 
+    const rangeSelectorActionsRef = useRef<any>({});
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getActiveSheet()!;
     const unitId = workbook.getUnitId();
@@ -54,7 +59,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-    // The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
+// The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
     const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(!!activeRule?.permissionId);
@@ -124,7 +129,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                 rangeErrorString = localeService.t('permission.panel.rangeOverlapOverPermissionError');
             }
         }
-        return rangeErrorString;
+        return rangeErrorString === '' ? undefined : rangeErrorString;
     };
 
     useEffect(() => {
@@ -276,8 +281,57 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         };
     }, [sidebarService, subUnitId, univerInstanceService]);
 
+    const handleRangeChange = (rangeText: string) => {
+        const newRange = rangeText.split(',').map(deserializeRangeWithSheet).map((item) => item.range);
+        if (newRange.some((i) => !isValidRange(i) || i.endColumn < i.startColumn || i.endRow < i.startRow)) {
+            return;
+        }
+
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const worksheet = workbook.getActiveSheet()!;
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const transformedRange = newRange.map((range) => {
+            const rowCount = worksheet.getRowCount();
+            const colCount = worksheet.getColumnCount();
+            setEndForRange(range, rowCount, colCount);
+            return range;
+        });
+        const rangeErrorString = checkRangeValid(transformedRange);
+        sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
+        if (rangeErrorString) return;
+
+        const sheetName = worksheet.getName();
+        const rangeStr = transformedRange.map((range) => {
+            const v = serializeRange(range);
+            return v === 'NaN' ? '' : v;
+        }).filter((r) => !!r).join(',');
+
+        const rule = {
+            ranges: transformedRange,
+            unitId,
+            subUnitId,
+            unitType: UnitObject.SelectRange,
+            name: `${sheetName}(${rangeStr})`,
+        };
+        if (rule.ranges.length === 1) {
+            const { startRow, endRow, startColumn, endColumn } = rule.ranges[0];
+            if (startRow === 0 && endRow === worksheet.getRowCount() - 1 && startColumn === 0 && worksheet.getColumnCount() - 1 === endColumn) {
+                rule.unitType = UnitObject.Worksheet;
+                rule.name = `${sheetName}`;
+            }
+        }
+
+        sheetPermissionPanelModel.setRule(rule);
+    };
+
+    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+    };
+
     return (
-        <div className={styles.permissionPanelDetailWrapper}>
+        <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
             {/* <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.name')}>
                 <Input
                     value={activeRule?.name ?? ''}
@@ -288,58 +342,18 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             </FormLayout> */}
             <Spin loading={loading}>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
-                    <RangeSelector
-                        className={clsx(styles.permissionRangeSelector)}
-                        textEditorClassName={clsx({ [styles.permissionRangeSelectorError]: rangeErrorMsg })}
-                        value={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
-                        id={createInternalEditorID('sheet-permission-panel')}
-                        openForSheetUnitId={unitId}
-                        openForSheetSubUnitId={subUnitId}
-                        onChange={(newRange) => {
-                            if (newRange.some((i) => !isValidRange(i.range) || i.range.endColumn < i.range.startColumn || i.range.endRow < i.range.startRow)) {
-                                return;
-                            }
-
-                            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                            const worksheet = workbook.getActiveSheet()!;
-                            const unitId = workbook.getUnitId();
-                            const subUnitId = worksheet.getSheetId();
-                            const transformedRange = newRange.map((i) => {
-                                const range = { ...i.range };
-                                const rowCount = worksheet.getRowCount();
-                                const colCount = worksheet.getColumnCount();
-                                setEndForRange(range, rowCount, colCount);
-                                return range;
-                            });
-                            const rangeErrorString = checkRangeValid(transformedRange);
-                            sheetPermissionPanelModel.setRangeErrorMsg(rangeErrorString);
-                            if (rangeErrorString) return;
-
-                            const sheetName = worksheet.getName();
-                            const rangeStr = transformedRange.map((range) => {
-                                const v = serializeRange(range);
-                                return v === 'NaN' ? '' : v;
-                            }).filter((r) => !!r).join(',');
-
-                            const rule = {
-                                ranges: transformedRange,
-                                unitId,
-                                subUnitId,
-                                unitType: UnitObject.SelectRange,
-                                name: `${sheetName}(${rangeStr})`,
-                            };
-                            if (rule.ranges.length === 1) {
-                                const { startRow, endRow, startColumn, endColumn } = rule.ranges[0];
-                                if (startRow === 0 && endRow === worksheet.getRowCount() - 1 && startColumn === 0 && worksheet.getColumnCount() - 1 === endColumn) {
-                                    rule.unitType = UnitObject.Worksheet;
-                                    rule.name = `${sheetName}`;
-                                }
-                            }
-
-                            sheetPermissionPanelModel.setRule(rule);
-                        }}
-                    />
-                    {rangeErrorMsg && <span className={styles.sheetPermissionPanelNameInputErrorText}>{rangeErrorMsg}</span>}
+                    {RangeSelector && (
+                        <RangeSelector
+                            unitId={unitId}
+                            errorText={rangeErrorMsg}
+                            subUnitId={subUnitId}
+                            initValue={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
+                            onChange={handleRangeChange}
+                    // onVerify={handleVerify}
+                            isFocus={isFocusRangeSelector}
+                            actions={rangeSelectorActionsRef.current}
+                        />
+                    ) }
                 </FormLayout>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
                     <Input

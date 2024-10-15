@@ -73,6 +73,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.79",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-formula-ui": "workspace:*",
         "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

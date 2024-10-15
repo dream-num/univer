@@ -170,7 +170,7 @@ const locale: typeof zhCN = {
             errorMessage: {
                 notBlank: 'Условие не может быть пустым',
                 formulaError: 'Ошибка формулы',
-
+                rangeError: 'Bad selection',
             },
         },
     },

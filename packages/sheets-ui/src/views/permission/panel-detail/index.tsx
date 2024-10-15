@@ -64,6 +64,8 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(!!activeRule?.permissionId);
 
+    const [rangeInitialization, setRangeInitialization] = useState(false);
+
     const handleAddPerson = async () => {
         const userList = await authzIoService.listCollaborators({
             objectID: unitId,
@@ -182,6 +184,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             unitType: fromSheetBar ? UnitObject.Worksheet : UnitObject.SelectRange,
 
         });
+        setRangeInitialization(true);
     }, [activeRule?.permissionId, fromSheetBar, selectionManagerService, sheetPermissionPanelModel, subUnitId, unitId, worksheet]);
 
     useEffect(() => {
@@ -344,7 +347,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             </FormLayout> */}
             <Spin loading={loading}>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
-                    {RangeSelector && (
+                    {RangeSelector && rangeInitialization && (
                         <RangeSelector
                             unitId={unitId}
                             errorText={rangeErrorMsg}

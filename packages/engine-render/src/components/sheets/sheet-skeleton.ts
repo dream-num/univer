@@ -36,13 +36,13 @@ import type {
     IStyleBase,
     IStyleData,
     ITextRotation,
-    ITextStyle,
     IWorksheetData,
     Nullable,
     Styles,
     TextDirection,
-    Worksheet,
-} from '@univerjs/core';
+    VerticalAlign,
+
+    Worksheet } from '@univerjs/core';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
@@ -54,7 +54,6 @@ import {
     BuildTextUtils,
     CellValueType,
     CustomRangeType,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
@@ -70,7 +69,6 @@ import {
     searchArray,
     TextX,
     Tools,
-    VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
@@ -89,6 +87,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
+import { createDocumentModelWithStyle, extractOtherStyle } from './util';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -173,31 +172,12 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
 }
 
 interface ICellOtherConfig {
-    /**
-     * textRotation
-     */
     textRotation?: ITextRotation;
-    /**
-     * textDirection
-     */
     textDirection?: Nullable<TextDirection>;
-    /**
-     * horizontalAlignment
-     */
     horizontalAlign?: HorizontalAlign;
-    /**
-     * verticalAlignment
-     */
     verticalAlign?: VerticalAlign;
-    /**
-     * wrapStrategy
-     */
     wrapStrategy?: WrapStrategy;
-    /**
-     * padding
-     */
     paddingData?: IPaddingData;
-
     cellValueType?: CellValueType;
 }
 
@@ -596,7 +576,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
 
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
             documentSkeleton.calculate();
 
             let { height: h = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
@@ -1125,16 +1105,14 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
     getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
-        const documentModelObject = this._getCellDocumentModel(cell, {
-            ignoreTextRotation: true,
-        });
+        const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
 
         const style = this._styles.getStyleByCell(cell);
         const textStyle = this._getFontFormat(style);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
-                documentModelObject.documentModel = this._getDocumentDataByStyle('', textStyle, {});
+                documentModelObject.documentModel = createDocumentModelWithStyle('', textStyle);
             }
             return documentModelObject;
         }
@@ -1149,9 +1127,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
-        fontString = getFontStyleString({}, this._localService).fontCache;
+        fontString = getFontStyleString({}, this._localeService).fontCache;
 
-        const documentModel = this._getDocumentDataByStyle(content, textStyle, {});
+        const documentModel = createDocumentModelWithStyle(content, textStyle);
 
         return {
             documentModel,
@@ -1198,7 +1176,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         let documentModel: Nullable<DocumentDataModel>;
         let fontString = 'document';
-        const cellOtherConfig = this._getOtherStyle(style) as ICellOtherConfig;
+        const cellOtherConfig = extractOtherStyle(style);
 
         const textRotation: ITextRotation = ignoreTextRotation
             ? DEFAULT_STYLES.tr
@@ -1210,7 +1188,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         if (cell.f && displayRawFormula) {
             // The formula does not detect horizontal alignment and rotation.
-            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
+            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign });
             horizontalAlign = DEFAULT_STYLES.ht;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
@@ -1226,10 +1204,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                     wrapStrategy,
                 }
             );
-            // console.log(cell.p);
         } else if (cell.v != null) {
             const textStyle = this._getFontFormat(style);
-            fontString = getFontStyleString(textStyle, this._localService).fontCache;
+            fontString = getFontStyleString(textStyle, this._localeService).fontCache;
 
             let cellText = extractPureTextFromCell(cell);
 
@@ -1239,12 +1216,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                 cellText = `'${cellText}`;
             }
 
-            documentModel = this._getDocumentDataByStyle(cellText, textStyle, {
+            documentModel = createDocumentModelWithStyle(cellText, textStyle, {
                 ...cellOtherConfig,
                 textRotation,
                 cellValueType: cell.t!,
             });
         }
+
+        // This is a compatible code. cc @weird94
         if (documentModel && cell.linkUrl && cell.linkId) {
             addLinkToDocumentModel(documentModel, cell.linkUrl, cell.linkId);
         }
@@ -1650,20 +1629,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Boolean(mergedData);
     }
 
-    // private _getMergeRangeCache() {
-    //     const dataMergeCache = this.dataMergeCache;
-    //     const mergeRangeCache = new ObjectMatrix<ObjectMatrix<boolean>>();
-    //     dataMergeCache?.forEach((r, dataMergeRow) => {
-    //         dataMergeRow?.forEach((c, dataCache) => {
-    //             const { startRow: startRowMargeIndex, endRow: endRowMargeIndex, startColumn: startColumnMargeIndex, endColumn: endColumnMargeIndex } = dataCache;
-    //             const endObject = new ObjectMatrix<boolean>();
-    //             endObject.setValue(endRowMargeIndex, endColumnMargeIndex, true);
-    //             mergeRangeCache.setValue(startRowMargeIndex, startColumnMargeIndex, endObject);
-    //         });
-    //     });
-    //     return mergeRangeCache;
-    // }
-
     /**
      * get the current row and column segment visible merge data
      * @returns {IRange} The visible merge data
@@ -1828,7 +1793,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const documentViewModel = new DocumentViewModel(documentModel);
         if (documentViewModel) {
             const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
+            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localeService);
             documentSkeleton.calculate();
 
             const config: IFontCacheItem = {
@@ -1931,69 +1896,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
         }
-
-        return new DocumentDataModel(documentData);
-    }
-
-    private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: ICellOtherConfig): DocumentDataModel {
-        const contentLength = content.length;
-        const {
-            textRotation,
-            paddingData = DEFAULT_PADDING_DATA,
-            horizontalAlign = HorizontalAlign.UNSPECIFIED,
-            verticalAlign = VerticalAlign.UNSPECIFIED,
-            wrapStrategy = WrapStrategy.UNSPECIFIED,
-            cellValueType,
-        } = config;
-
-        const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || {};
-
-        const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
-
-        const documentData: IDocumentData = {
-            id: 'd',
-            body: {
-                dataStream: `${content}${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
-                textRuns: [
-                    {
-                        ts: textStyle,
-                        st: 0,
-                        ed: contentLength,
-                    },
-                ],
-                paragraphs: [
-                    {
-                        startIndex: contentLength,
-                        paragraphStyle: {
-                            horizontalAlign,
-                        },
-                    },
-                ],
-                sectionBreaks: [{
-                    startIndex: contentLength + 1,
-                }],
-            },
-            documentStyle: {
-                pageSize: {
-                    width: Number.POSITIVE_INFINITY,
-                    height: Number.POSITIVE_INFINITY,
-                },
-                marginTop,
-                marginBottom,
-                marginRight,
-                marginLeft,
-                renderConfig: {
-                    horizontalAlign,
-                    verticalAlign,
-                    centerAngle,
-                    vertexAngle,
-                    wrapStrategy,
-                    cellValueType,
-                },
-            },
-            drawings: {},
-            drawingsOrder: [],
-        };
 
         return new DocumentDataModel(documentData);
     }
@@ -2141,35 +2043,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         ol && (style.ol = ol);
         cl && (style.cl = cl);
         return style;
-    }
-
-    private _getOtherStyle(format?: Nullable<IStyleData>): ICellOtherConfig {
-        if (!format) {
-            return {};
-        }
-
-        const {
-            tr: textRotation,
-
-            td: textDirection,
-
-            ht: horizontalAlign,
-
-            vt: verticalAlign,
-
-            tb: wrapStrategy,
-
-            pd: paddingData,
-        } = format;
-
-        return {
-            textRotation,
-            textDirection,
-            horizontalAlign,
-            verticalAlign,
-            wrapStrategy,
-            paddingData,
-        } as ICellOtherConfig;
     }
 
     /**

@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+import type { Plugin, PluginCtor } from '@univerjs/core';
 import { UniverActionRecorderPlugin } from '@univerjs/action-recorder';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
+import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
+import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
+import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
-import type { Plugin, PluginCtor } from '@univerjs/core';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
@@ -40,9 +44,13 @@ export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCt
                 return '/vs/editor/editor.worker.js';
             },
         }],
+        [UniverSheetsConditionalFormattingUIPlugin],
         [UniverActionRecorderPlugin],
+        [UniverSheetsHyperLinkUIPlugin],
         [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: false }],
+        [UniverSheetsDrawingUIPlugin],
         [UniverSheetsFindReplacePlugin],
+        [UniverDebuggerPlugin],
     ];
 }

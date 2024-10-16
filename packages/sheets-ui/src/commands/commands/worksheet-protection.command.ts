@@ -15,13 +15,12 @@
  */
 
 import type { ICommand, Workbook } from '@univerjs/core';
+import type { IWorksheetProtectionRule } from '@univerjs/sheets';
+
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 
 import { UniverType } from '@univerjs/protocol';
-
 import { AddWorksheetProtectionMutation, DeleteWorksheetProtectionMutation, SetWorksheetProtectionMutation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import type { IWorksheetProtectionRule } from '@univerjs/sheets';
-import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 
 export interface IAddWorksheetProtectionParams {
     unitId: string;
@@ -37,6 +36,7 @@ export interface IDeleteWorksheetProtectionParams {
 export interface ISetWorksheetProtectionParams {
     permissionId: string;
     rule: IWorksheetProtectionRule;
+    oldRule: IWorksheetProtectionRule;
 }
 
 export const AddWorksheetProtectionCommand: ICommand<IAddWorksheetProtectionParams> = {
@@ -107,14 +107,12 @@ export const SetWorksheetProtectionCommand: ICommand<ISetWorksheetProtectionPara
             return false;
         }
         const commandService = accessor.get(ICommandService);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const { rule, permissionId } = params;
+        const { rule, permissionId, oldRule } = params;
         const { unitId, subUnitId } = rule;
 
         const newRule = { ...rule, permissionId };
-        const oldRule = sheetPermissionPanelModel.oldRule;
 
         const result = await commandService.executeCommand(SetWorksheetProtectionMutation.id, {
             unitId,

@@ -17,10 +17,9 @@
 import type { ICommand, Workbook } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, Tools, UniverInstanceType } from '@univerjs/core';
 import { UnitObject } from '@univerjs/protocol';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetProtectionMutation, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionOpenPanelOperation } from '../operations/sheet-permission-open-panel.operation';
 import { DeleteWorksheetProtectionCommand } from './worksheet-protection.command';
 
@@ -39,6 +38,7 @@ export interface IDeleteRangeProtectionParams {
 
 export interface ISetProtectionParams {
     rule: IPermissionPanelRule;
+    oldRule: IPermissionPanelRule;
 }
 
 export const AddRangeProtectionFromToolbarCommand: ICommand = {
@@ -46,8 +46,6 @@ export const AddRangeProtectionFromToolbarCommand: ICommand = {
     id: 'sheet.command.add-range-protection-from-toolbar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
-        sheetPermissionPanelModel.resetRule();
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
         return true;
     },
@@ -58,8 +56,6 @@ export const AddRangeProtectionFromContextMenuCommand: ICommand = {
     id: 'sheet.command.add-range-protection-from-context-menu',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
-        sheetPermissionPanelModel.resetRule();
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
         return true;
     },
@@ -80,8 +76,6 @@ export const AddRangeProtectionFromSheetBarCommand: ICommand = {
     id: 'sheet.command.add-range-protection-from-sheet-bar',
     async handler(accessor) {
         const commandService = accessor.get(ICommandService);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
-        sheetPermissionPanelModel.resetRule();
         await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { fromSheetBar: true, showDetail: true });
         return true;
     },
@@ -109,12 +103,11 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionParams> = {
         const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
         const { rule, permissionId } = params;
 
-        const { unitId, subUnitId, ranges, name, description } = rule;
+        const { unitId, subUnitId, ranges, description } = rule;
         const rules = [{
             ranges,
             permissionId,
             id: selectionProtectionModel.createRuleId(unitId, subUnitId),
-            name,
             description,
         }];
 
@@ -164,59 +157,6 @@ export const DeleteRangeSelectionCommand: ICommand<IDeleteRangeProtectionParams>
             });
         }
 
-        return true;
-    },
-};
-
-export const SetRangeProtectionCommand: ICommand<ISetRangeProtectionParams> = {
-    type: CommandType.COMMAND,
-    id: 'sheet.command.set-range-protection',
-    async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const commandService = accessor.get(ICommandService);
-        const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
-        const undoRedoService = accessor.get(IUndoRedoService);
-        const { rule, permissionId } = params;
-
-        const { unitId, subUnitId, ranges, name, description } = rule;
-
-        if (rule.id) {
-            const redoMutationParam = {
-                unitId,
-                subUnitId,
-                ruleId: rule.id,
-                rule: {
-                    ranges,
-                    permissionId,
-                    id: selectionProtectionModel.createRuleId(unitId, subUnitId),
-                    name,
-                    description,
-                },
-            };
-            const result = await commandService.executeCommand(SetRangeProtectionMutation.id, redoMutationParam);
-
-            if (result) {
-                const redoMutations = [{
-                    id: SetRangeProtectionMutation.id, params: redoMutationParam,
-                }];
-                const undoMutations = [{
-                    id: SetRangeProtectionMutation.id, params: {
-                        unitId,
-                        subUnitId,
-                        ruleId: rule.id,
-                        rule: sheetPermissionPanelModel.oldRule,
-                    },
-                }];
-                undoRedoService.pushUndoRedo({
-                    unitID: unitId,
-                    redoMutations,
-                    undoMutations,
-                });
-            }
-        }
         return true;
     },
 };
@@ -287,7 +227,6 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
         if (worksheetRule?.permissionId) {
             const oldRule = {
                 ...worksheetRule,
@@ -295,9 +234,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
                 subUnitId,
                 ranges: [],
             };
-            sheetPermissionPanelModel.setRule(oldRule);
-            sheetPermissionPanelModel.setOldRule(oldRule);
-            await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
+            await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true, rule: Tools.deepClone(oldRule), oldRule: Tools.deepClone(oldRule) });
             return true;
         } else {
             const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
@@ -316,9 +253,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
                     unitId,
                     subUnitId,
                 };
-                sheetPermissionPanelModel.setRule(oldRule);
-                sheetPermissionPanelModel.setOldRule(oldRule);
-                await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true });
+                await commandService.executeCommand(SheetPermissionOpenPanelOperation.id, { showDetail: true, rule: Tools.deepClone(oldRule), oldRule: Tools.deepClone(oldRule) });
                 return true;
             } else {
                 return false;
@@ -336,15 +271,12 @@ export const SetProtectionCommand: ICommand<ISetProtectionParams> = {
         }
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
         const rangeProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
-        const { rule } = params;
+        const { rule, oldRule } = params;
         const { unitId, subUnitId } = rule;
 
         const redoMutations = [];
         const undoMutations = [];
-
-        const oldRule = sheetPermissionPanelModel.oldRule;
 
         if (oldRule?.unitType === rule.unitType) {
             if (rule.unitType === UnitObject.Worksheet) {

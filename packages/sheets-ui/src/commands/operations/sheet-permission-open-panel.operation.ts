@@ -17,9 +17,9 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
+import { UNIVER_SHEET_PERMISSION_PANEL } from '../../consts/permission';
 import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionUserManagerService } from '../../services/permission/sheet-permission-user-list.service';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../consts/permission';
 
 export interface IPermissionOpenPanelParam {
     fromSheetBar?: boolean;
@@ -44,10 +44,6 @@ export const SheetPermissionOpenPanelOperation: ICommand<IPermissionOpenPanelPar
                 fromSheetBar,
             },
             width: 330,
-            footer: {
-                label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
-                showDetail,
-            },
             onClose: () => {
                 sheetPermissionPanelModel.reset();
                 sheetPermissionUserManagerService.reset();

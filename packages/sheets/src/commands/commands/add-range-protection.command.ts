@@ -15,8 +15,8 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
 import { AddRangeProtectionMutation } from '../mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../mutations/delete-range-protection.mutation';
@@ -37,7 +37,7 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionCommandParam
         const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
         const { rule, permissionId } = params;
 
-        const { unitId, subUnitId, ranges, name, description } = rule;
+        const { unitId, subUnitId, ranges, description } = rule;
         const rules = [{
             ranges,
             permissionId,

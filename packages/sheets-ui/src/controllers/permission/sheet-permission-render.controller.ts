@@ -22,9 +22,9 @@ import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle }
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ComponentManager } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
-import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
+import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
-import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionPanelFooter, SheetPermissionUserDialog } from '../../views/permission';
+import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../../views/permission';
 import { AlertDialog } from '../../views/permission/error-msg-dialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
@@ -52,7 +52,6 @@ export class SheetPermissionRenderManagerController extends Disposable {
             [permissionCheckIconKey, CheckMarkSingle],
             [permissionLockIconKey, LockSingle],
             [UNIVER_SHEET_PERMISSION_PANEL, SheetPermissionPanel],
-            [UNIVER_SHEET_PERMISSION_PANEL_FOOTER, SheetPermissionPanelFooter],
             [UNIVER_SHEET_PERMISSION_USER_DIALOG, SheetPermissionUserDialog],
             [UNIVER_SHEET_PERMISSION_DIALOG, SheetPermissionDialog],
             [UNIVER_SHEET_PERMISSION_ALERT_DIALOG, AlertDialog],

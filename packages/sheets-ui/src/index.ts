@@ -152,7 +152,6 @@ export {
     DeleteRangeProtectionFromContextMenuCommand,
     DeleteRangeSelectionCommand,
     SetProtectionCommand,
-    SetRangeProtectionCommand,
     SetRangeProtectionFromContextMenuCommand,
     ViewSheetPermissionFromContextMenuCommand,
     ViewSheetPermissionFromSheetBarCommand,

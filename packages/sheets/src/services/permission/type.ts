@@ -15,6 +15,7 @@
  */
 
 import type { UnitObject } from '@univerjs/protocol';
+import type { EditStateEnum, ViewStateEnum } from '../../model/range-protection-rule.model';
 
 export interface IWorksheetProtectionRule {
     permissionId: string;
@@ -22,7 +23,8 @@ export interface IWorksheetProtectionRule {
     unitType: UnitObject;
     unitId: string;
     subUnitId: string;
-    name: string;
+    viewState: ViewStateEnum;
+    editState: EditStateEnum;
 }
 
 export interface IWorksheetProtectionPointRule {

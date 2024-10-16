@@ -20,15 +20,26 @@ import { Tools } from '@univerjs/core';
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
+export enum ViewStateEnum {
+    OthersCanView = 'othersCanView',
+    NoOneElseCanView = 'noOneElseCanView',
+}
+
+export enum EditStateEnum {
+    DesignedUserCanEdit = 'designedUserCanEdit',
+    OnlyMe = 'onlyMe',
+}
+
 export interface IRangeProtectionRule {
     ranges: IRange[];
     permissionId: string;
     id: string;
-    name: string;
     description?: string;
     unitType: UnitObject;
     unitId: string;
     subUnitId: string;
+    viewState: ViewStateEnum;
+    editState: EditStateEnum;
 }
 export type IObjectModel = Record<string, Record<string, IRangeProtectionRule[]>>;
 

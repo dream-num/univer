@@ -18,12 +18,12 @@ import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPoint } from '@univerjs/protocol';
 import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
-import { Avatar, Tooltip } from '@univerjs/design';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
+import { Avatar, Button, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { baseProtectionActions, DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 
@@ -31,7 +31,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { merge } from 'rxjs';
 import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
-import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
+import { UNIVER_SHEET_PERMISSION_PANEL } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
 import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { panelListEmptyBase64 } from './constant';
@@ -41,14 +41,10 @@ type IRuleItem = IRangeProtectionRule | IWorksheetProtectionRule;
 export const SheetPermissionPanelList = () => {
     const [isCurrentSheet, setIsCurrentSheet] = useState(true);
     const [forceUpdateFlag, setForceUpdateFlag] = useState(false);
-    const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
     const localeService = useDependency(LocaleService);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
     const worksheetProtectionModel = useDependency(WorksheetProtectionRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-
-    const unitId = workbook.getUnitId();
     const commandService = useDependency(ICommandService);
     const sidebarService = useDependency(ISidebarService);
     const authzIoService = useDependency(IAuthzIoService);
@@ -59,6 +55,14 @@ export const SheetPermissionPanelList = () => {
 
     const _sheetRuleRefresh = useObservable(worksheetProtectionModel.ruleRefresh$, '');
     const _rangeRuleRefresh = useObservable(rangeProtectionRuleModel.ruleRefresh$, '');
+
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+
+    if (!workbook) {
+        return null;
+    }
+
+    const unitId = workbook?.getUnitId();
 
     const getRuleList = useCallback(async (isCurrentSheet: boolean) => {
         const worksheet = workbook.getActiveSheet()!;
@@ -171,9 +175,6 @@ export const SheetPermissionPanelList = () => {
     });
 
     const handleEdit = (rule: IPermissionPanelRule) => {
-        sheetPermissionPanelModel.setRule(rule);
-        sheetPermissionPanelModel.setOldRule(rule);
-
         if (rule.subUnitId !== workbook.getActiveSheet().getSheetId()) {
             commandService.executeCommand(SetWorksheetActiveOperation.id, {
                 unitId: rule.unitId,
@@ -186,12 +187,10 @@ export const SheetPermissionPanelList = () => {
             children: {
                 label: UNIVER_SHEET_PERMISSION_PANEL,
                 showDetail: true,
+                rule: Tools.deepClone(rule),
+                oldRule: Tools.deepClone(rule),
             },
             width: 330,
-            footer: {
-                label: UNIVER_SHEET_PERMISSION_PANEL_FOOTER,
-                showDetail: true,
-            },
         };
 
         sidebarService.open(sidebarProps);
@@ -202,6 +201,10 @@ export const SheetPermissionPanelList = () => {
         const ruleList = await getRuleList(isCurrentSheet);
         setRuleList(ruleList);
     };
+
+    const workbookEditPermission = permissionService.getPermissionPoint(new WorkbookEditablePermission(unitId).id)?.value ?? false;
+    const workbookManagePermission = permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+    const hasSetProtectPermission = workbookEditPermission && workbookManagePermission;
 
     return (
         <div className={styles.sheetPermissionListPanelWrapper}>
@@ -335,6 +338,29 @@ export const SheetPermissionPanelList = () => {
                         <p className={styles.sheetPermissionListEmptyText}>{localeService.t('permission.dialog.listEmpty')}</p>
                     </div>
                 )}
+
+            {hasSetProtectPermission && (
+                <div className={styles.sheetPermissionPanelAddWrapper}>
+                    <Button
+                        className={styles.sheetPermissionPanelAddButton}
+                        type="primary"
+                        onClick={() => {
+                            const sidebarProps = {
+                                header: { title: `${localeService.t('permission.panel.title')}` },
+                                children: {
+                                    label: UNIVER_SHEET_PERMISSION_PANEL,
+                                    showDetail: true,
+                                },
+                                width: 330,
+                            };
+                            sidebarService.open(sidebarProps);
+                        }}
+                    >
+                        <div>+ </div>
+                        {localeService.t('permission.button.addNewPermission')}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };

@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { ICollaborator } from '@univerjs/protocol';
+import { BehaviorSubject } from 'rxjs';
 
 export class SheetPermissionUserManagerService {
     private _userList: ICollaborator[] = [];
     private _oldCollaboratorList: ICollaborator[] = [];
+
     private _selectUserList: ICollaborator[] = [];
-    private _allUserList: ICollaborator[] = [];
-
     private _selectUserList$ = new BehaviorSubject<ICollaborator[]>(this._selectUserList);
-
     selectUserList$ = this._selectUserList$.asObservable();
 
     get userList() {
         return this._userList;
     }
 
-    get allUserList() {
-        return this._allUserList;
-    }
-
-    setAllUserList(userList: ICollaborator[]) {
-        this._allUserList = userList;
-    }
-
-    setUserList(userList: ICollaborator[]) {
+    // Set all editable users of this unit
+    setCanEditUserList(userList: ICollaborator[]) {
         this._userList = userList;
     }
 
@@ -48,7 +39,6 @@ export class SheetPermissionUserManagerService {
         this._oldCollaboratorList = [];
         this._selectUserList = [];
         this._selectUserList$.next([]);
-        this._allUserList = [];
     }
 
     get oldCollaboratorList() {
@@ -63,6 +53,7 @@ export class SheetPermissionUserManagerService {
         return this._selectUserList;
     }
 
+    // The results of the user dialog selection panel should be rendered in the permission panel
     setSelectUserList(userList: ICollaborator[]) {
         this._selectUserList = userList;
         this._selectUserList$.next(userList);

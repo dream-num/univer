@@ -15,14 +15,14 @@
  */
 
 import type { IScale, ITextDecoration } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 
+import type { UniverRenderingContext } from '../../../context';
+import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
-import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
 
@@ -39,6 +39,12 @@ export class Line extends docExtension {
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
+        const { renderConfig } = this.extensionOffset;
+        // rotation of cell text
+        // rotate up down 90 cause problem, univer-pro/issues/2802, This is only a temporary solution
+        const vertexAngle = renderConfig?.vertexAngle || 0;
+        const centerAngle = renderConfig?.centerAngle || 0;
+        const drawStrikeAndUnderline = !(centerAngle === 0 && vertexAngle !== 0 && vertexAngle % 90 === 0);
         const { ts: textStyle, bBox, content } = glyph;
 
         if (line == null || textStyle == null || content === '\r') {
@@ -51,7 +57,7 @@ export class Line extends docExtension {
         const DELTA = 0.5;
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
-        if (underline) {
+        if (drawStrikeAndUnderline && underline) {
             const startY = asc + dsc;
             this._drawLine(ctx, glyph, underline, startY, scale);
         }
@@ -61,7 +67,7 @@ export class Line extends docExtension {
             this._drawLine(ctx, glyph, bottomBorderLine, startY, scale, 2);
         }
 
-        if (strikethrough) {
+        if (drawStrikeAndUnderline && strikethrough) {
             // strikethrough position is the middle of bounding box ascent and descent.
             let startY = asc + bd - strikeoutPosition - DELTA;
 

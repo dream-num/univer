@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
 import { IUniverInstanceService, LocaleService, useDependency } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
+import React, { useEffect, useState } from 'react';
 
-import styles from './index.module.less';
 import { DocHeaderFooterOptions } from './DocHeaderFooterOptions';
+import styles from './index.module.less';
 
 export const DocHeaderFooterPanel = () => {
     const localeService = useDependency(LocaleService);

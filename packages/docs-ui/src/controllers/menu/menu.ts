@@ -97,6 +97,47 @@ function getInsertTableHiddenObservable(
     });
 }
 
+function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
+
+    return new Observable((subscriber) => {
+        const subscription0 = commandService.onCommandExecuted((command) => {
+            if (command.id === SwitchDocModeCommand.id) {
+                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+                if (docDataModel == null) {
+                    subscriber.next(true);
+                    return;
+                }
+
+                const documentStyle = docDataModel.getSnapshot().documentStyle;
+                subscriber.next(documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL);
+            }
+        });
+
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+
+            if (docDataModel == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            return subscriber.next(docDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+            subscription0.dispose();
+        };
+    });
+}
+
 function getTableDisabledObservable(accessor: IAccessor): Observable<boolean> {
     const docSelectionManagerService = accessor.get(DocSelectionManagerService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -531,6 +572,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
+        disabled$: getHeaderFooterDisabledObservable(accessor),
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),

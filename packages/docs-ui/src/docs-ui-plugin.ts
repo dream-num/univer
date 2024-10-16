@@ -36,6 +36,7 @@ import { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/comma
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
@@ -190,6 +191,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocTableDeleteRowsCommand,
             DocTableDeleteColumnsCommand,
             DocTableDeleteTableCommand,
+            CloseHeaderFooterCommand,
             DocTableTabCommand,
             TabCommand,
             AfterSpaceCommand,

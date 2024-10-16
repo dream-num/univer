@@ -19,8 +19,7 @@ import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
-export interface ISwitchDocModeCommandParams {
-}
+export interface ISwitchDocModeCommandParams { }
 
 export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
     id: 'doc.command.switch-mode',

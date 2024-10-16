@@ -210,7 +210,6 @@ export class DocSelectionManagerService extends RxDisposable {
 
         // Remove all textRanges.
         // Add new textRanges.
-
         const { unitId, subUnitId } = params;
 
         this._refreshSelection$.next({

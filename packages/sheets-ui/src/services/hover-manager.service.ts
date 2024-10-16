@@ -51,7 +51,7 @@ export interface IHoverRichTextPosition extends IHoverCellPosition {
 export class HoverManagerService extends Disposable {
     private _currentCell$ = new BehaviorSubject<Nullable<IHoverCellPosition>>(null);
     private _currentRichText$ = new BehaviorSubject<Nullable<IHoverRichTextPosition>>(null);
-    private _currentClickedCell$ = new Subject<IHoverCellPosition>();
+    private _currentClickedCell$ = new Subject<IHoverRichTextPosition>();
 
     // Notify when hovering over different cells
     currentCell$ = this._currentCell$.asObservable().pipe(
@@ -163,6 +163,7 @@ export class HoverManagerService extends Disposable {
         if (font) {
             const { paddingLeft, paddingTop } = calcPadding(cell, font);
             const rects = calculateDocSkeletonRects(font.documentSkeleton, paddingLeft, paddingTop);
+
             const innerX = offsetX - position.startX - leftOffset;
             const innerY = offsetY - position.startY - topOffset;
             customRange = rects.links.find((link) => link.rects.some((rect) => rect.left <= innerX && innerX <= rect.right && (rect.top) <= innerY && innerY <= (rect.bottom)));

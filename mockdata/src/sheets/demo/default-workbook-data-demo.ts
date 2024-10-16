@@ -14287,6 +14287,114 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         t: 1,
                     },
                 },
+                25: {
+                    10: {
+                        p: {
+                            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 37.2261962890625,
+                                    height: undefined,
+                                },
+                                documentFlavor: 1,
+                                marginTop: 0,
+                                marginBottom: 2,
+                                marginRight: 2,
+                                marginLeft: 2,
+                                renderConfig: {
+                                    horizontalAlign: 2,
+                                    verticalAlign: 0,
+                                    centerAngle: 0,
+                                    vertexAngle: 0,
+                                    wrapStrategy: 0,
+                                },
+                            },
+                            drawings: {},
+                            drawingsOrder: [],
+                            body: {
+                                dataStream: '1\r\n',
+                                textRuns: [],
+                                paragraphs: [
+                                    {
+                                        startIndex: 1,
+                                        paragraphStyle: {
+                                            horizontalAlign: 2,
+                                        },
+                                        bullet: {
+                                            nestingLevel: 0,
+                                            textStyle: {
+                                                fs: 20,
+                                            },
+                                            listType: 'CHECK_LIST_CHECKED',
+                                            listId: 'w6THUh',
+                                        },
+                                    },
+                                ],
+                                sectionBreaks: [
+                                    {
+                                        startIndex: 2,
+                                    },
+                                ],
+                                customRanges: [],
+                                customDecorations: [],
+                            },
+                        },
+                        s: 'idtqdi',
+                    },
+                    11: {
+                        p: {
+                            id: '__INTERNAL_EDITOR__ZEN_EDITOR',
+                            documentStyle: {
+                                pageSize: {
+                                    width: 37.2261962890625,
+                                    height: undefined,
+                                },
+                                documentFlavor: 1,
+                                marginTop: 0,
+                                marginBottom: 2,
+                                marginRight: 2,
+                                marginLeft: 2,
+                                renderConfig: {
+                                    horizontalAlign: 2,
+                                    verticalAlign: 0,
+                                    centerAngle: 0,
+                                    vertexAngle: 0,
+                                    wrapStrategy: 0,
+                                },
+                            },
+                            drawings: {},
+                            drawingsOrder: [],
+                            body: {
+                                dataStream: '1\r\n',
+                                textRuns: [],
+                                paragraphs: [
+                                    {
+                                        startIndex: 1,
+                                        paragraphStyle: {
+                                            horizontalAlign: 2,
+                                        },
+                                        bullet: {
+                                            nestingLevel: 0,
+                                            textStyle: {
+                                                fs: 20,
+                                            },
+                                            listType: 'CHECK_LIST',
+                                            listId: 'w6THUh',
+                                        },
+                                    },
+                                ],
+                                sectionBreaks: [
+                                    {
+                                        startIndex: 2,
+                                    },
+                                ],
+                                customRanges: [],
+                                customDecorations: [],
+                            },
+                        },
+                        s: 'idtqdi',
+                    },
+                },
             },
 
             freeze: {

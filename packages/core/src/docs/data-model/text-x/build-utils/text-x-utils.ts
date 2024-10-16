@@ -15,11 +15,11 @@
  */
 
 import type { IAccessor } from '@wendellhu/redi';
-import type { Nullable } from '../../../../shared';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { IDeleteAction, IRetainAction } from '../action-types';
+import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -247,7 +247,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
 ): Array<IRetainAction | IDeleteAction> {
     const { startOffset, endOffset } = getDeleteSelection(selection, body);
     const dos: Array<IRetainAction | IDeleteAction> = [];
-
     const { paragraphs = [], dataStream } = body;
 
     const textStart = startOffset - memoryCursor;
@@ -320,7 +319,40 @@ export function getRetainAndDeleteAndExcludeLineBreak(
             line: 0,
             segmentId,
         });
+        cursor = textEnd;
     }
+
+    if (!preserveLineBreak) {
+        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
+        if (nextParagraph) {
+            if (nextParagraph.startIndex > cursor) {
+                dos.push({
+                    t: TextXActionType.RETAIN,
+                    len: nextParagraph.startIndex - cursor,
+                    segmentId,
+                });
+                cursor = nextParagraph.startIndex;
+            }
+
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            ...nextParagraph,
+                            startIndex: 0,
+                            bullet: paragraphInRange?.bullet,
+                        },
+                    ],
+                },
+                coverType: UpdateDocsAttributeType.REPLACE,
+            });
+        }
+    }
+
     return dos;
 }
 

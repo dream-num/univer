@@ -79,7 +79,7 @@ const calcDocGlyphPosition = (glyph: IDocumentSkeletonGlyph, skeleton: DocumentS
         top: rect.top,
         bottom: rect.bottom,
         left: rect.left,
-        right: rect.left,
+        right: rect.right,
     };
 };
 

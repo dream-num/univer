@@ -57,6 +57,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetActiveOperation,
+    SetWorksheetColIsAutoWidthCommand,
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
@@ -985,6 +986,17 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         id: SetWorksheetRowIsAutoHeightCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'AutoHeight',
+        title: 'rightClick.fitContent',
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: SetWorksheetColIsAutoWidthCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'AutoWidth',
         title: 'rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

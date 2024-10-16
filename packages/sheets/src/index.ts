@@ -292,7 +292,9 @@ export {
 export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,
+    type ISetWorksheetColIsAutoWidthCommandParams,
     SetColWidthCommand,
+    SetWorksheetColIsAutoWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
 export {
@@ -376,9 +378,13 @@ export {
 export { type ISetTabColorMutationParams, SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export {
+    type ISetWorksheetColAutoWidthMutationParams,
+    type ISetWorksheetColIsAutoWidthMutationParams,
     type ISetWorksheetColWidthMutationParams,
+
+    // SetWorksheetColAutoWidthMutation,
+    SetWorksheetColAutoWidthMutationFactory,
     SetWorksheetColWidthMutation,
-    SetWorksheetColWidthMutationFactory,
 } from './commands/mutations/set-worksheet-col-width.mutation';
 export { type ISetWorksheetHideMutationParams, SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';
 export { type ISetWorksheetNameMutationParams, SetWorksheetNameMutation } from './commands/mutations/set-worksheet-name.mutation';
@@ -392,6 +398,7 @@ export {
     type ISetWorksheetRowAutoHeightMutationParams,
     type ISetWorksheetRowHeightMutationParams,
     type ISetWorksheetRowIsAutoHeightMutationParams,
+
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,

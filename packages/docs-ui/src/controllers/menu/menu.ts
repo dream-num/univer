@@ -20,6 +20,7 @@ import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     DocumentFlavor,
     HorizontalAlign,
     ICommandService,
@@ -805,7 +806,7 @@ export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         type: MenuItemType.BUTTON,
         icon: 'KeyboardSingle',
         tooltip: 'toolbar.documentFlavor',
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
         activated$: new Observable<boolean>((subscriber) => {
             const subscription = commandService.onCommandExecuted((c) => {
                 if (c.id === SwitchDocModeCommand.id) {

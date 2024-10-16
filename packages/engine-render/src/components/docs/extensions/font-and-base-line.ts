@@ -108,12 +108,7 @@ export class FontAndBaseLine extends docExtension {
             const CHECKED_GLYPH = '\u2611';
             const UNCHECKED_GLYPH = '\u2610';
             if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
-                ctx.save();
                 const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
-                // ctx.translate(spanPointWithFont.x, spanPointWithFont.y);
-                // ctx.fillText(content, 0, 0);
-                // ctx.restore();
-
                 ctx.save();
                 const fontWidth = glyph.bBox.width;
                 const fontHeight = glyph.bBox.aba - glyph.bBox.abd;

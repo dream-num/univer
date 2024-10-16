@@ -73,6 +73,10 @@ export class FormulaDependencyTree {
 
     isCache: boolean = false;
 
+    refOffsetX: number = 0;
+
+    refOffsetY: number = 0;
+
     constructor(treeId?: string) {
         if (treeId != null) {
             this.treeId = treeId;

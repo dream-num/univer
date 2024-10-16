@@ -41,7 +41,6 @@ import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
 import { FormulaDependencyTree } from './dependency-tree';
-import { generateRandomDependencyTreeId } from './generate-tree-id';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
 
@@ -49,6 +48,11 @@ interface IFeatureFormulaParam {
     unitId: string;
     subUnitId: string;
     featureId: string;
+}
+
+function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): string {
+    const idNum = dependencyManagerService.getLastTreeId() || 0;
+    return idNum.toString();
 }
 
 export class FormulaDependencyGenerator extends Disposable {
@@ -182,6 +186,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList: FormulaDependencyTree[] = [];
 
+        const formulaRefCache = new Map<string, FormulaDependencyTree>();
+
         // Recalculation can only be triggered after clearing the cache. For example, if a calculation error is reported for a non-existent formula and a custom formula is registered later, all formulas need to be calculated forcibly.
         const forceCalculate = this._currentConfigService.isForceCalculate();
         if (forceCalculate) {
@@ -189,9 +195,9 @@ export class FormulaDependencyGenerator extends Disposable {
             this._formulaASTCache.clear();
         }
 
-        this._registerFormulas(formulaDataKeys, formulaData, unitData, treeList);
+        this._registerFormulas(formulaDataKeys, formulaData, unitData, treeList, formulaRefCache);
 
-        this._registerOtherFormulas(otherFormulaData, otherFormulaDataKeys, treeList);
+        this._registerOtherFormulas(otherFormulaData, otherFormulaDataKeys, treeList, formulaRefCache);
 
         this._registerFeatureFormulas(treeList);
 
@@ -211,15 +217,48 @@ export class FormulaDependencyGenerator extends Disposable {
                 continue;
             }
 
-            const rangeList = await this._getRangeListByNode(tree.node);
-            tree.pushRangeList(rangeList);
+            const { unitId, formula, refOffsetX, refOffsetY } = tree;
+            let applyCacheRange = false;
+            if (refOffsetX !== 0 || refOffsetY !== 0) {
+                const refTreeNode = formulaRefCache.get(`${unitId}${formula}`);
+                if (refTreeNode && refTreeNode.rangeList.length > 0) {
+                    tree.pushRangeList(this._moveRangeList(refTreeNode, refOffsetX, refOffsetY));
+                    applyCacheRange = true;
+                }
+            }
+
+            if (!applyCacheRange) {
+                const rangeList = await this._getRangeListByNode(tree.node);
+                tree.pushRangeList(rangeList);
+            }
 
             if (!tree.isCache) {
                 this._dependencyManagerService.addDependencyRTreeCache(tree);
             }
         }
 
+        formulaRefCache.clear();
+
         return treeList;
+    }
+
+    private _moveRangeList(tree: FormulaDependencyTree, refOffsetX: number, refOffsetY: number) {
+        const rangeList = tree.rangeList;
+        const newRangeList = [];
+        for (let i = 0, len = rangeList.length; i < len; i++) {
+            const range = rangeList[i];
+            const newRange = {
+                unitId: tree.unitId,
+                sheetId: tree.subUnitId,
+                range: { ...range.range },
+            };
+            newRange.range.startRow += refOffsetY;
+            newRange.range.endRow += refOffsetY;
+            newRange.range.startColumn += refOffsetX;
+            newRange.range.endColumn += refOffsetX;
+            newRangeList.push(newRange);
+        }
+        return newRangeList;
     }
 
     private _registerFeatureFormulas(treeList: FormulaDependencyTree[]) {
@@ -262,7 +301,7 @@ export class FormulaDependencyGenerator extends Disposable {
         return FDtree;
     }
 
-    private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: FormulaDependencyTree[]) {
+    private _registerOtherFormulas(otherFormulaData: IOtherFormulaData, otherFormulaDataKeys: string[], treeList: FormulaDependencyTree[], formulaRefCache: Map<string, FormulaDependencyTree>) {
         /**
          * Register formulas in doc, slide, and other types of applications.
          */
@@ -286,14 +325,16 @@ export class FormulaDependencyGenerator extends Disposable {
 
                 for (const subFormulaDataId of subFormulaDataKeys) {
                     const treeCache = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
+                    const formulaDataItem = subFormulaData[subFormulaDataId];
+                    const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
 
                     if (treeCache) {
                         treeCache.isCache = true;
+                        if (x === 0 && y === 0) {
+                            formulaRefCache.set(`${unitId}${formulaString}`, treeCache);
+                        }
                         continue;
                     }
-
-                    const formulaDataItem = subFormulaData[subFormulaDataId];
-                    const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
 
                     const node = this._generateAstNode(unitId, formulaString, x, y);
 
@@ -303,8 +344,14 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
                     FDtree.subUnitId = subUnitId;
+                    FDtree.refOffsetX = x;
+                    FDtree.refOffsetY = y;
 
                     FDtree.formulaId = subFormulaDataId;
+
+                    if (x === 0 && y === 0) {
+                        formulaRefCache.set(`${unitId}${formulaString}`, FDtree);
+                    }
 
                     this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, FDtree);
 
@@ -314,7 +361,7 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    private _registerFormulas(formulaDataKeys: string[], formulaData: IFormulaData, unitData: IUnitData, treeList: FormulaDependencyTree[]) {
+    private _registerFormulas(formulaDataKeys: string[], formulaData: IFormulaData, unitData: IUnitData, treeList: FormulaDependencyTree[], formulaRefCache: Map<string, FormulaDependencyTree>) {
         /**
          * Register formulas in the sheet.
          */
@@ -336,13 +383,16 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
 
+                    const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
+
                     const treeCache = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
                     if (treeCache) {
                         treeCache.isCache = true;
+                        if (x === 0 && y === 0) {
+                            formulaRefCache.set(`${unitId}${formulaString}`, treeCache);
+                        }
                         return true;
                     }
-
-                    const { f: formulaString, x, y } = formulaDataItem;
 
                     const node = this._generateAstNode(unitId, formulaString, x, y);
 
@@ -356,9 +406,15 @@ export class FormulaDependencyGenerator extends Disposable {
                     FDtree.subUnitId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
+                    FDtree.refOffsetX = x;
+                    FDtree.refOffsetY = y;
 
                     FDtree.rowCount = sheetItem.rowCount;
                     FDtree.columnCount = sheetItem.columnCount;
+
+                    if (x === 0 && y === 0) {
+                        formulaRefCache.set(`${unitId}${formulaString}`, FDtree);
+                    }
 
                     this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
 
@@ -393,9 +449,9 @@ export class FormulaDependencyGenerator extends Disposable {
         let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}`);
 
         if (astNode && !this._isDirtyDefinedForNode(astNode)) {
-            astNode.setRefOffset(refOffsetX, refOffsetY);
-            // return this._astTreeBuilder.createCacheNode(astNode, refOffsetX, refOffsetY);
-            return astNode;
+            // astNode.setRefOffset(refOffsetX, refOffsetY);
+            return this._astTreeBuilder.createCacheNode(astNode, refOffsetX, refOffsetY);
+            // return astNode;
         }
 
         const lexerNode = this._lexer.treeBuilder(formulaString);

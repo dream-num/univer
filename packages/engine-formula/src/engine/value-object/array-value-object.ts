@@ -1570,16 +1570,6 @@ export class ArrayValueObject extends BaseValueObject {
                         //     }
                         // }
                     }
-
-                    // else {
-                    //     for (let r = 0; r < rowCount; r++) {
-                    //         if (result[r] == null) {
-                    //             result[r] = [];
-                    //         }
-
-                    //         result[r][column] = BooleanValueObject.create(false);
-                    //     }
-                    // }
                 }
 
                 return;

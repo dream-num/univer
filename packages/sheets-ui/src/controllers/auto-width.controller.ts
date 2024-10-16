@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook } from '@univerjs/core';
+import type { IColAutoWidthInfo, IRange, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
-    ISetWorksheetRowAutoHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
+    ISetWorksheetColAutoWidthMutationParams,
+    ISetWorksheetColIsAutoWidthMutationParams,
 } from '@univerjs/sheets';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetRangeValuesCommand,
     SetStyleCommand,
-    SetWorksheetRowAutoHeightMutation,
-    SetWorksheetRowAutoHeightMutationFactory,
-    SetWorksheetRowIsAutoHeightCommand,
+    SetWorksheetColAutoWidthMutation,
+    SetWorksheetColAutoWidthMutationFactory,
+    SetWorksheetColIsAutoWidthCommand,
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -48,7 +48,7 @@ export class AutoHeightController extends Disposable {
         this._initialize();
     }
 
-    getUndoRedoParamsOfAutoHeight(ranges: IRange[]) {
+    getUndoRedoParamsOfColWidth(ranges: IRange[]) {
         const { _univerInstanceService: univerInstanceService } = this;
 
         const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
@@ -64,24 +64,24 @@ export class AutoHeightController extends Disposable {
             };
         }
         const { skeleton } = sheetSkeletonService.getCurrent()!;
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightByRange(ranges);
+        const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthByRange(ranges);
 
-        const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
+        const redoParams: ISetWorksheetColAutoWidthMutationParams = {
             subUnitId,
             unitId,
-            rowsAutoHeightInfo,
+            colsAutoWidthInfo,
         };
-        const undoParams: ISetWorksheetRowAutoHeightMutationParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);
+        const undoParams: ISetWorksheetColAutoWidthMutationParams = SetWorksheetColAutoWidthMutationFactory(redoParams, worksheet);
         return {
             undos: [
                 {
-                    id: SetWorksheetRowAutoHeightMutation.id,
+                    id: SetWorksheetColAutoWidthMutation.id,
                     params: undoParams,
                 },
             ],
             redos: [
                 {
-                    id: SetWorksheetRowAutoHeightMutation.id,
+                    id: SetWorksheetColAutoWidthMutation.id,
                     params: redoParams,
                 },
             ],
@@ -101,20 +101,20 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.range);
+                return this.getUndoRedoParamsOfColWidth(command.params.range);
             },
         }));
         // for intercept 'sheet.command.set-row-is-auto-height' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetWorksheetRowIsAutoHeightMutationParams }) => {
-                if (command.id !== SetWorksheetRowIsAutoHeightCommand.id) {
+            getMutations: (command: { id: string; params: ISetWorksheetColIsAutoWidthMutationParams }) => {
+                if (command.id !== SetWorksheetColIsAutoWidthCommand.id) {
                     return {
                         redos: [],
                         undos: [],
                     };
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(command.params.ranges);
+                return this.getUndoRedoParamsOfColWidth(command.params.ranges);
             },
         }));
 
@@ -147,7 +147,7 @@ export class AutoHeightController extends Disposable {
                     };
                 }
 
-                return this.getUndoRedoParamsOfAutoHeight(selections);
+                return this.getUndoRedoParamsOfColWidth(selections);
             },
         }));
     }

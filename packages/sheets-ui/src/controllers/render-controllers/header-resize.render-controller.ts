@@ -17,6 +17,14 @@
 /* eslint-disable max-lines-per-function */
 /* eslint-disable complexity */
 
+import type { EventState, Nullable, Workbook } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
+import type {
+    IDeltaColumnWidthCommandParams,
+    IDeltaRowHeightCommand,
+    ISetWorksheetColIsAutoWidthCommandParams,
+    ISetWorksheetRowIsAutoHeightCommandParams,
+} from '@univerjs/sheets';
 import {
     createInterceptorKey,
     Disposable,
@@ -27,15 +35,9 @@ import {
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
-import { Subscription } from 'rxjs';
-import type { EventState, Nullable, Workbook } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 
-import type {
-    IDeltaColumnWidthCommandParams,
-    IDeltaRowHeightCommand,
-    ISetWorksheetRowIsAutoHeightCommandParams,
-} from '@univerjs/sheets';
+import { SetWorksheetColIsAutoWidthCommand } from '@univerjs/sheets/commands/commands/set-worksheet-col-width.command.js';
+import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -366,11 +368,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                     }
 
                     const rowResizeRectX = this._columnResizeRect?.left || 0;
-
                     const rowResizeRectY = this._rowResizeRect?.top || 0;
-
                     scene.addObject(this._resizeHelperShape, SHEET_COMPONENT_HEADER_LAYER_INDEX);
-
                     scene.disableObjectsEvent();
 
                     // TODO: do it in another way
@@ -389,11 +388,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         const transformCoord = getTransformCoord(moveEvt.offsetX, moveEvt.offsetY, scene, skeleton);
 
                         const { x: moveOffsetX, y: moveOffsetY } = transformCoord;
-
                         const { scaleX, scaleY } = scene.getAncestorScale();
-
                         const scale = Math.max(scaleX, scaleY);
-
                         const HEADER_MENU_SHAPE_THUMB_SIZE_SCALE = HEADER_MENU_SHAPE_THUMB_SIZE / scale;
 
                         moveChangeX = moveOffsetX - this._startOffsetX - HEADER_MENU_SHAPE_THUMB_SIZE_SCALE / 2;
@@ -492,20 +488,36 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
         this.disposeWithMe(
             toDisposable(
                 eventBindingObject.onDblclick$.subscribeEvent(() => {
-                    if (initialType === HEADER_RESIZE_TYPE.ROW) {
-                        const scene = this._context.scene;
-
-                        scene.resetCursor();
-
-                        this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
-                            SetWorksheetRowIsAutoHeightCommand.id,
-                            {
-                                ranges: [{ startRow: this._currentRow, endRow: this._currentRow, startColumn: 0, endColumn: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getColumnCount() || 0 }],
-                            }
-                        );
-
-                        this._rowResizeRect?.hide();
+                    const scene = this._context.scene;
+                    scene.resetCursor();
+                    switch (initialType) {
+                        case HEADER_RESIZE_TYPE.COLUMN:
+                            this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
+                                SetWorksheetColIsAutoWidthCommand.id,
+                                {
+                                    ranges: [{
+                                        startColumn: this._currentColumn,
+                                        endColumn: this._currentColumn,
+                                        startRow: 0,
+                                        endRow: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getRowCount() || 0,
+                                    }],
+                                }
+                            );
+                            break;
+                        case HEADER_RESIZE_TYPE.ROW:
+                            this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
+                                SetWorksheetRowIsAutoHeightCommand.id,
+                                {
+                                    ranges: [{
+                                        startRow: this._currentRow,
+                                        endRow: this._currentRow,
+                                        startColumn: 0,
+                                        endColumn: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getColumnCount() || 0,
+                                    }],
+                                }
+                            );
                     }
+                    this._rowResizeRect?.hide();
                 })
             )
         );

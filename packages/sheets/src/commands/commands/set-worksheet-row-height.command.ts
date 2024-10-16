@@ -15,6 +15,11 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import type {
+    ISetWorksheetRowHeightMutationParams,
+    ISetWorksheetRowIsAutoHeightMutationParams,
+} from '../mutations/set-worksheet-row-height.mutation';
+
 import {
     BooleanNumber,
     CommandType,
@@ -25,13 +30,8 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type {
-    ISetWorksheetRowHeightMutationParams,
-    ISetWorksheetRowIsAutoHeightMutationParams,
-} from '../mutations/set-worksheet-row-height.mutation';
 import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowHeightMutationFactory,
@@ -291,6 +291,8 @@ export interface ISetWorksheetRowIsAutoHeightCommandParams {
     subUnitId?: string;
     ranges?: IRange[]; // For Facade API
 }
+
+
 
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,

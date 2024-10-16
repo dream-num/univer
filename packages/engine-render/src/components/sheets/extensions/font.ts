@@ -320,7 +320,7 @@ export class Font extends SheetExtension {
         endX: number,
         endY: number,
         row: number,
-        column: number,
+        col: number,
         overflowCache: ObjectMatrix<IRange>
     ) {
         const documents = this.getDocuments() as Documents;
@@ -333,6 +333,8 @@ export class Font extends SheetExtension {
         const cellHeight = endY - startY;
         const cellWidth = endX - startX;
 
+        console.log('rs', row, col, window.getDocsSkeletonPageSize(documentSkeleton));
+
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
@@ -343,7 +345,7 @@ export class Font extends SheetExtension {
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
-        const overflowRectangle = overflowCache.getValue(row, column);
+        const overflowRectangle = overflowCache.getValue(row, col);
 
         const isOverflow = !(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0);
         if (isOverflow) {

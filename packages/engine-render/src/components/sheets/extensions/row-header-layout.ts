@@ -16,13 +16,13 @@
 
 import type { IScale } from '@univerjs/core';
 
+import type { UniverRenderingContext } from '../../../context';
+import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces';
+import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { DEFAULT_FONTFACE_PLANE, FIX_ONE_PIXEL_BLUR_OFFSET, MIDDLE_CELL_POS_MAGIC_NUMBER } from '../../../basics/const';
 import { getColor } from '../../../basics/tools';
 import { SheetRowHeaderExtensionRegistry } from '../../extension';
 import { SheetExtension } from './sheet-extension';
-import type { UniverRenderingContext } from '../../../context';
-import type { IARowCfg, IARowCfgObj, IColumnStyleCfg, IRowStyleCfg } from '../interfaces';
-import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 
 const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
 
@@ -79,7 +79,7 @@ export class RowHeaderLayout extends SheetExtension {
             curRowSpecCfg = rowsCfg[rowIndex] as IRowStyleCfg & { text: string };
             mergeWithSpecCfg = { ...this.headerStyle, ...curRowSpecCfg };
         } else {
-            mergeWithSpecCfg = { ...this.headerStyle, text: `${rowIndex + 1}` };
+            mergeWithSpecCfg = { ...this.headerStyle, text: `${rowIndex}` };
         }
         const specStyle = Object.keys(curRowSpecCfg || {}).length > 1; // if cfg have more keys than 'text', means there would be special style config for this row.
         return [mergeWithSpecCfg, specStyle] as [IARowCfgObj, boolean];

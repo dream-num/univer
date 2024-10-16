@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { LocaleType } from '../types/enum/locale-type';
@@ -22,6 +21,7 @@ import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -171,9 +171,24 @@ export interface IColumnData {
     w?: number;
 
     /**
+     * is current row self-adaptive to its content
+     */
+    ia?: BooleanNumber;
+
+    /**
+     * auto width
+     */
+    aw?: number;
+
+    /**
      * hidden
      */
     hd?: BooleanNumber;
+}
+
+export interface IColAutoWidthInfo {
+    col: number;
+    autoWidth?: number;
 }
 
 /**

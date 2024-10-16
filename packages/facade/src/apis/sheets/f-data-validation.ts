@@ -174,6 +174,7 @@ export class FDataValidation {
 
     /**
      * Set the options for the data validation rule.
+     * For details of options, please refer to https://univer.ai/typedoc/@univerjs/core/interfaces/IDataValidationRuleOptions
      * @param options An object containing the options to set. `IDataValidationRuleOptions`
      * @returns true if the options are set successfully, false otherwise.
      */

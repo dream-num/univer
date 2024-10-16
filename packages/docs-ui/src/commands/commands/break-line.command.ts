@@ -112,6 +112,7 @@ export const BreakLineCommand: ICommand = {
             1,
             0
         );
+
         const result = await commandService.executeCommand(InsertCommand.id, {
             unitId,
             body: bodyAfter,

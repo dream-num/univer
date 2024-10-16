@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import type {
     ICustomBlock,
     ICustomDecoration,
@@ -26,6 +25,7 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { Tools, UpdateDocsAttributeType } from '../../../../shared';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
@@ -39,6 +39,7 @@ import {
     insertCustomDecorations,
     insertCustomRanges,
     insertParagraphs,
+    insertSectionBreaks,
     insertTables,
     insertTextRuns,
     normalizeTextRuns,
@@ -229,7 +230,6 @@ function updateParagraphs(
     }
 
     const removeParagraphs = deleteParagraphs(body, textLength, currentIndex);
-
     if (coverType !== UpdateDocsAttributeType.REPLACE) {
         const newUpdateParagraphs: IParagraph[] = [];
         for (const updateParagraph of updateDataParagraphs) {
@@ -336,7 +336,7 @@ function updateSectionBreaks(
         }
         updateBody.sectionBreaks = newUpdateSectionBreaks;
     }
-    insertParagraphs(body, updateBody, textLength, currentIndex);
+    insertSectionBreaks(body, updateBody, textLength, currentIndex);
 
     return removeSectionBreaks;
 }

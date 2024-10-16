@@ -1,6 +1,4 @@
-const { Buffer } = require('node:buffer');
 const fs = require('node:fs').promises;
-const sharp = require('sharp');
 
 const progress = [
     ['progress0', '@univerjs/icons-svg/single/start-page/progress-0-single.svg', { black: '#7A7A7A', '#E5E5E5': '#7A7A7A' }],
@@ -99,11 +97,7 @@ async function replaceFillAndConvertToBase64(filePath, replaceMap) {
             }
         }
 
-        const base64Encoded = await sharp(Buffer.from(svgContent)).resize(72)
-            .png({ progressive: true, compressionLevel: 0 })
-            .toBuffer()
-            .then((pngBuffer) => pngBuffer.toString('base64'));
-
+        const base64Encoded = encodeURIComponent(svgContent);
         return base64Encoded;
     } catch (error) {
         console.error('An error occurred:', error);
@@ -119,7 +113,7 @@ const runTask = async () => {
         for (const element of list) {
             const [key, path, replaceMap] = element;
             const base64 = await replaceFillAndConvertToBase64(`./node_modules/${path}`, replaceMap);
-            map[key] = `data:image/png;base64,${base64}`;
+            map[key] = `data:image/svg+xml;charset=utf-8,${base64}`;
         }
     }
     try {

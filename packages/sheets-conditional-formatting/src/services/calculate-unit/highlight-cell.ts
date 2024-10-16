@@ -34,6 +34,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
         const { worksheet } = context;
         const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
 
+        // eslint-disable-next-line complexity
         const getCache = () => {
             switch (ruleConfig.subType) {
                 case CFSubRuleType.average: {
@@ -105,6 +106,91 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         return { sequenceNodes };
                     }
                 }
+                case CFSubRuleType.timePeriod: {
+                    const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
+                    switch (subRuleConfig.operator) {
+                        case CFTimePeriodOperator.last7Days: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().subtract(7, 'day').valueOf(),
+                                    end: dayjs().valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.lastMonth: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('month').subtract(1, 'month').valueOf(),
+                                    end: dayjs().endOf('month').subtract(1, 'month').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.lastWeek: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('week').subtract(1, 'week').valueOf(),
+                                    end: dayjs().endOf('week').subtract(1, 'week').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.nextMonth: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('month').add(1, 'month').valueOf(),
+                                    end: dayjs().endOf('month').add(1, 'month').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.nextWeek: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('week').add(1, 'week').valueOf(),
+                                    end: dayjs().endOf('week').add(1, 'week').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.thisMonth: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('month').valueOf(),
+                                    end: dayjs().endOf('month').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.thisWeek: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('week').valueOf(),
+                                    end: dayjs().endOf('week').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.today: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('day').valueOf(),
+                                    end: dayjs().endOf('day').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.tomorrow: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('day').add(1, 'day').valueOf(),
+                                    end: dayjs().endOf('day').add(1, 'day').valueOf(),
+                                },
+                            };
+                        }
+                        case CFTimePeriodOperator.yesterday: {
+                            return {
+                                timePeriod: {
+                                    start: dayjs().startOf('day').subtract(1, 'day').valueOf(),
+                                    end: dayjs().endOf('day').subtract(1, 'day').valueOf(),
+                                },
+                            };
+                        }
+                    }
+                }
             }
         };
         const cache = getCache();
@@ -167,67 +253,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
                     }
-                    const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
                     const v = serialTimeToTimestamp(Number(value));
-                    switch (subRuleConfig.operator) {
-                        case CFTimePeriodOperator.last7Days: {
-                            const start = dayjs().subtract(7, 'day').valueOf();
-                            const end = dayjs().valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.lastMonth: {
-                            const preMonth = dayjs().subtract(1, 'month');
-                            const start = preMonth.startOf('month').valueOf();
-                            const end = preMonth.endOf('month').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.lastWeek: {
-                            const start = dayjs().subtract(1, 'week').valueOf();
-                            const end = dayjs().valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.nextMonth: {
-                            const nextMonth = dayjs().add(1, 'month');
-                            const start = nextMonth.startOf('month').valueOf();
-                            const end = nextMonth.endOf('month').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.nextWeek: {
-                            const week = dayjs();
-                            const nextWeek = week.add(1, 'week');
-                            const start = nextWeek.startOf('week').valueOf();
-                            const end = nextWeek.endOf('week').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.thisMonth: {
-                            const start = dayjs().startOf('month').valueOf();
-                            const end = dayjs().endOf('month').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.thisWeek: {
-                            const start = dayjs().startOf('week').valueOf();
-                            const end = dayjs().endOf('week').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.tomorrow: {
-                            const start = dayjs().startOf('day').add(1, 'day').valueOf();
-                            const end = dayjs().endOf('day').add(1, 'day').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.yesterday: {
-                            const start = dayjs().startOf('day').subtract(1, 'day').valueOf();
-                            const end = dayjs().endOf('day').subtract(1, 'day').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        case CFTimePeriodOperator.today: {
-                            const start = dayjs().startOf('day').valueOf();
-                            const end = dayjs().endOf('day').valueOf();
-                            return v >= start && v <= end;
-                        }
-                        default: {
-                            return false;
-                        }
-                    }
+                    const { start, end } = cache!.timePeriod!;
+                    return v >= start && v <= end;
                 }
                 case CFSubRuleType.average: {
                     const value = cellValue && cellValue.v;

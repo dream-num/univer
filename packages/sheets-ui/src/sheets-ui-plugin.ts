@@ -27,6 +27,7 @@ import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
@@ -143,6 +144,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [FormatPainterController],
             [SheetsDefinedNameController],
             [EditorDataSyncController],
+            [SheetCheckboxController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -185,6 +187,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [StatusBarController],
             [AutoHeightController],
             [EditorDataSyncController],
+            [SheetCheckboxController],
         ]);
     }
 

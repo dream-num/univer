@@ -81,7 +81,7 @@ import {
 import { SetTabColorCommand } from '../commands/commands/set-tab-color.command';
 import { SetWorkbookNameCommand } from '../commands/commands/set-workbook-name.command';
 import { SetWorksheetActivateCommand } from '../commands/commands/set-worksheet-activate.command';
-import { DeltaColumnWidthCommand, SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
+import { DeltaColumnWidthCommand, SetColWidthCommand, SetWorksheetColIsAutoWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetWorksheetHideCommand } from '../commands/commands/set-worksheet-hide.command';
 import { SetWorksheetNameCommand } from '../commands/commands/set-worksheet-name.command';
 import { SetWorksheetOrderCommand } from '../commands/commands/set-worksheet-order.command';
@@ -115,7 +115,7 @@ import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.m
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
-import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetColAutoWidthMutation, SetWorksheetColIsAutoWidthMutation, SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
@@ -168,7 +168,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
-            SetWorksheetColWidthMutation,
+            // SetWorksheetColWidthMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -244,10 +244,16 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetNameCommand,
                 SetWorksheetOrderCommand,
                 SetWorksheetOrderMutation,
+
                 SetWorksheetRowAutoHeightMutation,
                 SetWorksheetRowHeightMutation,
                 SetWorksheetRowIsAutoHeightCommand,
                 SetWorksheetRowIsAutoHeightMutation,
+                SetWorksheetColAutoWidthMutation,
+                SetWorksheetColWidthMutation,
+                SetWorksheetColIsAutoWidthCommand,
+                SetWorksheetColIsAutoWidthMutation,
+
                 SetSelectionsOperation,
                 ScrollToCellOperation,
                 InsertDefinedNameCommand,

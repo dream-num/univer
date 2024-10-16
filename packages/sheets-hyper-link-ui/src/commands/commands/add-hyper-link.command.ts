@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
+import type { ICellData, ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
@@ -22,7 +22,7 @@ import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
@@ -46,7 +46,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const hyperLinkModel = accessor.get(HyperLinkModel);
-
+        const editorBridgeService = accessor.get(IEditorBridgeService);
         const { unitId, subUnitId, link } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const currentRender = renderManagerService.getRenderById(unitId);
@@ -114,15 +114,19 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             body: newBody,
         };
 
+        const newCellData: ICellData = {
+            p: rangeValue,
+            t: CellValueType.STRING,
+        };
+
+        const finalCellData = await editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, newCellData);
+
         const redoParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,
             cellValue: {
                 [link.row]: {
-                    [link.column]: {
-                        p: rangeValue,
-                        t: CellValueType.STRING,
-                    },
+                    [link.column]: finalCellData,
                 },
             },
         };

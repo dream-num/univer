@@ -20,6 +20,7 @@ import { DependentOn, Inject, Injector, IUniverInstanceService, Plugin, UniverIn
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
+
 import { UniverMobileUIPlugin } from '@univerjs/ui';
 import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';

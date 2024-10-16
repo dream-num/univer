@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IRangeSelectorProps } from '../';
+import type { useFormulaToken } from './useFormulaToken';
 import { useEffect, useRef } from 'react';
 import { sequenceNodeToText } from '../utils/sequenceNodeToText';
 import { verifyRange } from '../utils/verifyRange';
-import type { IRangeSelectorProps } from '../';
-import type { useFormulaToken } from './useFormulaToken';
 
 export const useVerify = (onVerify: IRangeSelectorProps['onVerify'], sequenceNodes: ReturnType<typeof useFormulaToken>['sequenceNodes']) => {
     const isInitRender = useRef(true);

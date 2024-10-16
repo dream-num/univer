@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { ISequenceNode } from '@univerjs/engine-formula';
 import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { useEffect, useState } from 'react';
-import type { ISequenceNode } from '@univerjs/engine-formula';
 
 export const useFormulaToken = (text: string) => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
+import type { ICellData, ICellDataForSheetInterceptor, IDisposable, IPosition, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import type { ISheetLocation, SheetsSelectionsService } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
@@ -35,13 +35,13 @@ import {
     makeCellToSelection,
     ThemeService,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
-
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, mergeMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -61,18 +61,25 @@ export interface ICurrentEditCellParam {
     primary: ISelectionCell;
 }
 
-export interface IEditorBridgeServiceParam {
+export interface ICellEditorState {
     unitId: string;
     sheetId: string;
     row: number;
     column: number;
-    position: IPosition;
-    canvasOffset: { left: number; top: number };
     documentLayoutObject: IDocumentLayoutObject;
-    scaleX: number;
-    scaleY: number;
     editorUnitId: string;
     isInArrayFormulaRange?: Nullable<boolean>;
+}
+
+export interface ICellEditorLayout {
+    position: IPosition;
+    canvasOffset: { left: number; top: number };
+    scaleX: number;
+    scaleY: number;
+}
+
+export interface IEditorBridgeServiceParam extends ICellEditorState, ICellEditorLayout {
+
 }
 
 interface ISheetLocationForEditor extends ISheetLocation {
@@ -84,7 +91,10 @@ const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, IShee
 const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocationForEditor>('AFTER_CELL_EDIT_ASYNC');
 
 export interface IEditorBridgeService {
-    currentEditCellState$: Observable<Nullable<IEditorBridgeServiceParam>>;
+    currentEditCellState$: Observable<Nullable<ICellEditorState>>;
+    currentEditCellLayout$: Observable<Nullable<ICellEditorLayout>>;
+    currentEditCell$: Observable<Nullable<IEditorBridgeServiceParam>>;
+
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
     interceptor: InterceptorManager<{
         BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
@@ -96,6 +106,8 @@ export interface IEditorBridgeService {
     refreshEditCellPosition(resetSizeOnly?: boolean): void;
     setEditCell(param: ICurrentEditCellParam): void;
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
+    getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>>;
+    getEditLocation(): Readonly<Nullable<ICellEditorState>>;
     // Gets the DocumentDataModel of the latest table cell based on the latest cell contents
     getLatestEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>>;
     changeVisible(param: IEditorBridgeServiceVisibleParam): void;
@@ -106,6 +118,8 @@ export interface IEditorBridgeService {
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
     getCurrentEditorId(): Nullable<string>;
+
+    beforeSetRangeValue(workbook: Workbook, worksheet: Worksheet, row: number, column: number, cellData: ICellData): Promise<Nullable<ICellData>>;
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {
@@ -115,6 +129,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     private _editorIsDirty: boolean = false;
 
+    private _isDisabled: boolean = false;
     private _visible: IEditorBridgeServiceVisibleParam = {
         visible: false,
         eventType: DeviceInputEventType.Dblclick,
@@ -122,11 +137,19 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     };
 
     private _currentEditCell: Nullable<ICurrentEditCellParam> = null;
-    private _currentEditCellState: Nullable<IEditorBridgeServiceParam> = null;
+    private _currentEditCellState: Nullable<ICellEditorState> = null;
+    private _currentEditCellLayout: Nullable<ICellEditorLayout> = null;
 
     // TODO: @weird94 this should split into to subjects, documentDataModel & position
-    private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<IEditorBridgeServiceParam>>(null);
+    private readonly _currentEditCellState$ = new BehaviorSubject<Nullable<ICellEditorState>>(null);
     readonly currentEditCellState$ = this._currentEditCellState$.asObservable();
+
+    private readonly _currentEditCellLayout$ = new BehaviorSubject<Nullable<ICellEditorLayout>>(null);
+    readonly currentEditCellLayout$ = this._currentEditCellLayout$.asObservable();
+
+    readonly currentEditCell$ = this._currentEditCellState$.pipe(
+        mergeMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
+    );
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
     readonly visible$ = this._visible$.asObservable();
@@ -179,9 +202,18 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     refreshEditCellState() {
         const editCellState = this.getLatestEditCellState();
-        this._currentEditCellState = editCellState;
-
-        this._currentEditCellState$.next(editCellState);
+        if (!editCellState) {
+            this._currentEditCellState = null;
+            this._currentEditCellLayout = null;
+            this._currentEditCellState$.next(null);
+            this._currentEditCellLayout$.next(null);
+            return;
+        }
+        const { position, scaleX, scaleY, canvasOffset, ...rest } = editCellState;
+        this._currentEditCellState = rest;
+        this._currentEditCellLayout = { position, scaleX, scaleY, canvasOffset };
+        this._currentEditCellState$.next(this._currentEditCellState);
+        this._currentEditCellLayout$.next(this._currentEditCellLayout);
     }
 
     refreshEditCellPosition(resetSizeOnly?: boolean) {
@@ -199,7 +231,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         if (!this._currentEditCellState) return;
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
-        const { startRow, startColumn } = primary;
         const primaryWithCoord = attachPrimaryWithCoord(primary, skeleton);
         if (primaryWithCoord == null) {
             return;
@@ -218,38 +249,29 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-        if (resetSizeOnly && this._currentEditCellState) {
-            endX = endX - startX + this._currentEditCellState.position.startX;
-            endY = endY - startY + this._currentEditCellState.position.startY;
-            startX = this._currentEditCellState.position.startX;
-            startY = this._currentEditCellState.position.startY;
+        if (resetSizeOnly && this._currentEditCellLayout) {
+            endX = endX - startX + this._currentEditCellLayout.position.startX;
+            endY = endY - startY + this._currentEditCellLayout.position.startY;
+            startX = this._currentEditCellLayout.position.startX;
+            startY = this._currentEditCellLayout.position.startY;
         }
 
         this._editorService.setOperationSheetUnitId(unitId);
 
         this._editorService.setOperationSheetSubUnitId(sheetId);
 
-        const editCellState = {
+        this._currentEditCellLayout = {
             position: {
                 startX,
                 startY,
                 endX,
                 endY,
             },
+            canvasOffset,
             scaleX,
             scaleY,
-            canvasOffset,
-            row: startRow,
-            column: startColumn,
-            unitId,
-            sheetId,
-            documentLayoutObject: this._currentEditCellState.documentLayoutObject,
-            editorUnitId: this._editorUnitId,
-            isInArrayFormulaRange: this._currentEditCellState?.isInArrayFormulaRange,
         };
-
-        this._currentEditCellState = editCellState;
-        this._currentEditCellState$.next(editCellState);
+        this._currentEditCellLayout$.next(this._currentEditCellLayout);
     }
 
     setEditCell(param: ICurrentEditCellParam) {
@@ -278,9 +300,23 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     private _clearCurrentEditCellState() {
         this._currentEditCellState = null;
         this._currentEditCellState$.next(null);
+        this._currentEditCellLayout = null;
+        this._currentEditCellLayout$.next(null);
     }
 
     getEditCellState(): Readonly<Nullable<IEditorBridgeServiceParam>> {
+        if (this._currentEditCellState == null || this._currentEditCellLayout == null) {
+            return null;
+        }
+
+        return { ...this._currentEditCellState, ...this._currentEditCellLayout };
+    }
+
+    getEditCellLayout(): Readonly<Nullable<ICellEditorLayout>> {
+        return this._currentEditCellLayout;
+    }
+
+    getEditLocation(): Readonly<Nullable<ICellEditorState>> {
         return this._currentEditCellState;
     }
 
@@ -332,14 +368,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             origin: worksheet.getCellRaw(startRow, startColumn),
         };
 
+        let documentLayoutObject: Nullable<IDocumentLayoutObject>;
         const cell = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT)(
             worksheet.getCell(startRow, startColumn),
             location
         );
 
-        let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
+        documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
-        // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
+            // Rewrite the cellValueType to STRING to avoid render the value on the right side when number type.
         const renderConfig = documentLayoutObject?.documentModel?.documentStyle.renderConfig;
         if (renderConfig != null) {
             renderConfig.cellValueType = CellValueType.STRING;
@@ -357,7 +394,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
             }
             documentLayoutObject = blankModel;
         }
-        // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
+            // background of canvas is set to transparent, so if no bgcolor sepcified in curr cell, set it to white.
         documentLayoutObject.fill = documentLayoutObject.fill || '#fff';
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
@@ -449,6 +486,28 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
     getEditorDirty() {
         return this._editorIsDirty;
+    }
+
+    async beforeSetRangeValue(workbook: Workbook, worksheet: Worksheet, row: number, column: number, cellData: ICellData) {
+        const context = {
+            subUnitId: worksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            workbook: workbook!,
+            worksheet,
+            row,
+            col: column,
+            origin: Tools.deepClone(cellData),
+        };
+        const cell = this.interceptor.fetchThroughInterceptors(
+            this.interceptor.getInterceptPoints().AFTER_CELL_EDIT
+        )(cellData, context);
+
+        const finalCell = await this.interceptor.fetchThroughInterceptors(
+            this.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
+        )(Promise.resolve(cell), context);
+
+        // remove temp value
+        return finalCell;
     }
 }
 

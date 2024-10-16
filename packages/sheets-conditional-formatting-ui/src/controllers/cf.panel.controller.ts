@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import type { IDisposable } from '@univerjs/core';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
+import { Disposable, generateRandomId, Inject, Injector, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
+import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { ConditionFormattingPanel } from '../components/panel';
 
 const CF_PANEL_KEY = 'sheet.conditional.formatting.panel';

@@ -44,10 +44,6 @@ export class FontAndBaseLine extends docExtension {
             return;
         }
 
-        // const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
-
-        // const maxLineAsc = asc + lineMarginTop + linePaddingTop;
-
         const { ts: textStyle, content, fontStyle, bBox } = glyph;
 
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
@@ -78,7 +74,6 @@ export class FontAndBaseLine extends docExtension {
             spanPointWithFont.y += bBox.sbo;
         }
 
-        // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);
         this._fillText(ctx, glyph, spanPointWithFont);
     }
 
@@ -110,14 +105,12 @@ export class FontAndBaseLine extends docExtension {
             if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
                 const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
                 ctx.save();
-                const fontWidth = glyph.bBox.width;
                 const fontHeight = glyph.bBox.aba - glyph.bBox.abd;
                 const bottom = spanPointWithFont.y;
                 const top = bottom - fontHeight;
                 const left = spanPointWithFont.x;
-                const right = left + fontWidth;
                 const topOffset = top + (bottom - top - size) / 2;
-                const leftOffset = left + (right - left - size) / 2;
+                const leftOffset = left;
                 const BORDER_WIDTH = 1;
                 ctx.translate(leftOffset - BORDER_WIDTH / 2, topOffset - BORDER_WIDTH / 2);
                 Checkbox.drawWith(ctx, {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentStyle } from '@univerjs/core';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleService, Tools, useDependency } from '@univerjs/core';
 import { Button, Checkbox, InputNumber } from '@univerjs/design';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
@@ -24,6 +25,32 @@ import React, { useEffect, useState } from 'react';
 import { CoreHeaderFooterCommandId, type IHeaderFooterProps } from '../../../commands/commands/doc-header-footer.command';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 import styles from './index.module.less';
+
+function getSegmentId(documentStyle: IDocumentStyle, editArea: DocumentEditArea, pageIndex: number): string {
+    const { useFirstPageHeaderFooter, evenAndOddHeaders, defaultHeaderId, defaultFooterId, firstPageHeaderId, firstPageFooterId, evenPageHeaderId, evenPageFooterId } = documentStyle;
+
+    if (editArea === DocumentEditArea.HEADER) {
+        if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            if (pageIndex === 0) {
+                return firstPageHeaderId!;
+            } else {
+                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+            }
+        } else {
+            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageHeaderId! : defaultHeaderId!;
+        }
+    } else {
+        if (useFirstPageHeaderFooter === BooleanNumber.TRUE) {
+            if (pageIndex === 0) {
+                return firstPageFooterId!;
+            } else {
+                return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+            }
+        } else {
+            return evenAndOddHeaders === BooleanNumber.TRUE && pageIndex % 2 === 1 ? evenPageFooterId! : defaultFooterId!;
+        }
+    }
+}
 
 export interface IDocHeaderFooterOptionsProps {
     unitId: string;
@@ -102,23 +129,17 @@ export const DocHeaderFooterOptions = (props: IDocHeaderFooterOptionsProps) => {
                 },
             });
         } else {
-            let needFocusSegmentId;
             const segmentPageIndex = docSelectionRenderService.getSegmentPage();
             const prevSegmentId = docSelectionRenderService.getSegment();
 
-            if (type === 'useFirstPageHeaderFooter') {
-                if (editArea === DocumentEditArea.HEADER) {
-                    needFocusSegmentId = val && segmentPageIndex === 0 ? documentStyle.firstPageHeaderId : documentStyle.defaultHeaderId;
-                } else if (editArea === DocumentEditArea.FOOTER) {
-                    needFocusSegmentId = val && segmentPageIndex === 0 ? documentStyle.firstPageFooterId : documentStyle.defaultFooterId;
-                }
-            } else if (type === 'evenAndOddHeaders') {
-                if (editArea === DocumentEditArea.HEADER) {
-                    needFocusSegmentId = val && segmentPageIndex % 2 === 1 ? documentStyle.evenPageHeaderId : documentStyle.defaultHeaderId;
-                } else if (editArea === DocumentEditArea.FOOTER) {
-                    needFocusSegmentId = val && segmentPageIndex % 2 === 1 ? documentStyle.evenPageFooterId : documentStyle.defaultFooterId;
-                }
-            }
+            const needFocusSegmentId = getSegmentId(
+                {
+                    ...documentStyle,
+                    [type]: val ? BooleanNumber.TRUE : BooleanNumber.FALSE,
+                },
+                editArea,
+                segmentPageIndex
+            );
 
             if (needFocusSegmentId && needFocusSegmentId !== prevSegmentId) {
                 docSelectionRenderService.setSegment(needFocusSegmentId);

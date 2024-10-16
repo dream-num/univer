@@ -22,7 +22,6 @@ import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';

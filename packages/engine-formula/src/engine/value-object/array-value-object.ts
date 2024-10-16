@@ -1528,13 +1528,6 @@ export class ArrayValueObject extends BaseValueObject {
                             }
                             result[r][column] = BooleanValueObject.create(true);
                         });
-                        // for (let r = 0; r < rowCount; r++) {
-                        //     if (rowPositions.has(r + startRow)) {
-                        //         result[r][column] = BooleanValueObject.create(true);
-                        //     } else {
-                        //         result[r][column] = BooleanValueObject.create(false);
-                        //     }
-                        // }
                     }
                 } else {
                     const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(

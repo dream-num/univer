@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDisposable, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IDisposable, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
@@ -33,6 +33,7 @@ import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.comm
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
 
 // TODO: wzhudev: this should be merged with Edit EditingRenderController.
@@ -52,7 +53,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService,
         @IContextService private readonly _contextService: IContextService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
 
@@ -99,11 +101,23 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
             const unitId = this._context.unitId;
             const sheetId = this._context.unit.getActiveSheet()?.getSheetId();
             if (!sheetId) return;
-
+            const mergeInfo = this._sheetSkeletonManagerService.getWorksheetSkeleton(sheetId)?.skeleton.getCellByIndex(primary.actualRow, primary.actualColumn);
+            const newPrimary: ISelectionCell = mergeInfo
+                ? {
+                    actualRow: mergeInfo.actualRow,
+                    actualColumn: mergeInfo.actualColumn,
+                    isMerged: mergeInfo.isMerged,
+                    startRow: mergeInfo.mergeInfo.startRow,
+                    startColumn: mergeInfo.mergeInfo.startColumn,
+                    endRow: mergeInfo.mergeInfo.endRow,
+                    endColumn: mergeInfo.mergeInfo.endColumn,
+                    isMergedMainCell: mergeInfo.isMergedMainCell,
+                }
+                : primary;
             this._commandService.executeCommand<ICurrentEditCellParam>(SetActivateCellEditOperation.id, {
                 scene,
                 engine,
-                primary,
+                primary: newPrimary,
                 unitId,
                 sheetId,
             });

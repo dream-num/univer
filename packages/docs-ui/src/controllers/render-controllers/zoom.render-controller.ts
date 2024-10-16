@@ -30,6 +30,7 @@ import {
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
@@ -130,6 +131,17 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 this.updateViewZoom(zoomRatio);
             }
         }));
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SwitchDocModeCommand.id) {
+                    this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                        zoomRatio: 1,
+                        unitId: this._context.unitId,
+                    });
+                }
+            })
+        );
     }
 
     updateViewZoom(zoomRatio: number, needRefreshSelection = true) {

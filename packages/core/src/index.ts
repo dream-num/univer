@@ -186,4 +186,4 @@ export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
 export { type IRTreeItem, RTree } from './shared/r-tree';
 
-export { Univer } from './univer';
+export { type IUniverConfig, Univer } from './univer';

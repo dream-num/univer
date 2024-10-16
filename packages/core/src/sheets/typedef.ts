@@ -196,6 +196,11 @@ export interface IColumnData {
     s?: Nullable<IStyleData | string>;
 }
 
+export interface IColAutoWidthInfo {
+    col: number;
+    width?: number;
+}
+
 /**
  * Cell value type
  */
@@ -259,6 +264,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;
+    interceptorAutoWidth?: () => number | undefined;
     /**
      * can cell be covered when sibling is overflow
      */

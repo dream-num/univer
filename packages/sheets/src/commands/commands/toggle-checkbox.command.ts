@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ICommand, IMutationInfo, Workbook } from '@univerjs/core';
+import { BuildTextUtils, CellValueType, CommandType, DocumentDataModel, ICommandService, IUndoRedoService, IUniverInstanceService, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import { type ISetRangeValuesMutationParams, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 
 export interface IToggleCellCheckboxCommandParams {
     unitId: string;
@@ -26,7 +27,7 @@ export interface IToggleCellCheckboxCommandParams {
 }
 
 export const ToggleCellCheckboxCommand: ICommand<IToggleCellCheckboxCommandParams> = {
-    id: 'toggle-cell-checkbox',
+    id: 'sheet.command.toggle-cell-checkbox',
     type: CommandType.COMMAND,
     handler: (accessor, params) => {
         if (!params) {
@@ -36,6 +37,8 @@ export const ToggleCellCheckboxCommand: ICommand<IToggleCellCheckboxCommandParam
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const sheet = workbook?.getSheetBySheetId(subUnitId);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const commandService = accessor.get(ICommandService);
         if (!sheet) {
             return false;
         }
@@ -43,7 +46,48 @@ export const ToggleCellCheckboxCommand: ICommand<IToggleCellCheckboxCommandParam
         if (!cell?.p) {
             return false;
         }
+        const p = Tools.deepClone(cell.p);
+        const documentDataModel = new DocumentDataModel(p);
+        const textX = BuildTextUtils.paragraph.bullet.toggleChecklist({
+            document: documentDataModel,
+            paragraphIndex,
+        });
+        if (!textX) {
+            return false;
+        }
+        TextX.apply(documentDataModel.getBody()!, textX.serialize());
+        const redoParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: {
+                [row]: {
+                    [col]: {
+                        p,
+                        t: CellValueType.STRING,
+                    },
+                },
+            },
+        };
 
-        return true;
+        const redo: IMutationInfo = {
+            id: SetRangeValuesMutation.id,
+            params: redoParams,
+        };
+        const undoParams = SetRangeValuesUndoMutationFactory(accessor, redoParams);
+
+        const undo: IMutationInfo = {
+            id: SetRangeValuesMutation.id,
+            params: undoParams,
+        };
+        const redos = [redo];
+        const undos = [undo];
+
+        undoRedoService.pushUndoRedo({
+            redoMutations: redos,
+            undoMutations: undos,
+            unitID: unitId,
+        });
+
+        return commandService.syncExecuteCommand(redo.id, redo.params);
     },
 };

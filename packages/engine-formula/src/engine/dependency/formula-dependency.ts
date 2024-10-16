@@ -286,16 +286,16 @@ export class FormulaDependencyGenerator extends Disposable {
 
                 for (const subFormulaDataId of subFormulaDataKeys) {
                     const treeCache = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
+
                     if (treeCache) {
                         treeCache.isCache = true;
                         continue;
                     }
 
                     const formulaDataItem = subFormulaData[subFormulaDataId];
+                    const { f: formulaString, x = 0, y = 0 } = formulaDataItem;
 
-                    const { f: formulaString } = formulaDataItem;
-
-                    const node = this._generateAstNode(unitId, formulaString);
+                    const node = this._generateAstNode(unitId, formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
@@ -335,13 +335,14 @@ export class FormulaDependencyGenerator extends Disposable {
                     if (formulaDataItem == null) {
                         return true;
                     }
-                    const { f: formulaString, x, y } = formulaDataItem;
 
                     const treeCache = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
                     if (treeCache) {
                         treeCache.isCache = true;
                         return true;
                     }
+
+                    const { f: formulaString, x, y } = formulaDataItem;
 
                     const node = this._generateAstNode(unitId, formulaString, x, y);
 
@@ -389,9 +390,11 @@ export class FormulaDependencyGenerator extends Disposable {
 
     private _generateAstNode(unitId: string, formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
         // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
-        let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}##${refOffsetX}-${refOffsetY}`);
+        let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}`);
 
         if (astNode && !this._isDirtyDefinedForNode(astNode)) {
+            astNode.setRefOffset(refOffsetX, refOffsetY);
+            // return this._astTreeBuilder.createCacheNode(astNode, refOffsetX, refOffsetY);
             return astNode;
         }
 
@@ -403,13 +406,15 @@ export class FormulaDependencyGenerator extends Disposable {
 
         // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
 
-        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode, refOffsetX, refOffsetY);
+        astNode = this._astTreeBuilder.parse(lexerNode as LexerNode);
 
         if (astNode == null) {
             throw new Error('astNode is null');
         }
 
-        this._formulaASTCache.set(`${unitId}${formulaString}##${refOffsetX}-${refOffsetY}`, astNode);
+        astNode.setRefOffset(refOffsetX, refOffsetY);
+
+        this._formulaASTCache.set(`${unitId}${formulaString}`, astNode);
 
         return astNode;
     }

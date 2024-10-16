@@ -41,7 +41,9 @@ export class Interpreter extends Disposable {
             return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        await this._executeAsync(node);
+        const refOffset = node.getRefOffset();
+
+        await this._executeAsync(node, refOffset.x, refOffset.y);
 
         const value = node.getValue();
 
@@ -61,7 +63,9 @@ export class Interpreter extends Disposable {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        this._execute(node);
+        const refOffset = node.getRefOffset();
+
+        this._execute(node, refOffset.x, refOffset.y);
 
         const value = node.getValue();
 
@@ -101,7 +105,7 @@ export class Interpreter extends Disposable {
         }
     }
 
-    private async _executeAsync(node: BaseAstNode): Promise<AstNodePromiseType> {
+    private async _executeAsync(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): Promise<AstNodePromiseType> {
         if (this._runtimeService.isStopExecution()) {
             return Promise.resolve(AstNodePromiseType.ERROR);
         }
@@ -120,7 +124,11 @@ export class Interpreter extends Disposable {
                 item.execute();
                 continue;
             }
-            await this._executeAsync(item);
+            await this._executeAsync(item, refOffsetX, refOffsetY);
+        }
+
+        if (node.nodeType === NodeType.REFERENCE) {
+            node.setRefOffset(refOffsetX, refOffsetY);
         }
 
         if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
@@ -132,7 +140,7 @@ export class Interpreter extends Disposable {
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
-    private _execute(node: BaseAstNode): AstNodePromiseType {
+    private _execute(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): AstNodePromiseType {
         if (this._runtimeService.isStopExecution()) {
             return AstNodePromiseType.ERROR;
         }
@@ -151,7 +159,11 @@ export class Interpreter extends Disposable {
                 item.execute();
                 continue;
             }
-            this._execute(item);
+            this._execute(item, refOffsetX, refOffsetY);
+        }
+
+        if (node.nodeType === NodeType.REFERENCE) {
+            node.setRefOffset(refOffsetX, refOffsetY);
         }
 
         node.execute();

@@ -80,12 +80,19 @@ export class AstTreeBuilder extends Disposable {
         this._astNodeFactoryList = [];
     }
 
-    parse(lexerNode: LexerNode, refOffsetX: number = 0, refOffsetY: number = 0) {
+    createCacheNode(astNode: AstRootNode, refOffsetX = 0, refOffsetY = 0) {
+        const newAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
+        newAstNode.addChildren(...astNode.getChildren());
+        newAstNode.setRefOffset(refOffsetX, refOffsetY);
+        return newAstNode;
+    }
+
+    parse(lexerNode: LexerNode) {
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
-        this._refOffsetX = refOffsetX;
+        // this._refOffsetX = refOffsetX;
 
-        this._refOffsetY = refOffsetY;
+        // this._refOffsetY = refOffsetY;
 
         const node = this._parse(lexerNode, astNode);
 
@@ -328,7 +335,7 @@ export class AstTreeBuilder extends Disposable {
                     break;
                 }
                 case NodeType.REFERENCE:
-                    astNode.setRefOffset(this._refOffsetX, this._refOffsetY);
+                    // astNode.setRefOffset(this._refOffsetX, this._refOffsetY);
                     calculateStack.push(astNode);
                     break;
                 case NodeType.ROOT:
@@ -341,7 +348,7 @@ export class AstTreeBuilder extends Disposable {
                     calculateStack.push(astNode);
                     break;
                 case NodeType.PREFIX:
-                    this._setPrefixRefOffset(astNode);
+                    // this._setPrefixRefOffset(astNode);
                     calculateStack.push(astNode);
                     break;
                 case NodeType.SUFFIX:

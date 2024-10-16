@@ -19,6 +19,7 @@ import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, 
 import { Disposable, IAuthzIoService, ICommandService, Inject, InterceptorEffectEnum, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { skip } from 'rxjs';
 
 export class SheetPermissionInitController extends Disposable {
     constructor(
@@ -282,7 +283,8 @@ export class SheetPermissionInitController extends Disposable {
 
     private _initUserChange() {
         this.disposeWithMe(
-            this._userManagerService.currentUser$.subscribe(() => {
+            // When the user changes, the permission points are updated. The first modification needs to be filtered here because it is a Behavior type, but in fact the user information is ready when this controller is initialized.
+            this._userManagerService.currentUser$.pipe(skip(1)).subscribe(() => {
                 // This is to minimize the need for access providers to update the reference to permission points when the current user changes, reducing the integration steps required.
                 // If not handled this way, the access providers would have to handle the changes in user and the resulting changes in permission point references.
                 const _map = this._permissionService.getAllPermissionPoint();

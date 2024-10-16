@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DCOUNT: {
@@ -39,8 +40,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DCOUNTA: {
@@ -53,8 +55,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DGET: {
@@ -67,8 +70,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DMAX: {
@@ -81,8 +85,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DMIN: {
@@ -95,8 +100,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DPRODUCT: {
@@ -109,8 +115,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DSTDEV: {
@@ -123,8 +130,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DSTDEVP: {
@@ -137,8 +145,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DSUM: {
@@ -151,8 +160,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DVAR: {
@@ -165,8 +175,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
     DVARP: {
@@ -179,8 +190,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            database: { name: 'База данных', detail: 'интервал ячеек, образующих список или базу данных.' },
+            field: { name: 'поле', detail: 'столбец, используемый функцией.' },
+            criteria: { name: 'условия', detail: 'диапазон ячеек, который содержит задаваемые условия.' },
         },
     },
 };

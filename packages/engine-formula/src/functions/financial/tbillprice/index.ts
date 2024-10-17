@@ -17,6 +17,7 @@
 import { excelSerialToDate, getDateSerialNumberByObject, getDaysInYear } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsNullorArrayOrBoolean } from '../../../engine/utils/check-variant-error';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -25,6 +26,8 @@ export class Tbillprice extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 3;
+
+    override needsLocale = true;
 
     override calculate(settlement: BaseValueObject, maturity: BaseValueObject, discount: BaseValueObject): BaseValueObject {
         const { isError, errorObject, variants } = checkVariantsErrorIsNullorArrayOrBoolean(settlement, maturity, discount);
@@ -79,6 +82,6 @@ export class Tbillprice extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+        return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
     }
 }

@@ -16,11 +16,13 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Rept } from '../index';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test rept function', () => {
     const testFunction = new Rept(FUNCTION_NAMES_TEXT.REPT);
@@ -30,41 +32,53 @@ describe('Test rept function', () => {
             const text = StringValueObject.create('*-');
             const numberTimes = NumberValueObject.create(3);
             const result = testFunction.calculate(text, numberTimes);
-            expect(result.getValue()).toBe('*-*-*-');
+            expect(getObjectValue(result)).toBe('*-*-*-');
         });
 
         it('Value is number', () => {
             const text = NumberValueObject.create(1);
             const numberTimes = NumberValueObject.create(3);
             const result = testFunction.calculate(text, numberTimes);
-            expect(result.getValue()).toBe('111');
+            expect(getObjectValue(result)).toBe('111');
         });
 
         it('Value is boolean', () => {
             const text = BooleanValueObject.create(true);
             const numberTimes = BooleanValueObject.create(true);
             const result = testFunction.calculate(text, numberTimes);
-            expect(result.getValue()).toBe('TRUE');
+            expect(getObjectValue(result)).toBe('TRUE');
 
             const numberTimes2 = BooleanValueObject.create(false);
             const result2 = testFunction.calculate(text, numberTimes2);
-            expect(result2.getValue()).toBe('');
+            expect(getObjectValue(result2)).toBe('');
         });
 
         it('Value is blank cell', () => {
             const text = StringValueObject.create('abc');
             const numberTimes = NullValueObject.create();
             const result = testFunction.calculate(text, numberTimes);
-            expect(result.getValue()).toBe('');
+            expect(getObjectValue(result)).toBe('');
+        });
+
+        it('Value is error', () => {
+            const text = StringValueObject.create('abc');
+            const numberTimes = ErrorValueObject.create(ErrorType.NAME);
+            const result = testFunction.calculate(text, numberTimes);
+            expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const text2 = ErrorValueObject.create(ErrorType.NAME);
+            const numberTimes2 = NumberValueObject.create(3);
+            const result2 = testFunction.calculate(text2, numberTimes2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {
             const text = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
-                    [1, true, false, null, 'test'],
+                    [1, true, false, null, 'test', ErrorType.NAME],
                 ]),
                 rowCount: 1,
-                columnCount: 5,
+                columnCount: 6,
                 unitId: '',
                 sheetId: '',
                 row: 0,
@@ -87,13 +101,13 @@ describe('Test rept function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(text, numberTimes);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
-                ['11', 'TRUETRUE', 'FALSEFALSE', '', 'testtest'],
-                ['1', 'TRUE', 'FALSE', '', 'test'],
-                ['', '', '', '', ''],
-                ['', '', '', '', ''],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
-                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
+            expect(getObjectValue(result)).toStrictEqual([
+                ['11', 'TRUETRUE', 'FALSEFALSE', '', 'testtest', ErrorType.NAME],
+                ['1', 'TRUE', 'FALSE', '', 'test', ErrorType.NAME],
+                ['', '', '', '', '', ErrorType.NAME],
+                ['', '', '', '', '', ErrorType.NAME],
+                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
+                [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.NAME],
             ]);
         });
     });

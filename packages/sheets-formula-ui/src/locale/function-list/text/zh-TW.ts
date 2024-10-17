@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何全形字母，則文字不會變更。' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '陣列', detail: '要傳回做為文字的陣列。' },
+            format: { name: '資料格式', detail: '傳回資料的格式。它可以是兩個值的其中之一：\n0 預設。 易於閱讀的精簡格式。\n1 包含逸出字元和列分隔符號的限定格式。 產生可在輸入至資料編輯列時進行剖析的字串。 封裝會以引號傳回字串，除了布林值、數字和錯誤以外。' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '為要轉換成文字的數字，或包含數字的儲存格參照，或結果為數字的公式。' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是介於 1 和 255 之間的數字，用以指定您所需的字元。 此字元來自您電腦所使用的字元集。' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是要從中移除無法列印之字元的任何工作表資訊。' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是欲求其第一個字元代碼的文字。' },
         },
     },
     CONCAT: {
@@ -137,13 +132,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是文字或儲存格參照，其中包含所要變更的文字。 如果文字中不包含任何半形英文字母或片假名，文字就不會變更。' },
         },
     },
     DOLLAR: {
-        description: '使用 ￥（人民幣）貨幣格式將數字轉換為文本',
-        abstract: '使用 ￥（人民幣）貨幣格式將數字轉換為文本',
+        description: '使用貨幣格式將數字轉換為文本',
+        abstract: '使用貨幣格式將數字轉換為文本',
         links: [
             {
                 title: '教導',
@@ -151,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是一個數字、一個含有數字之儲存格的參照，或一個評估為數字的公式。' },
+            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
         },
     },
     EXACT: {
@@ -165,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: '文字1', detail: '這是第一個文字字串。' },
+            text2: { name: '文字2', detail: '這是第二個文字字串。' },
         },
     },
     FIND: {
@@ -207,8 +201,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '這是要四捨五入並轉換為文字的數字。' },
+            decimals: { name: '小數位數', detail: '這是小數點右邊的小數位數。 如果這是負數，則會將數位四捨五入到小數點的左邊。 如果您省略 decimals，則假設為 2。' },
+            noCommas: { name: '禁用分隔符', detail: '這是邏輯值，如果為 TRUE，會阻止 FIXED 在傳回的文字中包含逗號。' },
         },
     },
     LEFT: {
@@ -319,8 +314,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要轉換成數位的文字。' },
+            decimalSeparator: { name: '小數分隔符', detail: '用來分隔結果整數和小數部分的字元。' },
+            groupSeparator: { name: '群組分隔符', detail: '用來分隔數位群組的字元。' },
         },
     },
     PHONETIC: {
@@ -347,8 +343,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是以引號括住的文字、傳回文字的公式，或包含要將部分變為大寫之文字的儲存格參照。' },
         },
     },
     REGEXEXTRACT: {
@@ -446,8 +441,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
+            numChars: { name: '字元數', detail: '這會指定您要 RIGHT 擷取的字元數目。' },
         },
     },
     RIGHTB: {
@@ -460,8 +455,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含您想擷取之字元的文字字串。' },
+            numBytes: { name: '字節數', detail: '這會指定要 RIGHTB 擷取的字元數目，以位元組為單位。' },
         },
     },
     SEARCH: {
@@ -502,8 +497,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '這是包含要以字元取代文字的文字或參照。' },
+            oldText: { name: '搜尋文字', detail: '這是要取代的文字。' },
+            newText: { name: '取代文字', detail: '這是要用來取代 old_text 的文字。' },
+            instanceNum: { name: '指定取代對象', detail: '指定要將第幾個 old_text 取代為 new_text。 如果您指定 instance_num，則只會取代該 old_text。 否則，text 中的每一個 old_text 都會變更為 new_text。' },
         },
     },
     T: {
@@ -516,8 +513,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '這是要檢定的值。' },
         },
     },
     TEXT: {
@@ -626,8 +622,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '數值', detail: '是代表字元的 Unicode 數位。' },
         },
     },
     UNICODE: {
@@ -640,8 +635,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '是您要使用 Unicode 值的字元。' },
         },
     },
     UPPER: {
@@ -668,8 +662,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '以引號括住的文字或包含要轉換之文字的儲存格參照。' },
         },
     },
     VALUETOTEXT: {
@@ -682,8 +675,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '要以文字格式返回的值。' },
+            format: { name: '資料格式', detail: '傳回資料的格式。它可以是兩個值的其中之一：\n0 預設。 易於閱讀的精簡格式。\n1 包含逸出字元和列分隔符號的限定格式。 產生可在輸入至資料編輯列時進行剖析的字串。 封裝會以引號傳回字串，除了布林值、數字和錯誤以外。' },
         },
     },
     CALL: {

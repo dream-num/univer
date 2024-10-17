@@ -292,9 +292,19 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         const editCellState = this.getLatestEditCellState();
+        if (!editCellState) {
+            this._currentEditCellState = editCellState;
+            this._currentEditCellLayout = editCellState;
+            this._currentEditCellState$.next(editCellState);
+            this._currentEditCellLayout$.next(editCellState);
+            return;
+        }
 
-        this._currentEditCellState = editCellState;
-        this._currentEditCellState$.next(editCellState);
+        const { position, canvasOffset, scaleX, scaleY, ...rest } = editCellState;
+        this._currentEditCellState = rest;
+        this._currentEditCellLayout = { position, canvasOffset, scaleX, scaleY };
+        this._currentEditCellState$.next(this._currentEditCellState);
+        this._currentEditCellLayout$.next(this._currentEditCellLayout);
     }
 
     private _clearCurrentEditCellState() {

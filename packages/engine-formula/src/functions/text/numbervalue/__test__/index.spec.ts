@@ -137,6 +137,10 @@ describe('Test numbervalue function', () => {
             const text4 = StringValueObject.create('2a.50,027%');
             const result4 = testFunction.calculate(text4, decimalSeparator, groupSeparator);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
+
+            const text5 = StringValueObject.create('20%%');
+            const result5 = testFunction.calculate(text5, decimalSeparator, groupSeparator);
+            expect(getObjectValue(result5)).toStrictEqual(0.002);
         });
     });
 });

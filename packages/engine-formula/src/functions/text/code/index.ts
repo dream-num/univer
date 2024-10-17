@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Code extends BaseFunction {
     override minParams = 1;
@@ -52,6 +52,10 @@ export class Code extends BaseFunction {
 
         if (text.isBoolean()) {
             textValue = textValue.toLocaleUpperCase();
+        }
+
+        if (textValue === '') {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const result = textValue.charCodeAt(0);

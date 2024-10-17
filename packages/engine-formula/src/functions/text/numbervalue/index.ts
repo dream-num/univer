@@ -30,7 +30,6 @@ export class Numbervalue extends BaseFunction {
 
     override calculate(text: BaseValueObject, decimalSeparator?: BaseValueObject, groupSeparator?: BaseValueObject): BaseValueObject {
         const _decimalSeparator = decimalSeparator ?? StringValueObject.create('.');
-        // const _groupSeparator = groupSeparator ?? StringValueObject.create(',');
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
@@ -138,9 +137,15 @@ export class Numbervalue extends BaseFunction {
                 integerPart = integerPart.replace(/\./g, '');
             }
 
-            if (integerPart.endsWith('%')) {
+            let percentageCount = 0;
+
+            while (integerPart.endsWith('%')) {
                 integerPart = integerPart.slice(0, -1);
-                result = +integerPart / 100;
+                percentageCount++;
+            }
+
+            if (percentageCount > 0) {
+                result = +integerPart / (100 ** percentageCount);
             } else {
                 result = +integerPart;
             }
@@ -150,11 +155,12 @@ export class Numbervalue extends BaseFunction {
             }
 
             let decimalPart = splitText[1];
-            let isPercentage = false;
 
-            if (decimalPart.endsWith('%')) {
+            let percentageCount = 0;
+
+            while (decimalPart.endsWith('%')) {
                 decimalPart = decimalPart.slice(0, -1);
-                isPercentage = true;
+                percentageCount++;
             }
 
             const resultText = `${integerPart}.${decimalPart}`;
@@ -163,7 +169,11 @@ export class Numbervalue extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            result = isPercentage ? +resultText / 100 : +resultText;
+            if (percentageCount > 0) {
+                result = +resultText / (100 ** percentageCount);
+            } else {
+                result = +resultText;
+            }
         }
 
         if (Number.isNaN(result)) {

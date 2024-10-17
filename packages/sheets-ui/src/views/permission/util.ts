@@ -100,8 +100,8 @@ export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) =
     }
 
     return {
-        unitId: '',
-        subUnitId: '',
+        unitId: workbook.getUnitId(),
+        subUnitId: worksheet.getSheetId(),
         permissionId: '',
         unitType,
         description: '',

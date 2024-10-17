@@ -18,12 +18,13 @@ import type { IRange } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
 import { Injector, Tools, useDependency } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
+import { ComponentContainer, useComponentsOfPart } from '@univerjs/ui';
 import React, { useRef, useState } from 'react';
+import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
 import { checkRangeValid, generateDefaultRule } from '../util';
 import styles from './index.module.less';
 import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';
 import { PermissionDetailMainPart } from './PermissionDetailMainPart';
-import { PermissionDetailUserPart } from './PermissionDetailUserPart';
 
 interface ISheetPermissionPanelDetailProps {
     fromSheetBar: boolean;
@@ -52,6 +53,8 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
         handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
     };
 
+    const PermissionDetailUserPart = useComponentsOfPart(UNIVER_SHEET_PERMISSION_USER_PART);
+
     return (
         <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
             <PermissionDetailMainPart
@@ -67,12 +70,16 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                 onDescChange={(v) => setDesc(v)}
                 rangeSelectorRef={rangeSelectorActionsRef}
             />
-            <PermissionDetailUserPart
-                editState={editState}
-                onEditStateChange={(v) => setEditState(v as EditStateEnum)}
-                viewState={viewState}
-                onViewStateChange={(v) => setViewState(v as ViewStateEnum)}
-                permissionId={activeRule.permissionId}
+            <ComponentContainer
+                key="user-part"
+                components={PermissionDetailUserPart}
+                sharedProps={{
+                    editState,
+                    onEditStateChange: (v: EditStateEnum) => setEditState(v),
+                    viewState,
+                    onViewStateChange: (v: ViewStateEnum) => setViewState(v),
+                    permissionId: activeRule.permissionId,
+                }}
             />
             <PermissionDetailFooterPart
                 permissionId={activeRule.permissionId}

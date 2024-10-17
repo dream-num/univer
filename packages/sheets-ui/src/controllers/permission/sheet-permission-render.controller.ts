@@ -16,32 +16,38 @@
 
 import type { IRenderContext, IRenderModule, Spreadsheet } from '@univerjs/engine-render';
 import type { MenuConfig } from '@univerjs/ui';
-import { Disposable, Inject, IPermissionService, IUniverInstanceService } from '@univerjs/core';
+import { connectInjector, Disposable, Inject, Injector, IPermissionService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CheckMarkSingle, DeleteSingle, LockSingle, ProtectSingle, WriteSingle } from '@univerjs/icons';
 import { RangeProtectionRuleModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, IUIPartsService } from '@univerjs/ui';
 import { merge, throttleTime } from 'rxjs';
-import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG } from '../../consts/permission';
+import { permissionCheckIconKey, permissionDeleteIconKey, permissionEditIconKey, permissionLockIconKey, permissionMenuIconKey, UNIVER_SHEET_PERMISSION_DIALOG, UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_PART } from '../../consts/permission';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { SheetPermissionDialog, SheetPermissionPanel, SheetPermissionUserDialog } from '../../views/permission';
 import { AlertDialog } from '../../views/permission/error-msg-dialog';
 import { UNIVER_SHEET_PERMISSION_ALERT_DIALOG } from '../../views/permission/error-msg-dialog/interface';
 import { RANGE_PROTECTION_CAN_NOT_VIEW_RENDER_EXTENSION_KEY, RANGE_PROTECTION_CAN_VIEW_RENDER_EXTENSION_KEY, RangeProtectionCanNotViewRenderExtension, RangeProtectionCanViewRenderExtension } from '../../views/permission/extensions/range-protection.render';
 import { worksheetProtectionKey, WorksheetProtectionRenderExtension } from '../../views/permission/extensions/worksheet-permission.render';
+import { PermissionDetailUserPart } from '../../views/permission/panel-detail/PermissionDetailUserPart';
 
 export interface IUniverSheetsPermissionMenuConfig {
     menu: MenuConfig;
 }
 
 export class SheetPermissionRenderManagerController extends Disposable {
-    constructor(@Inject(ComponentManager) private _componentManager: ComponentManager) {
+    constructor(
+        @Inject(Injector) private _injector: Injector,
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @Inject(IUIPartsService) private _uiPartsService: IUIPartsService
+    ) {
         super();
         this._init();
     }
 
     private _init(): void {
         this._initComponents();
+        this._initUiPartComponents();
     }
 
     private _initComponents(): void {
@@ -61,6 +67,10 @@ export class SheetPermissionRenderManagerController extends Disposable {
                 component
             ));
         });
+    }
+
+    private _initUiPartComponents(): void {
+        this.disposeWithMe(this._uiPartsService.registerComponent(UNIVER_SHEET_PERMISSION_USER_PART, () => connectInjector(PermissionDetailUserPart, this._injector)));
     }
 }
 

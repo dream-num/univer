@@ -1692,6 +1692,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../watermark
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*

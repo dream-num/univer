@@ -83,8 +83,8 @@ export class UniverWatermarkPlugin extends Plugin {
         const injector = this._injector;
         injector.get(UniverWatermarkService);
 
-        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings } = this._config;
-        const shouldDisplayUI = !(userWatermarkSettings || textWatermarkSettings || imageWatermarkSettings);
+        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings, showMenu = true } = this._config;
+        const shouldDisplayUI = !(userWatermarkSettings || textWatermarkSettings || imageWatermarkSettings) && showMenu;
         if (shouldDisplayUI) {
             injector.get(UniverWatermarkMenuController);
         }

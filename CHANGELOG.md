@@ -1,5 +1,25 @@
 
 
+# [0.4.0](https://github.com/dream-num/univer/compare/v0.4.0-alpha.2...v0.4.0) (2024-10-17)
+
+
+### Bug Fixes
+
+* **docs-ui:** don't refresh-selection after set list ([#3780](https://github.com/dream-num/univer/issues/3780)) ([924dee7](https://github.com/dream-num/univer/commit/924dee7c98ed372f9638ea5ff3aa9427b26c11f6))
+* **docs-ui:** formula-editor should not render paragraph style ([#3783](https://github.com/dream-num/univer/issues/3783)) ([b7301af](https://github.com/dream-num/univer/commit/b7301afd70f5542943c58f207beb03fe043bbd72))
+* **docs:** header footer setting not focus ([#3698](https://github.com/dream-num/univer/issues/3698)) ([2db351b](https://github.com/dream-num/univer/commit/2db351b7fae5f723c963460419e602c386e67806))
+* **docs:** no need to cache font style when has no text run ([#3779](https://github.com/dream-num/univer/issues/3779)) ([8a48479](https://github.com/dream-num/univer/commit/8a48479355231d7ad96809bb3d1f342961773f32))
+* **engine-render:** check box render ([#3776](https://github.com/dream-num/univer/issues/3776)) ([83e0897](https://github.com/dream-num/univer/commit/83e08975e008e7dc937d0ad96c94deec4f693f23))
+* fix permission rangeSelector & insert menu ([#3757](https://github.com/dream-num/univer/issues/3757)) ([1f43484](https://github.com/dream-num/univer/commit/1f43484f4d9294e9fe8eae17f6266b142274e59b))
+* font render bounds ([#3754](https://github.com/dream-num/univer/issues/3754)) ([4ecd764](https://github.com/dream-num/univer/commit/4ecd764ee0ef11e4894abb59fbd2d328dd10e2b7))
+* **formula:** fix some bug ([#3774](https://github.com/dream-num/univer/issues/3774)) ([4c4efe4](https://github.com/dream-num/univer/commit/4c4efe4a8b66f007e90c16135781e8b7d73c4958))
+* **sheets-ui:** can't save first edit cell ([#3781](https://github.com/dream-num/univer/issues/3781)) ([d29da2f](https://github.com/dream-num/univer/commit/d29da2f2762ca66bcbf3c9c97ca6e5351ba457e6))
+
+
+### Features
+
+* **facade:** add `setOptions` on f-data-validation-builder ([#3773](https://github.com/dream-num/univer/issues/3773)) ([4008c86](https://github.com/dream-num/univer/commit/4008c8605ba1083432835e103a1ec761fed0ff3b))
+
 # [0.4.0-alpha.2](https://github.com/dream-num/univer/compare/v0.4.0-alpha.1...v0.4.0-alpha.2) (2024-10-16)
 
 

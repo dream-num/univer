@@ -16,8 +16,10 @@
 
 import type { ICommand, ICommandInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export interface ISwitchDocModeCommandParams { }
 
@@ -26,8 +28,10 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
 
     type: CommandType.COMMAND,
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
         const commandService = accessor.get(ICommandService);
+        const renderManagerService = accessor.get(IRenderManagerService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -38,6 +42,20 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
         }
 
         const unitId = docDataModel.getUnitId();
+
+        const skeleton = renderManagerService.getRenderById(unitId)
+            ?.with(DocSkeletonManagerService)
+            .getSkeleton();
+
+        const docSelectionRenderService = renderManagerService.getRenderById(unitId)?.with(DocSelectionRenderService);
+
+        if (skeleton == null || docSelectionRenderService == null) {
+            return false;
+        }
+
+        const segmentId = docSelectionRenderService?.getSegment();
+
+        const segmentPage = docSelectionRenderService?.getSegmentPage();
 
         const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
 
@@ -69,12 +87,78 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
 
         if (action) {
             rawActions.push(action);
-            doMutation.params!.actions = rawActions.reduce((acc, cur) => {
-                return JSONX.compose(acc, cur as JSONXActions);
-            }, null as JSONXActions);
         } else {
             return false;
         }
+
+        // Change all drawings' position to relative to paragraph if necessary.
+        // And only need to change drawing in body.
+        if (documentFlavor !== DocumentFlavor.MODERN) {
+            const snapshot = docDataModel.getSnapshot();
+            const { drawings = {}, body } = snapshot;
+            const customBlocks = body?.customBlocks ?? [];
+
+            for (const drawingId in drawings) {
+                const drawing = drawings[drawingId];
+
+                if (drawing.layoutType === PositionedObjectLayoutType.INLINE) {
+                    continue;
+                }
+
+                const customBlock = customBlocks.find((block) => block.blockId === drawingId);
+
+                // If drawing is not in body, skip it.
+                if (customBlock == null) {
+                    continue;
+                }
+
+                const drawingPositionV = drawing.docTransform.positionV;
+
+                const { relativeFrom: prevRelativeFrom, posOffset: prevPosOffset } = drawingPositionV;
+
+                if (prevRelativeFrom === ObjectRelativeFromV.PARAGRAPH) {
+                    continue;
+                }
+
+                const { startIndex } = customBlock;
+
+                const glyph = skeleton.findNodeByCharIndex(startIndex, segmentId, segmentPage);
+                const line = glyph?.parent?.parent;
+                const column = line?.parent;
+                const paragraphStartLine = column?.lines.find((l) => l.paragraphIndex === line?.paragraphIndex && l.paragraphStart);
+                const page = column?.parent?.parent;
+
+                if (glyph == null || line == null || paragraphStartLine == null || column == null || page == null) {
+                    continue;
+                }
+
+                let delta = 0;
+
+                if (prevRelativeFrom === ObjectRelativeFromV.LINE) {
+                    delta -= line.top;
+                } else if (prevRelativeFrom === ObjectRelativeFromV.PAGE) {
+                    delta += page.marginTop;
+                }
+
+                delta += paragraphStartLine.top;
+
+                const newPositionV = {
+                    ...drawingPositionV,
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: (prevPosOffset ?? 0) - delta,
+                };
+
+                const updateDrawingAction = jsonX.replaceOp(['drawings', drawingId, 'docTransform', 'positionV'], drawingPositionV, newPositionV);
+
+                if (updateDrawingAction) {
+                    rawActions.push(updateDrawingAction);
+                }
+            }
+        }
+
+        doMutation.params!.actions = rawActions.reduce((acc, cur) => {
+            return JSONX.compose(acc, cur as JSONXActions);
+        }, null as JSONXActions);
 
         const result = commandService.syncExecuteCommand<
             IRichTextEditingMutationParams,

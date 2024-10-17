@@ -24,7 +24,8 @@ import type {
 
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { IExecuteAstNodeData } from '../ast-node/ast-root-node';
+
+import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import { generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {

@@ -22,7 +22,7 @@ import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { LexerNode } from '../analysis/lexer-node';
-import type { AstRootNode, FunctionNode, IExecuteAstNodeData, PrefixNode, SuffixNode } from '../ast-node';
+import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { PreCalculateNodeType } from '../utils/node-type';
@@ -40,6 +40,7 @@ import { AstTreeBuilder } from '../analysis/parser';
 import { ErrorNode } from '../ast-node/base-ast-node';
 import { NodeType } from '../ast-node/node-type';
 import { Interpreter } from '../interpreter/interpreter';
+import { generateExecuteAstNodeData, type IExecuteAstNodeData } from '../utils/ast-node-tool';
 import { FormulaDependencyTree } from './dependency-tree';
 
 const FORMULA_CACHE_LRU_COUNT = 100000;
@@ -449,12 +450,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         if (astNode && !this._isDirtyDefinedForNode(astNode)) {
             // astNode.setRefOffset(refOffsetX, refOffsetY);
-            return {
-                node: astNode,
-                refOffsetX,
-                refOffsetY,
-            };
-            // return astNode;
+            return generateExecuteAstNodeData(astNode, refOffsetX, refOffsetY);
         }
 
         const lexerNode = this._lexer.treeBuilder(formulaString);
@@ -479,11 +475,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         this._formulaASTCache.set(`${unitId}${formulaString}`, astNode);
 
-        return {
-            node: astNode,
-            refOffsetX,
-            refOffsetY,
-        };
+        return generateExecuteAstNodeData(astNode, refOffsetX, refOffsetY);
     }
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {

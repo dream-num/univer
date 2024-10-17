@@ -22,12 +22,6 @@ import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
-export interface IExecuteAstNodeData {
-    node: AstRootNode;
-    refOffsetX: number;
-    refOffsetY: number;
-}
-
 export class AstRootNode extends BaseAstNode {
     override get nodeType() {
         return NodeType.ROOT;

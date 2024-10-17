@@ -33,6 +33,7 @@ import { IFormulaCurrentConfigService } from '../../../services/current-data.ser
 import { IFunctionService } from '../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { Interpreter } from '../../interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
 import { Lexer } from '../lexer';
 import { AstTreeBuilder } from '../parser';
 import { createCommandTestBed } from './create-command-test-bed';
@@ -99,7 +100,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.REF);
         });
@@ -109,7 +110,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
         });
@@ -119,7 +120,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
@@ -129,7 +130,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(-1);
         });
@@ -139,7 +140,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
@@ -149,7 +150,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
         });
@@ -159,7 +160,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(-1);
         });
@@ -169,7 +170,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
         });
@@ -179,7 +180,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
         });
@@ -189,7 +190,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(5);
         });
@@ -199,7 +200,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
         });
@@ -209,7 +210,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(3);
         });
@@ -219,7 +220,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
         });
@@ -229,7 +230,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.VALUE);
         });
@@ -239,7 +240,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NUM);
         });
@@ -249,7 +250,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(10);
         });
@@ -283,7 +284,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(0.1);
         });
@@ -305,7 +306,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual('{1,2,3;4,5,6}');
         });
@@ -315,7 +316,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(10);
         });

@@ -25,6 +25,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
@@ -197,7 +198,7 @@ describe('Test isref function', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();

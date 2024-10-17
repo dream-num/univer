@@ -26,6 +26,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { stripErrorMargin } from '../../../../engine/utils/math-kit';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
@@ -189,7 +190,7 @@ describe('Test subtotal', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();

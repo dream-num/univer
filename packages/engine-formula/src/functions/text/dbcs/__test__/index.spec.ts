@@ -49,8 +49,8 @@ describe('Test dbcs function', () => {
             });
             const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
-                ['１', '　', '１．２３', 'ＴＲＵＥ', 'ＦＡＬＳＥ', 0, 'Ｕｎｉｖｅｒ表格シート繁體한국인'],
-                ['０', '１００', 'ａｂｃ', 'ｔｅｓｔ', '－３', ErrorType.NAME, 0],
+                ['１', '　', '１．２３', 'ＴＲＵＥ', 'ＦＡＬＳＥ', '', 'Ｕｎｉｖｅｒ表格シート繁體한국인'],
+                ['０', '１００', 'ａｂｃ', 'ｔｅｓｔ', '－３', ErrorType.NAME, ''],
             ]);
 
             const text2 = ArrayValueObject.create({

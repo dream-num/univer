@@ -39,11 +39,15 @@ export class Dbcs extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject): BaseValueObject {
-        if (text.isError() || text.isNull()) {
+        if (text.isError()) {
             return text;
         }
 
-        let textValue = text.getValue().toLocaleString();
+        if (text.isNull()) {
+            return StringValueObject.create('');
+        }
+
+        let textValue = `${text.getValue()}`;
 
         if (text.isBoolean()) {
             textValue = textValue.toLocaleUpperCase();

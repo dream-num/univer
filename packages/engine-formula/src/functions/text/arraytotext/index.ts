@@ -15,8 +15,10 @@
  */
 
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
@@ -103,6 +105,10 @@ export class Arraytotext extends BaseFunction {
 
         if (formatValue) {
             result = `{${result}}`;
+        }
+
+        if (result.length > 32767) {
+            return ErrorValueObject.create(ErrorType.CALC);
         }
 
         return StringValueObject.create(result);

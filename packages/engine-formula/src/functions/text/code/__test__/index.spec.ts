@@ -66,5 +66,11 @@ describe('Test code function', () => {
             const result2 = testFunction.calculate(text2);
             expect(getObjectValue(result2)).toStrictEqual(3627);
         });
+
+        it('More test', () => {
+            const text = StringValueObject.create('');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
+        });
     });
 });

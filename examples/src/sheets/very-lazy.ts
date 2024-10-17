@@ -23,8 +23,11 @@ import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
 import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
 import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
-export default function getVeryLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
-    return [
+/* eslint-disable-next-line node/prefer-global/process */
+const IS_E2E: boolean = !!process.env.IS_E2E;
+
+export default function getVeryLazyPlugins() {
+    const plugins: Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> = [
         [UniverUniscriptPlugin, {
             getWorkerUrl(_: string, label: string) {
                 if (label === 'json') {
@@ -47,7 +50,12 @@ export default function getVeryLazyPlugins(): Array<[PluginCtor<Plugin>] | [Plug
         [UniverSheetsSortUIPlugin],
         [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFindReplacePlugin],
-        [UniverDebuggerPlugin],
     ];
+
+    if (!IS_E2E) {
+        plugins.push([UniverDebuggerPlugin]);
+    }
+
+    return plugins;
 }
 

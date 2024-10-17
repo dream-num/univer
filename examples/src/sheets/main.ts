@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -117,6 +118,11 @@ univer.registerPlugin(UniverThreadCommentUIPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+
+// If we are running in e2e platform, we should immediately register the debugger plugin.
+if (IS_E2E) {
+    univer.registerPlugin(UniverDebuggerPlugin);
+}
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);

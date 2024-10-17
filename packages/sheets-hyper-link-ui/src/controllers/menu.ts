@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
 import { map, mergeMap, Observable } from 'rxjs';
-import type { IAccessor, Workbook } from '@univerjs/core';
-import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
@@ -60,7 +60,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
         })
     );
 
-    return disableRange$.pipe(mergeMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
+    return disableRange$.pipe(mergeMap((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell))));
 };
 
 const getZenLinkDisable$ = (accessor: IAccessor) => {

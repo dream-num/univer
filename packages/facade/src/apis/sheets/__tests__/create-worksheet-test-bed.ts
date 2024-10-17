@@ -59,7 +59,7 @@ import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
 import { ISheetSelectionRenderService, SheetRenderController, SheetSelectionRenderService, SheetSkeletonManagerService, SheetsRenderService } from '@univerjs/sheets-ui';
 import { IPlatformService, IShortcutService, PlatformService, ShortcutService } from '@univerjs/ui';
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

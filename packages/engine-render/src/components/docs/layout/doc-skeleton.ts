@@ -1019,7 +1019,7 @@ export class DocumentSkeleton extends Skeleton {
             lists,
             drawings,
 
-            localeService: this._localService,
+            localeService: this._localeService,
             paragraphLineGapDefault,
             defaultTabStop,
             documentTextStyle: textStyle,

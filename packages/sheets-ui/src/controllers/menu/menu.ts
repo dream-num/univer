@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
     DEFAULT_STYLES,
@@ -32,10 +34,11 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
-
 import {
+    CancelFrozenCommand,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
     ResetBackgroundColorCommand,
@@ -77,10 +80,8 @@ import {
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatestWith, map, Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
 
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { combineLatestWith, map, Observable } from 'rxjs';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -105,7 +106,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,

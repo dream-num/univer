@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@univerjs/core';
-import { SheetsFilterService } from '@univerjs/sheets-filter';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { UniverInstanceType } from '@univerjs/core';
-
-import { map, of, switchMap } from 'rxjs';
-import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from '@univerjs/sheets-ui';
 import { RangeProtectionPermissionViewPoint, WorksheetFilterPermission, WorksheetViewPermission } from '@univerjs/sheets';
-import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SmartToggleSheetsFilterCommand } from '../commands/commands/sheets-filter.command';
+import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SheetsFilterService, SmartToggleSheetsFilterCommand } from '@univerjs/sheets-filter';
+
+import { getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from '@univerjs/sheets-ui';
+import { getMenuHiddenObservable, MenuItemType } from '@univerjs/ui';
+import { map, of, switchMap } from 'rxjs';
 
 export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     const sheetsFilterService = accessor.get(SheetsFilterService);

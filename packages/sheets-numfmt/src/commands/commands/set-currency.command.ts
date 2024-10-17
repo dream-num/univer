@@ -15,13 +15,12 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { CommandType, ICommandService, Range } from '@univerjs/core';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-
-import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import { countryCurrencyMap } from '../../base/const/CURRENCY-SYMBOLS';
+import { CURRENCYFORMAT } from '../../base/const/FORMATDETAIL';
 import { MenuCurrencyService } from '../../service/menu.currency.service';
-import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
 export const SetCurrencyCommand: ICommand = {

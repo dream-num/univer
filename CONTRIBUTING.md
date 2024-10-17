@@ -52,7 +52,7 @@ pnpm dev
 
 ### Architecture
 
-Please refer to the [architecture doc](https://github.com/dream-num/univer/wiki/Univer-Architecture).
+Please refer to [Architecture](https://univer.ai/guides/sheet/architecture/univer), and also [ISOMORPHIC.md](./docs/ISOMORPHIC.md) for more guidance on how to set up plugins.
 
 ### Source code organization
 

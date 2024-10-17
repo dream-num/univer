@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+import type { FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 import { ICommandService, type Injector, IUniverInstanceService, Univer, UniverInstanceType } from '@univerjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
-import { FUniver } from '../../facade';
-import type { FWorksheet } from '../../sheets/f-worksheet';
-import type { FWorkbook } from '../../sheets/f-workbook';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { FUniver } from '../../everything';
 
 function createUnitTestBed(): {
     univer: Univer;

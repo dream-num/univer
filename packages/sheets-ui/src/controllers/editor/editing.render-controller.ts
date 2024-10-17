@@ -20,8 +20,8 @@ import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocument
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelections } from '@univerjs/sheets';
-import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 
+import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import {
     CellValueType, DEFAULT_EMPTY_DOCUMENT_VALUE, Direction, Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,

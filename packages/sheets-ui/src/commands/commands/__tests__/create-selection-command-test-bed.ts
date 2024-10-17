@@ -16,20 +16,18 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, LocaleType, UniverInstanceType } from '@univerjs/core';
-import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-
+import { CancelFrozenCommand, SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetScrollManagerService } from '../../../services/scroll-manager.service';
+import { SelectAllService } from '../../../services/select-all/select-all.service';
+import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
 import { ShortcutExperienceService } from '../../../services/shortcut-experience.service';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../set-frozen.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
-import { SheetSkeletonManagerService } from '../../../services/sheet-skeleton-manager.service';
-import { SelectAllService } from '../../../services/select-all/select-all.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {

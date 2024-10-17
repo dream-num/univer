@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
-import { Inject, Injector } from '@univerjs/core';
+import type { BaseFunction } from '../../functions/base-function';
 
+import type { LexerNode } from '../analysis/lexer-node';
+import type {
+    AsyncArrayObject,
+    AsyncObject,
+    BaseReferenceObject,
+    FunctionVariantType,
+    NodeValueType,
+} from '../reference-object/base-reference-object';
+import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
@@ -29,15 +38,6 @@ import { type BaseValueObject, ErrorValueObject } from '../value-object/base-val
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
-import type { BaseFunction } from '../../functions/base-function';
-import type { LexerNode } from '../analysis/lexer-node';
-import type {
-    AsyncArrayObject,
-    AsyncObject,
-    BaseReferenceObject,
-    FunctionVariantType,
-    NodeValueType,
-} from '../reference-object/base-reference-object';
 
 export class FunctionNode extends BaseAstNode {
     constructor(
@@ -274,6 +274,27 @@ export class FunctionNode extends BaseAstNode {
 
     private _setLocale() {
         this._functionExecutor.setLocale(this._currentConfigService.getLocale());
+    }
+}
+
+export class ErrorFunctionNode extends BaseAstNode {
+    constructor(
+        token: string = 'Error'
+    ) {
+        super(token);
+    }
+
+    override get nodeType() {
+        return NodeType.FUNCTION;
+    }
+
+    override async executeAsync() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+        return Promise.resolve(AstNodePromiseType.SUCCESS);
+    }
+
+    override execute() {
+        this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
     }
 }
 

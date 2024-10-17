@@ -37,7 +37,7 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
-export class AutoHeightController extends Disposable {
+export class AutoWidthController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
@@ -64,7 +64,7 @@ export class AutoHeightController extends Disposable {
             };
         }
         const { skeleton } = sheetSkeletonService.getCurrent()!;
-        const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthByRange(ranges);
+        const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthInRange(ranges);
 
         const redoParams: ISetWorksheetColAutoWidthMutationParams = {
             subUnitId,
@@ -104,7 +104,8 @@ export class AutoHeightController extends Disposable {
                 return this.getUndoRedoParamsOfColWidth(command.params.range);
             },
         }));
-        // for intercept 'sheet.command.set-row-is-auto-height' command.
+
+        // for intercept 'sheet.command.set-col-is-auto-width' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
             getMutations: (command: { id: string; params: ISetWorksheetColIsAutoWidthMutationParams }) => {
                 if (command.id !== SetWorksheetColIsAutoWidthCommand.id) {

@@ -25,6 +25,7 @@ import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
+import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
@@ -132,6 +133,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             // controllers
             [ActiveWorksheetController],
             [AutoHeightController],
+            [AutoWidthController],
             [FormulaEditorController],
             [SheetClipboardController],
             [SheetsRenderService],
@@ -181,6 +183,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [StatusBarController],
             [AutoHeightController],
+            [AutoWidthController],
         ]);
     }
 

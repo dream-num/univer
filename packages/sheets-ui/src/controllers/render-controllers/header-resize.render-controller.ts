@@ -503,6 +503,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                                     }],
                                 }
                             );
+                            this._columnResizeRect?.hide();
                             break;
                         case HEADER_RESIZE_TYPE.ROW:
                             this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
@@ -516,8 +517,9 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                                     }],
                                 }
                             );
+                            this._rowResizeRect?.hide();
+                            break;
                     }
-                    this._rowResizeRect?.hide();
                 })
             )
         );

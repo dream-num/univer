@@ -285,6 +285,7 @@ export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,
     SetColWidthCommand,
+    SetWorksheetColIsAutoWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';
 export { SetWorksheetHideCommand } from './commands/commands/set-worksheet-hide.command';
 export {
@@ -297,7 +298,6 @@ export { SetWorksheetRightToLeftCommand } from './commands/commands/set-workshee
 export {
     DeltaRowHeightCommand,
     type IDeltaRowHeightCommand,
-    type ISetWorksheetColIsAutoWidthCommandParams,
     type ISetWorksheetRowIsAutoHeightCommandParams,
     SetRowHeightCommand,
     SetWorksheetRowIsAutoHeightCommand,

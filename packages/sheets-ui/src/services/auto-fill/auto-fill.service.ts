@@ -379,7 +379,7 @@ export class AutoFillService extends Disposable implements IAutoFillService {
         const skeleton = sheetSkeletonService?.getCurrent()?.skeleton;
         if (!skeleton) return { redos: [], undos: [] };
 
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightByRange(ranges);
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = { subUnitId, unitId, rowsAutoHeightInfo };
         const worksheet = skeleton.worksheet;
         const undoParams = SetWorksheetRowAutoHeightMutationFactory(redoParams, worksheet);

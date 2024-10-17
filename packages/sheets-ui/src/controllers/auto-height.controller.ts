@@ -64,7 +64,7 @@ export class AutoHeightController extends Disposable {
             };
         }
         const { skeleton } = sheetSkeletonService.getCurrent()!;
-        const rowsAutoHeightInfo = skeleton.calculateAutoHeightByRange(ranges);
+        const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
         const redoParams: ISetWorksheetRowAutoHeightMutationParams = {
             subUnitId,

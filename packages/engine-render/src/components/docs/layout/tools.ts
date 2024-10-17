@@ -825,10 +825,11 @@ export function getFontCreateConfig(
     const { paragraphStyle = {}, bullet } = paragraph;
     const { isRenderStyle } = renderConfig;
     const { startIndex } = paragraphNode;
+    const originTextRun = viewModel.getTextRun(index + startIndex);
 
     const textRun = isRenderStyle === BooleanNumber.FALSE
         ? { ts: {}, st: 0, ed: 0 }
-        : viewModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
+        : originTextRun ?? { ts: {}, st: 0, ed: 0 };
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
@@ -839,7 +840,7 @@ export function getFontCreateConfig(
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
-    if (cache && !hasAddonStyle) {
+    if (cache && !hasAddonStyle && originTextRun) {
         return cache;
     }
 
@@ -872,8 +873,8 @@ export function getFontCreateConfig(
         pageWidth,
     };
 
-    if (!hasAddonStyle) {
-        // TODO: cache should more precisely, take custom-range, custom-decroation, paragraphStyle into considering.
+    if (!hasAddonStyle && originTextRun) {
+        // TODO: cache should more precisely, take custom-range, custom-decoration, paragraphStyle into considering.
         fontCreateConfigCache.setValue(st, ed, result);
     }
 

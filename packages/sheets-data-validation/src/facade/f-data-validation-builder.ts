@@ -15,18 +15,18 @@
  */
 
 import type { IDataValidationRule, IDataValidationRuleOptions } from '@univerjs/core';
-import type { FRange } from './f-range';
+import type { FRange } from '@univerjs/sheets/facade';
 import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 import { serializeRangeToRefString } from '@univerjs/engine-formula';
 import { FDataValidation } from './f-data-validation';
 
- /**
-  * Builder for data validation rules.
-  *
-  *     Set the data validation for cell A1 to require a value from B1:B10.
-  *     var rule = FUniver.newDataValidation().requireValueInRange(range).build();
-  *     cell.setDataValidation(rule);
-  */
+/**
+ * Builder for data validation rules.
+ *
+ *     Set the data validation for cell A1 to require a value from B1:B10.
+ *     var rule = FUniver.newDataValidation().requireValueInRange(range).build();
+ *     cell.setDataValidation(rule);
+ */
 export class FDataValidationBuilder {
     private _rule: IDataValidationRule;
 

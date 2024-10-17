@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRuleChange, IValidStatusChange } from '@univerjs/data-validation';
+import type { IRuleChange } from '@univerjs/data-validation';
+import type { IValidStatusChange } from '../models/sheet-data-validation-model';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { type IDisposable, type IExecutionOptions, type Nullable, type ObjectMatrix, toDisposable } from '@univerjs/core';
 import { FWorkbook } from '@univerjs/sheets/facade';

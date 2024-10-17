@@ -36,6 +36,7 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     options?: { [key: string]: boolean };
     // Whether this mutation is from a sync operation.
     isSync?: boolean;
+    isEditing?: boolean;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -61,6 +62,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             isCompositionEnd,
             noNeedSetTextRange,
             debounce,
+            isEditing = true,
         } = params;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -98,7 +100,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                docSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
+                docSelectionManagerService.replaceTextRanges(textRanges, isEditing, params.options);
             });
         }
 

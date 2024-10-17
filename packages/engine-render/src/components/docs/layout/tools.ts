@@ -802,6 +802,8 @@ function getBulletParagraphTextStyle(bullet: IBullet, viewModel: DocumentViewMod
     return lists[listType].nestingLevel[0].paragraphProperties?.textStyle;
 }
 
+const DEFAULT_TEXT_RUN = { ts: {}, st: 0, ed: 0 };
+
 export function getFontCreateConfig(
     index: number,
     viewModel: DocumentViewModel,
@@ -828,15 +830,15 @@ export function getFontCreateConfig(
     const originTextRun = viewModel.getTextRun(index + startIndex);
 
     const textRun = isRenderStyle === BooleanNumber.FALSE
-        ? { ts: {}, st: 0, ed: 0 }
-        : originTextRun ?? { ts: {}, st: 0, ed: 0 };
+        ? DEFAULT_TEXT_RUN
+        : originTextRun ?? DEFAULT_TEXT_RUN;
     const customDecoration = viewModel.getCustomDecoration(index + startIndex);
     const showCustomDecoration = customDecoration && (customDecoration.show !== false);
     const customDecorationStyle = showCustomDecoration ? getCustomDecorationStyle(customDecoration) : null;
     const customRange = viewModel.getCustomRange(index + startIndex);
     const showCustomRange = customRange && (customRange.show !== false);
     const customRangeStyle = showCustomRange ? getCustomRangeStyle(customRange) : null;
-    const hasAddonStyle = showCustomRange || showCustomDecoration;
+    const hasAddonStyle = showCustomRange || showCustomDecoration || !!bullet;
     const { st, ed } = textRun;
     let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);

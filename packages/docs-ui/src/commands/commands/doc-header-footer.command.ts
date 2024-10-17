@@ -15,8 +15,8 @@
  */
 
 import type { ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
-import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';

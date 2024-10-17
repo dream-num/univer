@@ -23,7 +23,7 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 import { ErrorType } from '../basics/error-type';
-import { REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING, REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING, REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING } from '../basics/regex';
+import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
 import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
@@ -512,11 +512,11 @@ export class BaseFunction {
 
         let referenceObject: BaseReferenceObject;
 
-        if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(token)) {
+        if (regexTestSingeRange(token)) {
             referenceObject = new CellReferenceObject(token);
-        } else if (REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING.test(token)) {
+        } else if (regexTestSingleRow(token)) {
             referenceObject = new RowReferenceObject(token);
-        } else if (REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING.test(token)) {
+        } else if (regexTestSingleColumn(token)) {
             referenceObject = new ColumnReferenceObject(token);
         } else {
             referenceObject = new RangeReferenceObject(range, sheetId, unitId);

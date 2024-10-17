@@ -20,9 +20,9 @@ import type { BaseReferenceObject } from '../reference-object/base-reference-obj
 import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
-    REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING,
-    REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING,
-    REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING,
+    regexTestSingeRange,
+    regexTestSingleColumn,
+    regexTestSingleRow,
 } from '../../basics/regex';
 import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
@@ -136,7 +136,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         // const tokenTrim = param.trim();
-        // if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(tokenTrim)) {
+        // if (regexTestSingeRange(tokenTrim)) {
         //     return true;
         // }
 
@@ -147,12 +147,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         let node: Nullable<ReferenceNode>;
-        if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(tokenTrim)) {
+        if (regexTestSingeRange(tokenTrim)) {
             node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
-            if (new RegExp(REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING).test(tokenTrim)) {
+            if (regexTestSingleRow(tokenTrim)) {
                 node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
-            } else if (REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING.test(tokenTrim)) {
+            } else if (regexTestSingleColumn(tokenTrim)) {
                 node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
             }
         }

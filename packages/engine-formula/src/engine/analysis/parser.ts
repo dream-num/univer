@@ -82,11 +82,6 @@ export class AstTreeBuilder extends Disposable {
 
     parse(lexerNode: LexerNode) {
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
-
-        // this._refOffsetX = refOffsetX;
-
-        // this._refOffsetY = refOffsetY;
-
         const node = this._parse(lexerNode, astNode);
 
         /**

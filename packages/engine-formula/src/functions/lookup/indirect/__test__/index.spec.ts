@@ -95,7 +95,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
@@ -105,7 +105,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
@@ -115,7 +115,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([
                 [ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE, ErrorType.VALUE],
@@ -131,7 +131,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });
@@ -141,7 +141,7 @@ describe('Test indirect', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as BaseReferenceObject).toArrayValueObject().toValue()).toStrictEqual([[4]]);
         });

@@ -137,7 +137,7 @@ describe('Test isformula function', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();

@@ -17,7 +17,7 @@
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
-import { REFERENCE_REGEX_COLUMN_PRECOMPILING, REFERENCE_REGEX_ROW_PRECOMPILING, REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING } from '../../../basics/regex';
+import { regexTestColumn, regexTestRow, regexTestSingeRange } from '../../../basics/regex';
 import { operatorToken } from '../../../basics/token';
 import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
@@ -93,14 +93,14 @@ export class Indirect extends BaseFunction {
             return this._setDefault(rangeReferenceObject);
         }
 
-        if (REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(refTextV)) {
+        if (regexTestSingeRange(refTextV)) {
             return this._setDefault(new CellReferenceObject(refTextV));
         }
-        if (REFERENCE_REGEX_ROW_PRECOMPILING.test(refTextV)) {
+        if (regexTestRow(refTextV)) {
             return this._setDefault(new RowReferenceObject(refTextV));
         }
 
-        if (REFERENCE_REGEX_COLUMN_PRECOMPILING.test(refTextV)) {
+        if (regexTestColumn(refTextV)) {
             return this._setDefault(new ColumnReferenceObject(refTextV));
         }
 

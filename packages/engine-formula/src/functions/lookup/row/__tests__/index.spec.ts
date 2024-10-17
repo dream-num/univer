@@ -91,7 +91,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
@@ -100,7 +100,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[5]]);
         });
@@ -109,7 +109,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[5], [6], [7], [8], [9], [10]]);
         });
@@ -118,7 +118,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -127,7 +127,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -136,7 +136,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -145,7 +145,7 @@ describe('Test row', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute({ node: astNode as BaseAstNode, refOffsetX: 0, refOffsetY: 0 });
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });

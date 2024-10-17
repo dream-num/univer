@@ -997,6 +997,7 @@ export class FormulaDependencyGenerator extends Disposable {
                 continue;
             }
 
+            // It will clear the array.
             cacheStack.length = 0;
 
             for (const parentTree of tree.parents) {

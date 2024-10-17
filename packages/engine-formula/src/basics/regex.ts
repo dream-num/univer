@@ -76,19 +76,59 @@ export const REFERENCE_TABLE_SINGLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABL
 
 export const REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX = `^(${UNIT_NAME_REGEX})?${TABLE_NAME_REGEX}(\\[${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$|^${TABLE_NAME_REGEX}(\\[${TABLE_TITLE_REGEX}${TABLE_MULTIPLE_COLUMN_REGEX}\\])?$`; // =Table1[[#Title],[Column1]:[Column2]] | =Table1[[Column1]:[Column2]]
 
-export const $SUPER_TABLE_COLUMN_REGEX = '[.*?]';
+export const SUPER_TABLE_COLUMN_REGEX = '[.*?]';
 
-export const $SUPER_TABLE_COLUMN_REGEX_PRECOMPILING = new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g');
+export const SUPER_TABLE_COLUMN_REGEX_PRECOMPILING = new RegExp(SUPER_TABLE_COLUMN_REGEX, 'g');
 
-export const $ARRAY_VALUE_REGEX = '{.*?}';
+export const ARRAY_VALUE_REGEX = '{.*?}';
 
-export const $ARRAY_VALUE_REGEX_PRECOMPILING = new RegExp($ARRAY_VALUE_REGEX, 'g');
+export const ARRAY_VALUE_REGEX_PRECOMPILING = new RegExp(ARRAY_VALUE_REGEX, 'g');
+
+export function regexTestSingeRange(token: string): boolean {
+    REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestMultipleRange(token: string): boolean {
+    REFERENCE_MULTIPLE_RANGE_REGEX_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_MULTIPLE_RANGE_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestRow(token: string): boolean {
+    REFERENCE_REGEX_ROW_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_REGEX_ROW_PRECOMPILING.test(token);
+}
+
+export function regexTestColumn(token: string): boolean {
+    REFERENCE_REGEX_COLUMN_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_REGEX_COLUMN_PRECOMPILING.test(token);
+}
+
+export function regexTestSingleRow(token: string): boolean {
+    REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_REGEX_SINGLE_ROW_PRECOMPILING.test(token);
+}
+
+export function regexTestSingleColumn(token: string): boolean {
+    REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING.lastIndex = 0;
+    return REFERENCE_REGEX_SINGLE_COLUMN_PRECOMPILING.test(token);
+}
+
+export function regexTestSuperTableColumn(token: string): boolean {
+    SUPER_TABLE_COLUMN_REGEX_PRECOMPILING.lastIndex = 0;
+    return SUPER_TABLE_COLUMN_REGEX_PRECOMPILING.test(token);
+}
+
+export function regexTestArrayValue(token: string): boolean {
+    ARRAY_VALUE_REGEX_PRECOMPILING.lastIndex = 0;
+    return ARRAY_VALUE_REGEX_PRECOMPILING.test(token);
+}
 
 export function isReferenceString(refString: string) {
     return (
-        REFERENCE_SINGLE_RANGE_REGEX_PRECOMPILING.test(refString) ||
-        REFERENCE_MULTIPLE_RANGE_REGEX_PRECOMPILING.test(refString) ||
-        REFERENCE_REGEX_ROW_PRECOMPILING.test(refString) ||
-        REFERENCE_REGEX_COLUMN_PRECOMPILING.test(refString)
+        regexTestSingeRange(refString) ||
+        regexTestMultipleRange(refString) ||
+        regexTestRow(refString) ||
+        regexTestColumn(refString)
     );
 }

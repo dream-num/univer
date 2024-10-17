@@ -1703,7 +1703,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
                 const { w = defaultColumnWidth, aw, ia } = columnDataItem;
-                if ((ia === BooleanNumber.TRUE) && typeof aw === 'number') {
+                if (typeof aw === 'number') {
                     columnWidth = aw;
                 } else {
                     columnWidth = w;

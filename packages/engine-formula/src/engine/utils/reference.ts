@@ -263,10 +263,11 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
 
     const endGrid = singleReferenceToGrid(refEndString);
 
-    const startRow = startGrid.row;
-    const startColumn = startGrid.column;
-    const endRow = endGrid.row;
-    const endColumn = endGrid.column;
+    // range A1:B10 === B10:A1
+    const startRow = startGrid.row > endGrid.row ? endGrid.row : startGrid.row;
+    const startColumn = startGrid.column > endGrid.column ? endGrid.column : startGrid.column;
+    const endRow = startGrid.row > endGrid.row ? startGrid.row : endGrid.row;
+    const endColumn = startGrid.column > endGrid.column ? startGrid.column : endGrid.column;
 
     let rangeType = RANGE_TYPE.NORMAL;
     if (Number.isNaN(startRow) && Number.isNaN(endRow)) {

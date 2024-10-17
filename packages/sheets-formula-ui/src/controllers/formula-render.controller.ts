@@ -15,6 +15,7 @@
  */
 
 import { Inject, InterceptorEffectEnum, RxDisposable } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { extractFormulaError } from './utils/utils';
 
@@ -27,7 +28,8 @@ const FORMULA_ERROR_MARK = {
 
 export class FormulaRenderManagerController extends RxDisposable {
     constructor(
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -36,7 +38,13 @@ export class FormulaRenderManagerController extends RxDisposable {
             {
                 effect: InterceptorEffectEnum.Style,
                 handler: (cell, pos, next) => {
-                    const errorType = extractFormulaError(cell);
+                    const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData()?.
+                        [pos.unitId]?.
+                        [pos.subUnitId]?.
+                        [pos.row]?.
+                        [pos.col];
+
+                    const errorType = extractFormulaError(cell, !!arrayFormulaCellData);
                     if (!errorType) {
                         return next(cell);
                     }

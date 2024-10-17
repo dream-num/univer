@@ -15,13 +15,13 @@
  */
 
 import { isRealNum } from '@univerjs/core';
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { reverseCompareOperator } from '../../basics/calculate';
 import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { compareToken, operatorToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, divide, equals, floor, greaterThan, greaterThanOrEquals, lessThan, lessThanOrEquals, minus, mod, multiply, plus, pow, round, sqrt } from '../utils/math-kit';
-import { FormulaAstLRU } from '../../basics/cache-lru';
 import { comparePatternPriority } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
@@ -797,30 +797,51 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.powInverse(this);
         }
 
-        const currentValue = this.getValue();
-        const value = valueObject.getValue();
+        if (this.isError()) {
+            return this;
+        }
 
-        if (typeof value === 'string') {
+        const currentValue = this.getValue();
+
+        let _valueObject = valueObject;
+
+        if (valueObject.isString()) {
+            _valueObject = valueObject.convertToNumberObjectValue();
+        }
+
+        if (_valueObject.isError()) {
+            return _valueObject;
+        }
+
+        const value = +_valueObject.getValue();
+
+        if (Number.isNaN(value)) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
-        if (typeof value === 'number') {
-            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+
+        if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        if (currentValue === 0) {
+            if (value < 0) {
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
+            }
+
+            if (value === 0) {
                 return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            const result = pow(currentValue, value);
-
-            if (!Number.isFinite(result)) {
-                return ErrorValueObject.create(ErrorType.NUM);
-            }
-
-            return NumberValueObject.create(result);
-        }
-        if (typeof value === 'boolean') {
-            return NumberValueObject.create(pow(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(0);
         }
 
-        return this;
+        const result = pow(currentValue, value);
+
+        if (!Number.isFinite(result)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+
+        return NumberValueObject.create(result);
     }
 
     override sqrt(): BaseValueObject {

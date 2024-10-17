@@ -15,42 +15,16 @@
  */
 
 import type { Plugin, PluginCtor } from '@univerjs/core';
-import { UniverActionRecorderPlugin } from '@univerjs/action-recorder';
-import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-import { UniverSheetsCrosshairHighlightPlugin } from '@univerjs/sheets-crosshair-highlight';
+import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsDrawingUIPlugin } from '@univerjs/sheets-drawing-ui';
 import { UniverSheetsFilterUIPlugin } from '@univerjs/sheets-filter-ui';
-import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
-import { UniverSheetsHyperLinkUIPlugin } from '@univerjs/sheets-hyper-link-ui';
-import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 export default function getLazyPlugins(): Array<[PluginCtor<Plugin>] | [PluginCtor<Plugin>, unknown]> {
     return [
-        [UniverUniscriptPlugin, {
-            getWorkerUrl(_: string, label: string) {
-                if (label === 'json') {
-                    return '/vs/language/json/json.worker.js';
-                }
-                if (label === 'css' || label === 'scss' || label === 'less') {
-                    return '/vs/language/css/css.worker.js';
-                }
-                if (label === 'html' || label === 'handlebars' || label === 'razor') {
-                    return '/vs/language/html/html.worker.js';
-                }
-                if (label === 'typescript' || label === 'javascript') {
-                    return '/vs/language/typescript/ts.worker.js';
-                }
-                return '/vs/editor/editor.worker.js';
-            },
-        }],
+        [UniverSheetsDataValidationUIPlugin],
         [UniverSheetsConditionalFormattingUIPlugin],
-        [UniverActionRecorderPlugin],
-        [UniverSheetsHyperLinkUIPlugin],
-        [UniverSheetsCrosshairHighlightPlugin],
         [UniverSheetsFilterUIPlugin, { useRemoteFilterValuesGenerator: false }],
         [UniverSheetsDrawingUIPlugin],
-        [UniverSheetsFindReplacePlugin],
-        [UniverDebuggerPlugin],
     ];
 }

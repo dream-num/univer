@@ -18,6 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { LocaleType, LogLevel, Univer, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -29,13 +30,12 @@ import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { UniverSheetsDataValidationUIPlugin } from '@univerjs/sheets-data-validation-ui';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsFormulaUIPlugin } from '@univerjs/sheets-formula-ui';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
-import { UniverSheetsSortUIPlugin } from '@univerjs/sheets-sort-ui';
+import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { IThreadCommentMentionDataService, UniverSheetsThreadCommentPlugin, UniverThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
@@ -46,6 +46,7 @@ import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 const IS_E2E: boolean = !!process.env.IS_E2E;
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
+const LOAD_VERY_LAZY_PLUGINS_TIMEOUT = 3_000;
 
 export const mockUser = {
     userID: 'Owner_qxVnhPbQ',
@@ -109,15 +110,19 @@ univer.registerPlugin(UniverFormulaEnginePlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaPlugin, { notExecuteFormula: true });
 univer.registerPlugin(UniverSheetsFormulaUIPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
-univer.registerPlugin(UniverSheetsDataValidationUIPlugin);
 univer.registerPlugin(UniverSheetsConditionalFormattingPlugin);
 univer.registerPlugin(UniverSheetsFilterPlugin);
+univer.registerPlugin(UniverSheetsSortPlugin);
 univer.registerPlugin(UniverSheetsHyperLinkPlugin);
-univer.registerPlugin(UniverSheetsSortUIPlugin);
 univer.registerPlugin(UniverThreadCommentUIPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+
+// If we are running in e2e platform, we should immediately register the debugger plugin.
+if (IS_E2E) {
+    univer.registerPlugin(UniverDebuggerPlugin);
+}
 
 const injector = univer.__getInjector();
 const userManagerService = injector.get(UserManagerService);
@@ -134,6 +139,13 @@ setTimeout(() => {
         plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
     });
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
+
+setTimeout(() => {
+    import('./very-lazy').then((lazy) => {
+        const plugins = lazy.default();
+        plugins.forEach((p) => univer.registerPlugin(p[0], p[1]));
+    });
+}, LOAD_VERY_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
 window.univerAPI = FUniver.newAPI(univer);

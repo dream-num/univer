@@ -17,15 +17,12 @@
 import type { Nullable } from '@univerjs/core';
 import type { IWatermarkConfigWithType } from '../common/type';
 import { Disposable, ILocalStorageService, Inject } from '@univerjs/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
-import { IWatermarkTypeEnum } from '../common/type';
 
 export class UniverWatermarkService extends Disposable {
     private _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();
     public updateConfig$ = this._updateConfig$.asObservable();
-    private _menuHidden$ = new BehaviorSubject<boolean>(false);
-    public menuHidden$ = this._menuHidden$.asObservable();
     private _refresh$ = new Subject<number>();
     public refresh$ = this._refresh$.asObservable();
 
@@ -33,16 +30,6 @@ export class UniverWatermarkService extends Disposable {
         @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService
     ) {
         super();
-        this._initMenuHiddenState();
-    }
-
-    private async _initMenuHiddenState() {
-        const config = await this._localStorageService.getItem<IWatermarkConfigWithType>(UNIVER_WATERMARK_STORAGE_KEY);
-        if (config?.type === IWatermarkTypeEnum.UserInfo) {
-            this._menuHidden$.next(true);
-        } else {
-            this._menuHidden$.next(false);
-        }
     }
 
     public async getWatermarkConfig() {

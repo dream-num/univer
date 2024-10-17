@@ -15,7 +15,7 @@
  */
 
 import { Disposable, Inject } from '@univerjs/core';
-import { CrownSingle } from '@univerjs/icons';
+import { WatermarkSingle } from '@univerjs/icons';
 import { ComponentManager, IMenuManagerService } from '@univerjs/ui';
 import { UNIVER_WATERMARK_MENU, WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../common/const';
 import { WatermarkPanel } from '../views/components/WatermarkPanel';
@@ -34,7 +34,7 @@ export class UniverWatermarkMenuController extends Disposable {
 
     private _initComponents() {
         ([
-            [UNIVER_WATERMARK_MENU, CrownSingle],
+            [UNIVER_WATERMARK_MENU, WatermarkSingle],
             [WATERMARK_PANEL, WatermarkPanel],
             [WATERMARK_PANEL_FOOTER, WatermarkPanelFooter],
         ] as const).forEach(([key, component]) => {

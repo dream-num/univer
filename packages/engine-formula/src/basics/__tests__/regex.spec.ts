@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isReferenceString, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX, regexTestColumn, regexTestRow, regexTestSingeRange } from '../regex';
+import { isReferenceString, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX, regexTestColumn, regexTestMultipleRange, regexTestRow, regexTestSingeRange } from '../regex';
 
 describe('Test ref regex', () => {
     it('Single range', () => {
@@ -27,11 +27,11 @@ describe('Test ref regex', () => {
     });
 
     it('Multiple range', () => {
-        expect(regexTestSingeRange('A1:B10')).toBe(true);
-        expect(regexTestSingeRange('Sheet1!A1:B10')).toBe(true);
-        expect(regexTestSingeRange('[workbook]Sheet1!A1:B10')).toBe(true);
-        expect(regexTestSingeRange('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
-        expect(regexTestSingeRange('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('Sheet1!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('[workbook]Sheet1!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
     });
 
     it('Row range', () => {

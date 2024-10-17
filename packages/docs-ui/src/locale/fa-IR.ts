@@ -46,6 +46,7 @@ const locale: typeof zhCN = {
         order: 'لیست شماره‌دار',
         unorder: 'لیست بدون شماره',
         checklist: 'لیست وظیفه',
+        documentFlavor: 'Modern Mode',
         alignLeft: 'تراز چپ',
         alignCenter: 'تراز وسط',
         alignRight: 'تراز راست',

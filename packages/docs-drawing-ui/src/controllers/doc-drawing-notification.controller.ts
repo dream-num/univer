@@ -40,6 +40,7 @@ interface IAddOrRemoveDrawing {
 }
 
 // Check whether drawings are added or deleted from the mutation and obtain the drawing ID.
+// eslint-disable-next-line complexity
 function getAddOrRemoveDrawings(actions: JSONXActions): Nullable<IAddOrRemoveDrawing[]> {
     if (JSONX.isNoop(actions) || !Array.isArray(actions)) {
         return null;

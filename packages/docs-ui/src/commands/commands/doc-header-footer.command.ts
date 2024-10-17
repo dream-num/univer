@@ -17,9 +17,10 @@
 import type { ICommand, IDocumentBody, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BooleanNumber, CommandType, ICommandService, IUniverInstanceService, JSONX, Tools } from '@univerjs/core';
-import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { HeaderFooterType } from '../../controllers/doc-header-footer.controller';
+import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 import { SidebarDocHeaderFooterPanelOperation } from '../operations/doc-header-footer-panel.operation';
 
 function getEmptyHeaderFooterBody(): IDocumentBody {
@@ -239,5 +240,49 @@ export const OpenHeaderFooterPanelCommand: ICommand<IOpenHeaderFooterPanelParams
         const commandService = accessor.get(ICommandService);
 
         return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'open' });
+    },
+};
+
+interface ICloseHeaderFooterParams {
+    unitId: string;
+}
+
+export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
+    id: 'doc.command.close-header-footer',
+    type: CommandType.COMMAND,
+
+    handler: async (accessor, params: ICloseHeaderFooterParams) => {
+        const commandService = accessor.get(ICommandService);
+        const renderManagerService = accessor.get(IRenderManagerService);
+        const docSelectionManagerService = accessor.get(DocSelectionManagerService);
+
+        const { unitId } = params;
+
+        const renderObject = renderManagerService.getRenderById(unitId);
+        if (renderObject == null) {
+            return false;
+        }
+
+        const { scene } = renderObject;
+        const transformer = scene.getTransformerByCreate();
+        const docSkeletonManagerService = renderObject.with(DocSkeletonManagerService);
+        const docSelectionRenderService = renderObject.with(DocSelectionRenderService);
+        const skeleton = docSkeletonManagerService?.getSkeleton();
+        const viewModel = docSkeletonManagerService?.getViewModel();
+
+        if (viewModel == null || skeleton == null) {
+            return false;
+        }
+
+        // TODO: @JOCS, these codes bellow should be automatically executed?
+        docSelectionManagerService.replaceTextRanges([]); // Clear text selection.
+        transformer.clearSelectedObjects();
+        docSelectionRenderService.setSegment('');
+        docSelectionRenderService.setSegmentPage(-1);
+        viewModel.setEditArea(DocumentEditArea.BODY);
+        skeleton.calculate();
+        renderObject.mainComponent?.makeDirty(true);
+
+        return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
     },
 };

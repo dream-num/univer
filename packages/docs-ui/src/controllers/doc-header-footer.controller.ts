@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel } from '@univerjs/core';
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
 import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPathProps, IPointerEvent, IRenderContext, IRenderModule, RenderComponentType } from '@univerjs/engine-render';
 import type { Nullable } from 'vitest';
 import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
@@ -23,7 +23,8 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { neoGetDocObject } from '../basics/component-tools';
-import { CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
+import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
+import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
@@ -142,19 +143,28 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
     }
 
     private _initialize() {
-        // FIXME: @Jocs, NO need to register this controller in Modern Document???
-        const docDataModel = this._context.unit;
-
-        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
-
-        // Only traditional document support header/footer.
-        if (documentFlavor !== DocumentFlavor.TRADITIONAL) {
-            return;
-        }
-
         this._init();
         this._drawHeaderFooterLabel();
         this._initCustomComponents();
+        this._listenSwitchMode();
+    }
+
+    // Close header footer panel when switch mode.
+    private _listenSwitchMode() {
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (SwitchDocModeCommand.id === command.id) {
+                    const viewModel = this._docSkeletonManagerService.getViewModel();
+                    const editArea = viewModel.getEditArea();
+
+                    if (editArea !== DocumentEditArea.BODY) {
+                        this._commandService.executeCommand(CloseHeaderFooterCommand.id, {
+                            unitId: this._context.unitId,
+                        });
+                    }
+                }
+            })
+        );
     }
 
     private _initCustomComponents(): void {
@@ -181,6 +191,10 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
         this.disposeWithMe(document.onDblclick$.subscribeEvent(async (evt: IPointerEvent | IMouseEvent) => {
             if (this._isEditorReadOnly(unitId)) {
+                return;
+            }
+
+            if (!this._isTraditionalMode()) {
                 return;
             }
 
@@ -268,6 +282,10 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
             if (this._editorService.isEditor(unitId) || this._instanceSrv.getUniverDocInstance(unitId) == null) {
+                return;
+            }
+
+            if (!this._isTraditionalMode()) {
                 return;
             }
 
@@ -381,6 +399,14 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
         }
 
         return editor.isReadOnly();
+    }
+
+    private _isTraditionalMode() {
+        const docDataModel = this._context.unit;
+
+        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+
+        return documentFlavor === DocumentFlavor.TRADITIONAL;
     }
 
     private _getDocDataModel() {

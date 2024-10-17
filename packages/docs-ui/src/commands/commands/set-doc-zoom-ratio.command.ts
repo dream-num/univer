@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
 
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import {
     SetDocZoomRatioOperation,
     SetDocZoomRatioUndoMutationFactory,
 } from '../operations/set-doc-zoom-ratio.operation';
-import type { ISetDocZoomRatioOperationParams } from '../operations/set-doc-zoom-ratio.operation';
 
 export interface ISetDocZoomRatioCommandParams {
     zoomRatio?: number;

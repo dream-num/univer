@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import type { ILocale } from '@univerjs/design';
+import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
+import { LocaleService, ThemeService, useDependency } from '@univerjs/core';
 import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { BuiltInUIPart } from '../services/parts/parts.service';
-import styles from './mobile-app.module.less';
 import { ComponentContainer, useComponentsOfPart } from './components/ComponentContainer';
+import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
+import styles from './mobile-app.module.less';
 import { builtInGlobalComponents } from './parts';
-import { MobileContextMenu } from './components/context-menu/MobileContextMenu';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;

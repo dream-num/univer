@@ -411,6 +411,7 @@ export interface IHeaderAndFooterBase {
 }
 
 export enum DocumentFlavor {
+    UNSPECIFIED,
     TRADITIONAL,
     MODERN,
 }

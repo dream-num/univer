@@ -44,6 +44,7 @@ const locale = {
         order: '有序列表',
         unorder: '无序列表',
         checklist: '任务列表',
+        documentFlavor: '现代模式',
         alignLeft: '左对齐',
         alignCenter: '居中对齐',
         alignRight: '右对齐',

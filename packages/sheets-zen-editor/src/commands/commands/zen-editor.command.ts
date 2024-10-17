@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentDataModel, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DocumentDataModel, DocumentFlavor, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { EditingRenderController, IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -131,6 +131,8 @@ export const ConfirmZenEditCommand: ICommand = {
 
             if (editingRenderController) {
                 const snapshot = Tools.deepClone(editor.getDocumentData());
+                // Maybe we need a third Document flavor for sheet editor?
+                snapshot.documentStyle.documentFlavor = DocumentFlavor.UNSPECIFIED;
                 editingRenderController.submitCellData(new DocumentDataModel(snapshot));
             }
 

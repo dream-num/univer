@@ -73,7 +73,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         },
         tableSource: {},
         documentStyle: {
-            documentFlavor: DocumentFlavor.MODERN,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
         },
     };
 

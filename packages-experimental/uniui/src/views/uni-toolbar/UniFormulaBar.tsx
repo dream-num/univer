@@ -147,7 +147,7 @@ export function FormulaBar() {
                 width: Number.POSITIVE_INFINITY,
                 height: Number.POSITIVE_INFINITY,
             },
-            documentFlavor: DocumentFlavor.MODERN,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
             marginTop: 5,
             marginBottom: 5,
             marginRight: 0,

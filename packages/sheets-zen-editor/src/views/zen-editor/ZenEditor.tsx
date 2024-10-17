@@ -50,13 +50,13 @@ const INITIAL_SNAPSHOT: IDocumentData = {
     documentStyle: {
         pageSize: {
             width: 595,
-            height: 842,
+            height: Number.POSITIVE_INFINITY,
         },
         documentFlavor: DocumentFlavor.MODERN,
-        marginTop: 50,
-        marginBottom: 50,
-        marginRight: 40,
-        marginLeft: 40,
+        marginTop: 0,
+        marginBottom: 0,
+        marginRight: 0,
+        marginLeft: 0,
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,

@@ -78,7 +78,7 @@ export class ZenEditorController extends RxDisposable {
         const { width: engineWidth, height: engineHeight } = parent;
 
         let docsLeft = 0;
-        let docsTop = 0;
+        const docsTop = pageMarginTop;
 
         let sceneWidth = 0;
 
@@ -102,14 +102,12 @@ export class ZenEditorController extends RxDisposable {
         }
 
         if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
             sceneHeight = (engineHeight - pageMarginTop * 2) / scaleY;
         } else {
-            docsTop = pageMarginTop;
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
 
-        scene.resize(sceneWidth, sceneHeight + 200);
+        scene.resize(sceneWidth, sceneHeight);
         docsComponent.translate(docsLeft, docsTop);
         docBackground.translate(docsLeft, docsTop);
 

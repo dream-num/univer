@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, Nullable } from '@univerjs/core';
+import type { ILocale } from '@univerjs/design';
+import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
+import { DocumentFlavor, IUniverInstanceService, LocaleService, ThemeService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { ConfigContext, ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
+
 import clsx from 'clsx';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-
 import { createPortal } from 'react-dom';
-import type { ILocale } from '@univerjs/design';
 import { IMessageService } from '../../services/message/message.service';
 import { BuiltInUIPart } from '../../services/parts/parts.service';
 import { ComponentContainer, useComponentsOfPart } from '../components/ComponentContainer';
@@ -28,10 +30,9 @@ import { DesktopContextMenu } from '../components/context-menu/ContextMenu';
 import { Ribbon } from '../components/ribbon/Ribbon';
 import { Sidebar } from '../components/sidebar/Sidebar';
 import { ZenZone } from '../components/zen-zone/ZenZone';
-import { builtInGlobalComponents } from '../parts';
 
+import { builtInGlobalComponents } from '../parts';
 import styles from './workbench.module.less';
-import type { IWorkbenchOptions } from '../../controllers/ui/ui.controller';
 
 export interface IUniverWorkbenchProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -62,7 +63,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
     const leftSidebarComponents = useComponentsOfPart(BuiltInUIPart.LEFT_SIDEBAR);
     const globalComponents = useComponentsOfPart(BuiltInUIPart.GLOBAL);
 
-    const [focusUnitType, setFocusUnitType] = useState<UniverInstanceType>(UniverInstanceType.UNIVER_UNKNOWN);
+    const [docSnapShot, setDocSnapShot] = useState<Nullable<IDocumentData>>(null);
 
     useEffect(() => {
         const sub = instanceService.focused$.subscribe((id) => {
@@ -70,8 +71,11 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                 return;
             }
             const instanceType = instanceService.getUnitType(id);
+            const instance = instanceService.getUnit(id);
 
-            setFocusUnitType(instanceType);
+            if (instanceType === UniverInstanceType.UNIVER_DOC && instance) {
+                setDocSnapShot((instance as DocumentDataModel).getSnapshot());
+            }
         });
 
         return () => {
@@ -148,7 +152,7 @@ export function DesktopWorkbench(props: IUniverWorkbenchProps) {
                         <section className={clsx(
                             styles.workbenchContainerContent,
                             {
-                                [styles.workbenchContainerDocContent]: focusUnitType === UniverInstanceType.UNIVER_DOC,
+                                [styles.workbenchContainerDocContent]: docSnapShot?.documentStyle.documentFlavor === DocumentFlavor.TRADITIONAL,
                             }
                         )}
                         >

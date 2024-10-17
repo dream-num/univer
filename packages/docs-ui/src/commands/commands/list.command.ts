@@ -77,6 +77,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges: docRanges,
+                isEditing: false,
             },
         };
 
@@ -149,6 +150,7 @@ export const ChangeListTypeCommand: ICommand<IChangeListTypeCommandParams> = {
                 unitId,
                 actions: [],
                 textRanges: selections,
+                isEditing: false,
             },
         };
 
@@ -214,6 +216,7 @@ export const ChangeListNestingLevelCommand: ICommand<IChangeListNestingLevelComm
                 unitId,
                 actions: [],
                 textRanges: selections,
+                isEditing: false,
             },
         };
 
@@ -305,6 +308,7 @@ export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
                 actions: [],
                 textRanges: textRanges ?? [],
                 segmentId,
+                isEditing: false,
             },
         };
 
@@ -412,6 +416,7 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
                     endOffset: paragraphStart,
                     collapsed: true,
                 }],
+                isEditing: false,
             },
         };
 

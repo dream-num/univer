@@ -59,10 +59,12 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     const selectUserList = useObservable(sheetPermissionUserManagerService.selectUserList$, sheetPermissionUserManagerService.selectUserList);
 
-// The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
+    // The status of these two collaborators is updated directly by calling the interface, and will not be written to the snapshot or undoredo, so they are pulled in real time when they need to be displayed.
     const [editorGroupValue, setEditorGroupValue] = React.useState<editState>(selectUserList.length ? editState.designedUserCanEdit : editState.onlyMe);
     const [viewGroupValue, setViewGroupValue] = React.useState(viewState.othersCanView);
     const [loading, setLoading] = useState(!!activeRule?.permissionId);
+
+    const [rangeInitialization, setRangeInitialization] = useState(false);
 
     const handleAddPerson = async () => {
         const userList = await authzIoService.listCollaborators({
@@ -182,6 +184,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             unitType: fromSheetBar ? UnitObject.Worksheet : UnitObject.SelectRange,
 
         });
+        setRangeInitialization(true);
     }, [activeRule?.permissionId, fromSheetBar, selectionManagerService, sheetPermissionPanelModel, subUnitId, unitId, worksheet]);
 
     useEffect(() => {
@@ -330,6 +333,8 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
     };
 
+    const rangeStr = activeRule?.ranges?.map((i) => serializeRange(i)).join(',');
+
     return (
         <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>
             {/* <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.name')}>
@@ -342,18 +347,18 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             </FormLayout> */}
             <Spin loading={loading}>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.protectedRange')}>
-                    {RangeSelector && (
+                    {RangeSelector && rangeInitialization && (
                         <RangeSelector
                             unitId={unitId}
                             errorText={rangeErrorMsg}
                             subUnitId={subUnitId}
-                            initValue={activeRule?.ranges?.map((i) => serializeRange(i)).join(',')}
+                            initValue={rangeStr}
                             onChange={handleRangeChange}
-                    // onVerify={handleVerify}
+                            // onVerify={handleVerify}
                             isFocus={isFocusRangeSelector}
                             actions={rangeSelectorActionsRef.current}
                         />
-                    ) }
+                    )}
                 </FormLayout>
                 <FormLayout className={styles.sheetPermissionPanelTitle} label={localeService.t('permission.panel.permissionDirection')}>
                     <Input

@@ -1,5 +1,31 @@
 
 
+# [0.4.0-alpha.2](https://github.com/dream-num/univer/compare/v0.4.0-alpha.1...v0.4.0-alpha.2) (2024-10-16)
+
+
+### Bug Fixes
+
+* cell style in collaboration ([#3748](https://github.com/dream-num/univer/issues/3748)) ([e138b95](https://github.com/dream-num/univer/commit/e138b95ac6c83277963e14cf039f185f35bb9e7c))
+* **condition-formatting:** date calculation error ([#3733](https://github.com/dream-num/univer/issues/3733)) ([30da399](https://github.com/dream-num/univer/commit/30da399b0bda565b3e3b6f1d4c2e08e12f969694))
+* **conditional-formatting:** reduce icon map size ([#3769](https://github.com/dream-num/univer/issues/3769)) ([0f19fc0](https://github.com/dream-num/univer/commit/0f19fc0972c81767fd3a63deb148d6f93b801fc2))
+* **docs-ui:** doc list render error after operation like break-line ([#3766](https://github.com/dream-num/univer/issues/3766)) ([8c95a53](https://github.com/dream-num/univer/commit/8c95a5329db3b4d4a2913fc9d87594a909d1bde2))
+* flickering when init page ([#3762](https://github.com/dream-num/univer/issues/3762)) ([fe3ff31](https://github.com/dream-num/univer/commit/fe3ff311b73ba07ced2943b6c4a8cb8c9bf94f7a))
+* **formula:** fix ArrayValueObject compare cache bug ([#3764](https://github.com/dream-num/univer/issues/3764)) ([424bb02](https://github.com/dream-num/univer/commit/424bb026adb37d9d98594c1b282e6009420b9ede))
+* **formula:** fix datedif bug ([#3747](https://github.com/dream-num/univer/issues/3747)) ([f9f4973](https://github.com/dream-num/univer/commit/f9f497302d12b4de0683b974b52df973f476b2b9))
+* refresh selection when collapsed ([#3761](https://github.com/dream-num/univer/issues/3761)) ([a92a389](https://github.com/dream-num/univer/commit/a92a389a7108aec2b3dc54c626aab2ff5009e458))
+* **sheet:** fix can not delete when there are exclusive range ([#3729](https://github.com/dream-num/univer/issues/3729)) ([d6db560](https://github.com/dream-num/univer/commit/d6db560610f958bf682909433d2a2874914c8eb9))
+* **sheets-data-validation:** data validation validator status render error ([#3752](https://github.com/dream-num/univer/issues/3752)) ([555e9d5](https://github.com/dream-num/univer/commit/555e9d5a7cd17e25bf4758570e8f1e993e90e52c))
+* snapshot area ([#3715](https://github.com/dream-num/univer/issues/3715)) ([5957a04](https://github.com/dream-num/univer/commit/5957a04f2da88eafe68e8dc7b558f33a881ffe5a))
+* **ui:** fix missing context menu items ([#3758](https://github.com/dream-num/univer/issues/3758)) ([421d009](https://github.com/dream-num/univer/commit/421d0097fdb14293ab1e82d0da2eb668bfdbc946))
+* **ui:** ribbon others tab flickering resolved ([#3745](https://github.com/dream-num/univer/issues/3745)) ([bc8bfb6](https://github.com/dream-num/univer/commit/bc8bfb6339a4a713c52d181e676fc7af83d93697))
+
+
+### Features
+
+* **drawing:** add optional property to control rotate handle of drawing element ([#3750](https://github.com/dream-num/univer/issues/3750)) ([71ffde4](https://github.com/dream-num/univer/commit/71ffde4bdf3b81f40836fe4d8e554500eb4c2ba0))
+* **facade:** change data-validation facade api into sync ([#3736](https://github.com/dream-num/univer/issues/3736)) ([cbae4c9](https://github.com/dream-num/univer/commit/cbae4c9582be8e6f45030f9d149823cda0a729f1))
+* record & replay commands with multi-mode ([#3734](https://github.com/dream-num/univer/issues/3734)) ([047c9f2](https://github.com/dream-num/univer/commit/047c9f2dfc8742d2b3ef1aa1231841761f3a7d16))
+
 # [0.4.0-alpha.1](https://github.com/dream-num/univer/compare/v0.4.0-alpha.0...v0.4.0-alpha.1) (2024-10-12)
 
 

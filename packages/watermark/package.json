@@ -73,7 +73,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.78",
+        "@univerjs/icons": "^0.1.80",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"
     },

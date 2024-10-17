@@ -82,7 +82,12 @@ export class UniverWatermarkPlugin extends Plugin {
     override onRendered(): void {
         const injector = this._injector;
         injector.get(UniverWatermarkService);
-        injector.get(UniverWatermarkMenuController);
+
+        const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings } = this._config;
+        const shouldDisplayUI = !(userWatermarkSettings || textWatermarkSettings || imageWatermarkSettings);
+        if (shouldDisplayUI) {
+            injector.get(UniverWatermarkMenuController);
+        }
 
         this._initRenderDependencies();
     }

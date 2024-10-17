@@ -19,6 +19,7 @@ import { generateSnapshotName } from '../const';
 
 const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas';
 const isCI = !!process.env.CI;
+
 test('diff default sheet toolbar', async () => {
     const browser = await chromium.launch({
         headless: !!isCI, // Set to false to see the browser window
@@ -42,6 +43,7 @@ test('diff default sheet toolbar', async () => {
     });
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 });
+
 test('diff default sheet content', async ({ page }) => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);

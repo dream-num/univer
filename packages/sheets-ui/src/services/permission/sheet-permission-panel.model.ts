@@ -28,16 +28,6 @@ export const DEFAULT_RANGE_RULE: IRangeProtectionRule = {
     editState: EditStateEnum.OnlyMe,
 };
 
-export enum viewState {
-    othersCanView = 'othersCanView',
-    noOneElseCanView = 'noOneElseCanView',
-}
-
-export enum editState {
-    designedUserCanEdit = 'designedUserCanEdit',
-    onlyMe = 'onlyMe',
-}
-
 export type IPermissionPanelRule = (IRangeProtectionRule | IWorksheetProtectionRule) & { ranges: IRange[]; id: string };
 
 export class SheetPermissionPanelModel {

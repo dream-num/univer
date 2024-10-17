@@ -15,11 +15,13 @@
  */
 
 import type { Workbook } from '@univerjs/core';
+import type { ICollaborator } from '@univerjs/protocol';
 import { IAuthzIoService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Avatar, FormLayout, Radio, RadioGroup, Select } from '@univerjs/design';
+import { UnitRole } from '@univerjs/protocol';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_DIALOG, UNIVER_SHEET_PERMISSION_USER_DIALOG_ID } from '../../../consts/permission';
 import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import { UserEmptyBase64 } from '../user-dialog/constant';
@@ -30,10 +32,11 @@ interface IPermissionDetailUserPartProps {
     onEditStateChange: (v: EditStateEnum) => void;
     viewState: ViewStateEnum;
     onViewStateChange: (v: ViewStateEnum) => void;
+    permissionId: string;
 }
 
 export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) => {
-    const { editState, onEditStateChange, viewState, onViewStateChange } = props;
+    const { editState, onEditStateChange, viewState, onViewStateChange, permissionId } = props;
     const localeService = useDependency(LocaleService);
     const dialogService = useDependency(IDialogService);
     const authzIoService = useDependency(IAuthzIoService);
@@ -55,7 +58,6 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
         });
 
         sheetPermissionUserManagerService.setCanEditUserList(userList);
-
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
             title: { title: '' },
@@ -66,6 +68,26 @@ export const PermissionDetailUserPart = (props: IPermissionDetailUserPartProps) 
             className: 'sheet-permission-user-dialog',
         });
     };
+
+    useEffect(() => {
+        const getSelectUserList = async () => {
+            const collaborators = await authzIoService.listCollaborators({
+                objectID: permissionId!,
+                unitID: unitId,
+            });
+            const selectUserList: ICollaborator[] = collaborators.filter((user) => {
+                return user.role === UnitRole.Editor;
+            });
+            sheetPermissionUserManagerService.setSelectUserList(selectUserList);
+            sheetPermissionUserManagerService.setOldCollaboratorList(selectUserList);
+        };
+        if (permissionId && editState === EditStateEnum.DesignedUserCanEdit) {
+            getSelectUserList();
+        } else {
+            sheetPermissionUserManagerService.setSelectUserList([]);
+            sheetPermissionUserManagerService.setOldCollaboratorList([]);
+        }
+    }, []);
 
     return (
         <>

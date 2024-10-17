@@ -37,16 +37,17 @@ export const AddRangeProtectionCommand: ICommand<IAddRangeProtectionCommandParam
         const selectionProtectionModel = accessor.get(RangeProtectionRuleModel);
         const { rule, permissionId } = params;
 
-        const { unitId, subUnitId, ranges, description } = rule;
+        const { unitId, subUnitId, ranges, description, viewState, editState } = rule;
         const rules = [{
             ranges,
             permissionId,
             id: selectionProtectionModel.createRuleId(unitId, subUnitId),
-            name,
             description,
             unitType: rule.unitType,
             unitId,
             subUnitId,
+            viewState,
+            editState,
         }];
 
         const result = await commandService.executeCommand(AddRangeProtectionMutation.id, {

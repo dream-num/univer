@@ -86,23 +86,17 @@ export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) =
     const worksheet = workbook.getActiveSheet();
 
     let unitType = UnitObject.SelectRange;
+    let ranges = selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [];
 
     if (fromSheetBar) {
-        selectionManagerService.clearCurrentSelections();
-        selectionManagerService.addSelections([
-            {
-                primary: null,
-                style: null,
-                range: {
-                    startRow: 0,
-                    startColumn: 0,
-                    endRow: worksheet.getRowCount() - 1,
-                    endColumn: worksheet.getColumnCount() - 1,
-                    rangeType: RANGE_TYPE.ALL,
-                },
-            },
-        ]);
         unitType = UnitObject.Worksheet;
+        ranges = [{
+            startRow: 0,
+            startColumn: 0,
+            endRow: worksheet.getRowCount() - 1,
+            endColumn: worksheet.getColumnCount() - 1,
+            rangeType: RANGE_TYPE.ALL,
+        }];
     }
 
     return {
@@ -112,7 +106,7 @@ export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) =
         unitType,
         description: '',
         id: '',
-        ranges: selectionManagerService.getCurrentSelections()?.map((s) => s.range) ?? [],
+        ranges,
         editState: EditStateEnum.OnlyMe,
         viewState: ViewStateEnum.OthersCanView,
     };

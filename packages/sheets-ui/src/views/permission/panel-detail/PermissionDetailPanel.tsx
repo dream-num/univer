@@ -72,6 +72,7 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
                 onEditStateChange={(v) => setEditState(v as EditStateEnum)}
                 viewState={viewState}
                 onViewStateChange={(v) => setViewState(v as ViewStateEnum)}
+                permissionId={activeRule.permissionId}
             />
             <PermissionDetailFooterPart
                 permissionId={activeRule.permissionId}

@@ -22,7 +22,7 @@ import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { LexerNode } from '../analysis/lexer-node';
-import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
+import type { AstRootNode, FunctionNode, IExecuteAstNodeData, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { PreCalculateNodeType } from '../utils/node-type';
@@ -213,11 +213,14 @@ export class FormulaDependencyGenerator extends Disposable {
                 tree.unitId
             );
 
-            if (tree.node == null) {
+            const { unitId, formula, nodeData } = tree;
+
+            if (nodeData == null) {
                 continue;
             }
 
-            const { unitId, formula, refOffsetX, refOffsetY } = tree;
+            const { refOffsetX, refOffsetY } = nodeData;
+
             let applyCacheRange = false;
             if (refOffsetX !== 0 || refOffsetY !== 0) {
                 const refTreeNode = formulaRefCache.get(`${unitId}${formula}`);
@@ -228,7 +231,7 @@ export class FormulaDependencyGenerator extends Disposable {
             }
 
             if (!applyCacheRange) {
-                const rangeList = await this._getRangeListByNode(tree.node);
+                const rangeList = await this._getRangeListByNode(nodeData);
                 tree.pushRangeList(rangeList);
             }
 
@@ -336,16 +339,14 @@ export class FormulaDependencyGenerator extends Disposable {
                         continue;
                     }
 
-                    const node = this._generateAstNode(unitId, formulaString, x, y);
+                    const nodeData = this._generateAstNode(unitId, formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
-                    FDtree.node = node;
+                    FDtree.nodeData = nodeData;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
                     FDtree.subUnitId = subUnitId;
-                    FDtree.refOffsetX = x;
-                    FDtree.refOffsetY = y;
 
                     FDtree.formulaId = subFormulaDataId;
 
@@ -394,20 +395,18 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
 
-                    const node = this._generateAstNode(unitId, formulaString, x, y);
+                    const nodeData = this._generateAstNode(unitId, formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
 
                     const sheetItem = unitData[unitId][sheetId];
 
-                    FDtree.node = node;
+                    FDtree.nodeData = nodeData;
                     FDtree.formula = formulaString;
                     FDtree.unitId = unitId;
                     FDtree.subUnitId = sheetId;
                     FDtree.row = row;
                     FDtree.column = column;
-                    FDtree.refOffsetX = x;
-                    FDtree.refOffsetY = y;
 
                     FDtree.rowCount = sheetItem.rowCount;
                     FDtree.columnCount = sheetItem.columnCount;
@@ -444,20 +443,28 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    private _generateAstNode(unitId: string, formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
+    private _generateAstNode(unitId: string, formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0): IExecuteAstNodeData {
         // refOffsetX and refOffsetY are separated by -, otherwise x:1 y:10 will be repeated with x:11 y:0
         let astNode: Nullable<AstRootNode> = this._formulaASTCache.get(`${unitId}${formulaString}`);
 
         if (astNode && !this._isDirtyDefinedForNode(astNode)) {
             // astNode.setRefOffset(refOffsetX, refOffsetY);
-            return this._astTreeBuilder.createCacheNode(astNode, refOffsetX, refOffsetY);
+            return {
+                node: astNode,
+                refOffsetX,
+                refOffsetY,
+            };
             // return astNode;
         }
 
         const lexerNode = this._lexer.treeBuilder(formulaString);
 
         if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
-            return ErrorNode.create(lexerNode as ErrorType);
+            return {
+                node: ErrorNode.create(lexerNode as ErrorType),
+                refOffsetX,
+                refOffsetY,
+            };
         }
 
         // suffix Express, 1+(3*4=4)*5+1 convert to 134*4=5*1++
@@ -468,11 +475,15 @@ export class FormulaDependencyGenerator extends Disposable {
             throw new Error('astNode is null');
         }
 
-        astNode.setRefOffset(refOffsetX, refOffsetY);
+        // astNode.setRefOffset(refOffsetX, refOffsetY);
 
         this._formulaASTCache.set(`${unitId}${formulaString}`, astNode);
 
-        return astNode;
+        return {
+            node: astNode,
+            refOffsetX,
+            refOffsetY,
+        };
     }
 
     private _addFlattenCache(unitId: string, sheetId: string, range: IRange) {
@@ -558,12 +569,17 @@ export class FormulaDependencyGenerator extends Disposable {
         }
     }
 
-    private async _executeNode(node: PreCalculateNodeType | FunctionNode) {
+    private async _executeNode(node: PreCalculateNodeType | FunctionNode, refOffsetX = 0, refOffsetY = 0) {
         let value: BaseReferenceObject;
+        const nodeData = {
+            node,
+            refOffsetX,
+            refOffsetY,
+        };
         if (this._interpreter.checkAsyncNode(node)) {
-            value = (await this._interpreter.executeAsync(node)) as BaseReferenceObject;
+            value = (await this._interpreter.executeAsync(nodeData)) as BaseReferenceObject;
         } else {
-            value = this._interpreter.execute(node) as BaseReferenceObject;
+            value = this._interpreter.execute(nodeData) as BaseReferenceObject;
         }
         return value;
     }
@@ -573,21 +589,24 @@ export class FormulaDependencyGenerator extends Disposable {
      * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
      * @param node
      */
-    private async _getRangeListByNode(node: BaseAstNode) {
+    private async _getRangeListByNode(nodeData: IExecuteAstNodeData) {
         // ref function in offset indirect INDEX
         const preCalculateNodeList: PreCalculateNodeType[] = [];
         const referenceFunctionList: FunctionNode[] = [];
 
-        this._nodeTraversalRef(node, preCalculateNodeList);
+        const refOffsetX = nodeData.refOffsetX;
+        const refOffsetY = nodeData.refOffsetY;
 
-        this._nodeTraversalReferenceFunction(node, referenceFunctionList);
+        this._nodeTraversalRef(nodeData.node, preCalculateNodeList);
+
+        this._nodeTraversalReferenceFunction(nodeData.node, referenceFunctionList);
 
         const rangeList: IUnitRange[] = [];
 
         for (let i = 0, len = preCalculateNodeList.length; i < len; i++) {
             const node = preCalculateNodeList[i];
 
-            const value: BaseReferenceObject = await this._executeNode(node);
+            const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
 
             const gridRange = value.toUnitRange();
 
@@ -598,7 +617,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
             const node = referenceFunctionList[i];
-            const value: BaseReferenceObject = await this._executeNode(node);
+            const value: BaseReferenceObject = await this._executeNode(node, refOffsetX, refOffsetY);
 
             const gridRange = value.toUnitRange();
 
@@ -683,6 +702,12 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _dependencyFeatureCalculation(newTreeList: FormulaDependencyTree[]) {
+        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
+
+        if (featureMap.size === 0) {
+            return;
+        }
+
         /**
          * Clear the dependency relationships of all featureCalculation nodes in the tree.
          * Because each execution requires rebuilding the reverse dependencies,
@@ -693,7 +718,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
         let hasFeatureCalculation = false;
 
-        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
         featureMap.forEach((subUnitMap, _) => {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
@@ -839,7 +863,7 @@ export class FormulaDependencyGenerator extends Disposable {
         /**
          * Detect whether the dirty map contains a defined name.
          */
-        const node = tree.node;
+        const node = tree.nodeData?.node;
         if (node != null) {
             const dirtyDefinedName = this._isDirtyDefinedForNode(node);
             if (dirtyDefinedName) {
@@ -850,7 +874,7 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _detectForcedRecalculationNode(tree: FormulaDependencyTree) {
-        const node = tree.node;
+        const node = tree.nodeData?.node;
 
         if (node == null) {
             return false;

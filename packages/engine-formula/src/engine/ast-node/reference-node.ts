@@ -40,6 +40,9 @@ import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class ReferenceNode extends BaseAstNode {
+    private _refOffsetX = 0;
+    private _refOffsetY = 0;
+
     constructor(
         private _accessor: IAccessor,
         private _operatorString: string,
@@ -84,6 +87,18 @@ export class ReferenceNode extends BaseAstNode {
         } else {
             this.setValue(this._referenceObject);
         }
+    }
+
+    setRefOffset(x: number = 0, y: number = 0) {
+        this._refOffsetX = x;
+        this._refOffsetY = y;
+    }
+
+    getRefOffset() {
+        return {
+            x: this._refOffsetX,
+            y: this._refOffsetY,
+        };
     }
 }
 

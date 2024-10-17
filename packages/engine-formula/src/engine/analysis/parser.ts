@@ -80,13 +80,6 @@ export class AstTreeBuilder extends Disposable {
         this._astNodeFactoryList = [];
     }
 
-    createCacheNode(astNode: AstRootNode, refOffsetX = 0, refOffsetY = 0) {
-        const newAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
-        newAstNode.addChildren(...astNode.getChildren());
-        newAstNode.setRefOffset(refOffsetX, refOffsetY);
-        return newAstNode;
-    }
-
     parse(lexerNode: LexerNode) {
         const astNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);
 
@@ -367,16 +360,16 @@ export class AstTreeBuilder extends Disposable {
         return currentAstNode;
     }
 
-    private _setPrefixRefOffset(astNode: BaseAstNode) {
-        const children = astNode.getChildren();
-        const childrenCount = children.length;
-        for (let i = 0; i < childrenCount; i++) {
-            const item = children[i];
-            if (item.nodeType === NodeType.REFERENCE) {
-                item.setRefOffset(this._refOffsetX, this._refOffsetY);
-            }
-        }
-    }
+    // private _setPrefixRefOffset(astNode: BaseAstNode) {
+    //     const children = astNode.getChildren();
+    //     const childrenCount = children.length;
+    //     for (let i = 0; i < childrenCount; i++) {
+    //         const item = children[i];
+    //         if (item.nodeType === NodeType.REFERENCE) {
+    //             item.setRefOffset(this._refOffsetX, this._refOffsetY);
+    //         }
+    //     }
+    // }
 
     private _checkAstNode(item: LexerNode | string) {
         let astNode: Nullable<BaseAstNode> = null;

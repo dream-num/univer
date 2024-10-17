@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { FunctionNode, LambdaNode } from '../ast-node';
-
+import type { IExecuteAstNodeData } from '../ast-node/ast-root-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { FunctionNode } from '../ast-node/function-node';
+import type { LambdaNode } from '../ast-node/lambda-node';
+import type { ReferenceNode } from '../ast-node/reference-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import { Disposable } from '@univerjs/core';
@@ -32,18 +34,20 @@ export class Interpreter extends Disposable {
         super();
     }
 
-    async executeAsync(node: BaseAstNode): Promise<FunctionVariantType> {
+    async executeAsync(nodeData: IExecuteAstNodeData): Promise<FunctionVariantType> {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!node) {
+        if (!nodeData) {
             return Promise.resolve(ErrorValueObject.create(ErrorType.VALUE));
         }
 
-        const refOffset = node.getRefOffset();
+        const node = nodeData.node;
+        const refOffsetX = nodeData.refOffsetX;
+        const refOffsetY = nodeData.refOffsetY;
 
-        await this._executeAsync(node, refOffset.x, refOffset.y);
+        await this._executeAsync(node, refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
@@ -54,18 +58,20 @@ export class Interpreter extends Disposable {
         return Promise.resolve(value);
     }
 
-    execute(node: BaseAstNode): FunctionVariantType {
+    execute(nodeData: IExecuteAstNodeData): FunctionVariantType {
         // if (!this._interpreterCalculateProps) {
         //     return ErrorValueObject.create(ErrorType.ERROR);
         // }
 
-        if (!node) {
+        if (!nodeData) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const refOffset = node.getRefOffset();
+        const node = nodeData.node;
+        const refOffsetX = nodeData.refOffsetX;
+        const refOffsetY = nodeData.refOffsetY;
 
-        this._execute(node, refOffset.x, refOffset.y);
+        this._execute(node, refOffsetX, refOffsetY);
 
         const value = node.getValue();
 
@@ -128,7 +134,7 @@ export class Interpreter extends Disposable {
         }
 
         if (node.nodeType === NodeType.REFERENCE) {
-            node.setRefOffset(refOffsetX, refOffsetY);
+            (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
         if (node.nodeType === NodeType.FUNCTION && (node as FunctionNode).isAsync()) {
@@ -163,7 +169,7 @@ export class Interpreter extends Disposable {
         }
 
         if (node.nodeType === NodeType.REFERENCE) {
-            node.setRefOffset(refOffsetX, refOffsetY);
+            (node as ReferenceNode).setRefOffset(refOffsetX, refOffsetY);
         }
 
         node.execute();

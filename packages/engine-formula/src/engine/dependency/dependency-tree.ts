@@ -24,7 +24,7 @@ import type {
 
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
+import type { IExecuteAstNodeData } from '../ast-node/ast-root-node';
 import { generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {
@@ -45,7 +45,7 @@ export enum FDtreeStateType {
 export class FormulaDependencyTree {
     treeId: string = '';
 
-    node: Nullable<BaseAstNode>;
+    nodeData: Nullable<IExecuteAstNodeData>;
 
     children: Set<FormulaDependencyTree> = new Set();
 
@@ -72,10 +72,6 @@ export class FormulaDependencyTree {
     featureId: Nullable<string>;
 
     isCache: boolean = false;
-
-    refOffsetX: number = 0;
-
-    refOffsetY: number = 0;
 
     constructor(treeId?: string) {
         if (treeId != null) {
@@ -105,7 +101,9 @@ export class FormulaDependencyTree {
 
         this.parents = new Set();
 
-        this.node?.dispose();
+        this.nodeData?.node.dispose();
+
+        this.nodeData = null;
     }
 
     disposeWithChildren() {

@@ -15,4 +15,7 @@
  */
 
 export { UniverWatermarkPlugin } from './plugin';
-export { WatermarkUserInfoBaseConfig } from './common/const';
+export { WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
+export type { IImageWatermarkConfig, ITextWatermarkConfig } from './common/type';
+export { IWatermarkTypeEnum } from './common/type';
+export { UniverWatermarkService } from './services/watermarkService';

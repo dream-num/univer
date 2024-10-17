@@ -26,6 +26,7 @@ import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
 import type { IFComponentKey } from './utils';
 import {
     ICommandService,
@@ -46,6 +47,7 @@ import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, Rem
 import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
+import { IWatermarkTypeEnum, UniverWatermarkService, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { filter } from 'rxjs';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';
@@ -628,5 +630,60 @@ export class FWorkbook {
         const info = resolverService.parseHyperLink(hyperlink);
         info.handler();
     }
+    // #endregion
+
+    // #region watermark
+
+    /**
+     * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
+     *
+     * @param {IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image} type - The type of watermark to add. Can be either 'Text' or 'Image'.
+     * @param {ITextWatermarkConfig | IImageWatermarkConfig} config - The configuration object for the watermark.
+     * - If the type is 'Text', the config should follow the ITextWatermarkConfig interface.
+     * - If the type is 'Image', the config should follow the IImageWatermarkConfig interface.
+     * @throws {Error} Throws an error if the watermark type is unknown.
+     */
+    addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): void;
+    addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): void;
+    addWatermark(
+        type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
+        config: ITextWatermarkConfig | IImageWatermarkConfig
+    ): void {
+        const watermarkService = this._injector.get(UniverWatermarkService);
+        if (type === IWatermarkTypeEnum.Text) {
+            watermarkService.updateWatermarkConfig({
+                type: IWatermarkTypeEnum.Text,
+                config: {
+                    text: {
+                        ...WatermarkTextBaseConfig,
+                        ...config,
+                    },
+                },
+            });
+        } else if (type === IWatermarkTypeEnum.Image) {
+            watermarkService.updateWatermarkConfig({
+                type: IWatermarkTypeEnum.Image,
+                config: {
+                    image: {
+                        ...WatermarkImageBaseConfig,
+                        ...config,
+                    },
+                },
+            });
+        } else {
+            throw new Error('Unknown watermark type');
+        }
+    }
+
+    /**
+     * Deletes the currently applied watermark from the unit.
+     *
+     * This function retrieves the watermark service and invokes the method to remove any existing watermark configuration.
+     */
+    deleteWatermark(): void {
+        const watermarkService = this._injector.get(UniverWatermarkService);
+        watermarkService.deleteWatermarkConfig();
+    }
+
     // #endregion
 }

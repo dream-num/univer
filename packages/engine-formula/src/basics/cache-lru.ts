@@ -19,10 +19,10 @@ import { hashAlgorithm, LRUMap } from '@univerjs/core';
 // export const CACHE_FORMULA_AST = new LRUMap<string, AstRootNode>(100000);
 
 export class FormulaAstLRU<T> {
-    private _cache: LRUMap<number, T>;
+    private _cache: LRUMap<string, T>;
 
     constructor(cacheCount: number) {
-        this._cache = new LRUMap<number, T>(cacheCount);
+        this._cache = new LRUMap<string, T>(cacheCount);
     }
 
     set(formulaString: string, node: T) {
@@ -40,6 +40,9 @@ export class FormulaAstLRU<T> {
     }
 
     private _hash(formulaString: string) {
-        return hashAlgorithm(formulaString);
+        if (formulaString.length <= 64) {
+            return formulaString;
+        }
+        return hashAlgorithm(formulaString).toString();
     }
 }

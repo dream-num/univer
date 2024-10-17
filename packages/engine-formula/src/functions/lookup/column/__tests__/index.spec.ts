@@ -25,6 +25,7 @@ import { ErrorType } from '../../../../basics/error-type';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
+import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
@@ -91,7 +92,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(1);
         });
@@ -100,7 +101,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[3]]);
         });
@@ -109,7 +110,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[3, 4, 5, 6]]);
         });
@@ -118,7 +119,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -127,7 +128,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -136,7 +137,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
@@ -145,7 +146,7 @@ describe('Test column', () => {
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
-            const result = interpreter.execute(astNode as BaseAstNode);
+            const result = interpreter.execute(generateExecuteAstNodeData(astNode as BaseAstNode));
 
             expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });

@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { ErrorType } from '../../basics/error-type';
 
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
-import { Disposable } from '@univerjs/core';
+
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NodeType } from './node-type';
@@ -31,7 +31,7 @@ interface IAstNodeNodeJson {
 
 export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 
-export class BaseAstNode extends Disposable {
+export class BaseAstNode {
     private _children: BaseAstNode[] = [];
 
     private _definedNames: Array<string> = [];
@@ -46,17 +46,13 @@ export class BaseAstNode extends Disposable {
 
     private _address = false;
 
-    private _refOffsetX: number = 0;
-
-    private _refOffsetY: number = 0;
-
     private _isForcedCalculateFunction = false;
 
     constructor(private _token: string) {
-        super();
+
     }
 
-    override dispose(): void {
+    dispose(): void {
         this._children.forEach((node) => {
             node.dispose();
         });
@@ -136,18 +132,6 @@ export class BaseAstNode extends Disposable {
 
     setNotEmpty(state = true) {
         /* abstract */
-    }
-
-    setRefOffset(x: number = 0, y: number = 0) {
-        this._refOffsetX = x;
-        this._refOffsetY = y;
-    }
-
-    getRefOffset() {
-        return {
-            x: this._refOffsetX,
-            y: this._refOffsetY,
-        };
     }
 
     async executeAsync(): Promise<AstNodePromiseType> {

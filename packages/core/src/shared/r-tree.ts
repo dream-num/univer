@@ -89,42 +89,28 @@ export class RTree {
         }
     }
 
-    search(search: IUnitRange): Map<string, IRTreeItem> {
+    search(search: IUnitRange): IRTreeItem[] {
         const { unitId, sheetId: subUnitId, range } = search;
         const tree = this._tree.get(unitId)?.get(subUnitId);
         if (!tree) {
-            return new Map();
+            return [];
         }
-        const result = new Map<string, IRTreeItem>();
-        tree.search({
+
+        return tree.search({
             minX: range.startColumn,
             minY: range.startRow,
             maxX: range.endColumn,
             maxY: range.endRow,
-        }).forEach((item) => {
-            result.set(item.id, {
-                unitId,
-                sheetId: subUnitId,
-                id: item.id,
-                range: {
-                    startColumn: item.minX,
-                    startRow: item.minY,
-                    endColumn: item.maxX,
-                    endRow: item.maxY,
-                },
-            });
-        });
-        return result;
+        }) as unknown as IRTreeItem[];
     }
 
     bulkSearch(searchList: IUnitRange[]): Map<string, IRTreeItem> {
         const result = new Map<string, IRTreeItem>();
         for (const search of searchList) {
             const items = this.search(search);
-            items.forEach((value, key) => {
-                result.set(key, value);
-            });
-            items.clear();
+            for (const item of items) {
+                result.set(item.id, item);
+            }
         }
         return result;
     }

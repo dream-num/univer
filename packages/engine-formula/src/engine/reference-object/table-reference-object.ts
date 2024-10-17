@@ -16,7 +16,8 @@
 
 import type { ISuperTable } from '../../basics/common';
 import { TableOptionType } from '../../basics/common';
-import { $SUPER_TABLE_COLUMN_REGEX } from '../../basics/regex';
+import { regexTestSuperTableColumn } from '../../basics/regex';
+
 import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 
@@ -115,7 +116,7 @@ export class TableReferenceObject extends BaseReferenceObject {
         let startColumn = -1;
         let endColumn = -1;
         const colonIndex = rightString.indexOf(matchToken.COLON);
-        if (new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g').test(rightString)) {
+        if (regexTestSuperTableColumn(rightString)) {
             // =Table2[[11111]:[222]]
             const startColumnString = rightString.substring(0, colonIndex).substring(1, -1);
             const endColumnString = rightString.substring(colonIndex + 1).substring(1, -1);

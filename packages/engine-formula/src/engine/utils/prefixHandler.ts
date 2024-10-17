@@ -20,19 +20,22 @@ import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { PrefixNode } from '../ast-node/prefix-node';
 
+const minusRegExp = new RegExp(prefixToken.MINUS, 'g');
+const atRegExp = new RegExp(prefixToken.AT, 'g');
+
 export function prefixHandler(tokenTrimParam: string, functionService: IFunctionService, injector: Injector) {
     let minusPrefixNode: Nullable<PrefixNode>;
     let atPrefixNode: Nullable<PrefixNode>;
     let tokenTrim = tokenTrimParam;
     const prefix = tokenTrim.slice(0, 2);
     let sliceLength = 0;
-    if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {
+    if (prefix[0] === prefixToken.MINUS) {
         const functionExecutor = functionService.getExecutor(FUNCTION_NAMES_META.MINUS);
         minusPrefixNode = new PrefixNode(injector, prefixToken.MINUS, functionExecutor);
         sliceLength++;
     }
 
-    if (new RegExp(prefixToken.AT, 'g').test(prefix)) {
+    if (prefix[0] === prefixToken.AT) {
         atPrefixNode = new PrefixNode(injector, prefixToken.AT);
         if (minusPrefixNode) {
                 // minusPrefixNode.addChildren(atPrefixNode);

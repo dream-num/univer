@@ -195,7 +195,10 @@ export class ThreadCommentModel extends Disposable {
 
     addComment(unitId: string, subUnitId: string, origin: IThreadComment, shouldSync?: boolean) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const comment = origin;
+        const comment = {
+            ...origin,
+            parentId: origin.parentId === origin.id ? undefined : origin.parentId,
+        };
         const addCommentItem = (item: IThreadComment) => {
             commentMap[item.id] = item;
             this._commentUpdate$.next({

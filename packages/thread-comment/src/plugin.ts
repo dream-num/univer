@@ -24,6 +24,7 @@ import { ThreadCommentResourceController } from './controllers/tc-resource.contr
 import { ThreadCommentModel } from './models/thread-comment.model';
 import { IThreadCommentDataSourceService, ThreadCommentDataSourceService } from './services/tc-datasource.service';
 import { TC_PLUGIN_NAME } from './types/const';
+import { IThreadCommentMentionDataService, ThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';
 
 export class UniverThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
@@ -45,6 +46,7 @@ export class UniverThreadCommentPlugin extends Plugin {
     override onStarting(): void {
         (mergeOverrideWithDependencies([
             [IThreadCommentDataSourceService, { useClass: ThreadCommentDataSourceService }],
+            [IThreadCommentMentionDataService, { useClass: ThreadCommentMentionDataService }],
             [ThreadCommentModel],
             [ThreadCommentResourceController],
         ], this._config?.overrides) as Dependency[]).forEach(

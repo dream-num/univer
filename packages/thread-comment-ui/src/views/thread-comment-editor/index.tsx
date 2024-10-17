@@ -24,7 +24,7 @@ import type { IDocumentBody } from '@univerjs/core';
 import type { MentionProps } from '@univerjs/design';
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
-import { IThreadCommentMentionDataService } from '../../services/thread-comment-mention-data.service';
+import { IThreadCommentMentionDataService } from '@univerjs/thread-comment';
 import styles from './index.module.less';
 import { parseMentions, transformDocument2TextNodes, transformMention, transformTextNode2Text, transformTextNodes2Document } from './util';
 

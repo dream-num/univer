@@ -108,7 +108,7 @@ export function getBodySlice(
 
     for (const paragraph of paragraphs) {
         const { startIndex } = paragraph;
-        if (startIndex >= startOffset && startIndex <= endOffset) {
+        if (startIndex >= startOffset && startIndex < endOffset) {
             newParagraphs.push(Tools.deepClone(paragraph));
         }
     }

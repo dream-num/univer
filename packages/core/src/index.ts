@@ -143,7 +143,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
-export { fromCallback, takeAfter } from './shared/rxjs';
+export { bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime } from './shared/timer';
 export { Range } from './sheets/range';
 export {
@@ -189,4 +189,4 @@ export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
 export { type IRTreeItem, RTree } from './shared/r-tree';
 
-export { Univer } from './univer';
+export { type IUniverConfig, Univer } from './univer';

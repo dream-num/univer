@@ -15,13 +15,14 @@
  */
 
 import type { ICellData, IRange } from '@univerjs/core';
+import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
+import type { IContext } from './type';
 import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
-import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
+import dayjs from 'dayjs';
 import { CFNumberOperator, CFValueType } from '../../base/const';
-import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 import { ConditionalFormattingViewModel } from '../../models/conditional-formatting-view-model';
-import type { IContext } from './type';
+import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
 
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
@@ -83,11 +84,11 @@ export const serialTimeToTimestamp = (value: number) => {
     const mm = Math.floor(x / 60) % 60;
     const ss = Math.floor(x) % 60;
     // return it as a native date object
-    const dt = new Date(0);
-    dt.setUTCFullYear(y, m - 1, d);
-    dt.setUTCHours(hh, mm, ss);
-    return dt.getTime();
+    const dt = dayjs(`${y}/${m}/${d} ${hh}:${mm}:${ss}`);
+    const result = dt.valueOf();
+    return result;
 };
+// eslint-disable-next-line max-lines-per-function
 export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>, context: IContext & { cfId: string }) => {
     switch (value.type) {
         case CFValueType.max: {
@@ -186,6 +187,7 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
     });
     return matrix;
 };
+// eslint-disable-next-line complexity
 export const compareWithNumber = (config: { operator: CFNumberOperator; value: number | [number, number] }, v: number) => {
     switch (config.operator) {
         case CFNumberOperator.between: {

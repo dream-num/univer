@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import type { IScale } from '@univerjs/core';
-
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
+import type { UniverRenderingContext } from '../../../context';
+import { BaselineOffset, getColorStyle } from '@univerjs/core';
 import { GlyphType, hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
 import { Vector2 } from '../../../basics/vector2';
 import { Checkbox } from '../../../shape';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
 import { docExtension } from '../doc-extension';
-import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
-import type { UniverRenderingContext } from '../../../context';
 
 const UNIQUE_KEY = 'DefaultDocsFontAndBaseLineExtension';
 
@@ -44,10 +43,6 @@ export class FontAndBaseLine extends docExtension {
         if (!line) {
             return;
         }
-
-        // const { asc = 0, marginTop: lineMarginTop = 0, paddingTop: linePaddingTop = 0 } = line;
-
-        // const maxLineAsc = asc + lineMarginTop + linePaddingTop;
 
         const { ts: textStyle, content, fontStyle, bBox } = glyph;
 
@@ -79,7 +74,6 @@ export class FontAndBaseLine extends docExtension {
             spanPointWithFont.y += bBox.sbo;
         }
 
-        // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);
         this._fillText(ctx, glyph, spanPointWithFont);
     }
 
@@ -109,11 +103,16 @@ export class FontAndBaseLine extends docExtension {
             const CHECKED_GLYPH = '\u2611';
             const UNCHECKED_GLYPH = '\u2610';
             if ((content === UNCHECKED_GLYPH || content === CHECKED_GLYPH) && glyph.glyphType === GlyphType.LIST) {
-                ctx.save();
                 const size = Math.ceil((glyph.ts?.fs ?? 12) * 1.2);
-                // const MAGIC_OFFSET = 3;
-                // const lineHeight = glyph.parent?.parent?.lineHeight ?? 0;
-                ctx.translate(spanPointWithFont.x, spanPointWithFont.y - size);
+                ctx.save();
+                const fontHeight = glyph.bBox.aba - glyph.bBox.abd;
+                const bottom = spanPointWithFont.y;
+                const top = bottom - fontHeight;
+                const left = spanPointWithFont.x;
+                const topOffset = top + (bottom - top - size) / 2;
+                const leftOffset = left;
+                const BORDER_WIDTH = 1;
+                ctx.translate(leftOffset - BORDER_WIDTH / 2, topOffset - BORDER_WIDTH / 2);
                 Checkbox.drawWith(ctx, {
                     width: size,
                     height: size,

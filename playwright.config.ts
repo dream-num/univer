@@ -31,7 +31,7 @@ export default defineConfig({
         ['json', { outputFile: 'playwright-report.json' }],
         ['html', { attachments: true }],
     ],
-    outputDir: './playwright-report',
+    // outputDir: './playwright-report',
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Base URL to use in actions like `await page.goto('/')`. */

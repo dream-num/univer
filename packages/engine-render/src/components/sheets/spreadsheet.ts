@@ -32,6 +32,7 @@ import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
+
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
 import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';

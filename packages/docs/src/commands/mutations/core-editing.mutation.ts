@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
+import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 import { CommandType, IUniverInstanceService, JSONX } from '@univerjs/core';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
-import type { IMutation, IMutationCommonParams, JSONXActions, Nullable } from '@univerjs/core';
 import { DocSelectionManagerService } from '../../services/doc-selection-manager.service';
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import { DocStateEmitService } from '../../services/doc-state-emit.service';
-import type { IDocStateChangeInfo } from '../../services/doc-state-emit.service';
 
 export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     unitId: string;
@@ -34,6 +34,9 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     // Do you need to compose the undo and redo of history, and compose of the change states.
     debounce?: boolean;
     options?: { [key: string]: boolean };
+    // Whether this mutation is from a sync operation.
+    isSync?: boolean;
+    isEditing?: boolean;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -59,7 +62,9 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             isCompositionEnd,
             noNeedSetTextRange,
             debounce,
+            isEditing = true,
         } = params;
+
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
@@ -95,7 +100,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                docSelectionManagerService.replaceTextRanges(textRanges, true, params.options);
+                docSelectionManagerService.replaceTextRanges(textRanges, isEditing, params.options);
             });
         }
 

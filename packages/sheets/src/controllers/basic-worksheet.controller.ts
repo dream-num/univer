@@ -91,6 +91,7 @@ import {
     SetWorksheetRowIsAutoHeightCommand,
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
+import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
@@ -265,6 +266,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 AddRangeProtectionMutation,
                 DeleteRangeProtectionMutation,
                 SetRangeProtectionMutation,
+
+                ToggleCellCheckboxCommand,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

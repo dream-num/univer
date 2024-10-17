@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     InsertColAfterCommand,
     InsertColBeforeCommand,
@@ -25,13 +27,11 @@ import {
     WorksheetInsertColumnPermission,
     WorksheetInsertRowPermission,
 } from '@univerjs/sheets';
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { MenuItemType } from '@univerjs/ui';
-import type { IAccessor } from '@univerjs/core';
 
 import { InsertRangeMoveDownConfirmCommand } from '../../commands/commands/insert-range-move-down-confirm.command';
 import { InsertRangeMoveRightConfirmCommand } from '../../commands/commands/insert-range-move-right-confirm.command';
-import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getInsertAfterMenuHidden$, getInsertBeforeMenuHidden$, getObservableWithExclusiveRange$ } from './menu-util';
+import { getBaseRangeMenuHidden$, getCellMenuHidden$, getCurrentRangeDisable$, getObservableWithExclusiveRange$ } from './menu-util';
 
 export const COL_INSERT_MENU_ID = 'sheet.menu.col-insert';
 export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
@@ -40,7 +40,6 @@ export function ColInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
         icon: 'Insert',
-        hidden$: getBaseRangeMenuHidden$(accessor),
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetInsertColumnPermission] }),
     };
 }
@@ -52,8 +51,7 @@ export function RowInsertMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         type: MenuItemType.SUBITEMS,
         title: 'rightClick.insert',
         icon: 'Insert',
-        hidden$: getBaseRangeMenuHidden$(accessor),
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission] }),
     };
 }
 
@@ -75,8 +73,7 @@ export function InsertRowBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRowBefore',
         icon: 'InsertRowAbove',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertBeforeMenuHidden$(accessor, 'row'),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission] }),
     };
 }
 
@@ -86,8 +83,7 @@ export function InsertRowAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertRow',
         icon: 'InsertRowBelow',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'row'),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertRowPermission, WorksheetEditPermission] }),
     };
 }
 
@@ -97,8 +93,7 @@ export function InsertColBeforeMenuItemFactory(accessor: IAccessor): IMenuButton
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumnBefore',
         icon: 'LeftInsertColumn',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertBeforeMenuHidden$(accessor, 'col'),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission] }),
     };
 }
 
@@ -108,8 +103,7 @@ export function InsertColAfterMenuItemFactory(accessor: IAccessor): IMenuButtonI
         type: MenuItemType.BUTTON,
         title: 'rightClick.insertColumn',
         icon: 'RightInsertColumn',
-        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
-        hidden$: getInsertAfterMenuHidden$(accessor, 'col'),
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetInsertColumnPermission, WorksheetEditPermission] }),
     };
 }
 

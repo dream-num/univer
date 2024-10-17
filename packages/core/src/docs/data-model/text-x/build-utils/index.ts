@@ -15,6 +15,7 @@
  */
 
 import { copyCustomRange, getCustomRangesInterestsWithRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
@@ -51,6 +52,15 @@ export class BuildTextUtils {
         getPlainText,
         fromPlainText,
         isEmptyDocument,
+    };
+
+    static paragraph = {
+        bullet: {
+            set: setParagraphBullet,
+            switch: switchParagraphBullet,
+            toggleChecklist: toggleChecklistParagraph,
+            changeNestLevel: changeParagraphBulletNestLevel,
+        },
     };
 }
 

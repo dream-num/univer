@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule } from '@univerjs/core';
-import type { FRange } from '@univerjs/sheets/facade';
+import type { IDataValidationRule, IDataValidationRuleOptions } from '@univerjs/core';
+import type { FRange } from './f-range';
 import { DataValidationErrorStyle, DataValidationOperator, DataValidationType, generateRandomId } from '@univerjs/core';
 import { serializeRangeToRefString } from '@univerjs/engine-formula';
 import { FDataValidation } from './f-data-validation';
@@ -443,6 +443,18 @@ export class FDataValidationBuilder {
         this._rule.operator = values[0];
         this._rule.formula1 = values[1];
         this._rule.formula2 = values[2];
+        return this;
+    }
+
+    /**
+     * Sets the options for the data validation rule.
+     * For details of options, please refer to https://univer.ai/typedoc/@univerjs/core/interfaces/IDataValidationRuleOptions
+     *
+     * @param options The options to set for the data validation rule.
+     * @returns The current instance of the FDataValidationBuilder class to allow for method chaining.
+     */
+    setOptions(options: Partial<IDataValidationRuleOptions>): this {
+        Object.assign(this._rule, options);
         return this;
     }
 }

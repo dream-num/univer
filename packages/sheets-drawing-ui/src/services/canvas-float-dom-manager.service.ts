@@ -21,8 +21,9 @@ import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, DrawingTypeEnum, generateRandomId, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
-import { getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+import { Disposable, DisposableCollection, generateRandomId, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
+
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
@@ -57,6 +58,10 @@ export interface ICanvasFloatDom {
      * data of component, will save to snapshot, json-like data
      */
     data?: Serializable;
+    /**
+     * the float-dom type
+     */
+    type?: DrawingTypeEnum;
 }
 
 interface ICanvasFloatDomInfo {
@@ -267,7 +272,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     const { transform, drawingType, data } = floatDomParam;
 
-                    if (drawingType !== DrawingTypeEnum.DRAWING_DOM) {
+                    if (drawingType !== DrawingTypeEnum.DRAWING_DOM && drawingType !== DrawingTypeEnum.DRAWING_CHART) {
                         return;
                     }
 
@@ -300,6 +305,11 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         height,
                         zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
                     };
+
+                    if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                        imageConfig.fill = 'white';
+                        imageConfig.rotateEnabled = false;
+                    }
 
                     const rect = new Rect(rectShapeKey, imageConfig);
 
@@ -444,7 +454,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return;
                     }
 
-                    if (sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_DOM) {
+                    if (sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_DOM && sheetDrawing.drawingType !== DrawingTypeEnum.DRAWING_CHART) {
                         return;
                     }
 
@@ -491,7 +501,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             subUnitId,
             drawingId: id,
-            drawingType: DrawingTypeEnum.DRAWING_DOM,
+            drawingType: layer.type || DrawingTypeEnum.DRAWING_DOM,
             componentKey,
             sheetTransform,
             transform: {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/umd",
-    "version": "0.4.0-alpha.1",
+    "version": "0.4.0-alpha.2",
     "private": false,
     "description": "UMD bundle for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -55,7 +55,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/network": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.15",
+        "@univerjs/protocol": "0.1.39-alpha.30",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

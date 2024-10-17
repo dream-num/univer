@@ -199,7 +199,7 @@ pnpm test:e2e
 
 ### Update Snapshots
 
-Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by commenting the PR with `/update-snapshots` like [this](https://github.com/dream-num/univer/pull/3655#issuecomment-2398951289), or you can run this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) manually.
+Univer uses Playwright to perform visual comparison tests. If you have made changes to the UI, the CI may fail due to visual differences. You can update the snapshots by running this GitHub Action [📸 Manually Update Snapshots · Workflow runs · dream-num/univer (github.com)](https://github.com/dream-num/univer/actions/workflows/update-snapshots-manually.yml) on your branch.
 
 
 ### Clean code

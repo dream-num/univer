@@ -32,9 +32,13 @@ export function whenEditorStandalone(contextService: IContextService) {
  * @param cell
  * @returns
  */
-export function extractFormulaError(cell: Nullable<ICellData>) {
+export function extractFormulaError(cell: Nullable<ICellData>, isArrayFormulaCell: boolean = false) {
     // Must contain a formula
-    if ((isFormulaString(cell?.f) || isFormulaId(cell?.si)) && typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
+    if (!isArrayFormulaCell && !(isFormulaString(cell?.f) || isFormulaId(cell?.si))) {
+        return null;
+    }
+
+    if (typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
         return cell.v as ErrorType;
     }
 

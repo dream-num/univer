@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 3.7.3
-        version: 3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@commitlint/cli':
         specifier: ^19.5.0
         version: 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
@@ -1019,8 +1019,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
@@ -1077,8 +1077,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1899,8 +1899,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-numfmt
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1933,8 +1933,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1951,9 +1951,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      sharp:
-        specifier: ^0.33.5
-        version: 0.33.5
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -1985,8 +1982,8 @@ importers:
         specifier: ^0.1.79
         version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2104,8 +2101,8 @@ importers:
         specifier: ^0.1.79
         version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2165,8 +2162,8 @@ importers:
         specifier: ^0.1.79
         version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2395,8 +2392,8 @@ importers:
         specifier: workspace:*
         version: link:../find-replace
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2545,8 +2542,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2922,8 +2919,8 @@ importers:
         specifier: ^0.1.79
         version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3183,8 +3180,8 @@ importers:
         specifier: ^0.1.79
         version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -3351,8 +3348,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -3478,8 +3475,8 @@ importers:
         specifier: workspace:*
         version: link:../facade
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.15
-        version: 0.1.39-alpha.15(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.30
+        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3822,9 +3819,6 @@ packages:
 
   '@dprint/toml@0.6.2':
     resolution: {integrity: sha512-Mk5unEANsL/L+WHYU3NpDXt1ARU5bNU5k5OZELxaJodDycKG6RoRnSlZXpW6+7UN2PSnETAFVUdKrh937ZwtHA==}
-
-  '@emnapi/runtime@1.2.0':
-    resolution: {integrity: sha512-bV21/9LQmcQeCPEg3BDFtvwL6cwiTMksYNWQQ4KOxCZikEGalWtenoZ0wCiukJINlGCIi2KXx01g4FoH/LxpzQ==}
 
   '@es-joy/jsdoccomment@0.48.0':
     resolution: {integrity: sha512-G6QUWIcC+KvSwXNsJyDTHvqUdNoAVJPPgkc3+Uk4WBKqZvoXhlvazOgm9aL0HwihJLQf0l+tOE2UFzXBqCqgDw==}
@@ -4392,111 +4386,6 @@ packages:
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
-
-  '@img/sharp-darwin-arm64@0.33.5':
-    resolution: {integrity: sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@img/sharp-darwin-x64@0.33.5':
-    resolution: {integrity: sha512-fyHac4jIc1ANYGRDxtiqelIbdWkIuQaI84Mv45KvGRRxSAa7o7d1ZKAOBaYbnepLC1WqxfpimdeWfvqqSGwR2Q==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [x64]
-    os: [darwin]
-
-  '@img/sharp-libvips-darwin-arm64@1.0.4':
-    resolution: {integrity: sha512-XblONe153h0O2zuFfTAbQYAX2JhYmDHeWikp1LM9Hul9gVPjFY427k6dFEcOL72O01QxQsWi761svJ/ev9xEDg==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@img/sharp-libvips-darwin-x64@1.0.4':
-    resolution: {integrity: sha512-xnGR8YuZYfJGmWPvmlunFaWJsb9T/AO2ykoP3Fz/0X5XV2aoYBPkX6xqCQvUTKKiLddarLaxpzNe+b1hjeWHAQ==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@img/sharp-libvips-linux-arm64@1.0.4':
-    resolution: {integrity: sha512-9B+taZ8DlyyqzZQnoeIvDVR/2F4EbMepXMc/NdVbkzsJbzkUjhXv/70GQJ7tdLA4YJgNP25zukcxpX2/SueNrA==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@img/sharp-libvips-linux-arm@1.0.5':
-    resolution: {integrity: sha512-gvcC4ACAOPRNATg/ov8/MnbxFDJqf/pDePbBnuBDcjsI8PssmjoKMAz4LtLaVi+OnSb5FK/yIOamqDwGmXW32g==}
-    cpu: [arm]
-    os: [linux]
-
-  '@img/sharp-libvips-linux-s390x@1.0.4':
-    resolution: {integrity: sha512-u7Wz6ntiSSgGSGcjZ55im6uvTrOxSIS8/dgoVMoiGE9I6JAfU50yH5BoDlYA1tcuGS7g/QNtetJnxA6QEsCVTA==}
-    cpu: [s390x]
-    os: [linux]
-
-  '@img/sharp-libvips-linux-x64@1.0.4':
-    resolution: {integrity: sha512-MmWmQ3iPFZr0Iev+BAgVMb3ZyC4KeFc3jFxnNbEPas60e1cIfevbtuyf9nDGIzOaW9PdnDciJm+wFFaTlj5xYw==}
-    cpu: [x64]
-    os: [linux]
-
-  '@img/sharp-libvips-linuxmusl-arm64@1.0.4':
-    resolution: {integrity: sha512-9Ti+BbTYDcsbp4wfYib8Ctm1ilkugkA/uscUn6UXK1ldpC1JjiXbLfFZtRlBhjPZ5o1NCLiDbg8fhUPKStHoTA==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@img/sharp-libvips-linuxmusl-x64@1.0.4':
-    resolution: {integrity: sha512-viYN1KX9m+/hGkJtvYYp+CCLgnJXwiQB39damAO7WMdKWlIhmYTfHjwSbQeUK/20vY154mwezd9HflVFM1wVSw==}
-    cpu: [x64]
-    os: [linux]
-
-  '@img/sharp-linux-arm64@0.33.5':
-    resolution: {integrity: sha512-JMVv+AMRyGOHtO1RFBiJy/MBsgz0x4AWrT6QoEVVTyh1E39TrCUpTRI7mx9VksGX4awWASxqCYLCV4wBZHAYxA==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [arm64]
-    os: [linux]
-
-  '@img/sharp-linux-arm@0.33.5':
-    resolution: {integrity: sha512-JTS1eldqZbJxjvKaAkxhZmBqPRGmxgu+qFKSInv8moZ2AmT5Yib3EQ1c6gp493HvrvV8QgdOXdyaIBrhvFhBMQ==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [arm]
-    os: [linux]
-
-  '@img/sharp-linux-s390x@0.33.5':
-    resolution: {integrity: sha512-y/5PCd+mP4CA/sPDKl2961b+C9d+vPAveS33s6Z3zfASk2j5upL6fXVPZi7ztePZ5CuH+1kW8JtvxgbuXHRa4Q==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [s390x]
-    os: [linux]
-
-  '@img/sharp-linux-x64@0.33.5':
-    resolution: {integrity: sha512-opC+Ok5pRNAzuvq1AG0ar+1owsu842/Ab+4qvU879ippJBHvyY5n2mxF1izXqkPYlGuP/M556uh53jRLJmzTWA==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [x64]
-    os: [linux]
-
-  '@img/sharp-linuxmusl-arm64@0.33.5':
-    resolution: {integrity: sha512-XrHMZwGQGvJg2V/oRSUfSAfjfPxO+4DkiRh6p2AFjLQztWUuY/o8Mq0eMQVIY7HJ1CDQUJlxGGZRw1a5bqmd1g==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [arm64]
-    os: [linux]
-
-  '@img/sharp-linuxmusl-x64@0.33.5':
-    resolution: {integrity: sha512-WT+d/cgqKkkKySYmqoZ8y3pxx7lx9vVejxW/W4DOFMYVSkErR+w7mf2u8m/y4+xHe7yY9DAXQMWQhpnMuFfScw==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [x64]
-    os: [linux]
-
-  '@img/sharp-wasm32@0.33.5':
-    resolution: {integrity: sha512-ykUW4LVGaMcU9lu9thv85CbRMAwfeadCJHRsg2GmeRa/cJxsVY9Rbd57JcMxBkKHag5U/x7TSBpScF4U8ElVzg==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [wasm32]
-
-  '@img/sharp-win32-ia32@0.33.5':
-    resolution: {integrity: sha512-T36PblLaTwuVJ/zw/LaH0PdZkRz5rd3SmMHX8GSmR7vtNSP5Z6bQkExdSK7xGWyxLw4sUknBuugTelgw2faBbQ==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [ia32]
-    os: [win32]
-
-  '@img/sharp-win32-x64@0.33.5':
-    resolution: {integrity: sha512-MpY/o8/8kj+EcnxwvrP4aTJSWw/aZ7JIGR4aBeZkZw5B7/Jn+tY9/VNwtcoGmdT7GfggGIU4kygOMSbYnOrAbg==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-    cpu: [x64]
-    os: [win32]
 
   '@inquirer/figures@1.0.7':
     resolution: {integrity: sha512-m+Trk77mp54Zma6xLkLuY+mvanPxlE4A7yNKs2HBiyZ4UkVs28Mv5c/pgWrHeInx+USHeX/WEPzjrWrcJiQgjw==}
@@ -5469,6 +5358,13 @@ packages:
       '@grpc/grpc-js': 1.9.14
       rxjs: '>=7.0.0'
 
+  '@univerjs/protocol@0.1.39-alpha.30':
+    resolution: {integrity: sha512-mgA8MvuYTWc+E5Fedi45oLKMDBjFzEwOLpFSSZrvzA+rqRnXeVZY21wSOZPHSb+GlIKdNxVtdhg3/ahhVaKJvA==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      '@grpc/grpc-js': 1.9.14
+      rxjs: '>=7.0.0'
+
   '@vitejs/plugin-react@4.3.2':
     resolution: {integrity: sha512-hieu+o05v4glEBucTcKMK3dlES0OeJlD9YVOAPraVMOInBCwzumaIFiUjr4bHK7NPgnAHgiskUoceKercrN8vg==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -6178,13 +6074,6 @@ packages:
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
 
-  color-string@1.9.1:
-    resolution: {integrity: sha512-shrVawQFojnZv6xM40anx4CkoDP+fZsw/ZerEMsW/pyzsRbElpsL/DBVW7q3ExxwusdNXI3lXpuhEZkzs8p5Eg==}
-
-  color@4.2.3:
-    resolution: {integrity: sha512-1rXeuUUiGGrykh+CeBdu5Ie7OJwinCgQY0bc7GCRxy5xVHy+moaqkpL/jqQq0MtQOeYcrqEz4abc5f0KtU7W4A==}
-    engines: {node: '>=12.5.0'}
-
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
@@ -6605,10 +6494,6 @@ packages:
 
   detect-indent@6.1.0:
     resolution: {integrity: sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==}
-    engines: {node: '>=8'}
-
-  detect-libc@2.0.3:
-    resolution: {integrity: sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==}
     engines: {node: '>=8'}
 
   detect-newline@3.1.0:
@@ -7853,9 +7738,6 @@ packages:
 
   is-arrayish@0.2.1:
     resolution: {integrity: sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==}
-
-  is-arrayish@0.3.2:
-    resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==}
 
   is-async-function@2.0.0:
     resolution: {integrity: sha512-Y1JXKrfykRJGdlDwdKlLpLyMIiWqWvuSd17TvZk68PLAOGOoF4Xyav1z0Xhoi+gCYjZVeC5SI+hYFOfvXmGRCA==}
@@ -9820,10 +9702,6 @@ packages:
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
-  sharp@0.33.5:
-    resolution: {integrity: sha512-haPVm1EkS9pgvHrQ/F3Xy+hgcuMV0Wm9vfIBSiwZ05k+xgb0PkBQpGsAA/oWdDobNaZTH5ppvHtzCFbnSEwHVw==}
-    engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
-
   shebang-command@2.0.0:
     resolution: {integrity: sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==}
     engines: {node: '>=8'}
@@ -9854,9 +9732,6 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
-
-  simple-swizzle@0.2.2:
-    resolution: {integrity: sha512-JA//kQgZtbuY83m+xT+tXJkmJncGMTFT+C+g2h2R9uxkYIrE2yy9sgmcLhCnw57/WSD+Eh3J97FPEDFnbXnDUg==}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -10831,7 +10706,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
-  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.5.9)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -10840,7 +10715,7 @@ snapshots:
       '@stylistic/eslint-plugin': 2.8.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/eslint-plugin': 8.7.0(@typescript-eslint/parser@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       '@typescript-eslint/parser': 8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
-      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      '@vitest/eslint-plugin': 1.1.4(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       eslint: 9.12.0(jiti@1.21.6)
       eslint-config-flat-gitignore: 0.3.0(eslint@9.12.0(jiti@1.21.6))
       eslint-flat-config-utils: 0.4.0
@@ -11208,11 +11083,6 @@ snapshots:
   '@dprint/markdown@0.17.1': {}
 
   '@dprint/toml@0.6.2': {}
-
-  '@emnapi/runtime@1.2.0':
-    dependencies:
-      tslib: 2.7.0
-    optional: true
 
   '@es-joy/jsdoccomment@0.48.0':
     dependencies:
@@ -11644,81 +11514,6 @@ snapshots:
   '@hutson/parse-repository-url@5.0.0': {}
 
   '@iarna/toml@2.2.5': {}
-
-  '@img/sharp-darwin-arm64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-darwin-arm64': 1.0.4
-    optional: true
-
-  '@img/sharp-darwin-x64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-darwin-x64': 1.0.4
-    optional: true
-
-  '@img/sharp-libvips-darwin-arm64@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-darwin-x64@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-linux-arm64@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-linux-arm@1.0.5':
-    optional: true
-
-  '@img/sharp-libvips-linux-s390x@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-linux-x64@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-linuxmusl-arm64@1.0.4':
-    optional: true
-
-  '@img/sharp-libvips-linuxmusl-x64@1.0.4':
-    optional: true
-
-  '@img/sharp-linux-arm64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linux-arm64': 1.0.4
-    optional: true
-
-  '@img/sharp-linux-arm@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linux-arm': 1.0.5
-    optional: true
-
-  '@img/sharp-linux-s390x@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linux-s390x': 1.0.4
-    optional: true
-
-  '@img/sharp-linux-x64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linux-x64': 1.0.4
-    optional: true
-
-  '@img/sharp-linuxmusl-arm64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linuxmusl-arm64': 1.0.4
-    optional: true
-
-  '@img/sharp-linuxmusl-x64@0.33.5':
-    optionalDependencies:
-      '@img/sharp-libvips-linuxmusl-x64': 1.0.4
-    optional: true
-
-  '@img/sharp-wasm32@0.33.5':
-    dependencies:
-      '@emnapi/runtime': 1.2.0
-    optional: true
-
-  '@img/sharp-win32-ia32@0.33.5':
-    optional: true
-
-  '@img/sharp-win32-x64@0.33.5':
-    optional: true
 
   '@inquirer/figures@1.0.7': {}
 
@@ -12878,6 +12673,11 @@ snapshots:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
 
+  '@univerjs/protocol@0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+    dependencies:
+      '@grpc/grpc-js': 1.10.9
+      rxjs: 7.8.1
+
   '@vitejs/plugin-react@4.3.2(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@babel/core': 7.25.8
@@ -12910,7 +12710,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@vitest/eslint-plugin@1.1.4(@typescript-eslint/utils@8.8.1(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       eslint: 9.12.0(jiti@1.21.6)
     optionalDependencies:
@@ -13696,16 +13496,6 @@ snapshots:
 
   color-name@1.1.4: {}
 
-  color-string@1.9.1:
-    dependencies:
-      color-name: 1.1.4
-      simple-swizzle: 0.2.2
-
-  color@4.2.3:
-    dependencies:
-      color-convert: 2.0.1
-      color-string: 1.9.1
-
   colorette@2.0.20: {}
 
   combined-stream@1.0.8:
@@ -14110,8 +13900,6 @@ snapshots:
   destroy@1.2.0: {}
 
   detect-indent@6.1.0: {}
-
-  detect-libc@2.0.3: {}
 
   detect-newline@3.1.0: {}
 
@@ -15698,8 +15486,6 @@ snapshots:
       get-intrinsic: 1.2.4
 
   is-arrayish@0.2.1: {}
-
-  is-arrayish@0.3.2: {}
 
   is-async-function@2.0.0:
     dependencies:
@@ -18081,32 +17867,6 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  sharp@0.33.5:
-    dependencies:
-      color: 4.2.3
-      detect-libc: 2.0.3
-      semver: 7.6.3
-    optionalDependencies:
-      '@img/sharp-darwin-arm64': 0.33.5
-      '@img/sharp-darwin-x64': 0.33.5
-      '@img/sharp-libvips-darwin-arm64': 1.0.4
-      '@img/sharp-libvips-darwin-x64': 1.0.4
-      '@img/sharp-libvips-linux-arm': 1.0.5
-      '@img/sharp-libvips-linux-arm64': 1.0.4
-      '@img/sharp-libvips-linux-s390x': 1.0.4
-      '@img/sharp-libvips-linux-x64': 1.0.4
-      '@img/sharp-libvips-linuxmusl-arm64': 1.0.4
-      '@img/sharp-libvips-linuxmusl-x64': 1.0.4
-      '@img/sharp-linux-arm': 0.33.5
-      '@img/sharp-linux-arm64': 0.33.5
-      '@img/sharp-linux-s390x': 0.33.5
-      '@img/sharp-linux-x64': 0.33.5
-      '@img/sharp-linuxmusl-arm64': 0.33.5
-      '@img/sharp-linuxmusl-x64': 0.33.5
-      '@img/sharp-wasm32': 0.33.5
-      '@img/sharp-win32-ia32': 0.33.5
-      '@img/sharp-win32-x64': 0.33.5
-
   shebang-command@2.0.0:
     dependencies:
       shebang-regex: 3.0.0
@@ -18133,10 +17893,6 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
-
-  simple-swizzle@0.2.2:
-    dependencies:
-      is-arrayish: 0.3.2
 
   sisteransi@1.0.5: {}
 

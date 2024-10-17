@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@univerjs/core';
+import type { Dependency, Workbook } from '@univerjs/core';
 import type { IUniverSheetsDataValidationUIConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation-ui.command';
 import {
     CloseValidationPanelOperation,
@@ -32,6 +33,7 @@ import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 import { DataValidationPermissionController } from './controllers/dv-permission.controller';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 import { SheetsDataValidationRenderController } from './controllers/dv-render.controller';
+import { SheetsDataValidationReRenderController } from './controllers/dv-rerender.controller';
 import { SheetsDataValidationUIController } from './controllers/dv-ui.controller';
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
@@ -90,6 +92,12 @@ export class UniverSheetsDataValidationUIPlugin extends Plugin {
         this._injector.get(DataValidationPermissionController);
         this._injector.get(DataValidationRejectInputController);
         this._injector.get(DataValidationAlertController);
+
+        const renderManager = this._injector.get(IRenderManagerService);
+        renderManager.registerRenderModule<Workbook>(
+            UniverInstanceType.UNIVER_SHEET,
+            [SheetsDataValidationReRenderController] as Dependency
+        );
     }
 
     override onRendered(): void {

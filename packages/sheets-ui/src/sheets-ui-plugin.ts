@@ -27,10 +27,12 @@ import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+import { SheetCheckboxController } from './controllers/checkbox.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { SheetsDefinedNameController } from './controllers/defined-name/defined-name.controller';
 import { DragRenderController } from './controllers/drag-render.controller';
+import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
 import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
@@ -64,6 +66,7 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
 import { DragManagerService } from './services/drag-manager.service';
 import { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
+import { SheetCellEditorResizeService } from './services/editor/cell-editor-resize.service';
 import {
     FormulaEditorManagerService,
     IFormulaEditorManagerService,
@@ -140,6 +143,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoFillController],
             [FormatPainterController],
             [SheetsDefinedNameController],
+            [EditorDataSyncController],
+            [SheetCheckboxController],
 
             // permission
             [SheetPermissionPanelModel],
@@ -181,6 +186,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [StatusBarController],
             [AutoHeightController],
+            [EditorDataSyncController],
+            [SheetCheckboxController],
         ]);
     }
 
@@ -214,6 +221,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsScrollRenderController],
             [HeaderFreezeRenderController],
             [SheetsZoomRenderController],
+            [SheetCellEditorResizeService],
 
             [FormatPainterRenderController],
             [CellAlertRenderController],

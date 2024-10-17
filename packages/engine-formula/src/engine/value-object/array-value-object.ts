@@ -1518,19 +1518,16 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowPositions != null) {
                         rowPositions.forEach((row) => {
+                            if (row < startRow || row > startRow + rowCount - 1) {
+                                return;
+                            }
+
                             const r = row - startRow;
                             if (result[r] == null) {
                                 result[r] = [];
                             }
                             result[r][column] = BooleanValueObject.create(true);
                         });
-                        // for (let r = 0; r < rowCount; r++) {
-                        //     if (rowPositions.has(r + startRow)) {
-                        //         result[r][column] = BooleanValueObject.create(true);
-                        //     } else {
-                        //         result[r][column] = BooleanValueObject.create(false);
-                        //     }
-                        // }
                     }
                 } else {
                     const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
@@ -1573,16 +1570,6 @@ export class ArrayValueObject extends BaseValueObject {
                         //     }
                         // }
                     }
-
-                    // else {
-                    //     for (let r = 0; r < rowCount; r++) {
-                    //         if (result[r] == null) {
-                    //             result[r] = [];
-                    //         }
-
-                    //         result[r][column] = BooleanValueObject.create(false);
-                    //     }
-                    // }
                 }
 
                 return;

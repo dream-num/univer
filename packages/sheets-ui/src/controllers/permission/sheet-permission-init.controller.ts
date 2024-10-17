@@ -15,10 +15,10 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, ISetWorksheetPermissionPointsMutationParams, IWorksheetProtectionRenderCellData } from '@univerjs/sheets';
-import { Disposable, IAuthzIoService, ICommandService, Inject, InterceptorEffectEnum, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
+import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
 
 export class SheetPermissionInitController extends Disposable {
@@ -43,8 +43,6 @@ export class SheetPermissionInitController extends Disposable {
         this._initWorksheetPermissionPointsChange();
         this._initWorkbookPermissionFromSnapshot();
         this._initUserChange();
-        this._initViewModelByRangeInterceptor();
-        this._initViewModelBySheetInterceptor();
         this._refreshPermissionByCollaCreate();
     }
 
@@ -333,63 +331,6 @@ export class SheetPermissionInitController extends Disposable {
                 });
             })
         );
-    }
-
-    private _initViewModelByRangeInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
-            priority: 999,
-            effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-            handler: (cell = {}, context, next) => {
-                const { unitId, subUnitId, row, col } = context;
-
-                const selectionProtection = this._rangeProtectionCache.getCellInfo(unitId, subUnitId, row, col);
-
-                if (selectionProtection) {
-                    const isSkipRender = selectionProtection[UnitAction.View] === false;
-                    const _cellData = { ...cell, selectionProtection: [selectionProtection] };
-                    if (isSkipRender) {
-                        delete _cellData.s;
-                        delete _cellData.v;
-                        delete _cellData.p;
-                        return _cellData;
-                    }
-                    return next(_cellData);
-                }
-                return next(cell);
-            },
-
-        }
-        ));
-    }
-
-    private _initViewModelBySheetInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-            // permissions are placed at a high level to prioritize whether to filter subsequent renderings.
-            priority: 999,
-            effect: InterceptorEffectEnum.Value | InterceptorEffectEnum.Style,
-            handler: (cell = {}, context, next) => {
-                const { unitId, subUnitId } = context;
-                const worksheetRule = this._worksheetProtectionRuleModel.getRule(unitId, subUnitId);
-                if (worksheetRule?.permissionId) {
-                    const selectionProtection = [{
-                        [UnitAction.View]: this._permissionService.getPermissionPoint(new WorksheetViewPermission(unitId, subUnitId).id)?.value ?? false,
-                        [UnitAction.Edit]: this._permissionService.getPermissionPoint(new WorksheetEditPermission(unitId, subUnitId).id)?.value ?? false,
-                    }];
-                    const isSkipRender = !selectionProtection[0]?.[UnitAction.View];
-                    const _cellData: IWorksheetProtectionRenderCellData = { ...cell, hasWorksheetRule: true, selectionProtection };
-                    if (isSkipRender) {
-                        delete _cellData.s;
-                        delete _cellData.v;
-                        delete _cellData.p;
-                        return _cellData;
-                    }
-                    return next(_cellData);
-                }
-                return next(cell);
-            },
-        }
-        ));
     }
 
     public refreshPermission(unitId: string, permissionId: string) {

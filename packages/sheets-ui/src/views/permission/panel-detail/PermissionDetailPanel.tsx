@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { Injector, Tools, useDependency } from '@univerjs/core';
+import { Injector, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { EditStateEnum, ViewStateEnum } from '@univerjs/sheets';
-import { ComponentContainer, useComponentsOfPart } from '@univerjs/ui';
-import React, { useRef, useState } from 'react';
+import { ComponentContainer, ISidebarService, useComponentsOfPart } from '@univerjs/ui';
+import React, { useEffect, useRef, useState } from 'react';
 import { UNIVER_SHEET_PERMISSION_USER_PART } from '../../../consts/permission';
-import { checkRangeValid, generateDefaultRule } from '../util';
+import { checkRangeValid, generateDefaultRule, generateRuleByUnitType } from '../util';
 import styles from './index.module.less';
 import { PermissionDetailFooterPart } from './PermissionDetailFooterPart';
 import { PermissionDetailMainPart } from './PermissionDetailMainPart';
@@ -35,8 +35,7 @@ interface ISheetPermissionPanelDetailProps {
 export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailProps) => {
     const { fromSheetBar, rule, oldRule } = props;
     const injector = useDependency(Injector);
-
-    const activeRule = rule ? Tools.deepClone(rule) : generateDefaultRule(injector, fromSheetBar);
+    const activeRule: IPermissionPanelRule = rule ? generateRuleByUnitType(injector, rule) : generateDefaultRule(injector, fromSheetBar);
 
     const [ranges, setRanges] = useState<IRange[]>(activeRule.ranges);
     const [rangesErrMsg, setRangesErrMsg] = useState<string | undefined>(() => {
@@ -54,6 +53,22 @@ export const SheetPermissionPanelDetail = (props: ISheetPermissionPanelDetailPro
     };
 
     const PermissionDetailUserPart = useComponentsOfPart(UNIVER_SHEET_PERMISSION_USER_PART);
+
+    useEffect(() => {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const sidebarService = injector.get(ISidebarService);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) return;
+        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const activeSheetSubscribe = workbook.activeSheet$.subscribe((sheet) => {
+            if (sheet?.getSheetId() !== subUnitId) {
+                sidebarService.close();
+            }
+        });
+        return () => {
+            activeSheetSubscribe.unsubscribe();
+        };
+    }, []);
 
     return (
         <div className={styles.permissionPanelDetailWrapper} onClick={handlePanelClick}>

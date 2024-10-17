@@ -15,6 +15,7 @@
  */
 
 import type { Injector, IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
 import { IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { EditStateEnum, RangeProtectionRuleModel, SheetsSelectionsService, UnitObject, ViewStateEnum, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 
@@ -110,4 +111,26 @@ export const generateDefaultRule = (injector: Injector, fromSheetBar: boolean) =
         editState: EditStateEnum.OnlyMe,
         viewState: ViewStateEnum.OthersCanView,
     };
+};
+
+export const generateRuleByUnitType = (injector: Injector, rule: IPermissionPanelRule) => {
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    const worksheet = workbook.getActiveSheet();
+    const { unitType } = rule;
+
+    if (unitType === UnitObject.Worksheet) {
+        return {
+            ...rule,
+            ranges: [{
+                startRow: 0,
+                startColumn: 0,
+                endRow: worksheet.getRowCount() - 1,
+                endColumn: worksheet.getColumnCount() - 1,
+                rangeType: RANGE_TYPE.ALL,
+            }],
+        };
+    }
+
+    return rule;
 };

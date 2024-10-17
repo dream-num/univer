@@ -681,7 +681,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 const hasUnMergedCell = this._hasUnMergedCellInColumn(colIndex, startRow, endRow);
 
                 if (hasUnMergedCell) {
-                    const autoWidth = this._calculateColAutoWidth(colIndex);
+                    const autoWidth = this._calculateColMaxWidth(colIndex);
                     calculatedRows.add(colIndex);
                     results.push({
                         col: colIndex,
@@ -695,18 +695,20 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Return column width of the specified column(by column index)
+     * Iterate all rows and return column width of the specified column(by column index)
      * @param colIndex
      * @returns {number} width
      */
-    private _calculateColAutoWidth(colIndex: number): number {
+    private _calculateColMaxWidth(colIndex: number): number {
+        // row has default height, but col does not, col can be very narrow near zero
         const { rowCount, defaultColumnWidth } = this._worksheetData;
-        let width = defaultColumnWidth;
+        let width = 0;
 
         const worksheet = this.worksheet;
         if (!worksheet) {
             return width;
         }
+        // calc first and last row.
 
         for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
@@ -746,8 +748,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
             // key
-            let { width: w = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
-
+            const { width: w = 0 } = getDocsSkeletonPageSize(documentSkeleton, angle) ?? {};
             // When calculating the auto Height, need take the margin information into account,
             // because there is margin information when rendering
             if (documentSkeleton) {
@@ -770,7 +771,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             width = Math.max(width, w);
         }
-
         return Math.min(width, MAXIMUM_COL_WIDTH);
     }
     //#endregion
@@ -1703,11 +1703,12 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
                 const { w = defaultColumnWidth, aw, ia } = columnDataItem;
-                if ((ia === BooleanNumber.TRUE) && typeof aw === 'number') {
-                    columnWidth = aw;
-                } else {
-                    columnWidth = w;
-                }
+                columnWidth = w;
+                // if (typeof aw === 'number') {
+                //     columnWidth = aw;
+                // } else {
+                //     columnWidth = w;
+                // }
 
                 if (columnDataItem.hd === BooleanNumber.TRUE) {
                     columnWidth = 0;

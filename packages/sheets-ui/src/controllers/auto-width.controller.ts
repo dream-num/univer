@@ -17,7 +17,6 @@
 import type { IColAutoWidthInfo, IRange, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
-    ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
     ISetWorksheetColAutoWidthMutationParams,
     ISetWorksheetColIsAutoWidthMutationParams,
@@ -25,7 +24,6 @@ import type {
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    SetRangeValuesCommand,
     SetStyleCommand,
     SetWorksheetColAutoWidthMutation,
     SetWorksheetColAutoWidthMutationFactory,
@@ -91,19 +89,6 @@ export class AutoWidthController extends Disposable {
     private _initialize() {
         const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
             this;
-        // for intercept'SetRangeValuesCommand' command.
-        this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetRangeValuesRangeMutationParams }) => {
-                if (command.id !== SetRangeValuesCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this.getUndoRedoParamsOfColWidth(command.params.range);
-            },
-        }));
 
         // for intercept 'sheet.command.set-col-is-auto-width' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({

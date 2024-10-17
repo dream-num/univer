@@ -184,6 +184,7 @@ export const SetWorksheetColAutoWidthMutation: IMutation<ISetWorksheetColAutoWid
         for (const { col, autoWidth } of colsAutoWidthInfo) {
             const curCol = colManager.getColumnOrCreate(col);
             curCol.aw = autoWidth;
+            curCol.w = autoWidth;
         }
 
         return true;

@@ -19,7 +19,7 @@ import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton
 
 import type { UniverRenderingContext } from '../../../context';
 import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
@@ -34,6 +34,8 @@ export class Line extends docExtension {
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
+
+    private _preBackgroundColor = '';
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
@@ -151,7 +153,6 @@ export class Line extends docExtension {
         ctx.moveToByPrecision(start.x, start.y);
         ctx.lineToByPrecision(end.x, end.y);
         ctx.stroke();
-        ctx.closePath();
         ctx.restore();
     }
 

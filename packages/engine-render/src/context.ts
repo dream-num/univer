@@ -31,47 +31,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     constructor(context: CanvasRenderingContext2D) {
         this.canvas = context.canvas;
-
-        // 创建一个代理来拦截setTransform方法的调用
-        const proxyCtx = new Proxy(context, {
-            get(target, prop, receiver) {
-                if (typeof target[prop] === 'function') {
-                    return function (...args) {
-                      // 处理特定方法
-                        if (prop === 'setTransform') {
-                            if (args.length > 1) {
-                                if (args[0] !== 1 && args[0] !== 2) {
-                                    console.log('setTransform called with values:', args);
-                                }
-                            } else {
-                                if (args[0].a !== 1 && args[0].a !== 2) {
-                                    console.log('setTransform called with DOM Marix:', args[0].a);
-                                }
-                            }
-                        }
-
-                        if (prop === 'transform') {
-                            if (args[0] !== 1 && args[0] !== 2) {
-                                console.log('transform called with values:', args);
-                            }
-                        }
-
-                        if (prop === 'scale') {
-                            console.log('scale called with values:', args);
-                        }
-                      // 确保上下文是正确的
-                        return target[prop].apply(target, args);
-                    };
-                }
-                return target[prop];
-            },
-            set(target, prop, value) {
-                target[prop] = value; // 将值赋给原始上下文
-                return true; // 表示成功
-            },
-        });
-
-        this._context = proxyCtx;
+        this._context = context;
     }
 
     isContextLost(): boolean {
@@ -331,7 +291,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     /**
      * Get scale from ctx.
-     * DOMMatrix.a DOMMatrix.d would affect by ctx.roate()
+     * DOMMatrix.a DOMMatrix.d would affect by ctx.rotate()
      */
     protected _getScale() {
         const transform = this.getTransform();

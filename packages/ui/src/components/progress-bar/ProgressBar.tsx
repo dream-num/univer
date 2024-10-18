@@ -14,58 +14,37 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import React, { useEffect, useRef, useState } from 'react';
+import { ThemeService, useDependency } from '@univerjs/core';
 import { CloseSingle } from '@univerjs/icons';
-import type { IProgressStep } from '../../services/progress/progress.service';
-import { IProgressService } from '../../services/progress/progress.service';
+import React, { useEffect, useMemo, useRef } from 'react';
 import styles from './index.module.less';
 
 export interface IProgressBarProps {
-    barColor: string;
+    progress: { done: number; count: number };
+
+    barColor?: string;
+    onTerminate?: () => void;
 }
 
 export function ProgressBar(props: IProgressBarProps) {
-    const { barColor } = props;
-    const progressService = useDependency(IProgressService);
+    const { barColor, progress, onTerminate } = props;
+    const { count, done } = progress;
+
+    const themeService = useDependency(ThemeService);
+    const color = barColor ?? themeService.getCurrentTheme().primaryColor; ;
+
     const progressBarInnerRef = useRef<HTMLDivElement>(null);
-    const [visible, setVisible] = useState(false);
+    const visible = useMemo(() => count > 0, [count]);
 
     useEffect(() => {
-        const progressVisible = progressService.progressVisible$.subscribe((isVisible) => {
-            if (!isVisible) {
-                // Wait for the progress animation to complete before hiding the progress bar
-                setTimeout(() => {
-                    setVisible(isVisible);
-                    if (progressBarInnerRef.current) {
-                        progressBarInnerRef.current.style.width = '0%';
-                    }
-                }, 500);
-            } else {
-                setVisible(isVisible);
-            }
-        });
+        if (!progressBarInnerRef.current) return;
 
-        const progressChange = progressService.progressChange$.subscribe((task: IProgressStep) => {
-            const { step } = task;
-
-            // UseState asynchronous updates will not be reflected in the UI in time, so we use direct DOM manipulation
-            if (progressBarInnerRef.current) {
-                const currentProgress = Number.parseFloat(progressBarInnerRef.current.style.width) || 0;
-                const newProgress = currentProgress + (100 - currentProgress) * step;
-                progressBarInnerRef.current.style.width = `${newProgress}%`;
-            }
-        });
-
-        return () => {
-            progressVisible.unsubscribe();
-            progressChange.unsubscribe();
-        };
-    }, []);
-
-    function handleClose() {
-        progressService.stop();
-    };
+        if (count === 0) {
+            progressBarInnerRef.current.style.width = '0%';
+        } else {
+            progressBarInnerRef.current.style.width = `${count / done}%`;
+        }
+    }, [visible, count, done]);
 
     return (
         <div className={styles.progressBarContainer} style={{ display: visible ? 'flex' : 'none' }}>
@@ -74,12 +53,11 @@ export function ProgressBar(props: IProgressBarProps) {
                     ref={progressBarInnerRef}
                     className={styles.progressBarInner}
                     style={{
-                        backgroundColor: barColor,
+                        backgroundColor: color,
                     }}
                 />
             </div>
-            <div className={styles.progressBarCloseButton} onClick={handleClose}><CloseSingle /></div>
-
+            <div className={styles.progressBarCloseButton} onClick={onTerminate}><CloseSingle /></div>
         </div>
     );
 };

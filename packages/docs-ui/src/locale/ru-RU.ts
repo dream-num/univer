@@ -51,6 +51,7 @@ const locale: typeof zhCN = {
         alignJustify: 'Выровнять по ширине',
         headerFooter: 'Header & Footer',
         checklist: 'Task list',
+        documentFlavor: 'Modern Mode',
     },
     table: {
         insert: 'Insert',

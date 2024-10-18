@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -21,10 +22,9 @@ import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerj
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { KeyCode, ProgressBar } from '@univerjs/ui';
 import clsx from 'clsx';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
 
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
-import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
 import { useActiveWorkbook } from '../../components/hook';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 
@@ -126,7 +126,7 @@ export function FormulaBar() {
                 width: Number.POSITIVE_INFINITY,
                 height: Number.POSITIVE_INFINITY,
             },
-            documentFlavor: DocumentFlavor.MODERN,
+            documentFlavor: DocumentFlavor.UNSPECIFIED,
             marginTop: 5,
             marginBottom: 5,
             marginRight: 0,

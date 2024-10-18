@@ -53,11 +53,8 @@ export interface IDocumentOffsetConfig extends IPageMarginLayout {
 
 export class Documents extends DocComponent {
     private readonly _pageRender$ = new Subject<IPageRenderConfig>();
+
     readonly pageRender$ = this._pageRender$.asObservable();
-
-    docsLeft: number = 0;
-
-    docsTop: number = 0;
 
     private _drawLiquid: Nullable<Liquid> = new Liquid();
 

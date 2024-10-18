@@ -190,6 +190,7 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
         imageWidth: number, imageHeight: number
     ): Nullable<IDocDrawingPosition> {
         const activeTextRange = this._docSelectionRenderService.getActiveTextRange();
+        // TODO: NO need to get the cursor position, because the insert image is inline.
         const position = activeTextRange?.getAbsolutePosition() || {
             left: 0,
             top: 0,
@@ -205,8 +206,8 @@ export class DocDrawingUpdateRenderController extends Disposable implements IRen
                 posOffset: position.left,
             },
             positionV: {
-                relativeFrom: ObjectRelativeFromV.MARGIN,
-                posOffset: position.top,
+                relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                posOffset: 0,
             },
             angle: 0,
         };

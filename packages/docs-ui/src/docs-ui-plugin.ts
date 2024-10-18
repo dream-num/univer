@@ -36,6 +36,7 @@ import { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/comma
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
 import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
@@ -43,6 +44,7 @@ import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 import { CoverContentCommand, ReplaceContentCommand, ReplaceSnapshotCommand } from './commands/commands/replace-content.command';
 import { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from './commands/commands/switch-doc-mode.command';
 import { CreateDocTableCommand } from './commands/commands/table/doc-table-create.command';
 import { DocTableDeleteColumnsCommand, DocTableDeleteRowsCommand, DocTableDeleteTableCommand } from './commands/commands/table/doc-table-delete.command';
 import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableInsertColumnRightCommand, DocTableInsertRowAboveCommand, DocTableInsertRowBellowCommand, DocTableInsertRowCommand } from './commands/commands/table/doc-table-insert.command';
@@ -189,6 +191,7 @@ export class UniverDocsUIPlugin extends Plugin {
             DocTableDeleteRowsCommand,
             DocTableDeleteColumnsCommand,
             DocTableDeleteTableCommand,
+            CloseHeaderFooterCommand,
             DocTableTabCommand,
             TabCommand,
             AfterSpaceCommand,
@@ -199,6 +202,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ToggleCheckListCommand,
             QuickListCommand,
             IMEInputCommand,
+            SwitchDocModeCommand,
             DocParagraphSettingCommand,
             InnerPasteCommand,
             CutContentCommand,

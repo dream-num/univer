@@ -35,8 +35,6 @@ export class Line extends docExtension {
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
-    private _preBackgroundColor = '';
-
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
         const { ts: textStyle, bBox, content } = glyph;
@@ -52,10 +50,8 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
         if (underline) {
-            const startY = asc + dsc; // underline is too low if asc + dsc
-            ctx.save();
+            const startY = asc + dsc;
             this._drawLine(ctx, glyph, underline, startY, scale);
-            ctx.restore();
         }
 
         if (bottomBorderLine) {
@@ -124,6 +120,7 @@ export class Line extends docExtension {
 
         ctx.save();
 
+        // translate with precision is handled in moveToByPrecision and lineToByPrecision. NO NEED to do this again!
         // ctx.translateWithPrecision(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const color =

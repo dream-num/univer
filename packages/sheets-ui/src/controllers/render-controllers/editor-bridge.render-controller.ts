@@ -76,7 +76,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         this._commandExecutedListener(d);
         setTimeout(() => {
             this._initialKeyboardListener(d);
-        }, 1000);
+        }, 100);
         return d;
     }
 

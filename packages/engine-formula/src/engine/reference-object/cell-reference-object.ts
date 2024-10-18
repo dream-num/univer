@@ -17,7 +17,8 @@
 import type { IRange } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
-import { deserializeRangeWithSheetWithCache } from '../utils/reference';
+
+import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 import { RangeReferenceObject } from './range-reference-object';

@@ -196,11 +196,11 @@ export function compareNumfmtPriority(oldPattern: string, pattern: string) {
     return oldPattern;
 }
 
-const numberFormatTypeCache = new Map<string, NumberFormatType>();
-
+const numberFormatTypeCache = new FormulaAstLRU<NumberFormatType>(100000);
 function getNumberFormatType(pattern: string) {
-    if (numberFormatTypeCache.has(pattern)) {
-        return numberFormatTypeCache.get(pattern)!;
+    const patternTypeCache = numberFormatTypeCache.get(pattern);
+    if (patternTypeCache !== undefined) {
+        return patternTypeCache;
     }
 
     const type = getNumberFormatTypeRaw(pattern);

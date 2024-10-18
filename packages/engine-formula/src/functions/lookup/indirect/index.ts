@@ -24,7 +24,8 @@ import { ColumnReferenceObject } from '../../../engine/reference-object/column-r
 import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
 import { deserializeRangeForR1C1 } from '../../../engine/utils/r1c1-reference';
-import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/reference';
+
+import { deserializeRangeWithSheetWithCache } from '../../../engine/utils/reference-cache';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 

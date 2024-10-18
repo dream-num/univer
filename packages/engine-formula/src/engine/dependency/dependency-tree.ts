@@ -82,6 +82,18 @@ export class FormulaDependencyTree {
         }
     }
 
+    toJson() {
+        return {
+            formula: this.formula,
+            row: this.row,
+            column: this.column,
+            subUnitId: this.subUnitId,
+            unitId: this.unitId,
+            formulaId: this.formulaId,
+            featureId: this.featureId,
+        };
+    }
+
     getDirtyData: Nullable<
         (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
             runtimeCellData: IRuntimeUnitDataType;

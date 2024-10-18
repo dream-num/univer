@@ -77,5 +77,19 @@ describe('Test right function', () => {
                 ['0', '00', '34', 'et', '-3', ErrorType.NAME],
             ]);
         });
+
+        it('More test', () => {
+            const text = StringValueObject.create(',。、；:{}');
+            const numChars = NumberValueObject.create(4);
+            const result = testFunction.calculate(text, numChars);
+            expect(getObjectValue(result)).toStrictEqual('；:{}');
+
+            const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
+            const numChars2 = ArrayValueObject.create('{3,5,7,9,15}');
+            const result2 = testFunction.calculate(text2, numChars2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                ['rld', '😊rld', 'Wo😊rld', '😊Wo😊rld', 'llo中文o😊Wo😊rld'],
+            ]);
+        });
     });
 });

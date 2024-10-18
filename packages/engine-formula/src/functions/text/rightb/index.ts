@@ -17,7 +17,7 @@
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { charLenByte } from '../../../engine/utils/char-kit';
+import { getCharLenByteInText } from '../../../engine/utils/char-kit';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
@@ -90,29 +90,14 @@ export class Rightb extends BaseFunction {
             return StringValueObject.create('');
         }
 
-        let result = '';
+        let index = textValue.length - 1;
         let lenByte = 0;
+        let result = '';
 
-        for (let i = textValue.length - 1; i >= 0; i--) {
-            const char = textValue.charAt(i);
-            lenByte += charLenByte(char);
-
-            if (lenByte < numBytesValue) {
-                result = char + result;
-                continue;
-            }
-
-            if (lenByte === numBytesValue) {
-                result = char + result;
-                break;
-            }
-
-            if (lenByte === numBytesValue + 1) {
-                result = ` ${result}`;
-                break;
-            }
-
-            break;
+        while (lenByte < numBytesValue && index >= 0) {
+            lenByte += getCharLenByteInText(textValue, index, 'rtl');
+            result = textValue.charAt(index) + result;
+            index--;
         }
 
         return StringValueObject.create(result);

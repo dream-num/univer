@@ -80,8 +80,22 @@ describe('Test rightb function', () => {
             const numBytes2 = NumberValueObject.create(3);
             const result2 = testFunction.calculate(text, numBytes2);
             expect(getObjectValue(result2)).toStrictEqual([
-                ['1', ' ', ' 试', 'RUE', 'LSE', ''],
+                ['1', ' ', '测试', 'RUE', 'LSE', ''],
                 ['0', '100', '.34', 'eet', '-3', ErrorType.NAME],
+            ]);
+        });
+
+        it('More test', () => {
+            const text = StringValueObject.create(',。、；:{}');
+            const numBytes = NumberValueObject.create(4);
+            const result = testFunction.calculate(text, numBytes);
+            expect(getObjectValue(result)).toStrictEqual('；:{}');
+
+            const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
+            const numBytes2 = ArrayValueObject.create('{3,6,7,8,15}');
+            const result2 = testFunction.calculate(text2, numBytes2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                ['rld', '😊rld', '😊rld', 'o😊rld', '文o😊Wo😊rld'],
             ]);
         });
     });

@@ -26,7 +26,11 @@ export {
     ThreadCommentDataSourceService,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';
-
+export {
+    type IThreadCommentMentionDataSource,
+    IThreadCommentMentionDataService,
+    ThreadCommentMentionDataService,
+} from './services/thread-comment-mention-data.service';
 // #region - all commands
 
 export {

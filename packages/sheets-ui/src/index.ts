@@ -26,6 +26,7 @@ export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
+export { IUniverSheetsUIConfig } from './controllers/config.schema';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
     getCoordByCell,

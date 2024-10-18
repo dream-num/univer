@@ -15,39 +15,39 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { isReferenceString, REFERENCE_MULTIPLE_RANGE_REGEX, REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX } from '../regex';
+import { isReferenceString, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX, regexTestColumn, regexTestMultipleRange, regexTestRow, regexTestSingeRange } from '../regex';
 
 describe('Test ref regex', () => {
     it('Single range', () => {
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('Sheet1!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('[workbook]Sheet1!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('[workbook]\'Sheet-1\'!A1')).toBe(true);
-        expect(new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test('\'[workbook]Sheet1\'!A1')).toBe(true);
+        expect(regexTestSingeRange('A1')).toBe(true);
+        expect(regexTestSingeRange('Sheet1!A1')).toBe(true);
+        expect(regexTestSingeRange('[workbook]Sheet1!A1')).toBe(true);
+        expect(regexTestSingeRange('[workbook]\'Sheet-1\'!A1')).toBe(true);
+        expect(regexTestSingeRange('\'[workbook]Sheet1\'!A1')).toBe(true);
     });
 
     it('Multiple range', () => {
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('Sheet1!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('[workbook]Sheet1!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
-        expect(new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('Sheet1!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('[workbook]Sheet1!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('[workbook]\'Sheet-1\'!A1:B10')).toBe(true);
+        expect(regexTestMultipleRange('\'[workbook]Sheet1\'!A1:B10')).toBe(true);
     });
 
     it('Row range', () => {
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('Sheet1!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('[workbook]Sheet1!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('[workbook]\'Sheet-1\'!1:10')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_ROW).test('\'[workbook]Sheet1\'!1:10')).toBe(true);
+        expect(regexTestRow('1:10')).toBe(true);
+        expect(regexTestRow('Sheet1!1:10')).toBe(true);
+        expect(regexTestRow('[workbook]Sheet1!1:10')).toBe(true);
+        expect(regexTestRow('[workbook]\'Sheet-1\'!1:10')).toBe(true);
+        expect(regexTestRow('\'[workbook]Sheet1\'!1:10')).toBe(true);
     });
 
     it('Column range', () => {
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('Sheet1!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('[workbook]Sheet1!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('[workbook]\'Sheet-1\'!A:B')).toBe(true);
-        expect(new RegExp(REFERENCE_REGEX_COLUMN).test('\'[workbook]Sheet1\'!A:B')).toBe(true);
+        expect(regexTestColumn('A:B')).toBe(true);
+        expect(regexTestColumn('Sheet1!A:B')).toBe(true);
+        expect(regexTestColumn('[workbook]Sheet1!A:B')).toBe(true);
+        expect(regexTestColumn('[workbook]\'Sheet-1\'!A:B')).toBe(true);
+        expect(regexTestColumn('\'[workbook]Sheet1\'!A:B')).toBe(true);
     });
 
     it('Table single range', () => {

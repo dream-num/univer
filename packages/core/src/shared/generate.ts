@@ -19,8 +19,9 @@
  * @param val The number or string to be judged
  * @returns Result
  */
+const $blank = /\s/g;
 export function isRealNum(val: string | number | boolean) {
-    if (val === null || val.toString().replace(/\s/g, '') === '') {
+    if (val === null || val.toString().replace($blank, '') === '') {
         return false;
     }
 

@@ -30,6 +30,8 @@ import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
+import { clearNumberFormatTypeCache } from '../engine/utils/numfmt-kit';
+import { clearReferenceToRangeCache } from '../engine/utils/reference';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
@@ -174,6 +176,8 @@ export interface IFormulaRuntimeService {
     setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
 
     setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
+
+    clearReferenceAndNumberformatCache(): void;
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
@@ -253,6 +257,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this.reset();
         this._runtimeFeatureCellData = {};
         this._runtimeFeatureRange = {};
+        this.clearReferenceAndNumberformatCache();
     }
 
     enableCycleDependency() {
@@ -361,6 +366,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
+    }
+
+    clearReferenceAndNumberformatCache() {
+        clearNumberFormatTypeCache();
+        clearReferenceToRangeCache();
     }
 
     setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {

@@ -18,14 +18,14 @@ import { type IRange, RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import { deserializeRangeWithSheet } from '../utils/reference';
+import { deserializeRangeWithSheetWithCache } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class ColumnReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
-        const grid = deserializeRangeWithSheet(token);
+        const grid = deserializeRangeWithSheetWithCache(token);
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {

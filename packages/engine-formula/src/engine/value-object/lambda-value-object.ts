@@ -16,14 +16,15 @@
 
 import type { Nullable } from '@univerjs/core';
 
-import { ErrorType } from '../../basics/error-type';
-import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
-import { AsyncObject } from '../reference-object/base-reference-object';
-import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { LambdaParameterNode } from '../ast-node/lambda-parameter-node';
 import type { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { ErrorType } from '../../basics/error-type';
+import { DEFAULT_TOKEN_TYPE_LAMBDA_RUNTIME_PARAMETER } from '../../basics/token-type';
+import { AsyncObject } from '../reference-object/base-reference-object';
+import { generateExecuteAstNodeData } from '../utils/ast-node-tool';
+import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAstNode> {
     if (!node) {
@@ -86,9 +87,9 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
         let value: AsyncObject | BaseValueObject;
         if (this._interpreter.checkAsyncNode(this._lambdaNode)) {
-            value = new AsyncObject(this._interpreter.executeAsync(this._lambdaNode) as Promise<BaseValueObject>);
+            value = new AsyncObject(this._interpreter.executeAsync(generateExecuteAstNodeData(this._lambdaNode)) as Promise<BaseValueObject>);
         } else {
-            const o = this._interpreter.execute(this._lambdaNode);
+            const o = this._interpreter.execute(generateExecuteAstNodeData(this._lambdaNode));
             if (o.isReferenceObject()) {
                 value = (o as BaseReferenceObject).toArrayValueObject();
             } else {

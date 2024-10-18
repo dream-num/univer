@@ -18,7 +18,7 @@ import type { IUnitRangeName } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { deserializeRangeWithSheet } from './reference';
 
-const referenceToRangeCache = new FormulaAstLRU<IUnitRangeName>(10000);
+const referenceToRangeCache = new FormulaAstLRU<IUnitRangeName>(100000);
 export function deserializeRangeWithSheetWithCache(refString: string): IUnitRangeName {
     const refCache = referenceToRangeCache.get(refString);
     if (refCache) {

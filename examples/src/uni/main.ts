@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment';
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';

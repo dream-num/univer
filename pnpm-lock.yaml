@@ -28,7 +28,7 @@ importers:
         version: 4.2.0(release-it@17.8.2(typescript@5.6.3))
       '@release-it/conventional-changelog':
         specifier: ^8.0.2
-        version: 8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.8.2(typescript@5.6.3))
+        version: 8.0.2(release-it@17.8.2(typescript@5.6.3))
       '@storybook/react':
         specifier: 8.3.5
         version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
@@ -409,85 +409,6 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      minimist:
-        specifier: ^1.2.8
-        version: 1.2.8
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-
-  examples-node:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../packages/core
-      '@univerjs/data-validation':
-        specifier: workspace:*
-        version: link:../packages/data-validation
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../packages/docs
-      '@univerjs/docs-drawing':
-        specifier: workspace:*
-        version: link:../packages/docs-drawing
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../packages/drawing
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../packages/engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../packages/engine-render
-      '@univerjs/rpc':
-        specifier: workspace:*
-        version: link:../packages/rpc
-      '@univerjs/rpc-node':
-        specifier: workspace:*
-        version: link:../packages-experimental/rpc-node
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../packages/sheets
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../packages/sheets-data-validation
-      '@univerjs/sheets-drawing':
-        specifier: workspace:*
-        version: link:../packages/sheets-drawing
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../packages/sheets-filter
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../packages/sheets-formula
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: link:../packages/sheets-hyper-link
-      '@univerjs/sheets-sort':
-        specifier: workspace:*
-        version: link:../packages/sheets-sort
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../packages/thread-comment
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../common/shared
-      esbuild:
-        specifier: ^0.24.0
-        version: 0.24.0
-      esbuild-plugin-clean:
-        specifier: ^1.0.1
-        version: 1.0.1(esbuild@0.24.0)
-      esbuild-plugin-copy:
-        specifier: ^2.1.1
-        version: 2.1.1(esbuild@0.24.0)
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -10909,13 +10830,10 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.0
       chalk: 5.3.0
 
-  '@conventional-changelog/git-client@1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)':
+  '@conventional-changelog/git-client@1.0.1':
     dependencies:
       '@types/semver': 7.5.8
       semver: 7.6.3
-    optionalDependencies:
-      conventional-commits-filter: 4.0.0
-      conventional-commits-parser: 5.0.0
 
   '@dprint/formatter@0.3.0': {}
 
@@ -11611,12 +11529,12 @@ snapshots:
       walk-sync: 2.2.0
       yaml: 2.4.5
 
-  '@release-it/conventional-changelog@8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.8.2(typescript@5.6.3))':
+  '@release-it/conventional-changelog@8.0.2(release-it@17.8.2(typescript@5.6.3))':
     dependencies:
       concat-stream: 2.0.0
       conventional-changelog: 5.1.0
       conventional-recommended-bump: 9.0.0
-      git-semver-tags: 8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
+      git-semver-tags: 8.0.0
       release-it: 17.8.2(typescript@5.6.3)
       semver: 7.6.3
     transitivePeerDependencies:
@@ -14947,9 +14865,9 @@ snapshots:
       meow: 12.1.1
       semver: 7.6.3
 
-  git-semver-tags@8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0):
+  git-semver-tags@8.0.0:
     dependencies:
-      '@conventional-changelog/git-client': 1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
+      '@conventional-changelog/git-client': 1.0.1
       meow: 13.2.0
     transitivePeerDependencies:
       - conventional-commits-filter

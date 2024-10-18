@@ -40,7 +40,8 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
-import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { IThreadCommentMentionDataService } from '@univerjs/thread-comment';
+import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniDocsUIController } from '@univerjs/uni-docs-ui';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';

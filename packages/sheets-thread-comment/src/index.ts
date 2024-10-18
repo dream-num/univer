@@ -39,6 +39,6 @@ export type {
     IUpdateCommentCommandParams,
 } from '@univerjs/thread-comment';
 export { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
-export { IThreadCommentMentionDataService } from '@univerjs/thread-comment-ui';
+export { IThreadCommentMentionDataService } from '@univerjs/thread-comment';
 
 // #endregion

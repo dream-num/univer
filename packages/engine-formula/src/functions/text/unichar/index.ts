@@ -23,6 +23,21 @@ import { ErrorValueObject } from '../../../engine/value-object/base-value-object
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+// special case for some characters causing doc stream issues
+const filterCodeArray = Object.values(DataStreamTreeTokenType).filter((value) => {
+    return [
+        DataStreamTreeTokenType.TABLE_START,
+        DataStreamTreeTokenType.TABLE_ROW_START,
+        DataStreamTreeTokenType.TABLE_CELL_START,
+        DataStreamTreeTokenType.TABLE_CELL_END,
+        DataStreamTreeTokenType.TABLE_ROW_END,
+        DataStreamTreeTokenType.TABLE_END,
+        DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        DataStreamTreeTokenType.CUSTOM_RANGE_END,
+        DataStreamTreeTokenType.CUSTOM_BLOCK,
+    ].includes(value as DataStreamTreeTokenType);
+});
+
 export class Unichar extends BaseFunction {
     override minParams = 1;
 
@@ -65,19 +80,7 @@ export class Unichar extends BaseFunction {
         let result = String.fromCharCode(numberValue);
 
         // special case for some characters causing doc stream issues
-        if (Object.values(DataStreamTreeTokenType).filter((value) => {
-            return [
-                DataStreamTreeTokenType.TABLE_START,
-                DataStreamTreeTokenType.TABLE_ROW_START,
-                DataStreamTreeTokenType.TABLE_CELL_START,
-                DataStreamTreeTokenType.TABLE_CELL_END,
-                DataStreamTreeTokenType.TABLE_ROW_END,
-                DataStreamTreeTokenType.TABLE_END,
-                DataStreamTreeTokenType.CUSTOM_RANGE_START,
-                DataStreamTreeTokenType.CUSTOM_RANGE_END,
-                DataStreamTreeTokenType.CUSTOM_BLOCK,
-            ].includes(value as DataStreamTreeTokenType);
-        }).some((value) => value === result)) {
+        if (filterCodeArray.some((value) => value === result)) {
             result = String.fromCharCode(1);
         }
 

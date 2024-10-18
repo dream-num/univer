@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { romanToArabicMap } from '../../../basics/math';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Arabic extends BaseFunction {
     override minParams = 1;
@@ -68,10 +69,10 @@ export class Arabic extends BaseFunction {
         let result = 0;
 
         for (let i = 0; i < textValue.length; i++) {
-            const currentCharValue = this._romanToNumberMap.get(textValue[i]) || 0;
-            const nextCharValue = this._romanToNumberMap.get(textValue[i + 1]) || 0;
-            const nextnextCharValue = this._romanToNumberMap.get(textValue[i + 2]) || 0;
-            const nextnextnextCharValue = this._romanToNumberMap.get(textValue[i + 3]) || 0;
+            const currentCharValue = romanToArabicMap.get(textValue[i]) || 0;
+            const nextCharValue = romanToArabicMap.get(textValue[i + 1]) || 0;
+            const nextnextCharValue = romanToArabicMap.get(textValue[i + 2]) || 0;
+            const nextnextnextCharValue = romanToArabicMap.get(textValue[i + 3]) || 0;
 
             if (
                 !currentCharValue ||
@@ -91,14 +92,4 @@ export class Arabic extends BaseFunction {
 
         return NumberValueObject.create(isNegtive ? -result : result);
     }
-
-    private _romanToNumberMap = new Map<string, number>([
-        ['I', 1],
-        ['V', 5],
-        ['X', 10],
-        ['L', 50],
-        ['C', 100],
-        ['D', 500],
-        ['M', 1000],
-    ]);
 }

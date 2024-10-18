@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { arabicToRomanMap, romanFormArray } from '../../../basics/math';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Roman extends BaseFunction {
     override minParams = 1;
@@ -95,7 +96,7 @@ export class Roman extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const formArray = this._formArray[formValue];
+        const formArray = romanFormArray[formValue];
 
         let index = formArray.length - 1;
         let result = '';
@@ -107,47 +108,11 @@ export class Roman extends BaseFunction {
 
             numberValue -= number;
 
-            result += this._numberToRomanMap.get(number);
+            result += arabicToRomanMap.get(number);
         }
 
         return StringValueObject.create(result);
     }
-
-    private _formArray: Array<Array<number>> = [
-        [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000, 4000],
-        [1, 4, 5, 9, 10, 40, 45, 50, 90, 95, 100, 400, 450, 500, 900, 950, 1000, 4000],
-        [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 500, 900, 950, 990, 1000, 4000],
-        [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 500, 900, 950, 990, 995, 1000, 4000],
-        [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 499, 500, 900, 950, 990, 995, 999, 1000, 4000],
-    ];
-
-    private _numberToRomanMap = new Map<number, string>([
-        [1, 'I'],
-        [4, 'IV'],
-        [5, 'V'],
-        [9, 'IX'],
-        [10, 'X'],
-        [40, 'XL'],
-        [45, 'VL'],
-        [49, 'IL'],
-        [50, 'L'],
-        [90, 'XC'],
-        [95, 'VC'],
-        [99, 'IC'],
-        [100, 'C'],
-        [400, 'CD'],
-        [450, 'LD'],
-        [490, 'XD'],
-        [495, 'VD'],
-        [499, 'ID'],
-        [500, 'D'],
-        [900, 'CM'],
-        [950, 'LM'],
-        [990, 'XM'],
-        [995, 'VM'],
-        [999, 'IM'],
-        [1000, 'M'],
-    ]);
 
     private _binarySearch(target: number, left: number, right: number, array: Array<number>): number {
         let _left = left;

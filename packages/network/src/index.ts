@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export { UniverNetworkPlugin } from './plugin';
 export { HTTPHeaders } from './services/http/headers';
 export { HTTPService } from './services/http/http.service';
 export { IHTTPImplementation } from './services/http/implementations/implementation';

@@ -14,12 +14,55 @@
  * limitations under the License.
  */
 
+import type { BooleanNumber, ICommandService, type Injector, IUniverInstanceService, IWorkbookData, LocaleType, RedoCommand, UndoCommand, type Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
 import type { ISetColCustomMutationParams } from '../../mutations/set-col-custom.mutation';
-import { ICommandService, type Injector, IUniverInstanceService, RedoCommand, UndoCommand, type Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetColCustomMutation } from '../../mutations/set-col-custom.mutation';
 import { SetColCustomCommand } from '../set-col-custom.command';
 import { createCommandTestBed } from './create-command-test-bed';
+
+const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                name: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 'A1',
+                        },
+                        1: {
+                            v: 'A2',
+                        },
+                    },
+                },
+                columnData: {
+                    1: {
+                        hd: BooleanNumber.FALSE,
+                    },
+                    5: {
+                        custom: {
+                            key: 'value',
+                        },
+                    },
+                },
+                rowData: {
+                    1: {
+                        hd: BooleanNumber.FALSE,
+                    },
+
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+};
 
 describe('test set column custom commands', () => {
     let univer: Univer;
@@ -35,7 +78,7 @@ describe('test set column custom commands', () => {
     }
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO());
         univer = testBed.univer;
         get = testBed.get;
 
@@ -59,25 +102,23 @@ describe('test set column custom commands', () => {
                 2: {
                     color: 'green',
                 },
-                5: {
-                    color: 'blue',
-                },
+                5: undefined,
             },
         };
         await commandService.executeCommand(SetColCustomCommand.id, params);
 
         expect(getColumnCustom(1)).toEqual({ color: 'red' });
         expect(getColumnCustom(2)).toEqual({ color: 'green' });
-        expect(getColumnCustom(5)).toEqual({ color: 'blue' });
+        expect(getColumnCustom(5)).toEqual({ key: 'value' });
 
         await commandService.executeCommand(UndoCommand.id);
-        expect(getColumnCustom(1)).toBeUndefined();
+        expect(getColumnCustom(1)).toBeNull();
         expect(getColumnCustom(2)).toBeNull();
-        expect(getColumnCustom(5)).toBeNull();
+        expect(getColumnCustom(5)).toEqual({ key: 'value' });
 
         await commandService.executeCommand(RedoCommand.id);
         expect(getColumnCustom(1)).toEqual({ color: 'red' });
         expect(getColumnCustom(2)).toEqual({ color: 'green' });
-        expect(getColumnCustom(5)).toEqual({ color: 'blue' });
+        expect(getColumnCustom(5)).toEqual({ key: 'value' });
     });
 });

@@ -284,6 +284,7 @@ export {
 export {
     DeltaColumnWidthCommand,
     type IDeltaColumnWidthCommandParams,
+    type ISetWorksheetColIsAutoWidthCommandParams,
     SetColWidthCommand,
     SetWorksheetColIsAutoWidthCommand,
 } from './commands/commands/set-worksheet-col-width.command';

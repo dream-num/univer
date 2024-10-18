@@ -340,8 +340,6 @@ export class Font extends SheetExtension {
         const cellHeight = endY - startY;
         const cellWidth = endX - startX;
 
-        console.log('rs', row, col, window.getDocsSkeletonPageSize(documentSkeleton));
-
         // WRAP means next line
         if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);

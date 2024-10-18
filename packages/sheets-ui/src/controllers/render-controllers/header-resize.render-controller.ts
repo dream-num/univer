@@ -34,9 +34,8 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
+import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetColIsAutoWidthCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 
-import { SetWorksheetColIsAutoWidthCommand } from '@univerjs/sheets/commands/commands/set-worksheet-col-width.command.js';
 import { Subscription } from 'rxjs';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';

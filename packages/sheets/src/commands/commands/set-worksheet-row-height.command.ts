@@ -292,8 +292,6 @@ export interface ISetWorksheetRowIsAutoHeightCommandParams {
     ranges?: IRange[]; // For Facade API
 }
 
-
-
 export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-row-is-auto-height',

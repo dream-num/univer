@@ -172,9 +172,7 @@ export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angl
         height: allRotatedHeight,
     };
 }
-if (typeof window !== 'undefined') {
-    window.getDocsSkeletonPageSize = getDocsSkeletonPageSize;
-}
+
 interface ICellOtherConfig {
     /**
      * textRotation

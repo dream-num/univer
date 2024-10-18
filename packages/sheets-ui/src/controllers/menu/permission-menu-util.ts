@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, FOCUSING_FX_BAR_EDITOR, UserManagerService } from '@univerjs/core';
-import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookEditablePermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService ,FOCUSING_FX_BAR_EDITOR} from '@univerjs/core';
+import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 

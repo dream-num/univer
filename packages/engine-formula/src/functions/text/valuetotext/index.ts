@@ -83,8 +83,12 @@ export class Valuetotext extends BaseFunction {
             return StringValueObject.create('');
         }
 
-        if (value.isBoolean() || value.isNumber()) {
+        if (value.isBoolean()) {
             return value;
+        }
+
+        if (value.isNumber()) {
+            return NumberValueObject.create(value.getValue() as number);
         }
 
         const result = formatValue ? `"${value.getValue()}"` : `${value.getValue()}`;

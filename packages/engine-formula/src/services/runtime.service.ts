@@ -30,7 +30,7 @@ import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
-import { clearNumberFormatTypeCache } from '../engine/utils/numfmt-kit';
+import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
@@ -370,6 +370,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     clearReferenceAndNumberformatCache() {
         clearNumberFormatTypeCache();
+        clearStringToNumberPatternCache();
         clearReferenceToRangeCache();
     }
 

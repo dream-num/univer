@@ -105,7 +105,7 @@ describe('Test substitute function', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', '中文测试', true, false, null],
-                    [0, '100', '2.34', ' 1 11', -3, ErrorType.NAME],
+                    [0, '100', '2.34', ' 1 11 111', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -119,7 +119,7 @@ describe('Test substitute function', () => {
             const result = testFunction.calculate(text, oldText, newText);
             expect(getObjectValue(result)).toStrictEqual([
                 ['1', 'TRUE', '中文测试', 'TRUE', 'FALSE', ''],
-                ['0', '100', '2.34', 'TRUE1TRUE11', '-3', ErrorType.NAME],
+                ['0', '100', '2.34', 'TRUE1TRUE11TRUE111', '-3', ErrorType.NAME],
             ]);
         });
     });

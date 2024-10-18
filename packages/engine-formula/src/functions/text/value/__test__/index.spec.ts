@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ErrorType } from '../../../../basics/error-type';
-import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../../../../engine/value-object/array-value-object';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
@@ -65,6 +65,24 @@ describe('Test value function', () => {
             });
             const result2 = testFunction.calculate(text2);
             expect(getObjectValue(result2)).toStrictEqual(2.34);
+        });
+
+        it('More test', () => {
+            const text = ValueObjectFactory.create('20%');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(0.2);
+
+            const text2 = ValueObjectFactory.create('$1000');
+            const result2 = testFunction.calculate(text2);
+            expect(getObjectValue(result2)).toStrictEqual(1000);
+
+            const text3 = ValueObjectFactory.create('16:48:00');
+            const result3 = testFunction.calculate(text3);
+            expect(getObjectValue(result3)).toStrictEqual(0.7);
+
+            const text4 = ValueObjectFactory.create('2012-12-12');
+            const result4 = testFunction.calculate(text4);
+            expect(getObjectValue(result4)).toStrictEqual(41255);
         });
     });
 });

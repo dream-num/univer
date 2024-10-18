@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { DataStreamTreeTokenType } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Unichar extends BaseFunction {
     override minParams = 1;
@@ -61,7 +62,24 @@ export class Unichar extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const result = String.fromCharCode(numberValue);
+        let result = String.fromCharCode(numberValue);
+
+        // special case for some characters causing doc stream issues
+        if (Object.values(DataStreamTreeTokenType).filter((value) => {
+            return [
+                DataStreamTreeTokenType.TABLE_START,
+                DataStreamTreeTokenType.TABLE_ROW_START,
+                DataStreamTreeTokenType.TABLE_CELL_START,
+                DataStreamTreeTokenType.TABLE_CELL_END,
+                DataStreamTreeTokenType.TABLE_ROW_END,
+                DataStreamTreeTokenType.TABLE_END,
+                DataStreamTreeTokenType.CUSTOM_RANGE_START,
+                DataStreamTreeTokenType.CUSTOM_RANGE_END,
+                DataStreamTreeTokenType.CUSTOM_BLOCK,
+            ].includes(value as DataStreamTreeTokenType);
+        }).some((value) => value === result)) {
+            result = String.fromCharCode(1);
+        }
 
         return StringValueObject.create(result);
     }

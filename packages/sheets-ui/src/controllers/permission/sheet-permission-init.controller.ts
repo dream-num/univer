@@ -236,7 +236,7 @@ export class SheetPermissionInitController extends Disposable {
                         objectID: rule.permissionId,
                         unitID: unitId,
                         objectType: UnitObject.Worksheet,
-                        actions: [UnitAction.Edit, UnitAction.View],
+                        actions: [UnitAction.Edit, UnitAction.View, UnitAction.ManageCollaborator],
                     });
                 }
 

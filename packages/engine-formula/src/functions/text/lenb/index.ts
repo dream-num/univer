@@ -49,7 +49,7 @@ export class Lenb extends BaseFunction {
         }
 
         if (text.isString() || text.isBoolean() || text.isNumber()) {
-            const textValue = text.getValue().toString();
+            const textValue = `${text.getValue()}`;
             const textByteLen = charLenByte(textValue);
 
             return NumberValueObject.create(textByteLen);

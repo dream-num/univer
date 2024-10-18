@@ -15,11 +15,11 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Countifs } from '../index';
+import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
+import { Countifs } from '../index';
 
 describe('Test countifs function', () => {
     const testFunction = new Countifs(FUNCTION_NAMES_STATISTICAL.COUNTIFS);
@@ -234,7 +234,7 @@ describe('Test countifs function', () => {
             const criteria2 = StringValueObject.create('<5/3/2011');
 
             const resultObject = testFunction.calculate(range1, criteria1, range2, criteria2);
-            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[0]]);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
     });
 });

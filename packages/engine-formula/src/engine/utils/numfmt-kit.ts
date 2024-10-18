@@ -15,7 +15,8 @@
  */
 
 import type { ICellData, Nullable, Styles } from '@univerjs/core';
-import { numfmt } from '@univerjs/core';
+import { LocaleType, numfmt } from '@univerjs/core';
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { operatorToken } from '../../basics/token';
 
 const currencySymbols = [
@@ -278,4 +279,130 @@ export function comparePatternPriority(previousPattern: string, nextPattern: str
     }
 
     return previousPattern || nextPattern;
+}
+
+/**
+ * Get the currency symbol based on the locale
+ * Now define it here
+ * TODO: import from sheet-numfmt currencySymbolMap later
+ *
+ * @param locale
+ * @returns
+ */
+const countryCurrencySymbolMap = new Map<LocaleType, string>([
+    [LocaleType.EN_US, '$'],
+    // [LocaleType.JA_JP, '¥'],
+    [LocaleType.RU_RU, '₽'],
+    [LocaleType.VI_VN, '₫'],
+    [LocaleType.ZH_CN, '¥'],
+    [LocaleType.ZH_TW, 'NT$'],
+]);
+
+function getCurrencySymbol(locale: LocaleType): string {
+    return countryCurrencySymbolMap.get(locale) || '$';
+}
+
+export function getCurrencyFormat(locale: LocaleType, numberDigits: number = 2): string {
+    let _numberDigits = numberDigits;
+
+    if (numberDigits > 127) {
+        _numberDigits = 127;
+    }
+
+    let decimal = '';
+
+    if (_numberDigits > 0) {
+        decimal = `.${'0'.repeat(_numberDigits)}`;
+    }
+
+    return `"${getCurrencySymbol(locale)}"#,##0${decimal}_);[Red]("${getCurrencySymbol(locale)}"#,##0${decimal})`;
+}
+
+export function applyCurrencyFormat(locale: LocaleType, number: number, numberDigits: number = 2): string {
+    return numfmt.format(getCurrencyFormat(locale, numberDigits), number);
+}
+
+/**
+ * String is number pattern or date or time, for example
+ * "20%"
+ * "2012-12-12"
+ * "16:48:00"
+ *
+ * @param locale
+ * @returns
+ */
+const stringToNumberPatternCache = new FormulaAstLRU<{
+    value: number;
+    pattern: string;
+}>(100000);
+
+export function stringIsNumberPattern(input: string) {
+    let _input = input;
+
+    if (_input.startsWith('"') && _input.endsWith('"')) {
+        _input = _input.slice(1, -1);
+    }
+
+    const cacheValue = stringToNumberPatternCache.get(_input);
+
+    if (cacheValue) {
+        return {
+            isNumberPattern: true,
+            value: cacheValue.value,
+            pattern: cacheValue.pattern,
+        };
+    }
+
+    const numberPattern = numfmt.parseNumber(_input);
+
+    if (numberPattern) {
+        stringToNumberPatternCache.set(_input, {
+            value: numberPattern.v as number,
+            pattern: numberPattern.z as string,
+        });
+
+        return {
+            isNumberPattern: true,
+            value: numberPattern.v as number,
+            pattern: numberPattern.z as string,
+        };
+    }
+
+    const datePattern = numfmt.parseDate(_input);
+
+    if (datePattern) {
+        stringToNumberPatternCache.set(_input, {
+            value: datePattern.v as number,
+            pattern: datePattern.z as string,
+        });
+
+        return {
+            isNumberPattern: true,
+            value: datePattern.v as number,
+            pattern: datePattern.z as string,
+        };
+    }
+
+    const timePattern = numfmt.parseTime(_input);
+
+    if (timePattern) {
+        stringToNumberPatternCache.set(_input, {
+            value: timePattern.v as number,
+            pattern: timePattern.z as string,
+        });
+
+        return {
+            isNumberPattern: true,
+            value: timePattern.v as number,
+            pattern: timePattern.z as string,
+        };
+    }
+
+    return {
+        isNumberPattern: false,
+    };
+}
+
+export function clearStringToNumberPatternCache() {
+    stringToNumberPatternCache.clear();
 }

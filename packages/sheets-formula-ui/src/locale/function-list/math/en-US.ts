@@ -107,8 +107,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'A string enclosed in quotation marks, an empty string (""), or a reference to a cell containing text.' },
         },
     },
     ASIN: {
@@ -800,8 +799,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The Arabic numeral you want converted.' },
+            form: { name: 'form', detail: 'A number specifying the type of roman numeral you want. The roman numeral style ranges from Classic to Simplified, becoming more concise as the value of form increases.' },
         },
     },
     ROUND: {

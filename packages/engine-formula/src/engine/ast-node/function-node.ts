@@ -56,6 +56,10 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.isAddress()) {
             this.setAddress();
         }
+
+        if (this._functionExecutor.needsLocale) {
+            this._setLocale();
+        }
     }
 
     override get nodeType() {
@@ -266,6 +270,10 @@ export class FunctionNode extends BaseAstNode {
         referenceObject.setRuntimeArrayFormulaCellData(this._runtimeService.getRuntimeArrayFormulaCellData());
 
         referenceObject.setRuntimeFeatureCellData(this._runtimeService.getRuntimeFeatureCellData());
+    }
+
+    private _setLocale() {
+        this._functionExecutor.setLocale(this._currentConfigService.getLocale());
     }
 }
 

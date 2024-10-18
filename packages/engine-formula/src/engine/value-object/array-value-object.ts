@@ -24,6 +24,7 @@ import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
+import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
@@ -1895,6 +1896,11 @@ export class ValueObjectFactory {
             }
             if (isRealNum(rawValue)) {
                 return NumberValueObject.create(Number(rawValue));
+            }
+
+            const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
+            if (isNumberPattern) {
+                return NumberValueObject.create(value as number, pattern as string);
             }
 
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');

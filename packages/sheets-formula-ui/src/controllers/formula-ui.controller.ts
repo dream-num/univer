@@ -18,6 +18,7 @@ import type { Dependency } from '@univerjs/core';
 import { connectInjector, Disposable, ICommandService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
+import { SheetsUIPart } from '@univerjs/sheets-ui';
 import { BuiltInUIPart, ComponentManager, IMenuManagerService, IShortcutService, IUIPartsService } from '@univerjs/ui';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -26,6 +27,7 @@ import { InsertFunctionOperation } from '../commands/operations/insert-function.
 import { MoreFunctionsOperation } from '../commands/operations/more-functions.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
 import { SearchFunctionOperation } from '../commands/operations/search-function.operation';
+import { FormulaProgressBar } from '../views/formula-progress/FormulaProgress';
 import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
@@ -93,9 +95,8 @@ export class FormulaUIController extends Disposable {
     }
 
     private _registerComponents(): void {
-        this.disposeWithMe(
-            this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
-        );
+        this.disposeWithMe(this._uiPartsService.registerComponent(BuiltInUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector)));
+        this.disposeWithMe(this._uiPartsService.registerComponent(SheetsUIPart.FORMULA_AUX, () => connectInjector(FormulaProgressBar, this._injector)));
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
     }

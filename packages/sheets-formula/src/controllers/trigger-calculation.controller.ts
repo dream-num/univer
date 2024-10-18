@@ -24,7 +24,7 @@ import type {
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, throttle } from '@univerjs/core';
+import { Disposable, ICommandService } from '@univerjs/core';
 import {
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -45,10 +45,12 @@ import { BehaviorSubject } from 'rxjs';
  * This interface is for the progress bar to display the calculation progress.
  */
 export interface ICalculationProgress {
+    /** Task that already completed. */
     done: number;
     /** The total number of formulas need to calculate. */
     count: number;
 }
+
 const NilProgress: ICalculationProgress = { done: 0, count: 0 };
 
 const lo = { onlyLocal: true };
@@ -70,16 +72,40 @@ export class TriggerCalculationController extends Disposable {
 
     private _startExecutionTime: number = 0;
 
-    private _formulaCalculationDoneCount: number = 0;
-
-    private _arrayFormulaCalculationDoneCount: number = 0;
-
     private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
 
     private _restartCalculation = false;
 
+    private _totalCalculationTaskCount = 0;
+    private _formulaCalculationDoneCount = 0;
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
     readonly progress$ = this._progress$.asObservable();
+
+    private _updateProgress(): void {
+        this._progress$.next({ done: this._formulaCalculationDoneCount, count: this._totalCalculationTaskCount });
+    }
+
+    private _addTotalCount(count: number): void {
+        this._totalCalculationTaskCount += count;
+        this._updateProgress();
+    }
+
+    private _addDoneTask(count: number): void {
+        this._formulaCalculationDoneCount += count;
+        this._formulaCalculationDoneCount = Math.min(this._formulaCalculationDoneCount, this._totalCalculationTaskCount);
+        this._updateProgress();
+    }
+
+    private _completeProgress(): void {
+        this._formulaCalculationDoneCount = this._totalCalculationTaskCount;
+        this._updateProgress();
+    }
+
+    private _clearPregress(): void {
+        this._formulaCalculationDoneCount = 0;
+        this._totalCalculationTaskCount = 0;
+        this._updateProgress();
+    }
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -90,7 +116,6 @@ export class TriggerCalculationController extends Disposable {
         this._commandExecutedListener();
         this._initialExecuteFormulaProcessListener();
         this._initialExecuteFormula();
-        this._initialProgressBar();
     }
 
     override dispose(): void {
@@ -263,8 +288,6 @@ export class TriggerCalculationController extends Disposable {
     // eslint-disable-next-line max-lines-per-function
     private _initialExecuteFormulaProcessListener() {
         // Assignment operation after formula calculation.
-        const debouncedFormulaPushTask = throttle(this._pushFormulaTask.bind(this), 300);
-        const debouncedArrayFormulaPushTask = throttle(this._pushArrayFormulaTask.bind(this), 300);
         let startDependencyTimer: NodeJS.Timeout | null = null;
         let calculationProcessCount = 0; // Multiple calculations are performed in parallel, but only one progress bar is displayed, and the progress is only closed after the last calculation is completed.
         let formulaCalculationCount = 0;
@@ -303,9 +326,9 @@ export class TriggerCalculationController extends Disposable {
                         // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
                         startDependencyTimer = setTimeout(() => {
                             // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
-                            const taskCount = (formulaCalculationCount - this._formulaCalculationDoneCount) + (arrayFormulaCalculationCount - this._arrayFormulaCalculationDoneCount) + 100;
-                            // this._progressService.insertTaskCount(taskCount);
-                            // this._progressService.pushTask({ count: 5 });
+                            const taskCount = (formulaCalculationCount + arrayFormulaCalculationCount - this._formulaCalculationDoneCount) + 100;
+                            this._addTotalCount(taskCount);
+                            this._addDoneTask(5);
                             startDependencyTimer = null;
                         }, 1000);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
@@ -315,30 +338,22 @@ export class TriggerCalculationController extends Disposable {
                             if (startDependencyTimer) {
                                 formulaCalculationCount += totalFormulasToCalculate;
                             } else {
-                                // this._progressService.insertTaskCount(totalFormulasToCalculate);
+                                this._addTotalCount(totalFormulasToCalculate);
                             }
                         }
 
-                        if (startDependencyTimer) {
-                            this._formulaCalculationDoneCount = completedFormulasCount;
-                        } else {
-                            debouncedFormulaPushTask(completedFormulasCount);
-                        }
+                        this._addDoneTask(completedFormulasCount);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
                         if (completedArrayFormulasCount === 1 && !needStartArrayFormulaProgress) {
                             needStartArrayFormulaProgress = true;
                             if (startDependencyTimer) {
                                 arrayFormulaCalculationCount += totalArrayFormulasToCalculate;
                             } else {
-                                // this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
+                                this._addTotalCount(totalArrayFormulasToCalculate);
                             }
                         }
 
-                        if (startDependencyTimer) {
-                            this._arrayFormulaCalculationDoneCount = completedArrayFormulasCount;
-                        } else {
-                            debouncedArrayFormulaPushTask(completedArrayFormulasCount);
-                        }
+                        this._addDoneTask(completedArrayFormulasCount);
                     }
 
                     this._executionInProgressParams = params.stageInfo;
@@ -357,7 +372,7 @@ export class TriggerCalculationController extends Disposable {
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
                             // this._executingCommandQueue = [];
-                            // this._progressService.stop();
+                            this._clearPregress();
                             calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:
@@ -379,12 +394,11 @@ export class TriggerCalculationController extends Disposable {
                         } else {
                             // Manually hide the progress bar only if no other calculations are in process
                             if (state === FormulaExecutedStateType.SUCCESS) {
-                                // this._progressService.complete();
+                                this._completeProgress();
                             }
                         }
 
                         this._formulaCalculationDoneCount = 0;
-                        this._arrayFormulaCalculationDoneCount = 0;
                         needStartFormulaProgress = false;
                         needStartArrayFormulaProgress = false;
                     }
@@ -429,45 +443,5 @@ export class TriggerCalculationController extends Disposable {
             },
             lo
         );
-    }
-
-    /**
-     * The user manually stops the progress bar
-     */
-    private _initialProgressBar() {
-        // TODO: expose method to stop calculation
-        // this.disposeWithMe(this._progressService.progressVisible$.subscribe((isVisible) => {
-        //     if (!isVisible) {
-        //         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
-        //     }
-        // }));
-    }
-
-    /**
-     * Update progress by completed count
-     * @param completedCount
-     */
-    private _pushFormulaTask(completedCount: number) {
-        // if (this._progressService.getTaskCount() === 0) {
-        //     return;
-        // }
-
-        const count = completedCount - this._formulaCalculationDoneCount;
-        this._formulaCalculationDoneCount = completedCount;
-        // this._progressService.pushTask({ count });
-    }
-
-    /**
-     * Update progress by completed count
-     * @param completedCount
-     */
-    private _pushArrayFormulaTask(completedCount: number) {
-        // if (this._progressService.getTaskCount() === 0) {
-        //     return;
-        // }
-
-        // const count = completedCount - this._arrayFormulaCalculationDoneCount;
-        // this._arrayFormulaCalculationDoneCount = completedCount;
-        // this._progressService.pushTask({ count });
     }
 }

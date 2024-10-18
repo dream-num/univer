@@ -45,7 +45,6 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -94,7 +93,6 @@ export class UniverMobileUIPlugin extends Plugin {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
 
             // controllers

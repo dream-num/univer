@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import { act, renderHook } from '@testing-library/react-hooks';
 import type { IProgressStep } from '../progress/progress.service';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { ProgressService } from '../progress/progress.service';
 
 describe('ProgressService', () => {

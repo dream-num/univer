@@ -16,7 +16,7 @@
 
 import type { ICommand, ICommandInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { CommandType, DocumentFlavor, ICommandService, IUniverInstanceService, JSONX, ObjectRelativeFromV } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -101,9 +101,9 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
             for (const drawingId in drawings) {
                 const drawing = drawings[drawingId];
 
-                if (drawing.layoutType === PositionedObjectLayoutType.INLINE) {
-                    continue;
-                }
+                // if (drawing.layoutType === PositionedObjectLayoutType.INLINE) {
+                //     continue;
+                // }
 
                 const customBlock = customBlocks.find((block) => block.blockId === drawingId);
 

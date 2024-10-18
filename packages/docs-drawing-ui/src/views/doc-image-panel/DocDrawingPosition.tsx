@@ -75,24 +75,22 @@ export const DocDrawingPosition = (props: IDocDrawingPositionProps) => {
         value: String(ObjectRelativeFromH.MARGIN),
     }];
 
-    const VERTICAL_RELATIVE_FROM = documentFlavor === DocumentFlavor.MODERN ?
-        [{
-            label: localeService.t('image-position.paragraph'),
-            value: String(ObjectRelativeFromV.PARAGRAPH),
-        }] :
-        [{
-            label: localeService.t('image-position.line'),
-            value: String(ObjectRelativeFromV.LINE),
-        }, {
-            label: localeService.t('image-position.page'),
-            value: String(ObjectRelativeFromV.PAGE),
-        }, {
-            label: localeService.t('image-position.margin'),
-            value: String(ObjectRelativeFromV.MARGIN),
-        }, {
-            label: localeService.t('image-position.paragraph'),
-            value: String(ObjectRelativeFromV.PARAGRAPH),
-        }];
+    const VERTICAL_RELATIVE_FROM = [{
+        label: localeService.t('image-position.line'),
+        value: String(ObjectRelativeFromV.LINE),
+        disabled: documentFlavor === DocumentFlavor.MODERN,
+    }, {
+        label: localeService.t('image-position.page'),
+        value: String(ObjectRelativeFromV.PAGE),
+        disabled: documentFlavor === DocumentFlavor.MODERN,
+    }, {
+        label: localeService.t('image-position.margin'),
+        value: String(ObjectRelativeFromV.MARGIN),
+        disabled: documentFlavor === DocumentFlavor.MODERN,
+    }, {
+        label: localeService.t('image-position.paragraph'),
+        value: String(ObjectRelativeFromV.PARAGRAPH),
+    }];
 
     const [disabled, setDisabled] = useState(true);
     const [hPosition, setHPosition] = useState<IObjectPositionH>({

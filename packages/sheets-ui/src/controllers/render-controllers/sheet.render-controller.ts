@@ -15,10 +15,8 @@
  */
 
 import type { ICommandInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import type { IAfterRender$Info, IBasicFrameInfo, IExtendFrameInfo, IRenderContext, IRenderModule, ISummaryFrameInfo, ITimeMetric, IViewportInfos, Scene } from '@univerjs/engine-render';
 import { CommandType, ICommandService, Inject, Optional, Rectangle, RxDisposable } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     Rect,
     ScrollBar,
@@ -408,13 +406,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _markUnitDirty(command: ICommandInfo) {
         const { mainComponent: spreadsheet, scene } = this._context;
-
-        if (command.id === SetFormulaCalculationNotificationMutation.id) {
-            const params = command.params as ISetFormulaCalculationNotificationMutation;
-            if (params.stageInfo != null) {
-                return;
-            }
-        }
 
         if (spreadsheet) {
             spreadsheet.makeDirty(); // refresh spreadsheet

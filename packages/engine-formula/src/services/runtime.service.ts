@@ -36,55 +36,15 @@ import { objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
-/**
- * IDLE: Idle phase of the formula engine.
- *
- * DEPENDENCY: Dependency calculation phase, where the formulas that need to be calculated are determined by the modified area,
- * as well as their dependencies. This outputs an array of formulas to execute.
- *
- * INTERPRETER：Formula execution phase, where the calculation of formulas begins.
- *
- */
-export enum FormulaExecuteStageType {
-    IDLE,
-    START_DEPENDENCY,
-    START_CALCULATION,
-    CURRENTLY_CALCULATING,
-    START_DEPENDENCY_ARRAY_FORMULA,
-    START_CALCULATION_ARRAY_FORMULA,
-    CURRENTLY_CALCULATING_ARRAY_FORMULA,
-    CALCULATION_COMPLETED,
-}
-
-export enum FormulaExecutedStateType {
-    INITIAL,
-    STOP_EXECUTION,
-    NOT_EXECUTED,
-    SUCCESS,
-}
-
 export interface IAllRuntimeData {
     unitData: IRuntimeUnitDataType;
     arrayFormulaRange: IArrayFormulaRangeType;
     unitOtherData: IRuntimeOtherUnitDataType;
-    functionsExecutedState: FormulaExecutedStateType;
     arrayFormulaCellData: IRuntimeUnitDataType;
     clearArrayFormulaCellData: IRuntimeUnitDataType;
 
     runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType };
     runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType };
-}
-
-export interface IExecutionInProgressParams {
-    totalFormulasToCalculate: number;
-    completedFormulasCount: number;
-
-    totalArrayFormulasToCalculate: number;
-    completedArrayFormulasCount: number;
-
-    formulaCycleIndex: number;
-
-    stage: FormulaExecuteStageType;
 }
 
 export interface IFormulaRuntimeService {
@@ -119,47 +79,13 @@ export interface IFormulaRuntimeService {
 
     getUnitArrayFormula(): IArrayFormulaRangeType;
 
-    stopExecution(): void;
-
-    setFormulaExecuteStage(type: FormulaExecuteStageType): void;
-
     setFormulaCycleIndex(index: number): void;
-
-    isStopExecution(): boolean;
-
-    getFormulaExecuteStage(): FormulaExecuteStageType;
 
     setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType): void;
 
     getRuntimeOtherData(): IRuntimeOtherUnitDataType;
 
     getAllRuntimeData(): IAllRuntimeData;
-
-    markedAsSuccessfullyExecuted(): void;
-
-    markedAsNoFunctionsExecuted(): void;
-
-    markedAsStopFunctionsExecuted(): void;
-
-    markedAsInitialFunctionsExecuted(): void;
-
-    setTotalFormulasToCalculate(value: number): void;
-
-    getTotalFormulasToCalculate(): number;
-
-    setCompletedFormulasCount(value: number): void;
-
-    getCompletedFormulasCount(): number;
-
-    getRuntimeState(): IExecutionInProgressParams;
-
-    setTotalArrayFormulasToCalculate(value: number): void;
-
-    getTotalArrayFormulasToCalculate(): number;
-
-    setCompletedArrayFormulasCount(value: number): void;
-
-    getCompletedArrayFormulasCount(): number;
 
     enableCycleDependency(): void;
 
@@ -181,10 +107,6 @@ export interface IFormulaRuntimeService {
 }
 
 export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
-    private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
-
-    private _stopState = false;
-
     private _currentRow: number = -1;
     private _currentColumn: number = -1;
 
@@ -207,8 +129,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType } = {};
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
-
-    private _functionsExecutedState: FormulaExecutedStateType = FormulaExecutedStateType.INITIAL;
 
     // lambdaId: { key: BaseAstNode }
     private _functionDefinitionPrivacyVar: Map<string, Map<string, Nullable<BaseAstNode>>> = new Map();
@@ -272,38 +192,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._isCycleDependency;
     }
 
-    setTotalArrayFormulasToCalculate(value: number) {
-        this._totalArrayFormulasToCalculate = value;
-    }
-
-    getTotalArrayFormulasToCalculate() {
-        return this._totalArrayFormulasToCalculate;
-    }
-
-    setCompletedArrayFormulasCount(value: number) {
-        this._completedArrayFormulasCount = value;
-    }
-
-    getCompletedArrayFormulasCount() {
-        return this._completedArrayFormulasCount;
-    }
-
-    setTotalFormulasToCalculate(value: number) {
-        this._totalFormulasToCalculate = value;
-    }
-
-    getTotalFormulasToCalculate() {
-        return this._totalFormulasToCalculate;
-    }
-
-    setCompletedFormulasCount(value: number) {
-        this._completedFormulasCount = value;
-    }
-
-    getCompletedFormulasCount() {
-        return this._completedFormulasCount;
-    }
-
     setFormulaCycleIndex(index: number) {
         this._formulaCycleIndex = index;
     }
@@ -312,42 +200,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._formulaCycleIndex;
     }
 
-    markedAsSuccessfullyExecuted() {
-        this._functionsExecutedState = FormulaExecutedStateType.SUCCESS;
-    }
-
-    markedAsNoFunctionsExecuted() {
-        this._functionsExecutedState = FormulaExecutedStateType.NOT_EXECUTED;
-    }
-
-    markedAsStopFunctionsExecuted() {
-        this._functionsExecutedState = FormulaExecutedStateType.STOP_EXECUTION;
-    }
-
-    markedAsInitialFunctionsExecuted() {
-        this._functionsExecutedState = FormulaExecutedStateType.INITIAL;
-    }
-
-    stopExecution() {
-        this._stopState = true;
-
-        this.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-    }
-
-    isStopExecution() {
-        return this._stopState;
-    }
-
-    setFormulaExecuteStage(type: FormulaExecuteStageType) {
-        this._formulaExecuteStage = type;
-    }
-
-    getFormulaExecuteStage() {
-        return this._formulaExecuteStage;
-    }
-
     reset() {
-        this._formulaExecuteStage = FormulaExecuteStageType.IDLE;
         this._runtimeData = {};
         this._runtimeOtherData = {};
         this._unitArrayFormulaRange = {};
@@ -358,9 +211,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         // this._runtimeFeatureRange = {};
 
         this._functionDefinitionPrivacyVar.clear();
-        this.markedAsInitialFunctionsExecuted();
-
-        this._stopState = false;
 
         this._isCycleDependency = false;
 
@@ -630,28 +480,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             unitData: this.getUnitData(),
             arrayFormulaRange: this.getUnitArrayFormula(),
             unitOtherData: this.getRuntimeOtherData(),
-            functionsExecutedState: this._functionsExecutedState,
             arrayFormulaCellData: this.getRuntimeArrayFormulaCellData(),
             clearArrayFormulaCellData: this.getRuntimeClearArrayFormulaCellData(),
 
             runtimeFeatureRange: this.getRuntimeFeatureRange(),
             runtimeFeatureCellData: this.getRuntimeFeatureCellData(),
-        };
-    }
-
-    getRuntimeState(): IExecutionInProgressParams {
-        return {
-            totalFormulasToCalculate: this.getTotalFormulasToCalculate(),
-
-            completedFormulasCount: this.getCompletedFormulasCount(),
-
-            totalArrayFormulasToCalculate: this.getTotalArrayFormulasToCalculate(),
-
-            completedArrayFormulasCount: this.getCompletedArrayFormulasCount(),
-
-            stage: this.getFormulaExecuteStage(),
-
-            formulaCycleIndex: this.getFormulaCycleIndex(),
         };
     }
 

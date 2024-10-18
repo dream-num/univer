@@ -24,13 +24,12 @@ import type {
 } from '../basics/common';
 import type { LexerNode } from '../engine/analysis/lexer-node';
 
-import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
+import type { IAllRuntimeData } from './runtime.service';
 import {
     Disposable,
     IConfigService,
     Inject,
     ObjectMatrix,
-    requestImmediateMacroTask,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
@@ -42,7 +41,7 @@ import { FormulaDependencyGenerator } from '../engine/dependency/formula-depende
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
-import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
+import { IFormulaRuntimeService } from './runtime.service';
 
 export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
@@ -51,17 +50,9 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export class CalculateFormulaService extends Disposable {
-    private readonly _executionStartListener$ = new Subject<boolean>();
-
-    readonly executionStartListener$ = this._executionStartListener$.asObservable();
-
     private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
 
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
-
-    private readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
-
-    readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     constructor(
         @IConfigService private readonly _configService: IConfigService,
@@ -73,13 +64,6 @@ export class CalculateFormulaService extends Disposable {
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder
     ) {
         super();
-    }
-
-    /**
-     * Stop the execution of the formula.
-     */
-    stopFormulaExecution() {
-        this._runtimeService.stopExecution();
     }
 
     /**
@@ -98,8 +82,6 @@ export class CalculateFormulaService extends Disposable {
     }
 
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
-        this._executionStartListener$.next(true);
-
         this._currentConfigService.load(formulaDatasetConfig);
 
         this._runtimeService.reset();
@@ -118,10 +100,6 @@ export class CalculateFormulaService extends Disposable {
                 break;
             }
         }
-
-        this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CALCULATION_COMPLETED);
-
-        this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
 
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
 
@@ -148,7 +126,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
 
-        await this._apply(true);
+        await this._apply();
 
         return true;
     }
@@ -215,43 +193,12 @@ export class CalculateFormulaService extends Disposable {
         return { dirtyRanges, excludedCell };
     }
 
-    // eslint-disable-next-line max-lines-per-function
-    private async _apply(isArrayFormulaState = false) {
-        if (isArrayFormulaState) {
-            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY_ARRAY_FORMULA);
-        } else {
-            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_DEPENDENCY);
-        }
-
-        this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-
+    private async _apply() {
         const treeList = await this._formulaDependencyGenerator.generate();
 
         const interpreter = this._interpreter;
 
-        if (isArrayFormulaState) {
-            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION_ARRAY_FORMULA);
-
-            this._runtimeService.setTotalArrayFormulasToCalculate(treeList.length);
-        } else {
-            this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.START_CALCULATION);
-
-            this._runtimeService.setTotalFormulasToCalculate(treeList.length);
-        }
-
-        this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-
-        let pendingTasks: (() => void)[] = [];
-
         for (let i = 0, len = treeList.length; i < len; i++) {
-            /**
-             * For every functions, execute a setTimeout to wait for external command input.
-             */
-            await new Promise((resolve) => {
-                const calCancelTask = requestImmediateMacroTask(resolve);
-                pendingTasks.push(calCancelTask);
-            });
-
             const tree = treeList[i];
             const nodeData = tree.nodeData;
             const getDirtyData = tree.getDirtyData;
@@ -297,30 +244,6 @@ export class CalculateFormulaService extends Disposable {
                     this._runtimeService.setRuntimeData(value);
                 }
             }
-
-            if (isArrayFormulaState) {
-                this._runtimeService.setFormulaExecuteStage(
-                    FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA
-                );
-
-                this._runtimeService.setCompletedArrayFormulasCount(i + 1);
-            } else {
-                this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.CURRENTLY_CALCULATING);
-
-                this._runtimeService.setCompletedFormulasCount(i + 1);
-            }
-
-            this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-        }
-
-        // clear all pending tasks
-        pendingTasks.forEach((cancel) => cancel());
-        pendingTasks = [];
-
-        if (treeList.length > 0) {
-            this._runtimeService.markedAsSuccessfullyExecuted();
-        } else if (!isArrayFormulaState) {
-            this._runtimeService.markedAsNoFunctionsExecuted();
         }
 
         this._runtimeService.clearReferenceAndNumberformatCache();

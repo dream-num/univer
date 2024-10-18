@@ -15,7 +15,6 @@
  */
 
 import { ThemeService, useDependency } from '@univerjs/core';
-import { CloseSingle } from '@univerjs/icons';
 import React, { useEffect, useMemo, useRef } from 'react';
 import styles from './index.module.less';
 
@@ -23,11 +22,10 @@ export interface IProgressBarProps {
     progress: { done: number; count: number };
 
     barColor?: string;
-    onTerminate?: () => void;
 }
 
 export function ProgressBar(props: IProgressBarProps) {
-    const { barColor, progress, onTerminate } = props;
+    const { barColor, progress } = props;
     const { count, done } = progress;
 
     const themeService = useDependency(ThemeService);
@@ -57,7 +55,7 @@ export function ProgressBar(props: IProgressBarProps) {
                     }}
                 />
             </div>
-            <div className={styles.progressBarCloseButton} onClick={onTerminate}><CloseSingle /></div>
+            <div className={styles.progressBarCloseButton}></div>
         </div>
     );
 };

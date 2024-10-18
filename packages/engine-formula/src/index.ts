@@ -47,13 +47,10 @@ export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchPa
 export { SetDefinedNameMutationFactory } from './commands/mutations/set-defined-name.mutation';
 export { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from './commands/mutations/set-feature-calculation.mutation';
 export {
-    type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
     type ISetFormulaCalculationStartMutation,
-    SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
-    SetFormulaCalculationStopMutation,
 } from './commands/mutations/set-formula-calculation.mutation';
 export { type ISetFormulaDataMutationParams, SetFormulaDataMutation } from './commands/mutations/set-formula-data.mutation';
 export { type IRemoveOtherFormulaMutationParams, type ISetOtherFormulaMutationParams, RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
@@ -152,8 +149,7 @@ export { FeatureCalculationManagerService, IFeatureCalculationManagerService } f
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
-export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
+export { type IAllRuntimeData } from './services/runtime.service';
 export { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';

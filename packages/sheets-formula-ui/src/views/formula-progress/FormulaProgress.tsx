@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import { ICommandService, useDependency, useObservable } from '@univerjs/core';
-import { SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { useDependency, useObservable } from '@univerjs/core';
 import { TriggerCalculationController } from '@univerjs/sheets-formula';
 import { ProgressBar } from '@univerjs/ui';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 export function FormulaProgressBar() {
     const triggerCalculationController = useDependency(TriggerCalculationController);
-    const commandService = useDependency(ICommandService);
-
     const progress = useObservable(triggerCalculationController.progress$)!;
 
-    const terminateCalculation = useCallback(() => {
-        commandService.executeCommand(SetFormulaCalculationStopMutation.id);
-    }, [commandService]);
-
-    return <ProgressBar progress={progress} onTerminate={terminateCalculation} />;
+    return <ProgressBar progress={progress} />;
 }

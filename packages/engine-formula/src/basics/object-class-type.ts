@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-
-export class ObjectClassType extends Disposable {
+export class ObjectClassType {
     pattern: string = '';
+
+    dispose() {
+
+    }
 
     getPattern() {
         return this.pattern;

@@ -1,5 +1,17 @@
 
 
+## [0.4.1](https://github.com/dream-num/univer/compare/v0.4.0...v0.4.1) (2024-10-18)
+
+
+### Bug Fixes
+
+* **sheets-ui:** can't edit after dispose ([#3788](https://github.com/dream-num/univer/issues/3788)) ([77b39cd](https://github.com/dream-num/univer/commit/77b39cda6286a30fc639ea59ef9c6f4352882d85))
+
+
+### Performance Improvements
+
+* **formula:** calculation speed up ([#3738](https://github.com/dream-num/univer/issues/3738)) ([cea4571](https://github.com/dream-num/univer/commit/cea4571fc0bae64cb0f826ec81cc22761c4af222))
+
 # [0.4.0](https://github.com/dream-num/univer/compare/v0.4.0-alpha.2...v0.4.0) (2024-10-17)
 
 

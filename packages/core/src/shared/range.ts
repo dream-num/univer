@@ -20,6 +20,10 @@ import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { Rectangle } from './rectangle';
 
 export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false): IRange {
+    if (refOffsetX === 0 && refOffsetY === 0) {
+        return range;
+    }
+
     let newRange = { ...range };
 
     const startAbsoluteRefType = newRange.startAbsoluteRefType || AbsoluteRefType.NONE;

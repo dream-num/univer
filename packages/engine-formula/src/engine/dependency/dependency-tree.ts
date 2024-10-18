@@ -24,8 +24,9 @@ import type {
 
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
-import type { BaseAstNode } from '../ast-node/base-ast-node';
-import { Disposable, generateRandomId } from '@univerjs/core';
+
+import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
+import { generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -42,10 +43,10 @@ export enum FDtreeStateType {
  * A dependency tree, capable of calculating mutual dependencies,
  * is used to determine the order of formula calculations.
  */
-export class FormulaDependencyTree extends Disposable {
+export class FormulaDependencyTree {
     treeId: string = '';
 
-    node: Nullable<BaseAstNode>;
+    nodeData: Nullable<IExecuteAstNodeData>;
 
     children: Set<FormulaDependencyTree> = new Set();
 
@@ -74,7 +75,6 @@ export class FormulaDependencyTree extends Disposable {
     isCache: boolean = false;
 
     constructor(treeId?: string) {
-        super();
         if (treeId != null) {
             this.treeId = treeId;
         } else {
@@ -91,9 +91,7 @@ export class FormulaDependencyTree extends Disposable {
 
     private _state = FDtreeStateType.DEFAULT;
 
-    override dispose(): void {
-        super.dispose();
-
+    dispose(): void {
         // this.children.forEach((tree) => {
         //     tree.dispose();
         // });
@@ -104,7 +102,9 @@ export class FormulaDependencyTree extends Disposable {
 
         this.parents = new Set();
 
-        this.node?.dispose();
+        this.nodeData?.node.dispose();
+
+        this.nodeData = null;
     }
 
     disposeWithChildren() {
@@ -272,83 +272,3 @@ export class FormulaDependencyTree extends Disposable {
         this.parents.add(tree);
     }
 }
-
-// interface IFormulaDependencyTreeCacheItem {
-//     unitRangeWithToken: IUnitRangeWithToken;
-//     treeList: FormulaDependencyTree[];
-// }
-
-// export class FormulaDependencyTreeCache extends Disposable {
-//     private _cacheItems = new Map<string, IFormulaDependencyTreeCacheItem>();
-
-//     override dispose(): void {
-//         this.clear();
-//     }
-
-//     size() {
-//         return this._cacheItems.size;
-//     }
-
-//     get length() {
-//         return this._cacheItems.size;
-//     }
-
-//     add(unitRangeWithToken: IUnitRangeWithToken, tree: FormulaDependencyTree) {
-//         const { token } = unitRangeWithToken;
-//         if (!this._cacheItems.has(token)) {
-//             this._cacheItems.set(token, {
-//                 unitRangeWithToken,
-//                 treeList: [tree],
-//             });
-//             return;
-//         }
-
-//         const cacheItem = this._cacheItems.get(token)!;
-//         cacheItem.treeList.push(tree);
-//     }
-
-//     clear() {
-//         this._cacheItems.clear();
-//     }
-
-//     remove(token: string, tree: FormulaDependencyTree) {
-//         if (!this._cacheItems.has(token)) {
-//             return;
-//         }
-
-//         const cacheItem = this._cacheItems.get(token)!;
-//         const index = cacheItem.treeList.indexOf(tree);
-//         if (index !== -1) {
-//             cacheItem.treeList.splice(index, 1);
-//         }
-//     }
-
-//     delete(token: string) {
-//         this._cacheItems.delete(token);
-//     }
-
-//     /**
-//      * Determine whether range is dependent on other trees.
-//      * @param dependenceTree
-//      */
-//     dependency(dependenceTree: FormulaDependencyTree) {
-//         this._cacheItems.forEach((cacheItem) => {
-//             const { unitRangeWithToken, treeList } = cacheItem;
-//             const { gridRange } = unitRangeWithToken;
-//             const { unitId, sheetId, range } = gridRange;
-
-//             if (
-//                 dependenceTree.unitId === unitId &&
-//                 dependenceTree.subUnitId === sheetId &&
-//                 dependenceTree.inRangeData(range)
-//             ) {
-//                 treeList.forEach((tree) => {
-//                     if (tree === dependenceTree || tree.children.includes(dependenceTree)) {
-//                         return true;
-//                     }
-//                     tree.pushChildren(dependenceTree);
-//                 });
-//             }
-//         });
-//     }
-// }

@@ -21,7 +21,7 @@ import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
-import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
+import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
@@ -1898,7 +1898,7 @@ export class ValueObjectFactory {
             }
 
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');
-            if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValueSingleLine)) {
+            if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && regexTestArrayValue(rawValueSingleLine)) {
                 return ArrayValueObject.create(rawValueSingleLine);
             }
 

@@ -19,7 +19,7 @@ import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton
 
 import type { UniverRenderingContext } from '../../../context';
 import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
-import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
+import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
@@ -39,12 +39,6 @@ export class Line extends docExtension {
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
         const line = glyph.parent?.parent;
-        const { renderConfig } = this.extensionOffset;
-        // rotation of cell text
-        // rotate up down 90 cause problem, univer-pro/issues/2802, This is only a temporary solution
-        const vertexAngle = renderConfig?.vertexAngle || 0;
-        const centerAngle = renderConfig?.centerAngle || 0;
-        const drawStrikeAndUnderline = !(centerAngle === 0 && vertexAngle !== 0 && vertexAngle % 90 === 0);
         const { ts: textStyle, bBox, content } = glyph;
 
         if (line == null || textStyle == null || content === '\r') {
@@ -57,7 +51,7 @@ export class Line extends docExtension {
         const DELTA = 0.5;
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset, bbl: bottomBorderLine } = textStyle;
 
-        if (drawStrikeAndUnderline && underline) {
+        if (underline) {
             const startY = asc + dsc;
             this._drawLine(ctx, glyph, underline, startY, scale);
         }
@@ -67,7 +61,7 @@ export class Line extends docExtension {
             this._drawLine(ctx, glyph, bottomBorderLine, startY, scale, 2);
         }
 
-        if (drawStrikeAndUnderline && strikethrough) {
+        if (strikethrough) {
             // strikethrough position is the middle of bounding box ascent and descent.
             let startY = asc + bd - strikeoutPosition - DELTA;
 
@@ -126,12 +120,10 @@ export class Line extends docExtension {
 
         const { centerAngle: centerAngleDeg = 0, vertexAngle: vertexAngleDeg = 0 } = renderConfig;
 
-        const centerAngle = degToRad(centerAngleDeg);
-        const vertexAngle = degToRad(vertexAngleDeg);
-
         ctx.save();
 
-        ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+        // translate with precision is handled in moveToByPrecision and lineToByPrecision. NO NEED to do this again!
+        // ctx.translateWithPrecision(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
         const color =
             (c === BooleanNumber.TRUE ? getColorStyle(glyph.ts?.cl) : getColorStyle(colorStyle)) || COLOR_BLACK_RGB;
@@ -140,6 +132,8 @@ export class Line extends docExtension {
 
         this._setLineType(ctx, lineType || TextDecoration.SINGLE);
 
+        const centerAngle = degToRad(centerAngleDeg);
+        const vertexAngle = degToRad(vertexAngleDeg);
         const start = calculateRectRotate(
             originTranslate.addByPoint(left, startY),
             Vector2.create(0, 0),
@@ -159,7 +153,6 @@ export class Line extends docExtension {
         ctx.moveToByPrecision(start.x, start.y);
         ctx.lineToByPrecision(end.x, end.y);
         ctx.stroke();
-
         ctx.restore();
     }
 

@@ -106,6 +106,7 @@ export { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '
 export {
     WorkbookCommentPermission,
     WorkbookCopyPermission,
+    WorkbookCreateProtectPermission,
     WorkbookCreateSheetPermission,
     WorkbookDeleteSheetPermission,
     WorkbookDuplicatePermission,
@@ -122,8 +123,8 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookViewPermission,
     WorksheetCopyPermission,
-    WorksheetDeleteColumnPermission,
 
+    WorksheetDeleteColumnPermission,
     WorksheetDeleteRowPermission,
     WorksheetEditExtraObjectPermission,
     WorksheetEditPermission,

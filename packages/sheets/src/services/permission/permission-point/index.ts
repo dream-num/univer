@@ -19,6 +19,7 @@ export { RangeProtectionPermissionViewPoint } from './range/view';
 export { WorkbookCommentPermission } from './workbook/comment';
 export { WorkbookCopyPermission } from './workbook/copy';
 export { WorkbookCopySheetPermission } from './workbook/copy-sheet';
+export { WorkbookCreateProtectPermission } from './workbook/create-permission';
 export { WorkbookCreateSheetPermission } from './workbook/create-sheet';
 export { WorkbookDeleteSheetPermission } from './workbook/delete-sheet';
 export { WorkbookDuplicatePermission } from './workbook/duplicate';

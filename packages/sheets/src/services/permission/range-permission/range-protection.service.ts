@@ -109,7 +109,7 @@ export class RangeProtectionService extends Disposable {
                                 objectID: rule.permissionId,
                                 unitID: unitId,
                                 objectType: UnitObject.SelectRange,
-                                actions: [UnitAction.View, UnitAction.Edit],
+                                actions: [UnitAction.View, UnitAction.Edit, UnitAction.ManageCollaborator],
                             });
                         });
 

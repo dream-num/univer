@@ -63,7 +63,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.30",
+        "@univerjs/protocol": "0.1.39-alpha.33",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

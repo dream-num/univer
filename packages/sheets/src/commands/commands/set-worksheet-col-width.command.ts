@@ -15,7 +15,10 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
+import type { ISetWorksheetColIsAutoWidthMutationParams, ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
+
 import {
+    BooleanNumber,
     CommandType,
     ICommandService,
     IUndoRedoService,
@@ -24,11 +27,11 @@ import {
     Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
-
 import { SheetsSelectionsService } from '../../services/selections/selection-manager.service';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
 import {
+    SetWorksheetColIsAutoWidthMutation,
+    SetWorksheetColIsAutoWidthMutationFactory,
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
@@ -195,6 +198,66 @@ export const SetColWidthCommand: ICommand = {
                 unitID: unitId,
                 undoMutations: [...(intercepted.preUndos ?? []), { id: SetWorksheetColWidthMutation.id, params: undoMutationParams }, ...undos],
                 redoMutations: [...(intercepted.preRedos ?? []), { id: SetWorksheetColWidthMutation.id, params: redoMutationParams }, ...redos],
+            });
+
+            return true;
+        }
+
+        return false;
+    },
+};
+
+export interface ISetWorksheetColIsAutoWidthCommandParams {
+    unitId?: string;
+    subUnitId?: string;
+    ranges?: IRange[]; // For Facade API
+}
+
+export const SetWorksheetColIsAutoWidthCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'sheet.command.set-col-is-auto-width',
+    handler: async (accessor: IAccessor, params?: ISetWorksheetColIsAutoWidthCommandParams) => {
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const selectionManagerService = accessor.get(SheetsSelectionsService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId, worksheet } = target;
+        const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+
+        if (!ranges?.length) {
+            return false;
+        }
+
+        const redoMutationParams: ISetWorksheetColIsAutoWidthMutationParams = {
+            unitId,
+            subUnitId,
+            ranges,
+            autoWidthInfo: BooleanNumber.TRUE, // Hard code first, maybe it will change by the menu item in the future.
+        };
+
+        const undoMutationParams: ISetWorksheetColIsAutoWidthMutationParams =
+            SetWorksheetColIsAutoWidthMutationFactory(redoMutationParams, worksheet);
+
+        const setIsAutoHeightResult = commandService.syncExecuteCommand(
+            SetWorksheetColIsAutoWidthMutation.id,
+            redoMutationParams
+        );
+
+        const { undos, redos } = accessor.get(SheetInterceptorService).onCommandExecute({
+            id: SetWorksheetColIsAutoWidthCommand.id,
+            params: redoMutationParams,
+        });
+
+        const result = sequenceExecute([...redos], commandService);
+        if (setIsAutoHeightResult && result.result) {
+            undoRedoService.pushUndoRedo({
+                unitID: unitId,
+                undoMutations: [{ id: SetWorksheetColIsAutoWidthMutation.id, params: undoMutationParams }, ...undos],
+                redoMutations: [{ id: SetWorksheetColIsAutoWidthMutation.id, params: redoMutationParams }, ...redos],
             });
 
             return true;

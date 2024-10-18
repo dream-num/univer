@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo, IDisposable } from '@univerjs/core';
-import type { FormulaExecutedStateType, IExecutionInProgressParams, ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import type { ISetFormulaCalculationResultMutation, ISetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { ICommandService } from '@univerjs/core';
-import { SetFormulaCalculationNotificationMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+import { SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 
 /**
  * This interface class provides methods to modify the behavior of the operation formula.
@@ -45,13 +45,6 @@ export class FFormula {
     }
 
     /**
-     * Stop the calculation of the formula.
-     */
-    stopCalculation(): void {
-        this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
-    }
-
-    /**
      * Listening calculation starts.
      */
     calculationStart(callback: (forceCalculation: boolean) => void): IDisposable {
@@ -66,16 +59,16 @@ export class FFormula {
     /**
      * Listening calculation ends.
      */
-    calculationEnd(callback: (functionsExecutedState: FormulaExecutedStateType) => void): IDisposable {
+    calculationEnd(callback: (functionsExecutedState: ISetFormulaCalculationResultMutation) => void): IDisposable {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetFormulaCalculationNotificationMutation.id) {
+            if (command.id !== SetFormulaCalculationResultMutation.id) {
                 return;
             }
 
-            const params = command.params as ISetFormulaCalculationNotificationMutation;
+            const params = command.params as ISetFormulaCalculationResultMutation;
 
-            if (params.functionsExecutedState !== undefined) {
-                callback(params.functionsExecutedState);
+            if (params) {
+                callback(params);
             }
         });
     }
@@ -97,18 +90,10 @@ export class FFormula {
 
     /**
      * Listening calculation processing.
+     *
+     * @deprecated This method has been removed because it affects performance. The progress cannot be calculated accurately. Please estimate the progress based on the start and end calculations.
      */
-    calculationProcessing(callback: (stageInfo: IExecutionInProgressParams) => void): IDisposable {
-        return this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            if (command.id !== SetFormulaCalculationNotificationMutation.id) {
-                return;
-            }
-
-            const params = command.params as ISetFormulaCalculationNotificationMutation;
-
-            if (params.stageInfo !== undefined) {
-                callback(params.stageInfo);
-            }
-        });
+    calculationProcessing(callback: () => void): void {
+        console.error('This method has been removed because it affects performance. The progress cannot be calculated accurately. Please estimate the progress based on the start and end calculations.');
     }
 }

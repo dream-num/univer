@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-export enum SheetsUIPart {
-    FILTER_PANEL_EMBED_POINT = 'filter-panel-embed-point',
-    SHEETS_FOOTER = 'sheets-footer',
-    FORMULA_AUX = 'formula-aux',
+import { useDependency, useObservable } from '@univerjs/core';
+import { TriggerCalculationController } from '@univerjs/sheets-formula';
+import { ProgressBar } from '@univerjs/ui';
+import React from 'react';
+
+export function FormulaProgressBar() {
+    const triggerCalculationController = useDependency(TriggerCalculationController);
+    const progress = useObservable(triggerCalculationController.progress$)!;
+
+    return <ProgressBar progress={progress} />;
 }

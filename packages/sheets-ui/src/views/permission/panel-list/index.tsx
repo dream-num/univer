@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { Avatar, Tooltip } from '@univerjs/design';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import type { IRange, Workbook } from '@univerjs/core';
-import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
-import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ISidebarService, useObservable } from '@univerjs/ui';
-import { merge } from 'rxjs';
 import type { IPermissionPoint } from '@univerjs/protocol';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { DeleteSingle, WriteSingle } from '@univerjs/icons';
-
-import { serializeRange } from '@univerjs/engine-formula';
-
-import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
+import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
+import { Avatar, Tooltip } from '@univerjs/design';
+import { serializeRange } from '@univerjs/engine-formula';
+import { DeleteSingle, WriteSingle } from '@univerjs/icons';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { ISidebarService, useObservable } from '@univerjs/ui';
+import clsx from 'clsx';
+
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { merge } from 'rxjs';
+import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
+import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';
 
@@ -87,7 +87,7 @@ export const SheetPermissionPanelList = () => {
         const allPermissionRule = await authzIoService.list({
             objectIDs: allPermissionId,
             unitID: unitId,
-            actions: [UnitAction.View, UnitAction.Edit],
+            actions: [UnitAction.View, UnitAction.Edit, UnitAction.ManageCollaborator],
         });
 
         const subUnitPermissionIds = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).map((item) => item.permissionId);
@@ -232,9 +232,9 @@ export const SheetPermissionPanelList = () => {
                             const viewAction = item.actions.find((action) => action.action === UnitAction.View);
                             const viewPermission = viewAction?.allowed;
 
-                            const manageCollaboratorAction = permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+                            const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
 
-                            const hasManagerPermission = manageCollaboratorAction || currentUser.userID === item.creator?.userID;
+                            const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
 
                             let ruleName = '';
 

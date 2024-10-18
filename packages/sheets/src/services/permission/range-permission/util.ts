@@ -16,11 +16,12 @@
 
 import type { UnitAction } from '@univerjs/protocol';
 import { RangeProtectionPermissionEditPoint } from '../permission-point/range/edit';
+import { RangeProtectionPermissionManageCollaPoint } from '../permission-point/range/manage-collaborator';
 import { RangeProtectionPermissionViewPoint } from '../permission-point/range/view';
 
 export type IRangePermissionPoint = RangeProtectionPermissionEditPoint | RangeProtectionPermissionViewPoint;
 
-export const getAllRangePermissionPoint = () => [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint];
+export const getAllRangePermissionPoint = () => [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint, RangeProtectionPermissionManageCollaPoint];
 
 export const getDefaultRangePermission = (unitId = 'unitId', subUnitId = 'subUnitId', permissionId = 'permissionId') => getAllRangePermissionPoint().reduce((r, F) => {
     const i = new F(unitId, subUnitId, permissionId);

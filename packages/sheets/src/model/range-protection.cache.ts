@@ -21,6 +21,7 @@ import { Disposable, Inject, IPermissionService, IUniverInstanceService, Range, 
 import { UnitAction, UnitObject } from '@univerjs/protocol';
 import { filter, map } from 'rxjs';
 import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../services/permission/permission-point';
+import { RangeProtectionPermissionManageCollaPoint } from '../services/permission/permission-point/range/manage-collaborator';
 import { RangeProtectionRuleModel } from './range-protection-rule.model';
 
 export class RangeProtectionCache extends Disposable {
@@ -200,9 +201,11 @@ export class RangeProtectionCache extends Disposable {
         this._ruleModel.getSubunitRuleList(unitId, subUnitId).forEach((rule) => {
             const edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
             const view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
+            const manageProtection = this._permissionService.getPermissionPoint(new RangeProtectionPermissionManageCollaPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
             const selectionProtection = {
                 [UnitAction.Edit]: edit,
                 [UnitAction.View]: view,
+                [UnitAction.ManageCollaborator]: manageProtection,
                 ruleId: rule.id,
                 ranges: rule.ranges,
             };
@@ -211,9 +214,9 @@ export class RangeProtectionCache extends Disposable {
                 for (let i = startRow; i <= endRow; i++) {
                     const rowInfo = rowInfoMap.get(`${i}`);
                     if (!rowInfo) {
-                        rowInfoMap.set(`${i}`, new Map([[rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view }]]));
+                        rowInfoMap.set(`${i}`, new Map([[rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection }]]));
                     } else {
-                        rowInfo.set(rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view });
+                        rowInfo.set(rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection });
                     }
 
                     for (let j = startColumn; j <= endColumn; j++) {
@@ -221,9 +224,9 @@ export class RangeProtectionCache extends Disposable {
                         cellInfoMap.set(`${i}-${j}`, selectionProtection);
                         const colInfo = colInfoMap.get(`${j}`);
                         if (!colInfo) {
-                            colInfoMap.set(`${j}`, new Map([[rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view }]]));
+                            colInfoMap.set(`${j}`, new Map([[rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection }]]));
                         } else {
-                            colInfo.set(rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view });
+                            colInfo.set(rule.id, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection });
                         }
                     }
                 }
@@ -290,23 +293,24 @@ export class RangeProtectionCache extends Disposable {
                 const colInfoMap = this._ensureRowColInfoMap(unitId, subUnitId, 'col');
                 const edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, ruleInstance.permissionId)?.id)?.value ?? true;
                 const view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, ruleInstance.permissionId)?.id)?.value ?? true;
+                const manageProtection = this._permissionService.getPermissionPoint(new RangeProtectionPermissionManageCollaPoint(unitId, subUnitId, ruleInstance.permissionId).id)?.value ?? false;
 
                 ruleInstance.ranges.forEach((range) => {
                     const { startRow, endRow, startColumn, endColumn } = range;
                     for (let i = startRow; i <= endRow; i++) {
                         const rowInfo = rowInfoMap.get(`${i}`);
                         if (!rowInfo) {
-                            rowInfoMap.set(`${i}`, new Map([[ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view }]]));
+                            rowInfoMap.set(`${i}`, new Map([[ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection }]]));
                         } else {
-                            rowInfo.set(ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view });
+                            rowInfo.set(ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection });
                         }
 
                         for (let j = startColumn; j <= endColumn; j++) {
                             const colInfo = colInfoMap.get(`${j}`);
                             if (!colInfo) {
-                                colInfoMap.set(`${j}`, new Map([[ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view }]]));
+                                colInfoMap.set(`${j}`, new Map([[ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection }]]));
                             } else {
-                                colInfo.set(ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view });
+                                colInfo.set(ruleId, { [UnitAction.Edit]: edit, [UnitAction.View]: view, [UnitAction.ManageCollaborator]: manageProtection });
                             }
                         }
                     }
@@ -344,6 +348,7 @@ export class RangeProtectionCache extends Disposable {
 
         let view = true;
         let edit = true;
+        let manageProtection = false;
         const ruleId = this._cellRuleCache.get(unitId)?.get(subUnitId)?.get(`${row}-${col}`);
         if (!ruleId) {
             return;
@@ -353,9 +358,11 @@ export class RangeProtectionCache extends Disposable {
         if (rule) {
             view = this._permissionService.getPermissionPoint(new RangeProtectionPermissionViewPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
             edit = this._permissionService.getPermissionPoint(new RangeProtectionPermissionEditPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? true;
+            manageProtection = this._permissionService.getPermissionPoint(new RangeProtectionPermissionManageCollaPoint(unitId, subUnitId, rule.permissionId)?.id)?.value ?? false;
             const selectionProtection = {
                 [UnitAction.Edit]: edit,
                 [UnitAction.View]: view,
+                [UnitAction.ManageCollaborator]: manageProtection,
                 ruleId,
                 ranges: rule.ranges,
             };

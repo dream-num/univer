@@ -18,7 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import type { IAddRangeProtectionMutationParams, IAddWorksheetProtectionParams, ISetWorksheetPermissionPointsMutationParams } from '@univerjs/sheets';
 import { Disposable, IAuthzIoService, ICommandService, Inject, IPermissionService, IUndoRedoService, IUniverInstanceService, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, INTERCEPTOR_POINT, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, defaultWorkbookPermissionPoints, defaultWorksheetPermissionPoint, getAllRangePermissionPoint, getAllWorkbookPermissionPoint, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionCache, RangeProtectionRuleModel, SetWorksheetPermissionPointsMutation, SheetInterceptorService, WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { skip } from 'rxjs';
 
 export class SheetPermissionInitController extends Disposable {
@@ -65,7 +65,7 @@ export class SheetPermissionInitController extends Disposable {
                         objectID: rule.permissionId,
                         unitID: unitId,
                         objectType: UnitObject.SelectRange,
-                        actions: [UnitAction.View, UnitAction.Edit],
+                        actions: [UnitAction.View, UnitAction.Edit, UnitAction.ManageCollaborator],
                     });
                 });
             });
@@ -105,7 +105,7 @@ export class SheetPermissionInitController extends Disposable {
                         objectID: info.rule.permissionId,
                         unitID: info.unitId,
                         objectType: UnitObject.SelectRange,
-                        actions: [UnitAction.Edit, UnitAction.View],
+                        actions: [UnitAction.Edit, UnitAction.View, UnitAction.ManageCollaborator],
                     }).then((actionList) => {
                         getAllRangePermissionPoint().forEach((F) => {
                             if (info.type === 'set') {
@@ -172,7 +172,7 @@ export class SheetPermissionInitController extends Disposable {
                         objectID: info.rule.permissionId,
                         unitID: info.unitId,
                         objectType: UnitObject.Worksheet,
-                        actions: [UnitAction.Edit, UnitAction.View],
+                        actions: [UnitAction.Edit, UnitAction.View, UnitAction.ManageCollaborator],
                     }).then((actionList) => {
                         getAllWorksheetPermissionPoint().forEach((F) => {
                             const instance = new F(info.unitId, info.subUnitId);

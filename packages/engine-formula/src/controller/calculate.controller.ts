@@ -25,15 +25,12 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
-    SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
-    SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -49,16 +46,12 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-
-        this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFormulaCalculationStopMutation.id) {
-                    this._calculateFormulaService.stopFormulaExecution();
-                } else if (command.id === SetFormulaDataMutation.id) {
+                if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
 
                     // formulaData is the incremental data sent from the main thread and needs to be merged into formulaDataModel
@@ -136,45 +129,7 @@ export class CalculateController extends Disposable {
          * Assignment operation after formula calculation.
          */
         this._calculateFormulaService.executionCompleteListener$.subscribe((data) => {
-            const functionsExecutedState = data.functionsExecutedState;
-            switch (functionsExecutedState) {
-                case FormulaExecutedStateType.NOT_EXECUTED:
-                    break;
-                case FormulaExecutedStateType.STOP_EXECUTION:
-                    break;
-                case FormulaExecutedStateType.SUCCESS:
-                    this._applyResult(data);
-                    break;
-                case FormulaExecutedStateType.INITIAL:
-                    break;
-            }
-
-            this._commandService.executeCommand(
-                SetFormulaCalculationNotificationMutation.id,
-                {
-                    functionsExecutedState,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        });
-    }
-
-    private _initialExecuteFormulaProcessListener() {
-        /**
-         * Assignment operation after formula calculation.
-         */
-        this._calculateFormulaService.executionInProgressListener$.subscribe((data) => {
-            this._commandService.executeCommand(
-                SetFormulaCalculationNotificationMutation.id,
-                {
-                    stageInfo: data,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
+            this._applyResult(data);
         });
     }
 

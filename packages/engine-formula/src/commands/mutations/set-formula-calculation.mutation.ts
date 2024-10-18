@@ -21,7 +21,6 @@ import type {
 } from '../../basics/common';
 
 import type { IFormulaDirtyData } from '../../services/current-data.service';
-import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 import { CommandType } from '@univerjs/core';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
@@ -34,25 +33,6 @@ export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
  */
 export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculationStartMutation> = {
     id: 'formula.mutation.set-formula-calculation-start',
-    type: CommandType.MUTATION,
-    handler: () => true,
-};
-
-export interface ISetFormulaCalculationStopMutation {}
-
-export const SetFormulaCalculationStopMutation: IMutation<ISetFormulaCalculationStopMutation> = {
-    id: 'formula.mutation.set-formula-calculation-stop',
-    type: CommandType.MUTATION,
-    handler: () => true,
-};
-
-export interface ISetFormulaCalculationNotificationMutation {
-    functionsExecutedState?: FormulaExecutedStateType;
-    stageInfo?: IExecutionInProgressParams;
-}
-
-export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
-    id: 'formula.mutation.set-formula-calculation-notification',
     type: CommandType.MUTATION,
     handler: () => true,
 };

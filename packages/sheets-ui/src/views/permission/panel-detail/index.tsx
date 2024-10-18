@@ -136,6 +136,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     useEffect(() => {
         const isEdit = activeRule?.permissionId;
+        setRangeInitialization(true);
         if (isEdit) {
             if (activeRule.unitType === UnitObject.Worksheet) {
                 sheetPermissionPanelModel.setRule({
@@ -184,7 +185,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             unitType: fromSheetBar ? UnitObject.Worksheet : UnitObject.SelectRange,
 
         });
-        setRangeInitialization(true);
     }, [activeRule?.permissionId, fromSheetBar, selectionManagerService, sheetPermissionPanelModel, subUnitId, unitId, worksheet]);
 
     useEffect(() => {

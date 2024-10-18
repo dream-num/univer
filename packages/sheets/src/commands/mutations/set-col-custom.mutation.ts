@@ -36,7 +36,7 @@ export const SetColCustomMutationFactory = (
     for (const colIndex in custom) {
         const column = manager.getColumn(Number(colIndex));
 
-        if (column === null || column === undefined) {
+        if (column === null || column === undefined || column.custom == null || column.custom === undefined) {
             oldCustom[colIndex] = null;
         } else {
             oldCustom[colIndex] = column.custom;
@@ -65,7 +65,9 @@ export const SetColCustomMutation: IMutation<ISetColCustomMutationParams> = {
         for (const colIndex in custom) {
             const customData = custom[colIndex];
             const column = manager.getColumnOrCreate(Number(colIndex));
-            column.custom = customData;
+            if (customData !== undefined) {
+                column.custom = customData;
+            }
         }
 
         return true;

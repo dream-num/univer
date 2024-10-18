@@ -48,6 +48,14 @@ export class NormSDist extends BaseFunction {
         const resultArray = zArray.mapValue((zObject, rowIndex, columnIndex) => {
             const cumulativeObject = cumulativeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (zObject.isError()) {
+                return zObject;
+            }
+
+            if (cumulativeObject.isError()) {
+                return cumulativeObject;
+            }
+
             return this._handleSignleObject(zObject, cumulativeObject);
         });
 

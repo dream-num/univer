@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
 import type { IRange, Nullable } from '@univerjs/core';
+import type { IFunctionNames } from '../basics/function';
 
+import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { IDefinedNameMapItem } from '../services/defined-names.service';
+import { Disposable } from '@univerjs/core';
 import { ErrorType } from '../basics/error-type';
 import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
 import { compareToken } from '../basics/token';
@@ -30,11 +35,6 @@ import { serializeRangeToRefString } from '../engine/utils/reference';
 import { convertTonNumber } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
-import type { IFunctionNames } from '../basics/function';
-import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
-import type { ArrayBinarySearchType } from '../engine/utils/compare';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 export class BaseFunction extends Disposable {
     private _unitId: Nullable<string>;
@@ -270,7 +270,8 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
+            // return ErrorValueObject.create(ErrorType.NA);
+            return NumberValueObject.create(0);
         }
 
         return resultValue;

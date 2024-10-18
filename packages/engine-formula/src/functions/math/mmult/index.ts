@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { calculateMmult } from '../../../basics/math';
 import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
@@ -46,7 +47,7 @@ export class Mmult extends BaseFunction {
             return matrix2;
         }
 
-        const result = this._getResult(matrix1, matrix2, array1RowCount, array1ColumnCount, array2ColumnCount);
+        const result = calculateMmult(matrix1, matrix2);
 
         return ArrayValueObject.createByArray(result);
     }
@@ -85,29 +86,5 @@ export class Mmult extends BaseFunction {
         }
 
         return matrix;
-    }
-
-    private _getResult(
-        matrix1: number[][],
-        matrix2: number[][],
-        array1RowCount: number,
-        array1ColumnCount: number,
-        array2ColumnCount: number
-    ): number[][] {
-        const result = Array.from({ length: array1RowCount }, () => new Array(array2ColumnCount).fill(0));
-
-        for (let r = 0; r < array1RowCount; r++) {
-            for (let c = 0; c < array2ColumnCount; c++) {
-                let value = 0;
-
-                for (let k = 0; k < array1ColumnCount; k++) {
-                    value += matrix1[r][k] * matrix2[k][c];
-                }
-
-                result[r][c] = value;
-            }
-        }
-
-        return result;
     }
 }

@@ -25,6 +25,9 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
+import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
+import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import {
     ICommandService,
     IContextService,
@@ -35,13 +38,10 @@ import {
     ThemeService,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Scene, Viewport } from '@univerjs/engine-render';
 import { ScrollTimer, ScrollTimerType, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
-import type { ISelectionWithCoordAndStyle, ISetSelectionsOperationParams, WorkbookSelections } from '@univerjs/sheets';
 import { convertSelectionDataToRange, DISABLE_NORMAL_SELECTIONS, SelectionMoveType, SetSelectionsOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { IShortcutService } from '@univerjs/ui';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import type { ISheetObjectParam } from '../../controllers/utils/component-tools';
 import { getCoordByOffset, getSheetObject } from '../../controllers/utils/component-tools';
 import { isThisColSelected, isThisRowSelected } from '../../controllers/utils/selections-tools';
 import { SheetScrollManagerService } from '../scroll-manager.service';
@@ -169,6 +169,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             })
         );
 
+        // in mobile version, create a selection when pointerup.
         // do not use onPointerDown$, pointerDown would close popup
         // see packages/ui/src/views/components/context-menu/ContextMenu.tsx
         this.disposeWithMe(spreadsheetLeftTopPlaceholder?.onPointerUp$.subscribeEvent((_evt: IPointerEvent | IMouseEvent, state: EventState) => {
@@ -180,6 +181,7 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
             const selectionWithStyle = getAllSelection(skeleton);
             const selectionData = attachSelectionWithCoord(selectionWithStyle, skeleton);
             this._addSelectionControlBySelectionData(selectionData);
+            // pointerup --> create selection
             this.refreshSelectionMoveStart();
 
             state.stopPropagation();
@@ -385,7 +387,6 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
      * new selection control for mobile do one more thing: bind event for two control points.
      * @param scene
      * @param rangeType
-     * @returns
      */
     override newSelectionControl(scene: Scene, rangeType: RANGE_TYPE): MobileSelectionControl {
         const selectionControls = this.getSelectionControls();
@@ -610,8 +611,10 @@ export class MobileSheetsSelectionRenderService extends BaseSelectionRenderServi
         // const { rowHeaderWidth, columnHeaderHeight } = skeleton;
 
         if (rangeType === RANGE_TYPE.ROW) {
+            // eslint-disable-next-line no-param-reassign
             offsetX = Number.POSITIVE_INFINITY;
         } else if (rangeType === RANGE_TYPE.COLUMN) {
+            // eslint-disable-next-line no-param-reassign
             offsetY = Number.POSITIVE_INFINITY;
         }
 

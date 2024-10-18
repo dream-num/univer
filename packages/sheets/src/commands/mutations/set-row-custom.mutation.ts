@@ -36,7 +36,7 @@ export const SetRowCustomMutationFactory = (
     for (const rowIndex in custom) {
         const row = manager.getRow(Number(rowIndex));
 
-        if (row === null || row === undefined) {
+        if (row === null || row === undefined || row.custom === null || row.custom === undefined) {
             oldCustom[rowIndex] = null;
         } else {
             oldCustom[rowIndex] = row.custom;
@@ -65,7 +65,10 @@ export const SetRowCustomMutation: IMutation<ISetRowCustomMutationParams> = {
         for (const rowIndex in custom) {
             const customData = custom[rowIndex];
             const row = manager.getRowOrCreate(Number(rowIndex));
-            row.custom = customData;
+            if (customData !== undefined) {
+                // Custom will overwrite the original value
+                row.custom = customData;
+            }
         }
 
         return true;

@@ -17,7 +17,7 @@
 import type { DocumentDataModel, EventState, ICommandInfo, Nullable } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { DocumentSkeleton, IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
-import { ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocumentFlavor, ICommandService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocBackground, Documents, IRenderManagerService, Layer, PageLayoutType, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
@@ -212,17 +212,23 @@ export class DocRenderController extends RxDisposable implements IRenderModule {
         let width = 0;
         let height = 0;
 
+        const docDataModel = this._context.unit;
+
+        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             let { pageWidth, pageHeight, marginLeft, marginRight, marginTop, marginBottom } = page;
 
             // Mainly for modern mode, because pageHeight will be INFINITY in modern mode.
-            if (pageWidth === Number.POSITIVE_INFINITY) {
-                pageWidth = page.width + marginLeft + marginRight;
-            }
+            if (documentFlavor === DocumentFlavor.MODERN) {
+                if (pageWidth === Number.POSITIVE_INFINITY) {
+                    pageWidth = page.width + marginLeft + marginRight;
+                }
 
-            if (pageHeight === Number.POSITIVE_INFINITY) {
-                pageHeight = page.height + marginTop + marginBottom;
+                if (pageHeight === Number.POSITIVE_INFINITY) {
+                    pageHeight = page.height + marginTop + marginBottom;
+                }
             }
 
             if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {

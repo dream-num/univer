@@ -111,7 +111,7 @@ function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<bool
                 }
 
                 const documentStyle = docDataModel.getSnapshot().documentStyle;
-                subscriber.next(documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL);
+                subscriber.next(documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
             }
         });
 
@@ -128,7 +128,7 @@ function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<bool
                 return;
             }
 
-            return subscriber.next(docDataModel.getSnapshot().documentStyle.documentFlavor !== DocumentFlavor.TRADITIONAL);
+            return subscriber.next(docDataModel.getSnapshot().documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
         });
 
         return () => {

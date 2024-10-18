@@ -15,25 +15,25 @@
  */
 
 import type { IAccessor, IMutation, IMutationInfo } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
-import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
+
 import type { IAddRangeProtectionMutationParams } from './add-range-protection.mutation';
+import { CommandType } from '@univerjs/core';
+import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
 import { AddRangeProtectionMutation } from './add-range-protection.mutation';
 
-export interface IDeleteSelectionProtectionMutationParams {
+export interface IDeleteRangeProtectionMutationParams {
     ruleIds: string[];
     unitId: string;
     subUnitId: string;
 };
-export const FactoryDeleteRangeProtectionMutation = (accessor: IAccessor, param: IDeleteSelectionProtectionMutationParams) => {
+export const FactoryDeleteRangeProtectionMutation = (accessor: IAccessor, param: IDeleteRangeProtectionMutationParams) => {
     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
     const rules = param.ruleIds.map((id) => selectionProtectionRuleModel.getRule(param.unitId, param.subUnitId, id)).filter((rule) => !!rule) as IRangeProtectionRule[];
     const result: IMutationInfo<Omit<IAddRangeProtectionMutationParams, 'name'>> = { id: AddRangeProtectionMutation.id, params: { subUnitId: param.subUnitId, unitId: param.unitId, rules } };
     return result;
 };
-export const DeleteRangeProtectionMutation: IMutation<IDeleteSelectionProtectionMutationParams> = {
+export const DeleteRangeProtectionMutation: IMutation<IDeleteRangeProtectionMutationParams> = {
     id: 'sheet.mutation.delete-range-protection',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

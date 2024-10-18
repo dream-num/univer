@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { FOCUSING_EDITOR_INPUT_FORMULA, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -24,6 +24,7 @@ import { useEffect, useLayoutEffect } from 'react';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
+// eslint-disable-next-line max-lines-per-function
 export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRange: boolean) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
@@ -89,4 +90,21 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             refSelectionsRenderService?.setRemainLastEnabled(true);
         }
     }, [isOnlyOneRange]);
+
+    // 终止快捷键的监听
+    // packages/sheets-formula-ui/src/controllers/shortcuts/prompt.shortcut.ts:52
+    // 需要将docs-ui中的 packages/docs-ui/src/services/editor/editor-manager.service.ts:267  focusStyle 解耦到 sheet 中来...
+    useEffect(() => {
+        if (isNeed) {
+            const d = contextService.subscribeContextValue$(FOCUSING_EDITOR_INPUT_FORMULA).subscribe((v) => {
+                if (v) {
+                    contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+                }
+            });
+            contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+            return () => {
+                d.unsubscribe();
+            };
+        }
+    }, [isNeed]);
 };

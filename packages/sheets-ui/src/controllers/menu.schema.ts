@@ -39,7 +39,7 @@ import {
     SetSelectedRowsVisibleCommand, SetTabColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
-    SetVerticalTextAlignCommand, SetWorksheetHideCommand,
+    SetVerticalTextAlignCommand, SetWorksheetColIsAutoWidthCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
@@ -105,6 +105,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     CancelFrozenMenuItemFactory,
+    ColAutoWidthMenuItemFactory,
     CopyMenuItemFactory,
     // CutMenuItemFactory,
     FitContentMenuItemFactory,
@@ -483,6 +484,10 @@ export const menuSchema: MenuSchemaType = {
             [SetColWidthCommand.id]: {
                 order: 3,
                 menuItemFactory: SetColWidthMenuItemFactory,
+            },
+            [SetWorksheetColIsAutoWidthCommand.id]: {
+                order: 4,
+                menuItemFactory: ColAutoWidthMenuItemFactory,
             },
             [SHEET_FROZEN_HEADER_MENU_ID]: {
                 order: 4,

@@ -162,6 +162,7 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
+export { RangeProtectionPermissionManageCollaPoint } from './services/permission/permission-point/range/manage-collaborator';
 
 export { generateNullCell, generateNullCellValue } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
@@ -309,8 +310,9 @@ export type { ISetWorksheetShowCommandParams } from './commands/commands/set-wor
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
-export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteSelectionProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
+export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteRangeProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
 export { DeleteWorksheetProtectionMutation } from './commands/mutations/delete-worksheet-protection.mutation';
+export type { IDeleteWorksheetProtectionParams } from './commands/mutations/delete-worksheet-protection.mutation';
 export { EmptyMutation } from './commands/mutations/empty.mutation';
 export {
     InsertColMutation,
@@ -380,6 +382,7 @@ export { type ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation } from
 export { SetWorksheetPermissionPointsMutation } from './commands/mutations/set-worksheet-permission-points.mutation';
 export type { ISetWorksheetPermissionPointsMutationParams } from './commands/mutations/set-worksheet-permission-points.mutation';
 export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
+export type { ISetWorksheetProtectionParams } from './commands/mutations/set-worksheet-protection.mutation';
 export { SetWorksheetRightToLeftMutation } from './commands/mutations/set-worksheet-right-to-left.mutation';
 export {
     type ISetWorksheetRowAutoHeightMutationParams,

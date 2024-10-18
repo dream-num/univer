@@ -25,6 +25,14 @@ type DatabaseValueType = string | number | null;
 export function checkDatabase(database: BaseValueObject) {
     const databaseValues: DatabaseValueType[][] = [];
 
+    if (database.isError()) {
+        return {
+            isError: true,
+            errorObject: database as ErrorValueObject,
+            databaseValues,
+        };
+    }
+
     const rowCount = database.isArray() ? (database as ArrayValueObject).getRowCount() : 1;
     const columnCount = database.isArray() ? (database as ArrayValueObject).getColumnCount() : 1;
 
@@ -73,6 +81,14 @@ export function checkDatabase(database: BaseValueObject) {
 
 export function checkField(field: BaseValueObject, database: DatabaseValueType[][]) {
     let fieldIndex: number = -1;
+
+    if (field.isError()) {
+        return {
+            isError: true,
+            errorObject: field as ErrorValueObject,
+            fieldIndex,
+        };
+    }
 
     const rowCount = field.isArray() ? (field as ArrayValueObject).getRowCount() : 1;
     const columnCount = field.isArray() ? (field as ArrayValueObject).getColumnCount() : 1;
@@ -134,6 +150,14 @@ export function checkField(field: BaseValueObject, database: DatabaseValueType[]
 
 export function checkCriteria(criteria: BaseValueObject) {
     const criteriaValues: DatabaseValueType[][] = [];
+
+    if (criteria.isError()) {
+        return {
+            isError: true,
+            errorObject: criteria as ErrorValueObject,
+            criteriaValues,
+        };
+    }
 
     const rowCount = criteria.isArray() ? (criteria as ArrayValueObject).getRowCount() : 1;
     const columnCount = criteria.isArray() ? (criteria as ArrayValueObject).getColumnCount() : 1;

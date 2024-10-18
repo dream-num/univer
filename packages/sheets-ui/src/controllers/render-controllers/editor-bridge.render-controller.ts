@@ -19,7 +19,7 @@ import type { IEditorInputConfig } from '@univerjs/docs-ui';
 import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -163,10 +163,11 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
      * @param d DisposableCollection
      */
     private _initialKeyboardListener(d: DisposableCollection) {
+        let disposable: Nullable<IDisposable> = null;
         const addEvent = (render: IRender) => {
             const docSelectionRenderService = render.with(DocSelectionRenderService);
             if (docSelectionRenderService) {
-                d.add(docSelectionRenderService.onInputBefore$.subscribe((config) => {
+                disposable = toDisposable(docSelectionRenderService.onInputBefore$.subscribe((config) => {
                     if (!this._isCurrentSheetFocused()) {
                         return;
                     }
@@ -180,6 +181,8 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
                         this._showEditorByKeyboard(config);
                     }
                 }));
+
+                d.add(disposable);
             }
         };
 
@@ -187,9 +190,10 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         if (render) {
             addEvent(render);
         } else {
-            this._renderManagerService.created$.pipe(filter((render) => render.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).subscribe((render) => {
+            this.disposeWithMe(this._renderManagerService.created$.pipe(filter((render) => render.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).subscribe((render) => {
+                disposable?.dispose();
                 addEvent(render);
-            });
+            }));
         }
     }
 

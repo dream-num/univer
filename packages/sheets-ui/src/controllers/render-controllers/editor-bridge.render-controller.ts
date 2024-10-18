@@ -16,10 +16,10 @@
 
 import type { ICommandInfo, IDisposable, IExecutionOptions, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import type { IEditorInputConfig } from '@univerjs/docs-ui';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { IRender, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import type { ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
-import { DisposableCollection, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
+import { DisposableCollection, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, FOCUSING_SHEET, ICommandService, IContextService, Inject, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import {
@@ -28,7 +28,7 @@ import {
     SetWorksheetActiveOperation,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { merge } from 'rxjs';
+import { filter, merge } from 'rxjs';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../../commands/operations/activate-cell-edit.operation';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
@@ -74,9 +74,7 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
         this._initSelectionChangeListener(d);
         this._initEventListener(d);
         this._commandExecutedListener(d);
-        setTimeout(() => {
-            this._initialKeyboardListener(d);
-        }, 100);
+        this._initialKeyboardListener(d);
         return d;
     }
 
@@ -165,24 +163,33 @@ export class EditorBridgeRenderController extends RxDisposable implements IRende
      * @param d DisposableCollection
      */
     private _initialKeyboardListener(d: DisposableCollection) {
-        const docSelectionRenderService = this._renderManagerService.getCurrentTypeOfRenderer(UniverInstanceType.UNIVER_DOC)?.with(DocSelectionRenderService);
+        const addEvent = (render: IRender) => {
+            const docSelectionRenderService = render.with(DocSelectionRenderService);
+            if (docSelectionRenderService) {
+                d.add(docSelectionRenderService.onInputBefore$.subscribe((config) => {
+                    if (!this._isCurrentSheetFocused()) {
+                        return;
+                    }
 
-        if (docSelectionRenderService) {
-            d.add(docSelectionRenderService.onInputBefore$.subscribe((config) => {
-                if (!this._isCurrentSheetFocused()) {
-                    return;
-                }
+                    const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
+                    const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+                    const unitId = render.unitId;
+                    if (this._editorBridgeService.isVisible().visible) return;
 
-                const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FX_BAR_EDITOR);
-                const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-                // TODO@Jocs: should get editor instead of current doc
-                const unitId = this._instanceSrv.getCurrentUniverDocInstance()?.getUnitId();
-                if (this._editorBridgeService.isVisible().visible) return;
+                    if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                        this._showEditorByKeyboard(config);
+                    }
+                }));
+            }
+        };
 
-                if (unitId && isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
-                    this._showEditorByKeyboard(config);
-                }
-            }));
+        const render = this._renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        if (render) {
+            addEvent(render);
+        } else {
+            this._renderManagerService.created$.pipe(filter((render) => render.unitId === DOCS_NORMAL_EDITOR_UNIT_ID_KEY)).subscribe((render) => {
+                addEvent(render);
+            });
         }
     }
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, ICommandService, type Injector, IUniverInstanceService, IWorkbookData, LocaleType, RedoCommand, UndoCommand, type Univer, UniverInstanceType, type Workbook } from '@univerjs/core';
+import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import type { ISetRowCustomMutationParams } from '../../mutations/set-row-custom.mutation';
+import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetRowCustomMutation } from '../../mutations/set-row-custom.mutation';
 import { SetRowCustomCommand } from '../set-row-custom.command';

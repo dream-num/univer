@@ -77,34 +77,34 @@ export class TriggerCalculationController extends Disposable {
     private _restartCalculation = false;
 
     private _totalCalculationTaskCount = 0;
-    private _formulaCalculationDoneCount = 0;
+    private _doneCalculationTaskCount = 0;
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
     readonly progress$ = this._progress$.asObservable();
 
-    private _updateProgress(): void {
-        this._progress$.next({ done: this._formulaCalculationDoneCount, count: this._totalCalculationTaskCount });
+    private _emitProgress(): void {
+        this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount });
     }
 
     private _addTotalCount(count: number): void {
         this._totalCalculationTaskCount += count;
-        this._updateProgress();
+        this._emitProgress();
     }
 
     private _addDoneTask(count: number): void {
-        this._formulaCalculationDoneCount += count;
-        this._formulaCalculationDoneCount = Math.min(this._formulaCalculationDoneCount, this._totalCalculationTaskCount);
-        this._updateProgress();
+        this._doneCalculationTaskCount += count;
+        this._doneCalculationTaskCount = Math.min(this._doneCalculationTaskCount, this._totalCalculationTaskCount);
+        this._emitProgress();
     }
 
     private _completeProgress(): void {
-        this._formulaCalculationDoneCount = this._totalCalculationTaskCount;
-        this._updateProgress();
+        this._doneCalculationTaskCount = this._totalCalculationTaskCount;
+        this._emitProgress();
     }
 
-    private _clearPregress(): void {
-        this._formulaCalculationDoneCount = 0;
+    private _clearProgress(): void {
+        this._doneCalculationTaskCount = 0;
         this._totalCalculationTaskCount = 0;
-        this._updateProgress();
+        this._emitProgress();
     }
 
     constructor(
@@ -326,7 +326,7 @@ export class TriggerCalculationController extends Disposable {
                         // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
                         startDependencyTimer = setTimeout(() => {
                             // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
-                            const taskCount = (formulaCalculationCount + arrayFormulaCalculationCount - this._formulaCalculationDoneCount) + 100;
+                            const taskCount = (formulaCalculationCount + arrayFormulaCalculationCount - this._doneCalculationTaskCount) + 100;
                             this._addTotalCount(taskCount);
                             this._addDoneTask(5);
                             startDependencyTimer = null;
@@ -372,7 +372,7 @@ export class TriggerCalculationController extends Disposable {
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
                             // this._executingCommandQueue = [];
-                            this._clearPregress();
+                            this._clearProgress();
                             calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:
@@ -398,7 +398,7 @@ export class TriggerCalculationController extends Disposable {
                             }
                         }
 
-                        this._formulaCalculationDoneCount = 0;
+                        this._doneCalculationTaskCount = 0;
                         needStartFormulaProgress = false;
                         needStartArrayFormulaProgress = false;
                     }

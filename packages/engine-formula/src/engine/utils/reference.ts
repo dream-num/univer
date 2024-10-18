@@ -294,23 +294,6 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
     };
 }
 
-const referenceToRangeCache = new Map<string, IUnitRangeName>();
-export function deserializeRangeWithSheetWithCache(refString: string): IUnitRangeName {
-    if (referenceToRangeCache.has(refString)) {
-        return referenceToRangeCache.get(refString)!;
-    }
-
-    const result = deserializeRangeWithSheet(refString);
-
-    referenceToRangeCache.set(refString, result);
-
-    return deserializeRangeWithSheet(refString); ;
-}
-
-export function clearReferenceToRangeCache() {
-    referenceToRangeCache.clear();
-}
-
 /**
  * LOG10 is a formula, google sheet support it on Log10:L
  * EXCEL support it on Log10:Log10

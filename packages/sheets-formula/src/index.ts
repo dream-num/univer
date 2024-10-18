@@ -17,6 +17,8 @@
 export { type IInsertFunction, type IInsertFunctionCommandParams, InsertFunctionCommand } from './commands/commands/insert-function.command';
 export { OtherFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { UpdateDefinedNameController } from './controllers/update-defined-name.controller';
+export { TriggerCalculationController } from './controllers/trigger-calculation.controller';
+
 // #region - all commands
 
 export { UpdateFormulaController } from './controllers/update-formula.controller';

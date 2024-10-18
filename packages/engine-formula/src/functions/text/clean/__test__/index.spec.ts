@@ -48,7 +48,7 @@ describe('Test clean function', () => {
             });
             const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
-                [1, ' ', 1.23, true, false, 0],
+                [1, ' ', 1.23, true, false, ''],
                 [0, '100', '2.34', 'test', -3, ErrorType.NAME],
             ]);
 

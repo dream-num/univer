@@ -39,8 +39,12 @@ export class Clean extends BaseFunction {
     }
 
     private _handleSingleObject(text: BaseValueObject): BaseValueObject {
-        if (text.isError() || text.isNull() || text.isBoolean() || text.isNumber()) {
+        if (text.isError() || text.isBoolean() || text.isNumber()) {
             return text;
+        }
+
+        if (text.isNull()) {
+            return StringValueObject.create('');
         }
 
         const textValue = `${text.getValue()}`;

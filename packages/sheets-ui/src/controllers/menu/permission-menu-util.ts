@@ -16,7 +16,7 @@
 
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService ,FOCUSING_FX_BAR_EDITOR} from '@univerjs/core';
-import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -371,7 +371,7 @@ export function getSetPermissionFromSheetBarDisable$(accessor: IAccessor) {
                     const unitId = workbook.getUnitId();
                     const selectionProtectionRuleModel = accessor.get(RangeProtectionRuleModel);
                     const worksheetProtectionRuleModel = accessor.get(WorksheetProtectionRuleModel);
-                    const permission$ = permissionService.composePermission$([new WorkbookCreateProtectPermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
+                    const permission$ = permissionService.composePermission$([new WorkbookCreateProtectPermission(unitId).id, new WorkbookManageCollaboratorPermission(unitId).id]).pipe(map((permissions) => permissions.every((permission) => permission.value))) ?? of(false);
                     const worksheetRuleChange$ = worksheetProtectionRuleModel.ruleChange$.pipe(startWith(null));
                     const selectionRuleChange$ = selectionProtectionRuleModel.ruleChange$.pipe(startWith(null));
                     return combineLatest([permission$, worksheetRuleChange$, selectionRuleChange$]).pipe(

@@ -77,7 +77,8 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             }
         });
 
-        sheetPermissionUserManagerService.setUserList(userList);
+        const currentUser = userManagerService.getCurrentUser();
+        sheetPermissionUserManagerService.setUserList(userList.filter((user) => user.id !== currentUser.userID));
 
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,

@@ -17,10 +17,10 @@
 import type { Dependency } from '@univerjs/core';
 import type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
 import { DependentOn, ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { ThreadCommentMentionDataService, UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
-import { IThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';
+import { IThreadCommentMentionDataService, ThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { PLUGIN_NAME } from './types/const';
 

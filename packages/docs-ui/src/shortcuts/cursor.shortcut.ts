@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IShortcutItem } from '@univerjs/ui';
 import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
-import type { IShortcutItem } from '@univerjs/ui';
+import { DocSelectAllCommand } from '../commands/commands/doc-select-all.command';
 import { MoveCursorOperation, MoveSelectionOperation } from '../commands/operations/doc-cursor.operation';
-import { SelectAllOperation } from '../commands/operations/select-all.operation';
 import { whenDocAndEditorFocused } from './utils';
 
 export const MoveCursorUpShortcut: IShortcutItem = {
@@ -94,7 +94,7 @@ export const MoveSelectionRightShortcut: IShortcutItem = {
 };
 
 export const SelectAllShortcut: IShortcutItem = {
-    id: SelectAllOperation.id,
+    id: DocSelectAllCommand.id,
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) =>
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) && (contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED)),

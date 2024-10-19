@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import type { Dependency } from '@univerjs/core';
-import { DependentOn, ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
-import { PLUGIN_NAME } from './types/const';
-import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
-import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import type { IUniverThreadCommentUIConfig } from './controllers/config.schema';
+import { DependentOn, ICommandService, IConfigService, Inject, Injector, mergeOverrideWithDependencies, Plugin, UniverInstanceType } from '@univerjs/core';
+import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
+import { SetActiveCommentOperation, ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { IThreadCommentMentionDataService, ThreadCommentMentionDataService } from './services/thread-comment-mention-data.service';
+import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
+import { PLUGIN_NAME } from './types/const';
 
 @DependentOn(UniverThreadCommentPlugin)
 export class UniverThreadCommentUIPlugin extends Plugin {
@@ -47,6 +48,7 @@ export class UniverThreadCommentUIPlugin extends Plugin {
     override onStarting(): void {
         (mergeOverrideWithDependencies([
             [ThreadCommentPanelService],
+            [IThreadCommentMentionDataService, { useClass: ThreadCommentMentionDataService }],
         ], this._config?.overrides) as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
         });

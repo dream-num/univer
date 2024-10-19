@@ -62,10 +62,8 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*"

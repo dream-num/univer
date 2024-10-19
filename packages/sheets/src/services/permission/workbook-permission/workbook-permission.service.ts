@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
+import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';
 import { getAllWorkbookPermissionPoint } from './util';
 
@@ -56,7 +56,7 @@ export class WorkbookPermissionService extends Disposable {
 
                 const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
                 rangeRuleList.forEach((rule) => {
-                    [RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint].forEach((F) => {
+                    [...getAllRangePermissionPoint()].forEach((F) => {
                         const instance = new F(unitId, subUnitId, rule.permissionId);
                         this._permissionService.deletePermissionPoint(instance.id);
                     });

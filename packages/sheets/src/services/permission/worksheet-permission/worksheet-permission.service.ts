@@ -21,7 +21,7 @@ import { UniverType } from '@univerjs/protocol';
 
 import { takeUntil } from 'rxjs/operators';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
-import { RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint } from '../permission-point';
+import { getAllRangePermissionPoint } from '../range-permission/util';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
@@ -67,7 +67,7 @@ export class WorksheetPermissionService extends RxDisposable {
 
                 const rangeRuleList = this._rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId);
                 rangeRuleList.forEach((rule) => {
-                    [RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint].forEach((F) => {
+                    [...getAllRangePermissionPoint()].forEach((F) => {
                         const instance = new F(unitId, subUnitId, rule.permissionId);
                         this._permissionService.deletePermissionPoint(instance.id);
                     });

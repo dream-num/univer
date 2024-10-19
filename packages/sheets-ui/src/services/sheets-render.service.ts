@@ -17,17 +17,20 @@
 import type { IDisposable, Workbook } from '@univerjs/core';
 import {
     IContextService,
+    Inject,
     IUniverInstanceService,
     RxDisposable,
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet, UniverRenderConfigService } from '@univerjs/engine-render';
 import { distinctUntilChanged, takeUntil } from 'rxjs';
+import { SHOW_GRID_LINE_CONFIG_KEY } from '../controllers/config.schema';
 
 const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
+
 /**
- * This controller is responsible for managing units of a specific kind to be rendered on the canvas.
+ * This controller is responsible for managing units of a specific kind (UnierSheet) to be rendered on the canvas.
  */
 export class SheetsRenderService extends RxDisposable {
     private _skeletonChangeMutations = new Set<string>();
@@ -35,7 +38,8 @@ export class SheetsRenderService extends RxDisposable {
     constructor(
         @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(UniverRenderConfigService) private readonly _renderConfigService: UniverRenderConfigService
     ) {
         super();
 
@@ -58,6 +62,9 @@ export class SheetsRenderService extends RxDisposable {
         return toDisposable(() => this._skeletonChangeMutations.delete(mutationId));
     }
 
+    /**
+     * Examine if a mutation would make the skeleton to change.
+     */
     checkMutationShouldTriggerRerender(id: string): boolean {
         return this._skeletonChangeMutations.has(id);
     }
@@ -65,15 +72,13 @@ export class SheetsRenderService extends RxDisposable {
     private _init() {
         this._initWorkbookListener();
         this._initContextListener();
+        this._initRenderContext();
     }
 
     private _initWorkbookListener(): void {
         this._instanceSrv.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
-            .subscribe((workbook) => {
-                // TODO when does this function get called?
-                this._createRenderer(workbook);
-            });
+            .subscribe((workbook) => this._createRenderer(workbook));
         this._instanceSrv.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .forEach((workbook) => this._createRenderer(workbook));
 
@@ -103,14 +108,23 @@ export class SheetsRenderService extends RxDisposable {
 
     private _initContextListener(): void {
         // If we toggle the raw formula, we need to refresh all spreadsheets.
-        this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY)
-            .pipe(distinctUntilChanged(), takeUntil(this.dispose$))
+        this.disposeWithMe(this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY)
+            .pipe(distinctUntilChanged())
             .subscribe(() => {
                 this._renderManagerService.getRenderAll().forEach((renderer) => {
                     if (renderer.mainComponent instanceof Spreadsheet) {
                         (renderer.mainComponent as Spreadsheet).makeForceDirty(true);
                     }
                 });
-            });
+            }));
+    }
+
+    private _initRenderContext(): void {
+        this.disposeWithMe(this._contextService.subscribeContextValue$(SHOW_GRID_LINE_CONFIG_KEY)
+            .pipe(distinctUntilChanged())
+            .subscribe((value) => this._renderConfigService.setRenderConfig(SHOW_GRID_LINE_CONFIG_KEY, value))
+        );
+
+        this._renderConfigService.setRenderConfig(SHOW_GRID_LINE_CONFIG_KEY, false);
     }
 }

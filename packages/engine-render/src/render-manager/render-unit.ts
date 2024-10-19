@@ -15,10 +15,11 @@
  */
 
 import type { Dependency, DependencyIdentifier, IDisposable, Nullable, UnitModel, UnitType, UniverInstanceType } from '@univerjs/core';
-import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
+import { Disposable, Inject, Injector, isClassDependencyItem } from '@univerjs/core';
+import { UniverRenderConfigService } from '../services/render-config.service';
 
 /**
  * Public interface of a {@link RenderUnit}.
@@ -41,7 +42,7 @@ export interface IRender {
 /**
  * Every render module should implement this interface.
  */
-export interface IRenderModule extends IDisposable {}
+export interface IRenderModule extends IDisposable { }
 
 /**
  * Necessary context for a render module.This interface would be the first argument of render modules' constructor
@@ -77,8 +78,9 @@ export class RenderUnit extends Disposable implements IRender {
     get components(): Map<string, RenderComponentType> { return this._renderContext.components; }
 
     constructor(
-        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >,
-        @Inject(Injector) parentInjector: Injector
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit'>,
+        @Inject(Injector) parentInjector: Injector,
+        @Inject(UniverRenderConfigService) private readonly _renderConfigService: UniverRenderConfigService
     ) {
         super();
 
@@ -93,6 +95,8 @@ export class RenderUnit extends Disposable implements IRender {
             engine: init.engine,
             scene: init.scene,
         };
+
+        this._attachRenderConfig();
     }
 
     override dispose(): void {
@@ -139,4 +143,17 @@ export class RenderUnit extends Disposable implements IRender {
             j.get(identifier);
         });
     }
+
+    private _attachRenderConfig(): void {
+        const updateRenderConfig = () => {
+            this.engine.getCanvas().getContext().renderConfig = this._renderConfigService.getRenderConfig();
+        };
+
+        updateRenderConfig();
+        this.disposeWithMe(this._renderConfigService._updateSignal$.subscribe(() => {
+            updateRenderConfig();
+            this.scene.makeDirty(true);
+        }));
+    }
 }
+

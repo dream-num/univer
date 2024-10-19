@@ -16,9 +16,7 @@
 
 import type { IRange, ISelectionCellWithMergeInfo, Nullable, ObjectMatrix } from '@univerjs/core';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
-
 import type { Canvas } from '../../canvas';
-
 import type { UniverRenderingContext2D } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
@@ -32,7 +30,6 @@ import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
-
 import { SpreadsheetExtensionRegistry } from '../extension';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
 import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
@@ -94,12 +91,11 @@ export class Spreadsheet extends SheetComponent {
         return this._forceDisableGridlines;
     }
 
-    /**
-     * TODO: DR-Univer, fix as unknown as
-     */
     override dispose() {
         super.dispose();
         this._documents?.dispose();
+
+        // TODO: fix memory leak without reassigning these properties
         this._documents = null as unknown as Documents;
         this._backgroundExtension = null as unknown as Background;
         this._borderExtension = null as unknown as Border;
@@ -389,7 +385,7 @@ export class Spreadsheet extends SheetComponent {
 
         if (
             (segment.startRow === -1 && segment.endRow === -1) ||
-                (segment.startColumn === -1 && segment.endColumn === -1)
+            (segment.startColumn === -1 && segment.endColumn === -1)
         ) {
             return;
         }
@@ -545,6 +541,9 @@ export class Spreadsheet extends SheetComponent {
         if (spreadsheetSkeleton == null) {
             return;
         }
+
+        const showConfig = ctx.renderConfig.showGridLine;
+        if (showConfig === false) return;
 
         const { rowColumnSegment, overflowCache, showGridlines } = spreadsheetSkeleton;
         const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);

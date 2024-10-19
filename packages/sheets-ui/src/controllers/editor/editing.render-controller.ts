@@ -107,7 +107,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
-        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService
+        @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -694,23 +695,29 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const { documentLayoutObject, editorUnitId } = editCellState;
+        const { documentLayoutObject } = editCellState;
         const documentDataModel = documentLayoutObject.documentModel;
         if (documentDataModel == null) {
             return;
         }
 
-        const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
-        const documentViewModel = this._getEditorViewModel(editorUnitId);
+        const empty = (documentDataModel: DocumentDataModel) => {
+            const snapshot = Tools.deepClone(documentDataModel.getSnapshot());
+            const documentViewModel = this._getEditorViewModel(documentDataModel.getUnitId());
 
-        if (documentViewModel == null) {
-            return;
-        }
+            if (documentViewModel == null) {
+                return;
+            }
 
-        resetBodyStyle(snapshot.body!, removeStyle);
+            resetBodyStyle(snapshot.body!, removeStyle);
 
-        documentDataModel.reset(snapshot);
-        documentViewModel.reset(documentDataModel);
+            documentDataModel.reset(snapshot);
+            documentViewModel.reset(documentDataModel);
+        };
+
+        empty(documentDataModel);
+        const formulaDocument = this._univerInstanceService.getUnit<DocumentDataModel>(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, UniverInstanceType.UNIVER_DOC);
+        formulaDocument && empty(formulaDocument);
     }
 }
 

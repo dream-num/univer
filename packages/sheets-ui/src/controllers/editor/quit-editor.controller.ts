@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
+import { Disposable, generateRandomId, ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
 import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeSubscriptCommand, SetRangeSuperscriptCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { quitEditingBeforeCommand } from '../../common/editor';
 
 export class QuitEditorController extends Disposable {
+    private _extraCommandIds: Record<string, string> = Object.create(null);
+
     private _commandIds: Set<string> = new Set<string>([
         SetRangeBoldCommand.id,
         SetRangeItalicCommand.id,
@@ -41,17 +43,25 @@ export class QuitEditorController extends Disposable {
 
     private _initialize() {
         this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandInfo.id.indexOf('sheet.command') === 0 && !this._commandIds.has(commandInfo.id)) {
+            const commandIds = new Set([...this._commandIds, ...Object.values(this._extraCommandIds)]);
+
+            if (commandInfo.id.indexOf('sheet.command') === 0 && !commandIds.has(commandInfo.id)) {
                 quitEditingBeforeCommand(this._injector);
             }
         });
     }
 
+    /**
+     * Register command that should not quit editor
+     * @param commandId - command id
+     * @returns - disposable
+     */
     registerCommand(commandId: string) {
-        this._commandIds.add(commandId);
+        const key = generateRandomId(6);
+        this._extraCommandIds[key] = commandId;
 
         return toDisposable(() => {
-            this._commandIds.delete(commandId);
+            delete this._extraCommandIds[key];
         });
     }
 }

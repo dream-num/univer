@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
+import type { Observable } from 'rxjs';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
-import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
-import type { Observable } from 'rxjs';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 interface IActive {
     workbook: Workbook;
@@ -95,14 +96,15 @@ export function getObservableWithExclusiveRange$(accessor: IAccessor, observable
     );
 }
 
-export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {
+export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
+    const editorBridgeService = accessor.get(IEditorBridgeService);
 
-    return combineLatest([userManagerService.currentUser$, workbook$]).pipe(
-        switchMap(([_, workbook]) => {
-            if (!workbook) {
+    return combineLatest([userManagerService.currentUser$, workbook$, editorBridgeService.visible$]).pipe(
+        switchMap(([_, workbook, visible]) => {
+            if (!workbook || (visible.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit)) {
                 return of(true);
             }
 

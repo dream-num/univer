@@ -200,7 +200,7 @@ describe('Test dsum function', () => {
 
             const field5 = ErrorValueObject.create(ErrorType.NAME);
             const result5 = testFunction.calculate(database, field5, criteria);
-            expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
+            expect(getObjectValue(result5)).toStrictEqual(ErrorType.NAME);
 
             const field6 = ArrayValueObject.create('{1,2,3}');
             const result6 = testFunction.calculate(database, field6, criteria);

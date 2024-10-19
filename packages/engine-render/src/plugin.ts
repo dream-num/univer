@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { createIdentifier, IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import type { IUniverEngineRenderConfig } from './controllers/config.schema';
 
+import { createIdentifier, IConfigService, Inject, Injector, Plugin, registerDependencies } from '@univerjs/core';
+import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
-import type { IUniverEngineRenderConfig } from './controllers/config.schema';
-import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
+import { UniverRenderConfigService } from './services/render-config.service';
 
 /**
  * The global rendering engine.
@@ -42,13 +43,10 @@ export class UniverRenderEnginePlugin extends Plugin {
         const { ...rest } = this._config;
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
-        this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
-
-        this._injector.add([
-            IRenderManagerService,
-            {
-                useClass: RenderManagerService,
-            },
+        registerDependencies(this._injector, [
+            [UniverRenderConfigService],
+            [IRenderingEngine, { useFactory: () => new Engine() }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
         ]);
     }
 }

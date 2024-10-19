@@ -464,6 +464,8 @@ export class Viewport {
         return this.viewportScrollY - this._preViewportScrollY;
     }
 
+    get canvas() { return this._cacheCanvas; }
+
     enable() {
         this._active = true;
     }

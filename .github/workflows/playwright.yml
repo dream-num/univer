@@ -32,6 +32,7 @@ jobs:
               uses: amondnet/vercel-action@v25
               if: failure()
               id: vercel-e2e-report
+              if: failure() # we only need to upload to Vercel if this CI fails
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}

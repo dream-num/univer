@@ -16,10 +16,11 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IMessageProtocol } from '@univerjs/rpc';
-import type { Serializable } from 'node:child_process';
+import { fork, type Serializable } from 'node:child_process';
 import process from 'node:process';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
-import { ChannelService,
+import { IConfigService, ILogService, Inject, Injector, Plugin } from '@univerjs/core';
+import {
+    ChannelService,
     DataSyncPrimaryController,
     DataSyncReplicaController,
     IRemoteInstanceService,
@@ -31,7 +32,8 @@ import { ChannelService,
 import { Observable, shareReplay } from 'rxjs';
 
 export interface IUniverRPCNodeMainConfig {
-    messageProtocol: IMessageProtocol;
+    /** Path of the computing worker scripts. */
+    workerSrc: string;
 }
 
 const UNIVER_RPC_NODE_MAIN_PLUGIN_CONFIG_KEY = 'node-rpc.main.config';
@@ -50,9 +52,12 @@ export class UniverRPCNodeMainPlugin extends Plugin {
     }
 
     override onStarting(): void {
+        const { workerSrc } = this._config;
+        const messageProtocol = createNodeMessagePortOnMain(this._injector, workerSrc);
+
         const dependencies: Dependency[] = [
             [IRPCChannelService, {
-                useFactory: () => new ChannelService(this._config.messageProtocol),
+                useFactory: () => new ChannelService(messageProtocol),
             }],
             [DataSyncPrimaryController],
             [IRemoteSyncService, { useClass: RemoteSyncPrimaryService }],
@@ -87,12 +92,36 @@ export class UniverRPCNodeWorkerPlugin extends Plugin {
     }
 }
 
+function createNodeMessagePortOnMain(injector: Injector, path: string): IMessageProtocol {
+    const logService = injector.get(ILogService);
+
+    const child = fork(path);
+    child.on('spawn', () => logService.log('Child computing process spawned!'));
+    child.on('error', (error) => logService.error(error));
+
+    const messageProtocol: IMessageProtocol = {
+        send(message: unknown): void {
+            child.send(message as Serializable);
+        },
+        onMessage: new Observable<unknown>((subscriber) => {
+            const handler = (message: unknown) => {
+                subscriber.next(message);
+            };
+
+            child.on('message', handler);
+            return () => child.off('message', handler);
+        }).pipe(shareReplay(1)),
+    };
+
+    return messageProtocol;
+}
+
 function createNodeWorkerMessageProtocol(): IMessageProtocol {
     return {
         send(message) {
             process.send!(message as Serializable);
         },
-        onMessage: new Observable<any>((subscriber) => {
+        onMessage: new Observable<unknown>((subscriber) => {
             const handler = (event: unknown) => {
                 subscriber.next(event);
             };

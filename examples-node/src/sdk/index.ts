@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMessageProtocol } from '@univerjs/rpc';
-import type { Serializable } from 'node:child_process';
-import { fork } from 'node:child_process';
 import path from 'node:path';
-import { ILogService, Univer } from '@univerjs/core';
+import { Univer } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsDrawingPlugin } from '@univerjs/docs-drawing';
@@ -34,7 +31,6 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
-import { Observable, shareReplay } from 'rxjs';
 
 export function createUniverOnNode(): Univer {
     const univer = new Univer();
@@ -77,25 +73,5 @@ function registerSheetPlugins(univer: Univer): void {
 
 function registerRPCPlugin(univer: Univer): void {
     const childPath = path.join(__dirname, '../sdk/worker.js');
-    const logService = univer.__getInjector().get(ILogService);
-
-    const child = fork(childPath);
-    child.on('spawn', () => logService.log('Child computing process spawned!'));
-    child.on('error', (error) => logService.error(error));
-
-    const messageProtocol: IMessageProtocol = {
-        send(message: unknown): void {
-            child.send(message as Serializable);
-        },
-        onMessage: new Observable<unknown>((subscriber) => {
-            const handler = (message: unknown) => {
-                subscriber.next(message);
-            };
-
-            child.on('message', handler);
-            return () => child.off('message', handler);
-        }).pipe(shareReplay(1)),
-    };
-
-    univer.registerPlugin(UniverRPCNodeMainPlugin, { messageProtocol });
+    univer.registerPlugin(UniverRPCNodeMainPlugin, { workerSrc: childPath });
 }

@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
-import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 import type { Nullable } from '../../../../shared';
 import type {
     ICustomBlock,
@@ -28,6 +25,9 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
+import { isSameStyleTextRun } from '../../../../shared/compare';
+import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -122,6 +122,11 @@ export function insertTextRuns(
             if (!hasInserted) {
                 hasInserted = true;
                 textRun.ed += textLength;
+
+                // Inline styles should not be extended forward.
+                if (currentIndex === st && ed !== st) {
+                    textRun.st += textLength;
+                }
 
                 const pendingTextRuns = [];
 

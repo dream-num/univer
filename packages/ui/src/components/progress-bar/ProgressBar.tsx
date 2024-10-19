@@ -15,7 +15,7 @@
  */
 
 import { ThemeService, useDependency } from '@univerjs/core';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 
 export interface IProgressBarProps {
@@ -32,17 +32,41 @@ export function ProgressBar(props: IProgressBarProps) {
     const color = barColor ?? themeService.getCurrentTheme().primaryColor; ;
 
     const progressBarInnerRef = useRef<HTMLDivElement>(null);
-    const visible = useMemo(() => count > 0, [count]);
+    // Introduce a state variable for visibility
+    const [visible, setVisible] = useState(count > 0);
 
     useEffect(() => {
         if (!progressBarInnerRef.current) return;
 
-        if (count === 0) {
-            progressBarInnerRef.current.style.width = '0%';
-        } else {
-            progressBarInnerRef.current.style.width = `${Math.floor((done / count) * 100)}%`;
+        const progressBarInner = progressBarInnerRef.current;
+
+        // Update the width of the progress bar
+        if (count > 0) {
+            setVisible(true);
+            progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
+        } else if (count === 0 && done === 0) {
+            // Hide immediately if both count and done are zero
+            setVisible(false);
         }
-    }, [visible, count, done]);
+        // Else, wait for the transition to end before hiding
+
+        // Listen for the transitionend event
+        const handleTransitionEnd = () => {
+            if ((count === 0 && done === 0) || done === count) {
+                // Hide the progress bar after the animation finishes
+                setVisible(false);
+                // Reset the width for future progress bars
+                progressBarInner.style.width = '0%';
+            }
+        };
+
+        progressBarInner.addEventListener('transitionend', handleTransitionEnd);
+
+        // Clean up the event listener on unmount or when dependencies change
+        return () => {
+            progressBarInner.removeEventListener('transitionend', handleTransitionEnd);
+        };
+    }, [count, done]);
 
     return (
         <div className={styles.progressBarContainer} style={{ display: visible ? 'flex' : 'none' }}>

@@ -155,3 +155,4 @@ export { type IAllRuntimeData } from './services/runtime.service';
 export { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';
+export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';

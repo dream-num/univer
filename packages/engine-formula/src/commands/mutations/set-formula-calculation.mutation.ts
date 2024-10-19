@@ -38,6 +38,7 @@ export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculatio
 };
 
 export interface ISetFormulaCalculationNotificationMutation {
+    startCalculate: boolean;
     formulaCount: number;
 }
 

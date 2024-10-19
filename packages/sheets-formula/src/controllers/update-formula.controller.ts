@@ -40,7 +40,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { deserializeRangeWithSheet,
+import { deserializeRangeWithSheetWithCache,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
@@ -395,7 +395,7 @@ export class UpdateFormulaController extends Disposable {
                             continue;
                         }
 
-                        const sequenceGrid = deserializeRangeWithSheet(token);
+                        const sequenceGrid = deserializeRangeWithSheetWithCache(token);
 
                         const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
 

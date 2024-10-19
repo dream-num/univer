@@ -51,9 +51,13 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export class CalculateFormulaService extends Disposable {
-    private readonly _executionStartListener$ = new Subject<number>();
+    private readonly _executionStartListener$ = new Subject<boolean>();
 
     readonly executionStartListener$ = this._executionStartListener$.asObservable();
+
+    private readonly _executionInProgressListener$ = new Subject<number>();
+
+    readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
 
@@ -87,6 +91,8 @@ export class CalculateFormulaService extends Disposable {
     }
 
     async execute(formulaDatasetConfig: IFormulaDatasetConfig) {
+        this._executionStartListener$.next(true);
+
         this._currentConfigService.load(formulaDatasetConfig);
 
         this._runtimeService.reset();
@@ -209,7 +215,7 @@ export class CalculateFormulaService extends Disposable {
              */
             let calCancelTask = () => {};
             await new Promise((resolve) => {
-                this._executionStartListener$.next(treeList.length);
+                this._executionInProgressListener$.next(treeList.length);
                 calCancelTask = requestImmediateMacroTask(resolve);
             });
 

@@ -231,18 +231,21 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 />
             )}
             {typeValue !== 'range' && (
-                <TextEditor
-                    key={`${inputId}-editor`}
-                    value={formulaOrRefStringValue}
-                    onValid={setValidFormulaOrRange}
-                    onChange={formulaEditorChange}
-                    id={createInternalEditorID(`${inputId}-editor`)}
-                    placeholder={localeService.t('definedName.inputFormulaPlaceholder')}
-                    openForSheetUnitId={unitId}
-                    onlyInputFormula={true}
-                    style={{ width: '99%' }}
-                    canvasStyle={{ fontSize: 10 }}
-                />
+                <div className="univer-defined-name-input-formula-selector-text-wrap">
+                    <TextEditor
+                        key={`${inputId}-editor`}
+                        value={formulaOrRefStringValue}
+                        onValid={setValidFormulaOrRange}
+                        onChange={formulaEditorChange}
+                        id={createInternalEditorID(`${inputId}-editor`)}
+                        placeholder={localeService.t('definedName.inputFormulaPlaceholder')}
+                        openForSheetUnitId={unitId}
+                        onlyInputFormula={true}
+                        // style={{ width: '99%' }}
+                        className="univer-defined-name-input-text-editor-container"
+                        canvasStyle={{ fontSize: 10 }}
+                    />
+                </div>
             )}
 
             <div>

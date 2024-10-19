@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button } from '@univerjs/design';
-import { WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { WorkbookCreateProtectPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import React from 'react';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
@@ -34,7 +34,7 @@ export const SheetPermissionPanelAddFooter = () => {
     const unitId = workbook.getUnitId();
     const activeSheet$ = useObservable(workbook.activeSheet$);
 
-    const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+    const hasSetProtectPermission = permissionService.getPermissionPoint(new WorkbookCreateProtectPermission(unitId).id)?.value ?? false;
     const sheetPermissionPanelModel = useDependency(SheetPermissionPanelModel);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
 

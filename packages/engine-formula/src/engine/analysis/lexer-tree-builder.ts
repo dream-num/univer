@@ -39,7 +39,8 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
+import { isReferenceStringWithEffectiveColumn, replaceRefPrefixString, serializeRangeToRefString } from '../utils/reference';
+import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
 
@@ -281,7 +282,7 @@ export class LexerTreeBuilder extends Disposable {
 
             if (node.nodeType === sequenceNodeType.REFERENCE) {
                 const { token, endIndex } = node;
-                const sequenceGrid = deserializeRangeWithSheet(token);
+                const sequenceGrid = deserializeRangeWithSheetWithCache(token);
                 if (sequenceGrid == null) {
                     continue;
                 }
@@ -344,7 +345,7 @@ export class LexerTreeBuilder extends Disposable {
 
             const { token } = node;
 
-            const sequenceGrid = deserializeRangeWithSheet(token);
+            const sequenceGrid = deserializeRangeWithSheetWithCache(token);
 
             const { sheetName, unitId: sequenceUnitId } = sequenceGrid;
 

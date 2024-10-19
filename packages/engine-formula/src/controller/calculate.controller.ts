@@ -18,7 +18,7 @@ import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
 
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
-import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
+import type { ISetFormulaCalculationNotificationMutation, ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
@@ -126,12 +126,30 @@ export class CalculateController extends Disposable {
 
     // Notification
     private _initialExecuteFormulaListener() {
-        this._calculateFormulaService.executionStartListener$.subscribe((formulaCount) => {
+        this._calculateFormulaService.executionStartListener$.subscribe(() => {
+            const params: ISetFormulaCalculationNotificationMutation = {
+                startCalculate: true,
+                formulaCount: 0,
+            };
+
             this._commandService.executeCommand(
                 SetFormulaCalculationNotificationMutation.id,
+                params,
                 {
-                    formulaCount,
-                },
+                    onlyLocal: true,
+                }
+            );
+        });
+
+        this._calculateFormulaService.executionInProgressListener$.subscribe((formulaCount) => {
+            const params: ISetFormulaCalculationNotificationMutation = {
+                startCalculate: false,
+                formulaCount,
+            };
+
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                params,
                 {
                     onlyLocal: true,
                 }

@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
@@ -77,7 +77,7 @@ export class FormulaRefRangeService extends Disposable {
         };
         sequenceNodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                const gridRangeName = deserializeRangeWithSheet(node.token);
+                const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId, sheetName } = gridRangeName;
                 const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = sheetName ? workbook?.getSheetBySheetName(sheetName) : workbook?.getActiveSheet();

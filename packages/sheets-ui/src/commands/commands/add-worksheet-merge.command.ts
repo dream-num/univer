@@ -16,6 +16,8 @@
 
 /* eslint-disable max-lines-per-function */
 
+import type { IAccessor, ICommand, IMutationInfo, Injector, IRange, Workbook } from '@univerjs/core';
+import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
     CommandType,
     Dimension,
@@ -23,6 +25,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    Rectangle,
     sequenceExecute,
     Tools,
     UniverInstanceType,
@@ -33,12 +36,11 @@ import {
     AddMergeUndoSelectionsOperationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
+    getSheetCommandTarget,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation, SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
-import type { IAccessor, ICommand, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';
@@ -48,6 +50,7 @@ export interface IAddMergeCommandParams {
     selections: IRange[];
     unitId: string;
     subUnitId: string;
+    defaultMerge?: boolean;
 }
 
 export const AddWorksheetMergeCommand: ICommand = {
@@ -61,9 +64,7 @@ export const AddWorksheetMergeCommand: ICommand = {
         const confirmService = accessor.get(IConfirmService);
         const localeService = accessor.get(LocaleService);
 
-        const unitId = params.unitId;
-        const subUnitId = params.subUnitId;
-        const selections = params.selections;
+        const { unitId, subUnitId, selections, defaultMerge } = params;
         const ranges = getAddMergeMutationRangeByType(selections, params.value);
         const worksheet = univerInstanceService.getUniverSheetInstance(unitId)!.getSheetBySheetId(subUnitId)!;
 
@@ -72,7 +73,7 @@ export const AddWorksheetMergeCommand: ICommand = {
 
         // First we should check if there are values in the going-to-be-merged cells.
         const willClearSomeCell = checkCellContentInRanges(worksheet, ranges);
-        if (willClearSomeCell) {
+        if (willClearSomeCell && !defaultMerge) {
             const result = await confirmService.confirm({
                 id: 'merge.confirm.add-worksheet-merge',
                 title: {
@@ -233,3 +234,27 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
         } as IAddMergeCommandParams);
     },
 };
+
+export async function addMergeCellsUtil(injector: Injector, unitId: string, subUnitId: string, ranges: IRange[], defaultMerge: boolean) {
+    const univerInstanceService = injector.get(IUniverInstanceService);
+    const target = getSheetCommandTarget(univerInstanceService, { unitId, subUnitId });
+    if (!target) return;
+    const { worksheet } = target;
+    const mergeData = worksheet.getMergeData();
+    const overlap = mergeData.some((mergeRange) => {
+        return ranges.some((range) => {
+            return Rectangle.intersects(range, mergeRange);
+        });
+    });
+    if (overlap) {
+        throw new Error('The ranges to be merged overlap with the existing merged cells');
+    }
+    const commandService = injector.get(ICommandService);
+    await commandService.executeCommand(AddWorksheetMergeCommand.id, {
+        unitId,
+        subUnitId,
+        selections: ranges,
+        defaultMerge,
+    });
+}
+

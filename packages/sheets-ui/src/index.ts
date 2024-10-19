@@ -111,7 +111,7 @@ export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';
 
 // #region - all commands
-export { AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';
+export { addMergeCellsUtil, AddWorksheetMergeAllCommand, AddWorksheetMergeCommand, AddWorksheetMergeHorizontalCommand, AddWorksheetMergeVerticalCommand } from './commands/commands/add-worksheet-merge.command';
 export { AutoClearContentCommand, AutoFillCommand } from './commands/commands/auto-fill.command';
 export {
     type ISheetPasteParams,
@@ -176,6 +176,7 @@ export {
     DeleteWorksheetProtectionCommand,
     DeleteWorksheetProtectionFormSheetBarCommand,
     SetWorksheetProtectionCommand,
+
 } from './commands/commands/worksheet-protection.command';
 
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';

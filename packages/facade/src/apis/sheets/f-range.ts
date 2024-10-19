@@ -49,7 +49,6 @@ import { BooleanNumber, CustomRangeType, Dimension, generateRandomId, ICommandSe
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    addMergeCellsUtil,
     getAddMergeMutationRangeByType,
     RemoveWorksheetMergeCommand,
     SetHorizontalTextAlignCommand,
@@ -64,7 +63,7 @@ import { SetSheetFilterRangeCommand } from '@univerjs/sheets-filter-ui';
 import { AddHyperLinkCommand, CancelHyperLinkCommand, UpdateHyperLinkCommand } from '@univerjs/sheets-hyper-link-ui';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
 import { AddCommentCommand, DeleteCommentTreeCommand, SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
-import { CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { addMergeCellsUtil, CellAlertManagerService, ISheetClipboardService, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { getDT } from '@univerjs/thread-comment-ui';
 import { ComponentManager } from '@univerjs/ui';
 import { FDataValidation } from './f-data-validation';
@@ -921,11 +920,11 @@ export class FRange {
      * Merge cells in a range into one merged cell
      * @returns This range, for chaining
      */
-    async merge(): Promise<FRange> {
+    async merge(defaultMerge: boolean = true): Promise<FRange> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range]);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, [this._range], defaultMerge);
 
         return this;
     }
@@ -934,12 +933,12 @@ export class FRange {
      * Merges cells in a range horizontally.
      * @returns This range, for chaining
      */
-    async mergeAcross(): Promise<FRange> {
+    async mergeAcross(defaultMerge: boolean = true): Promise<FRange> {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.ROWS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }
@@ -948,12 +947,12 @@ export class FRange {
      * Merges cells in a range vertically.
      * @returns This range, for chaining
      */
-    async mergeVertically(): Promise<FRange> {
+    async mergeVertically(defaultMerge: boolean = true): Promise<FRange> {
         const ranges = getAddMergeMutationRangeByType([this._range], Dimension.COLUMNS);
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges);
+        await addMergeCellsUtil(this._injector, unitId, subUnitId, ranges, defaultMerge);
 
         return this;
     }

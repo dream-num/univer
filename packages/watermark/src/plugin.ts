@@ -19,12 +19,12 @@ import type { IWatermarkConfigWithType } from './common/type';
 import type { IUniverWatermarkConfig } from './controllers/config.schema';
 import { ICommandService, IConfigService, ILocalStorageService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { OpenWatermarkPanelOperation } from './commands/operations/OpenWatermarkPanelOperation';
+import { OpenWatermarkPanelOperation } from './commands/operations/open-watermark-panel.operation';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig, WatermarkUserInfoBaseConfig } from './common/const';
 import { IWatermarkTypeEnum } from './common/type';
 import { UniverWatermarkMenuController } from './controllers/watermark.menu.controller';
 import { WatermarkRenderController } from './controllers/watermark.render.controller';
-import { UniverWatermarkService } from './services/watermarkService';
+import { WatermarkService } from './services/watermark.service';
 
 const PLUGIN_NAME = 'UNIVER_WATERMARK_PLUGIN';
 
@@ -68,7 +68,7 @@ export class UniverWatermarkPlugin extends Plugin {
     }
 
     private _initDependencies(): void {
-        ([[UniverWatermarkService], [UniverWatermarkMenuController]] as Dependency[]).forEach((d) => {
+        ([[WatermarkService], [UniverWatermarkMenuController]] as Dependency[]).forEach((d) => {
             this._injector.add(d);
         });
     }
@@ -81,7 +81,7 @@ export class UniverWatermarkPlugin extends Plugin {
 
     override onRendered(): void {
         const injector = this._injector;
-        injector.get(UniverWatermarkService);
+        injector.get(WatermarkService);
 
         const { userWatermarkSettings, textWatermarkSettings, imageWatermarkSettings, showMenu = true } = this._config;
         const shouldDisplayUI = !(userWatermarkSettings || textWatermarkSettings || imageWatermarkSettings) && showMenu;

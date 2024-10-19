@@ -20,12 +20,12 @@ import { IClipboardInterfaceService, ISidebarService } from '@univerjs/ui';
 import React from 'react';
 import { WatermarkTextBaseConfig } from '../../common/const';
 import { IWatermarkTypeEnum } from '../../common/type';
-import { UniverWatermarkService } from '../../services/watermarkService';
+import { WatermarkService } from '../../services/watermark.service';
 import styles from './index.module.less';
 
 export const WatermarkPanelFooter: React.FC = () => {
     const sidebarService = useDependency(ISidebarService);
-    const watermarkService = useDependency(UniverWatermarkService);
+    const watermarkService = useDependency(WatermarkService);
     const localeService = useDependency(LocaleService);
     const clipboardService = useDependency(IClipboardInterfaceService);
 

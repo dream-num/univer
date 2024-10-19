@@ -19,7 +19,7 @@ import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { ILocalStorageService, Inject, RxDisposable, UserManagerService } from '@univerjs/core';
 import { UNIVER_WATERMARK_LAYER_INDEX, UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
 import { type IWatermarkConfigWithType, IWatermarkTypeEnum } from '../common/type';
-import { UniverWatermarkService } from '../services/watermarkService';
+import { WatermarkService } from '../services/watermark.service';
 import { WatermarkLayer } from '../views/extensions/watermark-layer';
 
 export class WatermarkRenderController extends RxDisposable implements IRenderModule {
@@ -27,7 +27,7 @@ export class WatermarkRenderController extends RxDisposable implements IRenderMo
 
     constructor(
         private readonly _context: IRenderContext<UnitModel>,
-        @Inject(UniverWatermarkService) private _watermarkService: UniverWatermarkService,
+        @Inject(WatermarkService) private _watermarkService: WatermarkService,
         @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService,
         @Inject(UserManagerService) private _userManagerService: UserManagerService
     ) {

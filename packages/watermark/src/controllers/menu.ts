@@ -18,7 +18,7 @@ import type { IMenuButtonItem } from '@univerjs/ui';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, type IAccessor, IUniverInstanceService } from '@univerjs/core';
 import { MenuItemType } from '@univerjs/ui';
 import { of, switchMap } from 'rxjs';
-import { OpenWatermarkPanelOperation } from '../commands/operations/OpenWatermarkPanelOperation';
+import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
 import { UNIVER_WATERMARK_MENU } from '../common/const';
 
 export function WatermarkMenuItemFactory(accessor: IAccessor): IMenuButtonItem {

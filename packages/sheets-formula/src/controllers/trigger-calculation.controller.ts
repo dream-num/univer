@@ -95,7 +95,7 @@ export class TriggerCalculationController extends Disposable {
     }
 
     private _startProgress(formulaCount: number): void {
-        const timePerFormula = 7 / 500000; // seconds per formula
+        const timePerFormula = 7 / 500000; // seconds per formula, 500,000 formulas take 7 seconds to calculate
         const estimatedTime = formulaCount * timePerFormula * 1000; // convert to milliseconds
 
         const startProgress = 10; // starting from 10%
@@ -108,7 +108,7 @@ export class TriggerCalculationController extends Disposable {
         this._doneCalculationTaskCount = startProgress * 10;
 
         const startTime = Date.now();
-        const updateInterval = 100; // update every 100ms
+        const updateInterval = 200; // update every 200ms
 
         // Clear any existing progress timer
         if (this._progressTimer !== null) {
@@ -337,26 +337,29 @@ export class TriggerCalculationController extends Disposable {
 
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 const { id } = command;
-                if (id === SetFormulaCalculationStartMutation.id) {
-                    // Increment the calculation process count and assign a new ID
-                    calculationProcessCount++;
+                if (id === SetFormulaCalculationNotificationMutation.id) {
+                    const { startCalculate, formulaCount } = command.params as ISetFormulaCalculationNotificationMutation;
 
-                    // Clear any existing timer to prevent duplicate executions
-                    if (startDependencyTimer !== null) {
-                        clearTimeout(startDependencyTimer);
-                        startDependencyTimer = null;
+                    if (startCalculate) {
+                        // Increment the calculation process count and assign a new ID
+                        calculationProcessCount++;
+
+                        // Clear any existing timer to prevent duplicate executions
+                        if (startDependencyTimer !== null) {
+                            clearTimeout(startDependencyTimer);
+                            startDependencyTimer = null;
+                        }
+
+                        // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 10%
+                        startDependencyTimer = setTimeout(() => {
+                            // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
+                            this._addTotalCount(10);
+                            this._addDoneTask(1);
+                            startDependencyTimer = null;
+                        }, 1000);
+                    } else if (startDependencyTimer === null) {
+                        this._startProgress(formulaCount);
                     }
-
-                    // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 10%
-                    startDependencyTimer = setTimeout(() => {
-                        // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
-                        this._addTotalCount(10);
-                        this._addDoneTask(1);
-                        startDependencyTimer = null;
-                    }, 1000);
-                } else if (id === SetFormulaCalculationNotificationMutation.id) {
-                    const { formulaCount } = command.params as ISetFormulaCalculationNotificationMutation;
-                    this._startProgress(formulaCount);
                 } else if (id === SetFormulaCalculationResultMutation.id) {
                     // Decrement the calculation process count
                     calculationProcessCount--;
@@ -371,12 +374,10 @@ export class TriggerCalculationController extends Disposable {
                             // The total calculation time does not exceed 1s, and the progress bar is not displayed.
                             clearTimeout(startDependencyTimer);
                             startDependencyTimer = null;
+                            this._clearProgress();
                         } else {
                             // Manually hide the progress bar only if no other calculations are in process
                             this._completeProgress();
-                            setTimeout(() => {
-                                this._clearProgress();
-                            }, 1500);
                         }
 
                         this._doneCalculationTaskCount = 0;

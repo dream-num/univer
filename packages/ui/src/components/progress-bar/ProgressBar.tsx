@@ -40,7 +40,7 @@ export function ProgressBar(props: IProgressBarProps) {
         if (count === 0) {
             progressBarInnerRef.current.style.width = '0%';
         } else {
-            progressBarInnerRef.current.style.width = `${count / done}%`;
+            progressBarInnerRef.current.style.width = `${Math.floor((done / count) * 100)}%`;
         }
     }, [visible, count, done]);
 

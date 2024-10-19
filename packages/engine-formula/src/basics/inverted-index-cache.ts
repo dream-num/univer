@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { NumericTuple } from '@flatten-js/interval-tree';
+import IntervalTree from '@flatten-js/interval-tree';
+
 export class InvertedIndexCache {
     /**
      * {
@@ -29,8 +32,7 @@ export class InvertedIndexCache {
      */
     private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, Set<number>>>>> = new Map();
 
-    private _continueBuildingCache: Map<string, Map<string, Map<number, { startRow: number; endRow: number }>>> =
-        new Map();
+    private _continueBuildingCache: Map<string, Map<string, Map<number, IntervalTree<NumericTuple>>>> = new Map();
 
     set(unitId: string, sheetId: string, column: number, value: string | number | boolean | null, row: number) {
         if (!this.shouldContinueBuildingCache(unitId, sheetId, column, row)) {
@@ -68,28 +70,9 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean) {
-        return this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
-    }
-
-    getCellPosition(
-        unitId: string,
-        sheetId: string,
-        column: number,
-        value: string | number | boolean,
-        startRow: number,
-        endRow: number
-    ) {
-        const rows = this.getCellPositions(unitId, sheetId, column, value);
-        if (rows == null) {
-            return;
-        }
-
-        for (const row of rows) {
-            if (row >= startRow && row <= endRow) {
-                return row;
-            }
-        }
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: number[]) {
+        const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
+        return rowsInCache.filter((row) => rows?.has(row));
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {
@@ -107,52 +90,77 @@ export class InvertedIndexCache {
 
         let columnMap = sheetMap.get(column);
         if (columnMap == null) {
-            columnMap = { startRow, endRow };
+            columnMap = new IntervalTree<NumericTuple>();
+            columnMap.insert([startRow, endRow]);
             sheetMap.set(column, columnMap);
             return;
         }
 
-        columnMap.startRow = Math.min(columnMap.startRow, startRow);
-
-        columnMap.endRow = Math.max(columnMap.endRow, endRow);
+        this._handleNewInterval(columnMap, startRow, endRow);
     }
 
     shouldContinueBuildingCache(unitId: string, sheetId: string, column: number, row: number) {
-        const rowRange = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
-        if (rowRange == null) {
+        const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
+
+        if (!columnMap) {
             return true;
         }
 
-        const { startRow, endRow } = rowRange;
+        const result = columnMap.search([row, row]);
 
-        if (row >= startRow && row <= endRow) {
-            return false;
-        }
-
-        return true;
+        return result.length === 0;
     }
 
     canUseCache(unitId: string, sheetId: string, column: number, rangeStartRow: number, rangeEndRow: number) {
-        if (column === -1 || rangeStartRow === -1 || rangeEndRow === -1) {
-            return false;
-        }
-        const rowRange = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
-        if (rowRange == null) {
-            return false;
-        }
+        const columnMap = this._continueBuildingCache.get(unitId)?.get(sheetId)?.get(column);
 
-        const { startRow, endRow } = rowRange;
-
-        if (!(rangeStartRow > endRow || rangeEndRow < startRow)) {
-            return true;
+        if (column === -1 || rangeStartRow === -1 || rangeEndRow === -1 || !columnMap) {
+            return {
+                rowsInCache: [],
+                rowsNotInCache: [],
+            };
         }
 
-        return false;
+        const rowsInCache: number[] = [];
+        const rowsNotInCache: number[] = [];
+
+        for (let r = rangeStartRow; r <= rangeEndRow; r++) {
+            if (columnMap.search([r, r]).length > 0) {
+                rowsInCache.push(r);
+            } else {
+                rowsNotInCache.push(r);
+            }
+        }
+
+        return {
+            rowsInCache,
+            rowsNotInCache,
+        };
     }
 
     clear() {
         this._cache.clear();
         this._continueBuildingCache.clear();
+    }
+
+    private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {
+        const result = columnMap.search([startRow, endRow]);
+
+        if (result.length === 0) {
+            columnMap.insert([startRow, endRow]);
+            return;
+        }
+
+        let min = startRow;
+        let max = endRow;
+
+        for (const interval of result) {
+            min = Math.min(min, interval[0]);
+            max = Math.max(max, interval[1]);
+            columnMap.remove(interval);
+        }
+
+        columnMap.insert([min, max]);
     }
 }
 

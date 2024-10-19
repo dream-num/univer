@@ -65,7 +65,7 @@ async function generateLocale() {
         '@univerjs/sheets-formula-ui',
         '@univerjs/sheets-hyper-link-ui',
         '@univerjs/sheets-numfmt-ui',
-        '@univerjs/sheets-thread-comment',
+        '@univerjs/sheets-thread-comment-ui',
         '@univerjs/sheets-ui',
         '@univerjs/sheets-zen-editor',
         '@univerjs/slides-ui',

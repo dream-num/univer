@@ -16,7 +16,7 @@
 
 import type { MenuSchemaType } from '@univerjs/ui';
 import { RibbonStartGroup } from '@univerjs/ui';
-import { OpenWatermarkPanelOperation } from '../commands/operations/OpenWatermarkPanelOperation';
+import { OpenWatermarkPanelOperation } from '../commands/operations/open-watermark-panel.operation';
 import { WatermarkMenuItemFactory } from './menu';
 
 export const menuSchema: MenuSchemaType = {

@@ -20,7 +20,7 @@ import { Select } from '@univerjs/design';
 import React, { useCallback, useEffect, useState } from 'react';
 import { UNIVER_WATERMARK_STORAGE_KEY, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '../../common/const';
 import { IWatermarkTypeEnum } from '../../common/type';
-import { UniverWatermarkService } from '../../services/watermarkService';
+import { WatermarkService } from '../../services/watermark.service';
 import styles from './index.module.less';
 import { WatermarkImageSetting } from './WatermarkImageSetting';
 import { WatermarkTextSetting } from './WatermarkTextSetting';
@@ -28,7 +28,7 @@ import { WatermarkTextSetting } from './WatermarkTextSetting';
 export const WatermarkPanel: React.FC = () => {
     const [watermarkType, setWatermarkType] = useState<IWatermarkTypeEnum>(IWatermarkTypeEnum.Text);
     const [config, setConfig] = useState<IWatermarkConfig>();
-    const watermarkService = useDependency(UniverWatermarkService);
+    const watermarkService = useDependency(WatermarkService);
     const localStorageService = useDependency(ILocalStorageService);
     const _refresh = useObservable(watermarkService.refresh$);
     const localeService = useDependency(LocaleService);

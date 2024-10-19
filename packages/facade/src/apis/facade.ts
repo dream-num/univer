@@ -62,7 +62,7 @@ import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, 
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
-import { IWatermarkTypeEnum, UniverWatermarkService, WatermarkImageBaseConfig, WatermarkTextBaseConfig } from '@univerjs/watermark';
+import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
@@ -556,7 +556,7 @@ export class FUniver {
         type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
         config: ITextWatermarkConfig | IImageWatermarkConfig
     ): void {
-        const watermarkService = this._injector.get(UniverWatermarkService);
+        const watermarkService = this._injector.get(WatermarkService);
         if (type === IWatermarkTypeEnum.Text) {
             watermarkService.updateWatermarkConfig({
                 type: IWatermarkTypeEnum.Text,
@@ -588,7 +588,7 @@ export class FUniver {
      * This function retrieves the watermark service and invokes the method to remove any existing watermark configuration.
      */
     deleteWatermark(): void {
-        const watermarkService = this._injector.get(UniverWatermarkService);
+        const watermarkService = this._injector.get(WatermarkService);
         watermarkService.deleteWatermarkConfig();
     }
 

@@ -20,7 +20,7 @@ import { Disposable, ILocalStorageService, Inject } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
 
-export class UniverWatermarkService extends Disposable {
+export class WatermarkService extends Disposable {
     private _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();
     public updateConfig$ = this._updateConfig$.asObservable();
     private _refresh$ = new Subject<number>();

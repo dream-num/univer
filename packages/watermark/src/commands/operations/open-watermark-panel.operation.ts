@@ -21,7 +21,7 @@ import { WATERMARK_PANEL, WATERMARK_PANEL_FOOTER } from '../../common/const';
 
 export const OpenWatermarkPanelOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'watermark.operation.open-watermark-panel',
+    id: 'univer.operation.open-watermark-panel',
     handler(accessor) {
         const sidebarService = accessor.get(ISidebarService);
         const localeService = accessor.get(LocaleService);

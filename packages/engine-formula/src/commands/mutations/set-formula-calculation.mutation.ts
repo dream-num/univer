@@ -37,6 +37,18 @@ export const SetFormulaCalculationStartMutation: IMutation<ISetFormulaCalculatio
     handler: () => true,
 };
 
+export interface ISetFormulaCalculationNotificationMutation {
+    formulaCount: number;
+}
+
+export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
+    id: 'formula.mutation.set-formula-calculation-notification',
+    type: CommandType.MUTATION,
+    handler: () => {
+        return true;
+    },
+};
+
 export interface ISetFormulaCalculationResultMutation {
     unitData: IRuntimeUnitDataPrimitiveType;
     unitOtherData: IRuntimeOtherUnitDataType;

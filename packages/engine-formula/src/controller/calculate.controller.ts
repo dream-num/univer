@@ -25,6 +25,7 @@ import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import {
+    SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
@@ -125,6 +126,18 @@ export class CalculateController extends Disposable {
 
     // Notification
     private _initialExecuteFormulaListener() {
+        this._calculateFormulaService.executionStartListener$.subscribe((formulaCount) => {
+            this._commandService.executeCommand(
+                SetFormulaCalculationNotificationMutation.id,
+                {
+                    formulaCount,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        });
+
         /**
          * Assignment operation after formula calculation.
          */

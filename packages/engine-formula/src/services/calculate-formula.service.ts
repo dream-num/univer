@@ -30,6 +30,7 @@ import {
     IConfigService,
     Inject,
     ObjectMatrix,
+    requestImmediateMacroTask,
 } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { ErrorType } from '../basics/error-type';
@@ -50,6 +51,10 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
 export class CalculateFormulaService extends Disposable {
+    private readonly _executionStartListener$ = new Subject<number>();
+
+    readonly executionStartListener$ = this._executionStartListener$.asObservable();
+
     private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
 
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
@@ -126,7 +131,7 @@ export class CalculateFormulaService extends Disposable {
 
         this._currentConfigService.loadDirtyRangesAndExcludedCell(dirtyRanges, excludedCell);
 
-        await this._apply();
+        await this._apply(true);
 
         return true;
     }
@@ -193,10 +198,23 @@ export class CalculateFormulaService extends Disposable {
         return { dirtyRanges, excludedCell };
     }
 
-    private async _apply() {
+    private async _apply(isArrayFormulaState = false) {
         const treeList = await this._formulaDependencyGenerator.generate();
 
         const interpreter = this._interpreter;
+
+        if (!isArrayFormulaState) {
+            /**
+             * Prevent messages sent to the main thread from getting stuck
+             */
+            let calCancelTask = () => {};
+            await new Promise((resolve) => {
+                this._executionStartListener$.next(treeList.length);
+                calCancelTask = requestImmediateMacroTask(resolve);
+            });
+
+            calCancelTask();
+        }
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];

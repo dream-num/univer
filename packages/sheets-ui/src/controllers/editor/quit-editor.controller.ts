@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector, toDisposable } from '@univerjs/core';
 import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeSubscriptCommand, SetRangeSuperscriptCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { quitEditingBeforeCommand } from '../../common/editor';
 
 export class QuitEditorController extends Disposable {
+    private _commandIds: Set<string> = new Set<string>([
+        SetRangeBoldCommand.id,
+        SetRangeItalicCommand.id,
+        SetRangeUnderlineCommand.id,
+        SetRangeStrickThroughCommand.id,
+        SetRangeSubscriptCommand.id,
+        SetRangeSuperscriptCommand.id,
+        SetRangeFontSizeCommand.id,
+        SetRangeFontFamilyCommand.id,
+        SetRangeTextColorCommand.id,
+    ]);
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(Injector) private readonly _injector: Injector
@@ -28,22 +40,18 @@ export class QuitEditorController extends Disposable {
     }
 
     private _initialize() {
-        const commandIds = new Set<string>([
-            SetRangeBoldCommand.id,
-            SetRangeItalicCommand.id,
-            SetRangeUnderlineCommand.id,
-            SetRangeStrickThroughCommand.id,
-            SetRangeSubscriptCommand.id,
-            SetRangeSuperscriptCommand.id,
-            SetRangeFontSizeCommand.id,
-            SetRangeFontFamilyCommand.id,
-            SetRangeTextColorCommand.id,
-        ]);
-
         this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandInfo.id.indexOf('sheet.command') === 0 && !commandIds.has(commandInfo.id)) {
+            if (commandInfo.id.indexOf('sheet.command') === 0 && !this._commandIds.has(commandInfo.id)) {
                 quitEditingBeforeCommand(this._injector);
             }
+        });
+    }
+
+    registerCommand(commandId: string) {
+        this._commandIds.add(commandId);
+
+        return toDisposable(() => {
+            this._commandIds.delete(commandId);
         });
     }
 }

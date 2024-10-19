@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
+import { Disposable, ICommandService, Inject, Injector, Rectangle } from '@univerjs/core';
 import { SetBackgroundColorCommand, SetBorderCommand, SetRangeValuesCommand, SetStyleCommand } from '@univerjs/sheets';
 import { SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
 import { quitEditingBeforeCommand } from '../../common/editor';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export class QuitEditorController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
         this._initialize();
@@ -33,10 +36,30 @@ export class QuitEditorController extends Disposable {
             SetBackgroundColorCommand.id,
             SetBorderCommand.id,
             SetStyleCommand.id,
-            SetRangeValuesCommand.id,
             SetOnceFormatPainterCommand.id,
         ]);
+
         this._commandService.beforeCommandExecuted((commandInfo) => {
+            const editState = this._editorBridgeService.getEditCellState();
+            const visible = this._editorBridgeService.isVisible();
+            if (!visible.visible || !editState) {
+                return;
+            }
+
+            if (commandInfo.id === SetRangeValuesCommand.id) {
+                const range = (commandInfo.params as ISetRangeValuesCommandParams).range;
+                const editingRange = {
+                    startRow: editState.row,
+                    startColumn: editState.column,
+                    endRow: editState.row,
+                    endColumn: editState.column,
+                };
+
+                if (!range || Rectangle.contains(range, editingRange)) {
+                    quitEditingBeforeCommand(this._injector);
+                }
+            }
+
             if (commandIds.has(commandInfo.id)) {
                 quitEditingBeforeCommand(this._injector);
             }

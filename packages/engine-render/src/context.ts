@@ -30,8 +30,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     private _browserType: string;
 
     constructor(context: CanvasRenderingContext2D) {
-        this._context = context;
         this.canvas = context.canvas;
+        this._context = context;
     }
 
     isContextLost(): boolean {
@@ -289,12 +289,21 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.textBaseline = val;
     }
 
-    private _getScale() {
-        const m = this._transformCache || this.getTransform();
-        if (!this._transformCache && m) this._transformCache = m;
+    /**
+     * Get scale from ctx.
+     * DOMMatrix.a DOMMatrix.d would affect by ctx.rotate()
+     */
+    protected _getScale() {
+        const transform = this.getTransform();
+        const { a, b, c, d } = transform;
+
+        const scaleX = Math.sqrt(a * a + b * b);
+        const scaleY = Math.sqrt(c * c + d * d);
+        // const angle = Math.atan2(b, a);
+
         return {
-            scaleX: m.a,
-            scaleY: m.d,
+            scaleX,
+            scaleY,
         };
     }
 
@@ -345,7 +354,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     getTransform() {
-        return this._context.getTransform();
+        const m = this._transformCache || this._context.getTransform();
+        return m;
     }
 
     resetTransform() {
@@ -787,8 +797,14 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
-
         this.moveTo(x, y);
+    }
+
+    moveToByPrecisionLog(x: number, y: number) {
+        const { scaleX, scaleY } = this._getScale();
+        const afterX = fixLineWidthByScale(x, scaleX);
+        const afterY = fixLineWidthByScale(y, scaleY);
+        this.moveTo(afterX, afterY);
     }
 
     /**
@@ -842,6 +858,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     rotate(angle: number) {
+        this._transformCache = null;
         this._context.rotate(angle);
     }
 
@@ -858,6 +875,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     scale(x: number, y: number) {
+        this._transformCache = null;
         this._context.scale(x, y);
     }
 
@@ -944,8 +962,8 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     transform(a: number, b: number, c: number, d: number, e: number, f: number) {
-        this._context.transform(a, b, c, d, e, f);
         this._transformCache = null;
+        this._context.transform(a, b, c, d, e, f);
     }
 
     /**
@@ -953,10 +971,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     translate(x: number, y: number) {
-        // const { scaleX, scaleY } = this._getScale();
-        // x = fixLineWidthByScale(x, scaleX);
-        // y = fixLineWidthByScale(y, scaleY);
-
+        this._transformCache = null;
         this._context.translate(x, y);
     }
 
@@ -964,11 +979,12 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
-
+        this._transformCache = null;
         this._context.translate(x, y);
     }
 
     translateWithPrecisionRatio(x: number, y: number) {
+        this._transformCache = null;
         const { scaleX, scaleY } = this._getScale();
         this._context.translate(x / scaleX, y / scaleY);
     }
@@ -998,16 +1014,8 @@ export class UniverRenderingContext extends UniverRenderingContext2D {
 export class UniverPrintingContext extends UniverRenderingContext2D {
     override __mode = 'printing';
 
-    private __getScale() {
-        const m = this.getTransform();
-        return {
-            scaleX: m.a,
-            scaleY: m.d,
-        };
-    }
-
     override clearRect(x: number, y: number, width: number, height: number): void {
-        const { scaleX, scaleY } = this.__getScale();
+        const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         width = fixLineWidthByScale(width, scaleX);

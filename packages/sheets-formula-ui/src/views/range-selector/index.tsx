@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IUnitRangeName } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { createInternalEditorID, debounce, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
@@ -25,10 +22,13 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
+import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useFormulaToken } from './hooks/useFormulaToken';
@@ -54,10 +54,7 @@ export interface IRangeSelectorProps {
     placeholder?: string;
     isFocus?: boolean;
     onBlur?: () => void;
-    /**
-     * 暂无效果
-     * @memberof IRangeSelectorProps
-     */
+
     onFocus?: () => void;
 
     actions?: {
@@ -88,6 +85,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             onVerify = noopFunction,
             onRangeSelectorDialogVisibleChange = noopFunction,
             onBlur = noopFunction,
+            onFocus = noopFunction,
             isFocus: _isFocus = true,
             isOnlyOneRange = false,
             isSupportAcrossSheet = false } = props;
@@ -234,7 +232,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         const d1 = commandService.beforeCommandExecuted((info) => {
-            if (info.id === SetWorksheetActiveOperation.id) {
+            if (info.id === SetWorksheetActiveOperation.id && !isSupportAcrossSheet) {
                 isFocusSet(false);
                 onBlur();
                 // Refresh the component
@@ -253,11 +251,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d1.dispose();
             d2.dispose();
         };
-    }, []);
+    }, [isSupportAcrossSheet]);
 
     useEffect(() => {
         isFocusSet(_isFocus);
-    }, [_isFocus]);
+        if (_isFocus) {
+            focus();
+        }
+    }, [_isFocus, focus]);
 
     useEffect(() => {
         if (editor && rangeDialogVisible) {
@@ -292,14 +293,26 @@ export function RangeSelector(props: IRangeSelectorProps) {
         };
     }, [containerRef.current]);
 
+    const handleClick = () => {
+        onFocus();
+        focus();
+        if (!isFocus) {
+            isFocusSet(false);
+            setTimeout(() => {
+                isFocusSet(true);
+            }, 30);
+        }
+    };
+
     return (
         <div className={styles.sheetRangeSelector} ref={rangeSelectorWrapRef}>
             <div className={cl(styles.sheetRangeSelectorTextWrap, {
                 [styles.sheetRangeSelectorActive]: isFocus && !isError,
                 [styles.sheetRangeSelectorError]: isError,
             })}
+
             >
-                <div className={styles.sheetRangeSelectorText} ref={containerRef}>
+                <div className={styles.sheetRangeSelectorText} ref={containerRef} onClick={handleClick}>
                 </div>
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />

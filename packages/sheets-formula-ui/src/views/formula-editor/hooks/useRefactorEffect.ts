@@ -24,7 +24,7 @@ import type { Workbook } from '@univerjs/core';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRange: boolean) => {
+export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
@@ -40,7 +40,6 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             editorBridgeService.enableForceKeepVisible();
-
             return () => {
                 d1?.dispose();
                 contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
@@ -81,12 +80,4 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             refSelectionsRenderService?.setSkipLastEnabled(false);
         }
     }, [isNeed]);
-
-    useEffect(() => {
-        if (isOnlyOneRange) {
-            refSelectionsRenderService?.setRemainLastEnabled(false);
-        } else {
-            refSelectionsRenderService?.setRemainLastEnabled(true);
-        }
-    }, [isOnlyOneRange]);
 };

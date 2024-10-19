@@ -24,7 +24,7 @@ export const findIndexFromSequenceNodes = (sequenceNode: (string | ISequenceNode
         }
         const oldIndex = pre.currentIndex;
         if (typeof cur !== 'string') {
-            pre.currentIndex += cur.endIndex - cur.startIndex + 1;
+            pre.currentIndex += cur.token.length;
         } else {
             const length = cur.length;
             pre.currentIndex += length;

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../types/interfaces';
 import { MemoryCursor } from '../../../common/memory-cursor';
 import { Tools } from '../../../shared';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
-import type { IDocumentBody } from '../../../types/interfaces';
 import { type TextXAction, TextXActionType } from './action-types';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';

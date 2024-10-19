@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { TextXAction } from '../action-types';
-import { TextXActionType } from '../action-types';
+import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '../../../../types/enum/text-style';
+import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
 describe('compose test cases', () => {

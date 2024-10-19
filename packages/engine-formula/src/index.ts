@@ -47,8 +47,10 @@ export { type ISetDefinedNameMutationParam, type ISetDefinedNameMutationSearchPa
 export { SetDefinedNameMutationFactory } from './commands/mutations/set-defined-name.mutation';
 export { RemoveFeatureCalculationMutation, SetFeatureCalculationMutation } from './commands/mutations/set-feature-calculation.mutation';
 export {
+    type ISetFormulaCalculationNotificationMutation,
     type ISetFormulaCalculationResultMutation,
     type ISetFormulaCalculationStartMutation,
+    SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
 } from './commands/mutations/set-formula-calculation.mutation';

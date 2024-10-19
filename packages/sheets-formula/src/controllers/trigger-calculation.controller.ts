@@ -20,11 +20,13 @@ import type {
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
     IFormulaDirtyData,
+    ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { Disposable, ICommandService } from '@univerjs/core';
 import {
     IActiveDirtyManagerService,
+    SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
@@ -67,12 +69,15 @@ export class TriggerCalculationController extends Disposable {
 
     private _startExecutionTime: number = 0;
 
-    private _restartCalculation = false;
-
     private _totalCalculationTaskCount = 0;
+
     private _doneCalculationTaskCount = 0;
+
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
+
     readonly progress$ = this._progress$.asObservable();
+
+    private _progressTimer: NodeJS.Timeout | null = null;
 
     private _emitProgress(): void {
         this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount });
@@ -87,6 +92,56 @@ export class TriggerCalculationController extends Disposable {
         this._doneCalculationTaskCount += count;
         this._doneCalculationTaskCount = Math.min(this._doneCalculationTaskCount, this._totalCalculationTaskCount);
         this._emitProgress();
+    }
+
+    private _startProgress(formulaCount: number): void {
+        const timePerFormula = 7 / 500000; // seconds per formula
+        const estimatedTime = formulaCount * timePerFormula * 1000; // convert to milliseconds
+
+        const startProgress = 10; // starting from 10%
+        const maxProgress = 90; // maximum progress is 90%
+        const progressRange = maxProgress - startProgress; // total progress increment is 80%
+
+        // Set total calculation task count to 1000 for percentage calculation
+        this._totalCalculationTaskCount = 1000;
+        // Initialize done task count to represent 10%
+        this._doneCalculationTaskCount = startProgress * 10;
+
+        const startTime = Date.now();
+        const updateInterval = 100; // update every 100ms
+
+        // Clear any existing progress timer
+        if (this._progressTimer !== null) {
+            clearInterval(this._progressTimer);
+            this._progressTimer = null;
+        }
+
+        // Start the progress timer
+        this._progressTimer = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+
+            if (elapsedTime >= estimatedTime) {
+                // Reached estimated time, set progress to 90% and clear the timer
+                this._doneCalculationTaskCount = maxProgress * 10;
+                this._emitProgress();
+                if (this._progressTimer !== null) {
+                    clearInterval(this._progressTimer);
+                    this._progressTimer = null;
+                }
+                return;
+            }
+
+            // Calculate progress percentage based on elapsed time
+            const progressPercent = startProgress + (elapsedTime / estimatedTime) * progressRange;
+            this._doneCalculationTaskCount = progressPercent * 10; // since total is 1000
+
+            // Ensure the progress does not exceed 90%
+            if (this._doneCalculationTaskCount > maxProgress * 10) {
+                this._doneCalculationTaskCount = maxProgress * 10;
+            }
+
+            this._emitProgress();
+        }, updateInterval);
     }
 
     private _completeProgress(): void {
@@ -299,6 +354,9 @@ export class TriggerCalculationController extends Disposable {
                         this._addDoneTask(1);
                         startDependencyTimer = null;
                     }, 1000);
+                } else if (id === SetFormulaCalculationNotificationMutation.id) {
+                    const { formulaCount } = command.params as ISetFormulaCalculationNotificationMutation;
+                    this._startProgress(formulaCount);
                 } else if (id === SetFormulaCalculationResultMutation.id) {
                     // Decrement the calculation process count
                     calculationProcessCount--;
@@ -316,9 +374,13 @@ export class TriggerCalculationController extends Disposable {
                         } else {
                             // Manually hide the progress bar only if no other calculations are in process
                             this._completeProgress();
+                            setTimeout(() => {
+                                this._clearProgress();
+                            }, 1500);
                         }
 
                         this._doneCalculationTaskCount = 0;
+                        this._totalCalculationTaskCount = 0;
                     }
                 }
             })

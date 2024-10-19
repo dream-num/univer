@@ -25,7 +25,6 @@ import {
     DisposableCollection,
     ICommandService,
     Inject,
-    Injector,
     InterceptorEffectEnum,
     IUniverInstanceService,
     LocaleService,
@@ -44,7 +43,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 
-import { quitEditingBeforeCommand, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
 import { combineLatest, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
@@ -77,8 +76,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @INumfmtService private _numfmtService: INumfmtService,
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ISidebarService private _sidebarService: ISidebarService,
-        @Inject(LocaleService) private _localeService: LocaleService,
-        @Inject(Injector) private _injector: Injector
+        @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super();
 
@@ -87,7 +85,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._initCommands();
         this._initCloseListener();
         this._commandExecutedListener();
-        this._initQuitEditor();
     }
 
     openPanel(): boolean {
@@ -320,13 +317,5 @@ export class NumfmtController extends Disposable implements INumfmtController {
                 this._sidebarDisposable = null;
             }
         });
-    }
-
-    private _initQuitEditor(): void {
-        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetNumfmtCommand.id) {
-                quitEditingBeforeCommand(this._injector);
-            }
-        }));
     }
 }

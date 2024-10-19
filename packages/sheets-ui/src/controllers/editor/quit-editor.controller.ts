@@ -15,8 +15,7 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { SetBackgroundColorCommand, SetBorderCommand, SetRangeValuesCommand, SetStyleCommand } from '@univerjs/sheets';
-import { SetOnceFormatPainterCommand } from '../../commands/commands/set-format-painter.command';
+import { SetRangeBoldCommand, SetRangeFontFamilyCommand, SetRangeFontSizeCommand, SetRangeItalicCommand, SetRangeStrickThroughCommand, SetRangeSubscriptCommand, SetRangeSuperscriptCommand, SetRangeTextColorCommand, SetRangeUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { quitEditingBeforeCommand } from '../../common/editor';
 
 export class QuitEditorController extends Disposable {
@@ -30,14 +29,19 @@ export class QuitEditorController extends Disposable {
 
     private _initialize() {
         const commandIds = new Set<string>([
-            SetBackgroundColorCommand.id,
-            SetBorderCommand.id,
-            SetStyleCommand.id,
-            SetRangeValuesCommand.id,
-            SetOnceFormatPainterCommand.id,
+            SetRangeBoldCommand.id,
+            SetRangeItalicCommand.id,
+            SetRangeUnderlineCommand.id,
+            SetRangeStrickThroughCommand.id,
+            SetRangeSubscriptCommand.id,
+            SetRangeSuperscriptCommand.id,
+            SetRangeFontSizeCommand.id,
+            SetRangeFontFamilyCommand.id,
+            SetRangeTextColorCommand.id,
         ]);
+
         this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandIds.has(commandInfo.id)) {
+            if (commandInfo.id.indexOf('sheet.command') === 0 && !commandIds.has(commandInfo.id)) {
                 quitEditingBeforeCommand(this._injector);
             }
         });

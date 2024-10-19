@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { LinkSingle } from '@univerjs/icons';
-import { quitEditingBeforeCommand } from '@univerjs/sheets-ui';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { AddHyperLinkCommand, AddRichHyperLinkCommand } from '../commands/commands/add-hyper-link.command';
 import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
@@ -32,7 +31,6 @@ export class SheetsHyperLinkUIController extends Disposable {
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @ICommandService private _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @Inject(Injector) private _injector: Injector,
         @Inject(IShortcutService) private _shortcutService: IShortcutService
     ) {
         super();
@@ -41,7 +39,6 @@ export class SheetsHyperLinkUIController extends Disposable {
         this._initCommands();
         this._initMenus();
         this._initShortCut();
-        this._initQuitEditor();
     }
 
     private _initComponents() {
@@ -78,18 +75,5 @@ export class SheetsHyperLinkUIController extends Disposable {
 
     private _initShortCut() {
         this._shortcutService.registerShortcut(InsertLinkShortcut);
-    }
-
-    private _initQuitEditor(): void {
-        const commandIs = new Set<string>([
-            AddHyperLinkCommand.id,
-            UpdateHyperLinkCommand.id,
-            CancelHyperLinkCommand.id,
-        ]);
-        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandIs.has(commandInfo.id)) {
-                quitEditingBeforeCommand(this._injector);
-            }
-        }));
     }
 }

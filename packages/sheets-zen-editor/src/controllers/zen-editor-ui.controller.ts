@@ -15,7 +15,6 @@
  */
 
 import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
-import { quitEditingBeforeCommand } from '@univerjs/sheets-ui';
 
 import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
@@ -41,7 +40,6 @@ export class ZenEditorUIController extends Disposable {
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
-        this._initQuitEditor();
     }
 
     private _initCustomComponents(): void {
@@ -62,13 +60,5 @@ export class ZenEditorUIController extends Disposable {
         [ZenEditorConfirmShortcut, ZenEditorCancelShortcut].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
-    }
-
-    private _initQuitEditor(): void {
-        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
-            if (commandInfo.id === OpenZenEditorCommand.id) {
-                quitEditingBeforeCommand(this._injector);
-            }
-        }));
     }
 }

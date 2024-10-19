@@ -1564,27 +1564,31 @@ export class ArrayValueObject extends BaseValueObject {
 
                 // handle the not in cache rows
                 if (rowsNotInCache.length > 0) {
-                    for (const r of rowsNotInCache) {
-                        this.__batchOperatorRowValue(
-                            valueObject,
-                            column,
-                            result,
-                            batchOperatorType,
-                            r,
-                            unitId,
-                            sheetId,
-                            startRow,
-                            startColumn,
-                            operator,
-                            isCaseSensitive
-                        );
+                    for (const interval of rowsNotInCache) {
+                        const [start, end] = interval;
+
+                        for (let r = start; r <= end; r++) {
+                            this.__batchOperatorRowValue(
+                                valueObject,
+                                column,
+                                result,
+                                batchOperatorType,
+                                r,
+                                unitId,
+                                sheetId,
+                                startRow,
+                                startColumn,
+                                operator,
+                                isCaseSensitive
+                            );
+                        }
 
                         CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
                             unitId,
                             sheetId,
                             column + startColumn,
-                            r,
-                            r
+                            start,
+                            end
                         );
                     }
                 }

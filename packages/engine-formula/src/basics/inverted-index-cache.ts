@@ -70,9 +70,9 @@ export class InvertedIndexCache {
         return this._cache.get(unitId)?.get(sheetId)?.get(column);
     }
 
-    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: number[]) {
+    getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
         const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
-        return rowsInCache.filter((row) => rows?.has(row));
+        return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {
@@ -121,14 +121,43 @@ export class InvertedIndexCache {
             };
         }
 
-        const rowsInCache: number[] = [];
-        const rowsNotInCache: number[] = [];
+        const result = columnMap.search([rangeStartRow, rangeEndRow]);
 
-        for (let r = rangeStartRow; r <= rangeEndRow; r++) {
-            if (columnMap.search([r, r]).length > 0) {
-                rowsInCache.push(r);
+        if (result.length === 0) {
+            return {
+                rowsInCache: [],
+                rowsNotInCache: [],
+            };
+        }
+
+        result.sort((a, b) => a[0] - b[0]);
+
+        const rowsInCache: NumericTuple[] = [];
+        const rowsNotInCache: NumericTuple[] = [];
+
+        let _rangeStartRow = rangeStartRow;
+
+        for (const interval of result) {
+            const [start, end] = interval;
+
+            if (_rangeStartRow >= start) {
+                if (rangeEndRow <= end) {
+                    rowsInCache.push([_rangeStartRow, rangeEndRow]);
+                    break;
+                }
+
+                rowsInCache.push([_rangeStartRow, end]);
+                _rangeStartRow = end + 1;
             } else {
-                rowsNotInCache.push(r);
+                if (rangeEndRow > end) {
+                    rowsInCache.push([start, end]);
+                    rowsNotInCache.push([_rangeStartRow, start - 1]);
+                    _rangeStartRow = end + 1;
+                    continue;
+                }
+
+                rowsInCache.push([start, rangeEndRow]);
+                rowsNotInCache.push([_rangeStartRow, start - 1]);
             }
         }
 

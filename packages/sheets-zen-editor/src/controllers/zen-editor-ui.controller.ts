@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService } from '@univerjs/core';
-import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
+import { quitEditingBeforeCommand } from '@univerjs/sheets-ui';
 
+import { IMenuManagerService, IShortcutService, IZenZoneService } from '@univerjs/ui';
 import { CancelZenEditCommand, ConfirmZenEditCommand, OpenZenEditorCommand } from '../commands/commands/zen-editor.command';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
 import { menuSchema } from './menu.schema';
@@ -27,7 +28,8 @@ export class ZenEditorUIController extends Disposable {
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -39,6 +41,7 @@ export class ZenEditorUIController extends Disposable {
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
+        this._initQuitEditor();
     }
 
     private _initCustomComponents(): void {
@@ -59,5 +62,13 @@ export class ZenEditorUIController extends Disposable {
         [ZenEditorConfirmShortcut, ZenEditorCancelShortcut].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));
         });
+    }
+
+    private _initQuitEditor(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
+            if (commandInfo.id === OpenZenEditorCommand.id) {
+                quitEditingBeforeCommand(this._injector);
+            }
+        }));
     }
 }

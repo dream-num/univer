@@ -71,6 +71,7 @@
         "@univerjs/protocol": "0.1.39-alpha.30",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "dayjs": "^1.11.13"
     },
     "devDependencies": {

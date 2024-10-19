@@ -35,6 +35,7 @@ import { DragRenderController } from './controllers/drag-render.controller';
 import { EditorDataSyncController } from './controllers/editor/data-sync.controller';
 import { EditingRenderController } from './controllers/editor/editing.render-controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
+import { QuitEditorController } from './controllers/editor/quit-editor.controller';
 import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
@@ -145,7 +146,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [EditorDataSyncController],
             [SheetCheckboxController],
-
+            [QuitEditorController],
             // permission
             [SheetPermissionPanelModel],
             [SheetPermissionUserManagerService],
@@ -188,6 +189,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [AutoHeightController],
             [EditorDataSyncController],
             [SheetCheckboxController],
+            [QuitEditorController],
         ]);
     }
 

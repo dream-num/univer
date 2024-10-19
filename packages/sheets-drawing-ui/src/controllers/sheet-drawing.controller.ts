@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, Inject } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Injector } from '@univerjs/core';
 import { AddImageSingle } from '@univerjs/icons';
 
+import { quitEditingBeforeCommand } from '@univerjs/sheets-ui';
 import { ComponentManager, IMenuManagerService, IShortcutService } from '@univerjs/ui';
 import { DeleteDrawingsCommand } from '../commands/commands/delete-drawings.command';
 import { GroupSheetDrawingCommand } from '../commands/commands/group-sheet-drawing.command';
@@ -41,7 +42,8 @@ export class SheetDrawingUIController extends Disposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @IMenuManagerService private readonly _menuManagerService: IMenuManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService
+        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
 
@@ -88,10 +90,19 @@ export class SheetDrawingUIController extends Disposable {
         });
     }
 
+    private _initQuitEditor(): void {
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
+            if (commandInfo.id === InsertFloatImageCommand.id) {
+                quitEditingBeforeCommand(this._injector);
+            }
+        }));
+    }
+
     private _init(): void {
         this._initCommands();
         this._initCustomComponents();
         this._initMenus();
         this._initShortcuts();
+        this._initQuitEditor();
     }
 }

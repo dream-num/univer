@@ -27,6 +27,7 @@ export { CellCustomRenderController } from './controllers/cell-custom-render.con
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
+export { quitEditingBeforeCommand } from './common/editor';
 export {
     getCoordByCell,
     getCoordByOffset,

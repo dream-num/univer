@@ -15,10 +15,11 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Inject, Injector, IUniverInstanceService, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
-import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
+import { quitEditingBeforeCommand } from '@univerjs/sheets-ui';
+import { AddSheetDataValidationCommand, getDataValidationDiffMutations, RemoveSheetDataValidationCommand } from '../commands/commands/data-validation.command';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
 import { CustomFormulaValidator } from '../validators/custom-validator';
@@ -32,7 +33,8 @@ export class DataValidationController extends RxDisposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetsSelectionsService) private _selectionManagerService: SheetsSelectionsService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel
+        @Inject(SheetDataValidationModel) private readonly _sheetDataValidationModel: SheetDataValidationModel,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._init();
@@ -41,6 +43,7 @@ export class DataValidationController extends RxDisposable {
     private _init() {
         this._registerValidators();
         this._initCommandInterceptor();
+        this._initQuitEditor();
     }
 
     private _registerValidators(): void {
@@ -94,5 +97,19 @@ export class DataValidationController extends RxDisposable {
                 };
             },
         });
+    }
+
+    private _initQuitEditor(): void {
+        const commandIds = new Set<string>([
+            AddSheetDataValidationCommand.id,
+            RemoveSheetDataValidationCommand.id,
+            AddSheetDataValidationCommand.id,
+        ]);
+
+        this.disposeWithMe(this._commandService.beforeCommandExecuted((commandInfo) => {
+            if (commandIds.has(commandInfo.id)) {
+                quitEditingBeforeCommand(this._injector);
+            }
+        }));
     }
 }

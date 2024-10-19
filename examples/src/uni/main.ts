@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
-import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment';
+import type { IThreadCommentMentionDataSource } from '@univerjs/thread-comment-ui';
 import { Injector, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import { UniverDebuggerPlugin } from '@univerjs/debugger';
 import { defaultTheme } from '@univerjs/design';
@@ -40,8 +40,7 @@ import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment
 import { SheetUIController, UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSlidesPlugin } from '@univerjs/slides';
 import { SlidesUIController, UniverSlidesUIPlugin } from '@univerjs/slides-ui';
-import { IThreadCommentMentionDataService } from '@univerjs/thread-comment';
-import { UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
+import { IThreadCommentMentionDataService, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { UniDocsUIController } from '@univerjs/uni-docs-ui';
 import { UniverDocUniFormulaPlugin } from '@univerjs/uni-formula';
 import { UniSheetsUIController } from '@univerjs/uni-sheets-ui';

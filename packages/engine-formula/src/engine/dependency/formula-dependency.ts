@@ -646,6 +646,8 @@ export class FormulaDependencyGenerator extends Disposable {
         const existTree = new Set<FormulaDependencyTree>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
 
+        this._dependencyManagerService.openKdTree();
+
         const allTree: FormulaDependencyTree[] = this._dependencyManagerService.buildDependencyTree(treeList);
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
@@ -689,6 +691,8 @@ export class FormulaDependencyGenerator extends Disposable {
                 existTree.add(tree);
             }
         }
+
+        this._dependencyManagerService.closeKdTree();
 
         return newTreeList;
     }

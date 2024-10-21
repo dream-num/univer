@@ -16,6 +16,7 @@
 
 import type { IDisposable, Workbook } from '@univerjs/core';
 import {
+    IConfigService,
     IContextService,
     Inject,
     IUniverInstanceService,
@@ -24,8 +25,8 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet, UniverRenderConfigService } from '@univerjs/engine-render';
-import { distinctUntilChanged, takeUntil } from 'rxjs';
-import { SHOW_GRID_LINE_CONFIG_KEY } from '../controllers/config.schema';
+import { distinctUntilChanged, Subscription, takeUntil } from 'rxjs';
+import { GRIDLINE_COLOR_CONFIG_KEY, SHOW_GRIDLINE_CONFIG_KEY } from '../controllers/config.schema';
 
 const SHEET_MAIN_CANVAS_ID = 'univer-sheet-main-canvas';
 
@@ -37,6 +38,7 @@ export class SheetsRenderService extends RxDisposable {
 
     constructor(
         @IContextService private readonly _contextService: IContextService,
+        @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(UniverRenderConfigService) private readonly _renderConfigService: UniverRenderConfigService
@@ -120,11 +122,14 @@ export class SheetsRenderService extends RxDisposable {
     }
 
     private _initRenderContext(): void {
-        this.disposeWithMe(this._contextService.subscribeContextValue$(SHOW_GRID_LINE_CONFIG_KEY)
-            .pipe(distinctUntilChanged())
-            .subscribe((value) => this._renderConfigService.setRenderConfig(SHOW_GRID_LINE_CONFIG_KEY, value))
-        );
+        const subscription = new Subscription();
+        const renderConfigKeys = [SHOW_GRIDLINE_CONFIG_KEY, GRIDLINE_COLOR_CONFIG_KEY];
+        renderConfigKeys.forEach((key) => {
+            subscription.add(this._configService.subscribeConfigValue$(key)
+                .pipe(distinctUntilChanged())
+                .subscribe((value) => this._renderConfigService.setRenderConfig(key, value)));
+        });
 
-        this._renderConfigService.setRenderConfig(SHOW_GRID_LINE_CONFIG_KEY, false);
+        this.disposeWithMe(subscription);
     }
 }

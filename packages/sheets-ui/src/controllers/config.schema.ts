@@ -21,21 +21,21 @@ export const PLUGIN_CONFIG_KEY = 'sheets-ui.config';
 
 export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
 
-export const SHOW_GRID_LINE_CONFIG_KEY = 'showGridLine';
-export const GRID_LINE_CONFIG_KEY = 'gridLineColor';
+export const SHOW_GRIDLINE_CONFIG_KEY = 'showGridline';
+export const GRIDLINE_COLOR_CONFIG_KEY = 'gridlineColor';
 
 export interface IUniverSheetsUIRenderConfig {
     /**
      * If Univer should display grid line.
      * @default true
      */
-    [SHOW_GRID_LINE_CONFIG_KEY]?: boolean;
+    [SHOW_GRIDLINE_CONFIG_KEY]?: boolean;
 
     /**
      * Color of the grid line.
      * @default The current themes' primary color.
      */
-    [GRID_LINE_CONFIG_KEY]?: string;
+    [GRIDLINE_COLOR_CONFIG_KEY]?: string;
 }
 
 export interface IUniverSheetsUIConfig extends IUniverSheetsUIRenderConfig {
@@ -51,6 +51,6 @@ export interface IUniverSheetsUIConfig extends IUniverSheetsUIRenderConfig {
 
 export const defaultPluginConfig: IUniverSheetsUIConfig = {
     formulaBar: true,
-    showGridLine: true,
+    showGridline: true,
 };
 

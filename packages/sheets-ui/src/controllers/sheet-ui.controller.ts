@@ -91,10 +91,11 @@ import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.ope
 import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet-permission-open-dialog.operation';
 import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
+import { HideGridlineOperation, ShowGridlineOperation, ToggleGridlineOperation } from '../commands/operations/toggle-gridline.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
-import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 
+import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
@@ -257,6 +258,9 @@ export class SheetUIController extends Disposable {
             SidebarDefinedNameOperation,
             AutoFillCommand,
             AutoClearContentCommand,
+            ToggleGridlineOperation,
+            ShowGridlineOperation,
+            HideGridlineOperation,
 
             // permission
             SheetPermissionOpenPanelOperation,

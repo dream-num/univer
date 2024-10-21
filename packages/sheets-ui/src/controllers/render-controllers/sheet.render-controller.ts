@@ -326,8 +326,15 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
         updateRenderConfig();
         scene.disposeWithMe(this._renderConfigService._updateSignal$.subscribe(() => {
+            // FIXME: not immediately clear drawing cache and re-render
             updateRenderConfig();
-            scene.makeDirty(true);
+            const { mainComponent: spreadsheet } = this._context;
+            if (spreadsheet) {
+                spreadsheet.makeDirty(true); // refresh spreadsheet
+                viewMain.markDirty(true);
+            }
+
+            this._sheetSkeletonManagerService.reCalculate();
         }));
 
         return {
@@ -394,7 +401,7 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
     private _initCommandListener(): void {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-            const { unit: workbook, unitId: workbookId } = this._context;
+            const { unit: workbook } = this._context;
             const { id: commandId } = command;
 
             if (COMMAND_LISTENER_SKELETON_CHANGE.includes(commandId) || this._sheetRenderService.checkMutationShouldTriggerRerender(commandId)) {
@@ -431,12 +438,12 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
 
             // All mutations must be executed. Using reCalculate alone will not trigger a refresh.
             if (command.type === CommandType.MUTATION) {
-                this._markUnitDirty(workbookId, command);
+                this._markUnitDirty(command);
             }
         }));
     }
 
-    private _markUnitDirty(unitId: string, command: ICommandInfo) {
+    private _markUnitDirty(command: ICommandInfo) {
         const { mainComponent: spreadsheet, scene } = this._context;
 
         if (command.id === SetFormulaCalculationNotificationMutation.id) {

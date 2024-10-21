@@ -111,6 +111,9 @@ const locale: typeof zhCN = {
             right: '右框線',
         },
         more: '更多',
+        hideGridlines: 'Hide Gridlines',
+        showGridlines: 'Show Gridlines',
+        toggleGridlines: 'Toggle Gridlines',
     },
     defaultFmt: {
         Automatic: {

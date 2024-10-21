@@ -37,8 +37,8 @@ import type {
 import type { ISocket } from '@univerjs/network';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
+import type { ISetGridlineColorOperationParams } from '@univerjs/sheets-ui';
 import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
-
 import {
     BorderStyleTypes,
     debounce,
@@ -60,7 +60,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { HideGridlineOperation, SetGridlineColorOperation, SHEET_VIEW_KEY, ShowGridlineOperation } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { FDocument } from './docs/f-document';
@@ -516,6 +516,22 @@ export class FUniver {
         } else {
             this._commandService.executeCommand(DisableCrosshairHighlightOperation.id);
         }
+    }
+
+    /**
+     * Show or hide grid line.
+     * @param {boolean} visible If the grid line should be visible.
+     */
+    setGridlineVisible(visible: boolean): void {
+        if (visible) {
+            this._commandService.executeCommand(ShowGridlineOperation.id);
+        } else {
+            this._commandService.executeCommand(HideGridlineOperation.id);
+        }
+    }
+
+    setGridlineColor(color: string): void {
+        this._commandService.executeCommand(SetGridlineColorOperation.id, { color } as ISetGridlineColorOperationParams);
     }
 
     /**

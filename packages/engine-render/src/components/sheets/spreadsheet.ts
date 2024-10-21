@@ -542,7 +542,8 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        const showConfig = ctx.renderConfig.showGridLine;
+        // TODO: @lumixraku sheet rendering widgets should be move to sheets-ui, so we can use render config identifiers
+        const showConfig = ctx.renderConfig.showGridline;
         if (showConfig === false) return;
 
         const { rowColumnSegment, overflowCache, showGridlines } = spreadsheetSkeleton;
@@ -566,8 +567,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.setLineWidthByPrecision(1);
 
-        // TODO@jikkai: these should be configurable
-        ctx.strokeStyle = getColor([214, 216, 219]);
+        ctx.strokeStyle = ctx.renderConfig.gridlineColor ?? getColor([214, 216, 219]);
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;

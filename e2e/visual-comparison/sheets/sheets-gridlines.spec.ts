@@ -32,7 +32,7 @@ test('sheets no gridlines', async () => {
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.waitForTimeout(5000);
-    await page.evaluate(() => window.univerAPI.getActiveWorkbook().getActiveSheet().setGridlinesVisible(false));
+    await page.evaluate(() => window.univerAPI.getActiveWorkbook().getActiveSheet().setHiddenGridlines(true));
     await page.waitForTimeout(1000);
 
     const filename = generateSnapshotName('sheets-no-gridlines');

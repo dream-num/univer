@@ -252,20 +252,16 @@ export class CalculateFormulaService extends Disposable {
                 pendingTasks.push(calCancelTask);
             });
 
-            if (this._runtimeService.isStopExecution()) {
-                this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-                this._runtimeService.markedAsStopFunctionsExecuted();
-                this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-                return;
-            }
-
             const tree = treeList[i];
             const nodeData = tree.nodeData;
             const getDirtyData = tree.getDirtyData;
             let value: FunctionVariantType;
 
-            if (nodeData == null && getDirtyData == null) {
-                throw new Error('AstNode or executor is null');
+            if (this._runtimeService.isStopExecution() || (nodeData == null && getDirtyData == null)) {
+                this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                this._runtimeService.markedAsStopFunctionsExecuted();
+                this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+                return;
             }
 
             this._runtimeService.setCurrent(

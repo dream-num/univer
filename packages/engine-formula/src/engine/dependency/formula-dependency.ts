@@ -26,7 +26,7 @@ import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-n
 import type { BaseAstNode } from '../ast-node/base-ast-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { PreCalculateNodeType } from '../utils/node-type';
-import { Disposable, Inject, ObjectMatrix } from '@univerjs/core';
+import { Disposable, Inject, moveRangeByOffset, ObjectMatrix } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
@@ -132,38 +132,42 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _isCyclicUtil(
-        node: FormulaDependencyTree,
-        visited: Set<FormulaDependencyTree>,
-        recursionStack: Set<FormulaDependencyTree>
+        treeId: string,
+        visited: Set<string>,
+        recursionStack: Set<string>
     ) {
-        if (!visited.has(node)) {
+        const node = this._dependencyManagerService.getTreeById(treeId);
+        if (node == null) {
+            return false;
+        }
+        if (!visited.has(node.treeId)) {
             // Mark the current node as visited and part of recursion stack
-            visited.add(node);
-            recursionStack.add(node);
+            visited.add(node.treeId);
+            recursionStack.add(node.treeId);
 
             // Recur for all the children of this node
-            for (const child of node.children) {
-                if (!visited.has(child) && this._isCyclicUtil(child, visited, recursionStack)) {
+            for (const childTreeId of node.children) {
+                if (!visited.has(childTreeId) && this._isCyclicUtil(childTreeId, visited, recursionStack)) {
                     return true;
                 }
-                if (recursionStack.has(child)) {
+                if (recursionStack.has(childTreeId)) {
                     return true;
                 }
             }
         }
-        recursionStack.delete(node); // remove the node from recursion stack
+        recursionStack.delete(node.treeId); // remove the node from recursion stack
         return false;
     }
 
     private _checkIsCycleDependency(treeList: FormulaDependencyTree[]) {
-        const visited = new Set<FormulaDependencyTree>();
-        const recursionStack = new Set<FormulaDependencyTree>();
+        const visited = new Set<string>();
+        const recursionStack = new Set<string>();
 
         // Call the recursive helper function to detect cycle in different
         // DFS trees
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
-            const isCycle = this._isCyclicUtil(tree, visited, recursionStack);
+            const isCycle = this._isCyclicUtil(tree.treeId, visited, recursionStack);
             if (isCycle === true) {
                 return true;
             }
@@ -250,16 +254,12 @@ export class FormulaDependencyGenerator extends Disposable {
         const rangeList = tree.rangeList;
         const newRangeList = [];
         for (let i = 0, len = rangeList.length; i < len; i++) {
-            const range = rangeList[i];
+            const unitRange = rangeList[i];
             const newRange = {
                 unitId: tree.unitId,
                 sheetId: tree.subUnitId,
-                range: { ...range.range },
+                range: moveRangeByOffset(unitRange.range, refOffsetX, refOffsetY),
             };
-            newRange.range.startRow += refOffsetY;
-            newRange.range.endRow += refOffsetY;
-            newRange.range.startColumn += refOffsetX;
-            newRange.range.endColumn += refOffsetX;
             newRangeList.push(newRange);
         }
         return newRangeList;
@@ -727,9 +727,9 @@ export class FormulaDependencyGenerator extends Disposable {
                             featureTree = this._getFeatureFormulaTree(featureId, params);
                             newTreeList.push(featureTree);
                         }
-                        featureTree.parents = new Set<FormulaDependencyTree>();
+                        featureTree.parents = new Set<string>();
                         intersectTrees.forEach((tree) => {
-                            if (tree.hasChildren(featureTree!)) {
+                            if (tree.hasChildren(featureTree!.treeId)) {
                                 return;
                             }
                             tree.pushChildren(featureTree!);
@@ -748,22 +748,30 @@ export class FormulaDependencyGenerator extends Disposable {
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
         newTreeList.forEach((tree) => {
-            const newChildren = new Set<FormulaDependencyTree>();
-            for (const child of tree.children) {
+            const newChildren = new Set<string>();
+            for (const childTreeId of tree.children) {
+                const child = this._dependencyManagerService.getTreeById(childTreeId);
+                if (!child) {
+                    continue;
+                }
                 if (!child.featureId) {
-                    newChildren.add(child);
+                    newChildren.add(childTreeId);
                 } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
-                    newChildren.add(child);
+                    newChildren.add(childTreeId);
                 }
             }
             tree.children = newChildren;
 
-            const newParents = new Set<FormulaDependencyTree>();
-            for (const parent of tree.parents) {
+            const newParents = new Set<string>();
+            for (const parentTreeId of tree.parents) {
+                const parent = this._dependencyManagerService.getTreeById(parentTreeId);
+                if (!parent) {
+                    continue;
+                }
                 if (!parent.featureId) {
-                    newParents.add(parent);
+                    newParents.add(parentTreeId);
                 } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
-                    newParents.add(parent);
+                    newParents.add(parentTreeId);
                 }
             }
             tree.parents = newParents;
@@ -996,7 +1004,11 @@ export class FormulaDependencyGenerator extends Disposable {
             // It will clear the array.
             cacheStack.length = 0;
 
-            for (const parentTree of tree.parents) {
+            for (const parentTreeId of tree.parents) {
+                const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
+                if (!parentTree) {
+                    throw new Error('ParentDependencyTree object is null');
+                }
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;
                 }

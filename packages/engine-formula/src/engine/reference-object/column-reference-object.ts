@@ -30,10 +30,12 @@ export class ColumnReferenceObject extends BaseReferenceObject {
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
+            ...grid.range,
             startColumn: grid.range.startColumn,
             startRow: Number.NaN,
-            endColumn: -1,
+            endColumn: grid.range.endColumn,
             endRow: Number.NaN,
+            rangeType: RANGE_TYPE.COLUMN,
         };
         this.setRangeData(range);
     }

@@ -109,6 +109,9 @@ const locale = {
             right: '右框线',
         },
         more: '更多',
+        hideGridlines: '隐藏网格线',
+        showGridlines: '展示网格线',
+        toggleGridlines: '切换网格线',
     },
     defaultFmt: {
         Automatic: {

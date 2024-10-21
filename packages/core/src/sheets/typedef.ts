@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { LocaleType } from '../types/enum/locale-type';
@@ -22,6 +21,7 @@ import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -127,7 +127,8 @@ export interface IWorksheetData {
         hidden?: BooleanNumber;
     };
 
-    showGridlines: BooleanNumber;
+    /** @deprecated */
+    showGridlines?: BooleanNumber;
     rightToLeft: BooleanNumber;
 }
 
@@ -526,7 +527,7 @@ export interface IOptionData {
 /**
  * Option of copyTo function
  */
-export interface ICopyToOptionsData extends IOptionData {}
+export interface ICopyToOptionsData extends IOptionData { }
 
 export interface IRectLTRB {
     left: number;
@@ -554,9 +555,9 @@ export interface ISingleCell {
     isMergedMainCell: boolean;
 }
 
-export interface IRangeWithCoord extends IPosition, IRange {}
+export interface IRangeWithCoord extends IPosition, IRange { }
 
-export interface ISelectionCell extends IRange, ISingleCell {}
+export interface ISelectionCell extends IRange, ISingleCell { }
 
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell

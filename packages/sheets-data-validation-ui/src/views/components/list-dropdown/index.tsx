@@ -28,7 +28,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, SetRangeValuesCommand, WorkbookEditablePermission, WorksheetEditPermission } from '@univerjs/sheets';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '@univerjs/sheets-data-validation';
-import { IEditorBridgeService, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, SetCellEditVisibleOperation, SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 import { KeyCode, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { debounceTime } from 'rxjs';
@@ -233,6 +233,11 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 }
 
                 commandService.executeCommand(SetRangeValuesCommand.id, params);
+                commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                    visible: false,
+                    eventType: DeviceInputEventType.Keyboard,
+                    unitId,
+                });
                 setLocalValue(str);
                 if (!multiple) {
                     hideFn();

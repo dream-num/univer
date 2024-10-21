@@ -19,9 +19,11 @@ import type { DateValidator } from '@univerjs/sheets-data-validation';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
 import { CellValueType, DataValidationErrorStyle, ICommandService, LocaleService, numfmt, useDependency } from '@univerjs/core';
 import { Button, DatePanel } from '@univerjs/design';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
 import { getPatternType } from '@univerjs/sheets-numfmt';
+import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import React, { useState } from 'react';
@@ -113,6 +115,11 @@ export function DateDropdown(props: IDropdownComponentProps) {
                         },
                     },
                 },
+            });
+            commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                unitId,
             });
             hideFn();
         } else {

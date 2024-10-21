@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
 import type { IDocumentBody } from '../../../../types/interfaces';
-import { BooleanNumber } from '../../../../types/enum';
-import { TextX } from '../text-x';
 import type { TextXAction } from '../action-types';
-import { TextXActionType } from '../action-types';
+import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { BooleanNumber } from '../../../../types/enum';
+import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 describe('test TextX static methods invert and makeInvertible', () => {
     it('test TextX static method invert', () => {

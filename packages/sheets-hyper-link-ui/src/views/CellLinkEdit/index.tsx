@@ -241,11 +241,11 @@ export const CellLinkEdit = () => {
     }, [editorBridgeService, renderManagerService]);
 
     useEffect(() => {
-        popupService.setIsKeepVisible(type === SheetHyperLinkType.RANGE);
+        popupService.setIsKeepVisible(isFocusRangeSelector);
         return () => {
             popupService.setIsKeepVisible(false);
         };
-    }, [type]);
+    }, [isFocusRangeSelector, popupService]);
 
     useEffect(() => {
         return () => {

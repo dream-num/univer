@@ -25,6 +25,8 @@ import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/muta
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutations';
+import { SetWorksheetRowColumnStyleMutation } from '../../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -59,4 +61,6 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     RemoveWorksheetMergeMutation.id,
     AddWorksheetMergeMutation.id,
     ReorderRangeMutation.id,
+    SetWorksheetRowColumnStyleMutation.id,
+    SetWorksheetDefaultStyleMutation.id,
 ];

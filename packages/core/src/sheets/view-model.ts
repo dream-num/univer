@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { InterceptorEffectEnum } from '../common/interceptor';
-
-import { Disposable, toDisposable } from '../shared/lifecycle';
 import type { IDisposable } from '../common/di';
+
 import type { Nullable } from '../shared/types';
 import type { ICellData, ICellDataForSheetInterceptor } from './typedef';
+import { InterceptorEffectEnum } from '../common/interceptor';
+import { Disposable, toDisposable } from '../shared/lifecycle';
 
 /**
  * @internal

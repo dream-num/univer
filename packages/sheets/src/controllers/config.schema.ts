@@ -28,6 +28,10 @@ export interface IUniverSheetsConfig {
      * web worker environment or server-side-calculation.
      */
     onlyRegisterFormulaRelatedMutations?: true;
+     /**
+      * If the row style and column style be set both, and the row style should precede the column style or not.
+      */
+    isRowStylePrecedeColumnStyle?: boolean;
 }
 
 export const defaultPluginConfig: IUniverSheetsConfig = {};

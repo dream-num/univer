@@ -15,10 +15,11 @@
  */
 
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
+import type { IStyleData } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils } from '../docs';
-import { ObjectMatrix, Tools } from '../shared';
+import { composeStyles, ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { type BooleanNumber, CellValueType } from '../types/enum';
 import { ColumnManager } from './column-manager';
@@ -87,8 +88,98 @@ export class Worksheet {
     }
 
     /**
+     * Get the style of the column.
+     * @param {number} column The column index
+     * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
+     * @returns {Nullable<IStyleData>|string} The style of the column
+     */
+    getColumnStyle(column: number, keepRaw = false): string | Nullable<IStyleData> {
+        if (keepRaw) {
+            return this._columnManager.getColumnStyle(column);
+        }
+        return this._styles.get(this._columnManager.getColumnStyle(column));
+    }
+
+    /**
+     * Set the style of the column.
+     * @param {number} column The column index
+     * @param {string|Nullable<IStyleData>} style The style to be set
+     */
+    setColumnStyle(column: number, style: string | Nullable<IStyleData>): void {
+        this._columnManager.setColumnStyle(column, style);
+    }
+
+    /**
+     * Get the style of the row.
+     * @param {number} row The row index
+     * @param {boolean} [keepRaw] If true, return the raw style data, otherwise return the style data object
+     * @returns {Nullable<IStyleData>} The style of the row
+     */
+    getRowStyle(row: number, keepRaw = false): string | Nullable<IStyleData> {
+        if (keepRaw) {
+            return this._rowManager.getRowStyle(row);
+        }
+        return this._styles.get(this._rowManager.getRowStyle(row));
+    }
+
+    /**
+     * Set the style of the row.
+     * @param {number} row
+     * @param {string|Nullable<IStyleData>} style The style to be set
+     */
+    setRowStyle(row: number, style: string | Nullable<IStyleData>): void {
+        this._rowManager.setRowStyle(row, style);
+    }
+
+    /**
+     * this function is used to mixin default style to cell raw{number}
+     * @param {number} row The row index
+     * @param {number} col The column index
+     * @param cellRaw The cell raw data
+     * @param {boolean} isRowStylePrecedeColumnStyle The priority of row style and column style
+     */
+    mixinDefaultStyleToCellRaw(row: number, col: number, cellRaw: Nullable<ICellData>, isRowStylePrecedeColumnStyle: boolean) {
+        const columnStyle = this.getColumnStyle(col) as Nullable<IStyleData>;
+        const rowStyle = this.getRowStyle(row) as Nullable<IStyleData>;
+        const defaultStyle = this.getDefaultCellStyleInternal();
+        if (defaultStyle || columnStyle || rowStyle) {
+            let cellStyle = cellRaw?.s;
+            if (typeof cellStyle === 'string') {
+                cellStyle = this._styles.get(cellStyle);
+            }
+            const s = isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
+            if (!cellRaw) {
+                // eslint-disable-next-line no-param-reassign
+                cellRaw = {};
+            }
+            cellRaw.s = s;
+        }
+    }
+
+    /**
+     * Get the default style of the worksheet.
+     * @returns {Nullable<IStyleData>} Default Style
+     */
+    getDefaultCellStyle(): Nullable<IStyleData> | string {
+        return this._snapshot.defaultStyle;
+    }
+
+    getDefaultCellStyleInternal(): Nullable<IStyleData> {
+        const style = this._snapshot.defaultStyle;
+        return this._styles.get(style);
+    }
+
+    /**
+     * Set Default Style, if the style has been set, all cells style will be base on this style.
+     * @param {Nullable<IStyleData>} style The style to be set as default style
+     */
+    setDefaultCellStyle(style: Nullable<IStyleData> | string): void {
+        this._snapshot.defaultStyle = style;
+    }
+
+    /**
      * Returns WorkSheet Cell Data Matrix
-     * @returns
+     * @returns WorkSheet Cell Data Matrix
      */
     getCellMatrix(): ObjectMatrix<Nullable<ICellData>> {
         return this._cellData;

@@ -82,8 +82,6 @@ export class ThreadCommentModel extends Disposable {
 
             if (stage === LifecycleStages.Rendered) {
                 this._tasks.forEach(({ unitId, subUnitId, threadIds }) => {
-                    // this.syncThreadComments(unitId, subUnitId, threadIds);
-                    // taskMap.set(`${unitId}-${subUnitId}`, new Set(threadIds));
                     let unitMap = taskMap.get(unitId);
                     if (!unitMap) {
                         unitMap = new Map();

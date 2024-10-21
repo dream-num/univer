@@ -34,6 +34,16 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context = context;
     }
 
+    private _id: string;
+
+    getId() {
+        return this._id;
+    }
+
+    setId(id: string) {
+        this._id = id;
+    }
+
     isContextLost(): boolean {
         // @ts-ignore
         return this._context.isContextLost();
@@ -438,10 +448,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     }
 
-     /**
-      * bezierCurveTo function precision.
-      * @method
-      */
+    /**
+     * bezierCurveTo function precision.
+     * @method
+     */
     bezierCurveToByPrecision(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
@@ -673,10 +683,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         this._context.fillRect(x, y, width, height);
     }
 
-     /**
-      * fillRect function precision.
-      * @method
-      */
+    /**
+     * fillRect function precision.
+     * @method
+     */
     fillRectByPrecision(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);

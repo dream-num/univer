@@ -26,6 +26,7 @@ import type { ICanvasFloatDom } from '@univerjs/sheets-drawing-ui';
 import type { ISheetHyperLinkInfo } from '@univerjs/sheets-hyper-link-ui';
 import type { CommentUpdate, IAddCommentCommandParams, IDeleteCommentCommandParams } from '@univerjs/thread-comment';
 import type { IDialogPartMethodOptions, ISidebarMethodOptions } from '@univerjs/ui';
+
 import type { IFComponentKey } from './utils';
 import {
     ICommandService,
@@ -46,6 +47,7 @@ import { AddSheetDataValidationCommand, RemoveSheetAllDataValidationCommand, Rem
 import { SheetsHyperLinkResolverService } from '@univerjs/sheets-hyper-link-ui';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { IDialogService, ISidebarService } from '@univerjs/ui';
+
 import { filter } from 'rxjs';
 import { FRange } from './f-range';
 import { FWorksheet } from './f-worksheet';

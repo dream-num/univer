@@ -16,7 +16,7 @@
 
 import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -96,15 +96,23 @@ export function getObservableWithExclusiveRange$(accessor: IAccessor, observable
     );
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
     const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+    const contextService = accessor.get(IContextService);
+    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
+    const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
-    return combineLatest([userManagerService.currentUser$, workbook$, editorBridgeService?.visible$ ?? of(null)]).pipe(
-        switchMap(([_, workbook, visible]) => {
-            if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit)) {
+    return combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$]).pipe(
+        switchMap(([_, workbook, visible, formulaEditorFocus]) => {
+            if (
+                !workbook ||
+                (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit) ||
+                (formulaEditorFocus && !supportCellEdit)
+            ) {
                 return of(true);
             }
 

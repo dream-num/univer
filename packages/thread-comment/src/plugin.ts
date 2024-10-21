@@ -68,9 +68,7 @@ export class UniverThreadCommentPlugin extends Plugin {
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
-    }
 
-    override onRendered(): void {
         this._injector.get(ThreadCommentResourceController);
     }
 }

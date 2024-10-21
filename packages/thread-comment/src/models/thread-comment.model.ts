@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, Disposable, ICommandService, Inject } from '@univerjs/core';
-import { BehaviorSubject, map, Subject } from 'rxjs';
-import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
+import { CustomRangeType, Disposable, ICommandService, Inject, LifecycleService, LifecycleStages } from '@univerjs/core';
+import { BehaviorSubject, map, Subject } from 'rxjs';
+import { IThreadCommentDataSourceService } from '../services/tc-datasource.service';
 
 export type CommentUpdate = {
     unitId: string;
@@ -63,15 +63,49 @@ export class ThreadCommentModel extends Disposable {
     commentUpdate$ = this._commentUpdate$.asObservable();
     commentMap$ = this._commentsMap$.asObservable();
 
+    private _tasks: { unitId: string; subUnitId: string; threadIds: string[] }[] = [];
+
     constructor(
         @Inject(IThreadCommentDataSourceService) private readonly _dataSourceService: IThreadCommentDataSourceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService
     ) {
         super();
 
         this.disposeWithMe(() => {
             this._commentUpdate$.complete();
             this._commentsMap$.complete();
+        });
+
+        this._lifecycleService.lifecycle$.subscribe((stage) => {
+            const taskMap = new Map<string, Map<string, Set<string>>>();
+
+            if (stage === LifecycleStages.Rendered) {
+                this._tasks.forEach(({ unitId, subUnitId, threadIds }) => {
+                    // this.syncThreadComments(unitId, subUnitId, threadIds);
+                    // taskMap.set(`${unitId}-${subUnitId}`, new Set(threadIds));
+                    let unitMap = taskMap.get(unitId);
+                    if (!unitMap) {
+                        unitMap = new Map();
+                        taskMap.set(unitId, unitMap);
+                    }
+                    let subUnitMap = unitMap.get(subUnitId);
+                    if (!subUnitMap) {
+                        subUnitMap = new Set();
+                        unitMap.set(subUnitId, subUnitMap);
+                    }
+                    for (const threadId of threadIds) {
+                        subUnitMap.add(threadId);
+                    }
+                });
+
+                this._tasks = [];
+                taskMap.forEach((subUnitMap, unitId) => {
+                    subUnitMap.forEach((threadIds, subUnitId) => {
+                        this.syncThreadComments(unitId, subUnitId, Array.from(threadIds));
+                    });
+                });
+            }
         });
     }
 
@@ -175,6 +209,11 @@ export class ThreadCommentModel extends Disposable {
     }
 
     async syncThreadComments(unitId: string, subUnitId: string, threadIds: string[]) {
+        if (this._lifecycleService.stage < LifecycleStages.Rendered) {
+            this._tasks.push({ unitId, subUnitId, threadIds });
+            return;
+        }
+
         const comments = await this._dataSourceService.listThreadComments(unitId, subUnitId, threadIds);
         if (!comments.length) {
             return;

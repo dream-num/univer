@@ -53,6 +53,7 @@ import {
     BooleanNumber,
     BuildTextUtils,
     CellValueType,
+    composeStyles,
     CustomRangeType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DEFAULT_STYLES,
@@ -1885,7 +1886,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const style = this._styles.getStyleByCell(cell);
+        // const style = this._styles.getStyleByCell(cell);
+
+        const cellStyle = this._styles.getStyleByCell(cell);
+        const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
+        const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
+        const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
+
+        const style = false ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
+
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
         this._setFontStylesCache(row, col, cell);

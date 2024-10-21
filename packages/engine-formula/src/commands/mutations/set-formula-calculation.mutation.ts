@@ -45,9 +45,7 @@ export interface ISetFormulaCalculationNotificationMutation {
 export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCalculationNotificationMutation> = {
     id: 'formula.mutation.set-formula-calculation-notification',
     type: CommandType.MUTATION,
-    handler: () => {
-        return true;
-    },
+    handler: () => true,
 };
 
 export interface ISetFormulaCalculationResultMutation {

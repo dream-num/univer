@@ -178,33 +178,23 @@ export class InvertedIndexCache {
     }
 
     private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {
-        const result = columnMap.search([startRow, endRow]);
+        let result = columnMap.search([startRow, endRow]);
 
         // the range is not overlapping with any existing range
         if (result.length === 0) {
             // check if the range is adjacent to any existing range
-            const adjacentRange = [startRow - 1 < 0 ? 0 : startRow - 1, endRow + 1];
-            const adjacentRangeResult = columnMap.search(adjacentRange as NumericTuple);
+            const adjacentRange: NumericTuple = [startRow - 1 < 0 ? 0 : startRow - 1, endRow + 1];
 
-            if (adjacentRangeResult.length === 0) {
+            result = columnMap.search(adjacentRange);
+
+            // the range is not overlapping or adjacent to any existing range, then insert it
+            if (result.length === 0) {
                 columnMap.insert([startRow, endRow]);
                 return;
             }
-
-            let min = startRow;
-            let max = endRow;
-
-            for (const interval of adjacentRangeResult) {
-                min = Math.min(min, interval[0]);
-                max = Math.max(max, interval[1]);
-                columnMap.remove(interval);
-            }
-
-            columnMap.insert([min, max]);
-
-            return;
         }
 
+        // merge overlapping or adjacent ranges
         let min = startRow;
         let max = endRow;
 

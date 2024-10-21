@@ -37,6 +37,7 @@ export interface IRichTextEditingMutationParams extends IMutationCommonParams {
     // Whether this mutation is from a sync operation.
     isSync?: boolean;
     isEditing?: boolean;
+    syncer?: string;
 }
 
 const RichTextEditingMutationId = 'doc.mutation.rich-text-editing';
@@ -50,6 +51,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
     type: CommandType.MUTATION,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: (accessor, params) => {
         const {
             unitId,
@@ -63,6 +65,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             noNeedSetTextRange,
             debounce,
             isEditing = true,
+            isSync,
+            syncer,
         } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
@@ -120,6 +124,8 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
                 textRanges: prevTextRanges ?? docRanges,
             },
             isCompositionEnd,
+            isSync,
+            syncer,
         };
         docStateEmitService.emitStateChangeInfo(changeState);
 

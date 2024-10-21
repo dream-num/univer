@@ -27,12 +27,12 @@ export class If extends BaseFunction {
     override maxParams = 3;
 
     override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
-        if (logicalTest.isError()) {
-            return logicalTest;
-        }
-
         // get single value object
         const _logicalTest = this._getSingleValueObject(logicalTest);
+
+        if (_logicalTest.isError()) {
+            return _logicalTest;
+        }
 
         if (!_logicalTest.isArray()) {
             return _logicalTest.getValue() ? valueIfTrue : valueIfFalse;

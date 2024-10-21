@@ -106,7 +106,6 @@ export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
-export { GRIDLINE_COLOR_CONFIG_KEY, SHOW_GRIDLINES_CONFIG_KEY } from './controllers/config.schema';
 
 export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';
@@ -180,7 +179,6 @@ export {
     SetWorksheetProtectionCommand,
 } from './commands/commands/worksheet-protection.command';
 
-export { type ISetGridlineColorOperationParams, SetGridlineColorOperation } from './commands/operations/set-gridline-color.operation';
 export { SetActivateCellEditOperation } from './commands/operations/activate-cell-edit.operation';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation, SetCellEditVisibleWithF2Operation } from './commands/operations/cell-edit.operation';
 export { RenameSheetOperation } from './commands/operations/rename-sheet.operation';

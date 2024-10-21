@@ -519,6 +519,16 @@ export class FUniver {
     }
 
     /**
+     * Set the color of the crosshair highlight.
+     * @param {string} color the color of the crosshair highlight
+     */
+    setCrosshairHighlightColor(color: string): void {
+        this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
+            value: color,
+        } as ISetCrosshairHighlightColorOperationParams);
+    }
+
+    /**
      * Show or hide grid line.
      * @param {boolean} visible If the grid line should be visible.
      */
@@ -530,18 +540,11 @@ export class FUniver {
         }
     }
 
+    /**
+     * Set the color of the gridlines.
+     */
     setGridlineColor(color: string): void {
         this._commandService.executeCommand(SetGridlineColorOperation.id, { color } as ISetGridlineColorOperationParams);
-    }
-
-    /**
-     * Set the color of the crosshair highlight.
-     * @param {string} color the color of the crosshair highlight
-     */
-    setCrosshairHighlightColor(color: string): void {
-        this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
-            value: color,
-        } as ISetCrosshairHighlightColorOperationParams);
     }
 
     // #endregion

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IAccessor, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { IAccessor, IMutation } from '@univerjs/core';
+import { BooleanNumber, CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 
 export interface ISetHideGridlinesMutationParams {
     hideGridlines: BooleanNumber;
@@ -31,7 +31,7 @@ export const SetHideGridlinesUndoMutationFactory = (
     const worksheet = workbook!.getSheetBySheetId(params.subUnitId);
     const config = worksheet!.getConfig();
 
-    const oldStatus = config.showGridlines;
+    const oldStatus = config.showGridlines ?? BooleanNumber.TRUE;
 
     return {
         ...Tools.deepClone(params),

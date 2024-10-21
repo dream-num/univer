@@ -15,9 +15,10 @@
  */
 
 import type { IAccessor, Workbook } from '@univerjs/core';
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 export function getAddPermissionHidden$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -186,10 +187,14 @@ export function getAddPermissionDisableBase$(accessor: IAccessor) {
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
+    const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+    const contextService = accessor.get(IContextService);
+    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
+    const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
-    return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
-        switchMap(([workbook, _]) => {
-            if (!workbook) {
+    return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(
+        switchMap(([workbook, __, visible, formulaEditorFocus]) => {
+            if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId()) || formulaEditorFocus) {
                 return of(true);
             }
 
@@ -436,10 +441,14 @@ export function getViewPermissionDisable$(accessor: IAccessor) {
     const permissionService = accessor.get(IPermissionService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
+    const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+    const contextService = accessor.get(IContextService);
+    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
+    const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
-    return combineLatest([workbook$, userManagerService.currentUser$]).pipe(
-        switchMap(([workbook, _]) => {
-            if (!workbook) {
+    return combineLatest([workbook$, userManagerService.currentUser$, editorVisible$, formulaEditorFocus$]).pipe(
+        switchMap(([workbook, __, visible, formulaEditorFocus]) => {
+            if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId()) || formulaEditorFocus) {
                 return of(true);
             }
 

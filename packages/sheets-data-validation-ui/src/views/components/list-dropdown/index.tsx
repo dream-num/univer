@@ -18,6 +18,7 @@ import type { DocumentDataModel } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ISetRangeValuesCommandParams, ISheetLocation } from '@univerjs/sheets';
 import type { ListMultipleValidator } from '@univerjs/sheets-data-validation';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IUniverSheetsDataValidationUIConfig } from '../../../controllers/config.schema';
 import type { IDropdownComponentProps } from '../../../services/dropdown-manager.service';
 import { BuildTextUtils, DataValidationRenderMode, DataValidationType, ICommandService, IConfigService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
@@ -204,7 +205,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
             title={multiple ? localeService.t('dataValidation.listMultiple.dropdown') : localeService.t('dataValidation.list.dropdown')}
             value={value}
             multiple={multiple}
-            onChange={(newValue) => {
+            onChange={async (newValue) => {
                 const str = serializeListOptions(newValue);
                 const params: ISetRangeValuesCommandParams = {
                     unitId,
@@ -232,12 +233,13 @@ export function ListDropDown(props: IDropdownComponentProps) {
                     });
                 }
 
-                commandService.executeCommand(SetRangeValuesCommand.id, params);
-                commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                await commandService.executeCommand(SetCellEditVisibleOperation.id, {
                     visible: false,
                     eventType: DeviceInputEventType.Keyboard,
                     unitId,
-                });
+                    keycode: KeyCode.ESC,
+                } as IEditorBridgeServiceVisibleParam);
+                commandService.executeCommand(SetRangeValuesCommand.id, params);
                 setLocalValue(str);
                 if (!multiple) {
                     hideFn();

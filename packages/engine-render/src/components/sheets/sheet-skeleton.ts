@@ -664,7 +664,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._rowHeightAccumulation = rowHeightAccumulation;
         this._columnTotalWidth = columnTotalWidth;
         this._columnWidthAccumulation = columnWidthAccumulation;
-        this._showGridlines = showGridlines || BooleanNumber.TRUE;
+        this._showGridlines = showGridlines;
 
         this.makeDirty(false);
     }

@@ -27,7 +27,6 @@ import {
     Spreadsheet,
     SpreadsheetColumnHeader,
     SpreadsheetRowHeader,
-    UniverRenderConfigService,
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -54,7 +53,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetsRenderService) private readonly _sheetRenderService: SheetsRenderService,
-        @Inject(UniverRenderConfigService) private readonly _renderConfigService: UniverRenderConfigService,
         @ICommandService private readonly _commandService: ICommandService,
         @Optional(ITelemetryService) private readonly _telemetryService?: ITelemetryService
     ) {
@@ -237,7 +235,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
         scene.enableLayerCache(SHEET_COMPONENT_MAIN_LAYER_INDEX, SHEET_COMPONENT_HEADER_LAYER_INDEX);
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private _initViewports(scene: Scene, rowHeader: { width: number }, columnHeader: { height: number }) {
         const bufferEdgeX = 100;
         const bufferEdgeY = 100;
@@ -302,40 +299,6 @@ export class SheetRenderController extends RxDisposable implements IRenderModule
             height: columnHeader.height,
             isWheelPreventDefaultX: true,
         });
-
-        // Refer to `packages/engine-render/src/render-manager/render-unit`, we should attach
-        // render config to canvas in these viewports.
-        const updateRenderConfig = () => {
-            [
-                viewMain,
-                viewLeftTop,
-                viewMainLeftTop,
-                viewMainLeft,
-                viewMainTop,
-                viewColumnLeft,
-                viewRowTop,
-                viewRowBottom,
-                viewColumnRight,
-            ].forEach((viewport) => {
-                const canvas = viewport.canvas;
-                if (canvas) {
-                    canvas.getContext().renderConfig = this._renderConfigService.getRenderConfig();
-                }
-            });
-        };
-
-        updateRenderConfig();
-        scene.disposeWithMe(this._renderConfigService._updateSignal$.subscribe(() => {
-            // FIXME: not immediately clear drawing cache and re-render
-            updateRenderConfig();
-            const { mainComponent: spreadsheet } = this._context;
-            if (spreadsheet) {
-                spreadsheet.makeDirty(true); // refresh spreadsheet
-                viewMain.markDirty(true);
-            }
-
-            this._sheetSkeletonManagerService.reCalculate();
-        }));
 
         return {
             viewMain,

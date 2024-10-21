@@ -542,10 +542,6 @@ export class Spreadsheet extends SheetComponent {
             return;
         }
 
-        // TODO: @lumixraku sheet rendering widgets should be move to sheets-ui, so we can use render config identifiers
-        const showConfig = ctx.renderConfig.showGridline;
-        if (showConfig === false) return;
-
         const { rowColumnSegment, overflowCache, showGridlines } = spreadsheetSkeleton;
         const mergeCellRanges = spreadsheetSkeleton.getCurrentRowColumnSegmentMergeData(rowColumnSegment);
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;

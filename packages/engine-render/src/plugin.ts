@@ -20,7 +20,6 @@ import { createIdentifier, IConfigService, Inject, Injector, Plugin, registerDep
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
 import { Engine } from './engine';
 import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
-import { UniverRenderConfigService } from './services/render-config.service';
 
 /**
  * The global rendering engine.
@@ -44,7 +43,6 @@ export class UniverRenderEnginePlugin extends Plugin {
         this._configService.setConfig(PLUGIN_CONFIG_KEY, rest);
 
         registerDependencies(this._injector, [
-            [UniverRenderConfigService],
             [IRenderingEngine, { useFactory: () => new Engine() }],
             [IRenderManagerService, { useClass: RenderManagerService }],
         ]);

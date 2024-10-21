@@ -41,6 +41,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
+    ToggleGridlinesCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
@@ -85,11 +86,10 @@ import {
     DeleteWorksheetProtectionFormSheetBarCommand,
 } from '../commands/commands/worksheet-protection.command';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
-import { ToggleGridlineOperation } from '../commands/operations/toggle-gridline.operation';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
-import { ToggleGridlineMenuFactory } from './menu/gridline.menu';
+import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
@@ -702,9 +702,9 @@ export const menuSchema: MenuSchemaType = {
     },
     [ContextMenuPosition.FOOTER_MENU]: {
         [ContextMenuGroup.OTHERS]: {
-            [ToggleGridlineOperation.id]: {
+            [ToggleGridlinesCommand.id]: {
                 order: 1,
-                menuItemFactory: ToggleGridlineMenuFactory,
+                menuItemFactory: ToggleGridlinesMenuFactory,
             },
         },
     },

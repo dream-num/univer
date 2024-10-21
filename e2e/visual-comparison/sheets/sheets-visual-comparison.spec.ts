@@ -17,7 +17,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
-const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas';
+const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
 const isCI = !!process.env.CI;
 
 test('diff default sheet toolbar', async () => {
@@ -52,7 +52,7 @@ test('diff default sheet content', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     const filename = generateSnapshotName('default-sheet');
-    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    const screenshot = await page.locator('#univer-sheet-main-canvas_test').screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 });
 

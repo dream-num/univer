@@ -86,7 +86,7 @@ export class SheetsRenderService extends RxDisposable {
         const unitId = workbook.getUnitId();
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === unitId) {
-                renderer.engine.getCanvas().setId(SHEET_MAIN_CANVAS_ID);
+                renderer.engine.getCanvas().setId(`${SHEET_MAIN_CANVAS_ID}_${unitId}`);
             }
         });
         this._renderManagerService.createRender(unitId);

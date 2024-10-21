@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 
-import type { DependencyOverride } from '@univerjs/core';
-import type { MenuConfig } from '@univerjs/ui';
-
-export const PLUGIN_CONFIG_KEY = 'sheets-ui.config';
-
-export const configSymbol = Symbol(PLUGIN_CONFIG_KEY);
-
-export interface IUniverSheetsUIConfig {
-    menu?: MenuConfig;
-    disableAutoFocus?: true;
-    override?: DependencyOverride;
-
-    /**
-     * Whether to show the formula bar.
-     */
-    formulaBar?: boolean;
+export interface IRenderConfig {
+    [key: string]: any;
 }
-
-export const defaultPluginConfig: IUniverSheetsUIConfig = {
-    formulaBar: true,
-};
-

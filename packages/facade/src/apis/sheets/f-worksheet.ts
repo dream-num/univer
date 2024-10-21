@@ -15,15 +15,15 @@
  */
 
 import type { ICellData, IDisposable, IFreeze, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
 
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
-import { Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -1035,6 +1035,25 @@ export class FWorksheet {
             return 0;
         }
         return freeze.startRow;
+    }
+
+    /**
+     * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
+     */
+    hasHiddenGridLines(): boolean {
+        return this._worksheet.getConfig().showGridlines === BooleanNumber.FALSE;
+    }
+
+    /**
+     * Hides or reveals the sheet gridlines.
+     * @param {boolean} hidden If `true`, hide gridlines in this sheet; otherwise show the gridlines.
+     */
+    setHiddenGridlines(hidden: boolean): Promise<boolean> {
+        return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+        } as IToggleGridlinesCommandParams);
     }
 
     /**

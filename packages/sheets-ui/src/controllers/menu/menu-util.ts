@@ -100,11 +100,11 @@ export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IP
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
-    const editorBridgeService = accessor.get(IEditorBridgeService);
+    const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
 
-    return combineLatest([userManagerService.currentUser$, workbook$, editorBridgeService.visible$]).pipe(
+    return combineLatest([userManagerService.currentUser$, workbook$, editorBridgeService?.visible$ ?? of(null)]).pipe(
         switchMap(([_, workbook, visible]) => {
-            if (!workbook || (visible.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit)) {
+            if (!workbook || (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit)) {
                 return of(true);
             }
 

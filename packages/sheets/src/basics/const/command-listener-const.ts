@@ -24,7 +24,7 @@ import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mut
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
-import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetColAutoWidthMutation, SetWorksheetColIsAutoWidthMutation, SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -40,6 +40,8 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetWorksheetRowIsAutoHeightMutation.id,
     SetWorksheetRowAutoHeightMutation.id,
     SetWorksheetColWidthMutation.id,
+    SetWorksheetColIsAutoWidthMutation.id,
+    SetWorksheetColAutoWidthMutation.id,
     SetWorksheetActiveOperation.id,
     MoveRowsMutation.id,
     MoveColsMutation.id,

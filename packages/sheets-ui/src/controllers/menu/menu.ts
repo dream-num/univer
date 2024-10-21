@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAccessor } from '@univerjs/core';
+import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     BooleanNumber,
     DEFAULT_STYLES,
@@ -32,9 +34,9 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '@univerjs/core';
+
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
-
 import {
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
@@ -56,6 +58,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetActiveOperation,
+    SetWorksheetColIsAutoWidthCommand,
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
@@ -77,10 +80,8 @@ import {
     IClipboardInterfaceService,
     MenuItemType,
 } from '@univerjs/ui';
-import { combineLatestWith, map, Observable } from 'rxjs';
-import type { IAccessor } from '@univerjs/core';
 
-import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
+import { combineLatestWith, map, Observable } from 'rxjs';
 import {
     SheetCopyCommand,
     SheetCutCommand,
@@ -977,6 +978,17 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         id: SetWorksheetRowIsAutoHeightCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'AutoHeight',
+        title: 'rightClick.fitContent',
+        disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
+    };
+}
+
+export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: SetWorksheetColIsAutoWidthCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'AutoWidth',
         title: 'rightClick.fitContent',
         disabled$: getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetSetRowStylePermission, WorksheetEditPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),

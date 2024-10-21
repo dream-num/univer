@@ -23,6 +23,14 @@ export function isCustomRangeSplitSymbol(text: string) {
     return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
 }
 
+/**
+ * Check if two ranges intersect
+ * @param line1Start - The start of the first range
+ * @param line1End - The end of the first range
+ * @param line2Start - The start of the second range
+ * @param line2End - The end of the second range
+ * @returns True if the ranges intersect, false otherwise
+ */
 export function isIntersecting(line1Start: number, line1End: number, line2Start: number, line2End: number) {
     if ((line1Start <= line2Start && line1End >= line2Start) ||
         (line1Start >= line2Start && line1Start <= line2End)) {

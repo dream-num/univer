@@ -236,6 +236,9 @@ export class SheetsHyperLinkPopupController extends Disposable {
                     this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.EDITING);
                     this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.EDITING);
                     this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.VIEWING);
+                } else {
+                    this._sheetsHyperLinkPopupService.hideCurrentPopup(HyperLinkEditSourceType.ZEN_EDITOR);
+                    this._sheetsHyperLinkPopupService.endEditing(HyperLinkEditSourceType.ZEN_EDITOR);
                 }
             })
         );

@@ -364,7 +364,7 @@ export const SetFontSizeCommand: ICommand<ISetFontSizeCommandParams> = {
 };
 
 export interface ISetColorCommandParams {
-    value: string;
+    value: string | null;
 }
 
 export const SetTextColorCommand: ICommand<ISetColorCommandParams> = {

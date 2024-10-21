@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { RxDisposable } from '@univerjs/core';
-import { BehaviorSubject } from 'rxjs';
 import type { JSONXActions, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { RxDisposable } from '@univerjs/core';
+import { BehaviorSubject } from 'rxjs';
 
 interface IDocChangeState {
     actions: JSONXActions;
@@ -37,6 +37,8 @@ export interface IDocStateChangeParams {
 
 export interface IDocStateChangeInfo extends IDocStateChangeParams {
     isCompositionEnd?: boolean;
+    isSync?: boolean;
+    syncer?: string;
 }
 
 export class DocStateEmitService extends RxDisposable {

@@ -128,6 +128,7 @@ export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-ra
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
 export { HideColConfirmCommand, HideRowConfirmCommand } from './commands/commands/hide-row-col-confirm.command';
 export {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,

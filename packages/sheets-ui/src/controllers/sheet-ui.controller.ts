@@ -39,6 +39,7 @@ import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-r
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
 import {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
@@ -228,6 +229,7 @@ export class SheetUIController extends Disposable {
             SetRangeFontSizeCommand,
             SetRangeFontFamilyCommand,
             SetRangeTextColorCommand,
+            ResetRangeTextColorCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
             SetFontFamilyCommand,

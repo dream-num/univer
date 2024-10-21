@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IAccessor, ITextRange, Workbook, Worksheet } from '@univerjs/core';
 import { BuildTextUtils, CustomRangeType, DataValidationType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { SheetsSelectionsService } from '@univerjs/sheets';
-import type { DocumentDataModel, IAccessor, ITextRange, Workbook, Worksheet } from '@univerjs/core';
 
 export const getShouldDisableCellLink = (worksheet: Worksheet, row: number, col: number) => {
     const cell = worksheet.getCell(row, col);
@@ -67,10 +67,10 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     }
 
     const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
-    const paragraphs = body?.paragraphs;
-    if (!paragraphs) {
+    if (!body) {
         return true;
     }
+    const paragraphs = body?.paragraphs ?? [];
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {
         const p = paragraphs[i];

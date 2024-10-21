@@ -1508,7 +1508,7 @@ export class ArrayValueObject extends BaseValueObject {
 
             if (rowsInCache.length > 0) {
                 if (operator === compareToken.EQUALS) {
-                    // TODO@DR-Univer: When comparing two parameters that are equal, one of them has an error, and the logic here is wrong
+                    // TODO@DR-Univer: When comparing equal with two parameters, one of them is error, and the logic here is wrong
                     const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
                         unitId,
                         sheetId,

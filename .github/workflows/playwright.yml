@@ -31,6 +31,7 @@ jobs:
             - name: 🚀 Deploy to Vercel
               uses: amondnet/vercel-action@v25
               id: vercel-e2e-report
+              if: failure() # we only need to upload to Vercel if this CI fails
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}

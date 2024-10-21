@@ -20,7 +20,6 @@ import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDe
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
-import type { IAllRuntimeData } from '../services/runtime.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -33,7 +32,7 @@ import {
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
+import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -49,8 +48,6 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-
-        this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
@@ -159,9 +156,7 @@ export class CalculateController extends Disposable {
                 }
             );
         });
-    }
 
-    private _initialExecuteFormulaProcessListener() {
         /**
          * Assignment operation after formula calculation.
          */

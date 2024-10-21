@@ -30,8 +30,8 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { COMMAND_LISTENER_SKELETON_CHANGE, COMMAND_LISTENER_VALUE_CHANGE, MoveRangeMutation, SetRangeValuesMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ITelemetryService } from '@univerjs/telemetry';
 
+import { ITelemetryService } from '@univerjs/telemetry';
 import { Subject, withLatestFrom } from 'rxjs';
 import {
     SHEET_COMPONENT_HEADER_LAYER_INDEX,

@@ -52,7 +52,6 @@ import {
     IMessageService,
     INotificationService,
     IPlatformService,
-    IProgressService,
     IShortcutService,
     ISidebarService,
     IUIController,
@@ -61,7 +60,6 @@ import {
     MenuManagerService,
     MenuService,
     PlatformService,
-    ProgressService,
     SharedController,
     ShortcutPanelController,
     ShortcutPanelService,
@@ -127,7 +125,6 @@ export class UniverUniUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: () => this._injector.createInstance(UniverUniUIController, this._config),

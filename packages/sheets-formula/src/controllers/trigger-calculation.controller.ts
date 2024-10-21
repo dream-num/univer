@@ -88,17 +88,6 @@ export class TriggerCalculationController extends Disposable {
         this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount });
     }
 
-    private _addTotalCount(count: number): void {
-        this._totalCalculationTaskCount += count;
-        this._emitProgress();
-    }
-
-    private _addDoneTask(count: number): void {
-        this._doneCalculationTaskCount += count;
-        this._doneCalculationTaskCount = Math.min(this._doneCalculationTaskCount, this._totalCalculationTaskCount);
-        this._emitProgress();
-    }
-
     private _startProgress(): void {
         if (this._executionInProgressParams) {
             const { totalFormulasToCalculate, completedFormulasCount, totalArrayFormulasToCalculate, completedArrayFormulasCount } = this._executionInProgressParams;

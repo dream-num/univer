@@ -497,11 +497,8 @@ export const CellLinkEdit = () => {
                                     const range = docSelectionManagerService.getTextRanges({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY })?.[0];
 
                                     if (docBackScrollRenderController && range) {
-                                        // TODO: this was hacking
-                                        setTimeout(() => {
-                                            docBackScrollRenderController.scrollToRange(range);
-                                            docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
-                                        }, 100);
+                                        docBackScrollRenderController.scrollToRange(range);
+                                        docSelectionManagerService.refreshSelection({ unitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY, subUnitId: DOCS_ZEN_EDITOR_UNIT_ID_KEY });
                                     }
                                 }
                                 editorBridgeService.disableForceKeepVisible();

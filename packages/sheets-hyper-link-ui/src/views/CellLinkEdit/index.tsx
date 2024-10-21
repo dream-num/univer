@@ -230,8 +230,11 @@ export const CellLinkEdit = () => {
     const payloadInitial = useMemo(() => payload, [type]);
 
     useEffect(() => {
-        const render = renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
+        const render = editing?.type === HyperLinkEditSourceType.ZEN_EDITOR ?
+            renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY) :
+            renderManagerService.getRenderById(editorBridgeService.getCurrentEditorId());
         const disposeCollection = new DisposableCollection();
+
         if (render) {
             const selectionRenderService = render.with(DocSelectionRenderService);
             selectionRenderService.setReserveRangesStatus(true);

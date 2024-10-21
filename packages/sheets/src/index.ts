@@ -194,6 +194,8 @@ export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams 
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
 export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
+export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutations';
+export { type ISetWorksheetRowColumnStyleMutationParams, SetWorksheetRowColumnStyleMutation, SetWorksheetRowColumnStyleMutationFactory } from './commands/mutations/set-worksheet-row-column-style.mutation';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,

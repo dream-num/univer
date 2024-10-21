@@ -221,6 +221,12 @@ export const CellLinkEdit = () => {
         };
     }, [editing, markSelectionService, themeService, univerInstanceService]);
 
+    useEffect(() => {
+        if (type === SheetHyperLinkType.RANGE && !showLabel && !isFocusRangeSelector) {
+            isFocusRangeSelectorSet(true);
+        }
+    }, [type, isFocusRangeSelector, showLabel, editorBridgeService]);
+
     const payloadInitial = useMemo(() => payload, [type]);
 
     useEffect(() => {

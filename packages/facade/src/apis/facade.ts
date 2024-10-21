@@ -35,7 +35,6 @@ import type {
     SpreadsheetRowHeader,
 } from '@univerjs/engine-render';
 import type { ISocket } from '@univerjs/network';
-import type { IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import type { ISetGridlineColorOperationParams } from '@univerjs/sheets-ui';
@@ -59,10 +58,9 @@ import {
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { ToggleGridlinesCommand } from '@univerjs/sheets';
 import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, SetCrosshairHighlightColorOperation } from '@univerjs/sheets-crosshair-highlight';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
-import { SetGridlineColorOperation, SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
 import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { FDocument } from './docs/f-document';
@@ -528,23 +526,6 @@ export class FUniver {
         this._commandService.executeCommand(SetCrosshairHighlightColorOperation.id, {
             value: color,
         } as ISetCrosshairHighlightColorOperationParams);
-    }
-
-    /**
-     * Show or hide grid line.
-     * @param {boolean} visible If the grid line should be visible.
-     */
-    setGridlinesVisible(visible?: boolean): Promise<boolean> {
-        return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
-            showGridlines: visible,
-        } as IToggleGridlinesCommandParams);
-    }
-
-    /**
-     * Set the color of the gridlines.
-     */
-    setGridlinesColor(color: string): void {
-        this._commandService.executeCommand(SetGridlineColorOperation.id, { color } as ISetGridlineColorOperationParams);
     }
 
     // #endregion

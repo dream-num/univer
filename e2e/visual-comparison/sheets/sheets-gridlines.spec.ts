@@ -32,36 +32,10 @@ test('sheets no gridlines', async () => {
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
     await page.waitForTimeout(5000);
-    await page.evaluate(() => window.univerAPI.setGridlineVisible(false));
+    await page.evaluate(() => window.univerAPI.getActiveWorkbook().getActiveSheet().setGridlinesVisible(false));
     await page.waitForTimeout(1000);
 
     const filename = generateSnapshotName('sheets-no-gridlines');
-    const screenshot = await page.screenshot({
-        mask: [
-            page.locator('.univer-headerbar'),
-        ],
-        fullPage: true,
-    });
-    expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
-});
-
-test('sheets gridlines color', async () => {
-    const browser = await chromium.launch({
-        headless: !!isCI, // Set to false to see the browser window
-    });
-    const context = await browser.newContext({
-        viewport: { width: 1280, height: 720 },
-        deviceScaleFactor: 2, // Set your desired DPR
-    });
-    const page = await context.newPage();
-    await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
-    await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(5000);
-    await page.evaluate(() => window.univerAPI.setGridlineColor('rgb(200, 0, 0)'));
-    await page.waitForTimeout(1000);
-
-    const filename = generateSnapshotName('sheets-gridlines-color');
     const screenshot = await page.screenshot({
         mask: [
             page.locator('.univer-headerbar'),

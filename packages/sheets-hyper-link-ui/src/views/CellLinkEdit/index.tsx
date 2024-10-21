@@ -445,7 +445,7 @@ export const CellLinkEdit = () => {
                             }
                         }}
                         placeholder={localeService.t('hyperLink.form.linkPlaceholder')}
-                        autoFocus={!showLabel}
+                        autoFocus
                         onKeyDown={(e) => {
                             if (e.keyCode === KeyCode.ENTER) {
                                 handleSubmit();

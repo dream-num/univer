@@ -112,6 +112,9 @@ export class Interpreter extends Disposable {
     }
 
     private async _executeAsync(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): Promise<AstNodePromiseType> {
+        if (this._runtimeService.isStopExecution()) {
+            return Promise.resolve(AstNodePromiseType.ERROR);
+        }
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {
@@ -144,6 +147,9 @@ export class Interpreter extends Disposable {
     }
 
     private _execute(node: BaseAstNode, refOffsetX = 0, refOffsetY = 0): AstNodePromiseType {
+        if (this._runtimeService.isStopExecution()) {
+            return AstNodePromiseType.ERROR;
+        }
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {

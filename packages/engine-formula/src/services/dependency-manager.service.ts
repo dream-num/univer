@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
 import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
@@ -65,7 +65,7 @@ export interface IDependencyManagerService {
 
     addDependencyRTreeCache(tree: FormulaDependencyTree): void;
 
-    searchDependency(search: IUnitRange[]): Map<string, IRTreeItem>;
+    searchDependency(search: IUnitRange[]): Set<string>;
 
     getLastTreeId(): number;
 
@@ -73,6 +73,9 @@ export interface IDependencyManagerService {
 
     clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
     clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
+
+    openKdTree(): void;
+    closeKdTree(): void;
 }
 
 /**
@@ -88,7 +91,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
 
     private _formulaData: IFormulaDependencyParam = {};
 
-    private _dependencyRTreeCache: RTree = new RTree();
+    private _dependencyRTreeCache: RTree = new RTree(true); // true: open kd-tree search state
 
     private _dependencyTreeIdLast: number = 0;
 
@@ -177,7 +180,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         return allTrees;
     }
 
-    searchDependency(search: IUnitRange[]): Map<string, IRTreeItem> {
+    searchDependency(search: IUnitRange[]): Set<string> {
         return this._dependencyRTreeCache.bulkSearch(search);
     }
 
@@ -193,21 +196,27 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             shouldBeBuildTreeMap.set(tree.treeId, tree);
         }
 
+        let count = 0;
+
         for (let i = 0; i < allTrees.length; i++) {
             const tree = allTrees[i];
             const RTreeItem = tree.toRTreeItem();
 
             const searchResults = this._dependencyRTreeCache.search(RTreeItem);
 
+            count += searchResults.length;
+
             for (let j = 0; j < searchResults.length; j++) {
-                const searchResult = searchResults[j];
-                const shouldBeBuildTree = shouldBeBuildTreeMap.get(searchResult.id);
+                const id = searchResults[j];
+                const shouldBeBuildTree = shouldBeBuildTreeMap.get(id);
 
                 if (shouldBeBuildTree && tree !== shouldBeBuildTree && !shouldBeBuildTree.hasChildren(tree)) {
                     shouldBeBuildTree.pushChildren(tree);
                 }
             }
         }
+
+        // console.log('searchResultsCount:', count);
 
         shouldBeBuildTreeMap.clear();
     }
@@ -232,8 +241,8 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             const searchResults = this._dependencyRTreeCache.search(RTreeItem);
 
             for (let j = 0; j < searchResults.length; j++) {
-                const searchResult = searchResults[j];
-                const allTree = allTreeMap.get(searchResult.id);
+                const id = searchResults[j];
+                const allTree = allTreeMap.get(id);
 
                 if (allTree && tree !== allTree && !allTree.hasChildren(tree)) {
                     allTree.pushChildren(tree);
@@ -490,6 +499,14 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 });
             });
         }
+    }
+
+    openKdTree() {
+        this._dependencyRTreeCache.openKdTree();
+    }
+
+    closeKdTree() {
+        this._dependencyRTreeCache.closeKdTree();
     }
 }
 

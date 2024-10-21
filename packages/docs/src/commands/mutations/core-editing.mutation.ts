@@ -64,7 +64,6 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             debounce,
             isEditing = true,
         } = params;
-
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const docStateEmitService = accessor.get(DocStateEmitService);
@@ -100,7 +99,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
-                docSelectionManagerService.replaceTextRanges(textRanges, isEditing, params.options);
+                docSelectionManagerService.replaceDocRanges(textRanges, { unitId, subUnitId: unitId }, isEditing, params.options);
             });
         }
 

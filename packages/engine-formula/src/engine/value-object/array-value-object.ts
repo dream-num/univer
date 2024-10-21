@@ -1538,36 +1538,35 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowValuePositions != null) {
                         rowValuePositions.forEach((rowPositions, rowValue) => {
+                            let currentValue: Nullable<BaseValueObject> = NullValueObject.create(); // handle blank cell
                             if (ERROR_TYPE_SET.has(rowValue as ErrorType)) {
+                                currentValue = ErrorValueObject.create(rowValue as ErrorType);
+                            } else if (typeof rowValue === 'string') {
+                                currentValue = StringValueObject.create(rowValue);
+                            } else if (typeof rowValue === 'number') {
+                                currentValue = NumberValueObject.create(rowValue);
+                            } else if (typeof rowValue === 'boolean') {
+                                currentValue = BooleanValueObject.create(rowValue);
+                            }
+
+                            let matchResult;
+                            if (currentValue.isError()) {
+                                matchResult = currentValue;
+                            } else if (valueObject.isError()) {
+                                matchResult = valueObject;
+                            } else {
+                                matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
+                            }
+
+                            if (matchResult.isError() || (matchResult as BooleanValueObject).getValue() === true) {
                                 rowPositions.forEach((index) => {
                                     if (index >= startRow && index <= startRow + rowCount - 1) {
                                         if (result[index - startRow] == null) {
                                             result[index - startRow] = [];
                                         }
-                                        result[index - startRow][column] = ErrorValueObject.create(rowValue as ErrorType);
+                                        result[index - startRow][column] = matchResult;
                                     }
                                 });
-                            } else {
-                                let currentValue: Nullable<BaseValueObject> = NullValueObject.create(); // handle blank cell
-                                if (typeof rowValue === 'string') {
-                                    currentValue = StringValueObject.create(rowValue);
-                                } else if (typeof rowValue === 'number') {
-                                    currentValue = NumberValueObject.create(rowValue);
-                                } else if (typeof rowValue === 'boolean') {
-                                    currentValue = BooleanValueObject.create(rowValue);
-                                }
-
-                                const matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
-                                if ((matchResult as BooleanValueObject).getValue() === true) {
-                                    rowPositions.forEach((index) => {
-                                        if (index >= startRow && index <= startRow + rowCount - 1) {
-                                            if (result[index - startRow] == null) {
-                                                result[index - startRow] = [];
-                                            }
-                                            result[index - startRow][column] = BooleanValueObject.create(true);
-                                        }
-                                    });
-                                }
                             }
                         });
                     }

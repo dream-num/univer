@@ -67,6 +67,9 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
     }
 
     const body = doc.getSelfOrHeaderFooterModel(activeRange.segmentId).getBody();
+    if (!body) {
+        return true;
+    }
     const paragraphs = body?.paragraphs ?? [];
 
     for (let i = 0, len = paragraphs.length; i < len; i++) {

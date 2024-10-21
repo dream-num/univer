@@ -28,7 +28,6 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { CELL_INVERTED_INDEX_CACHE } from '../basics/inverted-index-cache';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 
@@ -514,15 +513,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 sheetData.setValue(row, column, valueObject);
                 clearArrayUnitData.setValue(row, column, valueObject);
 
-                // Formula calculation results are saved to cache
-                CELL_INVERTED_INDEX_CACHE.set(
-                    unitId,
-                    sheetId,
-                    column,
-                    firstCell.getValue(),
-                    row
-                );
-
                 return;
             }
 
@@ -544,15 +534,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 const errorObject = objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
-
-                // Formula calculation results are saved to cache
-                CELL_INVERTED_INDEX_CACHE.set(
-                    unitId,
-                    sheetId,
-                    column,
-                    ErrorType.SPILL,
-                    row
-                );
 
                 /**
                  * When there are values within the array formula range, the entire formula will result in an error.
@@ -581,15 +562,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             } else {
                 const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                    // Formula calculation results are saved to cache
-                    CELL_INVERTED_INDEX_CACHE.set(
-                        unitId,
-                        sheetId,
-                        column - startColumn + columnIndex,
-                        !valueObject ? 0 : valueObject.getValue(),
-                        row - startRow + rowIndex
-                    );
-
                     const value = objectValueToCellValue(valueObject);
                     if (rowIndex === startRow && columnIndex === startColumn) {
                         /**
@@ -613,16 +585,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         } else {
             const valueObject = objectValueToCellValue(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
-
-            // Formula calculation results are saved to cache
-            CELL_INVERTED_INDEX_CACHE.set(
-                unitId,
-                sheetId,
-                column,
-                (functionVariant as BaseValueObject).getValue(),
-                row
-            );
-
             clearArrayUnitData.setValue(row, column, valueObject);
         }
     }

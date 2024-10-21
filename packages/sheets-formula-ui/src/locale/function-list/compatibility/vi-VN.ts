@@ -210,7 +210,6 @@ export default {
             array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
         },
     },
-
     GAMMADIST: {
         description: 'Trả về phân phối γ',
         abstract: 'Trả về phân phối γ',
@@ -221,8 +220,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm GAMMADIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     GAMMAINV: {
@@ -235,13 +236,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất gắn với phân bố gamma.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
         },
     },
     HYPGEOMDIST: {
-        description: 'Trả về phân phối siêu bội',
-        abstract: 'Trả về phân phối siêu bội',
+        description: 'Trả về phân bố siêu bội.',
+        abstract: 'Trả về phân bố siêu bội.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -249,13 +251,16 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            sampleS: { name: 'Số lần thành công mẫu', detail: 'Số lần thành công trong mẫu.' },
+            numberSample: { name: 'Kích thước mẫu', detail: 'Kích thước mẫu.' },
+            populationS: { name: 'Tổng số thành công', detail: 'Số lượng thành công trong dân số.' },
+            numberPop: { name: 'Kích thước tổng thể', detail: 'Kích thước tổng thể.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm HYPGEOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     LOGINV: {
-        description: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy lô-ga',
-        abstract: 'Trả về hàm nghịch đảo của hàm phân phối tích lũy lô-ga',
+        description: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
+        abstract: 'Trả về nghịch đảo của hàm phân bố lô-ga-rit chuẩn lũy tích của',
         links: [
             {
                 title: 'Giảng dạy',
@@ -263,13 +268,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            probability: { name: 'xác suất', detail: 'Một xác suất tương ứng với phân bố lô-ga-rit chuẩn.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
         },
     },
     LOGNORMDIST: {
-        description: 'Trả về hàm phân phối tích lũy lô-ga',
-        abstract: 'Trả về hàm phân phối tích lũy lô-ga',
+        description: 'Trả về phân bố chuẩn lô-ga-rít của',
+        abstract: 'Trả về phân bố chuẩn lô-ga-rít của',
         links: [
             {
                 title: 'Giảng dạy',
@@ -277,13 +283,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            standardDev: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì LOGNORMDIST trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     MODE: {
-        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu',
-        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu',
+        description: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
+        abstract: 'Trả về giá trị xuất hiện nhiều nhất trong tập dữ liệu.',
         links: [
             {
                 title: 'Giảng dạy',
@@ -291,13 +299,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            number1: { name: 'số 1', detail: 'Số đầu tiên, tham chiếu ô hoặc phạm vi ô mà chế độ sẽ được tính toán.' },
+            number2: { name: 'số 2', detail: 'Tối đa 255 số bổ sung, tham chiếu ô hoặc phạm vi ô để tính chế độ.' },
         },
     },
     NEGBINOMDIST: {
-        description: 'Trả về phân phối nhị thức âm',
-        abstract: 'Trả về phân phối nhị thức âm',
+        description: 'Trả về phân bố nhị thức âm',
+        abstract: 'Trả về phân bố nhị thức âm',
         links: [
             {
                 title: 'Giảng dạy',
@@ -305,8 +313,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'thứ nhất' },
-            number2: { name: 'number2', detail: 'thứ hai' },
+            numberF: { name: 'số lần thất bại.', detail: 'Số lần thất bại.' },
+            numberS: { name: 'số lần thành công', detail: 'Số ngưỡng thành công.' },
+            probabilityS: { name: 'xác suất thành công', detail: 'Xác suất thành công của mỗi phép thử.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm NEGBINOMDIST trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     NORMDIST: {
@@ -368,8 +378,8 @@ export default {
         },
     },
     PERCENTILE: {
-        description: 'Trả về giá trị phân vị thứ k trong một phạm vi dữ liệu',
-        abstract: 'Trả về giá trị phân vị thứ k trong một phạm vi dữ liệu',
+        description: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về giá trị phân vị thứ k trong tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -377,13 +387,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            k: { name: 'k', detail: 'Giá trị phần trăm từ 0 đến 1 (bao gồm 0 và 1).' },
         },
     },
     PERCENTRANK: {
-        description: 'Trả về vị trí phần trăm của giá trị trong tập dữ liệu',
-        abstract: 'Trả về vị trí phần trăm của giá trị trong tập dữ liệu',
+        description: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về thứ hạng phần trăm của các giá trị trong tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -391,13 +401,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hoặc phạm vi dữ liệu xác định vị trí tương đối.' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn biết thứ hạng của nó.' },
+            significance: { name: 'chữ số có nghĩa', detail: 'Giá trị xác định số chữ số có nghĩa của giá trị phần trăm trả về. Nếu bỏ qua, hàm PERCENTRANK dùng ba chữ số (0.xxx).' },
         },
     },
     POISSON: {
-        description: 'Trả về phân phối Poisson',
-        abstract: 'Trả về phân phối Poisson',
+        description: 'Trả về phân bố Poisson.',
+        abstract: 'Trả về phân bố Poisson.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -405,13 +416,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            mean: { name: 'trung độ số', detail: 'Trung độ số học của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu lũy tích là ĐÚNG thì POISSON trả về hàm phân bố lũy tích; nếu SAI, nó trả về hàm mật độ xác suất.' },
         },
     },
     QUARTILE: {
-        description: 'Trả về điểm phân vị của một tập dữ liệu',
-        abstract: 'Trả về điểm phân vị của một tập dữ liệu',
+        description: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
+        abstract: 'Trả về các phần tư của tập dữ liệu (bao gồm 0 và 1)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -419,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Một mảng hoặc phạm vi dữ liệu yêu cầu giá trị tứ phân vị.' },
+            quart: { name: 'giá trị tứ phân', detail: 'Giá trị tứ phân vị cần trả về.' },
         },
     },
     RANK: {
@@ -467,8 +479,8 @@ export default {
         },
     },
     TDIST: {
-        description: 'Trả về phân phối t-Student',
-        abstract: 'Trả về phân phối t-Student',
+        description: 'Trả về phân phối xác suất t-Student của Học sinh',
+        abstract: 'Trả về phân phối xác suất t-Student của Học sinh',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -476,13 +488,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Cần tính giá trị số của phân bố.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số phần dư của phân bố được trả về. Nếu Tails = 1, hàm TDIST sẽ trả về phân bố một phía. Nếu Tails = 2, hàm TDIST sẽ trả về phân bố hai phía.' },
         },
     },
     TINV: {
-        description: 'Trả về hàm nghịch đảo phân phối t-Student',
-        abstract: 'Trả về hàm nghịch đảo phân phối t-Student',
+        description: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
+        abstract: 'Trả về hàm nghịch đảo của phân bố xác suất t-Student của Học sinh (hai đuôi)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -490,13 +503,13 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            probability: { name: 'xác suất', detail: 'Xác suất liên quan đến phân phối t-Student của Sinh viên.' },
+            degFreedom: { name: 'bậc tự do', detail: 'Một số nguyên biểu thị số bậc tự do.' },
         },
     },
     TTEST: {
-        description: 'Trả về xác suất liên quan đến kiểm định t-Student',
-        abstract: 'Trả về xác suất liên quan đến kiểm định t-Student',
+        description: 'Trả về xác suất kết hợp với Phép thử t-Student.',
+        abstract: 'Trả về xác suất kết hợp với Phép thử t-Student.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -504,8 +517,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array1: { name: 'mảng 1', detail: 'Mảng thứ nhất của phạm vi dữ liệu.' },
+            array2: { name: 'mảng 2', detail: 'Mảng thứ hai của phạm vi dữ liệu.' },
+            tails: { name: 'đặc điểm đuôi', detail: 'Xác định số đuôi của phân phối. Nếu đuôi = 1, TTEST sử dụng phân phối một phía. Nếu đuôi = 2, TTEST sử dụng phân phối hai phía.' },
+            type: { name: 'loại Phép thử', detail: 'Loại Phép thử t cần thực hiện.' },
         },
     },
     VAR: {
@@ -537,8 +552,8 @@ export default {
         },
     },
     WEIBULL: {
-        description: 'Trả về phân phối Weibull',
-        abstract: 'Trả về phân phối Weibull',
+        description: 'Trả về phân bố Weibull.',
+        abstract: 'Trả về phân bố Weibull.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -546,13 +561,15 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            x: { name: 'x', detail: 'Giá trị mà bạn muốn có phân bố của nó.' },
+            alpha: { name: 'alpha', detail: 'Tham số đầu tiên của phân phối.' },
+            beta: { name: 'beta', detail: 'Tham số thứ hai của phân phối.' },
+            cumulative: { name: 'tích lũy', detail: 'Một giá trị lô-gic quyết định dạng thức của hàm. Nếu tích lũy là TRUE, hàm WEIBULL trả về hàm phân bố tích lũy; nếu FALSE, nó trả về hàm mật độ xác suất.' },
         },
     },
     ZTEST: {
-        description: 'Trả về giá trị xác suất đuôi đơn của kiểm định z',
-        abstract: 'Trả về giá trị xác suất đuôi đơn của kiểm định z',
+        description: 'Trả về giá trị xác suất một phía của kiểm tra z.',
+        abstract: 'Trả về giá trị xác suất một phía của kiểm tra z.',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -560,8 +577,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'tham số thứ nhất' },
-            number2: { name: 'number2', detail: 'tham số thứ hai' },
+            array: { name: 'mảng', detail: 'Mảng hay khoảng dữ liệu để kiểm tra x.' },
+            x: { name: 'x', detail: 'Giá trị cần kiểm tra.' },
+            sigma: { name: 'Độ lệch chuẩn', detail: 'Độ lệch chuẩn tổng thể (đã biết). Nếu bỏ qua, độ lệch chuẩn mẫu sẽ được dùng.' },
         },
     },
 

@@ -48,6 +48,14 @@ export class ChisqDistRt extends BaseFunction {
         const resultArray = xArray.mapValue((xObject, rowIndex, columnIndex) => {
             const degFreedomObject = degFreedomArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (xObject.isError()) {
+                return xObject;
+            }
+
+            if (degFreedomObject.isError()) {
+                return degFreedomObject;
+            }
+
             return this._handleSignleObject(xObject, degFreedomObject);
         });
 

@@ -49,6 +49,18 @@ export class ConfidenceNorm extends BaseFunction {
             const standardDevObject = standardDevArray.get(rowIndex, columnIndex) as BaseValueObject;
             const sizeObject = sizeArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (alphaObject.isError()) {
+                return alphaObject;
+            }
+
+            if (standardDevObject.isError()) {
+                return standardDevObject;
+            }
+
+            if (sizeObject.isError()) {
+                return sizeObject;
+            }
+
             const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(alphaObject, standardDevObject, sizeObject);
 
             if (isError) {

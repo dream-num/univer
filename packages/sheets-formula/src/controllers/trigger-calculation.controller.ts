@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
+    IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { Disposable, ICommandService } from '@univerjs/core';
 import {
+    FormulaExecutedStateType,
+    FormulaExecuteStageType,
     IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
 } from '@univerjs/engine-formula';
 import {
     ClearSelectionFormatCommand,
@@ -69,15 +72,17 @@ export class TriggerCalculationController extends Disposable {
 
     private _startExecutionTime: number = 0;
 
-    private _totalCalculationTaskCount = 0;
+    private _totalCalculationTaskCount: number = 0;
 
-    private _doneCalculationTaskCount = 0;
+    private _doneCalculationTaskCount: number = 0;
+
+    private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
+
+    private _restartCalculation = false;
 
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
 
     readonly progress$ = this._progress$.asObservable();
-
-    private _progressTimer: NodeJS.Timeout | null = null;
 
     private _emitProgress(): void {
         this._progress$.next({ done: this._doneCalculationTaskCount, count: this._totalCalculationTaskCount });
@@ -94,54 +99,14 @@ export class TriggerCalculationController extends Disposable {
         this._emitProgress();
     }
 
-    private _startProgress(formulaCount: number): void {
-        const timePerFormula = 7 / 500000; // seconds per formula, 500,000 formulas take 7 seconds to calculate
-        const estimatedTime = formulaCount * timePerFormula * 1000; // convert to milliseconds
-
-        const startProgress = 10; // starting from 10%
-        const maxProgress = 90; // maximum progress is 90%
-        const progressRange = maxProgress - startProgress; // total progress increment is 80%
-
-        // Set total calculation task count to 1000 for percentage calculation
-        this._totalCalculationTaskCount = 1000;
-        // Initialize done task count to represent 10%
-        this._doneCalculationTaskCount = startProgress * 10;
-
-        const startTime = Date.now();
-        const updateInterval = 200; // update every 200ms
-
-        // Clear any existing progress timer
-        if (this._progressTimer !== null) {
-            clearInterval(this._progressTimer);
-            this._progressTimer = null;
-        }
-
-        // Start the progress timer
-        this._progressTimer = setInterval(() => {
-            const elapsedTime = Date.now() - startTime;
-
-            if (elapsedTime >= estimatedTime) {
-                // Reached estimated time, set progress to 90% and clear the timer
-                this._doneCalculationTaskCount = maxProgress * 10;
-                this._emitProgress();
-                if (this._progressTimer !== null) {
-                    clearInterval(this._progressTimer);
-                    this._progressTimer = null;
-                }
-                return;
-            }
-
-            // Calculate progress percentage based on elapsed time
-            const progressPercent = startProgress + (elapsedTime / estimatedTime) * progressRange;
-            this._doneCalculationTaskCount = progressPercent * 10; // since total is 1000
-
-            // Ensure the progress does not exceed 90%
-            if (this._doneCalculationTaskCount > maxProgress * 10) {
-                this._doneCalculationTaskCount = maxProgress * 10;
-            }
+    private _startProgress(): void {
+        if (this._executionInProgressParams) {
+            const { totalFormulasToCalculate, completedFormulasCount, totalArrayFormulasToCalculate, completedArrayFormulasCount } = this._executionInProgressParams;
+            this._doneCalculationTaskCount = completedFormulasCount + completedArrayFormulasCount;
+            this._totalCalculationTaskCount = totalFormulasToCalculate + totalArrayFormulasToCalculate;
 
             this._emitProgress();
-        }, updateInterval);
+        }
     }
 
     private _completeProgress(): void {
@@ -201,7 +166,12 @@ export class TriggerCalculationController extends Disposable {
                     const dirtyData = this._generateDirty(this._waitingCommandQueue);
                     this._executingDirtyData = this._mergeDirty(this._executingDirtyData, dirtyData);
 
-                    this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
+                    if (this._executionInProgressParams == null) {
+                        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
+                    } else {
+                        this._restartCalculation = true;
+                        this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
+                    }
 
                     this._waitingCommandQueue = [];
                 }, 100);
@@ -326,6 +296,7 @@ export class TriggerCalculationController extends Disposable {
         });
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initialExecuteFormulaProcessListener() {
         // Assignment operation after formula calculation.
         let startDependencyTimer: NodeJS.Timeout | null = null;
@@ -333,12 +304,20 @@ export class TriggerCalculationController extends Disposable {
 
         this.disposeWithMe(
 
+            // eslint-disable-next-line max-lines-per-function
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const { id } = command;
-                if (id === SetFormulaCalculationNotificationMutation.id) {
-                    const { startCalculate, formulaCount } = command.params as ISetFormulaCalculationNotificationMutation;
+                if (command.id !== SetFormulaCalculationNotificationMutation.id) {
+                    return;
+                }
 
-                    if (startCalculate) {
+                const params = command.params as ISetFormulaCalculationNotificationMutation;
+
+                if (params.stageInfo != null) {
+                    const {
+                        stage,
+                    } = params.stageInfo;
+
+                    if (stage === FormulaExecuteStageType.START) {
                         this._startExecutionTime = performance.now();
 
                         // Increment the calculation process count and assign a new ID
@@ -350,24 +329,45 @@ export class TriggerCalculationController extends Disposable {
                             startDependencyTimer = null;
                         }
 
-                        // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 10%
+                        // If the total calculation time exceeds 1s, a progress bar is displayed.
                         startDependencyTimer = setTimeout(() => {
-                            // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
-                            this._addTotalCount(10);
-                            this._addDoneTask(1);
                             startDependencyTimer = null;
                         }, 1000);
-                    } else if (startDependencyTimer === null) {
-                        this._startProgress(formulaCount);
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING || stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                        this._executionInProgressParams = params.stageInfo;
+
+                        if (startDependencyTimer === null) {
+                            this._startProgress();
+                        }
                     }
-                } else if (id === SetFormulaCalculationResultMutation.id) {
+                } else {
+                    const state = params.functionsExecutedState;
+                    let result = '';
+
                     // Decrement the calculation process count
                     calculationProcessCount--;
 
-                    console.warn(`Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
-                    } ms`);
-
-                    this._resetExecutingDirtyData();
+                    switch (state) {
+                        case FormulaExecutedStateType.NOT_EXECUTED:
+                            result = 'No tasks are being executed anymore';
+                            this._resetExecutingDirtyData();
+                            break;
+                        case FormulaExecutedStateType.STOP_EXECUTION:
+                            result = 'The execution of the formula has been stopped';
+                            // this._executingCommandQueue = [];
+                            this._clearProgress();
+                            calculationProcessCount = 0;
+                            break;
+                        case FormulaExecutedStateType.SUCCESS:
+                            result = `Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
+                            } ms`;
+                            this._resetExecutingDirtyData();
+                            break;
+                        case FormulaExecutedStateType.INITIAL:
+                            result = 'Waiting for calculation';
+                            this._resetExecutingDirtyData();
+                            break;
+                    }
 
                     if (calculationProcessCount === 0) {
                         if (startDependencyTimer) {
@@ -383,6 +383,21 @@ export class TriggerCalculationController extends Disposable {
                         this._doneCalculationTaskCount = 0;
                         this._totalCalculationTaskCount = 0;
                     }
+
+                    if (state === FormulaExecutedStateType.STOP_EXECUTION && this._restartCalculation) {
+                        this._restartCalculation = false;
+                        this._commandService.executeCommand(
+                            SetFormulaCalculationStartMutation.id,
+                            {
+                                ...this._executingDirtyData,
+                            },
+                            lo
+                        );
+                    } else {
+                        this._executionInProgressParams = null;
+                    }
+
+                    console.warn(`Execution result: ${result}`);
                 }
             })
         );

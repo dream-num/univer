@@ -17,7 +17,7 @@
 import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import type { FUniver } from '../../facade';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { SetArrayFormulaDataMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
 
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -53,6 +53,8 @@ describe('Test FFormula', () => {
         commandService.registerCommand(SetHorizontalTextAlignCommand);
         commandService.registerCommand(SetTextWrapCommand);
         commandService.registerCommand(SetFormulaCalculationStartMutation);
+        commandService.registerCommand(SetFormulaCalculationStopMutation);
+        commandService.registerCommand(SetFormulaCalculationNotificationMutation);
         commandService.registerCommand(SetFormulaCalculationResultMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
 
@@ -89,10 +91,15 @@ describe('Test FFormula', () => {
             expect(forceCalculate).toBe(true);
         });
 
+        formula.calculationProcessing((stageInfo) => {
+            expect(stageInfo).toBeDefined();
+        });
+
         formula.calculationEnd((functionsExecutedState) => {
             expect(functionsExecutedState).toBeDefined();
         });
 
         formula.executeCalculation();
+        formula.stopCalculation();
     });
 });

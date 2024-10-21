@@ -32,6 +32,7 @@ import {
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationResultMutation,
     SetFormulaCalculationStartMutation,
+    SetFormulaCalculationStopMutation,
 } from '../commands/mutations/set-formula-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
@@ -81,6 +82,7 @@ export class FormulaController extends Disposable {
             SetFormulaDataMutation,
             SetArrayFormulaDataMutation,
             SetFormulaCalculationStartMutation,
+            SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
 

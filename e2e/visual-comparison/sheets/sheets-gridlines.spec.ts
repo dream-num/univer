@@ -61,7 +61,7 @@ test('sheets gridlines color', async () => {
     await page.evaluate(() => window.univerAPI.setGridlineColor('rgb(200, 0, 0)'));
     await page.waitForTimeout(1000);
 
-    const filename = generateSnapshotName('sheets-no-gridlines');
+    const filename = generateSnapshotName('sheets-gridlines-color');
     const screenshot = await page.screenshot({
         mask: [
             page.locator('.univer-headerbar'),

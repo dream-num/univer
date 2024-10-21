@@ -127,8 +127,7 @@ export interface IWorksheetData {
         hidden?: BooleanNumber;
     };
 
-    /** @deprecated */
-    showGridlines?: BooleanNumber;
+    showGridlines: BooleanNumber;
     rightToLeft: BooleanNumber;
 }
 

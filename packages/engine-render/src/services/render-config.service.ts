@@ -28,8 +28,8 @@ export class UniverRenderConfigService {
         ok: '111',
     };
 
-    private readonly _updateSigna$ = new Subject<void>();
-    readonly _updateSignal$ = this._updateSigna$.pipe(debounceTime(4));
+    private readonly _updateSignal$ = new Subject<void>();
+    readonly updateSignal$ = this._updateSignal$.pipe(debounceTime(4));
 
     setRenderConfig(key: string, value: any): void {
         if (value == null) {

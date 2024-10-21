@@ -72,7 +72,8 @@ export class InvertedIndexCache {
 
     getCellPositions(unitId: string, sheetId: string, column: number, value: string | number | boolean, rowsInCache: NumericTuple[]) {
         const rows = this._cache.get(unitId)?.get(sheetId)?.get(column)?.get(value);
-        return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        // return rows?.values().filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
+        return rows && [...rows].filter((row) => rowsInCache.some(([start, end]) => row >= start && row <= end));
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {

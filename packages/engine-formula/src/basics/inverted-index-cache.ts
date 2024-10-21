@@ -76,6 +76,10 @@ export class InvertedIndexCache {
     }
 
     setContinueBuildingCache(unitId: string, sheetId: string, column: number, startRow: number, endRow: number) {
+        if (column === -1 || startRow === -1 || endRow === -1) {
+            return;
+        }
+
         let unitMap = this._continueBuildingCache.get(unitId);
         if (unitMap == null) {
             unitMap = new Map();
@@ -175,8 +179,28 @@ export class InvertedIndexCache {
     private _handleNewInterval(columnMap: IntervalTree<NumericTuple>, startRow: number, endRow: number) {
         const result = columnMap.search([startRow, endRow]);
 
+        // the range is not overlapping with any existing range
         if (result.length === 0) {
-            columnMap.insert([startRow, endRow]);
+            // check if the range is adjacent to any existing range
+            const adjacentRange = [startRow - 1 < 0 ? 0 : startRow - 1, endRow + 1];
+            const adjacentRangeResult = columnMap.search(adjacentRange as NumericTuple);
+
+            if (adjacentRangeResult.length === 0) {
+                columnMap.insert([startRow, endRow]);
+                return;
+            }
+
+            let min = startRow;
+            let max = endRow;
+
+            for (const interval of adjacentRangeResult) {
+                min = Math.min(min, interval[0]);
+                max = Math.max(max, interval[1]);
+                columnMap.remove(interval);
+            }
+
+            columnMap.insert([min, max]);
+
             return;
         }
 

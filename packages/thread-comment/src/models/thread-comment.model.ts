@@ -77,7 +77,7 @@ export class ThreadCommentModel extends Disposable {
             this._commentsMap$.complete();
         });
 
-        this._lifecycleService.lifecycle$.subscribe((stage) => {
+        this.disposeWithMe(this._lifecycleService.lifecycle$.subscribe((stage) => {
             const taskMap = new Map<string, Map<string, Set<string>>>();
 
             if (stage === LifecycleStages.Rendered) {
@@ -106,7 +106,7 @@ export class ThreadCommentModel extends Disposable {
                     });
                 });
             }
-        });
+        }));
     }
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {

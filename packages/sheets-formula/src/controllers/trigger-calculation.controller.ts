@@ -203,8 +203,6 @@ export class TriggerCalculationController extends Disposable {
 
                     this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
 
-                    this._startExecutionTime = performance.now();
-
                     this._waitingCommandQueue = [];
                 }, 100);
             })
@@ -341,6 +339,8 @@ export class TriggerCalculationController extends Disposable {
                     const { startCalculate, formulaCount } = command.params as ISetFormulaCalculationNotificationMutation;
 
                     if (startCalculate) {
+                        this._startExecutionTime = performance.now();
+
                         // Increment the calculation process count and assign a new ID
                         calculationProcessCount++;
 

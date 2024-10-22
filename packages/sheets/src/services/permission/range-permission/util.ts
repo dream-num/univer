@@ -15,13 +15,14 @@
  */
 
 import { UnitAction } from '@univerjs/protocol';
+import { RangeProtectionPermissionDeleteProtectionPoint } from '../permission-point/range/delete-protection';
 import { RangeProtectionPermissionEditPoint } from '../permission-point/range/edit';
 import { RangeProtectionPermissionManageCollaPoint } from '../permission-point/range/manage-collaborator';
 import { RangeProtectionPermissionViewPoint } from '../permission-point/range/view';
 
 export type IRangePermissionPoint = RangeProtectionPermissionEditPoint | RangeProtectionPermissionViewPoint;
 
-export const getAllRangePermissionPoint = () => [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint, RangeProtectionPermissionManageCollaPoint];
+export const getAllRangePermissionPoint = () => [RangeProtectionPermissionViewPoint, RangeProtectionPermissionEditPoint, RangeProtectionPermissionManageCollaPoint, RangeProtectionPermissionDeleteProtectionPoint];
 
 export const baseProtectionActions = [UnitAction.Edit, UnitAction.View, UnitAction.ManageCollaborator, UnitAction.Delete];
 

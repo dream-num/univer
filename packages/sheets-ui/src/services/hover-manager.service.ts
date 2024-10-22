@@ -31,10 +31,6 @@ export interface IHoverCellPosition {
      * location of cell
      */
     location: ISheetLocation;
-    /**
-     * overflow location of cell
-     */
-    overflowLocation: ISheetLocation;
 }
 
 export interface IHoverRichTextPosition extends IHoverCellPosition {
@@ -196,7 +192,6 @@ export class HoverManagerService extends Disposable {
         this._currentCell$.next(activeCell && {
             location: activeCell.location,
             position: activeCell.position,
-            overflowLocation: activeCell.overflowLocation,
         });
 
         this._currentRichText$.next(activeCell && {

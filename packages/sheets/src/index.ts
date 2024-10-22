@@ -165,6 +165,7 @@ export { RangeProtectionPermissionEditPoint } from './services/permission/permis
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
 export { RangeProtectionPermissionManageCollaPoint } from './services/permission/permission-point/range/manage-collaborator';
 export { RangeProtectionPermissionDeleteProtectionPoint } from './services/permission/permission-point/range/delete-protection';
+export { baseProtectionActions } from './services/permission/range-permission/util';
 
 export { generateNullCell, generateNullCellValue } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';

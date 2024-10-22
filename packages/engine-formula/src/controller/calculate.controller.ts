@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IFormulaData } from '../basics/common';
 
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import type { IFormulaDirtyData } from '../services/current-data.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -63,13 +64,7 @@ export class CalculateController extends Disposable {
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
 
-                    if (params.forceCalculation === true) {
-                        this._calculate(true);
-                    } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
-
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache);
-                    }
+                    this._calculate(params);
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
 
@@ -87,14 +82,9 @@ export class CalculateController extends Disposable {
     }
 
     private async _calculate(
-        forceCalculate: boolean = false,
-        dirtyRanges: IUnitRange[] = [],
-        dirtyNameMap: IDirtyUnitSheetNameMap = {},
-        dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
-        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {},
-        clearDependencyTreeCache: IDirtyUnitSheetNameMap = {}
+        formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
+        const { forceCalculation: forceCalculate, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
         if (
             dirtyRanges.length === 0 &&
             Object.keys(dirtyNameMap).length === 0 &&

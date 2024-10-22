@@ -164,7 +164,7 @@ export interface IFormulaDatasetConfig {
     formulaData: IFormulaData;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
     arrayFormulaRange: IArrayFormulaRangeType;
-    forceCalculate: boolean;
+    forceCalculate?: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitSheetNameMap;

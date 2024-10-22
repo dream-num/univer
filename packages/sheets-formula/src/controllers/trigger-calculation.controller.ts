@@ -159,6 +159,7 @@ export class TriggerCalculationController extends Disposable {
                         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
                     } else {
                         this._restartCalculation = true;
+
                         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
                     }
 
@@ -246,7 +247,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            forceCalculation: false,
+            // forceCalculation: false,
             clearDependencyTreeCache: allClearDependencyTreeCache,
         };
     }
@@ -307,7 +308,10 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START) {
-                        this._startExecutionTime = performance.now();
+                        // When calculations are started multiple times in succession, only the first time is recognized
+                        if (calculationProcessCount === 0) {
+                            this._startExecutionTime = performance.now();
+                        }
 
                         // Increment the calculation process count and assign a new ID
                         calculationProcessCount++;
@@ -348,8 +352,12 @@ export class TriggerCalculationController extends Disposable {
                             calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:
-                            result = `Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
-                            } ms`;
+                            result = 'Formula calculation succeeded';
+
+                            if (calculationProcessCount === 0) {
+                                result += `. Total time consumed: ${performance.now() - this._startExecutionTime} ms`;
+                            }
+
                             this._resetExecutingDirtyData();
                             break;
                         case FormulaExecutedStateType.INITIAL:

@@ -258,13 +258,6 @@ export class CalculateFormulaService extends Disposable {
                     pendingTasks.push(calCancelTask);
                 });
 
-                if (this._runtimeService.isStopExecution()) {
-                    this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-                    this._runtimeService.markedAsStopFunctionsExecuted();
-                    this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-                    return;
-                }
-
                 if (isArrayFormulaState) {
                     this._runtimeService.setFormulaExecuteStage(
                         FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA

@@ -36,7 +36,7 @@ import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleSer
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
-    forceCalculation: boolean;
+    forceCalculation?: boolean;
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap;
@@ -277,7 +277,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
         this._arrayFormulaRange = config.arrayFormulaRange;
 
-        this._forceCalculate = config.forceCalculate;
+        // If you do not set whether to force refresh, it depends on the value set last time. Force refresh at initialization, randomly trigger multiple mutations, and only calculate dirty areas. At this time, undefined is passed and merged into forced refresh to ensure that the previous forced refresh can still be performed.
+        this._forceCalculate = config.forceCalculate || this._forceCalculate;
 
         this._clearDependencyTreeCache = config.clearDependencyTreeCache || {};
 

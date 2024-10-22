@@ -375,7 +375,7 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
+        spreadsheetSkeleton.setStylesCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 

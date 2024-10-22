@@ -46,7 +46,7 @@ import type {
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 /* eslint-disable max-lines-per-function */
 /* eslint-disable no-param-reassign */
 import {
@@ -92,6 +92,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW } from './constants';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -461,7 +462,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param bounds
      * @returns boolean
      */
-    calculateSegment(bounds?: IViewportInfo): boolean {
+    updateVisibleRange(bounds?: IViewportInfo): boolean {
         if (!this._worksheetData) {
             return false;
         }
@@ -479,18 +480,49 @@ export class SpreadsheetSkeleton extends Skeleton {
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
-        if (!this.calculateSegment(bounds)) {
+    /**
+     * Set border background and font to this._stylesCache by visible range, which derives from bounds)
+     * @param bounds viewBounds
+     */
+    setStylesCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
+        if (!this.updateVisibleRange(bounds)) {
             return;
         }
 
-        // const { mergeData } = this._worksheetData;
+        const rowColumnSegment = this._visibleRange;
+        const columnWidthAccumulation = this.columnWidthAccumulation;
+        const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
 
-        // // this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
-        // const rowColumnSegment = this._rowColumnSegment;
-        // const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
+        if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 
-        this._calculateStylesCache();
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
+        for (const mergeRange of mergeRanges) {
+            this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
+                mergeRange,
+            });
+        }
+
+        // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
+        const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+        const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+        for (let r = visibleStartRow; r <= visibleEndRow; r++) {
+            if (this.worksheet.getRowVisible(r) === false) continue;
+
+            for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
+            }
+
+            // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
+            for (let c = expandStartCol; c < visibleEndColumn; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+            }
+            if (visibleEndColumn === 0) continue;
+
+            // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
+            for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+            }
+        }
 
         return this;
     }
@@ -498,7 +530,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     calculate(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         this._resetCache();
 
-        this.calculateWithoutClearingCache(bounds);
+        this.setStylesCache(bounds);
 
         return this;
     }
@@ -1695,41 +1727,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
     }
 
-    private _calculateStylesCache(): void {
-        const rowColumnSegment = this._visibleRange;
-        const columnWidthAccumulation = this.columnWidthAccumulation;
-        const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-
-        if (endColumn === -1 || endRow === -1) return;
-
-        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
-        for (const mergeRange of mergeRanges) {
-            this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
-                mergeRange,
-            });
-        }
-
-        // const mergeRange = mergeRanges.length ? mergeRanges[0] : undefined;
-        for (let r = startRow; r <= endRow; r++) {
-            if (this.worksheet.getRowVisible(r) === false) continue;
-
-            for (let c = startColumn; c <= endColumn; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: true, border: true } });
-            }
-
-            // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-            for (let c = 0; c < startColumn; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
-            }
-            if (endColumn === 0) continue;
-
-            // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-            for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
-            }
-        }
-    }
-
     resetCache(): void {
         this._resetCache();
     }
@@ -1856,12 +1853,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Set border background and font to this._stylesCache
+     * Set border background and font to this._stylesCache cell by cell.
      * @param row {number}
      * @param col {number}
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
-    private _setStylesCache(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+    private _setStylesCacheForOneCell(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
         if (row === -1 || col === -1) {
             return;
         }

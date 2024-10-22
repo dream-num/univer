@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, FOCUSING_FX_BAR_EDITOR, IContextService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import { combineLatest, map, mergeMap, Observable, of } from 'rxjs';
+import { map, mergeMap, Observable, of } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
@@ -98,9 +99,8 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             const { sheet, row, col } = editingCell;
 
-            const contextService = accessor.get(IContextService);
-            const isEditing$ = combineLatest([contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR), editorBridgeService ? editorBridgeService.visible$ : of(null)])
-                .pipe(map(([fxBarEditorFocused, visible]) => fxBarEditorFocused ? DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY : visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
+            const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
+                .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
 
             return editorBridgeService ? isEditing$.pipe(mergeMap((editing) => (editing ? getZenLinkDisable$(accessor, editing) : of(getShouldDisableCellLink(sheet, row, col))))) : of(getShouldDisableCellLink(sheet, row, col));
         })

@@ -84,7 +84,7 @@ export class CalculateController extends Disposable {
     private async _calculate(
         formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
-        const { forceCalculation: forceCalculate, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
         if (
             dirtyRanges.length === 0 &&
             Object.keys(dirtyNameMap).length === 0 &&

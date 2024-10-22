@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, ICommandInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { BuildTextUtils, CommandType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
 import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
+import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { getRichTextEditPath } from '../util';
 
@@ -40,10 +41,10 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const imeInputManagerService = renderManagerService.getRenderById(unitId)?.with(DocIMEInputManagerService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null || imeInputManagerService == null) {
             return false;
@@ -53,6 +54,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         if (!previousActiveRange) {
             return false;
         }
+
         const { style, segmentId } = previousActiveRange;
         const body = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
@@ -84,12 +86,16 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen);
+
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const { dos, retain, cursor } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0, body);
+            const { dos, retain } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0, body);
+
             textX.push(...dos);
+
             doMutation.params!.textRanges = [{
                 startOffset: startOffset + len + retain,
                 endOffset: startOffset + len + retain,
@@ -116,6 +122,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             t: TextXActionType.INSERT,
             body: {
                 dataStream: newText,
+                textRuns: curTextRun
+                    ? [{
+                        ...curTextRun,
+                        st: 0,
+                        ed: newText.length,
+                    }]
+                    : [],
             },
             len: newText.length,
             line: 0,

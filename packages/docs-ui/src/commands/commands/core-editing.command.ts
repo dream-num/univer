@@ -51,10 +51,10 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
     // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
-
         const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
 
         if (docDataModel == null) {
@@ -64,7 +64,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         const activeRange = docSelectionManagerService.getActiveTextRange();
         const originBody = docDataModel.getSelfOrHeaderFooterModel(activeRange?.segmentId ?? '').getBody();
 
-        if (!originBody) {
+        if (originBody == null) {
             return false;
         }
         const actualRange = extendLastRange
@@ -104,6 +104,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             }
         } else {
             const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
+
             textX.push(...dos);
             doMutation.params.textRanges = [{
                 startOffset: startOffset + cursorMove + retain,

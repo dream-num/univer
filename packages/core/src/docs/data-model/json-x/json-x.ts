@@ -15,12 +15,12 @@
  */
 
 import type { Doc, JSONOp, Path } from 'ot-json1';
-import * as json1 from 'ot-json1';
-import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
-import type { TPriority } from '../text-x/text-x';
-import { TextX } from '../text-x/text-x';
-import type { TextXAction } from '../text-x/action-types';
 import type { Nullable } from '../../../shared';
+import type { IDocumentBody, IDocumentData } from '../../../types/interfaces';
+import type { TextXAction } from '../text-x/action-types';
+import type { TPriority } from '../text-x/text-x';
+import * as json1 from 'ot-json1';
+import { TextX } from '../text-x/text-x';
 
 export interface ISubType {
     name: string;
@@ -37,7 +37,7 @@ export interface ISubType {
     [k: string]: any;
 };
 
-export { JSONOp as JSONXActions, Path as JSONXPath, json1 as JSON1 };
+export { json1 as JSON1, JSONOp as JSONXActions, Path as JSONXPath };
 
 export class JSONX {
     // static name = 'json-x';

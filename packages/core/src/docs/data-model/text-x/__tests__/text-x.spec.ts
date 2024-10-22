@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-import { TextX } from '../text-x';
 import type { IDocumentBody } from '../../../../types/interfaces/i-document-data';
-import { BooleanNumber } from '../../../../types/enum/text-style';
+import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared/command-enum';
+import { BooleanNumber } from '../../../../types/enum/text-style';
 import { TextXActionType } from '../action-types';
+import { TextX } from '../text-x';
 
 describe('test TextX methods and branches', () => {
     describe('test TextX methods', () => {

@@ -18,7 +18,7 @@ import type { ITextRange } from '../../../../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
 import { CustomRangeType, type ICustomRange } from '../../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../../types';
-import { excludePointsFromRange, getCustomRangesInterestsWithRange, shouldDeleteCustomRange } from '../custom-range';
+import { excludePointsFromRange, getCustomRangesInterestsWithSelection, shouldDeleteCustomRange } from '../custom-range';
 
 describe('excludePointsFromRange function', () => {
     it('should handle empty points array', () => {

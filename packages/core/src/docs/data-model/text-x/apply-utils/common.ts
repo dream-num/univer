@@ -78,7 +78,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
  * @param textLength The length of the inserted content text.
  * @param currentIndex Determining the index where the content will be inserted into the current content.
  */
-// eslint-disable-next-line max-lines-per-function
+
 export function insertTextRuns(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -143,76 +143,6 @@ export function insertTextRuns(
 
             newTextRuns.push(textRun);
         }
-
-        // if (ed < currentIndex) {
-        //     newTextRuns.push(textRun);
-        // } else if (currentIndex >= st && currentIndex <= ed) {
-        //     // The inline format used to handle no selection will insert a textRun
-        //     // with `st` equal to `ed` at the current cursor,
-        //     // and when we insert text, the style should follow the new textRun.
-        //     if (nextRun && nextRun.st === nextRun.ed && currentIndex === nextRun.st) {
-        //         newTextRuns.push(textRun);
-        //         continue;
-        //     }
-
-        //     if (!hasInserted) {
-        //         hasInserted = true;
-        //         textRun.ed += textLength;
-
-        //         // Inline styles should not be extended forward.
-        //         if (currentIndex === st && ed !== st) {
-        //             textRun.st += textLength;
-        //         }
-
-        //         const pendingTextRuns = [];
-
-        //         if (insertTextRuns.length) {
-        //             const startSplitTextRun = {
-        //                 ...textRun,
-        //                 st,
-        //                 ed: insertTextRuns[0].st,
-        //             };
-
-        //             if (startSplitTextRun.ed > startSplitTextRun.st) {
-        //                 pendingTextRuns.push(startSplitTextRun);
-        //             }
-
-        //             pendingTextRuns.push(...insertTextRuns);
-
-        //             const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-        //             const endSplitTextRun = {
-        //                 ...textRun,
-        //                 st: lastInsertTextRuns.ed,
-        //                 ed: ed + textLength,
-        //             };
-
-        //             if (endSplitTextRun.ed > endSplitTextRun.st) {
-        //                 pendingTextRuns.push(endSplitTextRun);
-        //             }
-        //         } else {
-        //             pendingTextRuns.push(textRun);
-        //         }
-
-        //         newTextRuns.push(...pendingTextRuns);
-        //     } else {
-        //         textRun.st += textLength;
-        //         textRun.ed += textLength;
-
-        //         newTextRuns.push(textRun);
-        //     }
-        // } else {
-        //     // currentIndex < st
-        //     textRun.st += textLength;
-        //     textRun.ed += textLength;
-
-        //     if (!hasInserted) {
-        //         hasInserted = true;
-        //         newTextRuns.push(...insertTextRuns);
-        //     }
-
-        //     newTextRuns.push(textRun);
-        // }
     }
 
     if (!hasInserted) {

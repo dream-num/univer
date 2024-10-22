@@ -122,5 +122,22 @@ describe('Test percentileExc function', () => {
             const result8 = testFunction.calculate(array, k8);
             expect(getObjectValue(result8)).toStrictEqual(1.353);
         });
+
+        it('More test', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                ]),
+                rowCount: 1,
+                columnCount: 9,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const k = NumberValueObject.create(0.3);
+            const result = testFunction.calculate(array, k);
+            expect(getObjectValue(result)).toStrictEqual(3);
+        });
     });
 });

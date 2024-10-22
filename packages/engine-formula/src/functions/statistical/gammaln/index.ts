@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { gammaln } from '../../../basics/statistical';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Gammaln extends BaseFunction {
     override minParams = 1;
@@ -58,6 +58,10 @@ export class Gammaln extends BaseFunction {
         }
 
         const result = gammaln(xValue);
+
+        if (Math.abs(result) < 1e-15) {
+            return NumberValueObject.create(0);
+        }
 
         return NumberValueObject.create(result);
     }

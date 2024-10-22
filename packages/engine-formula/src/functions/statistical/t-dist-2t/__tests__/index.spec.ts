@@ -72,6 +72,11 @@ describe('Test tDist2t function', () => {
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(x, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(1);
+            const degFreedom2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, degFreedom2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

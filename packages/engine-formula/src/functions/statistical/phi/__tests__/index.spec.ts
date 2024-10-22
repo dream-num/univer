@@ -92,6 +92,20 @@ describe('Test phi function', () => {
                 [0.24197072451914337, ErrorType.VALUE, 0.18723541817072956, 0.24197072451914337, 0.3989422804014327, 0.3989422804014327],
                 [0.3989422804014327, 0, 0.02581657547158769, ErrorType.VALUE, 0.0044318484119380075, ErrorType.NAME],
             ]);
+
+            const x2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.123],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(x2);
+            expect(getObjectValue(result2)).toStrictEqual(0.3959358668649187);
         });
     });
 });

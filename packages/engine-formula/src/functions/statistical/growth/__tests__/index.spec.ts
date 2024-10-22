@@ -65,7 +65,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(true);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [136608.33775488456, 145970.01896985018],
+                [136608.33775488546, 145970.01896985146],
             ]);
         });
 
@@ -88,12 +88,12 @@ describe('Test growth function', () => {
             });
             const result = testFunction.calculate(knownYs);
             expect(getObjectValue(result)).toStrictEqual([
-                [32618.20377353977],
-                [47729.42261474775],
-                [69841.30085621732],
-                [102197.07337883205],
-                [149542.48674004516],
-                [218821.87621459411],
+                [32618.2037735398],
+                [47729.42261474784],
+                [69841.30085621751],
+                [102197.07337883243],
+                [149542.48674004586],
+                [218821.87621459534],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -173,6 +173,87 @@ describe('Test growth function', () => {
             expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
         });
 
+        it('KnownXs length error', () => {
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [2],
+                    [3],
+                    [4],
+                ]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [2],
+                    [3],
+                    [4],
+                    [5],
+                ]),
+                rowCount: 5,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(knownYs, knownXs);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+        });
+
+        it('NewXs length error', () => {
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [2],
+                    [3],
+                    [4],
+                ]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [2, 3],
+                    [3, 4],
+                    [4, 5],
+                ]),
+                rowCount: 4,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const newXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3],
+                    [2, 3, 4],
+                    [3, 4, 5],
+                    [4, 5, 6],
+                ]),
+                rowCount: 4,
+                columnCount: 3,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result = testFunction.calculate(knownYs, knownXs, newXs);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.REF);
+        });
+
         it('Constb value test', () => {
             const knownYs = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
@@ -210,7 +291,7 @@ describe('Test growth function', () => {
             const constb = BooleanValueObject.create(false);
             const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
             expect(getObjectValue(result)).toStrictEqual([
-                [1806822.1964432136, 4216666.612455021],
+                [1806822.1964432173, 4216666.612455025],
             ]);
 
             const knownYs2 = ArrayValueObject.create({
@@ -229,18 +310,17 @@ describe('Test growth function', () => {
                 row: 0,
                 column: 0,
             });
-            const constb2 = BooleanValueObject.create(false);
-            const result2 = testFunction.calculate(knownYs2, undefined, undefined, constb2);
+            const result2 = testFunction.calculate(knownYs2, undefined, undefined, constb);
             expect(getObjectValue(result2)).toStrictEqual([
-                [14.74828953909258],
-                [217.51204432890762],
-                [3207.9306080026727],
-                [47311.489428140674],
-                [697763.5446119357],
-                [10290818.785760397],
+                [14.748289539092573],
+                [217.51204432890742],
+                [3207.9306080026654],
+                [47311.48942814059],
+                [697763.5446119347],
+                [10290818.78576035],
             ]);
 
-            const constb3 = ArrayValueObject.create({
+            const constb2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['test', 1],
                     [2, ErrorType.NAME],
@@ -252,8 +332,18 @@ describe('Test growth function', () => {
                 row: 0,
                 column: 0,
             });
-            const result3 = testFunction.calculate(knownYs2, undefined, undefined, constb3);
+            const result3 = testFunction.calculate(knownYs2, undefined, undefined, constb2);
             expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
+
+            const result4 = testFunction.calculate(knownYs2, undefined, undefined, constb);
+            expect(getObjectValue(result4)).toStrictEqual([
+                [14.748289539092573],
+                [217.51204432890742],
+                [3207.9306080026654],
+                [47311.48942814059],
+                [697763.5446119347],
+                [10290818.78576035],
+            ]);
         });
 
         it('Value is error', () => {
@@ -275,6 +365,205 @@ describe('Test growth function', () => {
 
             const result2 = testFunction.calculate(knownYs, undefined, newXs);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
+        });
+
+        it('More test', () => {
+            const knownYs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [2, 3],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [3, 4],
+                    [4, 5],
+                ]),
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const newXs = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [5, 6, 7, 8, 9, 10, 11],
+                ]),
+                rowCount: 1,
+                columnCount: 7,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const constb = BooleanValueObject.create(true);
+            const result = testFunction.calculate(knownYs, knownXs, newXs, constb);
+            expect(getObjectValue(result)).toStrictEqual([
+                [3.2237097954706266, 5.583629154612603, 9.671129386411891, 16.750887463837827, 29.013388159235713, 50.252662391513546, 87.04016447770724],
+            ]);
+
+            const newXs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [5],
+                    [6],
+                    [7],
+                    [8],
+                    [9],
+                    [10],
+                    [11],
+                    [12],
+                    [13],
+                    [14],
+                    [15],
+                ]),
+                rowCount: 11,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const constb2 = BooleanValueObject.create(false);
+            const result2 = testFunction.calculate(knownYs, knownXs, newXs2, constb2);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [2.307651218612649],
+                [2.727747733175308],
+                [3.224320744759815],
+                [3.8112924221868782],
+                [4.505119396395902],
+                [5.325254146764445],
+                [6.294690380529891],
+                [7.440607695843031],
+                [8.795133602548706],
+                [10.396244265088487],
+                [12.288829221203034],
+            ]);
+
+            const knownYs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [2],
+                    [3],
+                    [4],
+                ]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [2, 3],
+                    [3, 4],
+                    [4, 5],
+                ]),
+                rowCount: 4,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const newXs3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                    [2, 3],
+                    [3, 4],
+                    [4, 5],
+                    [5, 6],
+                    [6, 7],
+                    [7, 8],
+                    [8, 9],
+                    [9, 10],
+                    [10, 11],
+                    [11, 12],
+                ]),
+                rowCount: 11,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb);
+            expect(getObjectValue(result3)).toStrictEqual([
+                [1.1161231740339033],
+                [1.7617295898720449],
+                [2.780778340631825],
+                [4.389282114679539],
+                [6.928203230275548],
+                [10.935729065914693],
+                [17.2613542397969],
+                [27.245952089325357],
+                [43.00600607235712],
+                [67.88225099390945],
+                [107.14782470725646],
+            ]);
+
+            const result4 = testFunction.calculate(knownYs2, knownXs2, newXs3, constb2);
+            expect(getObjectValue(result4)).toStrictEqual([
+                [1.1161231740339057],
+                [1.7617295898720433],
+                [2.780778340631814],
+                [4.389282114679508],
+                [6.928203230275478],
+                [10.935729065914547],
+                [17.261354239796617],
+                [27.245952089324824],
+                [43.00600607235614],
+                [67.88225099390776],
+                [107.14782470725342],
+            ]);
+
+            const knownYs3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4],
+                ]),
+                rowCount: 1,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const knownXs3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4],
+                    [2, 3, 4, 5],
+                ]),
+                rowCount: 2,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const newXs4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4, 5, 6, 7],
+                    [2, 3, 4, 5, 6, 7, 8],
+                ]),
+                rowCount: 2,
+                columnCount: 7,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result5 = testFunction.calculate(knownYs3, knownXs3, newXs4, constb);
+            expect(getObjectValue(result5)).toStrictEqual([
+                [1.1161231740339033, 1.7617295898720449, 2.780778340631825, 4.389282114679539, 6.928203230275548, 10.935729065914693, 17.2613542397969],
+            ]);
         });
     });
 });

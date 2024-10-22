@@ -128,61 +128,6 @@ function adjoint(matrix: number[][]): number[][] {
     return adj;
 }
 
-export const romanToArabicMap = new Map<string, number>([
-    ['I', 1],
-    ['V', 5],
-    ['X', 10],
-    ['L', 50],
-    ['C', 100],
-    ['D', 500],
-    ['M', 1000],
-]);
-
-export const arabicToRomanMap = new Map<number, string>([
-    [1, 'I'],
-    [4, 'IV'],
-    [5, 'V'],
-    [9, 'IX'],
-    [10, 'X'],
-    [40, 'XL'],
-    [45, 'VL'],
-    [49, 'IL'],
-    [50, 'L'],
-    [90, 'XC'],
-    [95, 'VC'],
-    [99, 'IC'],
-    [100, 'C'],
-    [400, 'CD'],
-    [450, 'LD'],
-    [490, 'XD'],
-    [495, 'VD'],
-    [499, 'ID'],
-    [500, 'D'],
-    [900, 'CM'],
-    [950, 'LM'],
-    [990, 'XM'],
-    [995, 'VM'],
-    [999, 'IM'],
-    [1000, 'M'],
-]);
-
-/**
- * form: A number specifying the type of roman numeral you want.
- * The roman numeral style ranges from Classic to Simplified, becoming more concise as the value of form increases
- * 0 Classic
- * 1 More concise
- * 2 More concise
- * 3 More concise
- * 4 Simplified
- */
-export const romanFormArray: number[][] = [
-    [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000, 4000],
-    [1, 4, 5, 9, 10, 40, 45, 50, 90, 95, 100, 400, 450, 500, 900, 950, 1000, 4000],
-    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 500, 900, 950, 990, 1000, 4000],
-    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 500, 900, 950, 990, 995, 1000, 4000],
-    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 499, 500, 900, 950, 990, 995, 999, 1000, 4000],
-];
-
 export function calculateMmult(matrix1: number[][], matrix2: number[][]): number[][] {
     return matrix1.map((row) => matrix2[0].map((_, colIndex) =>
         row.reduce((sum, element, rowIndex) => sum + element * matrix2[rowIndex][colIndex], 0)
@@ -552,3 +497,58 @@ function getMatrixSumProductOfCols(matrix: number[][], startCol: number, endCol:
 
     return sum;
 }
+
+export const romanToArabicMap = new Map<string, number>([
+    ['I', 1],
+    ['V', 5],
+    ['X', 10],
+    ['L', 50],
+    ['C', 100],
+    ['D', 500],
+    ['M', 1000],
+]);
+
+export const arabicToRomanMap = new Map<number, string>([
+    [1, 'I'],
+    [4, 'IV'],
+    [5, 'V'],
+    [9, 'IX'],
+    [10, 'X'],
+    [40, 'XL'],
+    [45, 'VL'],
+    [49, 'IL'],
+    [50, 'L'],
+    [90, 'XC'],
+    [95, 'VC'],
+    [99, 'IC'],
+    [100, 'C'],
+    [400, 'CD'],
+    [450, 'LD'],
+    [490, 'XD'],
+    [495, 'VD'],
+    [499, 'ID'],
+    [500, 'D'],
+    [900, 'CM'],
+    [950, 'LM'],
+    [990, 'XM'],
+    [995, 'VM'],
+    [999, 'IM'],
+    [1000, 'M'],
+]);
+
+/**
+ * form: A number specifying the type of roman numeral you want.
+ * The roman numeral style ranges from Classic to Simplified, becoming more concise as the value of form increases
+ * 0 Classic
+ * 1 More concise
+ * 2 More concise
+ * 3 More concise
+ * 4 Simplified
+ */
+export const romanFormArray: number[][] = [
+    [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000, 4000],
+    [1, 4, 5, 9, 10, 40, 45, 50, 90, 95, 100, 400, 450, 500, 900, 950, 1000, 4000],
+    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 500, 900, 950, 990, 1000, 4000],
+    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 500, 900, 950, 990, 995, 1000, 4000],
+    [1, 4, 5, 9, 10, 40, 45, 49, 50, 90, 95, 99, 100, 400, 450, 490, 495, 499, 500, 900, 950, 990, 995, 999, 1000, 4000],
+];

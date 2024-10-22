@@ -23,7 +23,12 @@ export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[
 export function getTextRunAtPosition(textRuns: ITextRun[], position: number) {
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const textRun = textRuns[i];
-        if (position > textRun.st && position <= textRun.ed) {
+        const { st, ed } = textRun;
+        if (st === ed && position === st) {
+            return textRun;
+        }
+
+        if (position > st && position <= ed) {
             return textRun;
         }
     }

@@ -86,7 +86,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
-        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset);
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen);
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();

@@ -256,7 +256,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
     );
 
-    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset));
+    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset - 1));
     const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
     const retainPoints = new Set<number>();
     relativeCustomRanges?.forEach((range) => {

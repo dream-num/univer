@@ -185,6 +185,7 @@ export class EditorDataSyncController extends Disposable {
             ...parmas,
             isSync: true,
             unitId,
+            syncer: parmas.unitId,
         });
 
         docViewModel.reset(docDataModel);

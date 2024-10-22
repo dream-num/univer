@@ -81,8 +81,8 @@ export class DocStateChangeManagerService extends RxDisposable {
                 return;
             }
 
-            const { isCompositionEnd, ...changeState } = changeStateInfo;
-            const imeInputManagerService = this._renderManagerService.getRenderById(changeStateInfo.unitId)?.with(DocIMEInputManagerService);
+            const { isCompositionEnd, isSync, syncer, ...changeState } = changeStateInfo;
+            const imeInputManagerService = this._renderManagerService.getRenderById(isSync ? syncer! : changeStateInfo.unitId)?.with(DocIMEInputManagerService);
 
             if (imeInputManagerService == null) {
                 return;

@@ -225,21 +225,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         'sheet-0010',
     ],
     styles: {
-        defaultSheetStyle: {
-            bg: {
-                rgb: 'rgb(255,0,0)',
-            },
-        },
-        defaultColStyle: {
-            bg: {
-                rgb: 'rgb(0,255,0)',
-            },
-        },
-        defaultRowStyle: {
-            bg: {
-                rgb: 'rgb(0,0,255)',
-            },
-        },
         1: {
             fs: 30,
             vt: 2,
@@ -14431,9 +14416,6 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 { startRow: 8, endRow: 9, startColumn: 10, endColumn: 10 },
             ],
             rowData: {
-                1: {
-                    s: 'defaultRowStyle',
-                },
                 11: {
                     hd: 0,
                     h: 19,
@@ -14494,11 +14476,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     ah: 19,
                 },
             },
-            columnData: {
-                2: {
-                    s: 'defaultColStyle',
-                },
-            },
+            columnData: {},
             showGridlines: 1,
             rowHeader: {
                 width: 46,

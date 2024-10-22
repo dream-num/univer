@@ -30,9 +30,7 @@ import {
     composeInterceptors,
     Disposable,
     DisposableCollection,
-    IConfigService,
     InterceptorEffectEnum,
-    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     IUniverInstanceService,
     remove,
     toDisposable,
@@ -75,15 +73,9 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    /**
-     * Whether the row style precedes the column style.
-     */
-    private _isRowStylePrecedeColumnStyle = false;
-
     /** @ignore */
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IConfigService private readonly _configService: IConfigService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -110,8 +102,6 @@ export class SheetInterceptorService extends Disposable {
                 return rawData;
             },
         });
-
-        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
     override dispose(): void {
@@ -241,7 +231,7 @@ export class SheetInterceptorService extends Disposable {
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
         const unitId = workbook.getUnitId();
-        const isRowStylePrecedeColumnStyle = this._isRowStylePrecedeColumnStyle;
+        // const isRowStylePrecedeColumnStyle = this._isRowStylePrecedeColumnStyle;
 
         // eslint-disable-next-line ts/no-this-alias
         const sheetInterceptorService = this;
@@ -254,7 +244,7 @@ export class SheetInterceptorService extends Disposable {
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
                         const rawData = worksheet.getCellRaw(row, col);
-                        worksheet.mixinDefaultStyleToCellRaw(row, col, rawData, isRowStylePrecedeColumnStyle);
+                        // worksheet.mixinDefaultStyleToCellRaw(row, col, rawData, isRowStylePrecedeColumnStyle);
                         return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
                             rawData,
                             {

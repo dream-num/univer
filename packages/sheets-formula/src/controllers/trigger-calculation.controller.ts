@@ -82,7 +82,7 @@ export class TriggerCalculationController extends Disposable {
     private _restartCalculation = false;
 
     /**
-     *
+     * The mark of forced calculation. If a new mutation triggers dirty area calculation during the forced calculation process, forced calculation is still required.
      */
     private _forceCalculating = false;
 

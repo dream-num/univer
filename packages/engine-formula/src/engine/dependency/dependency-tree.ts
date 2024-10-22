@@ -48,9 +48,9 @@ export class FormulaDependencyTree {
 
     nodeData: Nullable<IExecuteAstNodeData>;
 
-    children: Set<FormulaDependencyTree> = new Set();
+    children: Set<string> = new Set();
 
-    parents: Set<FormulaDependencyTree> = new Set();
+    parents: Set<string> = new Set();
 
     formula: string = '';
 
@@ -108,23 +108,15 @@ export class FormulaDependencyTree {
         //     tree.dispose();
         // });
 
-        this.children = new Set();
+        this.children.clear();
 
         this.rangeList = [];
 
-        this.parents = new Set();
+        this.parents.clear();
 
         this.nodeData?.node.dispose();
 
         this.nodeData = null;
-    }
-
-    disposeWithChildren() {
-        this.children.forEach((tree) => {
-            tree.disposeWithChildren();
-        });
-
-        this.dispose();
     }
 
     resetState() {
@@ -223,7 +215,7 @@ export class FormulaDependencyTree {
     }
 
     pushChildren(tree: FormulaDependencyTree) {
-        this.children.add(tree);
+        this.children.add(tree.treeId);
         tree._pushParent(this);
     }
 
@@ -235,8 +227,8 @@ export class FormulaDependencyTree {
         this.rangeList.push(...ranges);
     }
 
-    hasChildren(tree: FormulaDependencyTree) {
-        return this.children.has(tree);
+    hasChildren(treeId: string) {
+        return this.children.has(treeId);
     }
 
     toRTreeItem(): IRTreeItem {
@@ -281,6 +273,6 @@ export class FormulaDependencyTree {
     }
 
     private _pushParent(tree: FormulaDependencyTree) {
-        this.parents.add(tree);
+        this.parents.add(tree.treeId);
     }
 }

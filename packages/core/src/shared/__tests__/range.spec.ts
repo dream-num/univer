@@ -80,6 +80,72 @@ describe('test moveRangeByOffset', () => {
             endAbsoluteRefType: AbsoluteRefType.COLUMN,
         });
     });
+
+    it('test absolute and range type is all', () => {
+        const range = {
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+            startAbsoluteRefType: AbsoluteRefType.NONE,
+            endAbsoluteRefType: AbsoluteRefType.NONE,
+            rangeType: RANGE_TYPE.ALL,
+        };
+        const newRange = moveRangeByOffset(range, 1, 1);
+        expect(newRange).toEqual({
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+            startAbsoluteRefType: AbsoluteRefType.NONE,
+            endAbsoluteRefType: AbsoluteRefType.NONE,
+            rangeType: RANGE_TYPE.ALL,
+        });
+    });
+
+    it('test absolute column and range type is row', () => {
+        const range = {
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+            startAbsoluteRefType: AbsoluteRefType.COLUMN,
+            endAbsoluteRefType: AbsoluteRefType.ROW,
+            rangeType: RANGE_TYPE.ROW,
+        };
+        const newRange = moveRangeByOffset(range, 1, 1);
+        expect(newRange).toEqual({
+            startRow: 2,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+            startAbsoluteRefType: AbsoluteRefType.COLUMN,
+            endAbsoluteRefType: AbsoluteRefType.ROW,
+            rangeType: RANGE_TYPE.ROW,
+        });
+    });
+
+    it('test absolute row and range type is column', () => {
+        const range = {
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 3,
+            startAbsoluteRefType: AbsoluteRefType.COLUMN,
+            endAbsoluteRefType: AbsoluteRefType.ROW,
+            rangeType: RANGE_TYPE.COLUMN,
+        };
+        const newRange = moveRangeByOffset(range, 1, 1);
+        expect(newRange).toEqual({
+            startRow: 1,
+            startColumn: 1,
+            endRow: 3,
+            endColumn: 4,
+            startAbsoluteRefType: AbsoluteRefType.COLUMN,
+            endAbsoluteRefType: AbsoluteRefType.ROW,
+            rangeType: RANGE_TYPE.COLUMN,
+        });
+    });
 });
 
 // Test cases

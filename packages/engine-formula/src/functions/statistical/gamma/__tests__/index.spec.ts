@@ -42,6 +42,10 @@ describe('Test gamma function', () => {
             const number2 = NumberValueObject.create(-1);
             const result2 = testFunction.calculate(number2);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+
+            const number3 = NumberValueObject.create(172);
+            const result3 = testFunction.calculate(number3);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NUM);
         });
 
         it('Value is number string', () => {
@@ -92,6 +96,20 @@ describe('Test gamma function', () => {
                 [1, ErrorType.VALUE, 0.9107548563770899, 1, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, 9.33262154439441e+155, 1.19556877982239, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+
+            const number2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.001],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(number2);
+            expect(getObjectValue(result2)).toStrictEqual(999.4237724845955);
         });
     });
 });

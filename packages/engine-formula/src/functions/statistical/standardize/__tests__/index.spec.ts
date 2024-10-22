@@ -74,6 +74,15 @@ describe('Test standardize function', () => {
             const standardDev = NumberValueObject.create(1.5);
             const result = testFunction.calculate(x, mean, standardDev);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(42);
+            const mean2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, mean2, standardDev);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const standardDev2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, mean, standardDev2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

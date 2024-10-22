@@ -72,6 +72,11 @@ describe('Test tInv function', () => {
             const degFreedom = NumberValueObject.create(2);
             const result = testFunction.calculate(probability, degFreedom);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.75);
+            const degFreedom2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, degFreedom2);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

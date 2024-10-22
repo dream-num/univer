@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { erf, erfcINV } from './engineering';
 import { calculateCombin, calculateFactorial } from './math';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 
 export function betaCDF(x: number, alpha: number, beta: number): number {
     if (x <= 0) {
@@ -464,8 +464,7 @@ export function gammaln(x: number): number {
     let ser = 1.000000000190015;
 
     for (let j = 0; j < 6; j++) {
-        y += 1;
-        ser += coefficients[j] / y;
+        ser += coefficients[j] / ++y;
     }
 
     return -tmp + Math.log(2.5066282746310005 * ser / x);  // eslint-disable-line
@@ -476,8 +475,10 @@ function lowRegGamma(a: number, x: number): number {
         return Number.NaN;
     }
 
+    const EPSILON = 1e-30;
+
     // calculate maximum number of itterations required for a
-    const MAX_ITER = Math.min(-~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17), 10000);
+    const MAX_ITER = -~(Math.log((a >= 1) ? a : 1 / a) * 8.5 + a * 0.4 + 17);
     const aln = gammaln(a);
     const exp = Math.exp(-x + a * Math.log(x) - aln);
 
@@ -492,6 +493,10 @@ function lowRegGamma(a: number, x: number): number {
 
         for (let i = 1; i <= MAX_ITER; i++) {
             sum += del *= x / ++_a;
+
+            if (Math.abs(del) < Math.abs(sum) * EPSILON) {
+                break;
+            }
         }
 
         return sum * exp;
@@ -502,7 +507,7 @@ function lowRegGamma(a: number, x: number): number {
     }
 
     let b = x + 1 - a;
-    let c = 1 / 1.0e-30;
+    let c = 1 / EPSILON;
     let d = 1 / b;
     let h = d;
 
@@ -511,9 +516,23 @@ function lowRegGamma(a: number, x: number): number {
 
         b += 2;
         d = temp * d + b;
+
+        if (Math.abs(d) < EPSILON) {
+            d = EPSILON;
+        }
+
         c = b + temp / c;
+
+        if (Math.abs(c) < EPSILON) {
+            c = EPSILON;
+        }
+
         d = 1 / d;
         h *= d * c;
+
+        if (Math.abs(d * c - 1) < EPSILON) {
+            break;
+        }
     }
 
     return 1 - h * exp;

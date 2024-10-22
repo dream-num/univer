@@ -140,6 +140,19 @@ describe('Test gammaDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, alpha, beta, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(10);
+            const alpha2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, alpha2, beta, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const beta2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, alpha, beta2, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(x2, alpha, beta, cumulative2);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

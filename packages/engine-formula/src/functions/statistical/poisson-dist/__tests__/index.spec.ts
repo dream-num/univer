@@ -87,6 +87,15 @@ describe('Test poissonDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(x, mean, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(2);
+            const mean2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, mean2, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, mean, cumulative2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

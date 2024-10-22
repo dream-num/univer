@@ -117,6 +117,19 @@ describe('Test negbinomDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberF, numberS, probabilityS, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const numberF2 = NumberValueObject.create(6);
+            const numberS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(numberF2, numberS2, probabilityS, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const probabilityS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(numberF2, numberS, probabilityS2, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(numberF2, numberS, probabilityS, cumulative2);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

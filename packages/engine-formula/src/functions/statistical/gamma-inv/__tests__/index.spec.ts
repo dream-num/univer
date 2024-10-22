@@ -96,6 +96,15 @@ describe('Test gammaInv function', () => {
             const beta = NumberValueObject.create(2);
             const result = testFunction.calculate(probability, alpha, beta);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.068094);
+            const alpha2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, alpha2, beta);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const beta2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(probability2, alpha, beta2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

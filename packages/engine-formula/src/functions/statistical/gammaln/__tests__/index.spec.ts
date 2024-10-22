@@ -92,6 +92,26 @@ describe('Test gammaln function', () => {
                 [0, ErrorType.VALUE, -0.09348151082957568, 0, ErrorType.NUM, ErrorType.NUM],
                 [ErrorType.NUM, 359.1342053696796, 0.17862203839074242, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+
+            const x2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.123],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(x2);
+            expect(getObjectValue(result2)).toStrictEqual(2.036327503417766);
+        });
+
+        it('More test', () => {
+            const x = NumberValueObject.create(2);
+            const result = testFunction.calculate(x);
+            expect(getObjectValue(result)).toStrictEqual(0);
         });
     });
 });

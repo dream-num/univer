@@ -177,6 +177,20 @@ describe('Test prob function', () => {
             const probRange3 = ErrorValueObject.create(ErrorType.NAME);
             const result3 = testFunction.calculate(xRange3, probRange3, lowerLimit);
             expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const probRange4 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.2, 0.3, 0.1, 1],
+                ]),
+                rowCount: 1,
+                columnCount: 4,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result4 = testFunction.calculate(xRange3, probRange4, lowerLimit);
+            expect(getObjectValue(result4)).toBe(ErrorType.NUM);
         });
 
         it('LowerLimit and upperLimit value test', () => {
@@ -238,6 +252,10 @@ describe('Test prob function', () => {
             expect(getObjectValue(result6)).toStrictEqual([
                 [0.5, 0.3, 0, 0.3, 0.5, ErrorType.VALUE, 0.5, ErrorType.NAME],
             ]);
+
+            const upperLimit2 = ErrorValueObject.create(ErrorType.NAME);
+            const result7 = testFunction.calculate(xRange, probRange, lowerLimit, upperLimit2);
+            expect(getObjectValue(result7)).toBe(ErrorType.NAME);
         });
     });
 });

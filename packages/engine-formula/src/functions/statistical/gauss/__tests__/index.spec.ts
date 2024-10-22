@@ -92,6 +92,20 @@ describe('Test gauss function', () => {
                 [0.3413447460685429, ErrorType.VALUE, 0.39065144757430814, 0.3413447460685429, 0, 0],
                 [0, 0.5, 0.4903581300546417, ErrorType.VALUE, -0.4986501019683699, ErrorType.NAME],
             ]);
+
+            const z2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [0.123],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(z2);
+            expect(getObjectValue(result2)).toStrictEqual(0.04894645101643691);
         });
     });
 });

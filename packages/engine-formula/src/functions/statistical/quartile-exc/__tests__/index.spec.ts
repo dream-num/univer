@@ -122,5 +122,37 @@ describe('Test quartileExc function', () => {
             const result8 = testFunction.calculate(array, quart8);
             expect(getObjectValue(result8)).toStrictEqual(5.5);
         });
+
+        it('More test', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9],
+                ]),
+                rowCount: 1,
+                columnCount: 9,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const quart = NumberValueObject.create(2);
+            const result = testFunction.calculate(array, quart);
+            expect(getObjectValue(result)).toStrictEqual(5);
+
+            const array2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1, 2],
+                ]),
+                rowCount: 1,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const quart2 = NumberValueObject.create(1);
+            const result2 = testFunction.calculate(array2, quart2);
+            expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+        });
     });
 });

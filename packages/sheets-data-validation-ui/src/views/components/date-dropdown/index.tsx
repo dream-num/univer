@@ -94,6 +94,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 t: CellValueType.NUMBER,
             }, rule))
         ) {
+            hideFn();
             await commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: false,
                 eventType: DeviceInputEventType.Keyboard,
@@ -124,7 +125,6 @@ export function DateDropdown(props: IDropdownComponentProps) {
                     },
                 },
             });
-            hideFn();
         } else {
             rejectInputController.showReject(validator.getRuleFinalError(rule));
         }

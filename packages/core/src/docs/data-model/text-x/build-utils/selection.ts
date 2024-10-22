@@ -53,8 +53,16 @@ export function getSelectionWithSymbolMax(selection: ITextRange, body: IDocument
         startOffset -= 1;
     }
 
+    while (body.dataStream[startOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+        startOffset += 1;
+    }
+
     while (body.dataStream[endOffset] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
         endOffset += 1;
+    }
+
+    while (body.dataStream[endOffset - 1] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+        endOffset -= 1;
     }
 
     return {

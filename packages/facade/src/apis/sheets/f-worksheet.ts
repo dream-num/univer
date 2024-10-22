@@ -92,14 +92,30 @@ export class FWorksheet {
 
     //#region default style
 
+    /**
+     * Get the default style of the worksheet
+     * @returns Default style
+     */
     getDefaultStyle(): Nullable<IStyleData> | string {
         return this._worksheet.getDefaultCellStyle();
     }
 
+    /**
+     * Get the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from row manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet row name or style data
+     */
     getRowDefaultStyle(index: number, keepRaw = false): Nullable<IStyleData> | string {
         return this._worksheet.getRowStyle(index, keepRaw);
     }
 
+    /**
+     * Get the default style of the worksheet column
+     * @param {number} index The column index
+     * @param  {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet column name or style data
+     */
     getColumnDefaultStyle(index: number, keepRaw = false): Nullable<IStyleData> | string {
         return this._worksheet.getColumnStyle(index, keepRaw);
     }
@@ -121,6 +137,11 @@ export class FWorksheet {
         return this;
     }
 
+    /**
+     * Set the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
     async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
@@ -134,6 +155,11 @@ export class FWorksheet {
         return this;
     }
 
+    /**
+     * Set the default style of the worksheet column
+     * @param {number} index The column index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();

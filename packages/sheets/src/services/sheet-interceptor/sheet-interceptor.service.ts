@@ -244,7 +244,6 @@ export class SheetInterceptorService extends Disposable {
                 sheetDisposables.add(viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number, effect: InterceptorEffectEnum): Nullable<ICellData> {
                         const rawData = worksheet.getCellRaw(row, col);
-                        // worksheet.mixinDefaultStyleToCellRaw(row, col, rawData, isRowStylePrecedeColumnStyle);
                         return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT, effect)(
                             rawData,
                             {

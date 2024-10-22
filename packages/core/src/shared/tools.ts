@@ -17,7 +17,6 @@
 import type { IStyleData } from '../types/interfaces';
 import type { IKeyValue, Nullable } from './types';
 
-import mergeWith from 'lodash-es/mergeWith';
 import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl } from '../common/url';
 
@@ -53,6 +52,12 @@ const alphabets = [
     'Z',
 ];
 
+/**
+ * Deep diff between two object
+ * @param oneValue The first test value
+ * @param twoValue The second test value
+ * @returns {boolean} If objects are different, return false, otherwise return true
+ */
 function diffValue(oneValue: any, twoValue: any) {
     const oneType = Tools.getValueType(oneValue);
     const twoType = Tools.getValueType(twoValue);
@@ -691,18 +696,6 @@ export class Tools {
             return performance.now();
         }
         return Date.now();
-    }
-
-      /**
-       * @static
-       * @param {unknown} object Modify the property while leaving the reference unchanged.
-       * @param {unknown} source The source  being merged in object.
-       * @param {(value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}} [customize]
-       * @return {*}
-       * @memberof Tools
-       */
-    static mergeWith(object: unknown, source: unknown, customize?: (value: unknown, originValue: unknown, key: string, object: unknown, source: unknown, stack: string[]) => {}) {
-        return mergeWith(object, source, customize);
     }
 }
 

@@ -16,7 +16,7 @@
 
 import type { IAccessor, IMutation, IStyleData } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import { getSheetMutationTarget } from '../commands/utils/target-util';
+import { getSheetCommandTarget, getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetDefaultStyleMutationParams {
     unitId: string;
@@ -28,13 +28,12 @@ export const SetWorksheetDefaultStyleMutation: IMutation<ISetWorksheetDefaultSty
     id: 'sheet.mutation.set-worksheet-default-style',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, defaultStyle, subUnitId } = params;
-        const universheet = accessor.get(IUniverInstanceService).getUniverSheetInstance(unitId);
-        if (universheet == null) {
-            return false;
-        }
-        const worksheet = universheet.getSheetBySheetId(subUnitId);
+        const { defaultStyle } = params;
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
+        const { worksheet } = target;
         if (!worksheet) {
             return false;
         }

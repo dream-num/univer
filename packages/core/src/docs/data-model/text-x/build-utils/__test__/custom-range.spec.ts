@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { ITextRange } from '../../../../../sheets/typedef';
 import { describe, expect, it } from 'vitest';
-import { excludePointsFromRange, getCustomRangesInterestsWithRange, shouldDeleteCustomRange } from '../custom-range'; // 替换为你的文件路径
 import { CustomRangeType, type ICustomRange } from '../../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../../types';
-import type { ITextRange } from '../../../../../sheets/typedef';
+import { excludePointsFromRange, getCustomRangesInterestsWithRange, shouldDeleteCustomRange } from '../custom-range';
 
 describe('excludePointsFromRange function', () => {
     it('should handle empty points array', () => {

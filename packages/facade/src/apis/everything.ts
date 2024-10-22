@@ -28,13 +28,8 @@ import '@univerjs/sheets-thread-comment/facade';
 
 export { FHooks, FUniver } from '@univerjs/core';
 export { FFormula } from '@univerjs/engine-formula/facade';
-
-// #region
-
 export { FPermission, FRange, FSelection, FWorkbook, FWorksheet } from '@univerjs/sheets/facade';
 export { FDataValidation, FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade';
 export { FFilter } from '@univerjs/sheets-filter/facade';
 export { FThreadComment } from '@univerjs/sheets-thread-comment/facade';
 export { FSheetHooks } from '@univerjs/sheets-ui/facade';
-
-// #endregion

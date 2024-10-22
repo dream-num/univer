@@ -17,3 +17,6 @@
 import './apis/everything';
 
 export * from './apis/everything';
+
+console.error(`[!DEPREACTION WARNING!] @univerjs/facade and @univerjs-pro/facade is deprecated and will be removed in v0.6.0.
+Please refer to our official guide to migrate. https://univer.ai/guides/sheet/getting-started/facade`);

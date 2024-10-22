@@ -71,7 +71,9 @@ export const DocHyperLinkEdit = () => {
             return;
         }
 
-        const matchedRange = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
+        const body = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
+        const selection = body ? BuildTextUtils.selection.getInsertSelection(activeRange, body) : null;
+        const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
         if (doc && matchedRange) {
             setLink(matchedRange?.properties?.url ?? '');
         }

@@ -108,14 +108,14 @@ describe('excludePointsFromRange function', () => {
     });
 });
 
-describe('getCustomRangesInterestsWithRange function', () => {
+describe('getCustomRangesInterestsWithSelection function', () => {
     it('should return empty array if no custom ranges intersect', () => {
         const range: ITextRange = { startOffset: 5, endOffset: 10, collapsed: false };
         const customRanges: ICustomRange[] = [
             { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 11, endIndex: 15, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
         ];
-        expect(getCustomRangesInterestsWithRange(range, customRanges)).toEqual([]);
+        expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([]);
     });
 
     it('should return intersecting custom ranges', () => {
@@ -124,7 +124,7 @@ describe('getCustomRangesInterestsWithRange function', () => {
             { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
         ];
-        expect(getCustomRangesInterestsWithRange(range, customRanges)).toEqual([
+        expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([
             { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
         ]);
@@ -136,7 +136,7 @@ describe('getCustomRangesInterestsWithRange function', () => {
             { startIndex: 0, endIndex: 4, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 5, endIndex: 10, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
         ];
-        expect(getCustomRangesInterestsWithRange(range, customRanges)).toEqual([]);
+        expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([]);
     });
 
     it('should handle multiple intersecting custom ranges', () => {
@@ -147,7 +147,7 @@ describe('getCustomRangesInterestsWithRange function', () => {
             { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK },
         ];
 
-        expect(getCustomRangesInterestsWithRange(range, customRanges)).toEqual([
+        expect(getCustomRangesInterestsWithSelection(range, customRanges)).toEqual([
             { startIndex: 0, endIndex: 6, rangeId: '1', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 8, endIndex: 12, rangeId: '2', rangeType: CustomRangeType.HYPERLINK },
             { startIndex: 14, endIndex: 20, rangeId: '3', rangeType: CustomRangeType.HYPERLINK },

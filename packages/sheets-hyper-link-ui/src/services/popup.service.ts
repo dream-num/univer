@@ -213,7 +213,7 @@ export class SheetsHyperLinkPopupService extends Disposable {
                     label: BuildTextUtils.transform.getPlainText(body.dataStream),
                 };
             }
-            const links = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(textRange, body.customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK) ?? []);
+            const links = BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(textRange, body.customRanges?.filter((i) => i.rangeType === CustomRangeType.HYPERLINK) ?? []);
             let start = textRange.startOffset;
             let end = textRange.endOffset;
             links.forEach((link) => {

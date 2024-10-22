@@ -15,10 +15,12 @@
  */
 
 import { DataValidationType } from '@univerjs/core';
+import { LIST_DROPDOWN_KEY } from '../components';
 import { DropdownMultipleWidget } from '../widgets/dropdown-multiple-widget';
 import { BaseSheetDataValidatorView } from './sheet-validator-view';
 
 export class ListMultipleValidatorView extends BaseSheetDataValidatorView {
     override id = DataValidationType.LIST_MULTIPLE;
     override canvasRender = this.injector.createInstance(DropdownMultipleWidget);
+    override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 }

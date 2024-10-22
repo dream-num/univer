@@ -248,6 +248,10 @@ export class CalculateFormulaService extends Disposable {
         const intervalCount = config?.intervalCount || DEFAULT_INTERVAL_COUNT;
 
         for (let i = 0, len = treeList.length; i < len; i++) {
+            const tree = treeList[i];
+            const nodeData = tree.nodeData;
+            const getDirtyData = tree.getDirtyData;
+
             // Execute the await every 100 iterations
             if (i % intervalCount === 0) {
             /**
@@ -271,18 +275,13 @@ export class CalculateFormulaService extends Disposable {
                 }
 
                 this._executionInProgressListener$.next(this._runtimeService.getRuntimeState());
-            }
 
-            const tree = treeList[i];
-            const nodeData = tree.nodeData;
-            const getDirtyData = tree.getDirtyData;
-            let value: FunctionVariantType;
-
-            if (this._runtimeService.isStopExecution() || (nodeData == null && getDirtyData == null)) {
-                this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
-                this._runtimeService.markedAsStopFunctionsExecuted();
-                this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
-                return;
+                if (this._runtimeService.isStopExecution() || (nodeData == null && getDirtyData == null)) {
+                    this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
+                    this._runtimeService.markedAsStopFunctionsExecuted();
+                    this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
+                    return;
+                }
             }
 
             this._runtimeService.setCurrent(
@@ -293,6 +292,8 @@ export class CalculateFormulaService extends Disposable {
                 tree.subUnitId,
                 tree.unitId
             );
+
+            let value: FunctionVariantType;
 
             if (getDirtyData != null && tree.featureId != null) {
                 /**

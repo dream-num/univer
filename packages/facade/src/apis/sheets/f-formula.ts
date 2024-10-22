@@ -58,7 +58,7 @@ export class FFormula {
         return this._commandService.onCommandExecuted((command: ICommandInfo) => {
             if (command.id === SetFormulaCalculationStartMutation.id) {
                 const params = command.params as ISetFormulaCalculationStartMutation;
-                callback(params.forceCalculation || false);
+                callback(params.forceCalculation);
             }
         });
     }

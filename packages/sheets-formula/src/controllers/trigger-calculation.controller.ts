@@ -22,6 +22,7 @@ import type {
     IExecutionInProgressParams,
     IFormulaDirtyData,
     ISetFormulaCalculationNotificationMutation,
+    ISetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { Disposable, ICommandService } from '@univerjs/core';
@@ -79,6 +80,11 @@ export class TriggerCalculationController extends Disposable {
     private _executionInProgressParams: Nullable<IExecutionInProgressParams> = null;
 
     private _restartCalculation = false;
+
+    /**
+     *
+     */
+    private _forceCalculating = false;
 
     private readonly _progress$ = new BehaviorSubject<ICalculationProgress>(NilProgress);
 
@@ -159,8 +165,7 @@ export class TriggerCalculationController extends Disposable {
                         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
                     } else {
                         this._restartCalculation = true;
-
-                        this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
+                        this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
                     }
 
                     this._waitingCommandQueue = [];
@@ -247,7 +252,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            // forceCalculation: false,
+            forceCalculation: !!this._forceCalculating,
             clearDependencyTreeCache: allClearDependencyTreeCache,
         };
     }
@@ -296,6 +301,13 @@ export class TriggerCalculationController extends Disposable {
 
             // eslint-disable-next-line max-lines-per-function
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SetFormulaCalculationStartMutation.id) {
+                    const { forceCalculation } = command.params as ISetFormulaCalculationStartMutation;
+                    if (forceCalculation) {
+                        this._forceCalculating = true;
+                    }
+                }
+
                 if (command.id !== SetFormulaCalculationNotificationMutation.id) {
                     return;
                 }
@@ -379,6 +391,7 @@ export class TriggerCalculationController extends Disposable {
 
                         this._doneCalculationTaskCount = 0;
                         this._totalCalculationTaskCount = 0;
+                        this._forceCalculating = false;
                     }
 
                     if (state === FormulaExecutedStateType.STOP_EXECUTION && this._restartCalculation) {

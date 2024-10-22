@@ -227,7 +227,10 @@ export class RTree {
         const results: string[] = [];
 
         if (this._enableOneCellCache && this._enableOneCellCache) {
-            results.push(...this._searchByOneCellCache(search));
+            const oneCellResults = this._searchByOneCellCache(search);
+            for (const result of oneCellResults) {
+                results.push(result);
+            }
         }
 
         const tree = this._tree.get(unitId)?.get(subUnitId);
@@ -235,12 +238,16 @@ export class RTree {
             return results;
         }
 
-        results.push(...(tree.search({
+        const searchData = tree.search({
             minX: range.startColumn,
             minY: range.startRow,
             maxX: range.endColumn,
             maxY: range.endRow,
-        }) as unknown as IRTreeItem[]).map((item) => item.id));
+        }) as unknown as IRTreeItem[];
+
+        for (const item of searchData) {
+            results.push(item.id);
+        }
 
         return results;
     }

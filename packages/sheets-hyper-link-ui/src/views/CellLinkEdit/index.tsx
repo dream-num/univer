@@ -119,8 +119,10 @@ export const CellLinkEdit = () => {
                     };
                 } else {
                     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-                    const selection = textSelectionService.getActiveTextRange();
-                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc?.getBody()?.customRanges ?? [])?.[0];
+                    const currentSelection = textSelectionService.getActiveTextRange();
+                    const body = doc?.getBody();
+                    const selection = currentSelection && body ? BuildTextUtils.selection.getInsertSelection(currentSelection, body) : null;
+                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, body?.customRanges ?? [])?.[0];
 
                     setShowLabel(false);
                     link = {

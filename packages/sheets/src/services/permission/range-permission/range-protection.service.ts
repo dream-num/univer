@@ -17,7 +17,7 @@
 import type { UnitAction } from '@univerjs/protocol';
 
 import type { IObjectModel } from '../../../model/range-protection-rule.model';
-import { Disposable, Inject, IPermissionService, IResourceManagerService } from '@univerjs/core';
+import { Disposable, Inject, IPermissionService, IResourceManagerService, IUniverInstanceService } from '@univerjs/core';
 import { UnitObject, UniverType } from '@univerjs/protocol';
 import { RangeProtectionCache } from '../../../model/range-protection.cache';
 
@@ -31,7 +31,8 @@ export class RangeProtectionService extends Disposable {
         @Inject(RangeProtectionRuleModel) private _selectionProtectionRuleModel: RangeProtectionRuleModel,
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(RangeProtectionCache) private _selectionProtectionCache: RangeProtectionCache
+        @Inject(RangeProtectionCache) private _selectionProtectionCache: RangeProtectionCache,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
 
     ) {
         super();
@@ -125,7 +126,6 @@ export class RangeProtectionService extends Disposable {
                     });
                 },
                 onUnLoad: (unitId: string) => {
-                    this._selectionProtectionRuleModel.deleteUnitModel(unitId);
                     this._selectionProtectionCache.deleteUnit(unitId);
                 },
             })

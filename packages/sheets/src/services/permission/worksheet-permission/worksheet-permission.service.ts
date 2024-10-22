@@ -22,6 +22,7 @@ import { UniverType } from '@univerjs/protocol';
 import { takeUntil } from 'rxjs/operators';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
+import { getAllWorkbookPermissionPoint } from '../workbook-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from './utils';
 import { WorksheetProtectionPointModel } from './worksheet-permission-point.model';
 import { WorksheetProtectionRuleModel } from './worksheet-permission-rule.model';
@@ -155,6 +156,22 @@ export class WorksheetPermissionService extends RxDisposable {
                     this._worksheetProtectionRuleModel.changeRuleInitState(true);
                 },
                 onUnLoad: (unitId: string) => {
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
+                    if (workbook) {
+                        workbook.getSheets().forEach((worksheet) => {
+                            const subUnitId = worksheet.getSheetId();
+
+                            [...getAllWorksheetPermissionPoint(), ...getAllWorksheetPermissionPointByPointPanel()].forEach((F) => {
+                                const instance = new F(unitId, subUnitId);
+                                this._permissionService.deletePermissionPoint(instance.id);
+                            });
+                        });
+                        getAllWorkbookPermissionPoint().forEach((F) => {
+                            const instance = new F(unitId);
+                            this._permissionService.deletePermissionPoint(instance.id);
+                        });
+                    }
+
                     this._worksheetProtectionRuleModel.deleteUnitModel(unitId);
                 },
             })

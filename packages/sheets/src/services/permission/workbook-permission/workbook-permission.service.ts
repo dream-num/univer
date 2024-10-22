@@ -18,6 +18,7 @@ import type { Workbook } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
 import { getAllRangePermissionPoint } from '../range-permission/util';
+import { WorksheetProtectionPointModel, WorksheetProtectionRuleModel } from '../worksheet-permission';
 import { getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel } from '../worksheet-permission/utils';
 import { getAllWorkbookPermissionPoint } from './util';
 
@@ -25,7 +26,9 @@ export class WorkbookPermissionService extends Disposable {
     constructor(
         @Inject(IPermissionService) private _permissionService: IPermissionService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel
+        @Inject(RangeProtectionRuleModel) private _rangeProtectionRuleModel: RangeProtectionRuleModel,
+        @Inject(WorksheetProtectionRuleModel) private _worksheetProtectionRuleModel: WorksheetProtectionRuleModel,
+        @Inject(WorksheetProtectionPointModel) private _worksheetProtectionPointModel: WorksheetProtectionPointModel
     ) {
         super();
 
@@ -71,6 +74,10 @@ export class WorkbookPermissionService extends Disposable {
                 const instance = new F(unitId);
                 this._permissionService.deletePermissionPoint(instance.id);
             });
+
+            this._rangeProtectionRuleModel.deleteUnitModel(unitId);
+            this._worksheetProtectionPointModel.deleteUnitModel(unitId);
+            this._worksheetProtectionRuleModel.deleteUnitModel(unitId);
         }));
     }
 }

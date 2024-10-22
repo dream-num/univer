@@ -15,7 +15,7 @@
  */
 
 import { awaitTime, Disposable, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '@univerjs/mockdata';
+import { DEFAULT_WORKBOOK_DATA_DEMO, DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE } from '@univerjs/mockdata';
 import { DisposeUniverCommand } from '../../commands/commands/unit.command';
 import { getDefaultDocData } from './data/default-doc';
 import { getDefaultWorkbookData } from './data/default-sheet';
@@ -30,6 +30,7 @@ export interface IE2EControllerAPI {
     loadDefaultSheet(loadTimeout?: number): Promise<void>;
     loadDemoSheet(loadTimeout?: number): Promise<void>;
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
+    loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     loadDefaultDoc(loadTimeout?: number,): Promise<void>;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
@@ -66,6 +67,7 @@ export class E2EController extends Disposable {
             loadDefaultSheet: (loadTimeout) => this._loadDefaultSheet(loadTimeout),
             loadDemoSheet: () => this._loadDemoSheet(),
             loadMergeCellSheet: () => this._loadMergeCellSheet(2000),
+            loadDefaultStyleSheet: (loadTimeout) => this._loadDefaultStyleSheet(loadTimeout),
             disposeCurrSheetUnit: (disposeTimeout?: number) => this._diposeDefaultSheetUnit(disposeTimeout),
             loadDefaultDoc: (loadTimeout) => this._loadDefaultDoc(loadTimeout),
             disposeUniver: () => this._disposeUniver(),
@@ -100,6 +102,12 @@ export class E2EController extends Disposable {
     private async _loadMergeCellSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
         const data = { ...DEFAULT_WORKBOOK_DATA_DEMO };
         data.sheetOrder = ['sheet-0003'];
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, data);
+        await awaitTime(loadingTimeout);
+    }
+
+    private async _loadDefaultStyleSheet(loadingTimeout: number = AWAIT_LOADING_TIMEOUT): Promise<void> {
+        const data = { ...DEFAULT_WORKBOOK_DATA_DEMO_DEFAULT_STYLE };
         this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, data);
         await awaitTime(loadingTimeout);
     }

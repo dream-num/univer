@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { IResources } from '../services/resource-manager/type';
 import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { LocaleType } from '../types/enum/locale-type';
@@ -22,6 +21,7 @@ import type { IDocumentData } from '../types/interfaces';
 import type { ICellCustomRender } from '../types/interfaces/i-cell-custom-render';
 import type { ICellValidationData } from '../types/interfaces/i-cell-validation-data';
 import type { IStyleData } from '../types/interfaces/i-style-data';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 
 /**
  * Snapshot of a workbook.
@@ -65,6 +65,11 @@ export interface IWorkbookData {
      * Data of each {@link IWorksheetData} in this Univer Sheet.
      */
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
+
+    /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Workbook.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
 
     /**
      * Resources of the Univer Sheet. It is used to store the data of other plugins.
@@ -117,6 +122,11 @@ export interface IWorksheetData {
     rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
     columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
 
+    /**
+     * @property {string|Nullable<IStyleData>} [defaultStyle] - Default style id or style data of Worksheet.
+     */
+    defaultStyle?: Nullable<IStyleData> | string;
+
     rowHeader: {
         width: number;
         hidden?: BooleanNumber;
@@ -154,6 +164,11 @@ export interface IRowData {
      * hidden
      */
     hd?: BooleanNumber;
+
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 export interface IRowAutoHeightInfo {
@@ -174,6 +189,11 @@ export interface IColumnData {
      * hidden
      */
     hd?: BooleanNumber;
+
+    /**
+     * style id
+     */
+    s?: Nullable<IStyleData | string>;
 }
 
 /**

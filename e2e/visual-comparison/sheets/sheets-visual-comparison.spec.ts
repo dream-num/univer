@@ -166,3 +166,29 @@ test('diff merged cells rendering after scrolling', async () => {
     await page.waitForTimeout(2000);
     await browser.close();
 });
+
+/**
+ * Aim for default sheet style.
+ */
+test('diff sheet default style rendering', async () => {
+    const browser = await chromium.launch({
+        headless: !!isCI, // Set to false to see the browser window
+    });
+    const context = await browser.newContext({
+        viewport: { width: 1280, height: 1280 },
+        deviceScaleFactor: 2, // Set your desired DPR
+    });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultStyleSheet());
+    await page.waitForTimeout(2000);
+
+    const filename = generateSnapshotName('defaultstyle');
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+
+    await page.waitForTimeout(2000);
+    await browser.close();
+});

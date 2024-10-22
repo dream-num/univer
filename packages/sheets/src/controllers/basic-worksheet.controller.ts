@@ -116,11 +116,13 @@ import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutatio
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
+import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -169,6 +171,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             ReorderRangeMutation,
             EmptyMutation,
             SetWorksheetColWidthMutation,
+            SetWorksheetDefaultStyleMutation,
+            SetWorksheetRowColumnStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);

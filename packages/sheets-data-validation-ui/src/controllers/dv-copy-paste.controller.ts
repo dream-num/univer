@@ -151,7 +151,8 @@ export class DataValidationCopyPasteController extends Disposable {
                 copyInfo.subUnitId,
                 ruleMatrix.diffWithAddition(this._sheetDataValidationModel.getRules(copyInfo.unitId, copyInfo.subUnitId), additionRules.values()),
                 this._injector,
-                'patched'
+                'patched',
+                false
             );
 
             return {
@@ -191,7 +192,8 @@ export class DataValidationCopyPasteController extends Disposable {
                 subUnitId,
                 ruleMatrix.diff(this._sheetDataValidationModel.getRules(unitId, subUnitId)),
                 this._injector,
-                'patched'
+                'patched',
+                false
             );
 
             return {

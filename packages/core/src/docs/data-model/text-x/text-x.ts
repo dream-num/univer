@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Tools } from '../../../shared/tools';
-import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import type { IDocumentBody } from '../../../types/interfaces/i-document-data';
-import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from './action-types';
+import { UpdateDocsAttributeType } from '../../../shared/command-enum';
+import { Tools } from '../../../shared/tools';
 import { ActionIterator } from './action-iterator';
-import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
+import { type IDeleteAction, type IInsertAction, type IRetainAction, type TextXAction, TextXActionType } from './action-types';
 import { textXApply } from './apply';
 import { transformBody } from './transform-utils';
+import { composeBody, getBodySlice, isUselessRetainAction } from './utils';
 
 function onlyHasDataStream(body: IDocumentBody) {
     return Object.keys(body).length === 1;
@@ -118,6 +118,7 @@ export class TextX {
      *      2) If the other body property exists, then execute the TransformBody logic to override it
      */
     // priority - if true, this actions takes priority over other, that is, this actions are considered to happen "first".
+    // thisActions is the target action.
     static transform(thisActions: TextXAction[], otherActions: TextXAction[], priority: TPriority = 'right'): TextXAction[] {
         return this._transform(otherActions, thisActions, priority === 'left' ? 'right' : 'left');
     }

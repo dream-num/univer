@@ -16,6 +16,7 @@
 
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
+import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -654,6 +655,93 @@ describe('transform()', () => {
                 t: TextXActionType.RETAIN,
                 len: 1,
                 segmentId: '',
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('retain + retain with paragraph and REPLACE type', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [

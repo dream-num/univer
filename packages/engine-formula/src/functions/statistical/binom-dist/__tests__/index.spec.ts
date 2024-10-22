@@ -118,6 +118,19 @@ describe('Test binomDist function', () => {
             const cumulative = BooleanValueObject.create(true);
             const result = testFunction.calculate(numberS, trials, probabilityS, cumulative);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const numberS2 = NumberValueObject.create(6);
+            const trials2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(numberS2, trials2, probabilityS, cumulative);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const probabilityS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(numberS2, trials, probabilityS2, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const cumulative2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(numberS2, trials, probabilityS, cumulative2);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

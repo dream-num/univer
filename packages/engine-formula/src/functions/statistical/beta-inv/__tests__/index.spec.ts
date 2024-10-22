@@ -140,6 +140,23 @@ describe('Test betaInv function', () => {
             const B = NumberValueObject.create(3);
             const result = testFunction.calculate(probability, alpha, beta, A, B);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const probability2 = NumberValueObject.create(0.685470581);
+            const alpha2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(probability2, alpha2, beta, A, B);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const beta2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(probability2, alpha, beta2, A, B);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
+
+            const A2 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(probability2, alpha, beta, A2, B);
+            expect(getObjectValue(result4)).toBe(ErrorType.NAME);
+
+            const B2 = ErrorValueObject.create(ErrorType.NAME);
+            const result5 = testFunction.calculate(probability2, alpha, beta, A, B2);
+            expect(getObjectValue(result5)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

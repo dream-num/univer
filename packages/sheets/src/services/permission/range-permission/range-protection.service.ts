@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { IObjectModel } from '../../../model/range-protection-rule.model';
+import type { UnitAction } from '@univerjs/protocol';
 
+import type { IObjectModel } from '../../../model/range-protection-rule.model';
 import { Disposable, Inject, IPermissionService, IResourceManagerService } from '@univerjs/core';
-import { UnitAction, UnitObject, UniverType } from '@univerjs/protocol';
+import { UnitObject, UniverType } from '@univerjs/protocol';
 import { RangeProtectionCache } from '../../../model/range-protection.cache';
 
 import { RangeProtectionRuleModel } from '../../../model/range-protection-rule.model';
-import { getAllRangePermissionPoint } from './util';
+import { baseProtectionActions, getAllRangePermissionPoint } from './util';
 
 const PLUGIN_NAME = 'SHEET_RANGE_PROTECTION_PLUGIN';
 
@@ -109,7 +110,7 @@ export class RangeProtectionService extends Disposable {
                                 objectID: rule.permissionId,
                                 unitID: unitId,
                                 objectType: UnitObject.SelectRange,
-                                actions: [UnitAction.View, UnitAction.Edit, UnitAction.ManageCollaborator],
+                                actions: baseProtectionActions,
                             });
                         });
 

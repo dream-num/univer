@@ -125,6 +125,7 @@ export {
     WorksheetCopyPermission,
 
     WorksheetDeleteColumnPermission,
+    WorksheetDeleteProtectionPermission,
     WorksheetDeleteRowPermission,
     WorksheetEditExtraObjectPermission,
     WorksheetEditPermission,
@@ -163,6 +164,7 @@ export {
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
 export { RangeProtectionPermissionManageCollaPoint } from './services/permission/permission-point/range/manage-collaborator';
+export { RangeProtectionPermissionDeleteProtectionPoint } from './services/permission/permission-point/range/delete-protection';
 
 export { generateNullCell, generateNullCellValue } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';

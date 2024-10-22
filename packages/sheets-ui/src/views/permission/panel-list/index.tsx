@@ -23,7 +23,7 @@ import { Avatar, Tooltip } from '@univerjs/design';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, WriteSingle } from '@univerjs/icons';
 import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { baseProtectionActions, DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { ISidebarService, useObservable } from '@univerjs/ui';
 import clsx from 'clsx';
 
@@ -72,12 +72,12 @@ export const SheetPermissionPanelList = () => {
             const sheetId = sheet.getSheetId();
             const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, sheetId);
             rules.forEach((rule) => {
-                if (rule.permissionId && rule.name) {
+                if (rule.permissionId) {
                     allRangePermissionId.push(rule.permissionId);
                 }
             });
             const worksheetPermissionRule = worksheetProtectionModel.getRule(unitId, sheetId);
-            if (worksheetPermissionRule?.permissionId && worksheetPermissionRule.name) {
+            if (worksheetPermissionRule?.permissionId) {
                 allSheetPermissionId.push(worksheetPermissionRule.permissionId);
             }
         });
@@ -87,7 +87,7 @@ export const SheetPermissionPanelList = () => {
         const allPermissionRule = await authzIoService.list({
             objectIDs: allPermissionId,
             unitID: unitId,
-            actions: [UnitAction.View, UnitAction.Edit, UnitAction.ManageCollaborator],
+            actions: baseProtectionActions,
         });
 
         const subUnitPermissionIds = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).map((item) => item.permissionId);
@@ -233,8 +233,10 @@ export const SheetPermissionPanelList = () => {
                             const viewPermission = viewAction?.allowed;
 
                             const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
+                            const deleteAction = item.actions.find(((action) => action.action === UnitAction.Delete));
 
                             const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
+                            const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;
 
                             let ruleName = '';
 
@@ -282,14 +284,18 @@ export const SheetPermissionPanelList = () => {
                                             <div className={styles.sheetPermissionListItemHeaderName}>{ruleName}</div>
                                         </Tooltip>
 
-                                        {hasManagerPermission && (
+                                        {(hasManagerPermission || hasDeletePermission) && (
                                             <div className={styles.sheetPermissionListItemHeaderOperator}>
-                                                <Tooltip title={localeService.t('permission.panel.edit')}>
-                                                    <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleEdit(rule as IPermissionPanelRule)}><WriteSingle /></div>
-                                                </Tooltip>
-                                                <Tooltip title={localeService.t('permission.panel.delete')}>
-                                                    <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleDelete(rule)}><DeleteSingle /></div>
-                                                </Tooltip>
+                                                {hasManagerPermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.edit')}>
+                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleEdit(rule as IPermissionPanelRule)}><WriteSingle /></div>
+                                                    </Tooltip>
+                                                )}
+                                                {hasDeletePermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.delete')}>
+                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleDelete(rule)}><DeleteSingle /></div>
+                                                    </Tooltip>
+                                                )}
                                             </div>
                                         )}
                                     </div>

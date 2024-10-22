@@ -16,7 +16,7 @@
 
 import type { IAccessor, Workbook } from '@univerjs/core';
 import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, RANGE_TYPE, Rectangle, UniverInstanceType, UserManagerService ,FOCUSING_FX_BAR_EDITOR} from '@univerjs/core';
-import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { RangeProtectionCache, RangeProtectionRuleModel, SheetsSelectionsService, UnitAction, WorkbookCreateProtectPermission, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetDeleteProtectionPermission, WorksheetManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { combineLatest, map, merge, of, startWith, switchMap } from 'rxjs';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
@@ -340,7 +340,7 @@ export function getRemovePermissionFromSheetBarDisable$(accessor: IAccessor) {
                         map(() => {
                             const rule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                             if (rule) {
-                                return permissionService.getPermissionPoint(new WorksheetManageCollaboratorPermission(unitId, subUnitId).id)?.value === false;
+                                return permissionService.getPermissionPoint(new WorksheetDeleteProtectionPermission(unitId, subUnitId).id)?.value === false;
                             }
                             return true;
                         })
@@ -437,7 +437,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
 
                             const worksheetRule = worksheetProtectionRuleModel.getRule(unitId, subUnitId);
                             if (worksheetRule?.permissionId) {
-                                return permissionService.getPermissionPoint(new WorksheetManageCollaboratorPermission(unitId, subUnitId).id)?.value === false;
+                                return permissionService.getPermissionPoint(new WorksheetDeleteProtectionPermission(unitId, subUnitId).id)?.value === false;
                             }
 
                             const overlapRule = selectionProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).filter((rule) => {
@@ -456,7 +456,7 @@ export function getRemovePermissionDisable$(accessor: IAccessor) {
                                 for (let j = startColumn; j <= endColumn; j++) {
                                     const cellInfo = rangeProtectionCache.getCellInfo(unitId, subUnitId, i, j);
                                     if (cellInfo) {
-                                        return cellInfo[UnitAction.ManageCollaborator] === false;
+                                        return cellInfo[UnitAction.Delete] === false;
                                     }
                                 }
                             }

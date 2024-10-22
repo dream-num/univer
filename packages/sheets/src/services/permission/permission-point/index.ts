@@ -38,6 +38,7 @@ export { WorkbookViewPermission } from './workbook/view';
 export { WorkbookViewHistoryPermission } from './workbook/view-history';
 export { WorksheetCopyPermission } from './worksheet/copy';
 export { WorksheetDeleteColumnPermission } from './worksheet/delete-column';
+export { WorksheetDeleteProtectionPermission } from './worksheet/delete-protection';
 export { WorksheetDeleteRowPermission } from './worksheet/delete-row';
 export { WorksheetEditPermission } from './worksheet/edit';
 export { WorksheetEditExtraObjectPermission } from './worksheet/edit-extra-object';

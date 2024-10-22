@@ -72,7 +72,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.84",
-        "@univerjs/protocol": "0.1.39-alpha.33",
+        "@univerjs/protocol": "0.1.39-alpha.36",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-formula-ui": "workspace:*",

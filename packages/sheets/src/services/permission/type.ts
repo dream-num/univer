@@ -22,6 +22,7 @@ export interface IWorksheetProtectionRule {
     unitType: UnitObject;
     unitId: string;
     subUnitId: string;
+    name: string;
 }
 
 export interface IWorksheetProtectionPointRule {

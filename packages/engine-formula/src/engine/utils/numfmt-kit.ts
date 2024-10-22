@@ -356,50 +356,36 @@ export function stringIsNumberPattern(input: string) {
     const numberPattern = numfmt.parseNumber(_input);
 
     if (numberPattern) {
-        stringToNumberPatternCache.set(_input, {
-            value: numberPattern.v as number,
-            pattern: numberPattern.z as string,
-        });
-
-        return {
-            isNumberPattern: true,
-            value: numberPattern.v as number,
-            pattern: numberPattern.z as string,
-        };
+        return setNumberPatternCache(_input, numberPattern.v as number, numberPattern.z as string);
     }
 
     const datePattern = numfmt.parseDate(_input);
 
     if (datePattern) {
-        stringToNumberPatternCache.set(_input, {
-            value: datePattern.v as number,
-            pattern: datePattern.z as string,
-        });
-
-        return {
-            isNumberPattern: true,
-            value: datePattern.v as number,
-            pattern: datePattern.z as string,
-        };
+        return setNumberPatternCache(_input, datePattern.v as number, datePattern.z as string);
     }
 
     const timePattern = numfmt.parseTime(_input);
 
     if (timePattern) {
-        stringToNumberPatternCache.set(_input, {
-            value: timePattern.v as number,
-            pattern: timePattern.z as string,
-        });
-
-        return {
-            isNumberPattern: true,
-            value: timePattern.v as number,
-            pattern: timePattern.z as string,
-        };
+        return setNumberPatternCache(_input, timePattern.v as number, timePattern.z as string);
     }
 
     return {
         isNumberPattern: false,
+    };
+}
+
+function setNumberPatternCache(input: string, value: number, pattern: string) {
+    stringToNumberPatternCache.set(input, {
+        value,
+        pattern,
+    });
+
+    return {
+        isNumberPattern: true,
+        value,
+        pattern,
     };
 }
 

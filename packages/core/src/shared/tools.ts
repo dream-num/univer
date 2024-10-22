@@ -58,7 +58,7 @@ const alphabets = [
  * @param twoValue The second test value
  * @returns {boolean} If objects are different, return false, otherwise return true
  */
-function diffValue(oneValue: any, twoValue: any) {
+function isValueEqual(oneValue: any, twoValue: any) {
     const oneType = Tools.getValueType(oneValue);
     const twoType = Tools.getValueType(twoValue);
     if (oneType !== twoType) {
@@ -86,7 +86,7 @@ function diffArrays(oneArray: any[], twoArray: any[]) {
     for (let i = 0, len = oneArray.length; i < len; i++) {
         const oneValue = oneArray[i];
         const twoValue = twoArray[i];
-        if (!diffValue(oneValue, twoValue)) {
+        if (!isValueEqual(oneValue, twoValue)) {
             return false;
         }
     }
@@ -105,7 +105,7 @@ function diffObject(oneObject: IKeyValue, twoObject: IKeyValue) {
         }
         const oneValue = oneObject[key];
         const twoValue = twoObject[key];
-        if (!diffValue(oneValue, twoValue)) {
+        if (!isValueEqual(oneValue, twoValue)) {
             return false;
         }
     }
@@ -308,7 +308,7 @@ export class Tools {
     }
 
     static diffValue(one: any, two: any) {
-        return diffValue(one, two);
+        return isValueEqual(one, two);
     }
 
     static deepClone<T = unknown>(value: T): T {

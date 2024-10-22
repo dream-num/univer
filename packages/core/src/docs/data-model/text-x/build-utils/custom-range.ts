@@ -73,7 +73,7 @@ export function getCustomRangesInterestsWithRange(range: ITextRange, customRange
                 result.push(customRange);
             }
         } else {
-            if (isIntersecting(range.startOffset, range.endOffset, customRange.startIndex, customRange.endIndex)) {
+            if (isIntersecting(range.startOffset, range.endOffset - 1, customRange.startIndex, customRange.endIndex)) {
                 result.push(customRange);
             }
         }

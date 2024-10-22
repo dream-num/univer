@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { Subscription } from 'rxjs';
+import { Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, Inject } from '@univerjs/core';
+import { DocSkeletonManagerService } from '@univerjs/docs';
+import { getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { InsertCommand } from '../../commands/commands/core-editing.command';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
@@ -53,7 +54,7 @@ export class DocInputController extends Disposable implements IRenderModule {
                 return;
             }
 
-            const unitId = this._context.unitId;
+            const { unitId } = this._context;
 
             const { event, content = '', activeRange } = config;
 
@@ -61,20 +62,31 @@ export class DocInputController extends Disposable implements IRenderModule {
 
             const skeleton = this._docSkeletonManagerService.getSkeleton();
 
-            if (e.data == null || skeleton == null) {
-                return;
-            }
-
-            if (!skeleton || !activeRange) {
+            if (e.data == null || skeleton == null || activeRange == null) {
                 return;
             }
 
             const { segmentId } = activeRange;
             const UNITS = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+            const docDataModel = this._context.unit;
+            const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
+
+            // Insert content's style should follow the text style of the current position.
+            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset);
+
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,
                 body: {
                     dataStream: content,
+                    textRuns: curTextRun
+                        ? [
+                            {
+                                ...curTextRun,
+                                st: 0,
+                                ed: content.length,
+                            },
+                        ]
+                        : [],
                 },
                 range: activeRange,
                 segmentId,

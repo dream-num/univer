@@ -103,6 +103,7 @@ describe('apply method', () => {
 
         expect(resultA).toEqual(resultB);
         expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
     });
 
@@ -120,6 +121,15 @@ describe('apply method', () => {
                 line: 0,
                 body: {
                     dataStream: 'h',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
                 },
             },
         ];
@@ -163,9 +173,10 @@ describe('apply method', () => {
         // console.log(JSON.stringify(composedAction2, null, 2));
         // console.log(JSON.stringify(resultC, null, 2));
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(composedAction1).toEqual(composedAction2);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
     });
 
     it('should get the same result when apply two actions by order OR composed first case 3', () => {
@@ -181,6 +192,15 @@ describe('apply method', () => {
                 line: 0,
                 body: {
                     dataStream: 'h',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 1,
+                            ts: {
+                                bl: BooleanNumber.TRUE,
+                            },
+                        },
+                    ],
                 },
             },
         ];
@@ -225,8 +245,9 @@ describe('apply method', () => {
 
         // console.log(JSON.stringify(resultC, null, 2));
 
-        // expect(resultA).toEqual(resultB);
-        // expect(resultC).toEqual(resultD);
-        // expect(composedAction1).toEqual(composedAction2);
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
     });
 });

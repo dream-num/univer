@@ -21,10 +21,10 @@ import { Subject } from 'rxjs';
 import { UNIVER_WATERMARK_STORAGE_KEY } from '../common/const';
 
 export class WatermarkService extends Disposable {
-    private _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();
-    public updateConfig$ = this._updateConfig$.asObservable();
-    private _refresh$ = new Subject<number>();
-    public refresh$ = this._refresh$.asObservable();
+    private readonly _updateConfig$ = new Subject<Nullable<IWatermarkConfigWithType>>();
+    public readonly updateConfig$ = this._updateConfig$.asObservable();
+    private readonly _refresh$ = new Subject<number>();
+    public readonly refresh$ = this._refresh$.asObservable();
 
     constructor(
         @Inject(ILocalStorageService) private _localStorageService: ILocalStorageService

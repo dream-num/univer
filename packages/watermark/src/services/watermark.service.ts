@@ -50,4 +50,9 @@ export class WatermarkService extends Disposable {
     public refresh() {
         this._refresh$.next(Math.random());
     }
+
+    override dispose(): void {
+        this._refresh$.complete();
+        this._updateConfig$.complete();
+    }
 }

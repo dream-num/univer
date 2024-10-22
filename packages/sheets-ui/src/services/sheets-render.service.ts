@@ -51,7 +51,7 @@ export class SheetsRenderService extends RxDisposable {
      */
     registerSkeletonChangingMutations(mutationId: string): IDisposable {
         if (this._skeletonChangeMutations.has(mutationId)) {
-            return toDisposable(() => {});
+            return toDisposable(() => { });
         }
 
         this._skeletonChangeMutations.add(mutationId);
@@ -87,6 +87,7 @@ export class SheetsRenderService extends RxDisposable {
         this._renderManagerService.created$.subscribe((renderer) => {
             if (renderer.unitId === unitId) {
                 renderer.engine.getCanvas().setId(`${SHEET_MAIN_CANVAS_ID}_${unitId}`);
+                renderer.engine.getCanvas().getContext().setId(`${SHEET_MAIN_CANVAS_ID}_${unitId}`);
             }
         });
         this._renderManagerService.createRender(unitId);

@@ -28,7 +28,7 @@ importers:
         version: 4.2.0(release-it@17.8.2(typescript@5.6.3))
       '@release-it/conventional-changelog':
         specifier: ^8.0.2
-        version: 8.0.2(release-it@17.8.2(typescript@5.6.3))
+        version: 8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.8.2(typescript@5.6.3))
       '@storybook/react':
         specifier: 8.3.5
         version: 8.3.5(@storybook/test@8.3.5(storybook@8.3.5))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.3.5)(typescript@5.6.3)
@@ -360,6 +360,9 @@ importers:
       '@univerjs/uniui':
         specifier: workspace:*
         version: link:../packages-experimental/uniui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../packages/watermark
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1695,6 +1698,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../watermark
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3394,6 +3400,52 @@ importers:
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/watermark:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.80
+        version: 0.1.80(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.9
+        version: 18.3.11
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
 packages:
@@ -5177,6 +5229,12 @@ packages:
 
   '@univerjs/icons@0.1.79':
     resolution: {integrity: sha512-4dyyC75EWw7pBnIO9PwXUeshSEKjAdNUF5dXkyHZ2fmkW5+jNxuSLos4lVhsZ2PHMYhf0PWwffT2Ff6qD8M1kw==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/icons@0.1.80':
+    resolution: {integrity: sha512-6lR/dhGkGWbahgpdDdf/xEpDJxcRllIQTnknR9pNyo+4VdO/QrVaI3a2NgebY+0VQTD2rX5CuKKJhbkAdzXQdA==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -10833,10 +10891,13 @@ snapshots:
       '@types/conventional-commits-parser': 5.0.0
       chalk: 5.3.0
 
-  '@conventional-changelog/git-client@1.0.1':
+  '@conventional-changelog/git-client@1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)':
     dependencies:
       '@types/semver': 7.5.8
       semver: 7.6.3
+    optionalDependencies:
+      conventional-commits-filter: 4.0.0
+      conventional-commits-parser: 5.0.0
 
   '@dprint/formatter@0.3.0': {}
 
@@ -11532,12 +11593,12 @@ snapshots:
       walk-sync: 2.2.0
       yaml: 2.4.5
 
-  '@release-it/conventional-changelog@8.0.2(release-it@17.8.2(typescript@5.6.3))':
+  '@release-it/conventional-changelog@8.0.2(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)(release-it@17.8.2(typescript@5.6.3))':
     dependencies:
       concat-stream: 2.0.0
       conventional-changelog: 5.1.0
       conventional-recommended-bump: 9.0.0
-      git-semver-tags: 8.0.0
+      git-semver-tags: 8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
       release-it: 17.8.2(typescript@5.6.3)
       semver: 7.6.3
     transitivePeerDependencies:
@@ -11993,8 +12054,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       eslint: 9.12.0(jiti@1.21.6)
-      eslint-visitor-keys: 4.0.0
-      espree: 10.1.0
+      eslint-visitor-keys: 4.1.0
+      espree: 10.2.0
       estraverse: 5.3.0
       picomatch: 4.0.2
     transitivePeerDependencies:
@@ -12399,6 +12460,11 @@ snapshots:
   '@univerjs/icons-svg@0.1.78': {}
 
   '@univerjs/icons@0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@univerjs/icons@0.1.80(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -14868,9 +14934,9 @@ snapshots:
       meow: 12.1.1
       semver: 7.6.3
 
-  git-semver-tags@8.0.0:
+  git-semver-tags@8.0.0(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0):
     dependencies:
-      '@conventional-changelog/git-client': 1.0.1
+      '@conventional-changelog/git-client': 1.0.1(conventional-commits-filter@4.0.0)(conventional-commits-parser@5.0.0)
       meow: 13.2.0
     transitivePeerDependencies:
       - conventional-commits-filter
@@ -15591,7 +15657,7 @@ snapshots:
     dependencies:
       copy-anything: 2.0.6
       parse-node-version: 1.0.1
-      tslib: 2.6.3
+      tslib: 2.7.0
     optionalDependencies:
       errno: 0.1.8
       graceful-fs: 4.2.11

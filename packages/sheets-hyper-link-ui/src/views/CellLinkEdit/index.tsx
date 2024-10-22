@@ -122,7 +122,7 @@ export const CellLinkEdit = () => {
                     const currentSelection = textSelectionService.getActiveTextRange();
                     const body = doc?.getBody();
                     const selection = currentSelection && body ? BuildTextUtils.selection.getInsertSelection(currentSelection, body) : null;
-                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, body?.customRanges ?? [])?.[0];
+                    const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
 
                     setShowLabel(false);
                     link = {

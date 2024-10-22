@@ -64,7 +64,7 @@ export function shouldDeleteCustomRange(deleteStart: number, deleteLen: number, 
     return true;
 }
 
-export function getCustomRangesInterestsWithRange(range: ITextRange, customRanges: ICustomRange[]) {
+export function getCustomRangesInterestsWithSelection(range: ITextRange, customRanges: ICustomRange[]) {
     const result: ICustomRange[] = [];
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];

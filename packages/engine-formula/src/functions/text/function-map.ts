@@ -25,13 +25,17 @@ import { Concatenate } from './concatenate';
 import { Dbcs } from './dbcs';
 import { Dollar } from './dollar';
 import { Exact } from './exact';
+import { Find } from './find';
+import { Findb } from './findb';
 import { Fixed } from './fixed';
 import { FUNCTION_NAMES_TEXT } from './function-names';
+import { Left } from './left';
 import { Leftb } from './leftb';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Lower } from './lower';
 import { Mid } from './mid';
+import { Midb } from './midb';
 import { Numbervalue } from './numbervalue';
 import { Proper } from './proper';
 import { Regexextract } from './regexextract';
@@ -63,16 +67,20 @@ export const functionText = [
     [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
     [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
     [Exact, FUNCTION_NAMES_TEXT.EXACT],
+    [Find, FUNCTION_NAMES_TEXT.FIND],
+    [Findb, FUNCTION_NAMES_TEXT.FINDB],
     [Fixed, FUNCTION_NAMES_TEXT.FIXED],
+    [Left, FUNCTION_NAMES_TEXT.LEFT],
     [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
     [Mid, FUNCTION_NAMES_TEXT.MID],
+    [Midb, FUNCTION_NAMES_TEXT.MIDB],
+    [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
-    [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
     [Right, FUNCTION_NAMES_TEXT.RIGHT],

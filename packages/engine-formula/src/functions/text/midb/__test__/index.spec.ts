@@ -22,12 +22,12 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Mid } from '../index';
+import { Midb } from '../index';
 
-describe('Test mid function', () => {
-    const testFunction = new Mid(FUNCTION_NAMES_TEXT.MID);
+describe('Test midb function', () => {
+    const testFunction = new Midb(FUNCTION_NAMES_TEXT.MIDB);
 
-    describe('Mid', () => {
+    describe('Midb', () => {
         it('Value is normal', () => {
             const text = StringValueObject.create('Univer');
             const startNum = NumberValueObject.create(1);
@@ -101,7 +101,7 @@ describe('Test mid function', () => {
             const numChars = NumberValueObject.create(2);
             const result = testFunction.calculate(text, startNum, numChars);
             expect(getObjectValue(result)).toStrictEqual([
-                ['1', ' ', '中文', 'TR', 'FA', ''],
+                ['1', ' ', '中', 'TR', 'FA', ''],
                 ['0', '10', '2.', '2-', '-3', ErrorType.NAME],
             ]);
         });
@@ -111,13 +111,13 @@ describe('Test mid function', () => {
             const startNum = NumberValueObject.create(1);
             const numChars = NumberValueObject.create(4);
             const result = testFunction.calculate(text, startNum, numChars);
-            expect(getObjectValue(result)).toStrictEqual(',。、；');
+            expect(getObjectValue(result)).toStrictEqual(',。、');
 
             const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
             const numChars2 = ArrayValueObject.create('{3,5,7,10,15}');
             const result2 = testFunction.calculate(text2, startNum, numChars2);
             expect(getObjectValue(result2)).toStrictEqual([
-                ['Hel', 'Hello', 'Hello中文', 'Hello中文o😊', 'Hello中文o😊Wo😊r'],
+                ['Hel', 'Hello', 'Hello中', 'Hello中文o', 'Hello中文o😊W'],
             ]);
         });
     });

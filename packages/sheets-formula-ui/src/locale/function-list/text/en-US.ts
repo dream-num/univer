@@ -173,8 +173,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text you want to find.' },
+            withinText: { name: 'within_text', detail: 'The text containing the text you want to find.' },
+            startNum: { name: 'start_num', detail: 'Specifies the character at which to start the search. If you omit start_num, it is assumed to be 1.' },
         },
     },
     FINDB: {
@@ -187,8 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text you want to find.' },
+            withinText: { name: 'within_text', detail: 'The text containing the text you want to find.' },
+            startNum: { name: 'start_num', detail: 'Specifies the character at which to start the search. If you omit start_num, it is assumed to be 1.' },
         },
     },
     FIXED: {
@@ -216,8 +218,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want LEFT to extract.' },
         },
     },
     LEFTB: {
@@ -230,7 +232,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'The text string that contains the characters you want to extract.' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
             numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want LEFTB to extract, based on bytes.' },
         },
     },
@@ -287,8 +289,8 @@ export default {
         ],
         functionParameter: {
             text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
-            startNum: { name: 'start_num', detail: 'The position of the first character you want to extract in text. The first character in text has start_num 1, and so on.\nIf start_num is greater than the length of text, MID/MIDB returns "" (empty text).\nIf start_num is less than the length of text, but start_num plus num_chars exceeds the length of text, MID/MIDB returns the characters up to the end of text.\nIf start_num is less than 1, MID/MIDB returns the #VALUE! error value.' },
-            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want MID to return from text.\nIf num_chars is negative, MID returns the #VALUE! error value.' },
+            startNum: { name: 'start_num', detail: 'The position of the first character you want to extract in text.' },
+            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want MID to extract.' },
         },
     },
     MIDB: {
@@ -301,8 +303,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            startNum: { name: 'start_num', detail: 'The position of the first character you want to extract in text.' },
+            numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want MIDB to extract, based on bytes.' },
         },
     },
     NUMBERVALUE: {

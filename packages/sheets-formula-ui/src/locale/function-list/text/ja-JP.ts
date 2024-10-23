@@ -174,8 +174,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '検索文字列', detail: '「検索するテキスト」で検索する文字列。' },
+            withinText: { name: '検索するテキスト', detail: '「検索文字列」を検索する最初のテキスト。' },
+            startNum: { name: '開始位置', detail: '「検索するテキスト」内の検索を開始する文字位置。省略した場合は、値 1 が想定されます。' },
         },
     },
     FINDB: {
@@ -188,8 +189,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '検索文字列', detail: '「検索するテキスト」で検索する文字列。' },
+            withinText: { name: '検索するテキスト', detail: '「検索文字列」を検索する最初のテキスト。' },
+            startNum: { name: '開始位置', detail: '「検索するテキスト」内の検索を開始する文字位置。省略した場合は、値 1 が想定されます。' },
         },
     },
     FIXED: {
@@ -217,8 +219,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            numChars: { name: '文字数', detail: '取り出す文字数 (文字列の左端からの文字数) を指定します。' },
         },
     },
     LEFTB: {
@@ -232,7 +234,7 @@ export default {
         ],
         functionParameter: {
             text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
-            numBytes: { name: 'バイト数', detail: 'LEFTB で取り出す文字数をバイト数で指定します。' },
+            numBytes: { name: 'バイト数', detail: '取り出す文字数をバイト数で指定します。' },
         },
     },
     LEN: {
@@ -288,8 +290,8 @@ export default {
         ],
         functionParameter: {
             text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
-            startNum: { name: '開始位置', detail: '文字列から取り出す先頭文字の位置を数値で指定します。 文字列の先頭文字の位置が 1 になります。\nstart_numがテキストの長さより大きい場合、MID/MIDB は "" (空のテキスト) を返します。\nstart_numがテキストの長さより小さいが、start_numとnum_charsがテキストの長さを超える場合、MID/MIDB はテキストの末尾まで文字を返します。\nstart_numが 1 未満の場合、MID/MIDB は #VALUE を返します。 エラー値。' },
-            numChars: { name: '文字数', detail: '取り出す文字数を指定します。\n文字数に負の数を指定すると、エラー値 #VALUE! が返されます。' },
+            startNum: { name: '開始位置', detail: '文字列から取り出す先頭文字の位置を数値で指定します。' },
+            numChars: { name: '文字数', detail: '取り出す文字数を指定します。' },
         },
     },
     MIDB: {
@@ -302,8 +304,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '取り出す文字を含む文字列を指定します。' },
+            startNum: { name: '開始位置', detail: '文字列から取り出す先頭文字の位置を数値で指定します。' },
+            numBytes: { name: 'バイト数', detail: '取り出す文字数をバイト数で指定します。' },
         },
     },
     NUMBERVALUE: {

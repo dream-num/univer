@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IFreeze, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
-
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -89,6 +88,90 @@ export class FWorksheet {
 
         return this._injector.createInstance(FSelection, this._workbook, this._worksheet, selections);
     }
+
+    //#region default style
+
+    /**
+     * Get the default style of the worksheet
+     * @returns Default style
+     */
+    getDefaultStyle(): Nullable<IStyleData> | string {
+        return this._worksheet.getDefaultCellStyle();
+    }
+
+    /**
+     * Get the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from row manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet row name or style data
+     */
+    getRowDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
+        return this._worksheet.getRowStyle(index, keepRaw);
+    }
+
+    /**
+     * Get the default style of the worksheet column
+     * @param {number} index The column index
+     * @param  {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet column name or style data
+     */
+    getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
+        return this._worksheet.getColumnStyle(index, keepRaw);
+    }
+
+    /**
+     * Set the default style of the worksheet
+     * @param style default style
+     * @returns this worksheet
+     */
+    async setDefaultStyle(style: string): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        await this._commandService.executeCommand(SetWorksheetDefaultStyleMutation.id, {
+            unitId,
+            subUnitId,
+            defaultStyle: style,
+        });
+        this._worksheet.setDefaultCellStyle(style);
+        return this;
+    }
+
+    /**
+     * Set the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
+    async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const styles = [{ index, style }];
+        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+            unitId,
+            subUnitId,
+            isRow: false,
+            styles,
+        });
+        return this;
+    }
+
+    /**
+     * Set the default style of the worksheet column
+     * @param {number} index The column index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
+    async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const styles = [{ index, style }];
+        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+            unitId,
+            subUnitId,
+            isRow: true,
+            styles,
+        });
+        return this;
+    }
+    // #endregion
 
     /**
      * Returns a Range object representing a single cell at the specified row and column.
@@ -1069,7 +1152,7 @@ export class FWorksheet {
                 if (
                     params.unitId === this._workbook.getUnitId() &&
                     params.subUnitId === this._worksheet.getSheetId() &&
-                  params.cellValue
+                    params.cellValue
                 ) {
                     callback(new ObjectMatrix(params.cellValue));
                 }

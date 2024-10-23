@@ -83,7 +83,7 @@ export const shouldDisableAddLink = (accessor: IAccessor) => {
         }
     }
 
-    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithRange(activeRange as ITextRange, body.customRanges ?? []);
+    const insertCustomRanges = BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(activeRange as ITextRange, body.customRanges ?? []);
     // can't insert hyperlink in range contains other custom ranges
     return !insertCustomRanges.every((range) => range.rangeType === CustomRangeType.HYPERLINK);
 };

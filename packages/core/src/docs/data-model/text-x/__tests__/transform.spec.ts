@@ -18,6 +18,7 @@ import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
@@ -716,7 +717,7 @@ describe('transform()', () => {
             },
         ];
 
-        const expectedActionsWithPriorityTrue: TextXAction[] = [
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
@@ -736,7 +737,7 @@ describe('transform()', () => {
             },
         ];
 
-        const expectedActionsWithPriorityFalse: TextXAction[] = [
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
@@ -757,8 +758,107 @@ describe('transform()', () => {
             },
         ];
 
-        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
-        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityFalse);
+    });
+
+    it('retain + retain with custom range', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.example.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.baidu.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.baidu.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.example.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        // console.log(JSON.stringify(TextX._transform(actionsA, actionsB, 'right'), null, 2));
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityFalse);
     });
 
     it('insert after the retain attributes', () => {

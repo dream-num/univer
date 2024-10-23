@@ -46,6 +46,7 @@ export const EditorInsertTextCommandId = 'doc.command.insert-text';
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
+
     type: CommandType.COMMAND,
 
     // eslint-disable-next-line max-lines-per-function
@@ -106,6 +107,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
 
             textX.push(...dos);
+
             doMutation.params.textRanges = [{
                 startOffset: startOffset + cursorMove + retain,
                 endOffset: startOffset + cursorMove + retain,

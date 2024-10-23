@@ -259,7 +259,7 @@ function getCutActionsFromTextRanges(
                 segmentId,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
+            textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, segmentId, memoryCursor.cursor, false));
         }
 
         memoryCursor.reset();

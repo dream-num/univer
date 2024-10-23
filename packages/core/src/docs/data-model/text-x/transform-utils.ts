@@ -189,10 +189,18 @@ function transformParagraph(
     }
 
     if (targetParagraph.bullet) {
-        if (originParagraph.bullet == null || transformType === TextXTransformType.COVER) {
+        if (originParagraph.bullet == null) {
             paragraph.bullet = {
                 ...targetParagraph.bullet,
             };
+        } else {
+            if (coverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+                    ? { ...originParagraph.bullet }
+                    : { ...targetParagraph.bullet };
+            } else {
+                throw new Error('Bullet is only supported in replace mode.');
+            }
         }
     }
 

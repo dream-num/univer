@@ -29,8 +29,8 @@ import {
     SetWorksheetShowCommand,
     WorksheetProtectionRuleModel,
 } from '@univerjs/sheets';
-import React, { useCallback, useEffect, useState } from 'react';
 import { useObservable } from '@univerjs/ui';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
@@ -51,6 +51,7 @@ export interface ISheetBarMenuProps {
 
 export function SheetBarMenu(props: ISheetBarMenuProps) {
     const { style } = props;
+
     const [menu, setMenu] = useState<ISheetBarMenuItem[]>([]);
     const [visible, setVisible] = useState(false);
 

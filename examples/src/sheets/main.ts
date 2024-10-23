@@ -35,6 +35,7 @@ import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
+import { UniverSheetsThreadCommentUIPlugin } from '@univerjs/sheets-thread-comment-ui';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { IThreadCommentMentionDataService, type IThreadCommentMentionDataSource, UniverThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
@@ -117,6 +118,7 @@ univer.registerPlugin(UniverThreadCommentUIPlugin, {
     overrides: [[IThreadCommentMentionDataService, { useClass: CustomMentionDataService }]],
 });
 univer.registerPlugin(UniverSheetsThreadCommentPlugin);
+univer.registerPlugin(UniverSheetsThreadCommentUIPlugin);
 
 // If we are running in e2e platform, we should immediately register the debugger plugin.
 if (IS_E2E) {

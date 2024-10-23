@@ -400,12 +400,14 @@ export default {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/replace-%E9%96%A2%E6%95%B0-replaceb-%E9%96%A2%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ja-jp/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '文字列', detail: '置き換えを行う文字列を指定します。' },
+            startNum: { name: '開始位置', detail: '置換されるテキスト内の最初の文字の位置。' },
+            numChars: { name: '文字数', detail: '置換す文字数を指定します。' },
+            newText: { name: '置換文字列', detail: '文字列の一部と置き換える文字列を指定します。' },
         },
     },
     REPLACEB: {
@@ -414,12 +416,14 @@ export default {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/replace-%E9%96%A2%E6%95%B0-replaceb-%E9%96%A2%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+                url: 'https://support.microsoft.com/ja-jp/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '文字列', detail: '置き換えを行う文字列を指定します。' },
+            startNum: { name: '開始位置', detail: '置換されるテキスト内の最初の文字の位置。' },
+            numBytes: { name: 'バイト数', detail: '置換す文字数をバイト数で指定します。' },
+            newText: { name: '置換文字列', detail: '文字列の一部と置き換える文字列を指定します。' },
         },
     },
     REPT: {
@@ -474,8 +478,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '検索文字列', detail: '「検索するテキスト」で検索する文字列。' },
+            withinText: { name: '検索するテキスト', detail: '「検索文字列」を検索する最初のテキスト。' },
+            startNum: { name: '開始位置', detail: '「検索するテキスト」内の検索を開始する文字位置。省略した場合は、値 1 が想定されます。' },
         },
     },
     SEARCHB: {
@@ -488,8 +493,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '検索文字列', detail: '「検索するテキスト」で検索する文字列。' },
+            withinText: { name: '検索するテキスト', detail: '「検索文字列」を検索する最初のテキスト。' },
+            startNum: { name: '開始位置', detail: '「検索するテキスト」内の検索を開始する文字位置。省略した場合は、値 1 が想定されます。' },
         },
     },
     SUBSTITUTE: {

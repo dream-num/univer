@@ -365,8 +365,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            oldText: { name: 'старый текст', detail: 'Текст, в котором требуется заменить некоторые символы.' },
+            startNum: { name: 'стартовая позиция', detail: 'Позиция первого символа заменяемого текста.' },
+            numChars: { name: 'количество_знаков', detail: 'Количество символов, замененных функцией REPLACE.' },
+            newText: { name: 'текст замены', detail: 'Текст, который заменит символы в старом тексте.' },
         },
     },
     REPLACEB: {
@@ -379,8 +381,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            oldText: { name: 'старый текст', detail: 'Текст, в котором требуется заменить некоторые символы.' },
+            startNum: { name: 'стартовая позиция', detail: 'Позиция первого символа заменяемого текста.' },
+            numBytes: { name: 'количество_байтов', detail: 'Указывает в байтах количество символов, которые заменяет функция REPLACEB.' },
+            newText: { name: 'текст замены', detail: 'Текст, который заменит символы в старом тексте.' },
         },
     },
     REPT: {
@@ -435,8 +439,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            findText: { name: 'строка поиска', detail: 'Строка, которую нужно найти в «Текст для поиска».' },
+            withinText: { name: 'текст для поиска', detail: 'Первое вхождение текста для поиска «строки поиска».' },
+            startNum: { name: 'стартовая позиция', detail: 'Позиция символа, с которой начинается поиск в «тексте для поиска». Если опущено, предполагается значение 1.' },
         },
     },
     SEARCHB: {
@@ -449,8 +454,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'первый' },
-            number2: { name: 'number2', detail: 'второй' },
+            findText: { name: 'строка поиска', detail: 'Строка, которую нужно найти в «Текст для поиска».' },
+            withinText: { name: 'текст для поиска', detail: 'Первое вхождение текста для поиска «строки поиска».' },
+            startNum: { name: 'стартовая позиция', detail: 'Позиция символа, с которой начинается поиск в «тексте для поиска». Если опущено, предполагается значение 1.' },
         },
     },
     SUBSTITUTE: {

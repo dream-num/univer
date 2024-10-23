@@ -403,8 +403,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: 'old_text', detail: 'Text in which you want to replace some characters.' },
+            startNum: { name: 'start_num', detail: 'The position of the character in old_text that you want to replace with new_text.' },
+            numChars: { name: 'num_chars', detail: 'The number of characters in old_text that you want REPLACE to replace with new_text.' },
+            newText: { name: 'new_text', detail: 'The text that will replace characters in old_text.' },
         },
     },
     REPLACEB: {
@@ -417,8 +419,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: 'old_text', detail: 'Text in which you want to replace some characters.' },
+            startNum: { name: 'start_num', detail: 'The position of the character in old_text that you want to replace with new_text.' },
+            numBytes: { name: 'num_bytes', detail: 'The number of bytes in old_text that you want REPLACEB to replace with new_text.' },
+            newText: { name: 'new_text', detail: 'The text that will replace characters in old_text.' },
         },
     },
     REPT: {
@@ -473,8 +477,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text you want to find.' },
+            withinText: { name: 'within_text', detail: 'The text containing the text you want to find.' },
+            startNum: { name: 'start_num', detail: 'Specifies the character at which to start the search. If you omit start_num, it is assumed to be 1.' },
         },
     },
     SEARCHB: {
@@ -487,8 +492,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: 'find_text', detail: 'The text you want to find.' },
+            withinText: { name: 'within_text', detail: 'The text containing the text you want to find.' },
+            startNum: { name: 'start_num', detail: 'Specifies the character at which to start the search. If you omit start_num, it is assumed to be 1.' },
         },
     },
     SUBSTITUTE: {

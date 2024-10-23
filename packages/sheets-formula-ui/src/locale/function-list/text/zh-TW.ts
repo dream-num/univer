@@ -173,9 +173,9 @@ export default {
             },
         ],
         functionParameter: {
-            findText: { name: '搜尋字串', detail: '要在「要搜尋的文字」中尋找的字串。' },
-            withinText: { name: '要搜尋的文字', detail: '要搜尋「搜尋字串」的首次出現的文字。' },
-            startNum: { name: '開始位置', detail: '要在「要搜尋的文字」中開始搜尋的字元位置。若省略則假定其值為 1。' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     FINDB: {
@@ -188,9 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            findText: { name: '搜尋字串', detail: '要在「要搜尋的文字」中尋找的字串。' },
-            withinText: { name: '要搜尋的文字', detail: '要搜尋「搜尋字串」的首次出現的文字。' },
-            startNum: { name: '開始位置', detail: '要在「要搜尋的文字」中開始搜尋的字元位置。若省略則假定其值為 1。' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     FIXED: {
@@ -402,8 +402,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '舊文字', detail: '要替換其中某些字元的文字。' },
+            startNum: { name: '開始位置', detail: '要在文字中替換的第一個字元的位置。' },
+            numChars: { name: '字元數', detail: '指定要 REPLACE 替換的字元數目。' },
+            newText: { name: '替換文字', detail: '在舊文字中要替換字元的文字。' },
         },
     },
     REPLACEB: {
@@ -416,8 +418,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '舊文字', detail: '要替換其中某些字元的文字。' },
+            startNum: { name: '開始位置', detail: '要在文字中替換的第一個字元的位置。' },
+            numBytes: { name: '字節數', detail: '指定要 REPLACEB 替換的字元數目，以位元組為單位。' },
+            newText: { name: '替換文字', detail: '在舊文字中要替換字元的文字。' },
         },
     },
     REPT: {
@@ -474,8 +478,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     SEARCHB: {
@@ -488,8 +493,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜尋字串', detail: '要在“要搜尋的文字”中尋找的字串。' },
+            withinText: { name: '要搜尋的文字', detail: '要搜尋“搜尋字串”的首次出現的文字。' },
+            startNum: { name: '開始位置', detail: '要在“要搜尋的文字”中開始搜尋的字元位置。若省略則假定其值為 1。' },
         },
     },
     SUBSTITUTE: {

@@ -41,9 +41,13 @@ import { Proper } from './proper';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
 import { Regexreplace } from './regexreplace';
+import { Replace } from './replace';
+import { Replaceb } from './replaceb';
 import { Rept } from './rept';
 import { Right } from './right';
 import { Rightb } from './rightb';
+import { Search } from './search';
+import { Searchb } from './searchb';
 import { Substitute } from './substitute';
 import { T } from './t';
 import { Text } from './text';
@@ -82,9 +86,13 @@ export const functionText = [
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
     [Proper, FUNCTION_NAMES_TEXT.PROPER],
+    [Replace, FUNCTION_NAMES_TEXT.REPLACE],
+    [Replaceb, FUNCTION_NAMES_TEXT.REPLACEB],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
     [Right, FUNCTION_NAMES_TEXT.RIGHT],
     [Rightb, FUNCTION_NAMES_TEXT.RIGHTB],
+    [Search, FUNCTION_NAMES_TEXT.SEARCH],
+    [Searchb, FUNCTION_NAMES_TEXT.SEARCHB],
     [Substitute, FUNCTION_NAMES_TEXT.SUBSTITUTE],
     [T, FUNCTION_NAMES_TEXT.T],
     [Text, FUNCTION_NAMES_TEXT.TEXT],

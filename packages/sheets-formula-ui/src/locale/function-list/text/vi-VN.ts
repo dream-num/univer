@@ -164,8 +164,8 @@ export default {
         },
     },
     FIND: {
-        description: 'Tìm một giá trị văn bản trong một giá trị văn bản khác (phân biệt chữ hoa chữ thường)',
-        abstract: 'Tìm một giá trị văn bản trong một giá trị văn bản khác (phân biệt chữ hoa chữ thường)',
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -179,8 +179,8 @@ export default {
         },
     },
     FINDB: {
-        description: 'Tìm một giá trị văn bản trong một giá trị văn bản khác (phân biệt chữ hoa chữ thường)',
-        abstract: 'Tìm một giá trị văn bản trong một giá trị văn bản khác (phân biệt chữ hoa chữ thường)',
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -391,19 +391,35 @@ export default {
         },
     },
     REPLACE: {
-        description: 'Thay thế một phần của chuỗi văn bản bằng một chuỗi văn bản khác',
-        abstract: 'Thay thế một phần của chuỗi văn bản bằng một chuỗi văn bản khác',
+        description: 'Thay thế ký tự trong văn bản',
+        abstract: 'Thay thế ký tự trong văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-86e5e09d-1401-41a8-890b-8e692f1f46e5',
+                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
             },
         ],
         functionParameter: {
-            old_text: { name: 'old_text', detail: 'Văn bản bạn muốn thay thế một phần của nó.' },
-            start_num: { name: 'start_num', detail: 'Vị trí của ký tự đầu tiên bạn muốn thay thế trong văn bản.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự bạn muốn thay thế.' },
-            new_text: { name: 'new_text', detail: 'Văn bản thay thế.' },
+            oldText: { name: 'văn bản cũ', detail: 'Văn bản mà bạn muốn thay thế một vài ký tự trong đó.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí của ký tự đầu tiên trong văn bản cần thay thế.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn REPLACE thay thế.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản sẽ thay thế các ký tự trong văn bản cũ.' },
+        },
+    },
+    REPLACEB: {
+        description: 'Thay thế ký tự trong văn bản',
+        abstract: 'Thay thế ký tự trong văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+            },
+        ],
+        functionParameter: {
+            oldText: { name: 'văn bản cũ', detail: 'Văn bản mà bạn muốn thay thế một vài ký tự trong đó.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí của ký tự đầu tiên trong văn bản cần thay thế.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ định, tính bằng byte, số lượng ký tự được thay thế bằng REPLACEB.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản sẽ thay thế các ký tự trong văn bản cũ.' },
         },
     },
     REPT: {
@@ -449,8 +465,8 @@ export default {
         },
     },
     SEARCH: {
-        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
-        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -458,9 +474,24 @@ export default {
             },
         ],
         functionParameter: {
-            find_text: { name: 'find_text', detail: 'Văn bản bạn muốn tìm.' },
-            within_text: { name: 'within_text', detail: 'Văn bản mà bạn muốn tìm trong đó.' },
-            start_num: { name: 'start_num', detail: 'Số ký tự mà bạn muốn bắt đầu tìm kiếm.' },
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
+        },
+    },
+    SEARCHB: {
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/search-searchb-%E5%87%BD%E6%95%B0-dfb12d6f-c60d-4a40-b090-7d2617b49e11',
+            },
+        ],
+        functionParameter: {
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
         },
     },
     SPLIT: {

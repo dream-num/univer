@@ -403,8 +403,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '旧文本', detail: '要替换其部分字符的文本。' },
+            startNum: { name: '开始位置', detail: '文本中要替换的第一个字符的位置。' },
+            numChars: { name: '字符数', detail: '指定希望 REPLACE 替换的字符数。' },
+            newText: { name: '替换文本', detail: '将替换旧文本中字符的文本。' },
         },
     },
     REPLACEB: {
@@ -417,8 +419,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            oldText: { name: '旧文本', detail: '要替换其部分字符的文本。' },
+            startNum: { name: '开始位置', detail: '文本中要替换的第一个字符的位置。' },
+            numBytes: { name: '字节数', detail: '按字节指定要由 REPLACEB 替换的字符的数量。' },
+            newText: { name: '替换文本', detail: '将替换旧文本中字符的文本。' },
         },
     },
     REPT: {
@@ -473,8 +477,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     SEARCHB: {
@@ -487,8 +492,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            findText: { name: '搜索字符串', detail: '要在“要搜索的文本”中查找的字符串。' },
+            withinText: { name: '要搜索的文本', detail: '要搜索“搜索字符串”的首次出现的文本。' },
+            startNum: { name: '开始位置', detail: '要在“要搜索的文本”中开始搜索的字符位置。如果省略则假定其值为 1。' },
         },
     },
     SUBSTITUTE: {

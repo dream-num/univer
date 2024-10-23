@@ -22,7 +22,6 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Spreads
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
-    ISelectionWithStyle,
     ISetWorksheetColIsAutoWidthCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams } from '@univerjs/sheets';
 import {
@@ -493,14 +492,17 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                 eventBindingObject.onDblclick$.subscribeEvent(() => {
                     const scene = this._context.scene;
                     scene.resetCursor();
+
+                    const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                    if (!sk) return;
+
+                    const startRow = 0;
+                    const startColumn = 0;
+                    const endRow = sk.worksheet.getRowCount() - 1 || 0;
+                    const endColumn = sk.worksheet.getColumnCount() - 1 || 0;
                     switch (initialType) {
                         case HEADER_RESIZE_TYPE.COLUMN: {
                             const curSelections = this._selectionManagerService.getCurrentSelections();
-                            // const columnSelections: ISelectionWithStyle[] = [];
-                            // filter column selections, get last valid column selection.
-
-                            const startRow = 0;
-                            const endRow = this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getRowCount() || 0;
                             const ranges: IRange[] = [];
                             for (let i = 0; i < curSelections.length; i++) {
                                 const selection = curSelections[i];
@@ -538,8 +540,8 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                                     ranges: [{
                                         startRow: this._currentRow,
                                         endRow: this._currentRow,
-                                        startColumn: 0,
-                                        endColumn: this._sheetSkeletonManagerService.getCurrent()?.skeleton.worksheet.getColumnCount() || 0,
+                                        startColumn,
+                                        endColumn,
                                     }],
                                 }
                             );

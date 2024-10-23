@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IColAutoWidthInfo, IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IColAutoWidthInfo, IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 import { getSheetCommandTarget } from '../commands/utils/target-util';
@@ -68,38 +68,33 @@ export const SetWorksheetColWidthMutationFactory = (
     };
 };
 
-// export const SetWorksheetColIsAutoWidthMutationFactory = (
-//     params: ISetWorksheetColIsAutoWidthMutationParams,
-//     worksheet: Worksheet
-// ): ISetWorksheetColIsAutoWidthMutationParams => {
-//     const { unitId, subUnitId, ranges } = params;
-
-//     return {
-//         unitId,
-//         subUnitId,
-//         ranges,
-//     };
-// };
-
 export const SetWorksheetColAutoWidthMutationFactory = (
-    params: ISetWorksheetColAutoWidthMutationParams,
+    params: ISetWorksheetColWidthMutationParams,
     worksheet: Worksheet
-): ISetWorksheetColAutoWidthMutationParams => {
-    const { unitId, subUnitId, colsAutoWidthInfo } = params;
-    const results: IColAutoWidthInfo[] = [];
+): ISetWorksheetColWidthMutationParams => {
+    const { unitId, subUnitId, ranges } = params;
+    const colWidthObj: IObjectArrayPrimitiveType<Nullable<number>> = {};
     const manager = worksheet.getColumnManager();
 
-    for (const colInfo of colsAutoWidthInfo) {
-        const { col } = colInfo;
-        const { w } = manager.getColumnOrCreate(col);
+    for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i];
+        for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+            const col = manager.getColumnOrCreate(j);
+            const { w } = col;
+            colWidthObj[j] = w;
+        }
+        // const { col } = colInfo;
+        // const { w } = manager.getColumnOrCreate(col);
 
-        results.push({ col, width: w });
+        // results.push({ col, width: w });
     }
 
     return {
         unitId,
         subUnitId,
-        colsAutoWidthInfo: results,
+        // colsAutoWidthInfo: results,
+        ranges,
+        colWidth: colWidthObj,
     };
 };
 
@@ -118,15 +113,16 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();
         const ranges = params.ranges;
-
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                const column = manager.getColumnOrCreate(j);
-                if (typeof params.colWidth === 'number') {
-                    column.w = params.colWidth;
-                } else {
-                    column.w = params.colWidth[j] ?? defaultColumnWidth;
+        if (ranges) {
+            for (let i = 0; i < ranges.length; i++) {
+                const range = ranges[i];
+                for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+                    const column = manager.getColumnOrCreate(j);
+                    if (typeof params.colWidth === 'number') {
+                        column.w = params.colWidth;
+                    } else {
+                        column.w = params.colWidth[j] ?? defaultColumnWidth;
+                    }
                 }
             }
         }
@@ -138,22 +134,22 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
 /**
  * Apply auto width value.
  */
-export const SetWorksheetColAutoWidthMutation: IMutation<ISetWorksheetColAutoWidthMutationParams> = {
-    id: 'sheet.mutation.set-worksheet-col-auto-width',
-    type: CommandType.MUTATION,
-    handler: (accessor, params) => {
-        const { colsAutoWidthInfo } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const target = getSheetCommandTarget(univerInstanceService, params);
-        if (!target) return false;
+// export const SetWorksheetColAutoWidthMutation: IMutation<ISetWorksheetColAutoWidthMutationParams> = {
+//     id: 'sheet.mutation.set-worksheet-col-auto-width',
+//     type: CommandType.MUTATION,
+//     handler: (accessor, params) => {
+//         const { colsAutoWidthInfo } = params;
+//         const univerInstanceService = accessor.get(IUniverInstanceService);
+//         const target = getSheetCommandTarget(univerInstanceService, params);
+//         if (!target) return false;
 
-        const colManager = target.worksheet.getColumnManager();
+//         const colManager = target.worksheet.getColumnManager();
 
-        for (const { col, width } of colsAutoWidthInfo) {
-            const curCol = colManager.getColumnOrCreate(col);
-            curCol.w = width;
-        }
+//         for (const { col, width } of colsAutoWidthInfo) {
+//             const curCol = colManager.getColumnOrCreate(col);
+//             curCol.w = width;
+//         }
 
-        return true;
-    },
-};
+//         return true;
+//     },
+// };

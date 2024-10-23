@@ -116,7 +116,7 @@ import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.m
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
-import { SetWorksheetColAutoWidthMutation, SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
 import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
@@ -255,7 +255,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetRowHeightMutation,
                 SetWorksheetRowIsAutoHeightCommand,
                 SetWorksheetRowIsAutoHeightMutation,
-                SetWorksheetColAutoWidthMutation,
+                // SetWorksheetColAutoWidthMutation,
                 SetWorksheetColWidthMutation,
                 SetWorksheetColIsAutoWidthCommand,
                 // SetWorksheetColIsAutoWidthMutation,

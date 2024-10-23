@@ -606,6 +606,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
 
                 const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
+                // const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
 
                 if (hasUnMergedCell) {
                     const autoHeight = this._calculateRowAutoHeight(rowIndex);
@@ -708,7 +709,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const calculatedCols = new Set<number>();
 
         for (const range of ranges) {
-            const { startRow, endRow, startColumn, endColumn } = range;
+            const { startColumn, endColumn } = range;
 
             for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
                 // If the row has already been calculated, it does not need to be recalculated
@@ -716,17 +717,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                     continue;
                 }
 
-                const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
+                // const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
 
-                // only auto width if there is no merged cell.
-                if (mergedRanges.length === 0) {
-                    const autoWidth = this._calculateColMaxWidth(colIndex);
-                    calculatedCols.add(colIndex);
-                    results.push({
-                        col: colIndex,
-                        width: autoWidth,
-                    });
-                }
+                const autoWidth = this._calculateColMaxWidth(colIndex);
+                calculatedCols.add(colIndex);
+                results.push({
+                    col: colIndex,
+                    width: autoWidth,
+                });
             }
         }
 
@@ -750,70 +748,12 @@ export class SpreadsheetSkeleton extends Skeleton {
             return maxColWidth;
         }
 
-        const getMeasuredWidthByCell = (cell: ICellDataForSheetInterceptor) => {
-            let measuredWidth = 0;
-            if (cell?.interceptorAutoWidth) {
-                const cellWidth = cell.interceptorAutoWidth();
-                if (cellWidth) {
-                    maxColWidth = Math.max(maxColWidth, cellWidth);
-                    return measuredWidth;
-                }
-            }
-
-            const modelObject = this._getCellDocumentModel(cell);
-            if (modelObject == null) {
-                return measuredWidth;
-            }
-
-            const { documentModel, textRotation } = modelObject;
-            if (documentModel == null) {
-                return measuredWidth;
-            }
-
-            // 策略： 不看 P 只看 V (效果不明显， 加上之前1.56s 之后 1.32s)
-            if (cell?.p) {
-                cell.p = null;
-            }
-            const documentViewModel = new DocumentViewModel(documentModel);
-            const { vertexAngle: angle } = convertTextRotation(textRotation);
-
-            // const colWidth = columnData[i]?.w ?? defaultColumnWidth;
-            // if (wrapStrategy === WrapStrategy.WRAP) {
-            documentModel.updateDocumentDataPageSize(Infinity, Infinity);
-            // }
-
-            const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
-
-            documentSkeleton.calculate();
-            // key
-            measuredWidth = (getDocsSkeletonPageSize(documentSkeleton, angle) ?? { width: 0 }).width;
-            // When calculating the auto Height, need take the margin information into account,
-            // because there is margin information when rendering
-            if (documentSkeleton) {
-                const skeletonData = documentSkeleton.getSkeletonData()!;
-                const {
-                    marginTop: t,
-                    marginBottom: b,
-                    marginLeft: l,
-                    marginRight: r,
-                } = skeletonData.pages[skeletonData.pages.length - 1];
-
-                const absAngleInRad = Math.abs(degToRad(angle));
-
-                measuredWidth +=
-                    t * Math.cos(absAngleInRad) +
-                    r * Math.sin(absAngleInRad) +
-                    b * Math.cos(absAngleInRad) +
-                    l * Math.sin(absAngleInRad);
-            }
-            return measuredWidth;
-        };
-
         // for cell with only v, auto size for content width in visible range and ± 10000 rows around.
-        // for cell with p, auto width for cotent in visible range and ± 1000 rows, 1/10 of situation above.
-        // first row and last row should be considerated.
-        // skip hidden row, merged cell
-        // also handle mutiple viewport situation (freeze row & freeze row&col)
+        // for cell with p, auto width for content in visible range and ± 1000 rows, 1/10 of situation above.
+        // first row and last row should be considered.
+        // skip hidden row
+        // also handle multiple viewport situation (freeze row & freeze row&col)
+        // if there are no content in this column, return current column width.
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
         if (!visibleRangeViewMain) return maxColWidth;
 
@@ -823,29 +763,21 @@ export class SpreadsheetSkeleton extends Skeleton {
         const checkEnd = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
 
         for (let row = checkStart; row < checkEnd; row++) {
-            // When calculating the automatic height of a row, if a cell is in a merged cell,
-            // skip the cell directly, which currently follows the logic of Excel
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
+            if (isMerged && !isMergedMainCell) continue;
 
-            if (isMerged || isMergedMainCell) {
-                continue;
-            }
-
-            if (!this.worksheet.getRowVisible(row)) {
-                continue;
-            }
+            if (!this.worksheet.getRowVisible(row)) continue;
 
             const cell = worksheet.getCell(row, colIndex);
-            if (!cell) {
-                continue;
-            }
-            // for cell with paragraph, only check ±1000 rows around visible area
+            if (!cell) continue;
+
+            // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
             if (cell.p) {
                 if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) {
                     continue;
                 }
             }
-            const measuredWidth = getMeasuredWidthByCell(cell);
+            const measuredWidth = this.getMeasuredWidthByCell(cell);
             maxColWidth = Math.max(maxColWidth, measuredWidth);
         }
 
@@ -863,25 +795,75 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         for (const row of otherRowIndex) {
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
+            if (isMerged && !isMergedMainCell) continue;
 
-            if (isMerged || isMergedMainCell) {
-                continue;
-            }
-
-            if (!this.worksheet.getRowVisible(row)) {
-                continue;
-            }
+            if (!this.worksheet.getRowVisible(row)) continue;
 
             const cell = worksheet.getCell(row, colIndex);
-            if (!cell) {
-                continue;
-            }
-            const measuredWidth = getMeasuredWidthByCell(cell);
+            if (!cell) continue;
+
+            const measuredWidth = this.getMeasuredWidthByCell(cell);
             maxColWidth = Math.max(maxColWidth, measuredWidth);
         }
 
+        // if there are no content in this column, return current column width.
+        if (maxColWidth === 0) {
+            const preColIndex = Math.max(0, colIndex - 1);
+            return this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        }
         return Math.min(maxColWidth, MAXIMUM_COL_WIDTH);
     }
+
+    getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor) {
+        let measuredWidth = 0;
+        if (cell?.interceptorAutoWidth) {
+            const cellWidth = cell.interceptorAutoWidth();
+            if (cellWidth) {
+                return measuredWidth;
+            }
+        }
+
+        const modelObject = this._getCellDocumentModel(cell);
+        if (modelObject == null) {
+            return measuredWidth;
+        }
+
+        const { documentModel, textRotation } = modelObject;
+        if (documentModel == null) {
+            return measuredWidth;
+        }
+
+        const documentViewModel = new DocumentViewModel(documentModel);
+        const { vertexAngle: angle } = convertTextRotation(textRotation);
+
+        documentModel.updateDocumentDataPageSize(Infinity, Infinity);
+
+        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
+
+        documentSkeleton.calculate();
+        // key
+        measuredWidth = (getDocsSkeletonPageSize(documentSkeleton, angle) ?? { width: 0 }).width;
+        // When calculating the auto Height, need take the margin information into account,
+        // because there is margin information when rendering
+        if (documentSkeleton) {
+            const skeletonData = documentSkeleton.getSkeletonData()!;
+            const {
+                marginTop: t,
+                marginBottom: b,
+                marginLeft: l,
+                marginRight: r,
+            } = skeletonData.pages[skeletonData.pages.length - 1];
+
+            const absAngleInRad = Math.abs(degToRad(angle));
+
+            measuredWidth +=
+                t * Math.cos(absAngleInRad) +
+                r * Math.sin(absAngleInRad) +
+                b * Math.cos(absAngleInRad) +
+                l * Math.sin(absAngleInRad);
+        }
+        return measuredWidth;
+    };
     //#endregion
 
     /**

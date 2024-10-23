@@ -37,18 +37,30 @@ export function ProgressBar(props: IProgressBarProps) {
     // Introduce a state variable for visibility
     const [visible, setVisible] = useState(count > 0);
 
+    const [prevCount, setPrevCount] = useState(0);
+    const [prevDone, setPrevDone] = useState(0);
+
     useEffect(() => {
         if (!progressBarInnerRef.current) return;
 
         const progressBarInner = progressBarInnerRef.current;
 
+        // Hide immediately if both count and done are zero
+        if (count === 0 && done === 0) {
+            setVisible(false);
+        }
+        // Handle the special case if count and done are equal for the first time and not from a previous progress change
+        else if (count === done && prevCount === 0 && prevDone === 0) {
+            setVisible(true);
+            progressBarInner.style.width = '0%';
+            requestAnimationFrame(() => {
+                progressBarInner.style.width = '100%';
+            });
+        }
         // Update the width of the progress bar
-        if (count > 0) {
+        else if (count > 0) {
             setVisible(true);
             progressBarInner.style.width = `${Math.floor((done / count) * 100)}%`;
-        } else if (count === 0 && done === 0) {
-            // Hide immediately if both count and done are zero
-            setVisible(false);
         }
         // Else, wait for the transition to end before hiding
 
@@ -69,6 +81,10 @@ export function ProgressBar(props: IProgressBarProps) {
         };
 
         progressBarInner.addEventListener('transitionend', handleTransitionEnd);
+
+        // Update prevCount and prevDone
+        setPrevCount(count);
+        setPrevDone(done);
 
         // Clean up the event listener on unmount or when dependencies change
         return () => {

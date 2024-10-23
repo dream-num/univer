@@ -299,13 +299,15 @@ export class TriggerCalculationController extends Disposable {
 
         this.disposeWithMe(
 
-            // eslint-disable-next-line max-lines-per-function
+            // eslint-disable-next-line max-lines-per-function, complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetFormulaCalculationStartMutation.id) {
                     const { forceCalculation } = command.params as ISetFormulaCalculationStartMutation;
                     if (forceCalculation) {
                         this._forceCalculating = true;
                     }
+                } else if (command.id === SetFormulaCalculationStopMutation.id) {
+                    this.clearProgress();
                 }
 
                 if (command.id !== SetFormulaCalculationNotificationMutation.id) {
@@ -359,8 +361,6 @@ export class TriggerCalculationController extends Disposable {
                             break;
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
-                            // this._executingCommandQueue = [];
-                            this.clearProgress();
                             calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:

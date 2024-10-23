@@ -289,26 +289,6 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             child?.parents.delete(shouldBeClearTree.treeId);
         }
 
-        const parentsArray: FormulaDependencyTree[] = [];
-        const childrenArray: FormulaDependencyTree[] = [];
-
-        for (const parentTreeId of parents) {
-            const parent = allTreeMap.get(parentTreeId);
-            if (parent) {
-                parentsArray.push(parent);
-            }
-        }
-
-        for (const childTreeId of children) {
-            const child = allTreeMap.get(childTreeId);
-            if (child) {
-                childrenArray.push(child);
-            }
-        }
-
-        this._buildDependencyTree(parentsArray, childrenArray);
-        this._buildReverseDependency(parentsArray, childrenArray);
-
         shouldBeClearTree.dispose();
     }
 

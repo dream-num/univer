@@ -22,7 +22,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import { map, mergeMap, Observable, of } from 'rxjs';
+import { map, Observable, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
@@ -68,7 +68,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             const unit = univerInstanceService.getUnit<Workbook>(focused, UniverInstanceType.UNIVER_SHEET);
             return unit;
         }),
-        mergeMap((unit) => {
+        switchMap((unit) => {
             if (!unit) {
                 return new Observable<null>((sub) => {
                     sub.next(null);
@@ -76,7 +76,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             return unit.activeSheet$;
         }),
-        mergeMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
+        switchMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
         map((sheetWithSelection) => {
             if (!sheetWithSelection) {
                 return true;
@@ -93,7 +93,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
                 col,
             };
         }),
-        mergeMap((editingCell) => {
+        switchMap((editingCell) => {
             if (editingCell === true) {
                 return of(true);
             }
@@ -102,11 +102,11 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
                 .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
 
-            return editorBridgeService ? isEditing$.pipe(mergeMap((editing) => (editing ? getZenLinkDisable$(accessor, editing) : of(getShouldDisableCellLink(sheet, row, col))))) : of(getShouldDisableCellLink(sheet, row, col));
+            return editorBridgeService ? isEditing$.pipe(switchMap((editing) => (editing ? getZenLinkDisable$(accessor, editing) : of(getShouldDisableCellLink(sheet, row, col))))) : of(getShouldDisableCellLink(sheet, row, col));
         })
     );
 
-    return disableRange$.pipe(mergeMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
+    return disableRange$.pipe(switchMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
 };
 
 const linkMenu = {

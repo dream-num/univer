@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
+import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import { Disposable, fromEventSubject, Inject } from '@univerjs/core';
 import { DocSkeletonManagerService } from '@univerjs/docs';
 import { CURSOR_TYPE, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
-import { BehaviorSubject, distinctUntilChanged, filter, map, mergeMap, Subject, take, throttleTime } from 'rxjs';
-import type { DocumentDataModel, ICustomRange, IParagraph, ITextRangeParam, Nullable } from '@univerjs/core';
-import type { Documents, DocumentSkeleton, IBoundRectNoAngle, IDocumentSkeletonGlyph, IDocumentSkeletonPage, IMouseEvent, IPointerEvent, IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject, switchMap, take, throttleTime } from 'rxjs';
 import { DOC_VERTICAL_PADDING } from '../types/const/padding';
 import { transformOffset2Bound } from './doc-popup-manager.service';
 import { NodePositionConvertToCursor } from './selection/convert-text-range';
@@ -199,7 +199,7 @@ export class DocEventManagerService extends Disposable implements IRenderModule 
         const onPointerDown$ = fromEventSubject(this._context.mainComponent!.onPointerDown$);
         const onPointerUp$ = fromEventSubject(this._context.scene!.onPointerUp$);
         this.disposeWithMe(onPointerDown$.pipe(
-            mergeMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
+            switchMap((down) => onPointerUp$.pipe(take(1), map((up) => ({ down, up })))),
             filter(({ down, up }) => down.target === up.target && up.timeStamp - down.timeStamp < 300)
             // filter(({ down, up }) => down.offsetX === up.offsetX && down.offsetY === up.offsetY)
         ).subscribe(({ down }) => {

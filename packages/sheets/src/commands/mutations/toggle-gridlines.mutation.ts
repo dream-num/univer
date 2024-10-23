@@ -25,7 +25,7 @@ export interface IToggleGridlinesMutationParams {
 }
 
 export const ToggleGridlinesMutation: IMutation<IToggleGridlinesMutationParams> = {
-    id: 'sheet.mutation.set-hide-gridlines',
+    id: 'sheet.mutation.toggle-gridlines',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);

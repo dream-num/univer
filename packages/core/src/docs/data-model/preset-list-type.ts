@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 import { Tools } from '../../shared';
 import { BooleanNumber } from '../../types/enum';
 import { BulletAlignment, GlyphType } from '../../types/interfaces/i-document-data';
-import type { IListData, INestingLevel, ITextStyle } from '../../types/interfaces/i-document-data';
 
 export enum QuickListType {
     ORDER_LIST_QUICK_1 = '1.',

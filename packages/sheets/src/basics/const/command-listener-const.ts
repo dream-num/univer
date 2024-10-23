@@ -25,11 +25,14 @@ import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/muta
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutations';
+import { SetWorksheetRowColumnStyleMutation } from '../../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import { ToggleGridlinesMutation } from '../../commands/mutations/toggle-gridlines.mutation';
 import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
 
 /**
@@ -51,6 +54,7 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     InsertRowMutation.id,
     RemoveColMutation.id,
     RemoveRowMutation.id,
+    ToggleGridlinesMutation.id,
 ];
 
 export const COMMAND_LISTENER_VALUE_CHANGE = [
@@ -59,4 +63,6 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     RemoveWorksheetMergeMutation.id,
     AddWorksheetMergeMutation.id,
     ReorderRangeMutation.id,
+    SetWorksheetRowColumnStyleMutation.id,
+    SetWorksheetDefaultStyleMutation.id,
 ];

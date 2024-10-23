@@ -21,9 +21,10 @@ import { isRealNum } from '@univerjs/core';
 import { BooleanValue } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
-import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
+import { regexTestArrayValue } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
+import { stringIsNumberPattern } from '../utils/numfmt-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
@@ -1477,7 +1478,7 @@ export class ArrayValueObject extends BaseValueObject {
         return newArray;
     }
 
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     private _batchOperatorValue(
         valueObject: BaseValueObject,
         column: number,
@@ -1488,8 +1489,6 @@ export class ArrayValueObject extends BaseValueObject {
     ) {
         const rowCount = this._rowCount;
 
-        let canUseCache = false;
-
         const unitId = this.getUnitId();
         const sheetId = this.getSheetId();
         const startRow = this.getCurrentRow();
@@ -1499,7 +1498,7 @@ export class ArrayValueObject extends BaseValueObject {
          * then retrieve the judgment from the inverted index. This enhances performance.
          */
         if (batchOperatorType === BatchOperatorType.COMPARE) {
-            canUseCache = CELL_INVERTED_INDEX_CACHE.canUseCache(
+            const { rowsInCache, rowsNotInCache } = CELL_INVERTED_INDEX_CACHE.canUseCache(
                 unitId,
                 sheetId,
                 column + startColumn,
@@ -1507,13 +1506,15 @@ export class ArrayValueObject extends BaseValueObject {
                 startRow + rowCount - 1
             );
 
-            if (canUseCache === true) {
+            if (rowsInCache.length > 0) {
                 if (operator === compareToken.EQUALS) {
+                    // TODO@DR-Univer: When comparing equal with two parameters, one of them is error, and the logic here is wrong
                     const rowPositions = CELL_INVERTED_INDEX_CACHE.getCellPositions(
                         unitId,
                         sheetId,
                         column + startColumn,
-                        valueObject.getValue()
+                        valueObject.getValue(),
+                        rowsInCache
                     );
 
                     if (rowPositions != null) {
@@ -1539,7 +1540,9 @@ export class ArrayValueObject extends BaseValueObject {
                     if (rowValuePositions != null) {
                         rowValuePositions.forEach((rowPositions, rowValue) => {
                             let currentValue: Nullable<BaseValueObject> = NullValueObject.create(); // handle blank cell
-                            if (typeof rowValue === 'string') {
+                            if (ERROR_TYPE_SET.has(rowValue as ErrorType)) {
+                                currentValue = ErrorValueObject.create(rowValue as ErrorType);
+                            } else if (typeof rowValue === 'string') {
                                 currentValue = StringValueObject.create(rowValue);
                             } else if (typeof rowValue === 'number') {
                                 currentValue = NumberValueObject.create(rowValue);
@@ -1547,28 +1550,57 @@ export class ArrayValueObject extends BaseValueObject {
                                 currentValue = BooleanValueObject.create(rowValue);
                             }
 
-                            const matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
-                            if ((matchResult as BooleanValueObject).getValue() === true) {
+                            let matchResult;
+                            if (currentValue.isError()) {
+                                matchResult = currentValue;
+                            } else if (valueObject.isError()) {
+                                matchResult = valueObject;
+                            } else {
+                                matchResult = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
+                            }
+
+                            if (matchResult.isError() || (matchResult as BooleanValueObject).getValue() === true) {
                                 rowPositions.forEach((index) => {
                                     if (index >= startRow && index <= startRow + rowCount - 1) {
                                         if (result[index - startRow] == null) {
                                             result[index - startRow] = [];
                                         }
-                                        result[index - startRow][column] = BooleanValueObject.create(true);
+                                        result[index - startRow][column] = matchResult;
                                     }
                                 });
                             }
                         });
+                    }
+                }
 
-                        // for (let r = 0; r < rowCount; r++) {
-                        //     if (result[r] == null) {
-                        //         result[r] = [];
-                        //     }
+                // handle the not in cache rows
+                if (rowsNotInCache.length > 0) {
+                    for (const interval of rowsNotInCache) {
+                        const [start, end] = interval;
 
-                        //     if (result[r][column] == null) {
-                        //         result[r][column] = BooleanValueObject.create(false);
-                        //     }
-                        // }
+                        for (let r = start; r <= end; r++) {
+                            this.__batchOperatorRowValue(
+                                valueObject,
+                                column,
+                                result,
+                                batchOperatorType,
+                                r,
+                                unitId,
+                                sheetId,
+                                startRow,
+                                startColumn,
+                                operator,
+                                isCaseSensitive
+                            );
+                        }
+
+                        CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
+                            unitId,
+                            sheetId,
+                            column + startColumn,
+                            start,
+                            end
+                        );
                     }
                 }
 
@@ -1577,90 +1609,19 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         for (let r = 0; r < rowCount; r++) {
-            const currentValue = this.getValueOrDefault(r, column);
-            if (result[r] == null) {
-                result[r] = [];
-            }
-            if (currentValue && valueObject) {
-                if (currentValue.isError()) {
-                    result[r][column] = currentValue as ErrorValueObject;
-                } else if (valueObject.isError()) {
-                    // 1 + #NAME? gets #NAME?
-                    result[r][column] = valueObject;
-                } else {
-                    switch (batchOperatorType) {
-                        case BatchOperatorType.PLUS:
-                            result[r][column] = currentValue.plus(valueObject);
-                            break;
-                        case BatchOperatorType.MINUS:
-                            result[r][column] = currentValue.minus(valueObject);
-                            break;
-                        case BatchOperatorType.MULTIPLY:
-                            result[r][column] = currentValue.multiply(valueObject);
-                            break;
-                        case BatchOperatorType.DIVIDED:
-                            result[r][column] = currentValue.divided(valueObject);
-                            break;
-                        case BatchOperatorType.MOD:
-                            result[r][column] = currentValue.mod(valueObject);
-                            break;
-                        case BatchOperatorType.COMPARE:
-                            if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
-                            } else {
-                                result[r][column] = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
-                            }
-                            break;
-                        case BatchOperatorType.CONCATENATE_FRONT:
-                            result[r][column] = currentValue.concatenateFront(valueObject);
-                            break;
-                        case BatchOperatorType.CONCATENATE_BACK:
-                            result[r][column] = currentValue.concatenateBack(valueObject);
-                            break;
-                        case BatchOperatorType.POW:
-                            result[r][column] = currentValue.pow(valueObject);
-                            break;
-                        case BatchOperatorType.ROUND:
-                            result[r][column] = currentValue.round(valueObject);
-                            break;
-                        case BatchOperatorType.FLOOR:
-                            result[r][column] = currentValue.floor(valueObject);
-                            break;
-                        case BatchOperatorType.ATAN2:
-                            result[r][column] = currentValue.atan2(valueObject);
-                            break;
-                        case BatchOperatorType.CEIL:
-                            result[r][column] = currentValue.ceil(valueObject);
-                            break;
-                    }
-                }
-            } else {
-                result[r][column] = ErrorValueObject.create(ErrorType.NA);
-            }
-
-            /**
-             * Inverted indexing enhances matching performance.
-             */
-            if (currentValue == null) {
-                continue;
-            }
-            if (currentValue.isError()) {
-                CELL_INVERTED_INDEX_CACHE.set(
-                    unitId,
-                    sheetId,
-                    column + startColumn,
-                    (currentValue as ErrorValueObject).getErrorType(),
-                    r + startRow
-                );
-            } else {
-                CELL_INVERTED_INDEX_CACHE.set(
-                    unitId,
-                    sheetId,
-                    column + startColumn,
-                    currentValue.getValue(),
-                    r + startRow
-                );
-            }
+            this.__batchOperatorRowValue(
+                valueObject,
+                column,
+                result,
+                batchOperatorType,
+                r,
+                unitId,
+                sheetId,
+                startRow,
+                startColumn,
+                operator,
+                isCaseSensitive
+            );
         }
 
         CELL_INVERTED_INDEX_CACHE.setContinueBuildingCache(
@@ -1670,6 +1631,109 @@ export class ArrayValueObject extends BaseValueObject {
             startRow,
             startRow + rowCount - 1
         );
+    }
+
+    // eslint-disable-next-line
+    private __batchOperatorRowValue(
+        valueObject: BaseValueObject,
+        column: number,
+        result: BaseValueObject[][],
+        batchOperatorType: BatchOperatorType,
+        r: number,
+        unitId: string,
+        sheetId: string,
+        startRow: number,
+        startColumn: number,
+        operator?: compareToken,
+        isCaseSensitive?: boolean
+    ) {
+        const currentValue = this.getValueOrDefault(r, column);
+
+        if (result[r] == null) {
+            result[r] = [];
+        }
+
+        if (currentValue && valueObject) {
+            if (currentValue.isError()) {
+                result[r][column] = currentValue as ErrorValueObject;
+            } else if (valueObject.isError()) {
+                // 1 + #NAME? gets #NAME?
+                result[r][column] = valueObject;
+            } else {
+                switch (batchOperatorType) {
+                    case BatchOperatorType.PLUS:
+                        result[r][column] = currentValue.plus(valueObject);
+                        break;
+                    case BatchOperatorType.MINUS:
+                        result[r][column] = currentValue.minus(valueObject);
+                        break;
+                    case BatchOperatorType.MULTIPLY:
+                        result[r][column] = currentValue.multiply(valueObject);
+                        break;
+                    case BatchOperatorType.DIVIDED:
+                        result[r][column] = currentValue.divided(valueObject);
+                        break;
+                    case BatchOperatorType.MOD:
+                        result[r][column] = currentValue.mod(valueObject);
+                        break;
+                    case BatchOperatorType.COMPARE:
+                        if (!operator) {
+                            result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
+                        } else {
+                            result[r][column] = currentValue.compare(valueObject, operator as compareToken, isCaseSensitive);
+                        }
+                        break;
+                    case BatchOperatorType.CONCATENATE_FRONT:
+                        result[r][column] = currentValue.concatenateFront(valueObject);
+                        break;
+                    case BatchOperatorType.CONCATENATE_BACK:
+                        result[r][column] = currentValue.concatenateBack(valueObject);
+                        break;
+                    case BatchOperatorType.POW:
+                        result[r][column] = currentValue.pow(valueObject);
+                        break;
+                    case BatchOperatorType.ROUND:
+                        result[r][column] = currentValue.round(valueObject);
+                        break;
+                    case BatchOperatorType.FLOOR:
+                        result[r][column] = currentValue.floor(valueObject);
+                        break;
+                    case BatchOperatorType.ATAN2:
+                        result[r][column] = currentValue.atan2(valueObject);
+                        break;
+                    case BatchOperatorType.CEIL:
+                        result[r][column] = currentValue.ceil(valueObject);
+                        break;
+                }
+            }
+        } else {
+            result[r][column] = ErrorValueObject.create(ErrorType.NA);
+        }
+
+        /**
+         * Inverted indexing enhances matching performance.
+         */
+        if (currentValue == null) {
+            return;
+        }
+
+        if (currentValue.isError()) {
+            CELL_INVERTED_INDEX_CACHE.set(
+                unitId,
+                sheetId,
+                column + startColumn,
+                (currentValue as ErrorValueObject).getErrorType(),
+                r + startRow
+            );
+        } else {
+            CELL_INVERTED_INDEX_CACHE.set(
+                unitId,
+                sheetId,
+                column + startColumn,
+                currentValue.getValue(),
+                r + startRow
+            );
+        }
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity
@@ -1897,8 +1961,13 @@ export class ValueObjectFactory {
                 return NumberValueObject.create(Number(rawValue));
             }
 
+            const { isNumberPattern, value, pattern } = stringIsNumberPattern(rawValue);
+            if (isNumberPattern) {
+                return NumberValueObject.create(value as number, pattern as string);
+            }
+
             const rawValueSingleLine = rawValue.replace(/\n/g, '').replace(/\r/g, '');
-            if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValueSingleLine)) {
+            if (!isStringWrappedByDoubleQuotes(rawValueSingleLine) && regexTestArrayValue(rawValueSingleLine)) {
                 return ArrayValueObject.create(rawValueSingleLine);
             }
 

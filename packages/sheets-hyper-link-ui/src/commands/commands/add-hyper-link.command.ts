@@ -17,7 +17,6 @@
 import type { ICellData, ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
 import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -194,13 +193,9 @@ export const AddRichHyperLinkCommand: ICommand<IAddRichHyperLinkCommandParams> =
         }
         const { documentId, link } = params;
         const commandService = accessor.get(ICommandService);
-        const textSelectionService = accessor.get(DocSelectionManagerService);
         const newId = generateRandomId();
         const { payload } = link;
-        const range = textSelectionService.getActiveTextRange();
-        if (!range) {
-            return false;
-        }
+
         const replaceSelection = addCustomRangeBySelectionFactory(accessor, {
             unitId: documentId,
             rangeId: newId,

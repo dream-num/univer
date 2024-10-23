@@ -15,33 +15,34 @@
  */
 
 import type { IAccessor, Nullable } from '@univerjs/core';
-import { Inject, Injector } from '@univerjs/core';
+import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 
+import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
-    $SUPER_TABLE_COLUMN_REGEX,
-    REFERENCE_REGEX_SINGLE_COLUMN,
-    REFERENCE_REGEX_SINGLE_ROW,
-    REFERENCE_SINGLE_RANGE_REGEX,
+    regexTestSingeRange,
+    regexTestSingleColumn,
+    regexTestSingleRow,
 } from '../../basics/regex';
 import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
 import { RowReferenceObject } from '../reference-object/row-reference-object';
-import { TableReferenceObject } from '../reference-object/table-reference-object';
-import { ErrorValueObject } from '../value-object/base-value-object';
 import { prefixHandler } from '../utils/prefixHandler';
-import { IFunctionService } from '../../services/function.service';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class ReferenceNode extends BaseAstNode {
+    private _refOffsetX = 0;
+    private _refOffsetY = 0;
+
     constructor(
         private _accessor: IAccessor,
         private _operatorString: string,
@@ -87,6 +88,18 @@ export class ReferenceNode extends BaseAstNode {
             this.setValue(this._referenceObject);
         }
     }
+
+    setRefOffset(x: number = 0, y: number = 0) {
+        this._refOffsetX = x;
+        this._refOffsetY = y;
+    }
+
+    getRefOffset() {
+        return {
+            x: this._refOffsetX,
+            y: this._refOffsetY,
+        };
+    }
 }
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
@@ -123,7 +136,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         // const tokenTrim = param.trim();
-        // if (new RegExp(REFERENCE_MULTIPLE_RANGE_REGEX).test(tokenTrim)) {
+        // if (regexTestSingeRange(tokenTrim)) {
         //     return true;
         // }
 
@@ -134,36 +147,37 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         }
 
         let node: Nullable<ReferenceNode>;
-        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
+        if (regexTestSingeRange(tokenTrim)) {
             node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
-            if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
+            if (regexTestSingleRow(tokenTrim)) {
                 node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
-            } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
+            } else if (regexTestSingleColumn(tokenTrim)) {
                 node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
             }
-        } else {
-            const unitId = this._formulaRuntimeService.currentUnitId;
-            // parserDataLoader.get
-
-            const tableMap = this._superTableService.getTableMap(unitId);
-            const $regex = new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g');
-            const tableName = tokenTrim.replace($regex, '');
-            if (!isLexerNode && tableMap?.has(tableName)) {
-                const columnResult = $regex.exec(tokenTrim);
-                let columnDataString = '';
-                if (columnResult) {
-                    columnDataString = columnResult[0];
-                }
-                const tableData = tableMap.get(tableName)!;
-                const tableOption = this._superTableService.getTableOptionMap();
-                node = new ReferenceNode(
-                    this._injector,
-                    tokenTrim,
-                    new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
-                );
-            }
         }
+        // else {
+        //     const unitId = this._formulaRuntimeService.currentUnitId;
+        //     // parserDataLoader.get
+
+        //     const tableMap = this._superTableService.getTableMap(unitId);
+        //     const $regex = $SUPER_TABLE_COLUMN_REGEX_PRECOMPILING;
+        //     const tableName = tokenTrim.replace($regex, '');
+        //     if (!isLexerNode && tableMap?.has(tableName)) {
+        //         const columnResult = $regex.exec(tokenTrim);
+        //         let columnDataString = '';
+        //         if (columnResult) {
+        //             columnDataString = columnResult[0];
+        //         }
+        //         const tableData = tableMap.get(tableName)!;
+        //         const tableOption = this._superTableService.getTableOptionMap();
+        //         node = new ReferenceNode(
+        //             this._injector,
+        //             tokenTrim,
+        //             new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
+        //         );
+        //     }
+        // }
 
         if (node) {
             if (atPrefixNode) {

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import { BuildTextUtils, getBodySlice, ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency, useObservable } from '@univerjs/core';
 import { Button, FormLayout, Input } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { DocSelectionRenderService } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { KeyCode } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
-import type { DocumentDataModel } from '@univerjs/core';
 import { AddDocHyperLinkCommand } from '../../commands/commands/add-link.command';
 import { UpdateDocHyperLinkCommand } from '../../commands/commands/update-link.command';
 import { DocHyperLinkPopupService } from '../../services/hyper-link-popup.service';
@@ -47,7 +45,6 @@ export const DocHyperLinkEdit = () => {
     const editing = useObservable(hyperLinkService.editingLink$);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const renderManagerService = useDependency(IRenderManagerService);
 
     const docSelectionManagerService = useDependency(DocSelectionManagerService);
     const [link, setLink] = useState('');
@@ -57,8 +54,6 @@ export const DocHyperLinkEdit = () => {
     const doc = editing
         ? univerInstanceService.getUnit<DocumentDataModel>(editing.unitId, UniverInstanceType.UNIVER_DOC) :
         univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
-
-    const docSelectionRenderService = renderManagerService.getRenderById(doc!.getUnitId())?.with(DocSelectionRenderService);
 
     useEffect(() => {
         const activeRange = docSelectionManagerService.getActiveTextRange();
@@ -76,24 +71,13 @@ export const DocHyperLinkEdit = () => {
             return;
         }
 
-        const matchedRange = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody()?.customRanges?.find((i) => Math.max(activeRange.startOffset, i.startIndex) <= Math.min(activeRange.endOffset - 1, i.endIndex));
+        const body = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
+        const selection = body ? BuildTextUtils.selection.getInsertSelection(activeRange, body) : null;
+        const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
         if (doc && matchedRange) {
             setLink(matchedRange?.properties?.url ?? '');
         }
     }, [doc, editing, docSelectionManagerService, univerInstanceService]);
-
-    // TODO: @zhangwei, do not use docSelectionRenderService in this component.
-    useEffect(() => {
-        if (docSelectionRenderService) {
-            docSelectionRenderService.blurEditor();
-        }
-
-        return () => {
-            if (docSelectionRenderService) {
-                docSelectionRenderService.focusEditor();
-            }
-        };
-    }, [docSelectionRenderService]);
 
     const handleCancel = () => {
         hyperLinkService.hideEditPopup();

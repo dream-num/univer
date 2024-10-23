@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
+import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
+
+import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import {
     Disposable,
+    DocumentFlavor,
     FOCUSING_DOC,
     ICommandService,
     IContextService,
@@ -23,15 +28,12 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import { DocSelectionManagerService, DocSkeletonManagerService } from '@univerjs/docs';
-
-import type { DocumentDataModel, ICommandInfo } from '@univerjs/core';
-import type { IRenderContext, IRenderModule, IWheelEvent } from '@univerjs/engine-render';
 import { neoGetDocObject } from '../../basics/component-tools';
 import { SetDocZoomRatioCommand } from '../../commands/commands/set-doc-zoom-ratio.command';
+import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { SetDocZoomRatioOperation } from '../../commands/operations/set-doc-zoom-ratio.operation';
 import { DocPageLayoutService } from '../../services/doc-page-layout.service';
 import { IEditorService } from '../../services/editor/editor-manager.service';
-import type { ISetDocZoomRatioOperationParams } from '../../commands/operations/set-doc-zoom-ratio.operation';
 
 export class DocZoomRenderController extends Disposable implements IRenderModule {
     constructor(
@@ -72,6 +74,13 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
 
                 const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
                 if (!documentModel) {
+                    return;
+                }
+
+                const { documentFlavor } = documentModel.getSnapshot().documentStyle;
+
+                // Modern document does not support zooming.
+                if (documentFlavor === DocumentFlavor.MODERN) {
                     return;
                 }
 
@@ -122,13 +131,26 @@ export class DocZoomRenderController extends Disposable implements IRenderModule
                 this.updateViewZoom(zoomRatio);
             }
         }));
+
+        this.disposeWithMe(
+            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+                if (command.id === SwitchDocModeCommand.id) {
+                    this._commandService.executeCommand(SetDocZoomRatioCommand.id, {
+                        zoomRatio: 1,
+                        unitId: this._context.unitId,
+                    });
+                }
+            })
+        );
     }
 
     updateViewZoom(zoomRatio: number, needRefreshSelection = true) {
         const docObject = neoGetDocObject(this._context);
         docObject.scene.scale(zoomRatio, zoomRatio);
 
-        this._docPageLayoutService.calculatePagePosition();
+        if (!this._editorService.isEditor(this._context.unitId)) {
+            this._docPageLayoutService.calculatePagePosition();
+        }
 
         if (needRefreshSelection && !this._editorService.isEditor(this._context.unitId)) {
             this._textSelectionManagerService.refreshSelection();

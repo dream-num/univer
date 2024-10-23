@@ -92,6 +92,7 @@ import {
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
+import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
@@ -115,16 +116,19 @@ import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutatio
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
+import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -168,6 +172,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             ReorderRangeMutation,
             EmptyMutation,
             SetWorksheetColWidthMutation,
+            SetWorksheetDefaultStyleMutation,
+            SetWorksheetRowColumnStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -253,6 +259,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveDefinedNameCommand,
                 SetDefinedNameCommand,
                 SetWorksheetShowCommand,
+
+                ToggleGridlinesCommand,
+                ToggleGridlinesMutation,
 
                 // permissions range protection
                 SetWorksheetPermissionPointsCommand,

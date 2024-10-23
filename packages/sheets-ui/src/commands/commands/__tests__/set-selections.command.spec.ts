@@ -15,6 +15,11 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import type {
+    IExpandSelectionCommandParams,
+    IMoveSelectionCommandParams,
+    ISelectAllCommandParams,
+} from '../set-selection.command';
 import { Direction, ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import {
     SetColHiddenCommand,
@@ -27,13 +32,8 @@ import {
     SetSelectedRowsVisibleCommand,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type {
-    IExpandSelectionCommandParams,
-    IMoveSelectionCommandParams,
-    ISelectAllCommandParams,
-} from '../set-selection.command';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ExpandSelectionCommand, JumpOver, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 import {
     createSelectionCommandTestBed,

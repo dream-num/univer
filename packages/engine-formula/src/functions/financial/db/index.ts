@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 
 export class Db extends BaseFunction {
     override minParams = 4;
 
     override maxParams = 5;
+
+    override needsLocale = true;
 
     override calculate(cost: BaseValueObject, salvage: BaseValueObject, life: BaseValueObject, period: BaseValueObject, month?: BaseValueObject): BaseValueObject {
         let _month = month ?? NumberValueObject.create(12);
@@ -146,7 +149,7 @@ export class Db extends BaseFunction {
         }
 
         if (rowIndex === 0 && columnIndex === 0) {
-            return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+            return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
         } else {
             return NumberValueObject.create(result);
         }

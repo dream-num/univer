@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { Nullable } from 'vitest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { Nullable } from '../../../../shared';
 
+import type { IDocumentBody, ITextRun } from '../../../../types/interfaces';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
-import type { IDocumentBody, ITextRun } from '../../../../types/interfaces';
 import { deleteParagraphs, deleteTextRuns, insertTextRuns } from '../apply-utils/common';
 import { coverTextRuns } from '../apply-utils/update-apply';
 
@@ -523,10 +523,12 @@ describe('test case in apply utils', () => {
                     10
                 );
 
-                expect(body?.textRuns!.length).toBe(3);
+                expect(body?.textRuns!.length).toBe(4);
                 expect(body?.textRuns![0].ts?.bl).toBe(BooleanNumber.FALSE);
                 expect(body?.textRuns![1].ts?.bl).toBe(BooleanNumber.FALSE);
                 expect(body?.textRuns![2].ts?.bl).toBe(BooleanNumber.FALSE);
+                expect(body?.textRuns![2].ts?.it).toBe(BooleanNumber.TRUE);
+                expect(body?.textRuns![3].ts?.bl).toBe(BooleanNumber.FALSE);
             });
 
             it('If textRuns doesn\'t intersect, they shouldn\'t be merged', async () => {

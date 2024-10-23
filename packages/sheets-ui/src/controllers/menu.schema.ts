@@ -42,6 +42,7 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
+    ToggleGridlinesCommand,
 } from '@univerjs/sheets';
 import { ContextMenuGroup, ContextMenuPosition, RibbonStartGroup } from '@univerjs/ui';
 import {
@@ -89,6 +90,7 @@ import { RenameSheetOperation } from '../commands/operations/rename-sheet.operat
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import { CLEAR_SELECTION_MENU_ID, ClearSelectionAllMenuItemFactory, ClearSelectionContentMenuItemFactory, ClearSelectionFormatMenuItemFactory, ClearSelectionMenuItemFactory } from './menu/clear.menu';
 import { DELETE_RANGE_MENU_ID, DeleteRangeMenuItemFactory, DeleteRangeMoveLeftMenuItemFactory, DeleteRangeMoveUpMenuItemFactory, RemoveColMenuItemFactory, RemoveRowMenuItemFactory } from './menu/delete.menu';
+import { ToggleGridlinesMenuFactory } from './menu/gridlines.menu';
 import {
     CELL_INSERT_MENU_ID,
     CellInsertMenuItemFactory,
@@ -696,6 +698,14 @@ export const menuSchema: MenuSchemaType = {
             [ViewSheetPermissionFromSheetBarCommand.id]: {
                 order: 10,
                 menuItemFactory: sheetPermissionViewAllProtectRuleSheetBarMenuFactory,
+            },
+        },
+    },
+    [ContextMenuPosition.FOOTER_MENU]: {
+        [ContextMenuGroup.OTHERS]: {
+            [ToggleGridlinesCommand.id]: {
+                order: 1,
+                menuItemFactory: ToggleGridlinesMenuFactory,
             },
         },
     },

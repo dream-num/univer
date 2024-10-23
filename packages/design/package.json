@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/design",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,7 +68,7 @@
         "@rc-component/color-picker": "^2.0.1",
         "@rc-component/trigger": "^2.2.3",
         "@types/react-mentions": "^4.4.0",
-        "@univerjs/icons": "^0.1.79",
+        "@univerjs/icons": "^0.1.84",
         "clsx": "^2.1.1",
         "dayjs": "^1.11.13",
         "rc-dialog": "^9.6.0",

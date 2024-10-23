@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+export * from './default-workbook-data-default-style';
 export * from './default-workbook-data-demo';
 export * from './default-workbook-data-demo1';
 export * from './default-workbook-data-demo2';

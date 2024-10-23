@@ -16,11 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { ErrorType } from '../../../../basics/error-type';
+import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
+import { StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Lenb } from '../index';
-import { StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test lenb function', () => {
     const testFunction = new Lenb(FUNCTION_NAMES_TEXT.LENB);
@@ -29,7 +30,7 @@ describe('Test lenb function', () => {
         it('Text is single cell', () => {
             const text = StringValueObject.create('Univer');
             const result = testFunction.calculate(text);
-            expect(result.getValue()).toStrictEqual(6);
+            expect(getObjectValue(result)).toStrictEqual(6);
         });
 
         it('Text1 is array', () => {
@@ -46,7 +47,7 @@ describe('Test lenb function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(text);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([
+            expect(getObjectValue(result)).toStrictEqual([
                 [1, 1, 4, 4, 5, 0, 26],
                 [1, 3, 4, 4, 2, '#VALUE!', 0],
             ]);
@@ -68,6 +69,7 @@ describe('Test lenb function', () => {
                     ['𓀀'],
                     ['𐌰'],
                     ['♚'],
+                    [''],
                 ]),
                 rowCount: 13,
                 columnCount: 1,
@@ -77,7 +79,31 @@ describe('Test lenb function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(text);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([[1], [1], [1], [1], [1], [2], [2], [2], [2], [8], [2], [2], [1]]);
+            expect(getObjectValue(result)).toStrictEqual([
+                [1],
+                [1],
+                [1],
+                [1],
+                [2],
+                [2],
+                [2],
+                [4],
+                [4],
+                [16],
+                [4],
+                [4],
+                [2],
+            ]);
+        });
+
+        it('More test', () => {
+            const text = StringValueObject.create(',。、；:{}');
+            const result = testFunction.calculate(text);
+            expect(getObjectValue(result)).toStrictEqual(10);
+
+            const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
+            const result2 = testFunction.calculate(text2);
+            expect(getObjectValue(result2)).toStrictEqual(23);
         });
     });
 });

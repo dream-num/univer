@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu tới một ô có chứa văn bản mà bạn muốn thay đổi. Nếu văn bản không chứa chữ nào có độ rộng toàn phần, thì văn bản không thay đổi.' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'mảng', detail: 'Mảng cần trả về dưới dạng văn bản.' },
+            format: { name: 'Định dạng của dữ', detail: 'Định dạng của dữ liệu trả về. Nó có thể là một trong hai giá trị: \n0 Mặc định. Định dạng ngắn gọn dễ đọc.\n1 Định dạng nghiêm ngặt bao gồm ký tự thoát và dấu tách hàng. Tạo một chuỗi có thể được phân tích khi nhập vào thanh công thức. Đóng gói các chuỗi trả về trong dấu ngoặc kép, ngoại trừ Booleans, Numbers và Errors.' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Là số mà bạn muốn chuyển sang văn bản hoặc tham chiếu đến ô có chứa số, hay công thức định trị thành số.' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Số từ 1 đến 255 xác định bạn muốn ký tự nào. Ký tự này nằm trong bộ ký tự mà máy tính của bạn dùng.' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Bất kỳ thông tin trang tính nào bạn muốn loại bỏ ký tự không in được khỏi đó.' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn mã của ký tự đầu tiên cho văn bản đó.' },
         },
     },
     CONCAT: {
@@ -137,13 +132,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu tới một ô có chứa văn bản mà bạn muốn thay đổi. Nếu văn bản không chứa chữ Tiếng Anh có độ rộng bán phần hay katakana nào, thì văn bản không đổi.' },
         },
     },
     DOLLAR: {
-        description: 'Chuyển đổi số thành văn bản bằng định dạng tiền tệ Nhân dân tệ (RMB)',
-        abstract: 'Chuyển đổi số thành văn bản bằng định dạng tiền tệ Nhân dân tệ (RMB)',
+        description: 'Chuyển đổi một số thành văn bản bằng cách dùng định dạng tiền tệ',
+        abstract: 'Chuyển đổi một số thành văn bản bằng cách dùng định dạng tiền tệ',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -151,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'số', detail: 'Số, tham chiếu đến ô chứa số hoặc công thức sẽ trả về số.' },
+            decimals: { name: 'số chữ thập phân', detail: 'Số chữ số nằm bên phải dấu thập phân. Nếu đây là số âm, thì số được làm tròn sang bên trái dấu thập phân. Nếu bạn bỏ qua đối số decimals, nó được giả định là bằng 2.' },
         },
     },
     EXACT: {
@@ -165,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            text1: { name: 'bản văn 1', detail: 'Chuỗi văn bản đầu tiên' },
-            text2: { name: 'bản văn 2', detail: 'Chuỗi văn bản thứ hai' },
+            text1: { name: 'bản văn 1', detail: 'Chuỗi văn bản đầu tiên.' },
+            text2: { name: 'bản văn 2', detail: 'Chuỗi văn bản thứ hai.' },
         },
     },
     FIND: {
@@ -194,9 +188,9 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Số mà bạn muốn làm tròn và chuyển đổi thành văn bản.' },
-            decimals: { name: 'decimals', detail: 'Số lượng chữ số ở bên phải của dấu thập phân.' },
-            no_commas: { name: 'no_commas', detail: 'Giá trị logic chỉ định liệu trả về văn bản có bao gồm dấu phẩy hay không.' },
+            number: { name: 'số', detail: 'Số bạn muốn làm tròn và chuyển đổi thành văn bản.' },
+            decimals: { name: 'số chữ thập phân', detail: 'Số chữ số nằm bên phải dấu thập phân. Nếu đây là số âm, thì số được làm tròn sang bên trái dấu thập phân. Nếu bạn bỏ qua đối số decimals, nó được giả định là bằng 2.' },
+            noCommas: { name: 'tắt dấu phân cách', detail: 'Giá trị logic, nếu ĐÚNG, sẽ ngăn FIXED đưa dấu phẩy vào văn bản trả về.' },
         },
     },
     LEFT: {
@@ -267,6 +261,21 @@ export default {
             num_chars: { name: 'num_chars', detail: 'Bắt buộc đối với hàm MID. Chỉ rõ số ký tự mà bạn muốn hàm MID trả về từ văn bản.\nNếu số ký tự là số âm, thì hàm MID trả về giá trị lỗi #VALUE! .' },
         },
     },
+    NUMBERVALUE: {
+        description: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',
+        abstract: 'Chuyển văn bản sang số, theo cách độc lập vị trí.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/numbervalue-%E5%87%BD%E6%95%B0-1b05c8cf-2bfa-4437-af70-596c7ea7d879',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Văn bản chuyển sang số.' },
+            decimalSeparator: { name: 'dấu phân cách thập phân', detail: 'Ký tự dùng để tách số nguyên và phần phân số của kết quả.' },
+            groupSeparator: { name: 'dấu phân cách nhóm', detail: 'Ký tự dùng để tách các nhóm số.' },
+        },
+    },
     PHONETIC: {
         description: 'Trả về chuỗi Furigana từ chuỗi văn bản',
         abstract: 'Trả về chuỗi Furigana từ chuỗi văn bản',
@@ -291,7 +300,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn chuyển đổi chữ cái đầu tiên của mỗi từ thành chữ hoa và tất cả các chữ cái khác thành chữ thường.' },
+            text: { name: 'bản văn', detail: 'Văn bản được đặt trong dấu ngoặc kép, công thức trả về văn bản hoặc tham chiếu đến ô chứa văn bản mà bạn muốn viết hoa một phần.' },
         },
     },
     REGEXEXTRACT: {
@@ -377,8 +386,22 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự bạn muốn trích xuất.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự mà bạn muốn trích xuất.' },
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn RIGHT trích xuất.' },
+        },
+    },
+    RIGHTB: {
+        description: 'Trả về một số ký tự cụ thể từ cuối của chuỗi văn bản',
+        abstract: 'Trả về một số ký tự cụ thể từ cuối của chuỗi văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/right-rightb-%E5%87%BD%E6%95%B0-240267ee-9afa-4639-a02b-f19e1786cf2f',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm RIGHTB trích xuất, dựa trên byte.' },
         },
     },
     SEARCH: {
@@ -422,10 +445,23 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản ban đầu.' },
-            old_text: { name: 'old_text', detail: 'Văn bản bạn muốn thay thế.' },
-            new_text: { name: 'new_text', detail: 'Văn bản thay thế.' },
-            instance_num: { name: 'instance_num', detail: 'Số lần xuất hiện của old_text mà bạn muốn thay thế.' },
+            text: { name: 'bản văn', detail: 'Văn bản hoặc tham chiếu đến ô chứa văn bản mà bạn muốn thay thế bằng ký tự.' },
+            oldText: { name: 'tìm kiếm văn bản', detail: 'Văn bản bạn muốn thay thế.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản bạn muốn thay thế old_text.' },
+            instanceNum: { name: 'chỉ định đối tượng thay thế', detail: 'Chỉ định trường hợp nào của old_text bạn muốn thay thế bằng new_text. Nếu bạn chỉ định instance_num, chỉ trường hợp đó của old_text được thay thế. Nếu không, mọi trường hợp của old_text trong text sẽ được thay đổi thành new_text.' },
+        },
+    },
+    T: {
+        description: 'Chuyển đổi tham số thành văn bản',
+        abstract: 'Chuyển đổi tham số thành văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/t-%E5%87%BD%E6%95%B0-fb83aeec-45e7-4924-af95-53e073541228',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị mà bạn muốn kiểm tra.' },
         },
     },
     TEXT: {
@@ -535,7 +571,7 @@ export default {
             },
         ],
         functionParameter: {
-            number: { name: 'number', detail: 'Số Unicode đại diện cho ký tự.' },
+            number: { name: 'số', detail: 'Số là số Unicode biểu diễn ký tự.' },
         },
     },
     UNICODE: {
@@ -548,7 +584,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản đại diện cho ký tự Unicode.' },
+            text: { name: 'bản văn', detail: 'Văn bản là ký tự mà bạn muốn có giá trị Unicode.' },
         },
     },
     UPPER: {
@@ -574,7 +610,21 @@ export default {
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn chuyển đổi thành số.' },
+            text: { name: 'bản văn', detail: 'Văn bản được đặt trong dấu ngoặc kép hoặc tham chiếu đến ô chứa văn bản bạn muốn chuyển đổi.' },
+        },
+    },
+    VALUETOTEXT: {
+        description: 'Trả về văn bản từ bất kỳ giá trị nào được chỉ định.',
+        abstract: 'Trả về văn bản từ bất kỳ giá trị nào được chỉ định.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/valuetotext-%E5%87%BD%E6%95%B0-5fff61a2-301a-4ab2-9ffa-0a5242a08fea',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'Giá trị cần trả về dưới dạng văn bản.' },
+            format: { name: 'Định dạng của dữ', detail: 'Định dạng của dữ liệu trả về. Nó có thể là một trong hai giá trị: \n0 Mặc định. Định dạng ngắn gọn dễ đọc.\n1 Định dạng nghiêm ngặt bao gồm ký tự thoát và dấu tách hàng. Tạo một chuỗi có thể được phân tích khi nhập vào thanh công thức. Đóng gói các chuỗi trả về trong dấu ngoặc kép, ngoại trừ Booleans, Numbers và Errors.' },
         },
     },
 };

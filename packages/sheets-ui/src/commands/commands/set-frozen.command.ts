@@ -58,27 +58,27 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
         const { sheetViewStartRow = 0, sheetViewStartColumn = 0 } = scrollManagerService.getCurrentScrollState() || {};
         let startRow;
         let startColumn;
-        let ySplit;
-        let xSplit;
+        let freezedRowCount;
+        let freezedColCount;
         const { startRow: selectRow, startColumn: selectColumn, rangeType } = range;
         // Frozen to Row
         if (rangeType === RANGE_TYPE.ROW || type === SetSelectionFrozenType.Row) {
             startRow = selectRow;
-            ySplit = selectRow - sheetViewStartRow;
+            freezedRowCount = selectRow - sheetViewStartRow;
             startColumn = -1;
-            xSplit = 0;
+            freezedColCount = 0;
             // Frozen to Column
         } else if (rangeType === RANGE_TYPE.COLUMN || type === SetSelectionFrozenType.Column) {
             startRow = -1;
-            ySplit = 0;
+            freezedRowCount = 0;
             startColumn = selectColumn;
-            xSplit = selectColumn - sheetViewStartColumn;
+            freezedColCount = selectColumn - sheetViewStartColumn;
             // Frozen to Range
         } else if (rangeType === RANGE_TYPE.NORMAL) {
             startRow = selectRow;
-            ySplit = selectRow - sheetViewStartRow;
+            freezedRowCount = selectRow - sheetViewStartRow;
             startColumn = selectColumn;
-            xSplit = selectColumn - sheetViewStartColumn;
+            freezedColCount = selectColumn - sheetViewStartColumn;
             // Unexpected value
         } else {
             return false;
@@ -88,8 +88,8 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
             subUnitId,
             startRow,
             startColumn,
-            xSplit: startColumn > 0 ? Math.max(1, xSplit) : xSplit,
-            ySplit: startRow > 0 ? Math.max(1, ySplit) : ySplit,
+            xSplit: startColumn > 0 ? Math.max(1, freezedColCount) : freezedColCount,
+            ySplit: startRow > 0 ? Math.max(1, freezedRowCount) : freezedRowCount,
         };
         const undoMutationParams: ISetFrozenMutationParams = SetFrozenMutationFactory(accessor, redoMutationParams);
 

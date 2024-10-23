@@ -17,7 +17,7 @@
 import type { Nullable } from '../../../shared';
 import type { IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
-import { Tools } from '../../../shared';
+import { Tools, UpdateDocsAttributeType } from '../../../shared';
 import { normalizeTextRuns } from './apply-utils/common';
 
 enum TextXTransformType {
@@ -153,7 +153,8 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
 function transformParagraph(
     originParagraph: IParagraph,
     targetParagraph: IParagraph,
-    transformType: TextXTransformType
+    transformType: TextXTransformType,
+    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
 ): IParagraph {
     const paragraph: IParagraph = {
         startIndex: targetParagraph.startIndex,
@@ -165,16 +166,22 @@ function transformParagraph(
                 ...targetParagraph.paragraphStyle,
             };
         } else {
-            paragraph.paragraphStyle = {
-                ...targetParagraph.paragraphStyle,
-            };
+            if (coverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.paragraphStyle = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+                    ? { ...originParagraph.paragraphStyle }
+                    : { ...targetParagraph.paragraphStyle };
+            } else {
+                paragraph.paragraphStyle = {
+                    ...targetParagraph.paragraphStyle,
+                };
 
-            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
-                const keys = Object.keys(originParagraph.paragraphStyle);
+                if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                    const keys = Object.keys(originParagraph.paragraphStyle);
 
-                for (const key of keys) {
-                    if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
-                        delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                    for (const key of keys) {
+                        if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
+                            delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                        }
                     }
                 }
             }
@@ -192,15 +199,20 @@ function transformParagraph(
     return paragraph;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function transformBody(
     thisAction: IRetainAction,
     otherAction: IRetainAction,
     priority: boolean = false
 ): IDocumentBody {
-    const { body: thisBody } = thisAction;
-    const { body: otherBody } = otherAction;
+    const { body: thisBody, coverType: thisCoverType } = thisAction;
+    const { body: otherBody, coverType: otherCoverType } = otherAction;
     if (thisBody == null || thisBody.dataStream !== '' || otherBody == null || otherBody.dataStream !== '') {
         throw new Error('Data stream is not supported in transform.');
+    }
+
+    if (thisCoverType !== otherCoverType) {
+        throw new Error('Cover type is not consistent.');
     }
 
     const retBody: IDocumentBody = {
@@ -241,10 +253,11 @@ export function transformBody(
                 paragraph = transformParagraph(
                     thisParagraph,
                     otherParagraph,
-                    TextXTransformType.COVER_ONLY_NOT_EXISTED
+                    TextXTransformType.COVER_ONLY_NOT_EXISTED,
+                    thisCoverType
                 );
             } else {
-                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER);
+                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER, thisCoverType);
             }
 
             paragraphs.push(paragraph);

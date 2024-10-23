@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { copyCustomRange, getCustomRangesInterestsWithRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting, shouldDeleteCustomRange } from './custom-range';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
 import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
@@ -26,7 +26,7 @@ export class BuildTextUtils {
         delete: deleteCustomRangeTextX,
 
         copyCustomRange,
-        getCustomRangesInterestsWithRange,
+        getCustomRangesInterestsWithSelection,
         shouldDeleteCustomRange,
 
         isIntersecting,

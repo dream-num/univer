@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import React, { Component, createRef } from 'react';
-
 import type { IUniverDocsUIConfig } from '../../controllers/config.schema';
+
+import React, { Component, createRef } from 'react';
 import style from './index.module.less';
 
 interface IBaseDocContainerProps {

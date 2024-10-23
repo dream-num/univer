@@ -15,9 +15,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { BooleanNumber } from '../../../../types/enum/text-style';
 import { ActionIterator } from '../action-iterator';
 import { TextXActionType } from '../action-types';
-import { BooleanNumber } from '../../../../types/enum/text-style';
 
 describe('Test action iterator', () => {
     it('test action iterator basic use', () => {

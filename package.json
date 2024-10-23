@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": true,
     "packageManager": "pnpm@9.4.0",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -62,7 +62,7 @@
         "eslint-plugin-no-barrel-import": "^0.0.2",
         "eslint-plugin-no-penetrating-import": "^0.0.1",
         "eslint-plugin-react": "^7.37.1",
-        "eslint-plugin-react-hooks": "5.1.0-rc-107a2f8c3e-20240617",
+        "eslint-plugin-react-hooks": "5.0.0",
         "eslint-plugin-react-refresh": "^0.4.12",
         "husky": "^9.1.6",
         "lint-staged": "^15.2.10",

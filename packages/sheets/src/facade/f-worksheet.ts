@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IFreeze, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { IToggleGridlinesCommandParams } from '../commands/commands/toggle-gridlines.command';
 import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 import type { FWorkbook } from './f-workbook';
-import { Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, FBase, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
@@ -27,8 +28,11 @@ import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-
 import { SetRowHiddenCommand, SetSpecificRowsVisibleCommand } from '../commands/commands/set-row-visible.command';
 import { SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
+import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { copyRangeStyles } from '../commands/commands/utils/selection-utils';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
+import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
 import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -88,6 +92,89 @@ export class FWorksheet extends FBase {
     }
 
     // #region rows
+    //#region default style
+
+    /**
+     * Get the default style of the worksheet
+     * @returns Default style
+     */
+    getDefaultStyle(): Nullable<IStyleData> | string {
+        return this._worksheet.getDefaultCellStyle();
+    }
+
+    /**
+     * Get the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from row manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet row name or style data
+     */
+    getRowDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
+        return this._worksheet.getRowStyle(index, keepRaw);
+    }
+
+    /**
+     * Get the default style of the worksheet column
+     * @param {number} index The column index
+     * @param  {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
+     * @returns {Nullable<IStyleData> | string} The default style of the worksheet column name or style data
+     */
+    getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
+        return this._worksheet.getColumnStyle(index, keepRaw);
+    }
+
+    /**
+     * Set the default style of the worksheet
+     * @param style default style
+     * @returns this worksheet
+     */
+    async setDefaultStyle(style: string): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        await this._commandService.executeCommand(SetWorksheetDefaultStyleMutation.id, {
+            unitId,
+            subUnitId,
+            defaultStyle: style,
+        });
+        this._worksheet.setDefaultCellStyle(style);
+        return this;
+    }
+
+    /**
+     * Set the default style of the worksheet row
+     * @param {number} index The row index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
+    async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const styles = [{ index, style }];
+        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+            unitId,
+            subUnitId,
+            isRow: false,
+            styles,
+        });
+        return this;
+    }
+
+    /**
+     * Set the default style of the worksheet column
+     * @param {number} index The column index
+     * @param {string | Nullable<IStyleData>} style The style name or style data
+     */
+    async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+        const styles = [{ index, style }];
+        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+            unitId,
+            subUnitId,
+            isRow: true,
+            styles,
+        });
+        return this;
+    }
+    // #endregion
 
     /**
      * Returns a Range object representing a single cell at the specified row and column.
@@ -951,6 +1038,25 @@ export class FWorksheet extends FBase {
     }
 
     /**
+     * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
+     */
+    hasHiddenGridLines(): boolean {
+        return this._worksheet.getConfig().showGridlines === BooleanNumber.FALSE;
+    }
+
+    /**
+     * Hides or reveals the sheet gridlines.
+     * @param {boolean} hidden If `true`, hide gridlines in this sheet; otherwise show the gridlines.
+     */
+    setHiddenGridlines(hidden: boolean): Promise<boolean> {
+        return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+        } as IToggleGridlinesCommandParams);
+    }
+
+    /**
      * Subscribe to the cell data change event.
      * @param callback - The callback function to be executed when the cell data changes.
      * @returns - A disposable object to unsubscribe from the event.
@@ -963,7 +1069,7 @@ export class FWorksheet extends FBase {
                 if (
                     params.unitId === this._workbook.getUnitId() &&
                     params.subUnitId === this._worksheet.getSheetId() &&
-                  params.cellValue
+                    params.cellValue
                 ) {
                     callback(new ObjectMatrix(params.cellValue));
                 }

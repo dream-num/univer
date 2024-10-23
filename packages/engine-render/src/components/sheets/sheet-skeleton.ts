@@ -53,14 +53,17 @@ import {
     BooleanNumber,
     BuildTextUtils,
     CellValueType,
+    composeStyles,
     CustomRangeType,
     DEFAULT_STYLES,
     DocumentDataModel,
     extractPureTextFromCell,
     getColorStyle,
     HorizontalAlign,
+    IConfigService,
     IContextService,
     Inject,
+    IS_ROW_STYLE_PRECEDE_COLUMN_STYLE,
     isCellCoverable,
     isNullCell,
     isWhiteColor,
@@ -193,7 +196,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
     ignoreTextRotation: false,
 };
 
-interface IRowColumnRange extends IRowRange, IColumnRange {}
+interface IRowColumnRange extends IRowRange, IColumnRange { }
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
     fontString: string;
@@ -257,6 +260,11 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _marginTop: number = 0;
     private _marginLeft: number = 0;
 
+    /**
+     * Whether the row style precedes the column style.
+     */
+    private _isRowStylePrecedeColumnStyle = false;
+
     private _renderRawFormula = false;
 
     constructor(
@@ -270,13 +278,15 @@ export class SpreadsheetSkeleton extends Skeleton {
         private _cellData: ObjectMatrix<Nullable<ICellData>>,
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
-        @IContextService private readonly _contextService: IContextService
+        @IContextService private readonly _contextService: IContextService,
+        @IConfigService private readonly _configService: IConfigService
     ) {
         super(_localeService);
 
         this._updateLayout();
         this._initContextListener();
         // this.updateDataMerge();
+        this._isRowStylePrecedeColumnStyle = this._configService.getConfig(IS_ROW_STYLE_PRECEDE_COLUMN_STYLE) ?? false;
     }
 
     get rowHeightAccumulation(): number[] {
@@ -1843,14 +1853,21 @@ export class SpreadsheetSkeleton extends Skeleton {
             // If the cell is merged and is not the main cell, the cell is not rendered.
             if (isMerged && !isMergedMainCell) {
                 return;
-            // If the cell no merged, the cell is not rendered.
+                // If the cell no merged, the cell is not rendered.
             } else if (!isMergedMainCell) {
                 return;
             }
         }
 
         const cell = this.worksheet.getCell(row, col) || this.worksheet.getCellRaw(row, col);
-        const style = this._styles.getStyleByCell(cell);
+
+        const cellStyle = this._styles.getStyleByCell(cell);
+        const columnStyle = this.worksheet.getColumnStyle(col) as IStyleData;
+        const rowStyle = this.worksheet.getRowStyle(row) as IStyleData;
+        const defaultStyle = this.worksheet.getDefaultCellStyleInternal();
+
+        const style = this._isRowStylePrecedeColumnStyle ? composeStyles(defaultStyle, columnStyle, rowStyle, cellStyle) : composeStyles(defaultStyle, rowStyle, columnStyle, cellStyle);
+
         this._setBgStylesCache(row, col, style, options);
         this._setBorderStylesCache(row, col, style, options);
         this._setFontStylesCache(row, col, cell);

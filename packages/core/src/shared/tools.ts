@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IKeyValue } from './types';
-import { customAlphabet, nanoid } from 'nanoid';
+import type { IStyleData } from '../types/interfaces';
+import type { IKeyValue, Nullable } from './types';
 
+import { customAlphabet, nanoid } from 'nanoid';
 import { isLegalUrl, normalizeUrl } from '../common/url';
 
 const rmsPrefix = /^-ms-/;
@@ -50,6 +51,66 @@ const alphabets = [
     'Y',
     'Z',
 ];
+
+/**
+ * Deep diff between two object
+ * @param oneValue The first test value
+ * @param twoValue The second test value
+ * @returns {boolean} If objects are different, return false, otherwise return true
+ */
+function isValueEqual(oneValue: any, twoValue: any) {
+    const oneType = Tools.getValueType(oneValue);
+    const twoType = Tools.getValueType(twoValue);
+    if (oneType !== twoType) {
+        return false;
+    }
+    if (Tools.isArray(oneValue)) {
+        return diffArrays(oneValue, twoValue);
+    }
+    if (Tools.isObject(oneValue)) {
+        return diffObject(oneValue as object, twoValue);
+    }
+    if (Tools.isDate(oneValue)) {
+        return (oneValue as Date).getTime() === twoValue.getTime();
+    }
+    if (Tools.isRegExp(oneValue)) {
+        return (oneValue as unknown as string).toString() === twoValue.toString();
+    }
+    return oneValue === twoValue;
+}
+
+function diffArrays(oneArray: any[], twoArray: any[]) {
+    if (oneArray.length !== twoArray.length) {
+        return false;
+    }
+    for (let i = 0, len = oneArray.length; i < len; i++) {
+        const oneValue = oneArray[i];
+        const twoValue = twoArray[i];
+        if (!isValueEqual(oneValue, twoValue)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function diffObject(oneObject: IKeyValue, twoObject: IKeyValue) {
+    const oneKeys = Object.keys(oneObject);
+    const twoKeys = Object.keys(twoObject);
+    if (oneKeys.length !== twoKeys.length) {
+        return false;
+    }
+    for (const key of oneKeys) {
+        if (!twoKeys.includes(key)) {
+            return false;
+        }
+        const oneValue = oneObject[key];
+        const twoValue = twoObject[key];
+        if (!isValueEqual(oneValue, twoValue)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 /**
  * Universal tool library
@@ -246,62 +307,8 @@ export class Tools {
         return Number(Number(value).toFixed(digit));
     }
 
-    static diffValue(one: any, tow: any) {
-        function diffValue(oneValue: any, towValue: any) {
-            const oneType = Tools.getValueType(oneValue);
-            const towType = Tools.getValueType(towValue);
-            if (oneType !== towType) {
-                return false;
-            }
-            if (Tools.isArray(oneValue)) {
-                return diffArrays(oneValue, towValue);
-            }
-            if (Tools.isObject(oneValue)) {
-                return diffObject(oneValue as object, towValue);
-            }
-            if (Tools.isDate(oneValue)) {
-                return (oneValue as Date).getTime() === towValue.getTime();
-            }
-            if (Tools.isRegExp(oneValue)) {
-                return (oneValue as unknown as string).toString() === towValue.toString();
-            }
-            return oneValue === towValue;
-        }
-
-        function diffArrays(oneArray: any[], towArray: any[]) {
-            if (oneArray.length !== towArray.length) {
-                return false;
-            }
-            for (let i = 0, len = oneArray.length; i < len; i++) {
-                const oneValue = oneArray[i];
-                const towValue = towArray[i];
-                if (!diffValue(oneValue, towValue)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function diffObject(oneObject: IKeyValue, towObject: IKeyValue) {
-            const oneKeys = Object.keys(oneObject);
-            const towKeys = Object.keys(towObject);
-            if (oneKeys.length !== towKeys.length) {
-                return false;
-            }
-            for (const key of oneKeys) {
-                if (!towKeys.includes(key)) {
-                    return false;
-                }
-                const oneValue = oneObject[key];
-                const towValue = towObject[key];
-                if (!diffValue(oneValue, towValue)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        return diffValue(one, tow);
+    static diffValue(one: any, two: any) {
+        return isValueEqual(one, two);
     }
 
     static deepClone<T = unknown>(value: T): T {
@@ -698,4 +705,30 @@ export function generateRandomId(n: number = 21, alphabet?: string): string {
     }
 
     return nanoid(n);
+}
+
+interface IStyleDataObject {
+    [key: string]: unknown;
+}
+
+/**
+ * compose styles by priority, the latter will overwrite the former
+ * @param { Nullable<IStyleData>[]} styles the styles to be composed
+ * @returns  { Nullable<IStyleData>[]} Returns the composed style
+ */
+export function composeStyles(...styles: Nullable<IStyleData>[]): IStyleData {
+    const result: IStyleData = {};
+    const length = styles.length;
+    for (let i = length - 1; i >= 0; i--) {
+        const style = styles[i];
+        if (style) {
+            const keys = Object.keys(style);
+            for (const key of keys) {
+                if ((result as IStyleDataObject)[key] === undefined) {
+                    (result as IStyleDataObject)[key] = (style as IStyleDataObject)[key];
+                }
+            }
+        }
+    }
+    return result;
 }

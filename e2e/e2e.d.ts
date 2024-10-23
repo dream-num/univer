@@ -6,6 +6,7 @@ export interface IE2EControllerAPI {
     loadDefaultDoc(loadTimeout?: number): Promise<void>;
     loadDemoSheet(loadTimeout?: number): Promise<void>;
     loadMergeCellSheet(loadTimeout?: number): Promise<void>;
+    loadDefaultStyleSheet(loadTimeout?: number): Promise<void>;
     disposeUniver(): Promise<void>;
     disposeCurrSheetUnit(disposeTimeout?: number): Promise<void>;
 }
@@ -14,5 +15,7 @@ declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         E2EControllerAPI: IE2EControllerAPI;
+        // eslint-disable-next-line ts/no-explicit-any
+        univerAPI: any;
     }
 }

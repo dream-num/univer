@@ -27,7 +27,6 @@ export {
     ThreadCommentDataSourceService,
     type ThreadCommentJSON,
 } from './services/tc-datasource.service';
-
 // #region - all commands
 
 export {

@@ -204,7 +204,7 @@ export const docsDemoData: IDocumentData = {
             width: 594.3,
             height: 840.51,
         },
-        documentFlavor: DocumentFlavor.MODERN,
+        documentFlavor: DocumentFlavor.UNSPECIFIED,
         marginTop: 72,
         marginBottom: 72,
         marginRight: 90,

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-ui",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": false,
     "description": "UniverSheet normal ui-plugin-sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -72,7 +72,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
+        "@univerjs/icons": "^0.1.84",
         "@univerjs/protocol": "0.1.39-alpha.30",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",

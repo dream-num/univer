@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
@@ -32,7 +32,7 @@ import type {
     IUnitStylesData,
 } from '../basics/common';
 
-import { createIdentifier, Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
@@ -96,6 +96,8 @@ export interface IFormulaCurrentConfigService {
     getDirtyData(): IFormulaDirtyData;
 
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
+
+    getLocale(): LocaleType;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -132,7 +134,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
 
-    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
         super();
     }
 
@@ -230,6 +235,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getClearDependencyTreeCache() {
         return this._clearDependencyTreeCache;
+    }
+
+    getLocale() {
+        return this._localeService.getCurrentLocale();
     }
 
     load(config: IFormulaDatasetConfig) {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -85,7 +85,8 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*"
+        "@univerjs/ui": "workspace:*",
+        "@univerjs/watermark": "workspace:*"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

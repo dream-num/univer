@@ -23,6 +23,14 @@ export function isCustomRangeSplitSymbol(text: string) {
     return text === DataStreamTreeTokenType.CUSTOM_RANGE_END || text === DataStreamTreeTokenType.CUSTOM_RANGE_START;
 }
 
+/**
+ * Check if two ranges intersect
+ * @param line1Start - The start of the first range
+ * @param line1End - The end of the first range
+ * @param line2Start - The start of the second range
+ * @param line2End - The end of the second range
+ * @returns True if the ranges intersect, false otherwise
+ */
 export function isIntersecting(line1Start: number, line1End: number, line2Start: number, line2End: number) {
     if ((line1Start <= line2Start && line1End >= line2Start) ||
         (line1Start >= line2Start && line1Start <= line2End)) {
@@ -56,7 +64,7 @@ export function shouldDeleteCustomRange(deleteStart: number, deleteLen: number, 
     return true;
 }
 
-export function getCustomRangesInterestsWithRange(range: ITextRange, customRanges: ICustomRange[]) {
+export function getCustomRangesInterestsWithSelection(range: ITextRange, customRanges: ICustomRange[]) {
     const result: ICustomRange[] = [];
     for (let i = 0, len = customRanges.length; i < len; i++) {
         const customRange = customRanges[i];
@@ -65,7 +73,7 @@ export function getCustomRangesInterestsWithRange(range: ITextRange, customRange
                 result.push(customRange);
             }
         } else {
-            if (isIntersecting(range.startOffset, range.endOffset, customRange.startIndex, customRange.endIndex)) {
+            if (isIntersecting(range.startOffset, range.endOffset - 1, customRange.startIndex, customRange.endIndex)) {
                 result.push(customRange);
             }
         }

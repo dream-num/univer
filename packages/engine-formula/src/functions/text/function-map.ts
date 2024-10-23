@@ -14,26 +14,57 @@
  * limitations under the License.
  */
 
+import { Arraytotext } from './arraytotext';
+import { Asc } from './asc';
+import { Bahttext } from './bahttext';
+import { Char } from './char';
+import { Clean } from './clean';
+import { Code } from './code';
 import { Concat } from './concat';
 import { Concatenate } from './concatenate';
+import { Dbcs } from './dbcs';
+import { Dollar } from './dollar';
+import { Exact } from './exact';
+import { Fixed } from './fixed';
 import { FUNCTION_NAMES_TEXT } from './function-names';
 import { Leftb } from './leftb';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Lower } from './lower';
 import { Mid } from './mid';
+import { Numbervalue } from './numbervalue';
+import { Proper } from './proper';
 import { Regexextract } from './regexextract';
 import { Regexmatch } from './regexmatch';
 import { Regexreplace } from './regexreplace';
 import { Rept } from './rept';
+import { Right } from './right';
+import { Rightb } from './rightb';
+import { Substitute } from './substitute';
+import { T } from './t';
 import { Text } from './text';
 import { Textafter } from './textafter';
 import { Textbefore } from './textbefore';
 import { Textsplit } from './textsplit';
+import { Unichar } from './unichar';
+import { Unicode } from './unicode';
+import { Value } from './value';
+import { Valuetotext } from './valuetotext';
 
 export const functionText = [
+    [Asc, FUNCTION_NAMES_TEXT.ASC],
+    [Arraytotext, FUNCTION_NAMES_TEXT.ARRAYTOTEXT],
+    [Bahttext, FUNCTION_NAMES_TEXT.BAHTTEXT],
+    [Char, FUNCTION_NAMES_TEXT.CHAR],
+    [Clean, FUNCTION_NAMES_TEXT.CLEAN],
+    [Code, FUNCTION_NAMES_TEXT.CODE],
     [Concat, FUNCTION_NAMES_TEXT.CONCAT],
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
+    [Dbcs, FUNCTION_NAMES_TEXT.DBCS],
+    [Dollar, FUNCTION_NAMES_TEXT.DOLLAR],
+    [Exact, FUNCTION_NAMES_TEXT.EXACT],
+    [Fixed, FUNCTION_NAMES_TEXT.FIXED],
+    [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Lower, FUNCTION_NAMES_TEXT.LOWER],
@@ -41,10 +72,19 @@ export const functionText = [
     [Regexextract, FUNCTION_NAMES_TEXT.REGEXEXTRACT],
     [Regexmatch, FUNCTION_NAMES_TEXT.REGEXMATCH],
     [Regexreplace, FUNCTION_NAMES_TEXT.REGEXREPLACE],
+    [Numbervalue, FUNCTION_NAMES_TEXT.NUMBERVALUE],
+    [Proper, FUNCTION_NAMES_TEXT.PROPER],
     [Rept, FUNCTION_NAMES_TEXT.REPT],
+    [Right, FUNCTION_NAMES_TEXT.RIGHT],
+    [Rightb, FUNCTION_NAMES_TEXT.RIGHTB],
+    [Substitute, FUNCTION_NAMES_TEXT.SUBSTITUTE],
+    [T, FUNCTION_NAMES_TEXT.T],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
     [Textsplit, FUNCTION_NAMES_TEXT.TEXTSPLIT],
-    [Leftb, FUNCTION_NAMES_TEXT.LEFTB],
+    [Unichar, FUNCTION_NAMES_TEXT.UNICHAR],
+    [Unicode, FUNCTION_NAMES_TEXT.UNICODE],
+    [Value, FUNCTION_NAMES_TEXT.VALUE],
+    [Valuetotext, FUNCTION_NAMES_TEXT.VALUETOTEXT],
 ];

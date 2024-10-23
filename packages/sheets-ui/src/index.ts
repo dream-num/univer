@@ -67,7 +67,7 @@ export { BaseSelectionRenderService, ISheetSelectionRenderService } from './serv
 export { SelectionControl as SelectionShape } from './services/selection/selection-control';
 export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manager.service';
 export { attachRangeWithCoord, SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
-export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
+export { UniverSheetsUIPlugin } from './plugin';
 export { SheetRenderController } from './controllers/render-controllers/sheet.render-controller';
 export { HoverManagerService } from './services/hover-manager.service';
 export { DragManagerService } from './services/drag-manager.service';
@@ -95,7 +95,7 @@ export type { IRangeProtectionRenderCellData } from './views/permission/extensio
 export { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from './views/sheet-container/SheetContainer';
 export { SheetBar } from './views/sheet-bar/SheetBar';
 export { SheetPrintInterceptorService } from './services/print-interceptor.service';
-export { UniverSheetsMobileUIPlugin } from './mobile-sheets-ui-plugin';
+export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
 
@@ -129,6 +129,7 @@ export { DeleteRangeMoveLeftConfirmCommand } from './commands/commands/delete-ra
 export { DeleteRangeMoveUpConfirmCommand } from './commands/commands/delete-range-move-up-confirm.command';
 export { HideColConfirmCommand, HideRowConfirmCommand } from './commands/commands/hide-row-col-confirm.command';
 export {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,

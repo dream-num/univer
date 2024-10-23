@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
+import { calculateDDB } from '../../../basics/financial';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
+import { getCurrencyFormat } from '../../../engine/utils/numfmt-kit';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
-import { calculateDDB } from '../../../basics/financial';
 
 export class Vdb extends BaseFunction {
     override minParams = 5;
 
     override maxParams = 7;
+
+    override needsLocale = true;
 
     override calculate(
         cost: BaseValueObject,
@@ -145,7 +148,7 @@ export class Vdb extends BaseFunction {
             const result = this._getResult(costValue, salvageValue, lifeValue, startPeriodValue, endPeriodValue, factorValue, noSwitchValue);
 
             if (rowIndex === 0 && columnIndex === 0) {
-                return NumberValueObject.create(result, '"¥"#,##0.00_);[Red]("¥"#,##0.00)');
+                return NumberValueObject.create(result, getCurrencyFormat(this.getLocale()));
             }
 
             return NumberValueObject.create(result);

@@ -26,7 +26,7 @@ import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../co
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
 
 const getLinkDisable$ = (accessor: IAccessor) => {
-    const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] });
+    const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetSelectionService = accessor.get(SheetsSelectionsService);
     const disableCell$ = univerInstanceService.focused$.pipe(

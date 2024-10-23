@@ -90,6 +90,15 @@ describe('Test tdist function', () => {
             const tails = NumberValueObject.create(1);
             const result = testFunction.calculate(x, degFreedom, tails);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const x2 = NumberValueObject.create(1);
+            const degFreedom2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(x2, degFreedom2, tails);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const tails2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(x2, degFreedom, tails2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

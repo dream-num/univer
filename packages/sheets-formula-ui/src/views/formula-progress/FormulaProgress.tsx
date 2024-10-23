@@ -29,5 +29,9 @@ export function FormulaProgressBar() {
         commandService.executeCommand(SetFormulaCalculationStopMutation.id);
     }, [commandService]);
 
-    return <ProgressBar progress={progress} onTerminate={terminateCalculation} />;
+    const clearProgress = useCallback(() => {
+        triggerCalculationController.clearProgress();
+    }, [triggerCalculationController]);
+
+    return <ProgressBar progress={progress} onTerminate={terminateCalculation} onClearProgress={clearProgress} />;
 }

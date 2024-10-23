@@ -109,7 +109,7 @@ export class TriggerCalculationController extends Disposable {
         this._emitProgress();
     }
 
-    private _clearProgress(): void {
+    clearProgress(): void {
         this._doneCalculationTaskCount = 0;
         this._totalCalculationTaskCount = 0;
         this._emitProgress();
@@ -360,7 +360,7 @@ export class TriggerCalculationController extends Disposable {
                         case FormulaExecutedStateType.STOP_EXECUTION:
                             result = 'The execution of the formula has been stopped';
                             // this._executingCommandQueue = [];
-                            this._clearProgress();
+                            this.clearProgress();
                             calculationProcessCount = 0;
                             break;
                         case FormulaExecutedStateType.SUCCESS:
@@ -383,7 +383,7 @@ export class TriggerCalculationController extends Disposable {
                             // The total calculation time does not exceed 1s, and the progress bar is not displayed.
                             clearTimeout(startDependencyTimer);
                             startDependencyTimer = null;
-                            this._clearProgress();
+                            this.clearProgress();
                         } else {
                             // Manually hide the progress bar only if no other calculations are in process
                             this._completeProgress();

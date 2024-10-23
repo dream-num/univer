@@ -67,67 +67,10 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
     const [rangeInitialization, setRangeInitialization] = useState(false);
 
     const handleAddPerson = async () => {
-        // const userList = await authzIoService.listCollaborators({
-        //     objectID: unitId,
-        //     unitID: unitId,
-        // });
-
-        const userList = [
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100002',
-                    name: '用户B',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100000',
-                    name: '管理员',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100003',
-                    name: '张三',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100014',
-                    name: '管理员1',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100015',
-                    name: '管理员2',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-            {
-                id: '',
-                role: 1,
-                subject: {
-                    userID: '100016',
-                    name: '管理员3',
-                    avatar: 'https://xihufile.oss-cn-shanghai.aliyuncs.com/xihufile_prod/default.png',
-                },
-            },
-        ];
+        const userList = await authzIoService.listCollaborators({
+            objectID: unitId,
+            unitID: unitId,
+        });
         userList.forEach((user) => {
             if (user?.subject) {
                 userManagerService.addUser(user.subject as IUser);
@@ -135,7 +78,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
         });
 
         const currentUser = userManagerService.getCurrentUser();
-        sheetPermissionUserManagerService.setUserList(userList.filter((user) => user.subject.userID !== currentUser.userID));
+        sheetPermissionUserManagerService.setUserList(userList.filter((user) => user.subject?.userID !== currentUser.userID));
 
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,

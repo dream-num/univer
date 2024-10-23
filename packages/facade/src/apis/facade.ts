@@ -37,7 +37,6 @@ import type {
 import type { ISocket } from '@univerjs/network';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
-import type { ISetGridlineColorOperationParams } from '@univerjs/sheets-ui';
 import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
 import {
     BorderStyleTypes,

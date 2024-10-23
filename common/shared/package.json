@@ -24,6 +24,7 @@
         "javascript-obfuscator": "^4.1.1",
         "vite": "^5.4.8",
         "vite-plugin-dts": "^4.2.3",
+        "vite-plugin-external": "^4.3.1",
         "vitest": "^2.1.2"
     }
 }

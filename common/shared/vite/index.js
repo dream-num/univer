@@ -19,6 +19,7 @@ const process = require('node:process');
 
 const react = require('@vitejs/plugin-react');
 const { default: dts } = require('vite-plugin-dts');
+const vitePluginExternal = require('vite-plugin-external');
 const { defineConfig, mergeConfig } = require('vitest/config');
 const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
 const { buildPkg } = require('./build-pkg');
@@ -61,6 +62,9 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
         },
         plugins: [
             autoExternalizeDependency(),
+            vitePluginExternal({
+                nodeBuiltins: true, // exclude Node.js builtins from bundling
+            }),
             dts({
                 entryRoot: 'src',
                 outDir: 'lib/types',

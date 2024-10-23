@@ -15,11 +15,11 @@
  */
 
 import type { MenuSchemaType } from '@univerjs/ui';
-import { RibbonStartGroup } from '@univerjs/ui';
 import {
     ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand,
     SmartToggleSheetsFilterCommand,
-} from '../commands/commands/sheets-filter.command';
+} from '@univerjs/sheets-filter';
+import { RibbonStartGroup } from '@univerjs/ui';
 import {
     ClearFilterCriteriaMenuItemFactory,
     ReCalcFilterMenuItemFactory,

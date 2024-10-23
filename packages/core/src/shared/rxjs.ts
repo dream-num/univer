@@ -16,7 +16,7 @@
 
 import type { OperatorFunction } from 'rxjs';
 import type { IDisposable } from '../common/di';
-import { debounceTime, map, Observable, tap } from 'rxjs';
+import { debounceTime, map, Observable, ReplaySubject, take, tap } from 'rxjs';
 
 type CallbackFn<T extends readonly unknown[]> = (cb: (...args: T) => void) => IDisposable;
 
@@ -70,3 +70,10 @@ export function bufferDebounceTime<T>(time: number = 0): OperatorFunction<T, T[]
         );
     };
 }
+
+export function afterTime(ms: number): Observable<void> {
+    const subject = new ReplaySubject<void>(1);
+    setTimeout(() => subject.next(), ms);
+    return subject.pipe(take(1));
+}
+

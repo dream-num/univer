@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import type { countryCurrencyMap } from '../base/const/CURRENCY-SYMBOLS';
+import { BehaviorSubject } from 'rxjs';
 
 export class MenuCurrencyService {
     private _currencySymbol$ = new BehaviorSubject<keyof typeof countryCurrencyMap>('US');

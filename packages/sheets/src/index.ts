@@ -44,6 +44,7 @@ export {
     transformCellDataToSelectionData,
 } from './basics/selection';
 export { createTopMatrixFromMatrix, createTopMatrixFromRanges, findAllRectangle, rangeMerge, RangeMergeUtil } from './basics/rangeMerge';
+export { type IUniverSheetsConfig } from './controllers/config.schema';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export * from './services/permission/permission-point';
@@ -239,8 +240,8 @@ export {
 } from './commands/commands/set-col-visible.command';
 
 export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
-export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
-export { SetFrozenCommand } from './commands/commands/set-frozen.command';
+export { type ICancelFrozenCommandParams, type ISetFrozenCommandParams } from './commands/commands/set-frozen.command';
+export { CancelFrozenCommand, SetFrozenCommand } from './commands/commands/set-frozen.command';
 export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
 export { type ISetRangeProtectionCommandParams, SetRangeProtectionCommand } from './commands/commands/set-range-protection.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';

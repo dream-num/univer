@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
-
-import { convertUnitDataToRuntime } from '../basics/runtime';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
@@ -34,6 +31,9 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
+
+import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
     forceCalculation: boolean;

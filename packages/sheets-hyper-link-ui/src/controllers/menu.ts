@@ -106,7 +106,7 @@ const getLinkDisable$ = (accessor: IAccessor) => {
         })
     );
 
-    return disableRange$.pipe(mergeMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell)))));
+    return disableRange$.pipe(mergeMap((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell))));
 };
 
 const linkMenu = {

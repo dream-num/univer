@@ -38,9 +38,8 @@ import {
     RegisterFunctionService,
 } from '@univerjs/sheets-formula';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
-
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
     return {

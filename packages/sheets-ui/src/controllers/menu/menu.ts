@@ -38,6 +38,7 @@ import {
 import { DocSelectionManagerService, SetTextSelectionsOperation } from '@univerjs/docs';
 import { SetInlineFormatCommand } from '@univerjs/docs-ui';
 import {
+    CancelFrozenCommand,
     RangeProtectionPermissionEditPoint,
     RangeProtectionPermissionViewPoint,
     ResetBackgroundColorCommand,
@@ -105,7 +106,6 @@ import {
     SetOnceFormatPainterCommand,
 } from '../../commands/commands/set-format-painter.command';
 import {
-    CancelFrozenCommand,
     SetColumnFrozenCommand,
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,

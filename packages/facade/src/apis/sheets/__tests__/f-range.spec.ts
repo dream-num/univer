@@ -20,12 +20,11 @@ import type { ICellData, Injector, IRange, IStyleData, Nullable } from '@univerj
 import { DataValidationType, HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { FormulaDataModel } from '@univerjs/engine-formula';
 import { AddWorksheetMergeCommand, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-
 import { AddSheetDataValidationCommand } from '@univerjs/sheets-data-validation';
-import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter-ui';
+import { ClearSheetsFilterCriteriaCommand, RemoveSheetFilterCommand, SetSheetFilterRangeCommand, SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 describe('Test FRange', () => {
     let get: Injector['get'];

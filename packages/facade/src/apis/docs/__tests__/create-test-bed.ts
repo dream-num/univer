@@ -31,8 +31,7 @@ import { DocIMEInputManagerService, DocsRenderService, DocStateChangeManagerServ
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import enUS from '@univerjs/sheets-formula-ui/locale/en-US';
 import zhCN from '@univerjs/sheets-formula-ui/locale/zh-CN';
-
-import { FUniver } from '../../facade';
+import { FUniver } from '../../everything';
 
 function getTestDocumentDataDemo(): IDocumentData {
     return {

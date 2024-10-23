@@ -31,8 +31,9 @@ test('diff default sheet toolbar', async () => {
     const page = await context.newPage();
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
+
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(8000);
 
     const filename = generateSnapshotName('default-sheet-fullpage');
     const screenshot = await page.screenshot({

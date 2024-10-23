@@ -15,11 +15,10 @@
  */
 
 import type { Injector } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { ICommandService } from '@univerjs/core';
 import { InsertSheetCommand, InsertSheetMutation, RemoveSheetCommand, RemoveSheetMutation, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { FUniver } from '../../facade';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test Active Range', () => {

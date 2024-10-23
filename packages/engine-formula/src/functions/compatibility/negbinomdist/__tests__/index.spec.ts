@@ -91,6 +91,15 @@ describe('Test negbinomdist function', () => {
             const probabilityS = NumberValueObject.create(0.5);
             const result = testFunction.calculate(numberF, numberS, probabilityS);
             expect(getObjectValue(result)).toBe(ErrorType.NAME);
+
+            const numberF2 = NumberValueObject.create(6);
+            const numberS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result2 = testFunction.calculate(numberF2, numberS2, probabilityS);
+            expect(getObjectValue(result2)).toBe(ErrorType.NAME);
+
+            const probabilityS2 = ErrorValueObject.create(ErrorType.NAME);
+            const result3 = testFunction.calculate(numberF2, numberS, probabilityS2);
+            expect(getObjectValue(result3)).toBe(ErrorType.NAME);
         });
 
         it('Value is array', () => {

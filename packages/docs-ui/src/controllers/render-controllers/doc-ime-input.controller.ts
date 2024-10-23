@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, Nullable } from '@univerjs/core';
+import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
+import type { Subscription } from 'rxjs';
+import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
 import {
     Disposable,
     ICommandService,
     Inject,
-    IUniverInstanceService,
     Tools,
 } from '@univerjs/core';
-import { DocSkeletonManagerService } from '@univerjs/docs';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 
-import type { Subscription } from 'rxjs';
+import { DocSkeletonManagerService } from '@univerjs/docs';
 import { IMEInputCommand } from '../../commands/commands/ime-input.command';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
-import type { IEditorInputConfig } from '../../services/selection/doc-selection-render.service';
 
 export class DocIMEInputController extends Disposable implements IRenderModule {
     private _previousIMEContent: string = '';
@@ -45,10 +43,9 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
 
     constructor(
         private readonly _context: IRenderContext<DocumentDataModel>,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerSrv: IRenderManagerService,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocIMEInputManagerService) private readonly _docImeInputManagerService: DocIMEInputManagerService,
+        @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -105,14 +102,9 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
             return;
         }
 
-        const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
-        if (!documentModel) {
-            return;
-        }
+        const unitId = this._context.unitId;
 
-        const skeleton = this._renderManagerSrv.getRenderById(documentModel.getUnitId())
-            ?.with(DocSkeletonManagerService)
-            .getSkeleton();
+        const skeleton = this._docSkeletonManagerService.getSkeleton();
 
         const { event, activeRange } = config;
 
@@ -129,7 +121,7 @@ export class DocIMEInputController extends Disposable implements IRenderModule {
         }
 
         await this._commandService.executeCommand(IMEInputCommand.id, {
-            unitId: documentModel.getUnitId(),
+            unitId,
             newText: content,
             oldTextLen: this._previousIMEContent.length,
             isCompositionStart: this._isCompositionStart,

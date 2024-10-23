@@ -30,7 +30,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
+        "@univerjs/icons": "^0.1.84",
         "@univerjs/mockdata": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",

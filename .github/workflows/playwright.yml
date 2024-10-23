@@ -30,6 +30,7 @@ jobs:
 
             - name: 🚀 Deploy to Vercel
               uses: amondnet/vercel-action@v25
+              if: failure()
               id: vercel-e2e-report
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}

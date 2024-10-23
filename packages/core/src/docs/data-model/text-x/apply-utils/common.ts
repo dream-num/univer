@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
-import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 import type { Nullable } from '../../../../shared';
 import type {
     ICustomBlock,
@@ -28,6 +25,9 @@ import type {
     ISectionBreak,
     ITextRun,
 } from '../../../../types/interfaces';
+import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
+import { isSameStyleTextRun } from '../../../../shared/compare';
+import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -78,7 +78,7 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
  * @param textLength The length of the inserted content text.
  * @param currentIndex Determining the index where the content will be inserted into the current content.
  */
-// eslint-disable-next-line max-lines-per-function
+
 export function insertTextRuns(
     body: IDocumentBody,
     insertBody: IDocumentBody,
@@ -105,61 +105,32 @@ export function insertTextRuns(
 
     for (let i = 0; i < len; i++) {
         const textRun = textRuns[i];
-        const nextRun = textRuns[i + 1];
+        // const nextRun = textRuns[i + 1];
         const { st, ed } = textRun;
 
-        if (ed < currentIndex) {
+        if (ed <= currentIndex) {
             newTextRuns.push(textRun);
-        } else if (currentIndex >= st && currentIndex <= ed) {
-            // The inline format used to handle no selection will insert a textRun
-            // with `st` equal to `ed` at the current cursor,
-            // and when we insert text, the style should follow the new textRun.
-            if (nextRun && nextRun.st === nextRun.ed && currentIndex === nextRun.st) {
-                newTextRuns.push(textRun);
-                continue;
+        } else if (currentIndex > st && currentIndex < ed) {
+            hasInserted = true;
+
+            const firstSplitTextRun = {
+                ...textRun,
+                ed: currentIndex,
+            };
+
+            newTextRuns.push(firstSplitTextRun);
+
+            if (insertTextRuns.length) {
+                newTextRuns.push(...insertTextRuns);
             }
 
-            if (!hasInserted) {
-                hasInserted = true;
-                textRun.ed += textLength;
+            const lastSplitTextRun = {
+                ...textRun,
+                st: currentIndex + textLength,
+                ed: ed + textLength,
+            };
 
-                const pendingTextRuns = [];
-
-                if (insertTextRuns.length) {
-                    const startSplitTextRun = {
-                        ...textRun,
-                        st,
-                        ed: insertTextRuns[0].st,
-                    };
-
-                    if (startSplitTextRun.ed > startSplitTextRun.st) {
-                        pendingTextRuns.push(startSplitTextRun);
-                    }
-
-                    pendingTextRuns.push(...insertTextRuns);
-
-                    const lastInsertTextRuns = insertTextRuns[insertTextRuns.length - 1];
-
-                    const endSplitTextRun = {
-                        ...textRun,
-                        st: lastInsertTextRuns.ed,
-                        ed: ed + textLength,
-                    };
-
-                    if (endSplitTextRun.ed > endSplitTextRun.st) {
-                        pendingTextRuns.push(endSplitTextRun);
-                    }
-                } else {
-                    pendingTextRuns.push(textRun);
-                }
-
-                newTextRuns.push(...pendingTextRuns);
-            } else {
-                textRun.st += textLength;
-                textRun.ed += textLength;
-
-                newTextRuns.push(textRun);
-            }
+            newTextRuns.push(lastSplitTextRun);
         } else {
             // currentIndex < st
             textRun.st += textLength;
@@ -178,8 +149,6 @@ export function insertTextRuns(
         hasInserted = true;
         newTextRuns.push(...insertTextRuns);
     }
-
-    // console.log(JSON.stringify(newTextRuns, null, 2));
 
     body.textRuns = normalizeTextRuns(newTextRuns);
 }
@@ -534,12 +503,7 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
                     ed: ed - startIndex,
                 });
 
-                // https://github.com/dream-num/univer-pro/issues/2044.
-                if (startIndex === st) {
-                    textRun.ed = st;
-                } else {
-                    continue;
-                }
+                continue;
             } else if (st <= startIndex && ed >= endIndex) {
                 /**
                  * If the selection range is smaller than the current textRun,
@@ -727,6 +691,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
 
     const endIndex = currentIndex + textLength - 1;
     const removeTables: ICustomTable[] = [];
+
     if (tables) {
         const newTables = [];
         for (let i = 0, len = tables.length; i < len; i++) {
@@ -758,6 +723,7 @@ export function deleteTables(body: IDocumentBody, textLength: number, currentInd
         }
         body.tables = newTables;
     }
+
     return removeTables;
 }
 
@@ -768,6 +734,7 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
 
     const endIndex = currentIndex + textLength - 1;
     const removeCustomRanges: ICustomRange[] = [];
+
     if (customRanges) {
         const newCustomRanges = [];
         for (let i = 0, len = customRanges.length; i < len; i++) {
@@ -803,6 +770,7 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
     const startIndex = currentIndex;
     const endIndex = currentIndex + textLength - 1;
     const removeCustomDecorations: ICustomDecoration[] = [];
+
     if (customDecorations) {
         const newCustomDecorations = [];
         for (let i = 0, len = customDecorations.length; i < len; i++) {
@@ -827,5 +795,6 @@ export function deleteCustomDecorations(body: IDocumentBody, textLength: number,
         }
         body.customDecorations = newCustomDecorations;
     }
+
     return removeCustomDecorations;
 }

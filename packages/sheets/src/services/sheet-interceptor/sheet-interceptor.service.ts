@@ -74,7 +74,9 @@ export class SheetInterceptorService extends Disposable {
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
     /** @ignore */
-    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
+    constructor(
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
         super();
 
         // When a workbook is created or a worksheet is added after when workbook is created,
@@ -229,6 +231,7 @@ export class SheetInterceptorService extends Disposable {
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
         const unitId = workbook.getUnitId();
+        // const isRowStylePrecedeColumnStyle = this._isRowStylePrecedeColumnStyle;
 
         // eslint-disable-next-line ts/no-this-alias
         const sheetInterceptorService = this;

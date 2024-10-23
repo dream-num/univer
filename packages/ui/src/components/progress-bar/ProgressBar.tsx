@@ -23,10 +23,11 @@ export interface IProgressBarProps {
     progress: { done: number; count: number };
     barColor?: string;
     onTerminate?: () => void;
+    onClearProgress?: () => void; // Notify the parent component of the reset progress
 }
 
 export function ProgressBar(props: IProgressBarProps) {
-    const { barColor, progress, onTerminate } = props;
+    const { barColor, progress, onTerminate, onClearProgress } = props;
     const { count, done } = progress;
 
     const themeService = useDependency(ThemeService);
@@ -58,6 +59,12 @@ export function ProgressBar(props: IProgressBarProps) {
                 setVisible(false);
                 // Reset the width for future progress bars
                 progressBarInner.style.width = '0%';
+
+                // Notify the parent component to reset the progress after the animation ends
+                // After the progress bar is completed 100%, the upper props data source may not be reset, resulting in count and done still being the previous values (displaying 100%) when the progress bar is triggered next time, so a message is reported here to trigger clearing.
+                if (done === count && onClearProgress) {
+                    onClearProgress();
+                }
             }
         };
 

@@ -15,6 +15,7 @@
  */
 
 import './apis/everything';
+import './apis/facade';
 
 export * from './apis/everything';
 

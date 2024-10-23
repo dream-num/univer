@@ -241,7 +241,7 @@ export {
 export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
 export { SetFrozenCancelCommand } from './commands/commands/set-frozen-cancel.command';
 export { SetFrozenCommand } from './commands/commands/set-frozen.command';
-export { SetHideGridlinesCommand } from './commands/commands/set-hide-gridlines.command';
+export { type IToggleGridlinesCommandParams, ToggleGridlinesCommand } from './commands/commands/toggle-gridlines.command';
 export { type ISetRangeProtectionCommandParams, SetRangeProtectionCommand } from './commands/commands/set-range-protection.command';
 export { type ISetRangeValuesCommandParams, SetRangeValuesCommand } from './commands/commands/set-range-values.command';
 export {
@@ -352,7 +352,7 @@ export {
     SetFrozenMutation,
     SetFrozenMutationFactory,
 } from './commands/mutations/set-frozen.mutation';
-export { SetHideGridlinesMutation } from './commands/mutations/set-hide-gridlines.mutatiom';
+export { type IToggleGridlinesMutationParams, ToggleGridlinesMutation } from './commands/mutations/toggle-gridlines.mutation';
 export { FactorySetRangeProtectionMutation, type ISetRangeProtectionMutationParams, SetRangeProtectionMutation } from './commands/mutations/set-range-protection.mutation';
 export {
     type ISetRangeValuesMutationParams,

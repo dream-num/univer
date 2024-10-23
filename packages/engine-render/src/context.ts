@@ -15,19 +15,21 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IRenderConfig } from './services/render-config';
 import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     __mode = 'rendering';
-    private _system: string;
-    private _browser: string;
+
     private _transformCache: Nullable<DOMMatrix>;
     readonly canvas: HTMLCanvasElement;
 
     _context: CanvasRenderingContext2D;
     private _systemType: string;
     private _browserType: string;
+
+    renderConfig: Readonly<IRenderConfig> = {};
 
     constructor(context: CanvasRenderingContext2D) {
         this.canvas = context.canvas;
@@ -900,7 +902,6 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
             this._context.setLineDash(segments);
         } else if ('mozDash' in this._context) {
             // verified that this works in firefox
-
             (<any> this._context.mozDash) = segments;
         } else if ('webkitLineDash' in this._context) {
             // does not currently work for Safari
@@ -1008,18 +1009,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 }
 
-/**
- * TODO
- */
-export class UniverRenderingContextWebGL { }
-
-/**
- * TODO
- */
-export class UniverRenderingContextWebGPU { }
-
-export class UniverRenderingContext extends UniverRenderingContext2D {
-}
+export class UniverRenderingContext extends UniverRenderingContext2D { }
 
 export class UniverPrintingContext extends UniverRenderingContext2D {
     override __mode = 'printing';

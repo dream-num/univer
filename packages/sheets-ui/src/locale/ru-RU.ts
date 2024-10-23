@@ -110,6 +110,9 @@ const locale: typeof zhCN = {
             right: 'Правая рамка',
         },
         more: 'Больше',
+        hideGridlines: 'Скрыть сетку',
+        showGridlines: 'Показать сетку',
+        toggleGridlines: 'Переключить сетку',
     },
     defaultFmt: {
         Automatic: {

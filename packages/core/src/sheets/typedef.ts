@@ -546,7 +546,7 @@ export interface IOptionData {
 /**
  * Option of copyTo function
  */
-export interface ICopyToOptionsData extends IOptionData {}
+export interface ICopyToOptionsData extends IOptionData { }
 
 export interface IRectLTRB {
     left: number;
@@ -574,9 +574,9 @@ export interface ISingleCell {
     isMergedMainCell: boolean;
 }
 
-export interface IRangeWithCoord extends IPosition, IRange {}
+export interface IRangeWithCoord extends IPosition, IRange { }
 
-export interface ISelectionCell extends IRange, ISingleCell {}
+export interface ISelectionCell extends IRange, ISingleCell { }
 
 export interface ISelectionCellWithMergeInfo extends IPosition, ISingleCell {
     mergeInfo: IRangeWithCoord; // merge cell, start and end is upper left cell

@@ -15,26 +15,21 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IToggleGridlinesMutationParams } from '../mutations/toggle-gridlines.mutation';
 import { BooleanNumber, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
-
-import type { ISetHideGridlinesMutationParams } from '../mutations/set-hide-gridlines.mutatiom';
-import {
-    SetHideGridlinesMutation,
-    SetHideGridlinesUndoMutationFactory,
-} from '../mutations/set-hide-gridlines.mutatiom';
+import { ToggleGridlinesMutation } from '../mutations/toggle-gridlines.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export interface ISetHideGridlinesCommandParams {
-    hideGridlines?: BooleanNumber;
+export interface IToggleGridlinesCommandParams {
+    showGridlines?: BooleanNumber;
     unitId?: string;
     subUnitId?: string;
 }
 
-export const SetHideGridlinesCommand: ICommand = {
+export const ToggleGridlinesCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-hide-gridlines',
-
-    handler: async (accessor: IAccessor, params?: ISetHideGridlinesCommandParams) => {
+    id: 'sheet.command.toggle-gridlines',
+    handler: async (accessor: IAccessor, params?: IToggleGridlinesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -42,33 +37,31 @@ export const SetHideGridlinesCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
 
+        const { worksheet } = target;
+        const currentlyShow = worksheet.getConfig().showGridlines;
+        if (currentlyShow === params?.showGridlines) return false;
+
         const { unitId, subUnitId } = target;
-        let hideGridlines = BooleanNumber.FALSE;
-
-        if (params) {
-            hideGridlines = params.hideGridlines ?? BooleanNumber.FALSE;
-        }
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
-        const setHideGridlinesMutationParams: ISetHideGridlinesMutationParams = {
-            hideGridlines,
+        const doParams: IToggleGridlinesMutationParams = {
+            showGridlines: currentlyShow === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE,
             unitId,
             subUnitId,
         };
 
-        const undoMutationParams = SetHideGridlinesUndoMutationFactory(accessor, setHideGridlinesMutationParams);
-        const result = commandService.syncExecuteCommand(SetHideGridlinesMutation.id, setHideGridlinesMutationParams);
+        const undoMutationParams: IToggleGridlinesMutationParams = {
+            showGridlines: currentlyShow,
+            unitId,
+            subUnitId,
+        };
 
+        const result = commandService.syncExecuteCommand(ToggleGridlinesMutation.id, doParams);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetHideGridlinesMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: SetHideGridlinesMutation.id, params: setHideGridlinesMutationParams }],
+                undoMutations: [{ id: ToggleGridlinesMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: ToggleGridlinesMutation.id, params: doParams }],
             });
+
             return true;
         }
 

@@ -110,6 +110,9 @@ const locale: typeof zhCN = {
             right: 'خط راست قاب',
         },
         more: 'بیشتر',
+        hideGridlines: 'پنهان کردن خطوط شبکه',
+        showGridlines: 'نمایش خطوط شبکه',
+        toggleGridlines: 'تغییر وضعیت خطوط شبکه',
     },
     defaultFmt: {
         Automatic: {

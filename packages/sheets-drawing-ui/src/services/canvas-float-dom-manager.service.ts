@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Worksheet } from '@univerjs/core';
+import type { IDisposable, IPosition, ITransformState, Nullable, Serializable, Workbook, Worksheet } from '@univerjs/core';
 import type { IDrawingJsonUndo1 } from '@univerjs/drawing';
 import type { BaseObject, IBoundRectNoAngle, IRectProps, IRender, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, generateRandomId, ICommandService, Inject, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
-import { ISheetSelectionRenderService, SetScrollOperation, SetZoomRatioOperation, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, Subject } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
@@ -371,29 +371,50 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     private _scrollUpdateListener() {
-        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
-            const updateSheet = (unitId: string, subUnitId: string) => {
-                const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
-                const map = this._ensureMap(unitId, subUnitId);
-                const ids = Array.from(map.keys());
-                const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
-                const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
-                if (!renderObject || !target || !skeleton) {
-                    return;
+        const updateSheet = (unitId: string, subUnitId: string) => {
+            const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+            const map = this._ensureMap(unitId, subUnitId);
+            const ids = Array.from(map.keys());
+            const target = getSheetCommandTarget(this._univerInstanceService, { unitId, subUnitId });
+            const skeleton = this._renderManagerService.getRenderById(unitId)?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+            if (!renderObject || !target || !skeleton) {
+                return;
+            }
+            ids.forEach((id) => {
+                const info = this._domLayerInfoMap.get(id);
+                if (info) {
+                    const position = calcPosition(info.rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
+                    info.position$.next(position);
                 }
-                ids.forEach((id) => {
-                    const info = this._domLayerInfoMap.get(id);
-                    if (info) {
-                        const position = calcPosition(info.rect, renderObject.renderObject, skeleton.skeleton, target.worksheet);
-                        info.position$.next(position);
-                    }
-                });
-            };
-            if (commandInfo.id === SetScrollOperation.id) {
-                const params = (commandInfo.params) as any;
-                const { unitId, sheetId } = params;
-                updateSheet(unitId, sheetId);
-            } else if (commandInfo.id === SetZoomRatioOperation.id) {
+            });
+        };
+        let time = 0;
+
+        this.disposeWithMe(
+
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+                .pipe(
+                    filter((sheet) => !!sheet),
+                    map((sheet) => {
+                        const render = this._renderManagerService.getRenderById(sheet.getUnitId());
+                        return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getActiveSheet().getSheetId() } : null;
+                    }),
+                    filter((render) => !!render),
+                    mergeMap((render) => fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onMouseWheel$)
+                        .pipe(
+                            map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId }))
+                        )
+                    )
+                )
+                .subscribe(({ unitId, subUnitId }) => {
+                    const now = performance.now();
+                    time = now;
+                    updateSheet(unitId, subUnitId);
+                })
+
+        );
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetZoomRatioOperation.id) {
                 const params = (commandInfo.params) as any;
                 const { unitId } = params;
                 const subUnitIds = Array.from(this._domLayerMap.get(unitId)?.keys() ?? []);

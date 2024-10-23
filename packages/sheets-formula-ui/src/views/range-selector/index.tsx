@@ -234,7 +234,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEffect(() => {
         const d1 = commandService.beforeCommandExecuted((info) => {
-            if (info.id === SetWorksheetActiveOperation.id) {
+            if (info.id === SetWorksheetActiveOperation.id && !isSupportAcrossSheet) {
                 isFocusSet(false);
                 onBlur();
                 // Refresh the component
@@ -253,7 +253,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d1.dispose();
             d2.dispose();
         };
-    }, []);
+    }, [isSupportAcrossSheet]);
 
     useEffect(() => {
         isFocusSet(_isFocus);

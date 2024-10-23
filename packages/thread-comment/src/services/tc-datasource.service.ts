@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable } from '@univerjs/core';
 import type { Nullable } from '@univerjs/core';
 import type { IBaseComment, IThreadComment } from '../types/interfaces/i-thread-comment';
+import { createIdentifier, Disposable } from '@univerjs/core';
 
 export type ThreadCommentJSON = {
     id: string;
@@ -73,7 +73,7 @@ export interface IThreadCommentDataSourceService {
     deleteComment: (unitId: string, subUnitId: string, threadId: string, commentId: string) => Promise<Success>;
     saveToSnapshot: (unitComments: Record<string, IThreadComment[]>, unitId: string) => Record<string, ThreadCommentJSON[]>;
     getThreadComment: (unitId: string, subUnitId: string, threadId: string) => Promise<Nullable<IBaseComment>>;
-    listThreadComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[]>;
+    listThreadComments: (unitId: string, subUnitId: string, threadId: string[]) => Promise<IBaseComment[] | false>;
 }
 
 /**
@@ -108,7 +108,7 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
         if (this._dataSource) {
             return this._dataSource.addComment(comment);
         }
-        return comment;
+        return { ...comment, threadId: comment.threadId ?? comment.id };
     }
 
     async updateComment(comment: IThreadComment) {
@@ -137,7 +137,7 @@ export class ThreadCommentDataSourceService extends Disposable implements IThrea
             return this.dataSource.listComments(unitId, subUnitId, threadIds);
         }
 
-        return [];
+        return false;
     }
 
     saveToSnapshot(unitComments: Record<string, IThreadComment[]>, unitId: string) {

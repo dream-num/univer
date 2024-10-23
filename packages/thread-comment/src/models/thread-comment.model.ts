@@ -198,7 +198,7 @@ export class ThreadCommentModel extends Disposable {
         const threadMap = this._ensureThreadMap(unitId, subUnitId);
         const commentMap = this._ensureCommentMap(unitId, subUnitId);
         const comments = await this._dataSourceService.listThreadComments(unitId, subUnitId, threadIds);
-        if (!comments.length) {
+        if (!comments) {
             return;
         }
         const deleteThreads = new Set<string>(threadIds);

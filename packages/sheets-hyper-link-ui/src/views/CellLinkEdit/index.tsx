@@ -229,8 +229,6 @@ export const CellLinkEdit = () => {
         }
     }, [type, isFocusRangeSelector, showLabel, editorBridgeService]);
 
-    const payloadInitial = useMemo(() => payload, [type]);
-
     useEffect(() => {
         const render = editing?.type === HyperLinkEditSourceType.ZEN_EDITOR ?
             renderManagerService.getRenderById(DOCS_ZEN_EDITOR_UNIT_ID_KEY) :
@@ -249,7 +247,7 @@ export const CellLinkEdit = () => {
             editorBridgeService.disableForceKeepVisible();
             disposeCollection.dispose();
         };
-    }, [editorBridgeService, renderManagerService]);
+    }, [editing?.type, editorBridgeService, renderManagerService]);
 
     useEffect(() => {
         popupService.setIsKeepVisible(isFocusRangeSelector);
@@ -472,7 +470,7 @@ export const CellLinkEdit = () => {
                         subUnitId={subUnitId}
                         isOnlyOneRange
                         isSupportAcrossSheet
-                        initValue={payloadInitial}
+                        initValue={payload}
                         onChange={handleRangeChange}
                         isFocus={isFocusRangeSelector}
                         onBlur={() => { isFocusRangeSelectorSet(false); }}

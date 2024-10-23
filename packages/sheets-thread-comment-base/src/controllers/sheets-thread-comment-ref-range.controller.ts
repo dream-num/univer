@@ -158,23 +158,18 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
     }
 
     private _initData() {
-        const data = this._threadCommentModel.getAll();
+        const datas = this._threadCommentModel.getAll();
 
-        for (const unitId in data) {
-            const unitMap = data[unitId];
-            for (const subUnitId in unitMap) {
-                const subUnitMap = unitMap[subUnitId];
-                for (const id in subUnitMap) {
-                    const comment = subUnitMap[id];
-                    const ref = comment.ref;
-                    const pos = singleReferenceToGrid(ref);
-                    const sheetComment = {
-                        ...comment,
-                        ...pos,
-                    };
-                    this._register(unitId, subUnitId, sheetComment);
-                    this._watch(unitId, subUnitId, sheetComment);
-                }
+        for (const data of datas) {
+            for (const thread of data.threads) {
+                const { unitId, subUnitId, root } = thread;
+                const pos = singleReferenceToGrid(root.ref);
+                const sheetComment = {
+                    ...root,
+                    ...pos,
+                };
+                this._register(unitId, subUnitId, sheetComment);
+                this._watch(unitId, subUnitId, sheetComment);
             }
         }
     }

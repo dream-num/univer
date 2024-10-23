@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 import { generateRandomId, useDependency } from '@univerjs/core';
 import { ICommandService, type IUser, LocaleService, type UniverInstanceType, UserManagerService } from '@univerjs/core';
 import { Dropdown, Menu, MenuItem, Tooltip } from '@univerjs/design';
@@ -21,14 +23,13 @@ import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingl
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
 import cs from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
-import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { debounceTime } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { getDT } from '../../common/utils';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
 import styles from './index.module.less';
-import type { IThreadCommentEditorInstance } from '../thread-comment-editor';
 
 export interface IThreadCommentTreeProps {
     id?: string;
@@ -204,7 +205,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
     const [editingId, setEditingId] = useState('');
-    useObservable(threadCommentModel.commentMap$);
+    const updte$ = useMemo(() => threadCommentModel.commentUpdate$.pipe(debounceTime(16)), [threadCommentModel]);
+    useObservable(updte$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
     const userManagerService = useDependency(UserManagerService);

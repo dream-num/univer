@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { CommentUpdate, IThreadComment } from '@univerjs/thread-comment';
-import { ThreadCommentModel } from '@univerjs/thread-comment';
+import { Disposable, Inject, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { singleReferenceToGrid } from '@univerjs/engine-formula';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { Subject } from 'rxjs';
 
 export type SheetCommentUpdate = CommentUpdate & {
@@ -107,16 +107,12 @@ export class SheetsThreadCommentModel extends Disposable {
     }
 
     private _initData() {
-        const data = this._threadCommentModel.getAll();
+        const datas = this._threadCommentModel.getAll();
 
-        for (const unitId in data) {
-            const unitMap = data[unitId];
-            for (const subUnitId in unitMap) {
-                const subUnitMap = unitMap[subUnitId];
-                for (const id in subUnitMap) {
-                    const comment = subUnitMap[id];
-                    this._addComment(unitId, subUnitId, comment);
-                }
+        for (const data of datas) {
+            for (const thread of data.threads) {
+                const { unitId, subUnitId, root } = thread;
+                this._addComment(unitId, subUnitId, root);
             }
         }
     }
@@ -132,17 +128,21 @@ export class SheetsThreadCommentModel extends Disposable {
             locationMap.set(commentId, { row, column });
         }
 
-        this._commentUpdate$.next({
-            unitId,
-            subUnitId,
-            payload: comment,
-            type: 'add',
-            isRoot: !parentId,
-            ...location,
-        });
+        if (!parentId) {
+            this._commentUpdate$.next({
+                unitId,
+                subUnitId,
+                payload: comment,
+                type: 'add',
+                isRoot: !parentId,
+                ...location,
+            });
+        }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initUpdateTransform() {
+        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
 
@@ -252,7 +252,11 @@ export class SheetsThreadCommentModel extends Disposable {
         if (!commentId) {
             return undefined;
         }
-        return this._threadCommentModel.getCommentWithChildren(unitId, subUnitId, commentId);
+        const comment = this.getComment(unitId, subUnitId, commentId);
+        if (!comment) {
+            return undefined;
+        }
+        return this._threadCommentModel.getThread(unitId, subUnitId, comment.threadId);
     }
 
     showCommentMarker(unitId: string, subUnitId: string, row: number, column: number) {
@@ -270,6 +274,6 @@ export class SheetsThreadCommentModel extends Disposable {
     }
 
     getSubUnitAll(unitId: string, subUnitId: string) {
-        return Object.values(this._threadCommentModel.getAll()[unitId]?.[subUnitId] ?? {});
+        return this._threadCommentModel.getUnit(unitId).filter((i) => i.subUnitId === subUnitId).map((i) => i.root);
     }
 }

@@ -75,22 +75,26 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
-            return {
-                sheet,
-                row,
-                col,
-            };
+
+            if (getShouldDisableCellLink(sheet, row, col)) {
+                return true;
+            }
         }),
-        switchMap((editingCell) => {
-            if (editingCell === true) {
+        switchMap((disableCell) => {
+            if (disableCell) {
                 return of(true);
             }
-            const { sheet, row, col } = editingCell;
 
             const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
                 .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
 
-            return isEditing$.pipe(switchMap((editing) => (editing ? getEditingLinkDisable$(accessor, editing) : of(getShouldDisableCellLink(sheet, row, col)))));
+            return isEditing$.pipe(
+                switchMap(
+                    (editing) => editing ?
+                        getEditingLinkDisable$(accessor, editing)
+                        : of(false)
+                )
+            );
         })
     );
 

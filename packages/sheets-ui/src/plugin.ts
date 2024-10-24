@@ -47,6 +47,7 @@ import { SheetPermissionInterceptorCanvasRenderController } from './controllers/
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
@@ -152,10 +153,12 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
+            [SheetPermissionViewModelController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override));
 
         touchDependencies(this._injector, [
+            [SheetPermissionViewModelController],
             [SheetPermissionPanelModel],
         ]);
     }

@@ -37,7 +37,7 @@ import {
 } from '@univerjs/sheets';
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { debounceTime, map, mergeMap, Observable } from 'rxjs';
+import { debounceTime, map, Observable, switchMap } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
 import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
@@ -160,7 +160,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
         let subscribe: Nullable<Subscription> = null;
         this.disposeWithMe(
             this._editorBridgeService.currentEditCellState$
-                .pipe(mergeMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
+                .pipe(switchMap((state) => this._editorBridgeService.visible$.pipe(map((visible) => ({ visible, state })))))
                 .subscribe(({ visible, state }) => {
                     if (!state) {
                         return;
@@ -245,7 +245,7 @@ export class SheetsHyperLinkPopupController extends Disposable {
 
         this.disposeWithMe(
             this._univerInstanceService.focused$.pipe(
-                mergeMap((id) => {
+                switchMap((id) => {
                     const render = id === DOCS_ZEN_EDITOR_UNIT_ID_KEY ? this._renderManagerService.getRenderById(id) : null;
                     if (render) {
                         return render.with(DocEventManagerService).hoverCustomRanges$.pipe(debounceTime(200));

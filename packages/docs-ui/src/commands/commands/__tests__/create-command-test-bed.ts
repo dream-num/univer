@@ -37,6 +37,7 @@ import { DocSelectionManagerService, DocSkeletonManagerService, DocStateEmitServ
 import { DocumentViewModel, IRenderManagerService } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 import { DocIMEInputManagerService } from '../../../services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../../../services/doc-menu-style.service';
 import { DocStateChangeManagerService } from '../../../services/doc-state-change-manager.service';
 import { DocSelectionRenderService } from '../../../services/selection/doc-selection-render.service';
 
@@ -117,6 +118,7 @@ export function createCommandTestBed(docData?: IDocumentData, dependencies?: Dep
             injector.add([IRenderManagerService, { useClass: MockRenderManagerService as unknown as Ctor<IRenderManagerService> }]);
 
             injector.add([DocSelectionManagerService]);
+            injector.add([DocMenuStyleService]);
             injector.add([DocStateEmitService]);
             injector.add([DocStateChangeManagerService]);
             injector.add([DocIMEInputManagerService]);

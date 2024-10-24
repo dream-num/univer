@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
-import { normalizeTextRuns } from '../apply-utils/common';
-import { BooleanNumber } from '../../../../types/enum/text-style';
 import type { ITextRun } from '../../../../types/interfaces/i-document-data';
+
+import { describe, expect, it } from 'vitest';
+import { BooleanNumber } from '../../../../types/enum/text-style';
+import { normalizeTextRuns } from '../apply-utils/common';
 
 describe('common utils test cases', () => {
     describe('normalizeTextRuns', () => {
@@ -56,13 +56,6 @@ describe('common utils test cases', () => {
             ];
 
             const expectedTextRuns: ITextRun[] = [
-                {
-                    st: 0,
-                    ed: 0,
-                    ts: {
-                        bl: BooleanNumber.FALSE,
-                    },
-                },
                 {
                     st: 15,
                     ed: 35,

@@ -19,18 +19,20 @@ import type { IUnitRange } from '../sheets/typedef';
 import KDBush from 'kdbush';
 import RBush from 'rbush';
 
+type StringOrNumber = string | number;
+
 export interface IRTreeItem extends IUnitRange {
-    id: string;
+    id: StringOrNumber;
 }
 
 interface IRBushItem extends BBox {
-    id: string;
+    id: StringOrNumber;
 }
 
 interface IRdTreeItem {
     x: number;
     y: number;
-    ids: Set<string>;
+    ids: Set<StringOrNumber>;
 }
 
 export interface IRTreeData {
@@ -43,7 +45,7 @@ export class RTree {
     private _tree: Map<string, Map<string, RBush<IRBushItem>>> = new Map();
 
     // unitId -> subUnitId -> row -> column -> ids
-    private _oneCellCache = new Map<string, Map<string, Map<number, Map<number, Set<string>>>>>();
+    private _oneCellCache = new Map<string, Map<string, Map<number, Map<number, Set<StringOrNumber>>>>>();
 
     private _kdTree: Map<string, Map<string, { tree: KDBush; items: IRdTreeItem[] } | undefined>> = new Map();
 
@@ -68,7 +70,7 @@ export class RTree {
         return this._tree.get(unitId)!.get(subUnitId)!;
     }
 
-    private _getOneCellCache(unitId: string, subUnitId: string, row: number, column: number): Set<string> {
+    private _getOneCellCache(unitId: string, subUnitId: string, row: number, column: number): Set<StringOrNumber> {
         if (!this._oneCellCache.has(unitId)) {
             this._oneCellCache.set(unitId, new Map());
         }
@@ -85,7 +87,7 @@ export class RTree {
         return this._oneCellCache.get(unitId)!.get(subUnitId)!.get(row)!.get(column)!;
     }
 
-    private _removeOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: string) {
+    private _removeOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
         const unitCache = this._oneCellCache.get(unitId);
         if (!unitCache) return;
 
@@ -101,11 +103,11 @@ export class RTree {
         cellCache.delete(id);
     }
 
-    private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: string) {
+    private _insertOneCellCache(unitId: string, subUnitId: string, row: number, column: number, id: StringOrNumber) {
         this._getOneCellCache(unitId, subUnitId, row, column).add(id);
     }
 
-    private _getRdTreeItems(map: Map<number, Map<number, Set<string>>>) {
+    private _getRdTreeItems(map: Map<number, Map<number, Set<StringOrNumber>>>) {
         const items: IRdTreeItem[] = [];
 
         for (const [y, innerMap] of map) {
@@ -121,7 +123,7 @@ export class RTree {
         return items;
     }
 
-    private _searchByOneCellCache(search: IUnitRange): string[] {
+    private _searchByOneCellCache(search: IUnitRange): StringOrNumber[] {
         const { unitId, sheetId: subUnitId, range } = search;
         const { startRow, startColumn, endRow, endColumn } = range;
         const searchObject = this._kdTree.get(unitId)?.get(subUnitId);
@@ -133,7 +135,7 @@ export class RTree {
 
         const indexes = tree.range(startColumn, startRow, endColumn, endRow);
 
-        const result: string[] = [];
+        const result: StringOrNumber[] = [];
 
         for (const index of indexes) {
             const item = items[index];
@@ -221,10 +223,10 @@ export class RTree {
         }
     }
 
-    search(search: IUnitRange): string[] {
+    search(search: IUnitRange): StringOrNumber[] {
         const { unitId, sheetId: subUnitId, range } = search;
 
-        const results: string[] = [];
+        const results: StringOrNumber[] = [];
 
         if (this._enableOneCellCache && this._enableOneCellCache) {
             const oneCellResults = this._searchByOneCellCache(search);
@@ -252,8 +254,8 @@ export class RTree {
         return results;
     }
 
-    bulkSearch(searchList: IUnitRange[]): Set<string> {
-        const result = new Set<string>();
+    bulkSearch(searchList: IUnitRange[]): Set<StringOrNumber> {
+        const result = new Set<StringOrNumber>();
         for (const search of searchList) {
             const items = this.search(search);
             for (const item of items) {

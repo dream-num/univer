@@ -26,7 +26,7 @@ import { NodeType } from './node-type';
 interface IAstNodeNodeJson {
     token: string;
     children?: IAstNodeNodeJson[];
-    nodeType: string;
+    nodeType: number;
 }
 
 export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;

@@ -47,10 +47,12 @@ Extensible. High-performance. Embedded to your application.
 ## 🌈 Highlights
 
 - 📈 Univer is designed to support **spreadsheets**, **documents** and **presentation**.
+- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js.
 - ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
 - 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
-- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* and *Facade API* that makes it a delight for developers to implement their unique requirements on the top of Univer.
+- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* that makes it a delight for developers to implement their unique requirements on the top of Univer.
 - 💄 Univer is **highly customizable**, allowing you to personalize its appearance using *themes*. It also provides support for internationalization (i18n).
+- 🥤 Univer is **easy to work with**. The *Presets* & *Facade API* make it easy to hands on.
 - ⚡ Univer in **performant**.
   - ✏️ Univer boasts an efficient *rendering engine* based on canvas, capable of rendering various document types flawlessly. The rendering engines supports advanced typesetting features such as *punctuation squeezing*, *text and image layout* and *scroll buffering*.
   - 🧮 Univer incorporates a lightning-fast *formula engine* that can operate in Web Workers or even on the server side.
@@ -76,12 +78,12 @@ Univer provides a wide range of features for spreadsheets, documents and present
 - **Comments**: Enables adding comments to cells to provide additional information.
 - **Cross-highlighting**: Supports displaying cross-highlighting in spreadsheets to help users quickly locate selected cells.
 - **Pivot Tables**[^1]: Supports pivot tables, allowing users to summarize and analyze data.
-- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously.
+- **Collaborative Editing**[^1]: Supports multiple users editing a spreadsheet simultaneously. File history and recovering are also provided.
 - **Printing**[^1]: Allows printing a spreadsheet or exporting it to PDF.
 - **Import & Export**[^1]: Support for importing and exporting data in XLSX.
 - **Charts**[^2]: Third-party chart support via [VChart][vchart-link].
 
-### 📝 Univer Doc (Under Development)
+### 📝 Univer Doc (beta)
 
 - **Core Features**: Univer supports core document features, including paragraphs, headings, lists, superscript, subscript, and more.
 - **Lists**: Supports ordered lists, unordered lists, and task lists.

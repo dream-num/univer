@@ -54,6 +54,7 @@ import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { BULLET_LIST_TYPE_COMPONENT, ORDER_LIST_TYPE_COMPONENT } from '../../components/list-type-picker';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 
 function getInsertTableHiddenObservable(
     accessor: IAccessor
@@ -913,11 +914,16 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(DocSelectionManagerService);
+    const docMenuStyleService = accessor.get(DocMenuStyleService);
+
     const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveTextRange();
+    const cacheStyle = docMenuStyleService.getStyleCache() ?? {};
 
     if (docDataModel == null || activeTextRange == null) {
-        return;
+        return {
+            ts: cacheStyle,
+        };
     }
 
     const { startOffset, segmentId } = activeTextRange;
@@ -925,7 +931,9 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textRuns = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.textRuns;
 
     if (textRuns == null) {
-        return;
+        return {
+            ts: cacheStyle,
+        };
     }
 
     let textRun;
@@ -939,7 +947,13 @@ function getFontStyleAtCursor(accessor: IAccessor) {
         }
     }
 
-    return textRun;
+    return {
+        ...textRun,
+        ts: {
+            ...textRun?.ts,
+            ...cacheStyle,
+        },
+    };
 }
 
 function getParagraphStyleAtCursor(accessor: IAccessor) {

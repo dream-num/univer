@@ -33,15 +33,15 @@ export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
 
     for (const textRun of textRuns) {
-        const { ed, ts } = textRun;
+        const { st, ed, ts } = textRun;
 
         if (textRun.sId === undefined) {
             delete textRun.sId;
         }
 
-        // if (st === ed) {
-        //     continue;
-        // }
+        if (st === ed) {
+            continue;
+        }
 
         // Delete textRun if it has no style(ts is empty or has no sId)
         if (Tools.isEmptyObject(ts) && textRun.sId == null) {
@@ -473,18 +473,18 @@ export function deleteTextRuns(body: IDocumentBody, textLength: number, currentI
     const removeTextRuns: ITextRun[] = [];
 
     // Handles special case where repeated set inline format style by cursor.
-    if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
-        const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
-        removeTextRuns.push({
-            ...textRun,
-            st: textRun.st - currentIndex,
-            ed: textRun.ed - currentIndex,
-        });
+    // if (startIndex === endIndex && textRuns?.find((t) => t.st === currentIndex && t.ed === currentIndex)) {
+    //     const textRun = textRuns.find((t) => t.st === currentIndex && t.ed === currentIndex)!;
+    //     removeTextRuns.push({
+    //         ...textRun,
+    //         st: textRun.st - currentIndex,
+    //         ed: textRun.ed - currentIndex,
+    //     });
 
-        body.textRuns = body.textRuns?.filter((t) => t !== textRun);
+    //     body.textRuns = body.textRuns?.filter((t) => t !== textRun);
 
-        return removeTextRuns;
-    }
+    //     return removeTextRuns;
+    // }
 
     if (textRuns) {
         const newTextRuns = [];

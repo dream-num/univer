@@ -384,13 +384,6 @@ describe('apply method', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // console.log(JSON.stringify(resultA, null, 2));
-        // console.log(JSON.stringify(resultB, null, 2));
-
-        // console.log('composedAction1', JSON.stringify(composedAction1, null, 2));
-
-        // console.log(JSON.stringify(resultC, null, 2));
-
         expect(resultA).toEqual(resultB);
         expect(resultC).toEqual(resultD);
         expect(resultA).toEqual(resultC);
@@ -470,6 +463,75 @@ describe('apply method', () => {
         // console.log(JSON.stringify(resultB, null, 2));
 
         // console.log('composedAction1', JSON.stringify(composedAction1, null, 2));
+
+        // console.log(JSON.stringify(resultC, null, 2));
+
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should get the same result when set different style at 2 clients', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+            }, {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [{
+                        st: 0,
+                        ed: 1,
+                        ts: { fs: 9 },
+                    }],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 2,
+                segmentId: '',
+                body: {
+                    dataStream: '',
+                    textRuns: [{
+                        st: 0,
+                        ed: 2,
+                        ts: {
+                            cl: {
+                                rgb: '#ee0000',
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const doc1 = getDefaultDocWithLength2();
+        const doc2 = getDefaultDocWithLength2();
+        const doc3 = getDefaultDocWithLength2();
+        const doc4 = getDefaultDocWithLength2();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        // console.log(JSON.stringify(resultA, null, 2));
+        // console.log(JSON.stringify(resultB, null, 2));
+
+        // console.log('composedAction1', JSON.stringify(composedAction1, null, 2));
+        // console.log('composedAction2', JSON.stringify(composedAction2, null, 2));
 
         // console.log(JSON.stringify(resultC, null, 2));
 

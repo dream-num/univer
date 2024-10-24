@@ -15,6 +15,7 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommand, IDocumentBody, IMutationInfo, IStyleBase, ITextDecoration, ITextRun,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
@@ -24,8 +25,10 @@ import {
     ICommandService, IUniverInstanceService,
     JSONX, MemoryCursor,
     TextX, TextXActionType,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
 
 function handleInlineFormat(
@@ -233,6 +236,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const docRanges = docSelectionManagerService.getDocRanges();
 
@@ -242,7 +246,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
 
         const segmentId = docRanges[0].segmentId;
 
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         if (docDataModel == null) {
             return false;
         }
@@ -312,6 +316,16 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             const { startOffset, endOffset } = range;
 
             if (startOffset == null || endOffset == null) {
+                continue;
+            }
+
+            if (startOffset === endOffset) {
+                // Cache the menu style for next input.
+                docMenuStyleService.setStyleCache(
+                    {
+                        [COMMAND_ID_TO_FORMAT_KEY_MAP[preCommandId]]: formatValue,
+                    }
+                );
                 continue;
             }
 

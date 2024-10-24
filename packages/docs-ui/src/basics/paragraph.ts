@@ -14,22 +14,27 @@
  * limitations under the License.
  */
 
-import type { ICustomTable, IParagraph, ITextRun } from '@univerjs/core';
+import type { ICustomTable, IParagraph, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
 
 export function hasParagraphInTable(paragraph: IParagraph, tables: ICustomTable[]) {
     return tables.some((table) => paragraph.startIndex > table.startIndex && paragraph.startIndex < table.endIndex);
 }
 
-export function getTextRunAtPosition(textRuns: ITextRun[], position: number) {
+export function getTextRunAtPosition(textRuns: ITextRun[], position: number, cacheStyle?: Nullable<ITextStyle>) {
     for (let i = textRuns.length - 1; i >= 0; i--) {
         const textRun = textRuns[i];
         const { st, ed } = textRun;
-        if (st === ed && position === st) {
-            return textRun;
-        }
 
         if (position > st && position <= ed) {
-            return textRun;
+            return {
+                ...textRun,
+                ts: {
+                    ...textRun.ts,
+                    ...cacheStyle,
+                },
+            };
         }
     }
+
+    return cacheStyle ? { ts: cacheStyle } : null;
 }

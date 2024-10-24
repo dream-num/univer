@@ -25,14 +25,15 @@ import type { IDrawInfo } from '../extension';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
+import type { IPaintForRefresh, IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
 import { BooleanNumber, sortRules, Tools } from '@univerjs/core';
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import { sheetContentViewportKeys, sheetHeaderViewportKeys } from './constants';
 import { SHEET_EXTENSION_PREFIX } from './extensions/sheet-extension';
-import { type IPaintForRefresh, type IPaintForScrolling, SHEET_VIEWPORT_KEY } from './interfaces';
 import { SheetComponent } from './sheet-component';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
@@ -375,7 +376,7 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-        spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
+        spreadsheetSkeleton.setStylesCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
@@ -407,13 +408,13 @@ export class Spreadsheet extends SheetComponent {
         // SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX selection  this.getObjectsByOrder() ---> [_Rect, Group]
 
         // SpreadsheetRowHeader SpreadsheetColumnHeader is not render by spreadsheet
-        if (this.sheetContentViewport().includes(viewportKey as SHEET_VIEWPORT_KEY)) {
+        if (sheetContentViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {
             if (viewportInfo && viewportInfo.cacheCanvas) {
                 this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
                 this._draw(mainCtx, viewportInfo);
             }
-        } else if (this.sheetHeaderViewport().includes(viewportKey as SHEET_VIEWPORT_KEY)) {
+        } else if (sheetHeaderViewportKeys.includes(viewportKey as SHEET_VIEWPORT_KEY)) {
             // doing nothing, other components(SpreadsheetRowHeader...) will render
         } else {
             // embed in doc & slide
@@ -683,14 +684,6 @@ export class Spreadsheet extends SheetComponent {
 
             ctx.clearRectForTexture(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
-    }
-
-    sheetContentViewport() {
-        return [SHEET_VIEWPORT_KEY.VIEW_MAIN, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP, SHEET_VIEWPORT_KEY.VIEW_MAIN_LEFT];
-    }
-
-    sheetHeaderViewport() {
-        return [SHEET_VIEWPORT_KEY.VIEW_ROW_TOP, SHEET_VIEWPORT_KEY.VIEW_ROW_BOTTOM, SHEET_VIEWPORT_KEY.VIEW_COLUMN_LEFT, SHEET_VIEWPORT_KEY.VIEW_COLUMN_RIGHT, SHEET_VIEWPORT_KEY.VIEW_LEFT_TOP];
     }
 
     testShowRuler(cacheCtx: UniverRenderingContext2D, viewportInfo: IViewportInfo): void {

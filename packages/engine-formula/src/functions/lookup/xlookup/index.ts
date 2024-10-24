@@ -57,8 +57,8 @@ export class Xlookup extends BaseFunction {
 
         if (
             (rowCountLookup !== 1 && columnCountLookup !== 1) ||
-            (rowCountReturn === 1 && columnCountLookup !== columnCountReturn) ||
-            (columnCountReturn === 1 && rowCountLookup !== rowCountReturn)
+            (rowCountLookup === 1 && columnCountLookup > 1 && columnCountLookup !== columnCountReturn) ||
+            (columnCountLookup === 1 && rowCountLookup > 1 && rowCountLookup !== rowCountReturn)
         ) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
@@ -107,7 +107,10 @@ export class Xlookup extends BaseFunction {
         rowCountReturn: number,
         columnCountReturn: number
     ) {
-        if (lookupValue.isArray()) {
+        const lookupValueRowCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getRowCount() : 1;
+        const lookupValueColumnCount = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getColumnCount() : 1;
+
+        if (lookupValueRowCount > 1 || lookupValueColumnCount > 1) {
             let resultArray: Nullable<ArrayValueObject>;
 
             if (rowCountLookup === 1) {
@@ -137,6 +140,8 @@ export class Xlookup extends BaseFunction {
             });
         }
 
+        const _lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).get(0, 0) as BaseValueObject : lookupValue;
+
         if (columnCountLookup === columnCountReturn && rowCountLookup === rowCountReturn) {
             const checkErrorCombination = this._checkErrorCombination(matchModeValue, searchModeValue);
 
@@ -144,7 +149,7 @@ export class Xlookup extends BaseFunction {
                 return checkErrorCombination;
             }
 
-            const result = this._handleSingleObject(lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
+            const result = this._handleSingleObject(_lookupValue, lookupArray, returnArray!, matchModeValue, searchModeValue);
 
             if (result.isError()) {
                 return ifNotFound!;
@@ -162,7 +167,7 @@ export class Xlookup extends BaseFunction {
             axis = 1;
         }
 
-        const resultArray = this._handleExpandObject(lookupValue, lookupArray, returnArray, matchModeValue, searchModeValue, axis);
+        const resultArray = this._handleExpandObject(_lookupValue, lookupArray, returnArray, matchModeValue, searchModeValue, axis);
 
         if (resultArray == null) {
             return ErrorValueObject.create(ErrorType.NA);

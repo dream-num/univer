@@ -20,6 +20,7 @@ import type { ISetRangeValuesMutationParams, ISheetCommandSharedParams } from '@
 import type { RangeMutation } from '../../models/rule-matrix';
 import { CommandType, DataValidationType, ICommandService, IUndoRedoService, IUniverInstanceService, ObjectMatrix, Range, sequenceExecute, Tools } from '@univerjs/core';
 import { AddDataValidationMutation, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { SheetDataValidationModel } from '../../models/sheet-data-validation-model';
 import { getStringCellValue } from '../../utils/get-cell-data-origin';
@@ -54,6 +55,7 @@ export function getDataValidationDiffMutations(
     source: DataValidationChangeSource = 'command',
     fillDefaultValue = true
 ) {
+    const lexerTreeBuilder = accessor.get(LexerTreeBuilder);
     const redoMutations: IMutationInfo[] = [];
     const undoMutations: IMutationInfo[] = [];
     const sheetDataValidationModel = accessor.get(SheetDataValidationModel);
@@ -124,6 +126,7 @@ export function getDataValidationDiffMutations(
                         source,
                     } as IUpdateDataValidationMutationParams,
                 });
+
                 undoMutations.unshift({
                     id: UpdateDataValidationMutation.id,
                     params: {
@@ -137,6 +140,48 @@ export function getDataValidationDiffMutations(
                         source,
                     } as IUpdateDataValidationMutationParams,
                 });
+
+                if (diff.rule.type === DataValidationType.CUSTOM) {
+                    const originRow = diff.oldRanges[0].startRow;
+                    const originColumn = diff.oldRanges[0].startColumn;
+                    const newRow = diff.newRanges[0].startRow;
+                    const newColumn = diff.newRanges[0].startColumn;
+                    const rowDiff = newRow - originRow;
+                    const columnDiff = newColumn - originColumn;
+                    const newFormula = lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula1!, columnDiff, rowDiff);
+
+                    if (newFormula !== diff.rule.formula1) {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.SETTING,
+                                    payload: {
+                                        ...getRuleSetting(diff.rule),
+                                        formula1: newFormula,
+                                    },
+                                },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.SETTING,
+                                    payload: getRuleSetting(diff.rule),
+                                },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+                    }
+                }
+
                 const rule = sheetDataValidationModel.getRuleById(unitId, subUnitId, diff.ruleId);
                 if (rule && rule.type === DataValidationType.CHECKBOX) {
                     const validator = sheetDataValidationModel.getValidator(DataValidationType.CHECKBOX) as CheckboxValidator;

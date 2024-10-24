@@ -398,4 +398,8 @@ export class Rectangle {
             height: bottom - top,
         } as Required<IRectLTRB>;
     }
+
+    static sort(ranges: IRange[]) {
+        return ranges.sort((a, b) => a.startRow - b.startRow || a.startColumn - b.startColumn);
+    }
 }

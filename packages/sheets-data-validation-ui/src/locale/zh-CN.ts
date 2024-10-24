@@ -164,6 +164,7 @@ const locale = {
             title: '自定义公式',
             error: '此单元格的内容违反了验证规则',
             validFail: '请输入合法的公式',
+            ruleName: '自定义公式 {FORMULA1}',
         },
         alert: {
             title: '提示',

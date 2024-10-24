@@ -166,6 +166,7 @@ const locale: typeof zhCN = {
             title: '自訂公式',
             error: '此儲存格的內容違反了驗證規則',
             validFail: '請輸入合法的公式',
+            ruleName: '自訂公式 {FORMULA1}',
         },
         alert: {
             title: '提示',

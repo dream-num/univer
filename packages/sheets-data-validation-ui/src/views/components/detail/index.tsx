@@ -65,6 +65,7 @@ export function DataValidationDetail() {
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
     const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
+    const [isRangeError, setIsRangeError] = useState(false);
 
     const rangeSelectorActionsRef = useRef<Parameters<typeof RangeSelector>[0]['actions']>({});
     const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
@@ -104,7 +105,7 @@ export function DataValidationDetail() {
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleOk = () => {
-        if (!localRule.ranges.length) {
+        if (!localRule.ranges.length || isRangeError) {
             return;
         }
         if (validator.validatorFormula(localRule, unitId, subUnitId).success) {
@@ -254,7 +255,7 @@ export function DataValidationDetail() {
         <div className={styles.dataValidationDetail} onClick={handlePanelClick}>
             <FormLayout
                 label={localeService.t('dataValidation.panel.range')}
-                error={!localRule.ranges.length ? localeService.t('dataValidation.panel.rangeError') : ''}
+                error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
             >
                 <RangeSelector
                     unitId={unitId}
@@ -263,23 +264,8 @@ export function DataValidationDetail() {
                     onChange={handleUpdateRuleRanges}
                     isFocus={isFocusRangeSelector}
                     actions={rangeSelectorActionsRef.current}
+                    onVerify={(isValid) => setIsRangeError(!isValid)}
                 />
-                {/* <RangeSelector
-                    key={key}
-                    className={styles.dataValidationDetailFormItem}
-                    value={rangeStr}
-                    id={createInternalEditorID('data-validation-detail')}
-                    openForSheetUnitId={unitId}
-                    openForSheetSubUnitId={subUnitId}
-                    onChange={(newRange) => {
-                        if (newRange.some((i) => !isValidRange(i.range) || i.range.endColumn < i.range.startColumn || i.range.endRow < i.range.startRow)) {
-                            return;
-                        }
-
-                        handleUpdateRuleRanges(newRange);
-                    }}
-
-                /> */}
             </FormLayout>
             <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select

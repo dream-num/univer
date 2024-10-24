@@ -89,6 +89,8 @@ export class SheetDataValidationModel extends Disposable {
         for (const [unitId, subUnitMap] of allRules) {
             for (const [subUnitId, rules] of subUnitMap) {
                 for (const rule of rules) {
+                    this._addRule(unitId, subUnitId, rule);
+
                     this._ruleChange$.next({
                         type: 'add',
                         unitId,
@@ -96,14 +98,12 @@ export class SheetDataValidationModel extends Disposable {
                         rule,
                         source: 'patched',
                     });
-                    this._addRule(unitId, subUnitId, rule);
                 }
             }
         }
 
         this.disposeWithMe(
             this._dataValidationModel.ruleChange$.subscribe((ruleChange) => {
-                this._ruleChange$.next(ruleChange);
                 switch (ruleChange.type) {
                     case 'add':
                         this._addRule(ruleChange.unitId, ruleChange.subUnitId, ruleChange.rule);
@@ -115,6 +115,8 @@ export class SheetDataValidationModel extends Disposable {
                         this._removeRule(ruleChange.unitId, ruleChange.subUnitId, ruleChange.rule);
                         break;
                 }
+
+                this._ruleChange$.next(ruleChange);
             })
         );
     }

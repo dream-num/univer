@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
+import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 
 export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
     return result?.[0]?.[0]?.v;
@@ -22,4 +23,8 @@ export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
 
 export function getFormulaCellData(result: Nullable<Nullable<ICellData>[][]>) {
     return result?.[0]?.[0];
+}
+
+export function isLegalFormulaResult(res: string) {
+    return !(ERROR_TYPE_SET as Set<string>).has(res);
 }

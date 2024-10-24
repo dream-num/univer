@@ -148,7 +148,7 @@ describe('test case in apply utils', () => {
             expect(removeTextRuns).toEqual(expectedTextRuns);
         });
 
-        it('Should return collapsed textRun when textLength is 0 and remove the collapsed textRun in body', () => {
+        it('Should return textRun when textLength is 5 and remove the textRun in body', () => {
             const body = {
                 dataStream: 'hello\rworld hello\rworld hello\rworld he\r\n',
                 textRuns: [
@@ -157,13 +157,6 @@ describe('test case in apply utils', () => {
                         ed: 15,
                         ts: {
                             bl: BooleanNumber.FALSE,
-                        },
-                    },
-                    {
-                        st: 15,
-                        ed: 15,
-                        ts: {
-                            it: BooleanNumber.TRUE,
                         },
                     },
                     {
@@ -198,18 +191,19 @@ describe('test case in apply utils', () => {
                 ],
             };
 
-            const removeTextRuns = deleteTextRuns(body as IDocumentBody, 0, 15);
+            const removeTextRuns = deleteTextRuns(body as IDocumentBody, 5, 15);
 
             const expectedTextRuns = [{
                 st: 0,
-                ed: 0,
+                ed: 5,
                 ts: {
+                    bl: BooleanNumber.FALSE,
                     it: BooleanNumber.TRUE,
                 },
             }];
 
             expect(removeTextRuns).toEqual(expectedTextRuns);
-            expect(body?.textRuns?.length).toBe(3);
+            expect(body?.textRuns?.length).toBe(2);
         });
     });
 
@@ -397,38 +391,6 @@ describe('test case in apply utils', () => {
             expect(needUpdateTextRuns[1]?.ts?.bl).toBe(BooleanNumber.FALSE);
             expect(needUpdateTextRuns[2]?.ts?.bl).toBe(BooleanNumber.FALSE);
             expect(needUpdateTextRuns[3]?.ts?.bl).toBe(BooleanNumber.TRUE);
-        });
-
-        it('it should be pass the test when the updateTextRuns and removeTextRuns are both collapsed', () => {
-            const updateTextRuns = [
-                {
-                    st: 0,
-                    ed: 0,
-                    ts: {
-                        bl: BooleanNumber.TRUE,
-                    },
-                },
-            ];
-
-            const removedTextRuns = [
-                {
-                    st: 0,
-                    ed: 0,
-                    ts: {
-                        cl: { rgb: 'rgb(30, 30, 30)' },
-                        ff: 'Microsoft YaHei',
-                        fs: 12,
-                    },
-                },
-            ];
-
-            const needUpdateTextRuns = coverTextRuns(updateTextRuns, removedTextRuns, UpdateDocsAttributeType.COVER);
-
-            expect(needUpdateTextRuns.length).toBe(1);
-            expect(needUpdateTextRuns[0]?.ts?.bl).toBe(BooleanNumber.TRUE);
-            expect(needUpdateTextRuns[0]?.ts?.cl?.rgb).toBe('rgb(30, 30, 30)');
-            expect(needUpdateTextRuns[0]?.ts?.ff).toBe('Microsoft YaHei');
-            expect(needUpdateTextRuns[0]?.ts?.fs).toBe(12);
         });
 
         describe('test cases in function insertTextRuns', () => {

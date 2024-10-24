@@ -76,6 +76,7 @@ import { DocClipboardService, IDocClipboardService } from './services/clipboard/
 import { DocAutoFormatService } from './services/doc-auto-format.service';
 import { DocEventManagerService } from './services/doc-event-manager.service';
 import { DocIMEInputManagerService } from './services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from './services/doc-menu-style.service';
 import { DocPageLayoutService } from './services/doc-page-layout.service';
 import { DocCanvasPopManagerService } from './services/doc-popup-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
@@ -258,6 +259,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocsRenderService],
             [DocStateChangeManagerService],
             [DocAutoFormatService],
+            [DocMenuStyleService],
         ], this._config.override);
         dependencies.forEach((d) => injector.add(d));
     }

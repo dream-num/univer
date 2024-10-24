@@ -255,7 +255,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * Range viewBounds. only update by viewBounds.
-     * It would change mutiple times in one frame if there is mutilple viewport (after freeze row&col)
+     * It would change multiple times in one frame if there is multiple viewport (after freeze row&col)
      */
     private _visibleRange: IRowColumnRange = {
         startRow: -1,
@@ -740,7 +740,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const worksheet = this.worksheet;
 
         // row has default height, but col does not, col can be very narrow near zero
-        let maxColWidth = 0;
+        let colWidth = 0;
 
         // for cell with only v, auto size for content width in visible range and ± 10000 rows around.
         // for cell with p, auto width for content in visible range and ± 1000 rows, 1/10 of situation above.
@@ -749,14 +749,40 @@ export class SpreadsheetSkeleton extends Skeleton {
         // also handle multiple viewport situation (freeze row & freeze row&col)
         // if there are no content in this column, return current column width.
         const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
-        if (!visibleRangeViewMain) return maxColWidth;
+        if (!visibleRangeViewMain) return colWidth;
 
         const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
         const rowCount = this.worksheet.getRowCount();
         const checkStart = Math.max(0, startRowOfViewMain - MEASURE_EXTENT); // 0
         const checkEnd = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
 
-        for (let row = checkStart; row < checkEnd; row++) {
+        // check width of first row and last row,
+        const otherRowIndex: Set<number> = new Set();
+        otherRowIndex.add(0);
+        otherRowIndex.add(rowCount - 1);
+
+        // add rows in viewMainTop(viewMainTopLeft are included)
+        const visibleRangeViewMainTop = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
+        if (visibleRangeViewMainTop) {
+            const { startRow: startRowOfViewMainTop, endRow: endRowOfViewMainTop } = visibleRangeViewMainTop;
+            for (let i = startRowOfViewMainTop; i <= endRowOfViewMainTop; i++) {
+                otherRowIndex.add(i);
+            }
+        }
+
+        const createRowSequence = (start: number, end: number, additionalArr: number[] | Set<number>) => {
+            const range = Array.from(
+                { length: end - start + 1 },
+                (_, i) => i + start
+            );
+            return [...range, ...additionalArr];
+        };
+
+        const rowIdxArr = createRowSequence(checkStart, checkEnd, otherRowIndex);
+
+        for (let i = 0; i < rowIdxArr.length; i++) {
+            const row = rowIdxArr[i];
+
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
             if (isMerged && !isMergedMainCell) continue;
 
@@ -772,50 +798,20 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
             }
             const measuredWidth = this.getMeasuredWidthByCell(cell);
-            maxColWidth = Math.max(maxColWidth, measuredWidth);
+            colWidth = Math.max(colWidth, measuredWidth);
 
-            // return early if maxColWidth is larger than MAXIMUM_COL_WIDTH
-            if (maxColWidth >= MAXIMUM_COL_WIDTH) {
+            // early return, if maxColWidth is larger than MAXIMUM_COL_WIDTH
+            if (colWidth >= MAXIMUM_COL_WIDTH) {
                 return MAXIMUM_COL_WIDTH;
             }
         }
 
-        // check width of first row and last row, and rows in viewMainTop(viewMainTopLeft are included)
-        const otherRowIndex: Set<number> = new Set();
-        otherRowIndex.add(0);
-        otherRowIndex.add(rowCount - 1);
-        const visibleRangeViewMainTop = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
-        if (visibleRangeViewMainTop) {
-            const { startRow: startRowOfViewMainTop, endRow: endRowOfViewMainTop } = visibleRangeViewMainTop;
-            for (let i = startRowOfViewMainTop; i <= endRowOfViewMainTop; i++) {
-                otherRowIndex.add(i);
-            }
-        }
-
-        for (const row of otherRowIndex) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
-            if (isMerged && !isMergedMainCell) continue;
-
-            if (!this.worksheet.getRowVisible(row)) continue;
-
-            const cell = worksheet.getCell(row, colIndex);
-            if (!cell) continue;
-
-            const measuredWidth = this.getMeasuredWidthByCell(cell);
-            maxColWidth = Math.max(maxColWidth, measuredWidth);
-
-            // return early if maxColWidth is larger than MAXIMUM_COL_WIDTH
-            if (maxColWidth >= MAXIMUM_COL_WIDTH) {
-                return MAXIMUM_COL_WIDTH;
-            }
-        }
-
-        // if there are no content in this column, return current column width.
-        if (maxColWidth === 0) {
+        // if there are no content in this column( measure result is 0), return current column width.
+        if (colWidth === 0) {
             const preColIndex = Math.max(0, colIndex - 1);
             return this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
         }
-        return maxColWidth;
+        return colWidth;
     }
 
     getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor) {

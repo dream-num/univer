@@ -49,6 +49,7 @@ export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {
 export interface IFormulaResult<T = any> {
     formula1: T;
     formula2: T;
+    isFormulaVaild: boolean;
 }
 
 export interface IFormulaValidResult {
@@ -185,6 +186,10 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         }
 
         const formulaInfo = await this.parseFormula(rule, unitId, subUnitId);
+
+        if (!formulaInfo.isFormulaVaild) {
+            return false;
+        }
 
         if (!(await this.isValidType(cellInfo, formulaInfo, rule))) {
             return false;

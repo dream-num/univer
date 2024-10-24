@@ -31,6 +31,7 @@ export { DateValidator } from './validators/date-validator';
 export { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator, transformCheckboxValue } from './validators/checkbox-validator';
 export { ListMultipleValidator } from './validators/list-multiple-validator';
 export { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from './validators/util';
+export { isLegalFormulaResult } from './utils/formula';
 
 // #region - all commands
 

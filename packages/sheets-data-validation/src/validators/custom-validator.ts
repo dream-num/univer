@@ -41,6 +41,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return {
             formula1: undefined,
             formula2: undefined,
+            isFormulaVaild: false,
         };
     }
 
@@ -49,6 +50,10 @@ export class CustomFormulaValidator extends BaseDataValidator {
         const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
         const cellData = getFormulaCellData(result?.result);
         const formulaResult = cellData?.v;
+
+        if (!isLegalFormulaResult(String(formulaResult))) {
+            return false;
+        }
 
         if (Tools.isDefine(formulaResult) && formulaResult !== '') {
             if (cellData!.t === CellValueType.BOOLEAN) {

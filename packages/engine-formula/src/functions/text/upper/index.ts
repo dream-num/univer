@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Lower extends BaseFunction {
+export class Upper extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 1;
@@ -47,7 +47,7 @@ export class Lower extends BaseFunction {
             return StringValueObject.create('');
         }
 
-        const result = `${text.getValue()}`.toLocaleLowerCase();
+        const result = `${text.getValue()}`.toLocaleUpperCase();
 
         return StringValueObject.create(result);
     }

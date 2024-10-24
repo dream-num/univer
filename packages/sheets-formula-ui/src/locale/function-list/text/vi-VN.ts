@@ -164,18 +164,33 @@ export default {
         },
     },
     FIND: {
-        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa, chữ thường)',
-        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa, chữ thường)',
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/find-%E5%87%BD%E6%95%B0-dbcdf877-a93f-4d9e-a60d-b360804a3a5a',
+                url: 'https://support.microsoft.com/vi-vn/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
             },
         ],
         functionParameter: {
-            find_text: { name: 'find_text', detail: 'Văn bản bạn muốn tìm.' },
-            within_text: { name: 'within_text', detail: 'Văn bản mà bạn muốn tìm trong đó.' },
-            start_num: { name: 'start_num', detail: 'Số ký tự mà bạn muốn bắt đầu tìm kiếm.' },
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
+        },
+    },
+    FINDB: {
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (phân biệt chữ hoa chữ thường)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/find-findb-%E5%87%BD%E6%95%B0-c7912941-af2a-4bdf-a553-d0d89b0a0628',
+            },
+        ],
+        functionParameter: {
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
         },
     },
     FIXED: {
@@ -194,17 +209,31 @@ export default {
         },
     },
     LEFT: {
-        description: 'Trả về một số ký tự cụ thể từ đầu của chuỗi văn bản',
-        abstract: 'Trả về một số ký tự cụ thể từ đầu của chuỗi văn bản',
+        description: 'Trả về ký tự ngoài cùng bên trái trong giá trị văn bản',
+        abstract: 'Trả về ký tự ngoài cùng bên trái trong giá trị văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/left-leftb-%E5%87%BD%E6%95%B0-f64f8495-4e12-49ab-803c-91e37d7e70c2',
+                url: 'https://support.microsoft.com/vi-vn/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự bạn muốn trích xuất.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự mà bạn muốn trích xuất.' },
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn LEFT trích xuất.' },
+        },
+    },
+    LEFTB: {
+        description: 'Trả về ký tự ngoài cùng bên trái trong giá trị văn bản',
+        abstract: 'Trả về ký tự ngoài cùng bên trái trong giá trị văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/left-leftb-%E5%87%BD%E6%95%B0-9203d2d2-7960-479b-84c6-1ea52b99640c',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm LEFTB trích xuất, dựa trên byte.' },
         },
     },
     LEN: {
@@ -239,26 +268,41 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lower-%E5%87%BD%E6%95%B0-0b22ff44-f335-402b-b171-8f62a7a6d159',
+                url: 'https://support.microsoft.com/vi-vn/office/lower-%E5%87%BD%E6%95%B0-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
             },
         ],
         functionParameter: {
-            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
         },
     },
     MID: {
-        description: 'Trả về một số ký tự cụ thể từ một chuỗi văn bản bắt đầu tại vị trí mà bạn chỉ định',
-        abstract: 'Trả về một số ký tự cụ thể từ một chuỗi văn bản bắt đầu tại vị trí mà bạn chỉ định',
+        description: 'Trả về một số ký tự cụ thể bắt đầu tại một vị trí được chỉ định trong chuỗi văn bản',
+        abstract: 'Trả về một số ký tự cụ thể bắt đầu tại một vị trí được chỉ định trong chuỗi văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-ha%CC%80m-mid-midb-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản có chứa các ký tự mà bạn muốn trích xuất.' },
-            start_num: { name: 'start_num', detail: 'Ví trí của ký tự thứ nhất mà bạn muốn trích xuất trong văn bản. Ký tự thứ nhất trong chuỗi văn bản có số bắt đầu là 1, và v.v.\nNếu start_num văn bản lớn hơn, thì hàm MID/MIDB trả về "" (văn bản trống).\nNếu start_num độ dài văn bản nhỏ hơn nhưng start_num cộng num_chars vượt quá độ dài văn bản, thì hàm MID/MIDB trả về các ký tự đến cuối văn bản.\nNếu start_num nhỏ hơn 1, thì hàm MID/MIDB trả về giá #VALUE! .' },
-            num_chars: { name: 'num_chars', detail: 'Bắt buộc đối với hàm MID. Chỉ rõ số ký tự mà bạn muốn hàm MID trả về từ văn bản.\nNếu số ký tự là số âm, thì hàm MID trả về giá trị lỗi #VALUE! .' },
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Ví trí của ký tự thứ nhất mà bạn muốn trích xuất trong văn bản.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn MID trích xuất.' },
+        },
+    },
+    MIDB: {
+        description: 'Trả về một số ký tự cụ thể bắt đầu tại một vị trí được chỉ định trong chuỗi văn bản',
+        abstract: 'Trả về một số ký tự cụ thể bắt đầu tại một vị trí được chỉ định trong chuỗi văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/mid-midb-%E5%87%BD%E6%95%B0-d5f9e25c-d7d6-472e-b568-4ecb12433028',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Chuỗi văn bản chứa các ký tự bạn muốn trích xuất.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Ví trí của ký tự thứ nhất mà bạn muốn trích xuất trong văn bản.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ rõ số ký tự mà bạn muốn hàm MIDB trích xuất, dựa trên byte.' },
         },
     },
     NUMBERVALUE: {
@@ -347,19 +391,35 @@ export default {
         },
     },
     REPLACE: {
-        description: 'Thay thế một phần của chuỗi văn bản bằng một chuỗi văn bản khác',
-        abstract: 'Thay thế một phần của chuỗi văn bản bằng một chuỗi văn bản khác',
+        description: 'Thay thế ký tự trong văn bản',
+        abstract: 'Thay thế ký tự trong văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-86e5e09d-1401-41a8-890b-8e692f1f46e5',
+                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
             },
         ],
         functionParameter: {
-            old_text: { name: 'old_text', detail: 'Văn bản bạn muốn thay thế một phần của nó.' },
-            start_num: { name: 'start_num', detail: 'Vị trí của ký tự đầu tiên bạn muốn thay thế trong văn bản.' },
-            num_chars: { name: 'num_chars', detail: 'Số lượng ký tự bạn muốn thay thế.' },
-            new_text: { name: 'new_text', detail: 'Văn bản thay thế.' },
+            oldText: { name: 'văn bản cũ', detail: 'Văn bản mà bạn muốn thay thế một vài ký tự trong đó.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí của ký tự đầu tiên trong văn bản cần thay thế.' },
+            numChars: { name: 'số ký tự', detail: 'Chỉ định số ký tự bạn muốn REPLACE thay thế.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản sẽ thay thế các ký tự trong văn bản cũ.' },
+        },
+    },
+    REPLACEB: {
+        description: 'Thay thế ký tự trong văn bản',
+        abstract: 'Thay thế ký tự trong văn bản',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/replace-replaceb-%E5%87%BD%E6%95%B0-8d799074-2425-4a8a-84bc-82472868878a',
+            },
+        ],
+        functionParameter: {
+            oldText: { name: 'văn bản cũ', detail: 'Văn bản mà bạn muốn thay thế một vài ký tự trong đó.' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí của ký tự đầu tiên trong văn bản cần thay thế.' },
+            numBytes: { name: 'số Byte', detail: 'Chỉ định, tính bằng byte, số lượng ký tự được thay thế bằng REPLACEB.' },
+            newText: { name: 'văn bản thay thế', detail: 'Văn bản sẽ thay thế các ký tự trong văn bản cũ.' },
         },
     },
     REPT: {
@@ -405,8 +465,8 @@ export default {
         },
     },
     SEARCH: {
-        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
-        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa, chữ thường)',
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
         links: [
             {
                 title: 'Hướng dẫn',
@@ -414,9 +474,24 @@ export default {
             },
         ],
         functionParameter: {
-            find_text: { name: 'find_text', detail: 'Văn bản bạn muốn tìm.' },
-            within_text: { name: 'within_text', detail: 'Văn bản mà bạn muốn tìm trong đó.' },
-            start_num: { name: 'start_num', detail: 'Số ký tự mà bạn muốn bắt đầu tìm kiếm.' },
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
+        },
+    },
+    SEARCHB: {
+        description: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        abstract: 'Trả về vị trí của một chuỗi văn bản trong một chuỗi văn bản khác (không phân biệt chữ hoa chữ thường)',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/search-searchb-%E5%87%BD%E6%95%B0-dfb12d6f-c60d-4a40-b090-7d2617b49e11',
+            },
+        ],
+        functionParameter: {
+            findText: { name: 'chuỗi tìm kiếm', detail: 'Chuỗi cần tìm trong "Văn bản cần tìm kiếm".' },
+            withinText: { name: 'văn bản để tìm kiếm', detail: 'Lần xuất hiện đầu tiên của văn bản để tìm kiếm "chuỗi tìm kiếm".' },
+            startNum: { name: 'vị trí bắt đầu', detail: 'Vị trí ký tự để bắt đầu tìm kiếm trong "văn bản cần tìm kiếm". Nếu bỏ qua, giá trị là 1 được giả định.' },
         },
     },
     SPLIT: {
@@ -520,14 +595,14 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textjoin-%E5%87%BD%E6%95%B0-c50e06da-9c72-4cae-a5a3-1e6d42bd43e1',
+                url: 'https://support.microsoft.com/vi-vn/office/textjoin-%E5%87%BD%E6%95%B0-357b449a-ec91-49d0-80c3-0e8fc845691c',
             },
         ],
         functionParameter: {
-            delimiter: { name: 'delimiter', detail: 'Dấu phân cách để sử dụng giữa các văn bản.' },
-            ignore_empty: { name: 'ignore_empty', detail: 'Giá trị logic để chỉ định liệu bỏ qua các ô trống.' },
-            text1: { name: 'text1', detail: 'Chuỗi văn bản đầu tiên để kết hợp.' },
-            text2: { name: 'text2', detail: 'Chuỗi văn bản tiếp theo để kết hợp.' },
+            delimiter: { name: 'dấu tách', detail: 'Một chuỗi văn bản, trống hoặc có một hay nhiều ký tự nằm giữa các dấu ngoặc kép hay một tham chiếu tới một chuỗi văn bản hợp lệ.' },
+            ignoreEmpty: { name: 'bỏ qua các ô trống', detail: 'Nếu TRUE, hãy bỏ qua các ô trống.' },
+            text1: { name: 'bản văn 1', detail: 'Mục văn bản cần kết hợp. Một chuỗi văn bản hoặc xâu chuỗi, chẳng hạn như một phạm vi ô.' },
+            text2: { name: 'bản văn 2', detail: 'Các mục văn bản bổ sung cần kết hợp. Có thể có tối đa 252 tham đối văn bản cho các mục văn bản, bao gồm text1. Mỗi tham đối có thể là một chuỗi văn bản hoặc xâu chuỗi, chẳng hạn như phạm vi ô.' },
         },
     },
     TEXTSPLIT: {
@@ -549,16 +624,16 @@ export default {
         },
     },
     TRIM: {
-        description: 'Loại bỏ tất cả các khoảng trắng khỏi chuỗi văn bản ngoại trừ các khoảng trắng đơn giữa các từ',
-        abstract: 'Loại bỏ tất cả các khoảng trắng khỏi chuỗi văn bản ngoại trừ các khoảng trắng đơn giữa các từ',
+        description: 'Loại bỏ tất cả khoảng trống ra khỏi văn bản, chỉ để lại một khoảng trống giữa các từ.',
+        abstract: 'Xóa khoảng trắng khỏi văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479d0',
+                url: 'https://support.microsoft.com/vi-vn/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479f9',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn loại bỏ các khoảng trắng.' },
+            text: { name: 'bản văn', detail: 'Văn bản bạn muốn loại bỏ các khoảng trống.' },
         },
     },
     UNICHAR: {
@@ -593,11 +668,11 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/upper-%E5%87%BD%E6%95%B0-8a57ae40-4fa5-4754-a65b-9b6745c4a5f0',
+                url: 'https://support.microsoft.com/vi-vn/office/upper-%E5%87%BD%E6%95%B0-c11f29b3-d1a3-4537-8df6-04d0049963d6',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ hoa.' },
+            text: { name: 'bản văn', detail: 'Văn bản bạn muốn chuyển đổi thành chữ hoa.' },
         },
     },
     VALUE: {

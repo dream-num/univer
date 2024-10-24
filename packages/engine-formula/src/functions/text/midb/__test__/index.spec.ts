@@ -22,65 +22,65 @@ import { ErrorValueObject } from '../../../../engine/value-object/base-value-obj
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Mid } from '../index';
+import { Midb } from '../index';
 
-describe('Test mid function', () => {
-    const testFunction = new Mid(FUNCTION_NAMES_TEXT.MID);
+describe('Test midb function', () => {
+    const testFunction = new Midb(FUNCTION_NAMES_TEXT.MIDB);
 
-    describe('Mid', () => {
+    describe('Midb', () => {
         it('Value is normal', () => {
             const text = StringValueObject.create('Univer');
             const startNum = NumberValueObject.create(1);
-            const numChars = NumberValueObject.create(3);
-            const result = testFunction.calculate(text, startNum, numChars);
+            const numBytes = NumberValueObject.create(3);
+            const result = testFunction.calculate(text, startNum, numBytes);
             expect(getObjectValue(result)).toStrictEqual('Uni');
         });
 
         it('StartNum value test', () => {
             const text = StringValueObject.create('Univer');
             const startNum = NullValueObject.create();
-            const numChars = NumberValueObject.create(3);
-            const result = testFunction.calculate(text, startNum, numChars);
+            const numBytes = NumberValueObject.create(3);
+            const result = testFunction.calculate(text, startNum, numBytes);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
 
             const startNum2 = BooleanValueObject.create(true);
-            const result2 = testFunction.calculate(text, startNum2, numChars);
+            const result2 = testFunction.calculate(text, startNum2, numBytes);
             expect(getObjectValue(result2)).toStrictEqual('Uni');
 
             const startNum3 = NumberValueObject.create(7);
-            const result3 = testFunction.calculate(text, startNum3, numChars);
+            const result3 = testFunction.calculate(text, startNum3, numBytes);
             expect(getObjectValue(result3)).toStrictEqual('');
 
             const startNum4 = StringValueObject.create('test');
-            const result4 = testFunction.calculate(text, startNum4, numChars);
+            const result4 = testFunction.calculate(text, startNum4, numBytes);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.VALUE);
 
             const startNum5 = ErrorValueObject.create(ErrorType.NAME);
-            const result5 = testFunction.calculate(text, startNum5, numChars);
+            const result5 = testFunction.calculate(text, startNum5, numBytes);
             expect(getObjectValue(result5)).toStrictEqual(ErrorType.NAME);
         });
 
-        it('NumChars value test', () => {
+        it('NumBytes value test', () => {
             const text = StringValueObject.create('Univer');
             const startNum = NumberValueObject.create(1);
-            const numChars = NumberValueObject.create(-2);
-            const result = testFunction.calculate(text, startNum, numChars);
+            const numBytes = NumberValueObject.create(-2);
+            const result = testFunction.calculate(text, startNum, numBytes);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
 
-            const numChars2 = BooleanValueObject.create(false);
-            const result2 = testFunction.calculate(text, startNum, numChars2);
+            const numBytes2 = BooleanValueObject.create(false);
+            const result2 = testFunction.calculate(text, startNum, numBytes2);
             expect(getObjectValue(result2)).toStrictEqual('');
 
-            const numChars3 = NumberValueObject.create(6);
-            const result3 = testFunction.calculate(text, startNum, numChars3);
+            const numBytes3 = NumberValueObject.create(6);
+            const result3 = testFunction.calculate(text, startNum, numBytes3);
             expect(getObjectValue(result3)).toStrictEqual('Univer');
 
-            const numChars4 = ErrorValueObject.create(ErrorType.NAME);
-            const result4 = testFunction.calculate(text, startNum, numChars4);
+            const numBytes4 = ErrorValueObject.create(ErrorType.NAME);
+            const result4 = testFunction.calculate(text, startNum, numBytes4);
             expect(getObjectValue(result4)).toStrictEqual(ErrorType.NAME);
 
-            const numChars5 = StringValueObject.create('test');
-            const result5 = testFunction.calculate(text, startNum, numChars5);
+            const numBytes5 = StringValueObject.create('test');
+            const result5 = testFunction.calculate(text, startNum, numBytes5);
             expect(getObjectValue(result5)).toStrictEqual(ErrorType.VALUE);
         });
 
@@ -98,10 +98,10 @@ describe('Test mid function', () => {
                 column: 0,
             });
             const startNum = NumberValueObject.create(1);
-            const numChars = NumberValueObject.create(2);
-            const result = testFunction.calculate(text, startNum, numChars);
+            const numBytes = NumberValueObject.create(2);
+            const result = testFunction.calculate(text, startNum, numBytes);
             expect(getObjectValue(result)).toStrictEqual([
-                ['1', ' ', '中文', 'TR', 'FA', ''],
+                ['1', ' ', '中', 'TR', 'FA', ''],
                 ['0', '10', '2.', '2-', '-3', ErrorType.NAME],
             ]);
         });
@@ -109,15 +109,15 @@ describe('Test mid function', () => {
         it('More test', () => {
             const text = StringValueObject.create(',。、；:{}');
             const startNum = NumberValueObject.create(1);
-            const numChars = NumberValueObject.create(4);
-            const result = testFunction.calculate(text, startNum, numChars);
-            expect(getObjectValue(result)).toStrictEqual(',。、；');
+            const numBytes = NumberValueObject.create(4);
+            const result = testFunction.calculate(text, startNum, numBytes);
+            expect(getObjectValue(result)).toStrictEqual(',。、');
 
             const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
-            const numChars2 = ArrayValueObject.create('{3,5,7,10,15}');
-            const result2 = testFunction.calculate(text2, startNum, numChars2);
+            const numBytes2 = ArrayValueObject.create('{3,5,7,10,15}');
+            const result2 = testFunction.calculate(text2, startNum, numBytes2);
             expect(getObjectValue(result2)).toStrictEqual([
-                ['Hel', 'Hello', 'Hello中文', 'Hello中文o😊', 'Hello中文o😊Wo😊r'],
+                ['Hel', 'Hello', 'Hello中', 'Hello中文o', 'Hello中文o😊W'],
             ]);
         });
     });

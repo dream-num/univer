@@ -272,10 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: '文本',
-                detail: '要转换为小写字母的文本。 LOWER 不改变文本中的非字母字符。',
-            },
+            text: { name: '文本', detail: '要转换为小写字母的文本。' },
         },
     },
     MID: {
@@ -586,8 +583,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: '分隔符', detail: '文本字符串，或者为空，或用双引号引起来的一个或多个字符，或对有效文本字符串的引用。' },
+            ignoreEmpty: { name: '忽略空白', detail: '如果为 TRUE，则忽略空白单元格。' },
+            text1: { name: '文本1', detail: '要联接的文本项。 文本字符串或字符串数组，如单元格区域中。' },
+            text2: { name: '文本2', detail: '要联接的其他文本项。 文本项最多可以包含 252 个文本参数 text1。 每个参数可以是一个文本字符串或字符串数组，如单元格区域。' },
         },
     },
     TEXTSPLIT: {
@@ -609,7 +608,7 @@ export default {
         },
     },
     TRIM: {
-        description: '删除文本中的空格',
+        description: '除了单词之间的单个空格之外，删除文本中的所有空格。',
         abstract: '删除文本中的空格',
         links: [
             {
@@ -618,8 +617,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要从中删除空格的文本。' },
         },
     },
     UNICHAR: {
@@ -658,8 +656,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文本', detail: '要转换为大写字母的文本。' },
         },
     },
     VALUE: {

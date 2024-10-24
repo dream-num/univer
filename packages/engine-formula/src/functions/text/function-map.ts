@@ -53,9 +53,12 @@ import { T } from './t';
 import { Text } from './text';
 import { Textafter } from './textafter';
 import { Textbefore } from './textbefore';
+import { Textjoin } from './textjoin';
 import { Textsplit } from './textsplit';
+import { Trim } from './trim';
 import { Unichar } from './unichar';
 import { Unicode } from './unicode';
+import { Upper } from './upper';
 import { Value } from './value';
 import { Valuetotext } from './valuetotext';
 
@@ -98,9 +101,12 @@ export const functionText = [
     [Text, FUNCTION_NAMES_TEXT.TEXT],
     [Textafter, FUNCTION_NAMES_TEXT.TEXTAFTER],
     [Textbefore, FUNCTION_NAMES_TEXT.TEXTBEFORE],
+    [Textjoin, FUNCTION_NAMES_TEXT.TEXTJOIN],
     [Textsplit, FUNCTION_NAMES_TEXT.TEXTSPLIT],
+    [Trim, FUNCTION_NAMES_TEXT.TRIM],
     [Unichar, FUNCTION_NAMES_TEXT.UNICHAR],
     [Unicode, FUNCTION_NAMES_TEXT.UNICODE],
+    [Upper, FUNCTION_NAMES_TEXT.UPPER],
     [Value, FUNCTION_NAMES_TEXT.VALUE],
     [Valuetotext, FUNCTION_NAMES_TEXT.VALUETOTEXT],
 ];

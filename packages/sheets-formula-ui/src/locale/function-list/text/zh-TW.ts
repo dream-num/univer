@@ -272,10 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: '文字',
-                detail: '要轉換為小寫字母的文字。 LOWER 不會改變文字中的非字母字元。 ',
-            },
+            text: { name: '文字', detail: '要轉換成小寫的文字。' },
         },
     },
     MID: {
@@ -589,8 +586,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: '分隔符號', detail: '文字字串，可以是空白、雙引號括起來的一或多個字元，或是有效文字字串的參照。' },
+            ignoreEmpty: { name: '忽略空白', detail: '如果為 TRUE，則會忽略空白儲存格。' },
+            text1: { name: '文字1', detail: '要加入的文字項目。 文字字串或字串陣列，例如儲存格範圍。' },
+            text2: { name: '文字2', detail: '要加入的其他文字項目。 文字項目最多可有 252 個文字引數，包含 text1。 每個項目可以是文字字串或字串陣列，例如儲存格範圍。' },
         },
     },
     TEXTSPLIT: {
@@ -612,7 +611,7 @@ export default {
         },
     },
     TRIM: {
-        description: '刪除文字中的空格',
+        description: '刪除文字的所有空格，僅保留單字之間的單個空格。',
         abstract: '刪除文字中的空格',
         links: [
             {
@@ -621,8 +620,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要從中刪除空格的文字。' },
         },
     },
     UNICHAR: {
@@ -661,8 +659,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字', detail: '要轉換成大寫的文字。' },
         },
     },
     VALUE: {

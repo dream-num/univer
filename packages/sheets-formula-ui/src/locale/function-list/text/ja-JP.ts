@@ -273,10 +273,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: '文字列',
-                detail: '小文字に変換する文字列を指定します。 それ以外の文字は変換されません。',
-            },
+            text: { name: '文字列', detail: '小文字に変換する文字列を指定します。' },
         },
     },
     MID: {
@@ -587,8 +584,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: '区切り記号', detail: '空のテキスト文字列、または二重引用符で囲まれた 1 つ以上の文字、または有効なテキスト文字列への参照。' },
+            ignoreEmpty: { name: '空のセルは無視', detail: 'TRUE の場合、空のセルは無視されます。' },
+            text1: { name: '文字列1', detail: '結合するテキスト項目。 文字列またはセルの範囲などの文字列の配列。' },
+            text2: { name: '文字列2', detail: '結合する追加のテキスト項目。 テキスト項目には、text1 を含め、最大 252 のテキスト引数を設定できます。 各引数には、文字列、またはセルの範囲などの文字列の配列を指定できます。' },
         },
     },
     TEXTSPLIT: {
@@ -610,7 +609,7 @@ export default {
         },
     },
     TRIM: {
-        description: '文字列から余分なスペースを削除します。',
+        description: '各単語間のスペースは 1 つ残し、不要なスペースをすべて削除します。',
         abstract: '文字列から余分なスペースを削除します。',
         links: [
             {
@@ -619,8 +618,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '余分なスペースを削除するテキストを指定します。' },
         },
     },
     UNICHAR: {
@@ -659,8 +657,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: '文字列', detail: '大文字に変換する文字列を指定します。' },
         },
     },
     VALUE: {

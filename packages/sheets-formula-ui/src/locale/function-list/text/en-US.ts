@@ -272,10 +272,7 @@ export default {
             },
         ],
         functionParameter: {
-            text: {
-                name: 'text',
-                detail: 'The text you want to convert to lowercase. LOWER does not change characters in text that are not letters.',
-            },
+            text: { name: 'text', detail: 'The text you want to convert to lowercase.' },
         },
     },
     MID: {
@@ -586,8 +583,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            delimiter: { name: 'delimiter', detail: 'A text string, either empty, or one or more characters enclosed by double quotes, or a reference to a valid text string.' },
+            ignoreEmpty: { name: 'ignore_empty', detail: 'If TRUE, ignores empty cells.' },
+            text1: { name: 'text1', detail: 'Text item to be joined. A text string, or array of strings, such as a range of cells.' },
+            text2: { name: 'text2', detail: 'Additional text items to be joined. There can be a maximum of 252 text arguments for the text items, including text1. Each can be a text string, or array of strings, such as a range of cells.' },
         },
     },
     TEXTSPLIT: {
@@ -609,7 +608,7 @@ export default {
         },
     },
     TRIM: {
-        description: 'Removes spaces from text',
+        description: 'Removes all spaces from text except for single spaces between words.',
         abstract: 'Removes spaces from text',
         links: [
             {
@@ -618,8 +617,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text from which you want spaces removed.' },
         },
     },
     UNICHAR: {
@@ -658,8 +656,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text you want converted to uppercase.' },
         },
     },
     VALUE: {

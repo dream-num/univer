@@ -21,23 +21,23 @@ import { ArrayValueObject, transformToValueObject } from '../../../../engine/val
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Lower } from '../index';
+import { Upper } from '../index';
 
-describe('Test lower function', () => {
-    const testFunction = new Lower(FUNCTION_NAMES_TEXT.LOWER);
+describe('Test upper function', () => {
+    const testFunction = new Upper(FUNCTION_NAMES_TEXT.UPPER);
 
-    describe('Lower', () => {
+    describe('Upper', () => {
         it('Value is normal', () => {
-            const text = StringValueObject.create('Univer');
+            const text = StringValueObject.create('univer');
             const result = testFunction.calculate(text);
-            expect(getObjectValue(result)).toStrictEqual('univer');
+            expect(getObjectValue(result)).toStrictEqual('UNIVER');
         });
 
         it('Value is array', () => {
             const text = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', '中文测试', true, false, null],
-                    [0, '100', '2.34', '2-Way Street', -3, ErrorType.NAME],
+                    [0, '100', '2.34', '2-way street', -3, ErrorType.NAME],
                 ]),
                 rowCount: 2,
                 columnCount: 6,
@@ -48,8 +48,8 @@ describe('Test lower function', () => {
             });
             const result = testFunction.calculate(text);
             expect(getObjectValue(result)).toStrictEqual([
-                ['1', ' ', '中文测试', 'true', 'false', ''],
-                ['0', '100', '2.34', '2-way street', '-3', ErrorType.NAME],
+                ['1', ' ', '中文测试', 'TRUE', 'FALSE', ''],
+                ['0', '100', '2.34', '2-WAY STREET', '-3', ErrorType.NAME],
             ]);
 
             const text2 = ArrayValueObject.create({
@@ -64,7 +64,7 @@ describe('Test lower function', () => {
                 column: 0,
             });
             const result2 = testFunction.calculate(text2);
-            expect(getObjectValue(result2)).toStrictEqual(' hello univer ');
+            expect(getObjectValue(result2)).toStrictEqual(' HELLO UNIVER ');
         });
 
         it('More test', () => {
@@ -74,7 +74,7 @@ describe('Test lower function', () => {
 
             const text2 = StringValueObject.create('Hello中文o😊Wo😊rld');
             const result2 = testFunction.calculate(text2);
-            expect(getObjectValue(result2)).toStrictEqual('hello中文o😊wo😊rld');
+            expect(getObjectValue(result2)).toStrictEqual('HELLO中文O😊WO😊RLD');
         });
     });
 });

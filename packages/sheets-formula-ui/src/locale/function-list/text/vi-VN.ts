@@ -268,11 +268,11 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/lower-%E5%87%BD%E6%95%B0-0b22ff44-f335-402b-b171-8f62a7a6d159',
+                url: 'https://support.microsoft.com/vi-vn/office/lower-%E5%87%BD%E6%95%B0-3f21df02-a80c-44b2-afaf-81358f9fdeb4',
             },
         ],
         functionParameter: {
-            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
+            text: { name: 'bản văn', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ thường.' },
         },
     },
     MID: {
@@ -595,14 +595,14 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/textjoin-%E5%87%BD%E6%95%B0-c50e06da-9c72-4cae-a5a3-1e6d42bd43e1',
+                url: 'https://support.microsoft.com/vi-vn/office/textjoin-%E5%87%BD%E6%95%B0-357b449a-ec91-49d0-80c3-0e8fc845691c',
             },
         ],
         functionParameter: {
-            delimiter: { name: 'delimiter', detail: 'Dấu phân cách để sử dụng giữa các văn bản.' },
-            ignore_empty: { name: 'ignore_empty', detail: 'Giá trị logic để chỉ định liệu bỏ qua các ô trống.' },
-            text1: { name: 'text1', detail: 'Chuỗi văn bản đầu tiên để kết hợp.' },
-            text2: { name: 'text2', detail: 'Chuỗi văn bản tiếp theo để kết hợp.' },
+            delimiter: { name: 'dấu tách', detail: 'Một chuỗi văn bản, trống hoặc có một hay nhiều ký tự nằm giữa các dấu ngoặc kép hay một tham chiếu tới một chuỗi văn bản hợp lệ.' },
+            ignoreEmpty: { name: 'bỏ qua các ô trống', detail: 'Nếu TRUE, hãy bỏ qua các ô trống.' },
+            text1: { name: 'bản văn 1', detail: 'Mục văn bản cần kết hợp. Một chuỗi văn bản hoặc xâu chuỗi, chẳng hạn như một phạm vi ô.' },
+            text2: { name: 'bản văn 2', detail: 'Các mục văn bản bổ sung cần kết hợp. Có thể có tối đa 252 tham đối văn bản cho các mục văn bản, bao gồm text1. Mỗi tham đối có thể là một chuỗi văn bản hoặc xâu chuỗi, chẳng hạn như phạm vi ô.' },
         },
     },
     TEXTSPLIT: {
@@ -624,16 +624,16 @@ export default {
         },
     },
     TRIM: {
-        description: 'Loại bỏ tất cả các khoảng trắng khỏi chuỗi văn bản ngoại trừ các khoảng trắng đơn giữa các từ',
-        abstract: 'Loại bỏ tất cả các khoảng trắng khỏi chuỗi văn bản ngoại trừ các khoảng trắng đơn giữa các từ',
+        description: 'Loại bỏ tất cả khoảng trống ra khỏi văn bản, chỉ để lại một khoảng trống giữa các từ.',
+        abstract: 'Xóa khoảng trắng khỏi văn bản',
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479d0',
+                url: 'https://support.microsoft.com/vi-vn/office/trim-%E5%87%BD%E6%95%B0-410388fa-c5df-49c6-b16c-9e5630b479f9',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Chuỗi văn bản mà bạn muốn loại bỏ các khoảng trắng.' },
+            text: { name: 'bản văn', detail: 'Văn bản bạn muốn loại bỏ các khoảng trống.' },
         },
     },
     UNICHAR: {
@@ -668,11 +668,11 @@ export default {
         links: [
             {
                 title: 'Hướng dẫn',
-                url: 'https://support.microsoft.com/vi-vn/office/upper-%E5%87%BD%E6%95%B0-8a57ae40-4fa5-4754-a65b-9b6745c4a5f0',
+                url: 'https://support.microsoft.com/vi-vn/office/upper-%E5%87%BD%E6%95%B0-c11f29b3-d1a3-4537-8df6-04d0049963d6',
             },
         ],
         functionParameter: {
-            text: { name: 'text', detail: 'Văn bản mà bạn muốn chuyển đổi thành chữ hoa.' },
+            text: { name: 'bản văn', detail: 'Văn bản bạn muốn chuyển đổi thành chữ hoa.' },
         },
     },
     VALUE: {

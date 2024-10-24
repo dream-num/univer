@@ -61,3 +61,6 @@ packages/sheets-zen-editor @Jocs
 # business - slides
 packages/slides @jikkai
 packages/slides-ui @jikkai
+
+# collaboration
+**/mutations/** @yuhongz

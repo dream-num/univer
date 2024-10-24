@@ -119,13 +119,13 @@ export const SheetPermissionPanelList = () => {
 
     useEffect(() => {
         const subscribe = workbook.activeSheet$.subscribe(async () => {
-            const ruleList = await getRuleList(true);
+            const ruleList = await getRuleList(isCurrentSheet);
             setRuleList(ruleList);
         });
         return () => {
             subscribe.unsubscribe();
         };
-    }, []);
+    }, [isCurrentSheet]);
 
     useEffect(() => {
         const getRuleListByRefresh = async () => {
@@ -303,7 +303,7 @@ export const SheetPermissionPanelList = () => {
                                     <div className={styles.sheetPermissionListItemContent}>
                                         <div className={styles.sheetPermissionListItemContentEdit}>
 
-                                            <Tooltip title={item.creator?.userID}>
+                                            <Tooltip title={item.creator?.name}>
                                                 <div>
                                                     <Avatar src={item.creator?.avatar} style={{ marginRight: 6 }} size={24} />
                                                 </div>

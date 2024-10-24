@@ -62,6 +62,9 @@ export interface IPermissionService {
     composePermission$(permissionId: string[]): Observable<IPermissionPoint<unknown>[]>;
     composePermission(permissionId: string[]): IPermissionPoint<unknown>[];
     getAllPermissionPoint(): Map<string, Observable<IPermissionPoint<unknown>>>;
+
+    getShowComponents(): boolean;
+    setShowComponents(showComponents: boolean): void;
 }
 
 export const IPermissionService = createIdentifier<IPermissionService>('univer.permission-service');

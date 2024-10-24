@@ -17,7 +17,7 @@
 import type { IFloatDom } from '../../../services/dom/canvas-dom-layer.service';
 import { IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import React, { memo, useEffect, useMemo, useRef } from 'react';
-import { distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, first } from 'rxjs';
 import { ComponentManager } from '../../../common';
 import { useObservable } from '../../../components/hooks/observable';
 import { CanvasFloatDomService } from '../../../services/dom/canvas-dom-layer.service';
@@ -26,7 +26,7 @@ import styles from './index.module.less';
 const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
     const { layer, id } = props;
     const componentManager = useDependency(ComponentManager);
-    const position$ = useMemo(() => layer.position$.pipe(
+    const size$ = useMemo(() => layer.position$.pipe(
         distinctUntilChanged(
             (prev, curr) => prev.absolute.left === curr.absolute.left &&
                 prev.absolute.top === curr.absolute.top &&
@@ -35,9 +35,13 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         )
     ), [layer.position$]);
 
-    const position = useObservable(position$);
+    const position = useObservable(useMemo(() => layer.position$.pipe(first()), [layer.position$]));
     const domRef = useRef<HTMLDivElement>(null);
+    const innerDomRef = useRef<HTMLDivElement>(null);
     const transformRef = useRef<string>(`transform: rotate(${position?.rotate}deg) translate(${position?.startX}px, ${position?.startY}px)`);
+    const innerStyle = useRef<React.CSSProperties>({
+
+    });
     const Component = typeof layer.componentKey === 'string' ? componentManager.get(layer.componentKey) : layer.componentKey;
     const layerProps: any = useMemo(() => ({
         data: layer.data,
@@ -51,10 +55,41 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
                 domRef.current.style.transform = transformRef.current;
             }
         });
-        return () => subscription.unsubscribe();
-    }, [layer.position$]);
+
+        const sizeSubscription = size$.subscribe((size) => {
+            if (domRef.current) {
+                domRef.current.style.width = `${size.endX - size.startX}px`;
+                domRef.current.style.height = `${size.endY - size.startY}px`;
+            }
+
+            if (innerDomRef.current) {
+                const style = {
+                    width: `${size.width}px`,
+                    height: `${size.height}px`,
+                    left: `${size.absolute.left ? 0 : 'auto'}`,
+                    top: `${size.absolute.top ? 0 : 'auto'}`,
+                    right: `${size.absolute.left ? 'auto' : 0}`,
+                    bottom: `${size.absolute.top ? 'auto' : 0}`,
+                };
+
+                innerDomRef.current.style.width = style.width;
+                innerDomRef.current.style.height = style.height;
+                innerDomRef.current.style.left = style.left;
+                innerDomRef.current.style.top = style.top;
+                innerDomRef.current.style.right = style.right;
+                innerDomRef.current.style.bottom = style.bottom;
+
+                innerStyle.current = style;
+            }
+        });
+        return () => {
+            subscription.unsubscribe();
+            sizeSubscription.unsubscribe();
+        };
+    }, [layer.position$, size$]);
 
     const component = useMemo(() => Component ? <Component {...layerProps} /> : null, [Component, layerProps]);
+
     if (!position) {
         return null;
     }
@@ -87,14 +122,9 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
         >
             <div
                 id={id}
+                ref={innerDomRef}
                 className={styles.floatDom}
-                style={{
-                    width: position.width,
-                    height: position.height,
-                    position: 'absolute',
-                    ...(position.absolute.left) ? { left: 0 } : { right: 0 },
-                    ...(position.absolute.top) ? { top: 0 } : { bottom: 0 },
-                }}
+                style={{ position: 'absolute', ...innerStyle.current }}
             >
                 {component}
             </div>

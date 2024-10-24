@@ -623,13 +623,9 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     private _calculateRowAutoHeight(rowNum: number): number {
+        const worksheet = this.worksheet;
         const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
         let height = defaultRowHeight;
-
-        const worksheet = this.worksheet;
-        if (!worksheet) {
-            return height;
-        }
 
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
@@ -737,16 +733,14 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param colIndex
      * @returns {number} width
      */
+
     private _calculateColMaxWidth(colIndex: number): number {
         const MEASURE_EXTENT = 10000;
         const MEASURE_EXTENT_FOR_PARAGRAPH = MEASURE_EXTENT / 10;
+        const worksheet = this.worksheet;
+
         // row has default height, but col does not, col can be very narrow near zero
         let maxColWidth = 0;
-
-        const worksheet = this.worksheet;
-        if (!worksheet) {
-            return maxColWidth;
-        }
 
         // for cell with only v, auto size for content width in visible range and ± 10000 rows around.
         // for cell with p, auto width for content in visible range and ± 1000 rows, 1/10 of situation above.
@@ -758,7 +752,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!visibleRangeViewMain) return maxColWidth;
 
         const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
-        const { rowCount } = this._worksheetData;
+        const rowCount = this.worksheet.getRowCount();
         const checkStart = Math.max(0, startRowOfViewMain - MEASURE_EXTENT); // 0
         const checkEnd = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
 
@@ -779,6 +773,11 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
             const measuredWidth = this.getMeasuredWidthByCell(cell);
             maxColWidth = Math.max(maxColWidth, measuredWidth);
+
+            // return early if maxColWidth is larger than MAXIMUM_COL_WIDTH
+            if (maxColWidth >= MAXIMUM_COL_WIDTH) {
+                return MAXIMUM_COL_WIDTH;
+            }
         }
 
         // check width of first row and last row, and rows in viewMainTop(viewMainTopLeft are included)
@@ -804,6 +803,11 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const measuredWidth = this.getMeasuredWidthByCell(cell);
             maxColWidth = Math.max(maxColWidth, measuredWidth);
+
+            // return early if maxColWidth is larger than MAXIMUM_COL_WIDTH
+            if (maxColWidth >= MAXIMUM_COL_WIDTH) {
+                return MAXIMUM_COL_WIDTH;
+            }
         }
 
         // if there are no content in this column, return current column width.
@@ -811,7 +815,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const preColIndex = Math.max(0, colIndex - 1);
             return this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
         }
-        return Math.min(maxColWidth, MAXIMUM_COL_WIDTH);
+        return maxColWidth;
     }
 
     getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor) {

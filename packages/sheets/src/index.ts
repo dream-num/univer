@@ -381,8 +381,6 @@ export {
     type ISetWorksheetColAutoWidthMutationParams,
     type ISetWorksheetColIsAutoWidthMutationParams,
     type ISetWorksheetColWidthMutationParams,
-
-    // SetWorksheetColAutoWidthMutation,
     SetWorksheetColAutoWidthMutationFactory,
     SetWorksheetColWidthMutation,
 } from './commands/mutations/set-worksheet-col-width.mutation';

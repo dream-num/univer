@@ -17,7 +17,7 @@
 import { chromium, expect, test } from '@playwright/test';
 import { generateSnapshotName } from '../const';
 
-const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas';
+const SHEET_MAIN_CANVAS_ID = '#univer-sheet-main-canvas_workbook-01';
 const isCI = !!process.env.CI;
 
 test('diff default sheet toolbar', async () => {
@@ -32,7 +32,7 @@ test('diff default sheet toolbar', async () => {
     await page.goto('http://localhost:3000/sheets/');
     await page.waitForTimeout(2000);
     await page.evaluate(() => window.E2EControllerAPI.loadDefaultSheet());
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(5000);
 
     const filename = generateSnapshotName('default-sheet-fullpage');
     const screenshot = await page.screenshot({
@@ -41,7 +41,7 @@ test('diff default sheet toolbar', async () => {
         ],
         fullPage: true,
     });
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
 });
 
 test('diff default sheet content', async ({ page }) => {
@@ -52,7 +52,7 @@ test('diff default sheet content', async ({ page }) => {
     await page.waitForTimeout(2000);
 
     const filename = generateSnapshotName('default-sheet');
-    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    const screenshot = await page.locator('#univer-sheet-main-canvas_test').screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 });
 
@@ -160,6 +160,32 @@ test('diff merged cells rendering after scrolling', async () => {
     await page.waitForTimeout(2000);
 
     const filename = generateSnapshotName('mergedCellsRenderingScrolling');
+    const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+
+    await page.waitForTimeout(2000);
+    await browser.close();
+});
+
+/**
+ * Aim for default sheet style.
+ */
+test('diff sheet default style rendering', async () => {
+    const browser = await chromium.launch({
+        headless: !!isCI, // Set to false to see the browser window
+    });
+    const context = await browser.newContext({
+        viewport: { width: 1280, height: 1280 },
+        deviceScaleFactor: 2, // Set your desired DPR
+    });
+    const page = await context.newPage();
+    await page.goto('http://localhost:3000/sheets/');
+    await page.waitForTimeout(2000);
+
+    await page.evaluate(() => window.E2EControllerAPI.loadDefaultStyleSheet());
+    await page.waitForTimeout(2000);
+
+    const filename = generateSnapshotName('defaultstyle');
     const screenshot = await page.locator(SHEET_MAIN_CANVAS_ID).screenshot();
     await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 

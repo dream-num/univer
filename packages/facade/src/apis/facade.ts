@@ -37,6 +37,7 @@ import type {
 import type { ISocket } from '@univerjs/network';
 import type { ISetCrosshairHighlightColorOperationParams } from '@univerjs/sheets-crosshair-highlight';
 import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
+import type { IImageWatermarkConfig, ITextWatermarkConfig } from '@univerjs/watermark';
 import {
     BorderStyleTypes,
     debounce,
@@ -53,7 +54,6 @@ import {
     UniverInstanceType,
     WrapStrategy,
 } from '@univerjs/core';
-
 import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
@@ -61,6 +61,7 @@ import { DisableCrosshairHighlightOperation, EnableCrosshairHighlightOperation, 
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { CopyCommand, PasteCommand } from '@univerjs/ui';
+import { IWatermarkTypeEnum, WatermarkImageBaseConfig, WatermarkService, WatermarkTextBaseConfig } from '@univerjs/watermark';
 import { FDocument } from './docs/f-document';
 import { FHooks } from './f-hooks';
 import { FDataValidationBuilder } from './sheets/f-data-validation-builder';
@@ -536,4 +537,59 @@ export class FUniver {
     getPermission(): FPermission {
         return this._injector.createInstance(FPermission);
     }
+
+    // #region watermark
+
+    /**
+     * Adds a watermark to the unit. Supports both text and image watermarks based on the specified type.
+     *
+     * @param {IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image} type - The type of watermark to add. Can be either 'Text' or 'Image'.
+     * @param {ITextWatermarkConfig | IImageWatermarkConfig} config - The configuration object for the watermark.
+     * - If the type is 'Text', the config should follow the ITextWatermarkConfig interface.
+     * - If the type is 'Image', the config should follow the IImageWatermarkConfig interface.
+     * @throws {Error} Throws an error if the watermark type is unknown.
+     */
+    addWatermark(type: IWatermarkTypeEnum.Text, config: ITextWatermarkConfig): void;
+    addWatermark(type: IWatermarkTypeEnum.Image, config: IImageWatermarkConfig): void;
+    addWatermark(
+        type: IWatermarkTypeEnum.Text | IWatermarkTypeEnum.Image,
+        config: ITextWatermarkConfig | IImageWatermarkConfig
+    ): void {
+        const watermarkService = this._injector.get(WatermarkService);
+        if (type === IWatermarkTypeEnum.Text) {
+            watermarkService.updateWatermarkConfig({
+                type: IWatermarkTypeEnum.Text,
+                config: {
+                    text: {
+                        ...WatermarkTextBaseConfig,
+                        ...config,
+                    },
+                },
+            });
+        } else if (type === IWatermarkTypeEnum.Image) {
+            watermarkService.updateWatermarkConfig({
+                type: IWatermarkTypeEnum.Image,
+                config: {
+                    image: {
+                        ...WatermarkImageBaseConfig,
+                        ...config,
+                    },
+                },
+            });
+        } else {
+            throw new Error('Unknown watermark type');
+        }
+    }
+
+    /**
+     * Deletes the currently applied watermark from the unit.
+     *
+     * This function retrieves the watermark service and invokes the method to remove any existing watermark configuration.
+     */
+    deleteWatermark(): void {
+        const watermarkService = this._injector.get(WatermarkService);
+        watermarkService.deleteWatermarkConfig();
+    }
+
+    // #endregion
 }

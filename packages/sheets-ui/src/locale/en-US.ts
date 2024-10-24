@@ -110,6 +110,9 @@ const locale: typeof zhCN = {
             right: 'Right frame line',
         },
         more: 'More',
+        hideGridlines: 'Hide Gridlines',
+        showGridlines: 'Show Gridlines',
+        toggleGridlines: 'Toggle Gridlines',
     },
     defaultFmt: {
         Automatic: {

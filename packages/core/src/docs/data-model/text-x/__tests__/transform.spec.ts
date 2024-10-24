@@ -16,6 +16,7 @@
 
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
+import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
@@ -671,5 +672,323 @@ describe('transform()', () => {
 
         expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
         expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('retain + retain with paragraph and REPLACE type', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId: '',
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            startIndex: 0,
+                            paragraphStyle: {
+                                lineSpacing: 5,
+                                spaceBelow: { v: 6 },
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+    });
+
+    it('insert after the retain attributes', () => {
+        const actionA: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+            },
+        }];
+
+        const actionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        const transformedActionA: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+                customRanges: [],
+                customDecorations: [],
+            },
+        }];
+
+        const transformedActionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                customRanges: [],
+                customDecorations: [],
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        expect(TextX._transform(actionB, actionA, 'right')).toEqual(transformedActionA);
+        expect(TextX._transform(actionA, actionB, 'left')).toEqual(transformedActionB);
+    });
+
+    it('insert before the retain attributes', () => {
+        const actionA: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+            },
+        }];
+
+        const actionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        const transformedActionA: TextXAction[] = [{
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+                customRanges: [],
+                customDecorations: [],
+            },
+        }];
+
+        const transformedActionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                customRanges: [],
+                customDecorations: [],
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        expect(TextX._transform(actionB, actionA, 'right')).toEqual(transformedActionA);
+        expect(TextX._transform(actionA, actionB, 'left')).toEqual(transformedActionB);
+    });
+
+    it('insert between the retain attributes', () => {
+        const actionA: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+            },
+        }];
+
+        const actionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 2,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 2,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        const transformedActionA: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.INSERT,
+            len: 1,
+            line: 0,
+            body: {
+                dataStream: 'e',
+                customRanges: [],
+                customDecorations: [],
+            },
+        }];
+
+        const transformedActionB: TextXAction[] = [{
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                customRanges: [],
+                customDecorations: [],
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }, {
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+        }, {
+            t: TextXActionType.RETAIN,
+            len: 1,
+            segmentId: '',
+            body: {
+                dataStream: '',
+                customRanges: [],
+                customDecorations: [],
+                textRuns: [
+                    {
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    },
+                ],
+            },
+        }];
+
+        expect(TextX._transform(actionB, actionA, 'right')).toEqual(transformedActionA);
+        expect(TextX._transform(actionA, actionB, 'left')).toEqual(transformedActionB);
     });
 });

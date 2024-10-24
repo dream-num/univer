@@ -252,20 +252,16 @@ export class CalculateFormulaService extends Disposable {
                 pendingTasks.push(calCancelTask);
             });
 
-            if (this._runtimeService.isStopExecution()) {
+            const tree = treeList[i];
+            const nodeData = tree.nodeData;
+            const getDirtyData = tree.getDirtyData;
+            let value: FunctionVariantType;
+
+            if (this._runtimeService.isStopExecution() || (nodeData == null && getDirtyData == null)) {
                 this._runtimeService.setFormulaExecuteStage(FormulaExecuteStageType.IDLE);
                 this._runtimeService.markedAsStopFunctionsExecuted();
                 this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
                 return;
-            }
-
-            const tree = treeList[i];
-            const astNode = tree.node;
-            const getDirtyData = tree.getDirtyData;
-            let value: FunctionVariantType;
-
-            if (astNode == null && getDirtyData == null) {
-                throw new Error('AstNode or executor is null');
             }
 
             this._runtimeService.setCurrent(
@@ -288,11 +284,11 @@ export class CalculateFormulaService extends Disposable {
                 this._runtimeService.setRuntimeFeatureCellData(tree.featureId, runtimeCellData);
 
                 this._runtimeService.setRuntimeFeatureRange(tree.featureId, dirtyRanges);
-            } else if (astNode != null) {
-                if (interpreter.checkAsyncNode(astNode)) {
-                    value = await interpreter.executeAsync(astNode);
+            } else if (nodeData != null) {
+                if (interpreter.checkAsyncNode(nodeData.node)) {
+                    value = await interpreter.executeAsync(nodeData);
                 } else {
-                    value = interpreter.execute(astNode);
+                    value = interpreter.execute(nodeData);
                 }
 
                 if (tree.formulaId != null) {
@@ -326,6 +322,8 @@ export class CalculateFormulaService extends Disposable {
         } else if (!isArrayFormulaState) {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
+
+        this._runtimeService.clearReferenceAndNumberformatCache();
 
         return this._runtimeService.getAllRuntimeData();
     }

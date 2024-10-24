@@ -22,7 +22,7 @@ import { DocSelectionManagerService } from '@univerjs/docs';
 
 import { DeleteLeftCommand, DocEventManagerService, IEditorService, InsertCommand, MoveCursorOperation } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { filter, map, mergeMap } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs';
 import { AddDocUniFormulaCommand, RemoveDocUniFormulaCommand, UpdateDocUniFormulaCommand } from '../commands/commands/doc.command';
 import { CloseFormulaPopupOperation, ShowFormulaPopupOperation } from '../commands/operations/operation';
 import { UniFormulaPopupService } from '../services/formula-popup.service';
@@ -96,7 +96,7 @@ export class DocUniFormulaInputController extends Disposable {
             map((focused) => focused ? this._instanceSrv.getUnit<DocumentDataModel>(focused, UniverInstanceType.UNIVER_DOC) : null),
             map((doc) => doc && { doc, docEventManagerService: this._renderManagerService.getRenderById(doc!.getUnitId())?.with(DocEventManagerService) }),
             filter((info) => !!info),
-            mergeMap((info) => info.docEventManagerService!.hoverCustomRanges$.pipe(map((ranges) => ({ doc: info.doc, ranges }))))
+            switchMap((info) => info.docEventManagerService!.hoverCustomRanges$.pipe(map((ranges) => ({ doc: info.doc, ranges }))))
         );
 
         this.disposeWithMe(rangesWithDoc$.subscribe(({ doc, ranges: customRanges }) => {

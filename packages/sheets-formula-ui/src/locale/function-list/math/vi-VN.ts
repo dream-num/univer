@@ -80,6 +80,19 @@ export default {
             number: { name: 'số', detail: 'Giá trị tuyệt đối của Số phải lớn hơn 1.' },
         },
     },
+    ARABIC: {
+        description: '将罗马数字转换为阿拉伯数字',
+        abstract: '将罗马数字转换为阿拉伯数字',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/arabic-%E5%87%BD%E6%95%B0-9a8da418-c17b-4ef9-a657-9370a30a674f',
+            },
+        ],
+        functionParameter: {
+            text: { name: 'bản văn', detail: 'Một chuỗi nằm trong dấu ngoặc kép, một chuỗi trống ("") hoặc một tham chiếu đến ô có chứa văn bản.' },
+        },
+    },
     ASIN: {
         description: 'Trả về arcsin, hayine nghịch đảo của một số.',
         abstract: 'Trả về arcsin, hayine nghịch đảo của một số.',
@@ -729,6 +742,20 @@ export default {
         functionParameter: {
             bottom: { name: 'giá trị tối thiểu', detail: 'Số nguyên nhỏ nhất mà sẽ trả về.' },
             top: { name: 'giá trị tối đa', detail: 'Số nguyên lớn nhất mà sẽ trả về.' },
+        },
+    },
+    ROMAN: {
+        description: 'Chuyển đổi số Ả-rập thành số La Mã, dạng văn bản.',
+        abstract: 'Chuyển đổi số Ả-rập thành số La Mã, dạng văn bản.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/roman-%E5%87%BD%E6%95%B0-d6b0b99e-de46-4704-a518-b45a0f8b56f5',
+            },
+        ],
+        functionParameter: {
+            number: { name: 'số', detail: 'Số Ả-rập mà bạn muốn chuyển đổi.' },
+            form: { name: 'hình thức', detail: 'Một số xác định kiểu chữ số La Mã bạn muốn. Kiểu chữ số La Mã bao gồm từ kiểu Cổ điển đến kiểu Giản thể, trở nên ngắn gọn hơn khi giá trị của biểu mẫu tăng lên.' },
         },
     },
     ROUND: {

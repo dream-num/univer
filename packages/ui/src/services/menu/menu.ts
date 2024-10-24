@@ -97,12 +97,12 @@ interface IMenuItemBase<V> {
      * Custom label component id.
      */
     label?:
-        | string
-        | {
-            name: string;
-            hoverable?: boolean;
-            props?: Record<string, any>;
-        }; // custom component, send to CustomLabel label property
+    | string
+    | {
+        name: string;
+        hoverable?: boolean;
+        props?: Record<string, any>;
+    }; // custom component, send to CustomLabel label property
 
     hidden$?: Observable<boolean>;
     disabled$?: Observable<boolean>;
@@ -121,12 +121,12 @@ export interface IValueOption<T = undefined> {
     value?: string | number;
     value$?: Observable<T>;
     label?:
-        | string
-        | {
-            name: string;
-            hoverable?: boolean;
-            props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
-        }; // custom component, send to CustomLabel label property
+    | string
+    | {
+        name: string;
+        hoverable?: boolean;
+        props?: Record<string, string | number | Array<{ [x: string | number]: string }>>;
+    }; // custom component, send to CustomLabel label property
     icon?: string;
     tooltip?: string;
     style?: object;

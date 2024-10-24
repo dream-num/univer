@@ -25,8 +25,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or a reference to a cell that contains the text you want to change. If text does not contain any full-width letters, text is not changed.' },
         },
     },
     ARRAYTOTEXT: {
@@ -39,8 +38,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'The array to return as text.' },
+            format: { name: 'format', detail: 'The format of the returned data. It can be one of two values: \n0 Default. Concise format that is easy to read. \n1 Strict format that includes escape characters and row delimiters. Generates a string that can be parsed when entered into the formula bar. Encapsulates returned strings in quotes except for Booleans, Numbers and Errors.' },
         },
     },
     BAHTTEXT: {
@@ -53,8 +52,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number you want to convert to text, or a reference to a cell containing a number, or a formula that evaluates to a number.' },
         },
     },
     CHAR: {
@@ -67,8 +65,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number between 1 and 255 specifying which character you want. The character is from the character set used by your computer.' },
         },
     },
     CLEAN: {
@@ -81,8 +78,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Any worksheet information from which you want to remove nonprintable characters.' },
         },
     },
     CODE: {
@@ -95,8 +91,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text for which you want the code of the first character.' },
         },
     },
     CONCAT: {
@@ -137,13 +132,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or a reference to a cell that contains the text you want to change. If text does not contain any half-width English letters or katakana, text is not changed.' },
         },
     },
     DOLLAR: {
-        description: 'Converts a number to text, using the $ (dollar) currency format',
-        abstract: 'Converts a number to text, using the $ (dollar) currency format',
+        description: 'Converts a number to text using currency format',
+        abstract: 'Converts a number to text using currency format',
         links: [
             {
                 title: 'Instruction',
@@ -151,8 +145,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'A number, a reference to a cell containing a number, or a formula that evaluates to a number.' },
+            decimals: { name: 'decimals', detail: 'The number of digits to the right of the decimal point. If this is negative, the number is rounded to the left of the decimal point. If you omit decimals, it is assumed to be 2.' },
         },
     },
     EXACT: {
@@ -165,8 +159,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text1: { name: 'text1', detail: 'The first text string.' },
+            text2: { name: 'text2', detail: 'The second text string.' },
         },
     },
     FIND: {
@@ -207,8 +201,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number you want to round and convert to text.' },
+            decimals: { name: 'decimals', detail: 'The number of digits to the right of the decimal point. If this is negative, the number is rounded to the left of the decimal point. If you omit decimals, it is assumed to be 2.' },
+            noCommas: { name: 'no_commas', detail: 'A logical value that, if TRUE, prevents FIXED from including commas in the returned text.' },
         },
     },
     LEFT: {
@@ -320,8 +315,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text to convert to a number.' },
+            decimalSeparator: { name: 'decimal_separator', detail: 'The character used to separate the integer and fractional part of the result.' },
+            groupSeparator: { name: 'group_separator', detail: 'The character used to separate groupings of numbers.' },
         },
     },
     PHONETIC: {
@@ -348,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Text enclosed in quotation marks, a formula that returns text, or a reference to a cell containing the text you want to partially capitalize.' },
         },
     },
     REGEXEXTRACT: {
@@ -447,8 +442,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            numChars: { name: 'num_chars', detail: 'Specifies the number of characters you want RIGHT to extract.' },
         },
     },
     RIGHTB: {
@@ -461,8 +456,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text string containing the characters you want to extract.' },
+            numBytes: { name: 'num_bytes', detail: 'Specifies the number of characters you want RIGHTB to extract, based on bytes.' },
         },
     },
     SEARCH: {
@@ -503,8 +498,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text or the reference to a cell containing text for which you want to substitute characters.' },
+            oldText: { name: 'old_text', detail: 'The text you want to replace.' },
+            newText: { name: 'new_text', detail: 'The text you want to replace old_text with.' },
+            instanceNum: { name: 'instance_num', detail: 'Specifies which occurrence of old_text you want to replace with new_text. If you specify instance_num, only that instance of old_text is replaced. Otherwise, every occurrence of old_text in text is changed to new_text.' },
         },
     },
     T: {
@@ -517,8 +514,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value you want to test.' },
         },
     },
     TEXT: {
@@ -627,8 +623,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'Number is the Unicode number that represents the character.' },
         },
     },
     UNICODE: {
@@ -641,8 +636,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'Text is the character for which you want the Unicode value.' },
         },
     },
     UPPER: {
@@ -669,8 +663,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text enclosed in quotation marks or a reference to a cell containing the text you want to convert.' },
         },
     },
     VALUETOTEXT: {
@@ -683,8 +676,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value to return as text.' },
+            format: { name: 'format', detail: 'The format of the returned data. It can be one of two values: \n0 Default. Concise format that is easy to read. \n1 Strict format that includes escape characters and row delimiters. Generates a string that can be parsed when entered into the formula bar. Encapsulates returned strings in quotes except for Booleans, Numbers and Errors.' },
         },
     },
     CALL: {

@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, LocaleType, Nullable } from '@univerjs/core';
+import type { IFunctionNames } from '../basics/function';
+
+import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { ArrayBinarySearchType } from '../engine/utils/compare';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 import { ErrorType } from '../basics/error-type';
-import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
+import { regexTestSingeRange, regexTestSingleColumn, regexTestSingleRow } from '../basics/regex';
 import { compareToken } from '../basics/token';
 import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
@@ -30,18 +35,14 @@ import { serializeRangeToRefString } from '../engine/utils/reference';
 import { convertTonNumber } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
-import type { IFunctionNames } from '../basics/function';
-import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
-import type { ArrayBinarySearchType } from '../engine/utils/compare';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
-export class BaseFunction extends Disposable {
+export class BaseFunction {
     private _unitId: Nullable<string>;
     private _subUnitId: Nullable<string>;
     private _row: number = -1;
     private _column: number = -1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
+    private _locale: LocaleType;
 
     /**
      * Whether the function needs to expand the parameters
@@ -54,6 +55,11 @@ export class BaseFunction extends Disposable {
     needsReferenceObject: boolean = false;
 
     /**
+     * Whether the function needs handle locale
+     */
+    needsLocale: boolean = false;
+
+    /**
      * Minimum number of parameters
      */
     minParams: number = -1;
@@ -64,7 +70,7 @@ export class BaseFunction extends Disposable {
     maxParams: number = -1;
 
     constructor(private _name: IFunctionNames) {
-        super();
+
     }
 
     get name() {
@@ -87,6 +93,10 @@ export class BaseFunction extends Disposable {
         return this._column;
     }
 
+    dispose() {
+
+    }
+
     /**
      * In Excel, to inject a defined name into a function that has positioning capabilities,
      * such as using the INDIRECT function to reference a named range,
@@ -105,6 +115,14 @@ export class BaseFunction extends Disposable {
 
     setDefinedNames(definedNames: IDefinedNameMapItem) {
         this._definedNames = definedNames;
+    }
+
+    getLocale() {
+        return this._locale;
+    }
+
+    setLocale(locale: LocaleType) {
+        this._locale = locale;
     }
 
     isAsync() {
@@ -508,11 +526,11 @@ export class BaseFunction extends Disposable {
 
         let referenceObject: BaseReferenceObject;
 
-        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(token)) {
+        if (regexTestSingeRange(token)) {
             referenceObject = new CellReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(token)) {
+        } else if (regexTestSingleRow(token)) {
             referenceObject = new RowReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(token)) {
+        } else if (regexTestSingleColumn(token)) {
             referenceObject = new ColumnReferenceObject(token);
         } else {
             referenceObject = new RangeReferenceObject(range, sheetId, unitId);

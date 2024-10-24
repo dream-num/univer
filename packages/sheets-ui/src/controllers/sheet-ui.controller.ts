@@ -17,8 +17,9 @@
 import type { IUniverSheetsUIConfig } from './config.schema';
 import { connectInjector, Disposable, ICommandService, IConfigService, Inject, Injector, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionRenderService } from '@univerjs/docs-ui';
-
 import { IRenderManagerService } from '@univerjs/engine-render';
+
+import { HideGridlines } from '@univerjs/icons';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -39,6 +40,7 @@ import { DeleteRangeMoveLeftConfirmCommand } from '../commands/commands/delete-r
 import { DeleteRangeMoveUpConfirmCommand } from '../commands/commands/delete-range-move-up-confirm.command';
 import { HideColConfirmCommand, HideRowConfirmCommand } from '../commands/commands/hide-row-col-confirm.command';
 import {
+    ResetRangeTextColorCommand,
     SetRangeBoldCommand,
     SetRangeFontFamilyCommand,
     SetRangeFontSizeCommand,
@@ -92,8 +94,8 @@ import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
 import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
-import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 
+import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
     FONT_FAMILY_ITEM_COMPONENT,
@@ -175,7 +177,7 @@ export class SheetUIController extends Disposable {
     }
 
     private _init(): void {
-        this._initCustomComponents();
+        this._initComponents();
         this._initCommands();
         this._initMenus();
         this._initShortcuts();
@@ -183,8 +185,10 @@ export class SheetUIController extends Disposable {
         this._initFocusHandler();
     }
 
-    private _initCustomComponents(): void {
+    private _initComponents(): void {
         const componentManager = this._componentManager;
+
+        // init custom components
         this.disposeWithMe(componentManager.register(MENU_ITEM_INPUT_COMPONENT, MenuItemInput));
         this.disposeWithMe(componentManager.register(BORDER_PANEL_COMPONENT, BorderPanel));
         this.disposeWithMe(componentManager.register(COLOR_PICKER_COMPONENT, ColorPicker));
@@ -192,6 +196,9 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
         this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
+
+        // init icons
+        this.disposeWithMe(componentManager.register('HideGridlines', HideGridlines));
     }
 
     // eslint-disable-next-line max-lines-per-function
@@ -228,6 +235,7 @@ export class SheetUIController extends Disposable {
             SetRangeFontSizeCommand,
             SetRangeFontFamilyCommand,
             SetRangeTextColorCommand,
+            ResetRangeTextColorCommand,
             SetItalicCommand,
             SetStrikeThroughCommand,
             SetFontFamilyCommand,

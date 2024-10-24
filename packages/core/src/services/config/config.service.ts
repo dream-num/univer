@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '../../common/di';
-import { Tools } from '../../shared';
-
+import type { IDisposable } from '../../common/di';
 import type { Nullable } from '../../shared/types';
+import { filter, Observable, Subject } from 'rxjs';
+import { createIdentifier } from '../../common/di';
+
+import { Tools } from '../../shared';
 
 // WARNING!!! Do not set per unit config here! You can definitely find a better place to do that.
 
@@ -45,10 +47,19 @@ export interface IConfigService {
     getConfig<T>(id: string): Nullable<T>;
     setConfig(id: string | symbol, value: unknown, options?: IConfigOptions): void;
     deleteConfig(id: string): boolean;
+    subscribeConfigValue$<T = unknown>(key: string): Observable<T>;
+
 }
 
-export class ConfigService implements IConfigService {
+export class ConfigService implements IConfigService, IDisposable {
+    private _configChanged$ = new Subject<{ [key: string]: unknown }>();
+    readonly configChanged$ = this._configChanged$.asObservable();
+
     private readonly _config: Map<string | symbol, any> = new Map();
+
+    dispose(): void {
+        this._configChanged$.complete();
+    }
 
     getConfig<T>(id: string | symbol): Nullable<T> {
         return this._config.get(id) as T;
@@ -57,18 +68,33 @@ export class ConfigService implements IConfigService {
     setConfig(id: string, value: unknown, options?: IConfigOptions): void {
         const { merge = false } = options || {};
 
-        const existingValue = this._config.get(id) ?? {};
+        let nextValue = this._config.get(id) ?? {};
 
         if (merge) {
-            this._config.set(id, Tools.deepMerge(existingValue, value));
-
-            return;
+            nextValue = Tools.deepMerge(nextValue, value);
+        } else {
+            nextValue = value;
         }
 
-        this._config.set(id, value);
+        this._config.set(id, nextValue);
+        this._configChanged$.next({ [id]: nextValue });
     }
 
     deleteConfig(id: string | symbol): boolean {
         return this._config.delete(id);
+    }
+
+    subscribeConfigValue$<T = unknown>(key: string): Observable<T> {
+        return new Observable<T>((observer) => {
+            if (Object.prototype.hasOwnProperty.call(this._config, key)) {
+                observer.next(this._config.get(key) as T);
+            }
+
+            const sub = this.configChanged$
+                .pipe(filter((c) => Object.prototype.hasOwnProperty.call(c, key)))
+                .subscribe((c) => observer.next(c[key] as T));
+
+            return () => sub.unsubscribe();
+        });
     }
 }

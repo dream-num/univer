@@ -135,6 +135,7 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         return {
+            ...this._rangeData,
             startRow,
             endRow,
             startColumn,

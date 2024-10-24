@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-hyper-link",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -62,7 +62,7 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.30",
+        "@univerjs/protocol": "0.1.39-alpha.36",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

@@ -15,6 +15,9 @@
  */
 
 import type { Dependency, IWorkbookData, Workbook } from '@univerjs/core';
+import type { ISheetData } from '../../../basics/common';
+
+import type { FormulaDataModel } from '../../../models/formula-data.model';
 import {
     CellValueType,
     ILogService,
@@ -28,12 +31,11 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-
-import type { ISheetData } from '../../../basics/common';
-import type { FormulaDataModel } from '../../../models/formula-data.model';
 import { CalculateFormulaService } from '../../../services/calculate-formula.service';
 import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
+import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
+import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
 import { FunctionService, IFunctionService } from '../../../services/function.service';
 import {
     IOtherFormulaManagerService,
@@ -299,6 +301,8 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
     injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
     injector.add([ISuperTableService, { useClass: SuperTableService }]);
+    injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
+    injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
 
     injector.add([FormulaDependencyGenerator]);
     injector.add([Interpreter]);

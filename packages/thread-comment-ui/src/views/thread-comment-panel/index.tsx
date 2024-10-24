@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import type { IThreadComment } from '@univerjs/thread-comment';
+import type { Observable } from 'rxjs';
+import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 import { ICommandService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import { Button, Select } from '@univerjs/design';
 import { IncreaseSingle } from '@univerjs/icons';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Nullable } from '@univerjs/core';
-import type { IThreadComment } from '@univerjs/thread-comment';
-import type { Observable } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import { ThreadCommentTree } from '../thread-comment-tree';
 import styles from './index.module.less';
-import type { IThreadCommentTreeProps } from '../thread-comment-tree';
 
 export interface IThreadCommentPanelProps {
     unitId: string;
@@ -44,6 +44,10 @@ export interface IThreadCommentPanelProps {
     onAddComment?: IThreadCommentTreeProps['onAddComment'];
     onDeleteComment?: IThreadCommentTreeProps['onDeleteComment'];
     showComments?: string[];
+}
+
+interface IThreadCommentWithUsers extends IThreadComment {
+    users: Set<string>;
 }
 
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
@@ -79,21 +83,20 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const currentUser = useObservable(userService.currentUser$);
     const comments = useMemo(() => {
         const allComments =
-            (unit === 'all' ? unitComments.map((i) => i[1]).flat() : unitComments.find((i) => i[0] === subUnitId)?.[1] ?? [])
-                .filter((i) => !i.parentId);
+            (unit === 'all' ? unitComments : unitComments.filter((i) => i.subUnitId === subUnitId) ?? []);
 
         const sort = sortComments ?? ((a) => a);
-        const res = allComments;
+        const res: IThreadCommentWithUsers[] = allComments.map((i) => ({ ...i.root, children: i.children ?? [], users: i.relativeUsers }));
 
         if (showComments) {
-            const map = new Map<string, IThreadComment>();
+            const map = new Map<string, IThreadCommentWithUsers>();
             res.forEach((comment) => {
                 map.set(comment.id, comment);
             });
 
-            return [...showComments, ''].map((id) => map.get(id)).filter(Boolean) as IThreadComment[];
+            return [...showComments, ''].map((id) => map.get(id)).filter(Boolean) as IThreadCommentWithUsers[];
         } else {
-            return sort(res);
+            return sort(res) as IThreadCommentWithUsers[];
         }
     }, [showComments, unit, unitComments, sortComments, subUnitId]);
 
@@ -115,16 +118,11 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
                 return commentsSorted;
             }
 
-            return commentsSorted.map((comment) => threadCommentModel.getCommentWithChildren(comment.unitId, comment.subUnitId, comment.id)).map((comment) => {
-                if (comment?.relativeUsers.has(currentUser.userID)) {
-                    return comment.root;
-                }
-                return null;
-            }).filter(Boolean) as IThreadComment[];
+            return commentsSorted.filter((comment) => comment?.users.has(currentUser.userID));
         }
 
         return commentsSorted;
-    }, [commentsSorted, currentUser?.userID, status, threadCommentModel]);
+    }, [commentsSorted, currentUser?.userID, status]);
 
     const renderComments = tempComment
         ? [tempComment, ...statuedComments]

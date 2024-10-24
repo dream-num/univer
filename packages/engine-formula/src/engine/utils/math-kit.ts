@@ -23,21 +23,36 @@
 import Decimal from 'decimal.js';
 
 export function plus(a: number, b: number): number {
+    const result = a + b;
+    if (Number.isSafeInteger(result)) {
+        return result;
+    }
     return new Decimal(a).add(b).toNumber();
 }
 
 export function minus(a: number, b: number): number {
+    const result = a - b;
+    if (Number.isSafeInteger(result)) {
+        return result;
+    }
     return new Decimal(a).sub(b).toNumber();
 }
 
 export function multiply(a: number, b: number): number {
+    const result = a * b;
+    if (Number.isSafeInteger(result)) {
+        return result;
+    }
     return new Decimal(a).mul(b).toNumber();
 }
 
 export function divide(a: number, b: number): number {
+    const result = a / b;
+    if (Number.isSafeInteger(result)) {
+        return result;
+    }
     return new Decimal(a).div(b).toNumber();
 }
-
 /**
  * Rounds a number to a specified number of decimal places.
  * @param base The number to round.

@@ -202,6 +202,10 @@ function compareFontInfoDistance(a: FontDistance, b: FontDistance) {
 }
 
 async function checkLocalFontsPermission() {
+    if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+        return;
+    }
+
     if (typeof window === 'undefined') {
         return;
     }

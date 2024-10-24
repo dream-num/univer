@@ -51,6 +51,7 @@ const locale: typeof zhCN = {
         alignJustify: '兩端對齊',
         headerFooter: '頁眉頁腳',
         checklist: '任務列表',
+        documentFlavor: '现代模式',
     },
     table: {
         insert: 'Insert',

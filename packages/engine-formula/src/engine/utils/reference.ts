@@ -18,7 +18,7 @@ import type { IRange, IUnitRangeName, IUnitRangeWithName } from '@univerjs/core'
 import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
-import { isReferenceString, UNIT_NAME_REGEX } from '../../basics/regex';
+import { isReferenceString, UNIT_NAME_REGEX_PRECOMPILING } from '../../basics/regex';
 import { prefixToken, SPACE_TOKEN } from '../../basics/token';
 
 const $ROW_REGEX = /[^0-9]/g;
@@ -201,13 +201,13 @@ export function singleReferenceToGrid(refBody: string) {
 }
 
 export function handleRefStringInfo(refString: string) {
-    const unitIdMatch = new RegExp(UNIT_NAME_REGEX).exec(refString);
+    const unitIdMatch = UNIT_NAME_REGEX_PRECOMPILING.exec(refString);
     let unitId = '';
 
     if (unitIdMatch != null) {
         unitId = unitIdMatch[0].trim();
         unitId = unitId.slice(1, unitId.length - 1);
-        refString = refString.replace(new RegExp(UNIT_NAME_REGEX), '');
+        refString = refString.replace(UNIT_NAME_REGEX_PRECOMPILING, '');
     }
 
     const sheetNameIndex = refString.indexOf('!');

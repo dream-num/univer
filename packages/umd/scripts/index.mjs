@@ -90,6 +90,9 @@ async function generateLocale() {
     }, {
         key: 'zh-TW',
         dayjsKey: 'zh-tw',
+    }, {
+        key: 'fa-IR',
+        dayjsKey: 'fa',
     }];
 
     const outputDir = path.resolve(__dirname, '../lib/locale');

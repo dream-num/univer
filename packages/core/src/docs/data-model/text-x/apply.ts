@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDocumentBody } from '../../../types/interfaces';
 import { MemoryCursor } from '../../../common/memory-cursor';
 import { Tools } from '../../../shared';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
-import type { IDocumentBody } from '../../../types/interfaces';
 import { type TextXAction, TextXActionType } from './action-types';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
@@ -51,6 +51,7 @@ function insertApply(
     textLength: number,
     currentIndex: number
 ) {
+    // No need to insert empty text.
     if (textLength === 0) {
         return;
     }
@@ -64,9 +65,8 @@ export function textXApply(doc: IDocumentBody, actions: TextXAction[]): IDocumen
     memoryCursor.reset();
 
     actions.forEach((action) => {
-        // FIXME: @JOCS Since updateApply modifies the action(used in undo/redo),
-        // so make a deep copy here, does updateApply need to
-        // be modified to have no side effects in the future?
+        // Since updateApply modifies the action(used in undo/redo),
+        // so make a deep copy here.
         const clonedAction = Tools.deepClone(action);
 
         switch (clonedAction.t) {

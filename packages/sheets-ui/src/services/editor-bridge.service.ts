@@ -41,7 +41,7 @@ import {
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService } from '@univerjs/sheets';
-import { BehaviorSubject, map, mergeMap } from 'rxjs';
+import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -148,7 +148,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     readonly currentEditCellLayout$ = this._currentEditCellLayout$.asObservable();
 
     readonly currentEditCell$ = this._currentEditCellState$.pipe(
-        mergeMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
+        switchMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
     );
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);
@@ -292,9 +292,19 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         }
 
         const editCellState = this.getLatestEditCellState();
+        if (!editCellState) {
+            this._currentEditCellState = editCellState;
+            this._currentEditCellLayout = editCellState;
+            this._currentEditCellState$.next(editCellState);
+            this._currentEditCellLayout$.next(editCellState);
+            return;
+        }
 
-        this._currentEditCellState = editCellState;
-        this._currentEditCellState$.next(editCellState);
+        const { position, canvasOffset, scaleX, scaleY, ...rest } = editCellState;
+        this._currentEditCellState = rest;
+        this._currentEditCellLayout = { position, canvasOffset, scaleX, scaleY };
+        this._currentEditCellState$.next(this._currentEditCellState);
+        this._currentEditCellLayout$.next(this._currentEditCellLayout);
     }
 
     private _clearCurrentEditCellState() {

@@ -20,36 +20,63 @@ import { AbsoluteRefType, RANGE_TYPE } from '../sheets/typedef';
 import { Rectangle } from './rectangle';
 
 export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false): IRange {
+    if (refOffsetX === 0 && refOffsetY === 0) {
+        return range;
+    }
+
     let newRange = { ...range };
 
     const startAbsoluteRefType = newRange.startAbsoluteRefType || AbsoluteRefType.NONE;
     const endAbsoluteRefType = newRange.endAbsoluteRefType || AbsoluteRefType.NONE;
 
+    const rangeType = newRange.rangeType || RANGE_TYPE.NORMAL;
+
     if (!ignoreAbsolute && startAbsoluteRefType === AbsoluteRefType.ALL && endAbsoluteRefType === AbsoluteRefType.ALL) {
         return newRange;
     }
 
+    const start = moveRangeByRangeType(newRange.startRow, refOffsetY, newRange.startColumn, refOffsetX, rangeType);
+    const end = moveRangeByRangeType(newRange.endRow, refOffsetY, newRange.endColumn, refOffsetX, rangeType);
+
     if (ignoreAbsolute || (startAbsoluteRefType === AbsoluteRefType.NONE && endAbsoluteRefType === AbsoluteRefType.NONE)) {
-        return Rectangle.moveOffset(newRange, refOffsetX, refOffsetY);
+        return newRange = {
+            ...newRange,
+            startRow: start.row,
+            startColumn: start.column,
+            endRow: end.row,
+            endColumn: end.column,
+        };
     }
 
     if (startAbsoluteRefType === AbsoluteRefType.NONE) {
-        newRange = { ...newRange, startRow: newRange.startRow + refOffsetY, startColumn: newRange.startColumn + refOffsetX };
+        newRange = { ...newRange, startRow: start.row, startColumn: start.column };
     } else if (startAbsoluteRefType === AbsoluteRefType.COLUMN) {
-        newRange = { ...newRange, startRow: newRange.startRow + refOffsetY };
+        newRange = { ...newRange, startRow: start.row };
     } else if (startAbsoluteRefType === AbsoluteRefType.ROW) {
-        newRange = { ...newRange, startColumn: newRange.startColumn + refOffsetX };
+        newRange = { ...newRange, startColumn: start.column };
     }
 
     if (endAbsoluteRefType === AbsoluteRefType.NONE) {
-        newRange = { ...newRange, endRow: newRange.endRow + refOffsetY, endColumn: newRange.endColumn + refOffsetX };
+        newRange = { ...newRange, endRow: end.row, endColumn: end.column };
     } else if (endAbsoluteRefType === AbsoluteRefType.COLUMN) {
-        newRange = { ...newRange, endRow: newRange.endRow + refOffsetY };
+        newRange = { ...newRange, endRow: end.row };
     } else if (endAbsoluteRefType === AbsoluteRefType.ROW) {
-        newRange = { ...newRange, endColumn: newRange.endColumn + refOffsetX };
+        newRange = { ...newRange, endColumn: end.column };
     }
 
     return newRange;
+}
+
+function moveRangeByRangeType(row: number, rowOffset: number, column: number, columnOffset: number, rangeType: RANGE_TYPE): { row: number; column: number } {
+    if (rangeType === RANGE_TYPE.NORMAL) {
+        return { row: row + rowOffset, column: column + columnOffset };
+    } else if (rangeType === RANGE_TYPE.ROW) {
+        return { row: row + rowOffset, column };
+    } else if (rangeType === RANGE_TYPE.COLUMN) {
+        return { row, column: column + columnOffset };
+    } else {
+        return { row, column };
+    }
 }
 
 /**

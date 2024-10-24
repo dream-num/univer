@@ -38,8 +38,13 @@ export class ThreadCommentResourceController extends Disposable {
             const map = this._threadCommentModel.getUnit(unitID);
             const resultMap: UnitThreadCommentJSON = {};
             if (map) {
-                map.forEach(([key, v]) => {
-                    resultMap[key] = v;
+                map.forEach((info) => {
+                    const subUnitComments = resultMap[info.subUnitId] ?? [];
+                    subUnitComments.push({
+                        ...info.root,
+                        children: info.children,
+                    });
+                    resultMap[info.unitId] = subUnitComments;
                 });
 
                 return JSON.stringify(this._threadCommentDataSourceService.saveToSnapshot(resultMap, unitID));

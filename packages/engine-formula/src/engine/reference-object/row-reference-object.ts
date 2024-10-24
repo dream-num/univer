@@ -18,21 +18,24 @@ import { type IRange, RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import { deserializeRangeWithSheet } from '../utils/reference';
+
+import { deserializeRangeWithSheetWithCache } from '../utils/reference-cache';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class RowReferenceObject extends BaseReferenceObject {
     constructor(token: string) {
         super(token);
-        const grid = deserializeRangeWithSheet(token);
+        const grid = deserializeRangeWithSheetWithCache(token);
         this.setForcedUnitIdDirect(grid.unitId);
         this.setForcedSheetName(grid.sheetName);
         const range: IRange = {
+            ...grid.range,
             startColumn: Number.NaN,
             startRow: grid.range.startRow,
             endColumn: Number.NaN,
-            endRow: -1,
+            endRow: grid.range.endRow,
+            rangeType: RANGE_TYPE.ROW,
         };
         this.setRangeData(range);
     }

@@ -36,12 +36,13 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         const parent = scene?.getParent();
 
         const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
+
         if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
             return;
         }
         const { width: engineWidth, height: engineHeight } = parent;
         let docsLeft = 0;
-        let docsTop = 0;
+        let docsTop = pageMarginTop;
 
         let sceneWidth = 0;
 
@@ -63,14 +64,12 @@ export class DocPageLayoutService extends Disposable implements IRenderModule {
         }
 
         if (engineHeight > docsHeight) {
-            docsTop = engineHeight / 2 - docsHeight / 2;
             sceneHeight = (engineHeight - pageMarginTop * 2) / zoomRatio;
         } else {
-            docsTop = pageMarginTop;
             sceneHeight = docsHeight + pageMarginTop * 2;
         }
 
-        scene.resize(sceneWidth, sceneHeight + 200);
+        scene.resize(sceneWidth, sceneHeight);
 
         // the engine width is 1, when engine has no container.
         // Use to fix flickering issues into the page.

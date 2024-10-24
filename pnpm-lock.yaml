@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 3.7.3
-        version: 3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+        version: 3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
       '@commitlint/cli':
         specifier: ^19.5.0
         version: 19.5.0(@types/node@22.7.5)(typescript@5.6.3)
@@ -66,8 +66,8 @@ importers:
         specifier: ^7.37.1
         version: 7.37.1(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-react-hooks:
-        specifier: 5.1.0-rc-107a2f8c3e-20240617
-        version: 5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6))
+        specifier: 5.0.0
+        version: 5.0.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-react-refresh:
         specifier: ^0.4.12
         version: 0.4.12(eslint@9.12.0(jiti@1.21.6))
@@ -250,8 +250,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/find-replace
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../mockdata
@@ -360,6 +360,9 @@ importers:
       '@univerjs/uniui':
         specifier: workspace:*
         version: link:../packages-experimental/uniui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../packages/watermark
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -409,85 +412,6 @@ importers:
       less:
         specifier: ^4.2.0
         version: 4.2.0
-      minimist:
-        specifier: ^1.2.8
-        version: 1.2.8
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-
-  examples-node:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../packages/core
-      '@univerjs/data-validation':
-        specifier: workspace:*
-        version: link:../packages/data-validation
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../packages/docs
-      '@univerjs/docs-drawing':
-        specifier: workspace:*
-        version: link:../packages/docs-drawing
-      '@univerjs/drawing':
-        specifier: workspace:*
-        version: link:../packages/drawing
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../packages/engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../packages/engine-render
-      '@univerjs/rpc':
-        specifier: workspace:*
-        version: link:../packages/rpc
-      '@univerjs/rpc-node':
-        specifier: workspace:*
-        version: link:../packages-experimental/rpc-node
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../packages/sheets
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../packages/sheets-conditional-formatting
-      '@univerjs/sheets-data-validation':
-        specifier: workspace:*
-        version: link:../packages/sheets-data-validation
-      '@univerjs/sheets-drawing':
-        specifier: workspace:*
-        version: link:../packages/sheets-drawing
-      '@univerjs/sheets-filter':
-        specifier: workspace:*
-        version: link:../packages/sheets-filter
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../packages/sheets-formula
-      '@univerjs/sheets-hyper-link':
-        specifier: workspace:*
-        version: link:../packages/sheets-hyper-link
-      '@univerjs/sheets-sort':
-        specifier: workspace:*
-        version: link:../packages/sheets-sort
-      '@univerjs/thread-comment':
-        specifier: workspace:*
-        version: link:../packages/thread-comment
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../common/shared
-      esbuild:
-        specifier: ^0.24.0
-        version: 0.24.0
-      esbuild-plugin-clean:
-        specifier: ^1.0.1
-        version: 1.0.1(esbuild@0.24.0)
-      esbuild-plugin-copy:
-        specifier: ^2.1.1
-        version: 2.1.1(esbuild@0.24.0)
       minimist:
         specifier: ^1.2.8
         version: 1.2.8
@@ -571,8 +495,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/design
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -710,8 +634,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -747,8 +671,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -787,8 +711,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../../packages/rpc
@@ -848,8 +772,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/docs-ui
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -900,8 +824,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../../packages/slides
@@ -967,8 +891,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
@@ -1016,11 +940,14 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
+      kdbush:
+        specifier: ^4.0.2
+        version: 4.0.2
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -1074,8 +1001,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1108,8 +1035,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1273,8 +1200,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1310,8 +1237,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1350,8 +1277,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1448,8 +1375,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -1500,8 +1427,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1540,8 +1467,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       ot-json1:
         specifier: ^1.0.2
         version: 1.0.2
@@ -1580,8 +1507,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1613,6 +1540,9 @@ importers:
 
   packages/engine-formula:
     dependencies:
+      '@flatten-js/interval-tree':
+        specifier: ^1.1.3
+        version: 1.1.3
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -1768,6 +1698,9 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../watermark
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -1809,8 +1742,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1893,8 +1826,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-numfmt
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1927,8 +1860,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1973,11 +1906,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2040,8 +1973,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2092,11 +2025,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2153,11 +2086,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2245,8 +2178,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2322,8 +2255,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2386,8 +2319,8 @@ importers:
         specifier: workspace:*
         version: link:../find-replace
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2416,18 +2349,12 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/docs':
         specifier: workspace:*
         version: link:../docs
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -2478,8 +2405,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2536,8 +2463,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-formula
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2579,8 +2506,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2637,8 +2564,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2717,8 +2644,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2775,8 +2702,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2879,11 +2806,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2940,8 +2867,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3023,8 +2950,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/slides':
         specifier: workspace:*
         version: link:../slides
@@ -3100,8 +3027,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3137,11 +3064,11 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -3192,8 +3119,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.79
-        version: 0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^0.1.84
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3308,8 +3235,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -3435,8 +3362,8 @@ importers:
         specifier: workspace:*
         version: link:../facade
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.30
-        version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.36
+        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -3473,6 +3400,52 @@ importers:
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/watermark:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/design':
+        specifier: workspace:*
+        version: link:../design
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.80
+        version: 0.1.80(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@univerjs/ui':
+        specifier: workspace:*
+        version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.9
+        version: 18.3.11
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.2
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.1
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
 packages:
@@ -5254,14 +5227,20 @@ packages:
   '@univerjs/icons-svg@0.1.78':
     resolution: {integrity: sha512-9T9V6wtDkLJIJVCCKiOTgCyU8d9oQVjlK8saDxzyKEK8bWFVgSWIr7swIww0gHjVp0tJXiBRQNhcXMqJvCt2ZQ==}
 
-  '@univerjs/icons@0.1.79':
-    resolution: {integrity: sha512-4dyyC75EWw7pBnIO9PwXUeshSEKjAdNUF5dXkyHZ2fmkW5+jNxuSLos4lVhsZ2PHMYhf0PWwffT2Ff6qD8M1kw==}
+  '@univerjs/icons@0.1.84':
+    resolution: {integrity: sha512-fB13Qbn54xHHsX6p2QjI7QjvnLVP143h/4eTlI8BFUtoRA0Wp8Vo1R5mcZyU5sOtlD/nUNlyP27s7q2g8T89cw==}
     peerDependencies:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.39-alpha.30':
-    resolution: {integrity: sha512-mgA8MvuYTWc+E5Fedi45oLKMDBjFzEwOLpFSSZrvzA+rqRnXeVZY21wSOZPHSb+GlIKdNxVtdhg3/ahhVaKJvA==}
+  '@univerjs/icons@0.1.80':
+    resolution: {integrity: sha512-6lR/dhGkGWbahgpdDdf/xEpDJxcRllIQTnknR9pNyo+4VdO/QrVaI3a2NgebY+0VQTD2rX5CuKKJhbkAdzXQdA==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
+  '@univerjs/protocol@0.1.39-alpha.36':
+    resolution: {integrity: sha512-mmNm+hhI30ArFDaE+rrodEpEDajw6ikTJuSZMwhJBWQRzUlGMhyq8BnlOVnEiDjf244xfjuHWnh9ItIJEKiQAw==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': 1.9.14
@@ -6907,8 +6886,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617:
-    resolution: {integrity: sha512-FqbGPZg0U97cOqiZuGm8yplPYtTNTa2YhEDFyL/8qtxQjwQX7KVbCWA1DiAdiNOUi37KrAqZ0TiqrnbQ4QOSTQ==}
+  eslint-plugin-react-hooks@5.0.0:
+    resolution: {integrity: sha512-hIOwI+5hYGpJEc4uPRmz2ulCjAGD/N13Lukkh8cLV0i2IRk/bdZDYjgLVHj+U9Z704kLIdIO6iueGvxNur0sgw==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -7998,6 +7977,9 @@ packages:
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
+
+  kdbush@4.0.2:
+    resolution: {integrity: sha512-WbCVYJ27Sz8zi9Q7Q0xHC+05iwkm3Znipc2XTlrnJbsHMYktW4hPhXUE8Ys1engBrvffoSCqbil1JQAa7clRpA==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -10576,7 +10558,7 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.25.0
 
-  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
+  '@antfu/eslint-config@3.7.3(@eslint-react/eslint-plugin@1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@typescript-eslint/utils@8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3))(@vue/compiler-sfc@3.4.38)(eslint-plugin-format@0.1.2(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-hooks@5.0.0(eslint@9.12.0(jiti@1.21.6)))(eslint-plugin-react-refresh@0.4.12(eslint@9.12.0(jiti@1.21.6)))(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)(vitest@2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))':
     dependencies:
       '@antfu/install-pkg': 0.4.1
       '@clack/prompts': 0.7.0
@@ -10617,7 +10599,7 @@ snapshots:
     optionalDependencies:
       '@eslint-react/eslint-plugin': 1.14.3(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       eslint-plugin-format: 0.1.2(eslint@9.12.0(jiti@1.21.6))
-      eslint-plugin-react-hooks: 5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6))
+      eslint-plugin-react-hooks: 5.0.0(eslint@9.12.0(jiti@1.21.6))
       eslint-plugin-react-refresh: 0.4.12(eslint@9.12.0(jiti@1.21.6))
     transitivePeerDependencies:
       - '@typescript-eslint/utils'
@@ -12072,8 +12054,8 @@ snapshots:
     dependencies:
       '@typescript-eslint/utils': 8.7.0(eslint@9.12.0(jiti@1.21.6))(typescript@5.6.3)
       eslint: 9.12.0(jiti@1.21.6)
-      eslint-visitor-keys: 4.0.0
-      espree: 10.1.0
+      eslint-visitor-keys: 4.1.0
+      espree: 10.2.0
       estraverse: 5.3.0
       picomatch: 4.0.2
     transitivePeerDependencies:
@@ -12477,12 +12459,17 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.78': {}
 
-  '@univerjs/icons@0.1.79(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@univerjs/icons@0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/icons@0.1.80(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  '@univerjs/protocol@0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
@@ -14359,7 +14346,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-hooks@5.1.0-rc-107a2f8c3e-20240617(eslint@9.12.0(jiti@1.21.6)):
+  eslint-plugin-react-hooks@5.0.0(eslint@9.12.0(jiti@1.21.6)):
     dependencies:
       eslint: 9.12.0(jiti@1.21.6)
 
@@ -15646,6 +15633,8 @@ snapshots:
       object.assign: 4.1.5
       object.values: 1.2.0
 
+  kdbush@4.0.2: {}
+
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -15668,7 +15657,7 @@ snapshots:
     dependencies:
       copy-anything: 2.0.6
       parse-node-version: 1.0.1
-      tslib: 2.6.3
+      tslib: 2.7.0
     optionalDependencies:
       errno: 0.1.8
       graceful-fs: 4.2.11

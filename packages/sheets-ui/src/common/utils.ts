@@ -265,14 +265,13 @@ export function getHoverCellPosition(currentRender: IRender, workbook: Workbook,
     });
 
     const actualCell = skeleton.getCellByIndex(actualRow, actualCol);
-    const originCell = skeleton.getCellByIndex(cellIndex.row, cellIndex.col);
     const originLocation = {
         unitId,
         subUnitId: sheetId,
         workbook,
         worksheet,
-        row: originCell.actualRow,
-        col: originCell.actualColumn,
+        row: actualCell.actualRow,
+        col: actualCell.actualColumn,
     };
 
     const location: ISheetLocation = getCellRealRange(workbook, worksheet, skeleton, actualRow, actualCol);

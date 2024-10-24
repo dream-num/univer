@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, PresetListType } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, PresetListType } from '@univerjs/core';
 import type { IMenuButtonItem, IMenuItem, IMenuSelectorItem } from '@univerjs/ui';
 import type { Subscription } from 'rxjs';
 import {
     BaselineOffset,
     BooleanNumber,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
+    DocumentFlavor,
     HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -45,6 +47,7 @@ import { OpenHeaderFooterPanelCommand } from '../../commands/commands/doc-header
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from '../../commands/commands/inline-format.command';
 import { BulletListCommand, CheckListCommand, getParagraphsInRange, OrderListCommand } from '../../commands/commands/list.command';
 import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from '../../commands/commands/paragraph-align.command';
+import { SwitchDocModeCommand } from '../../commands/commands/switch-doc-mode.command';
 import { DocCreateTableOperation } from '../../commands/operations/doc-create-table.operation';
 import { getCommandSkeleton } from '../../commands/util';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
@@ -91,6 +94,47 @@ function getInsertTableHiddenObservable(
         subscriber.next(viewModel.getEditArea() !== DocumentEditArea.BODY);
 
         return () => subscription.unsubscribe();
+    });
+}
+
+function getHeaderFooterDisabledObservable(accessor: IAccessor): Observable<boolean> {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const commandService = accessor.get(ICommandService);
+
+    return new Observable((subscriber) => {
+        const subscription0 = commandService.onCommandExecuted((command) => {
+            if (command.id === SwitchDocModeCommand.id) {
+                const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+                if (docDataModel == null) {
+                    subscriber.next(true);
+                    return;
+                }
+
+                const documentStyle = docDataModel.getSnapshot().documentStyle;
+                subscriber.next(documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
+            }
+        });
+
+        const subscription = univerInstanceService.focused$.subscribe((unitId) => {
+            if (unitId == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
+
+            if (docDataModel == null) {
+                subscriber.next(true);
+                return;
+            }
+
+            return subscriber.next(docDataModel.getSnapshot().documentStyle?.documentFlavor !== DocumentFlavor.TRADITIONAL);
+        });
+
+        return () => {
+            subscription.unsubscribe();
+            subscription0.dispose();
+        };
     });
 }
 
@@ -528,6 +572,7 @@ export function HeaderFooterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         icon: 'HeaderFooterSingle',
         tooltip: 'toolbar.headerFooter',
+        disabled$: getHeaderFooterDisabledObservable(accessor),
         hidden$: combineLatest(getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC), getHeaderFooterMenuHiddenObservable(accessor), (one, two) => {
             return one || two;
         }),
@@ -791,6 +836,34 @@ export function CheckListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         disabled$: disableMenuWhenNoDocRange(accessor),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC),
         activated$: listValueFactory$(accessor).pipe(map((v) => v && v.indexOf('CHECK_LIST') === 0)),
+    };
+}
+
+export function DocSwitchModeMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const commandService = accessor.get(ICommandService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+
+    return {
+        id: SwitchDocModeCommand.id,
+        type: MenuItemType.BUTTON,
+        icon: 'KeyboardSingle',
+        tooltip: 'toolbar.documentFlavor',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, undefined, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
+        activated$: new Observable<boolean>((subscriber) => {
+            const subscription = commandService.onCommandExecuted((c) => {
+                if (c.id === SwitchDocModeCommand.id) {
+                    const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+
+                    subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+                }
+            });
+
+            const instance = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+
+            subscriber.next(instance?.getSnapshot()?.documentStyle.documentFlavor === DocumentFlavor.MODERN);
+
+            return () => subscription.dispose();
+        }),
     };
 }
 

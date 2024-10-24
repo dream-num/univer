@@ -14,99 +14,92 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { charLenByte } from '../../../engine/utils/char-kit';
+import { getCharLenByteInText } from '../../../engine/utils/char-kit';
+import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Leftb extends BaseFunction {
     override minParams = 1;
 
     override maxParams = 2;
 
-    override calculate(text: BaseValueObject, numBytes?: BaseValueObject) {
-        if (text.isError()) {
-            return text;
-        }
-
-        if (numBytes?.isError()) {
-            return numBytes;
-        }
-
-        const _numBytes = numBytes || NumberValueObject.create(1);
+    override calculate(text: BaseValueObject, numBytes?: BaseValueObject): BaseValueObject {
+        const _numBytes = numBytes ?? NumberValueObject.create(1);
 
         const maxRowLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getRowCount() : 1,
-            _numBytes && _numBytes.isArray() ? (_numBytes as ArrayValueObject).getRowCount() : 1
+            _numBytes.isArray() ? (_numBytes as ArrayValueObject).getRowCount() : 1
         );
 
         const maxColumnLength = Math.max(
             text.isArray() ? (text as ArrayValueObject).getColumnCount() : 1,
-            _numBytes && _numBytes.isArray() ? (_numBytes as ArrayValueObject).getColumnCount() : 1
+            _numBytes.isArray() ? (_numBytes as ArrayValueObject).getColumnCount() : 1
         );
 
-        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text);
-        const numBytesArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numBytes);
+        const textArray = expandArrayValueObject(maxRowLength, maxColumnLength, text, NullValueObject.create());
+        const numBytesArray = expandArrayValueObject(maxRowLength, maxColumnLength, _numBytes, NullValueObject.create());
 
-        return textArray.map((textValue, rowIndex, columnIndex) => {
-            return this._handleSingleText(textValue, rowIndex, columnIndex, numBytesArray);
+        const resultArray = textArray.mapValue((textObject, rowIndex, columnIndex) => {
+            const numBytesObject = numBytesArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (textObject.isError()) {
+                return textObject;
+            }
+
+            if (numBytesObject.isError()) {
+                return numBytesObject;
+            }
+
+            return this._handleSingleObject(textObject, numBytesObject);
         });
+
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return (resultArray as ArrayValueObject).get(0, 0) as BaseValueObject;
+        }
+
+        return resultArray;
     }
 
-    private _handleSingleText(textValue: BaseValueObject, rowIndex: number, columnIndex: number, numBytesArray: ArrayValueObject) {
-        let numBytes = numBytesArray.get(rowIndex, columnIndex) || NumberValueObject.create(1);
+    private _handleSingleObject(text: BaseValueObject, numBytes: BaseValueObject): BaseValueObject {
+        let textValue = `${text.getValue()}`;
 
-        if (numBytes.isError()) {
-            return numBytes;
+        if (text.isBoolean()) {
+            textValue = textValue.toLocaleUpperCase();
         }
 
-        let textValueString = textValue.getValue();
+        const { isError, errorObject, variants } = checkVariantsErrorIsStringToNumber(numBytes);
 
-        if (textValue.isNull()) {
-            textValueString = '';
+        if (isError) {
+            return errorObject as BaseValueObject;
         }
 
-        if (textValue.isBoolean()) {
-            textValueString = textValueString ? 'TRUE' : 'FALSE';
-        }
+        const [numBytesObject] = variants as BaseValueObject[];
 
-        textValueString = `${textValueString}`;
+        const numBytesValue = Math.floor(+numBytesObject.getValue());
 
-        if (numBytes.isString() || numBytes.isBoolean() || numBytes.isNull()) {
-            numBytes = numBytes.convertToNumberObjectValue();
-        }
-
-        if (numBytes.isError()) {
-            return numBytes;
-        }
-
-        const numBytesValueNumber = Math.floor(+numBytes.getValue());
-
-        if (numBytesValueNumber < 0) {
+        if (numBytesValue < 0) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return StringValueObject.create(this._sliceByBytes(textValueString, numBytesValueNumber));
-    }
-
-    private _sliceByBytes(text: string, numBytes: number) {
-        let byteCount = 0;
-        let sliceIndex = 0;
-
-        // Iterate over each Unicode character (correctly handling multi-byte characters and emoji)
-        for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            const charByteLength = charLenByte(char);
-            if (byteCount + charByteLength > numBytes) {
-                break;
-            }
-            byteCount += charByteLength;
-            sliceIndex++;
+        if (text.isNull() || numBytesValue === 0) {
+            return StringValueObject.create('');
         }
 
-        return [...text].slice(0, sliceIndex).join('');
+        let index = 0;
+        let lenByte = 0;
+        let result = '';
+
+        while (lenByte < numBytesValue && index < textValue.length) {
+            lenByte += getCharLenByteInText(textValue, index);
+            result += textValue.charAt(index);
+            index++;
+        }
+
+        return StringValueObject.create(result);
     }
 }

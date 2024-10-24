@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
 import type { DocumentDataModel, ICommandInfo, ICustomRange, IDisposable, IParagraph, IParagraphRange, ITextRange, Nullable } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { BuildTextUtils, Disposable, Inject, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
 
 export interface IAutoFormatContext {
     unit: DocumentDataModel;
@@ -121,7 +121,7 @@ export class DocAutoFormatService extends Disposable {
                 selection,
                 isBody: !selection.segmentId,
                 paragraphs: getParagraphsInRange(selection, doc.getBody()?.paragraphs ?? []),
-                customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithRange(selection, doc.getBody()?.customRanges ?? []),
+                customRanges: BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, doc.getBody()?.customRanges ?? []),
                 commandId: id,
                 commandParams: params,
             };

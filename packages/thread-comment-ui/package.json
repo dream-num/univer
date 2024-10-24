@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/thread-comment-ui",
-    "version": "0.4.0-alpha.2",
+    "version": "0.4.1",
     "private": false,
     "description": "Univer common thread comment UI plugin",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,8 +68,8 @@
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
-        "@univerjs/protocol": "0.1.39-alpha.30",
+        "@univerjs/icons": "^0.1.84",
+        "@univerjs/protocol": "0.1.39-alpha.36",
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1",

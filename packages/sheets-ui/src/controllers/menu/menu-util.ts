@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { FOCUSING_COMMON_DRAWINGS, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
-import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorkbookManageCollaboratorPermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
 import type { IAccessor, IPermissionTypes, IRange, Nullable, Workbook, WorkbookPermissionPointConstructor, Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
+import { FOCUSING_COMMON_DRAWINGS, FOCUSING_FX_BAR_EDITOR, IContextService, IPermissionService, IUniverInstanceService, Rectangle, Tools, UniverInstanceType, UserManagerService } from '@univerjs/core';
+import { IExclusiveRangeService, RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { combineLatest, debounceTime, map, merge, of, startWith, switchMap } from 'rxjs';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 interface IActive {
     workbook: Workbook;
@@ -95,14 +96,23 @@ export function getObservableWithExclusiveRange$(accessor: IAccessor, observable
     );
 }
 
-export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}) {
+// eslint-disable-next-line max-lines-per-function
+export function getCurrentRangeDisable$(accessor: IAccessor, permissionTypes: IPermissionTypes = {}, supportCellEdit = false) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook$ = univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const userManagerService = accessor.get(UserManagerService);
+    const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+    const contextService = accessor.get(IContextService);
+    const formulaEditorFocus$ = contextService.subscribeContextValue$(FOCUSING_FX_BAR_EDITOR);
+    const editorVisible$ = editorBridgeService?.visible$ ?? of(null);
 
-    return combineLatest([userManagerService.currentUser$, workbook$]).pipe(
-        switchMap(([_, workbook]) => {
-            if (!workbook) {
+    return combineLatest([userManagerService.currentUser$, workbook$, editorVisible$, formulaEditorFocus$]).pipe(
+        switchMap(([_, workbook, visible, formulaEditorFocus]) => {
+            if (
+                !workbook ||
+                (visible?.visible && visible.unitId === workbook.getUnitId() && !supportCellEdit) ||
+                (formulaEditorFocus && !supportCellEdit)
+            ) {
                 return of(true);
             }
 
@@ -401,19 +411,18 @@ export function getWorkbookPermissionDisable$(accessor: IAccessor, workbookPermi
                     const workbookPermissionIds: string[] = [];
                     workbookPermissionTypes.forEach((F) => workbookPermissionIds.push(new F(unitId).id));
                     const workbookPermission$ = permissionService.composePermission$(workbookPermissionIds).pipe(map((list) => list.every((item) => item.value === true)));
-                    const workbookManageCollaboratorPermission$ = permissionService.getPermissionPoint$(new WorkbookManageCollaboratorPermission(unitId).id)?.pipe(map((permission) => permission.value)) ?? of(false);
 
-                    return combineLatest([workbookPermission$, workbookManageCollaboratorPermission$]).pipe(
-                        map(([basePermission, manageable]) => {
+                    return workbookPermission$.pipe(
+                        map((basePermission) => {
                             if (!basePermission) {
                                 return true;
                             }
 
                             const subUnitId = activeSheet.getSheetId();
                             const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
-                            const worksheetRuleList = selectionRuleModel.getSubunitRuleList(unitId, subUnitId);
-                            if (worksheetRule || worksheetRuleList.length) {
-                                return !manageable;
+                            const rangeRuleList = selectionRuleModel.getSubunitRuleList(unitId, subUnitId);
+                            if (worksheetRule || rangeRuleList.length) {
+                                return true;
                             }
                             return false;
                         })

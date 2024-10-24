@@ -15,7 +15,6 @@
         "@univerjs/docs-drawing": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/rpc-node": "workspace:*",
         "@univerjs/sheets": "workspace:*",
@@ -38,4 +37,3 @@
         "typescript": "^5.6.3"
     }
 }
-

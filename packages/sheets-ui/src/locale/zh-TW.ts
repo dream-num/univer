@@ -111,6 +111,9 @@ const locale: typeof zhCN = {
             right: '右框線',
         },
         more: '更多',
+        hideGridlines: '隱藏網格線',
+        showGridlines: '顯示網格線',
+        toggleGridlines: '切換網格線',
     },
     defaultFmt: {
         Automatic: {

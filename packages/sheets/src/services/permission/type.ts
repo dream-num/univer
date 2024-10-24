@@ -18,11 +18,11 @@ import type { UnitObject } from '@univerjs/protocol';
 
 export interface IWorksheetProtectionRule {
     permissionId: string;
-    name?: string;
     description?: string;
     unitType: UnitObject;
     unitId: string;
     subUnitId: string;
+    name: string;
 }
 
 export interface IWorksheetProtectionPointRule {

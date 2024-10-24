@@ -15,11 +15,11 @@
  */
 
 import type { IMutation, IMutationInfo } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { IRangeProtectionRule } from '../../model/range-protection-rule.model';
+
+import type { IDeleteRangeProtectionMutationParams } from './delete-range-protection.mutation';
+import { CommandType } from '@univerjs/core';
 import { RangeProtectionRuleModel } from '../../model/range-protection-rule.model';
-import type { IDeleteSelectionProtectionMutationParams } from './delete-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from './delete-range-protection.mutation';
 
 export interface IAddRangeProtectionMutationParams {
@@ -31,8 +31,8 @@ export interface IAddRangeProtectionMutationParams {
 };
 
 export const FactoryAddRangeProtectionMutation = (param: IAddRangeProtectionMutationParams) => {
-    const deleteParams: IDeleteSelectionProtectionMutationParams = { ...param, ruleIds: param.rules.map((rule) => rule.id) };
-    return { id: DeleteRangeProtectionMutation.id, params: deleteParams } as IMutationInfo<IDeleteSelectionProtectionMutationParams>;
+    const deleteParams: IDeleteRangeProtectionMutationParams = { ...param, ruleIds: param.rules.map((rule) => rule.id) };
+    return { id: DeleteRangeProtectionMutation.id, params: deleteParams } as IMutationInfo<IDeleteRangeProtectionMutationParams>;
 };
 
 export const AddRangeProtectionMutation: IMutation<IAddRangeProtectionMutationParams> = {

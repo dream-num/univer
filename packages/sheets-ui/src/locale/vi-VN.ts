@@ -110,6 +110,9 @@ const locale: typeof zhCN = {
             right: 'Viền phải',
         },
         more: 'Thêm',
+        hideGridlines: 'Ẩn đường lưới',
+        showGridlines: 'Hiện đường lưới',
+        toggleGridlines: 'Chuyển đổi đường lưới',
     },
     defaultFmt: {
         Automatic: {

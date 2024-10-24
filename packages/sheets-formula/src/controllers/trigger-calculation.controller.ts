@@ -366,7 +366,8 @@ export class TriggerCalculationController extends Disposable {
                         case FormulaExecutedStateType.SUCCESS:
                             result = 'Formula calculation succeeded';
 
-                            if (calculationProcessCount === 0) {
+                            // When the calculation is stopped and then a successful calculation is triggered, the value is -1
+                            if (calculationProcessCount === 0 || calculationProcessCount === -1) {
                                 result += `. Total time consumed: ${performance.now() - this._startExecutionTime} ms`;
                             }
 
@@ -378,7 +379,8 @@ export class TriggerCalculationController extends Disposable {
                             break;
                     }
 
-                    if (calculationProcessCount === 0) {
+                    // When the calculation is stopped and then a successful calculation is triggered, the value is -1
+                    if (calculationProcessCount === 0 || calculationProcessCount === -1) {
                         if (startDependencyTimer) {
                             // The total calculation time does not exceed 1s, and the progress bar is not displayed.
                             clearTimeout(startDependencyTimer);
@@ -389,6 +391,7 @@ export class TriggerCalculationController extends Disposable {
                             this._completeProgress();
                         }
 
+                        calculationProcessCount = 0;
                         this._doneCalculationTaskCount = 0;
                         this._totalCalculationTaskCount = 0;
                         this._forceCalculating = false;

@@ -93,6 +93,7 @@ import {
 } from '../commands/commands/set-worksheet-row-height.command';
 import { SetWorksheetShowCommand } from '../commands/commands/set-worksheet-show.command';
 import { ToggleCellCheckboxCommand } from '../commands/commands/toggle-checkbox.command';
+import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { AddWorksheetMergeMutation } from '../commands/mutations/add-worksheet-merge.mutation';
 import { AddWorksheetProtectionMutation } from '../commands/mutations/add-worksheet-protection.mutation';
@@ -128,6 +129,7 @@ import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../commands/mutations/set-worksheet-row-height.mutation';
+import { ToggleGridlinesMutation } from '../commands/mutations/toggle-gridlines.mutation';
 import { ScrollToCellOperation } from '../commands/operations/scroll-to-cell.operation';
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
@@ -258,6 +260,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 RemoveDefinedNameCommand,
                 SetDefinedNameCommand,
                 SetWorksheetShowCommand,
+
+                ToggleGridlinesCommand,
+                ToggleGridlinesMutation,
 
                 // permissions range protection
                 SetWorksheetPermissionPointsCommand,

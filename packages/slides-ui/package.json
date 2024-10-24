@@ -71,7 +71,7 @@
         "@univerjs/docs-ui": "workspace:*",
         "@univerjs/drawing": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.79",
+        "@univerjs/icons": "^0.1.84",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"

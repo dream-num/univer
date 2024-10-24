@@ -257,8 +257,26 @@
         padding-bottom: 5px;
 
         & > div {
-            width: 100%;
-            margin-top: 5px;
+            // check docs-ui/src/components/editor/index.module.less .text-editor-validation-error
+            margin-top: 16px;
+        }
+
+        // univer-defined-name-input
+        &-formula-selector-text-wrap {
+            margin-top: 16px;
+            height: 100%;
+            position: relative;
+            padding: 0 0 0 6px;
+            border: 1px solid rgb(var(--border-color));
+            transition: all 0.15s;
+            border-radius: var(--border-radius-base);
+        }
+
+        &-text-editor-container {
+            position: relative;
+            width: 95%;
+            height: 30px;
+            user-select: none;
         }
 
         &-validation {

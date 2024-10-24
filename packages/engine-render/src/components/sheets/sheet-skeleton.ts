@@ -216,7 +216,7 @@ const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
     ignoreTextRotation: false,
 };
 
-interface IRowColumnRange extends IRowRange, IColumnRange {}
+interface IRowColumnRange extends IRowRange, IColumnRange { }
 export interface IDocumentLayoutObject {
     documentModel: Nullable<DocumentDataModel>;
     fontString: string;
@@ -1888,7 +1888,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             // If the cell is merged and is not the main cell, the cell is not rendered.
             if (isMerged && !isMergedMainCell) {
                 return;
-            // If the cell no merged, the cell is not rendered.
+                // If the cell no merged, the cell is not rendered.
             } else if (!isMergedMainCell) {
                 return;
             }

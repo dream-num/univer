@@ -61,7 +61,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/icons": "^0.1.79"
+        "@univerjs/icons": "^0.1.84"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",

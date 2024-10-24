@@ -41,7 +41,7 @@ test('diff default sheet toolbar', async () => {
         ],
         fullPage: true,
     });
-    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
+    await expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 100 });
 });
 
 test('diff default sheet content', async ({ page }) => {

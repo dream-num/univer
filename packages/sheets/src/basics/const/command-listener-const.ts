@@ -32,6 +32,7 @@ import {
     SetWorksheetRowHeightMutation,
     SetWorksheetRowIsAutoHeightMutation,
 } from '../../commands/mutations/set-worksheet-row-height.mutation';
+import { ToggleGridlinesMutation } from '../../commands/mutations/toggle-gridlines.mutation';
 import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
 
 /**
@@ -53,6 +54,7 @@ export const COMMAND_LISTENER_SKELETON_CHANGE = [
     InsertRowMutation.id,
     RemoveColMutation.id,
     RemoveRowMutation.id,
+    ToggleGridlinesMutation.id,
 ];
 
 export const COMMAND_LISTENER_VALUE_CHANGE = [

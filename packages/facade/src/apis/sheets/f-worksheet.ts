@@ -15,15 +15,14 @@
  */
 
 import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
 import type { FilterModel } from '@univerjs/sheets-filter';
-
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
-import { Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
+import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService } from '@univerjs/sheets';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -106,7 +105,7 @@ export class FWorksheet {
      * @param {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from row manager
      * @returns {Nullable<IStyleData> | string} The default style of the worksheet row name or style data
      */
-    getRowDefaultStyle(index: number, keepRaw = false): Nullable<IStyleData> | string {
+    getRowDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
         return this._worksheet.getRowStyle(index, keepRaw);
     }
 
@@ -116,7 +115,7 @@ export class FWorksheet {
      * @param  {boolean} [keepRaw] If true, return the raw style data maybe the style name or style data, otherwise return the data from col manager
      * @returns {Nullable<IStyleData> | string} The default style of the worksheet column name or style data
      */
-    getColumnDefaultStyle(index: number, keepRaw = false): Nullable<IStyleData> | string {
+    getColumnDefaultStyle(index: number, keepRaw: boolean = false): Nullable<IStyleData> | string {
         return this._worksheet.getColumnStyle(index, keepRaw);
     }
 
@@ -1122,6 +1121,25 @@ export class FWorksheet {
     }
 
     /**
+     * Returns true if the sheet's gridlines are hidden; otherwise returns false. Gridlines are visible by default.
+     */
+    hasHiddenGridLines(): boolean {
+        return this._worksheet.getConfig().showGridlines === BooleanNumber.FALSE;
+    }
+
+    /**
+     * Hides or reveals the sheet gridlines.
+     * @param {boolean} hidden If `true`, hide gridlines in this sheet; otherwise show the gridlines.
+     */
+    setHiddenGridlines(hidden: boolean): Promise<boolean> {
+        return this._commandService.executeCommand(ToggleGridlinesCommand.id, {
+            unitId: this._workbook.getUnitId(),
+            subUnitId: this._worksheet.getSheetId(),
+            showGridlines: hidden ? BooleanNumber.FALSE : BooleanNumber.TRUE,
+        } as IToggleGridlinesCommandParams);
+    }
+
+    /**
      * Subscribe to the cell data change event.
      * @param callback - The callback function to be executed when the cell data changes.
      * @returns - A disposable object to unsubscribe from the event.
@@ -1134,7 +1152,7 @@ export class FWorksheet {
                 if (
                     params.unitId === this._workbook.getUnitId() &&
                     params.subUnitId === this._worksheet.getSheetId() &&
-                  params.cellValue
+                    params.cellValue
                 ) {
                     callback(new ObjectMatrix(params.cellValue));
                 }

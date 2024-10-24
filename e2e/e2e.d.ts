@@ -15,5 +15,7 @@ declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         E2EControllerAPI: IE2EControllerAPI;
+        // eslint-disable-next-line ts/no-explicit-any
+        univerAPI: any;
     }
 }

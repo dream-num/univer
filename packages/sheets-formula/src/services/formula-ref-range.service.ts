@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { Disposable, DisposableCollection, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
+import { Disposable, DisposableCollection, Inject, IUniverInstanceService } from '@univerjs/core';
+import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
@@ -36,16 +36,12 @@ export class FormulaRefRangeService extends Disposable {
         super();
     }
 
-    registerFormula(formula: string, callback: FormulaChangeCallback): IDisposable {
+    registerFormula(unitId: string, subUnitId: string, formula: string, callback: FormulaChangeCallback): IDisposable {
         const rangeMap = new Map<string, { unitId: string; subUnitId: string; range: IRange; sheetName: string }>();
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
-        const handleChange = (params: EffectRefRangeParams) => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-            const worksheet = workbook.getActiveSheet();
-            const unitId = workbook.getUnitId();
-            const subUnitId = worksheet?.getSheetId();
 
+        const handleChange = (params: EffectRefRangeParams) => {
             const transformSequenceNodes = sequenceNodes?.map((node) => {
                 if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                     const rangeInfo = rangeMap.get(node.token)!;
@@ -78,21 +74,22 @@ export class FormulaRefRangeService extends Disposable {
         sequenceNodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheet(node.token);
-                const { range, unitId, sheetName } = gridRangeName;
-                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-                const worksheet = sheetName ? workbook?.getSheetBySheetName(sheetName) : workbook?.getActiveSheet();
+                const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
+                const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
+                const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
                 if (!worksheet) {
                     return;
                 }
-                const sheetId = worksheet.getSheetId();
+                const realUnitId = workbook!.getUnitId();
+                const realSheetId = worksheet.getSheetId();
                 const item = {
-                    unitId,
-                    subUnitId: sheetId,
+                    unitId: realUnitId,
+                    subUnitId: realSheetId,
                     range,
-                    sheetName,
+                    sheetName: rangeSheetName,
                 };
                 rangeMap.set(node.token, item);
-                disposableCollection.add(this._refRangeService.registerRefRange(range, handleChange, unitId, sheetId));
+                disposableCollection.add(this._refRangeService.registerRefRange(range, handleChange, realUnitId, realSheetId));
             }
         });
 

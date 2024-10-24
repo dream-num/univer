@@ -15,14 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ErrorType } from '../../../basics/error-type';
-import { createNewArray, expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { createNewArray, expandArrayValueObject } from '../../../engine/utils/array-object';
+import { isSingleValueObject } from '../../../engine/utils/value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { isSingleValueObject } from '../../../engine/utils/value-object';
 
 export class Vlookup extends BaseFunction {
     override minParams = 3;
@@ -158,10 +158,16 @@ export class Vlookup extends BaseFunction {
     }
 
     private _handleTableArray(lookupValue: BaseValueObject, tableArray: BaseValueObject, colIndexNum: BaseValueObject, rangeLookupValue: number) {
-        const colIndexNumValue = this.getIndexNumValue(colIndexNum);
+        let colIndexNumValue = this.getIndexNumValue(colIndexNum);
 
         if (colIndexNumValue instanceof ErrorValueObject) {
             return colIndexNumValue;
+        }
+
+        colIndexNumValue = Math.floor(colIndexNumValue);
+
+        if (colIndexNumValue < 1) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);

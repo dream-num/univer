@@ -97,6 +97,7 @@ export { SheetPrintInterceptorService } from './services/print-interceptor.servi
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+export { type IUniverSheetsUIConfig } from './controllers/config.schema';
 
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';

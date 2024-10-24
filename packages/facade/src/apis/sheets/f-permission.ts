@@ -17,7 +17,6 @@
 import type { IRange, RangePermissionPointConstructor, WorkbookPermissionPointConstructor, WorkSheetPermissionPointConstructor } from '@univerjs/core';
 import { generateRandomId, IAuthzIoService, ICommandService, Inject, Injector, IPermissionService, Rectangle } from '@univerjs/core';
 import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, getAllWorksheetPermissionPoint, getAllWorksheetPermissionPointByPointPanel, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetPermissionPointsMutation, UnitObject, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionPointModel, WorksheetProtectionRuleModel, WorksheetViewPermission } from '@univerjs/sheets';
-import { SheetPermissionInterceptorBaseController } from '@univerjs/sheets-ui';
 
 export class FPermission {
     constructor(
@@ -297,7 +296,6 @@ export class FPermission {
      * @param {boolean} visible
      */
     setPermissionDialogVisible(visible: boolean): void {
-        const sheetPermissionInterceptorBaseController = this._injector.get(SheetPermissionInterceptorBaseController);
-        sheetPermissionInterceptorBaseController.setShowPermissionDialog(visible);
+        this._permissionService.setShowComponents(visible);
     }
 }

@@ -378,10 +378,8 @@ export {
 export { type ISetTabColorMutationParams, SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetWorkbookNameMutationParams, SetWorkbookNameMutation } from './commands/mutations/set-workbook-name.mutation';
 export {
-    type ISetWorksheetColAutoWidthMutationParams,
-    type ISetWorksheetColIsAutoWidthMutationParams,
+    createAutoColWidthUndoMutationsByRedos,
     type ISetWorksheetColWidthMutationParams,
-    SetWorksheetColAutoWidthMutationFactory,
     SetWorksheetColWidthMutation,
 } from './commands/mutations/set-worksheet-col-width.mutation';
 export { type ISetWorksheetHideMutationParams, SetWorksheetHideMutation } from './commands/mutations/set-worksheet-hide.mutation';

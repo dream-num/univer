@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand, IRange } from '@univerjs/core';
-import type { ISetWorksheetColIsAutoWidthMutationParams, ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
+import type { ISetWorksheetColWidthMutationParams } from '../mutations/set-worksheet-col-width.mutation';
 
 import {
     CommandType,
@@ -238,7 +238,7 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
             return false;
         }
 
-        const redoMutationParams: ISetWorksheetColIsAutoWidthMutationParams = {
+        const redoMutationParams: Required<ISetWorksheetColIsAutoWidthCommandParams> = {
             unitId,
             subUnitId,
             ranges,

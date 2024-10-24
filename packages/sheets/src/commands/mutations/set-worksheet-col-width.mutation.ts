@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColAutoWidthInfo, IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 import { getSheetCommandTarget } from '../commands/utils/target-util';
@@ -24,18 +24,6 @@ export interface ISetWorksheetColWidthMutationParams {
     subUnitId: string;
     ranges: IRange[];
     colWidth: number | IObjectArrayPrimitiveType<Nullable<number>>;
-}
-
-export interface ISetWorksheetColIsAutoWidthMutationParams {
-    unitId: string;
-    subUnitId: string;
-    ranges: IRange[];
-}
-
-export interface ISetWorksheetColAutoWidthMutationParams {
-    unitId: string;
-    subUnitId: string;
-    colsAutoWidthInfo: IColAutoWidthInfo[];
 }
 
 /**
@@ -68,7 +56,7 @@ export const SetWorksheetColWidthMutationFactory = (
     };
 };
 
-export const SetWorksheetColAutoWidthMutationFactory = (
+export const createAutoColWidthUndoMutationsByRedos = (
     params: ISetWorksheetColWidthMutationParams,
     worksheet: Worksheet
 ): ISetWorksheetColWidthMutationParams => {
@@ -80,8 +68,7 @@ export const SetWorksheetColAutoWidthMutationFactory = (
         const range = ranges[i];
         for (let j = range.startColumn; j < range.endColumn + 1; j++) {
             const col = manager.getColumnOrCreate(j);
-            const { w } = col;
-            colWidthObj[j] = w;
+            colWidthObj[j] = col.w;
         }
     }
 
@@ -108,18 +95,16 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();
         const ranges = params.ranges;
-        if (ranges) {
-            for (let i = 0; i < ranges.length; i++) {
-                const range = ranges[i];
-                for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-                    const visible = worksheet.getColVisible(j);
-                    if (!visible) continue;
-                    const column = manager.getColumnOrCreate(j);
-                    if (typeof params.colWidth === 'number') {
-                        column.w = params.colWidth;
-                    } else {
-                        column.w = params.colWidth[j] ?? defaultColumnWidth;
-                    }
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+                const visible = worksheet.getColVisible(j);
+                if (!visible) continue;
+                const column = manager.getColumnOrCreate(j);
+                if (typeof params.colWidth === 'number') {
+                    column.w = params.colWidth;
+                } else {
+                    column.w = params.colWidth[j] ?? defaultColumnWidth;
                 }
             }
         }

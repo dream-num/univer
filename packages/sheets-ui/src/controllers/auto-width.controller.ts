@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, Nullable, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
-    ISetWorksheetColIsAutoWidthMutationParams,
+    ISetWorksheetColIsAutoWidthCommandParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
-import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    SetWorksheetColAutoWidthMutationFactory,
+    createAutoColWidthUndoMutationsByRedos,
     SetWorksheetColIsAutoWidthCommand,
     SetWorksheetColWidthMutation,
     SheetInterceptorService,
@@ -42,23 +42,25 @@ export class AutoWidthController extends Disposable {
         this._initialize();
     }
 
-    getUndoRedoParamsOfColWidth(ranges: IRange[]) {
+    getUndoRedoParamsOfColWidth(params: Required<ISetWorksheetColIsAutoWidthCommandParams>) {
+        const defaultValue = { redos: [], undos: [] };
         const { _univerInstanceService: univerInstanceService } = this;
+        const unitId = params.unitId;
+        const subUnitId = params.subUnitId;
+        if (!unitId || !subUnitId) return defaultValue;
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
+        if (!workbook) return defaultValue;
+
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) return defaultValue;
 
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
-        if (!subUnitId || !sheetSkeletonService.getCurrent()) {
-            return {
-                redos: [],
-                undos: [],
-            };
-        }
+
+        if (!sheetSkeletonService.getCurrent()) return defaultValue;
+
         const { skeleton } = sheetSkeletonService.getCurrent()!;
-        const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthInRange(ranges);
+        const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthInRange(params.ranges);
 
         const colWidthObject: IObjectArrayPrimitiveType<Nullable<number>> = {};
         for (const { col, width } of colsAutoWidthInfo) {
@@ -67,10 +69,10 @@ export class AutoWidthController extends Disposable {
         const redoParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,
-            ranges,
+            ranges: params.ranges,
             colWidth: colWidthObject,
         };
-        const undoParams: ISetWorksheetColWidthMutationParams = SetWorksheetColAutoWidthMutationFactory(redoParams, worksheet);
+        const undoParams: ISetWorksheetColWidthMutationParams = createAutoColWidthUndoMutationsByRedos(redoParams, worksheet);
         return {
             undos: [
                 {
@@ -88,12 +90,11 @@ export class AutoWidthController extends Disposable {
     }
 
     private _initialize() {
-        const { _sheetInterceptorService: sheetInterceptorService } =
-            this;
+        const { _sheetInterceptorService: sheetInterceptorService } = this;
 
         // intercept 'sheet.command.set-col-is-auto-width' command.
         this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetWorksheetColIsAutoWidthMutationParams }) => {
+            getMutations: (command: { id: string; params: Required<ISetWorksheetColIsAutoWidthCommandParams> }) => {
                 if (command.id !== SetWorksheetColIsAutoWidthCommand.id) {
                     return {
                         redos: [],
@@ -101,7 +102,7 @@ export class AutoWidthController extends Disposable {
                     };
                 }
 
-                return this.getUndoRedoParamsOfColWidth(command.params.ranges);
+                return this.getUndoRedoParamsOfColWidth(command.params);
             },
         }));
     }

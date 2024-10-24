@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { chisquareINV } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class ChisqInvRt extends BaseFunction {
     override minParams = 2;
@@ -48,6 +48,14 @@ export class ChisqInvRt extends BaseFunction {
         const resultArray = probabilityArray.mapValue((probabilityObject, rowIndex, columnIndex) => {
             const degFreedomObject = degFreedomArray.get(rowIndex, columnIndex) as BaseValueObject;
 
+            if (probabilityObject.isError()) {
+                return probabilityObject;
+            }
+
+            if (degFreedomObject.isError()) {
+                return degFreedomObject;
+            }
+
             return this._handleSignleObject(probabilityObject, degFreedomObject);
         });
 
@@ -73,7 +81,7 @@ export class ChisqInvRt extends BaseFunction {
         const probabilityValue = +_probabilityObject.getValue();
         const degFreedomValue = Math.floor(+_degFreedomObject.getValue());
 
-        if (probabilityValue < 0 || probabilityValue > 1 || degFreedomValue < 1) {
+        if (probabilityValue < 0 || probabilityValue > 1 || degFreedomValue < 1 || degFreedomValue > 10 ** 10) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

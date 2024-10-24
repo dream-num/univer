@@ -59,3 +59,14 @@ export const TextLengthErrorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.textLength.errorMsg.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.textLength.errorMsg.notEqual',
 };
+
+export const CustomRuleNameMap: Record<DataValidationOperator, string> = {
+    [DataValidationOperator.EQUAL]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.BETWEEN]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.GREATER_THAN]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.LESS_THAN]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.custom.ruleName',
+    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.custom.ruleName',
+};

@@ -164,6 +164,7 @@ const locale: typeof zhCN = {
             title: 'Custom formula',
             error: 'This cell\'s contents violate its validation rule',
             validFail: 'Please input a valid formula',
+            ruleName: 'Custom formula is {FORMULA1}',
         },
         alert: {
             title: 'Error',

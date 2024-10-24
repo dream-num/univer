@@ -161,9 +161,10 @@ const locale: typeof zhCN = {
             unchecked: 'مقدار انتخاب نشده',
         },
         custom: {
-            title: 'فرمول سفارشی',
+            title: 'فرمول سفارشی ',
             error: 'محتوای این سلول با قانون اعتبارسنجی آن نقض می‌شود',
             validFail: 'لطفا یک فرمول معتبر وارد کنید',
+            ruleName: 'فرمول سفارشی {FORMULA1}',
         },
         alert: {
             title: 'خطا',

@@ -81,4 +81,8 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
         return this.localeService.t('dataValidation.custom.error');
     }
+
+    override generateRuleName(rule: IDataValidationRuleBase): string {
+        return (this.localeService.t('dataValidation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
+    }
 }

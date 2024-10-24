@@ -164,6 +164,7 @@ const locale: typeof zhCN = {
             title: 'Công thức tùy chỉnh',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
             validFail: 'Vui lòng nhập một công thức hợp lệ',
+            ruleName: 'Công thức tùy chỉnh {FORMULA1}',
         },
         alert: {
             title: 'Thông báo',

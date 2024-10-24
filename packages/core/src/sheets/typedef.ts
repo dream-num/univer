@@ -172,7 +172,7 @@ export interface IRowData {
      */
     s?: Nullable<IStyleData | string>;
 
-    /** 
+    /**
      * User stored custom fields
      */
     custom?: CustomData;
@@ -202,7 +202,7 @@ export interface IColumnData {
      */
     s?: Nullable<IStyleData | string>;
 
-    /** 
+    /**
      * User stored custom fields
      */
     custom?: CustomData;

@@ -388,10 +388,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 }
             });
         };
-        let time = 0;
 
         this.disposeWithMe(
-
             this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
                 .pipe(
                     filter((sheet) => !!sheet),
@@ -400,18 +398,14 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getActiveSheet().getSheetId() } : null;
                     }),
                     filter((render) => !!render),
-                    switchMap((render) => fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onMouseWheel$)
-                        .pipe(
-                            map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId }))
-                        )
+                    switchMap((render) =>
+                        fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onScrollAfter$)
+                            .pipe(map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId })))
                     )
                 )
                 .subscribe(({ unitId, subUnitId }) => {
-                    const now = performance.now();
-                    time = now;
                     updateSheet(unitId, subUnitId);
                 })
-
         );
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetZoomRatioOperation.id) {

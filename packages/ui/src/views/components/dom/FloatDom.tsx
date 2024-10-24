@@ -58,8 +58,8 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
 
         const sizeSubscription = size$.subscribe((size) => {
             if (domRef.current) {
-                domRef.current.style.width = `${size.endX - size.startX}px`;
-                domRef.current.style.height = `${size.endY - size.startY}px`;
+                domRef.current.style.width = `${Math.max(size.endX - size.startX - 2, 0)}px`;
+                domRef.current.style.height = `${Math.max(size.endY - size.startY - 2, 0)}px`;
             }
 
             if (innerDomRef.current) {

@@ -16,19 +16,20 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { ArrayOrderSearchType, getMatchModeValue, getSearchModeValue } from '../../../engine/utils/compare';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Xlookup extends BaseFunction {
     override minParams = 3;
 
     override maxParams = 6;
 
+    // eslint-disable-next-line
     override calculate(
         lookupValue: BaseValueObject,
         lookupArray: ArrayValueObject,
@@ -54,7 +55,11 @@ export class Xlookup extends BaseFunction {
         const rowCountReturn = returnArray.getRowCount();
         const columnCountReturn = returnArray.getColumnCount();
 
-        if ((rowCountLookup !== 1 && columnCountLookup !== 1) || (rowCountLookup !== rowCountReturn && columnCountLookup !== columnCountReturn)) {
+        if (
+            (rowCountLookup !== 1 && columnCountLookup !== 1) ||
+            (rowCountReturn === 1 && columnCountLookup !== columnCountReturn) ||
+            (columnCountReturn === 1 && rowCountLookup !== rowCountReturn)
+        ) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 

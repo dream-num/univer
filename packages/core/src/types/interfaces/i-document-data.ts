@@ -134,6 +134,7 @@ export interface IDocumentBody {
     // links?: { [index: number]: IHyperlink }; // links
 
     customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
+
     customDecorations?: ICustomDecoration[];
 
     /**

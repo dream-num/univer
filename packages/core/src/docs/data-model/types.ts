@@ -37,7 +37,7 @@ export enum DataStreamTreeTokenType {
     TABLE_CELL_END = '\x1D', // 表格单元格结束
     TABLE_ROW_END = '\x0E', // 表格行结束
     TABLE_END = '\x0F', // 表格结束
-
+    // custom range.
     CUSTOM_RANGE_START = '\x1F', // 自定义范围开始
     CUSTOM_RANGE_END = '\x1E', // 自定义范围结束
 
@@ -45,6 +45,7 @@ export enum DataStreamTreeTokenType {
     PAGE_BREAK = '\f', // 换页
     DOCS_END = '\0', // 文档结尾
     TAB = '\t', // 制表符
+    // custom block.
     CUSTOM_BLOCK = '\b', // 图片 mention 等不参与文档流的场景
 
     LETTER = '',

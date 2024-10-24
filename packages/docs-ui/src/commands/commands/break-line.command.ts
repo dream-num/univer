@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph } from '@univerjs/core';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IParagraph } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, UniverInstanceType, updateAttributeByInsert } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { InsertCommand } from './core-editing.command';
 
@@ -51,6 +51,7 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
+
     type: CommandType.COMMAND,
 
     handler: async (accessor) => {
@@ -68,21 +69,23 @@ export const BreakLineCommand: ICommand = {
         if (rectRanges && rectRanges.length) {
             const { startOffset } = activeTextRange;
 
-            docSelectionManagerService.replaceTextRanges([{
+            docSelectionManagerService.replaceDocRanges([{
                 startOffset,
                 endOffset: startOffset,
             }]);
+
             return true;
         }
 
         const { segmentId } = activeTextRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (!docDataModel || !body) {
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '').getBody();
+        if (docDataModel == null || body == null) {
             return false;
         }
 
         const unitId = docDataModel.getUnitId();
+
         const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
 
         const paragraphs = body.paragraphs ?? [];

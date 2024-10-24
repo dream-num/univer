@@ -26,7 +26,6 @@ import { CommandType } from '@univerjs/core';
 
 export interface ISetFormulaCalculationStartMutation extends IFormulaDirtyData {
     options: Nullable<IExecutionOptions>;
-    forceCalculation: boolean;
 }
 /**
  * TODO: @DR-Univer

@@ -23,7 +23,7 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -115,7 +115,7 @@ export class UpdateDefinedNameController extends Disposable {
                 }
                 const { token } = node;
 
-                const sequenceGrid = deserializeRangeWithSheet(token);
+                const sequenceGrid = deserializeRangeWithSheetWithCache(token);
 
                 const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
                 const sequenceSheetId = workbook.getSheetBySheetName(sheetName)?.getSheetId() || '';

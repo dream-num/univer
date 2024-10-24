@@ -51,9 +51,9 @@ interface IFeatureFormulaParam {
     featureId: string;
 }
 
-function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): string {
+function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): number {
     const idNum = dependencyManagerService.getLastTreeId() || 0;
-    return idNum.toString();
+    return idNum;
 }
 
 export class FormulaDependencyGenerator extends Disposable {
@@ -132,9 +132,9 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _isCyclicUtil(
-        treeId: string,
-        visited: Set<string>,
-        recursionStack: Set<string>
+        treeId: number,
+        visited: Set<number>,
+        recursionStack: Set<number>
     ) {
         const node = this._dependencyManagerService.getTreeById(treeId);
         if (node == null) {
@@ -160,8 +160,8 @@ export class FormulaDependencyGenerator extends Disposable {
     }
 
     private _checkIsCycleDependency(treeList: FormulaDependencyTree[]) {
-        const visited = new Set<string>();
-        const recursionStack = new Set<string>();
+        const visited = new Set<number>();
+        const recursionStack = new Set<number>();
 
         // Call the recursive helper function to detect cycle in different
         // DFS trees
@@ -727,7 +727,7 @@ export class FormulaDependencyGenerator extends Disposable {
                             featureTree = this._getFeatureFormulaTree(featureId, params);
                             newTreeList.push(featureTree);
                         }
-                        featureTree.parents = new Set<string>();
+                        featureTree.parents = new Set<number>();
                         intersectTrees.forEach((tree) => {
                             if (tree.hasChildren(featureTree!.treeId)) {
                                 return;
@@ -748,7 +748,7 @@ export class FormulaDependencyGenerator extends Disposable {
         const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
 
         newTreeList.forEach((tree) => {
-            const newChildren = new Set<string>();
+            const newChildren = new Set<number>();
             for (const childTreeId of tree.children) {
                 const child = this._dependencyManagerService.getTreeById(childTreeId);
                 if (!child) {
@@ -762,7 +762,7 @@ export class FormulaDependencyGenerator extends Disposable {
             }
             tree.children = newChildren;
 
-            const newParents = new Set<string>();
+            const newParents = new Set<number>();
             for (const parentTreeId of tree.parents) {
                 const parent = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parent) {

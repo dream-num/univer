@@ -40,7 +40,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { deserializeRangeWithSheet,
+import { deserializeRangeWithSheetWithCache,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
@@ -164,6 +164,7 @@ export class UpdateFormulaController extends Disposable {
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
 
+        // TODO@Dushusir: When the amount of data is large, the communication overhead is high. The main thread and the worker update their own models to reduce the communication overhead.
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
             {
@@ -395,7 +396,7 @@ export class UpdateFormulaController extends Disposable {
                             continue;
                         }
 
-                        const sequenceGrid = deserializeRangeWithSheet(token);
+                        const sequenceGrid = deserializeRangeWithSheetWithCache(token);
 
                         const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
 

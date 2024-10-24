@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
+export const EMBEDDING_FORMULA_EDITOR = 'embedding_formula_editor';
 
-export const getOffsetFromSequenceNodes = (sequenceNode: (string | ISequenceNode)[]) => {
-    return sequenceNode.reduce((pre, cur) => {
-        if (typeof cur === 'string') {
-            return pre + cur.length;
-        }
-        return pre + cur.token.length;
-    }, 0);
+export const isEmbeddingFormulaEditor = (unitId: string) => {
+    return unitId.includes(EMBEDDING_FORMULA_EDITOR);
 };
+

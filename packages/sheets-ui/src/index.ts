@@ -107,6 +107,7 @@ export { FONT_SIZE_COMPONENT } from './components/font-size/interface';
 export { attachPrimaryWithCoord, attachSelectionWithCoord } from './services/selection/util';
 export { SELECTION_SHAPE_DEPTH } from './services/selection/const';
 export { isRangeSelector, RANGE_SELECTOR_SYMBOLS } from './controllers/editor/utils/isRangeSelector';
+export { EMBEDDING_FORMULA_EDITOR, isEmbeddingFormulaEditor } from './controllers/editor/utils/isEmbeddingFormulaEditor';
 
 export { menuSchema } from './controllers/menu.schema';
 export { getCellRealRange } from './common/utils';

@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
-
-export const getOffsetFromSequenceNodes = (sequenceNode: (string | ISequenceNode)[]) => {
-    return sequenceNode.reduce((pre, cur) => {
-        if (typeof cur === 'string') {
-            return pre + cur.length;
-        }
-        return pre + cur.token.length;
-    }, 0);
+export const getFormulaText = (formula: string) => {
+    if (formula.startsWith('=')) {
+        return formula.slice(1);
+    }
+    return formula;
 };

@@ -83,16 +83,11 @@ export const SetWorksheetColAutoWidthMutationFactory = (
             const { w } = col;
             colWidthObj[j] = w;
         }
-        // const { col } = colInfo;
-        // const { w } = manager.getColumnOrCreate(col);
-
-        // results.push({ col, width: w });
     }
 
     return {
         unitId,
         subUnitId,
-        // colsAutoWidthInfo: results,
         ranges,
         colWidth: colWidthObj,
     };
@@ -117,6 +112,8 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
             for (let i = 0; i < ranges.length; i++) {
                 const range = ranges[i];
                 for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+                    const visible = worksheet.getColVisible(j);
+                    if (!visible) continue;
                     const column = manager.getColumnOrCreate(j);
                     if (typeof params.colWidth === 'number') {
                         column.w = params.colWidth;

@@ -708,14 +708,13 @@ export class SpreadsheetSkeleton extends Skeleton {
             const { startColumn, endColumn } = range;
 
             for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
+                if (!this.worksheet.getColVisible(colIndex)) continue;
                 // If the row has already been calculated, it does not need to be recalculated
-                if (calculatedCols.has(colIndex)) {
-                    continue;
-                }
+                if (calculatedCols.has(colIndex)) continue;
 
                 // const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
 
-                const autoWidth = this._calculateColMaxWidth(colIndex);
+                const autoWidth = this._calculateColWidth(colIndex);
                 calculatedCols.add(colIndex);
                 results.push({
                     col: colIndex,
@@ -733,8 +732,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param colIndex
      * @returns {number} width
      */
-
-    private _calculateColMaxWidth(colIndex: number): number {
+    private _calculateColWidth(colIndex: number): number {
         const MEASURE_EXTENT = 10000;
         const MEASURE_EXTENT_FOR_PARAGRAPH = MEASURE_EXTENT / 10;
         const worksheet = this.worksheet;
@@ -792,7 +790,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        for (const row of otherRowIndex) {
+        const createRowSequence = (start: number, end: number, additionalArr: number[] | Set<number>) => {
+            const range = Array.from(
+                { length: end - start + 1 },
+                (_, i) => i + start
+            );
+            return [...range, ...additionalArr];
+        };
+
+        const rowIdxArr = createRowSequence(checkStart, checkEnd, otherRowIndex);
+        const preColIndex = Math.max(0, colIndex - 1);
+        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        for (let i = 0; i < rowIdxArr.length; i++) {
+            const row = rowIdxArr[i];
+
             const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
             if (isMerged && !isMergedMainCell) continue;
 
@@ -801,8 +812,20 @@ export class SpreadsheetSkeleton extends Skeleton {
             const cell = worksheet.getCell(row, colIndex);
             if (!cell) continue;
 
-            const measuredWidth = this.getMeasuredWidthByCell(cell);
-            maxColWidth = Math.max(maxColWidth, measuredWidth);
+            // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
+            if (cell.p) {
+                if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) {
+                    continue;
+                }
+            }
+
+            let measuredWidth = this._getMeasuredWidthByCell(cell, currColWidth);
+
+            if (cell.fontRenderExtension) {
+                measuredWidth += ((cell.fontRenderExtension?.leftOffset || 0) + (cell.fontRenderExtension?.rightOffset || 0));
+            }
+
+            colWidth = Math.max(colWidth, measuredWidth);
 
             // return early if maxColWidth is larger than MAXIMUM_COL_WIDTH
             if (maxColWidth >= MAXIMUM_COL_WIDTH) {
@@ -810,20 +833,26 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
-        // if there are no content in this column, return current column width.
-        if (maxColWidth === 0) {
-            const preColIndex = Math.max(0, colIndex - 1);
-            return this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        // if there are no content in this column( measure result is 0), return current column width.
+        if (colWidth === 0) {
+            return currColWidth;
         }
         return maxColWidth;
     }
 
-    getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor) {
+    /**
+     * For _calculateColMaxWidth
+     * @param cell
+     * @returns {number} width
+     */
+    _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, currColWidth: number) {
         let measuredWidth = 0;
-        if (cell?.interceptorAutoWidth) {
-            const cellWidth = cell.interceptorAutoWidth();
+
+        // isSkip means the text in this cell would not rendering.
+        if (cell.fontRenderExtension?.isSkip && cell?.interceptorAutoWidth) {
+            const cellWidth = cell.interceptorAutoWidth?.();
             if (cellWidth) {
-                return measuredWidth;
+                return cellWidth;
             }
         }
 
@@ -839,8 +868,13 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const documentViewModel = new DocumentViewModel(documentModel);
         const { vertexAngle: angle } = convertTextRotation(textRotation);
+        const cellStyle = this._styles.getStyleByCell(cell);
 
-        documentModel.updateDocumentDataPageSize(Infinity, Infinity);
+        if (cellStyle?.tb === WrapStrategy.WRAP) {
+            documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
+        } else {
+            documentModel.updateDocumentDataPageSize(Infinity, Infinity);
+        }
 
         const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
 
@@ -861,10 +895,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             const absAngleInRad = Math.abs(degToRad(angle));
 
             measuredWidth +=
-                t * Math.cos(absAngleInRad) +
-                r * Math.sin(absAngleInRad) +
-                b * Math.cos(absAngleInRad) +
-                l * Math.sin(absAngleInRad);
+                t * Math.sin(absAngleInRad) +
+                r * Math.cos(absAngleInRad) +
+                b * Math.sin(absAngleInRad) +
+                l * Math.cos(absAngleInRad);
         }
         return measuredWidth;
     };

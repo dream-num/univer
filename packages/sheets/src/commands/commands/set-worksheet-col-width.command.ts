@@ -223,7 +223,16 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
         if (!target) return false;
 
         const { unitId, subUnitId } = target;
-        const ranges = params?.ranges?.length ? params.ranges : selectionManagerService.getCurrentSelections()?.map((s) => s.range);
+
+        let ranges = [];
+        if (params?.ranges) {
+            ranges = [...params.ranges];
+        } else {
+            const selections = selectionManagerService.getCurrentSelections();
+            for (let i = 0; i < selections.length; i++) {
+                ranges.push(selections[i].range);
+            }
+        }
 
         if (!ranges?.length) {
             return false;
@@ -234,9 +243,6 @@ export const SetWorksheetColIsAutoWidthCommand: ICommand = {
             subUnitId,
             ranges,
         };
-
-        // const undoMutationParams: ISetWorksheetColIsAutoWidthMutationParams =
-        // SetWorksheetColIsAutoWidthMutationFactory(redoMutationParams, worksheet);
 
         // undos redos comes from auto-width.controller
         // for intercept 'sheet.command.set-col-is-auto-width' command.

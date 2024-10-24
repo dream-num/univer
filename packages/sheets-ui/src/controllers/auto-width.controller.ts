@@ -17,19 +17,16 @@
 import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
-    ISetStyleCommandParams,
     ISetWorksheetColIsAutoWidthMutationParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    SetStyleCommand,
     SetWorksheetColAutoWidthMutationFactory,
     SetWorksheetColIsAutoWidthCommand,
     SetWorksheetColWidthMutation,
     SheetInterceptorService,
-    SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -39,7 +36,6 @@ export class AutoWidthController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetsSelectionsService) private readonly _selectionManagerService: SheetsSelectionsService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -92,7 +88,7 @@ export class AutoWidthController extends Disposable {
     }
 
     private _initialize() {
-        const { _sheetInterceptorService: sheetInterceptorService, _selectionManagerService: selectionManagerService } =
+        const { _sheetInterceptorService: sheetInterceptorService } =
             this;
 
         // intercept 'sheet.command.set-col-is-auto-width' command.
@@ -106,36 +102,6 @@ export class AutoWidthController extends Disposable {
                 }
 
                 return this.getUndoRedoParamsOfColWidth(command.params.ranges);
-            },
-        }));
-
-        // for intercept set style command.
-        this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: ISetStyleCommandParams<number> }) => {
-                if (command.id !== SetStyleCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                if (!AFFECT_LAYOUT_STYLES.includes(command.params?.style.type)) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                const selections = selectionManagerService.getCurrentSelections()?.map((s) => s.range);
-
-                if (!selections?.length) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this.getUndoRedoParamsOfColWidth(selections);
             },
         }));
     }

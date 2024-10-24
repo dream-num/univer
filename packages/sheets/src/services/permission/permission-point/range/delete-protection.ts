@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-import type { UnitObject } from '@univerjs/protocol';
+import type { IPermissionPoint } from '@univerjs/core';
+import { PermissionStatus } from '@univerjs/core';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
 
-export interface IWorksheetProtectionRule {
-    permissionId: string;
-    description?: string;
-    unitType: UnitObject;
-    unitId: string;
-    subUnitId: string;
-    name: string;
-}
-
-export interface IWorksheetProtectionPointRule {
+export class RangeProtectionPermissionDeleteProtectionPoint implements IPermissionPoint {
+    type = UnitObject.SelectRange;
+    subType = UnitAction.Delete;
+    status = PermissionStatus.INIT;
+    value = true;
+    id: string;
     unitId: string;
     subUnitId: string;
     permissionId: string;
+    constructor(unitId: string, subUnitId: string, permissionId: string) {
+        this.unitId = unitId;
+        this.subUnitId = subUnitId;
+        this.permissionId = permissionId;
+        this.id = `${UnitObject.SelectRange}.${UnitAction.Delete}.${permissionId}`;
+    }
 }
-
-export type IObjectModel = Record<string, IWorksheetProtectionRule[]>;
-export type IModel = Map<string, Map<string, IWorksheetProtectionRule>>;
-
-export type IObjectPointModel = Record<string, IWorksheetProtectionPointRule[]>;
-export type IPointRuleModel = Map<string, Map<string, IWorksheetProtectionPointRule>>;
-

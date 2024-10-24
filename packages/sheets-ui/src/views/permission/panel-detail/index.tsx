@@ -77,7 +77,8 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             }
         });
 
-        sheetPermissionUserManagerService.setUserList(userList);
+        const currentUser = userManagerService.getCurrentUser();
+        sheetPermissionUserManagerService.setUserList(userList.filter((user) => user.subject?.userID !== currentUser.userID));
 
         dialogService.open({
             id: UNIVER_SHEET_PERMISSION_USER_DIALOG_ID,
@@ -136,6 +137,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
 
     useEffect(() => {
         const isEdit = activeRule?.permissionId;
+        setRangeInitialization(true);
         if (isEdit) {
             if (activeRule.unitType === UnitObject.Worksheet) {
                 sheetPermissionPanelModel.setRule({
@@ -184,7 +186,6 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
             unitType: fromSheetBar ? UnitObject.Worksheet : UnitObject.SelectRange,
 
         });
-        setRangeInitialization(true);
     }, [activeRule?.permissionId, fromSheetBar, selectionManagerService, sheetPermissionPanelModel, subUnitId, unitId, worksheet]);
 
     useEffect(() => {

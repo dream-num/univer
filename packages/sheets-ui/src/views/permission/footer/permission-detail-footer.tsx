@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { Button } from '@univerjs/design';
 import { IAuthzIoService, ICommandService, LocaleService, useDependency } from '@univerjs/core';
-import React from 'react';
-import { ISidebarService, useObservable } from '@univerjs/ui';
+import { Button } from '@univerjs/design';
 import { ObjectScope, UnitAction, UnitObject, UnitRole } from '@univerjs/protocol';
 import { AddRangeProtectionCommand } from '@univerjs/sheets';
-import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
-import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
-import { getUserListEqual } from '../../../common/utils';
+import { ISidebarService, useObservable } from '@univerjs/ui';
+import React from 'react';
 import { SetProtectionCommand } from '../../../commands/commands/range-protection.command';
 import { AddWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
+import { getUserListEqual } from '../../../common/utils';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
+import { editState, SheetPermissionPanelModel, viewState } from '../../../services/permission/sheet-permission-panel.model';
+import { SheetPermissionUserManagerService } from '../../../services/permission/sheet-permission-user-list.service';
 import styles from './index.module.less';
 
 export const SheetPermissionPanelDetailFooter = () => {
@@ -43,7 +43,7 @@ export const SheetPermissionPanelDetailFooter = () => {
             <Button
                 type="primary"
                 onClick={async () => {
-                    if (!activeRule.name || rangeErrMsg) return;
+                    if (rangeErrMsg) return;
                     let collaborators = sheetPermissionUserManagerService.selectUserList;
                     if (activeRule.editStatus === editState.onlyMe) {
                         collaborators = [];

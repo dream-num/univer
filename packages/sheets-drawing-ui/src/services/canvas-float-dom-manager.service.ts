@@ -29,7 +29,7 @@ import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import { BehaviorSubject, filter, map, mergeMap, Subject } from 'rxjs';
+import { BehaviorSubject, filter, map, Subject, switchMap } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
@@ -400,7 +400,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         return render ? { render, unitId: sheet.getUnitId(), subUnitId: sheet.getActiveSheet().getSheetId() } : null;
                     }),
                     filter((render) => !!render),
-                    mergeMap((render) => fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onMouseWheel$)
+                    switchMap((render) => fromEventSubject(render.render.scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!.onMouseWheel$)
                         .pipe(
                             map(() => ({ unitId: render.unitId, subUnitId: render.subUnitId }))
                         )

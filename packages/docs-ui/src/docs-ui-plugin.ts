@@ -38,6 +38,7 @@ import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands
 import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
+import { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import { ResetInlineFormatTextBackgroundColorCommand, SetInlineFormatBoldCommand, SetInlineFormatCommand, SetInlineFormatFontFamilyCommand, SetInlineFormatFontSizeCommand, SetInlineFormatItalicCommand, SetInlineFormatStrikethroughCommand, SetInlineFormatSubscriptCommand, SetInlineFormatSuperscriptCommand, SetInlineFormatTextBackgroundColorCommand, SetInlineFormatTextColorCommand, SetInlineFormatUnderlineCommand } from './commands/commands/inline-format.command';
 import { BulletListCommand, ChangeListNestingLevelCommand, ChangeListTypeCommand, CheckListCommand, ListOperationCommand, OrderListCommand, QuickListCommand, ToggleCheckListCommand } from './commands/commands/list.command';
@@ -51,7 +52,6 @@ import { DocTableInsertColumnCommand, DocTableInsertColumnLeftCommand, DocTableI
 import { DocTableTabCommand } from './commands/commands/table/doc-table-tab.command';
 import { MoveCursorOperation, MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 import { DocParagraphSettingPanelOperation } from './commands/operations/doc-paragraph-setting-panel.operation';
-import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { AppUIController } from './controllers';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controllers/config.schema';
@@ -211,7 +211,7 @@ export class UniverDocsUIPlugin extends Plugin {
             ReplaceSnapshotCommand,
             CoverContentCommand,
             SetDocZoomRatioCommand,
-            SelectAllOperation,
+            DocSelectAllCommand,
             DocParagraphSettingPanelOperation,
             MoveCursorOperation,
             MoveSelectionOperation,

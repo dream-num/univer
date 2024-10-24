@@ -147,7 +147,7 @@ export { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } f
 export { DocCreateTableOperation } from './commands/operations/doc-create-table.operation';
 export { MoveSelectionOperation } from './commands/operations/doc-cursor.operation';
 export { MoveCursorOperation } from './commands/operations/doc-cursor.operation';
-export { SelectAllOperation } from './commands/operations/select-all.operation';
+export { DocSelectAllCommand } from './commands/commands/doc-select-all.command';
 export { type ISetDocZoomRatioOperationParams, SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 
 // #endregion

@@ -150,34 +150,36 @@ export function getDataValidationDiffMutations(
                     const columnDiff = newColumn - originColumn;
                     const newFormula = lexerTreeBuilder.moveFormulaRefOffset(diff.rule.formula1!, columnDiff, rowDiff);
 
-                    redoMutations.push({
-                        id: UpdateDataValidationMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            ruleId: diff.ruleId,
-                            payload: {
-                                type: UpdateRuleType.SETTING,
+                    if (newFormula !== diff.rule.formula1) {
+                        redoMutations.push({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
                                 payload: {
-                                    ...getRuleSetting(diff.rule),
-                                    formula1: newFormula,
+                                    type: UpdateRuleType.SETTING,
+                                    payload: {
+                                        ...getRuleSetting(diff.rule),
+                                        formula1: newFormula,
+                                    },
                                 },
-                            },
-                        } as IUpdateDataValidationMutationParams,
-                    });
+                            } as IUpdateDataValidationMutationParams,
+                        });
 
-                    undoMutations.unshift({
-                        id: UpdateDataValidationMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            ruleId: diff.ruleId,
-                            payload: {
-                                type: UpdateRuleType.SETTING,
-                                payload: getRuleSetting(diff.rule),
-                            },
-                        } as IUpdateDataValidationMutationParams,
-                    });
+                        undoMutations.unshift({
+                            id: UpdateDataValidationMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                ruleId: diff.ruleId,
+                                payload: {
+                                    type: UpdateRuleType.SETTING,
+                                    payload: getRuleSetting(diff.rule),
+                                },
+                            } as IUpdateDataValidationMutationParams,
+                        });
+                    }
                 }
 
                 const rule = sheetDataValidationModel.getRuleById(unitId, subUnitId, diff.ruleId);

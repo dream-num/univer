@@ -20,6 +20,7 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { deserializeListOptions } from './util';
 
@@ -37,7 +38,10 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
                         resultSet.add(numfmt.format(cell.s.n.pattern, value, { throws: false }));
                         return;
                     }
-                    resultSet.add(value.toString());
+
+                    if (isLegalFormulaResult(value.toString())) {
+                        resultSet.add(value.toString());
+                    }
                 }
             });
         }

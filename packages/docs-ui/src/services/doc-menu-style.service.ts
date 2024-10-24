@@ -17,15 +17,11 @@
 import type { ITextStyle, Nullable } from '@univerjs/core';
 import { Disposable, Inject } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
-import { Subject } from 'rxjs';
 
 // It is used to cache the styles in the doc menu, which is used for the next input,
 // and is cleared when the doc range is changed.
 export class DocMenuStyleService extends Disposable {
     private _cacheStyle: Nullable<ITextStyle> = null;
-
-    private readonly _styleCache$ = new Subject<Nullable<ITextStyle>>();
-    readonly styleCache$ = this._styleCache$.asObservable();
 
     constructor(
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService
@@ -56,13 +52,9 @@ export class DocMenuStyleService extends Disposable {
             ...this._cacheStyle,
             ...style,
         };
-
-        this._styleCache$.next(this._cacheStyle);
     }
 
     private _clearStyleCache() {
         this._cacheStyle = null;
-
-        this._styleCache$.next(null);
     }
 }

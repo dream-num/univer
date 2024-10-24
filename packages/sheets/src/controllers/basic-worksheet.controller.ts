@@ -255,7 +255,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetRowHeightMutation,
                 SetWorksheetRowIsAutoHeightCommand,
                 SetWorksheetRowIsAutoHeightMutation,
-                // SetWorksheetColAutoWidthMutation,
                 SetWorksheetColWidthMutation,
                 SetWorksheetColIsAutoWidthCommand,
                 // SetWorksheetColIsAutoWidthMutation,

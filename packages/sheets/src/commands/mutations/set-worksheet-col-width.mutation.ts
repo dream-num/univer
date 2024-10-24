@@ -130,26 +130,3 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         return true;
     },
 };
-
-/**
- * Apply auto width value.
- */
-// export const SetWorksheetColAutoWidthMutation: IMutation<ISetWorksheetColAutoWidthMutationParams> = {
-//     id: 'sheet.mutation.set-worksheet-col-auto-width',
-//     type: CommandType.MUTATION,
-//     handler: (accessor, params) => {
-//         const { colsAutoWidthInfo } = params;
-//         const univerInstanceService = accessor.get(IUniverInstanceService);
-//         const target = getSheetCommandTarget(univerInstanceService, params);
-//         if (!target) return false;
-
-//         const colManager = target.worksheet.getColumnManager();
-
-//         for (const { col, width } of colsAutoWidthInfo) {
-//             const curCol = colManager.getColumnOrCreate(col);
-//             curCol.w = width;
-//         }
-
-//         return true;
-//     },
-// };

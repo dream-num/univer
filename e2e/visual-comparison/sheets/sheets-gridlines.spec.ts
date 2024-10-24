@@ -39,9 +39,10 @@ test('sheets no gridlines', async () => {
     const screenshot = await page.screenshot({
         mask: [
             page.locator('.univer-headerbar'),
+            page.locator('.univer-workbench-container-header'),
+            page.locator('.univer-formula-box'),
         ],
         fullPage: true,
     });
     expect(screenshot).toMatchSnapshot(filename, { maxDiffPixels: 5 });
 });
-

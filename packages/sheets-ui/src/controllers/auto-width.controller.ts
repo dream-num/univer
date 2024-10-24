@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import type { IColAutoWidthInfo, IRange, Workbook } from '@univerjs/core';
+import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
     ISetStyleCommandParams,
-    ISetWorksheetColAutoWidthMutationParams,
     ISetWorksheetColIsAutoWidthMutationParams,
+    ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
     SetStyleCommand,
-    SetWorksheetColAutoWidthMutation,
     SetWorksheetColAutoWidthMutationFactory,
     SetWorksheetColIsAutoWidthCommand,
+    SetWorksheetColWidthMutation,
     SheetInterceptorService,
     SheetsSelectionsService,
 } from '@univerjs/sheets';
@@ -64,22 +64,27 @@ export class AutoWidthController extends Disposable {
         const { skeleton } = sheetSkeletonService.getCurrent()!;
         const colsAutoWidthInfo: IColAutoWidthInfo[] = skeleton.calculateAutoWidthInRange(ranges);
 
-        const redoParams: ISetWorksheetColAutoWidthMutationParams = {
+        const colWidthObject: IObjectArrayPrimitiveType<Nullable<number>> = {};
+        for (const { col, width } of colsAutoWidthInfo) {
+            colWidthObject[col] = width;
+        }
+        const redoParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,
-            colsAutoWidthInfo,
+            ranges,
+            colWidth: colWidthObject,
         };
-        const undoParams: ISetWorksheetColAutoWidthMutationParams = SetWorksheetColAutoWidthMutationFactory(redoParams, worksheet);
+        const undoParams: ISetWorksheetColWidthMutationParams = SetWorksheetColAutoWidthMutationFactory(redoParams, worksheet);
         return {
             undos: [
                 {
-                    id: SetWorksheetColAutoWidthMutation.id,
+                    id: SetWorksheetColWidthMutation.id,
                     params: undoParams,
                 },
             ],
             redos: [
                 {
-                    id: SetWorksheetColAutoWidthMutation.id,
+                    id: SetWorksheetColWidthMutation.id,
                     params: redoParams,
                 },
             ],

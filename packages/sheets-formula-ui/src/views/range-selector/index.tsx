@@ -175,13 +175,18 @@ export function RangeSelector(props: IRangeSelectorProps) {
     };
 
     const focus = useMemo(() => {
-        let time: NodeJS.Timeout = 0 as any;
         return () => {
-            clearTimeout(time);
             if (editor) {
-                time = setTimeout(() => {
-                    editor.focus();
-                }, 30);
+                const focusId = editorService.getFocusId();
+                if (focusId !== editor.getEditorId()) {
+                    editorService.focus(editor.getEditorId());
+                    const selections = editor.getSelectionRanges();
+                    if (!selections.length) {
+                        const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
+                        const offset = Math.max(body.length - 2, 0);
+                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+                    }
+                }
             }
         };
     }, [editor]);
@@ -259,7 +264,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEffect(() => {
         isFocusSet(_isFocus);
         if (_isFocus) {
-            focus();
+            setTimeout(() => {
+                focus();
+            }, 300);
         }
     }, [_isFocus, focus]);
 
@@ -299,12 +306,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const handleClick = () => {
         onFocus();
         focus();
-        if (!isFocus) {
-            isFocusSet(false);
-            setTimeout(() => {
-                isFocusSet(true);
-            }, 30);
-        }
+        isFocusSet(true);
     };
 
     return (

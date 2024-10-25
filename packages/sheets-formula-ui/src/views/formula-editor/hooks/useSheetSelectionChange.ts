@@ -21,10 +21,10 @@ import type { Editor } from '@univerjs/docs-ui';
 
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import type { INode } from '../../range-selector/utils/filterReferenceNode';
-import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
@@ -57,15 +57,6 @@ export const useSheetSelectionChange = (
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
     const isScalingRef = useRef(false);
-
-    const debounceReset = useMemo(() => debounce(() => {
-        isScalingRef.current = false;
-    }, 300), []);
-
-    const setIsScaling = () => {
-        isScalingRef.current = true;
-        debounceReset();
-    };
 
     useEffect(() => {
         if (refSelectionsRenderService && isNeed) {
@@ -142,6 +133,7 @@ export const useSheetSelectionChange = (
             };
             const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections);
+                isScalingRef.current = false;
             });
 
             // const d2 = refSelectionsRenderService.selectionMoving$.subscribe((selections) => {
@@ -194,15 +186,16 @@ export const useSheetSelectionChange = (
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
-                setIsScaling();
                 handleRangeChange(result, offset || -1);
             };
             let time = 0 as any;
             const dispose = refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {
+                disposableCollection.dispose();
                 time = setTimeout(() => {
                     const controls = refSelectionsRenderService.getSelectionControls();
                     controls.forEach((control, index) => {
                         disposableCollection.add(control.selectionScaling$.subscribe((e) => {
+                            isScalingRef.current = true;
                             const rangeText = serializeRange(e);
                             handleSequenceNodeReplace(rangeText, index);
                         }));

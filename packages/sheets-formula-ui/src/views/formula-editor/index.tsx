@@ -58,6 +58,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             onChange,
             actions,
     } = props;
+
     const editorService = useDependency(IEditorService);
 
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
@@ -90,6 +91,23 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
+
+    const focus = useMemo(() => {
+        return () => {
+            if (editor) {
+                const focusId = editorService.getFocusId();
+                if (focusId !== editor.getEditorId()) {
+                    editorService.focus(editor?.getEditorId());
+                    const selections = editor.getSelectionRanges();
+                    if (!selections.length) {
+                        const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
+                        const offset = Math.max(body.length - 2, 0);
+                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+                    }
+                }
+            }
+        };
+    }, [editor]);
 
     const handleSelectionChange = (refString: string, offset: number) => {
         const result = `=${refString}`;
@@ -141,6 +159,11 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     useEffect(() => {
         isFocusSet(_isFocus);
+        if (_isFocus) {
+            setTimeout(() => {
+                focus();
+            }, 300);
+        }
     }, [_isFocus]);
 
     useLayoutEffect(() => {
@@ -168,8 +191,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const handleFunctionSelect = (v: string) => {
         const res = handlerFormulaReplace(v);
         if (res) {
-            editor?.focus();
             formulaTextSet(`=${res.text}`);
+            focus();
             const selections = editor?.getSelectionRanges();
             if (selections && selections.length === 1) {
                 const range = selections[0];
@@ -186,9 +209,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const handleClick = () => {
         if (editor) {
-            editor.focus();
             isFocusSet(true);
             onFocus();
+            focus();
         }
     };
     return (

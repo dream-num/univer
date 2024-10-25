@@ -45,12 +45,13 @@ export class Sheet extends BaseFunction {
 
         if (value.isReferenceObject()) {
             const forcedSheetId = (value as BaseReferenceObject).getForcedSheetId();
+            const defaultSheetId = (value as BaseReferenceObject).getDefaultSheetId();
 
             const sheetIndex = sheetOrder.findIndex((sheetId) => {
                 if (forcedSheetId) {
                     return sheetId === forcedSheetId;
                 } else {
-                    return sheetId === this.subUnitId;
+                    return sheetId === defaultSheetId;
                 }
             });
 

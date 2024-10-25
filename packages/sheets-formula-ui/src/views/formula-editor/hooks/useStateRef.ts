@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
+import { useRef } from 'react';
 
-export const getOffsetFromSequenceNodes = (sequenceNode: (string | ISequenceNode)[]) => {
-    return sequenceNode.reduce((pre, cur) => {
-        if (typeof cur === 'string') {
-            return pre + cur.length;
-        }
-        return pre + cur.token.length;
-    }, 0);
+export const useStateRef = <T = any>(value: T) => {
+    const cache = useRef<T>();
+    cache.current = value;
+    return cache as { current: T };
 };

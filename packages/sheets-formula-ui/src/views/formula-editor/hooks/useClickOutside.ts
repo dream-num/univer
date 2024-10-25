@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import type { ISequenceNode } from '@univerjs/engine-formula';
-import { useDependency } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-export type INode = (string | ISequenceNode);
-export const useFormulaToken = (text: string) => {
-    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
-
-    const [sequenceNodes, sequenceNodesSet] = useState<INode[]>([]);
-
+export const useClickOutside = (handle: () => void, domEle: HTMLElement | null) => {
     useEffect(() => {
-        sequenceNodesSet(lexerTreeBuilder.sequenceNodesBuilder(text) ?? []);
-    }, [text]);
-
-    return {
-        sequenceNodes,
-        sequenceNodesSet,
-    };
+        if (!domEle) {
+            return;
+        }
+        const handleClick = (event: MouseEvent) => {
+            const target = event.target as Node;
+            if (domEle && !domEle.contains(target)) {
+                handle();
+            }
+        };
+        document.addEventListener('click', handleClick);
+        return () => {
+            document.removeEventListener('click', handleClick);
+        };
+    }, [domEle]);
 };

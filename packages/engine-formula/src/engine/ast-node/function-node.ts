@@ -281,7 +281,7 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _setSheetsInfo() {
-
+        this._functionExecutor.setSheetsInfo(this._currentConfigService.getSheetsInfo());
     }
 }
 

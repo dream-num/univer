@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { TextEditor } from '@univerjs/docs-ui';
-import { CFRuleType, CFSubRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import React, { useEffect, useState } from 'react';
 import type { Workbook } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
+import type { IStyleEditorProps } from './type';
+import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import React, { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
 import { WrapperError } from '../../wrapper-error/WrapperError';
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
-import type { IStyleEditorProps } from './type';
 
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
@@ -36,6 +36,9 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
 
+    const divEleRef = useRef<HTMLDivElement>(null);
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
     const [style, styleSet] = useState<IHighlightCell['style']>({});
     const [formula, formulaSet] = useState(() => {
         if (rule?.subType === CFSubRuleType.formula) {
@@ -84,25 +87,37 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     }) => {
         onChange(getResult(config));
     };
+
+    useEffect(() => {
+        const handlePanelClick = (e: MouseEvent) => {
+            const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+            handleOutClick && handleOutClick(e as any, isFocusFormulaEditorSet);
+        };
+        divEleRef.current?.parentElement?.addEventListener('click', handlePanelClick);
+        return () => {
+            divEleRef.current?.parentElement?.removeEventListener('click', handlePanelClick);
+        };
+    }, []);
     return (
-        <div>
+        <div ref={divEleRef}>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
+
                 <WrapperError errorText={formulaError}>
-                    <TextEditor
-                        id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`)}
-                        openForSheetSubUnitId={worksheet?.getSheetId()}
-                        openForSheetUnitId={workbook.getUnitId()}
-                        value={formula}
-                        canvasStyle={{ fontSize: 10 }}
-                        onlyInputFormula={true}
-                        onChange={(v = '') => {
-                            const formula = v || '';
+                    <FormulaEditor
+                        onChange={(formula) => {
                             formulaSet(formula);
                             _onChange({ style, formula });
                             formulaErrorSet('');
                         }}
-                    />
+                        onFocus={() => { isFocusFormulaEditorSet(true); }}
+                        actions={formulaEditorActionsRef.current}
+                        isFocus={isFocusFormulaEditor}
+                        initValue={formula as any}
+                        unitId={workbook.getUnitId()}
+                        subUnitId={worksheet?.getSheetId()}
+                    >
+                    </FormulaEditor>
                 </WrapperError>
 
             </div>

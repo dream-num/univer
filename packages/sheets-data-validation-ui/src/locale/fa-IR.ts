@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             messageInfo: 'پیام راهنما',
             showInfo: 'نمایش متن راهنما برای یک سلول انتخاب شده',
             rangeError: 'محدوده‌ها نامعتبر هستند',
+            allowBlank: 'رد سلول خالی',
         },
         operators: {
             between: 'بین',

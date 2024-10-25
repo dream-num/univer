@@ -32,6 +32,7 @@ const locale: typeof zhCN = {
             formulaError: 'Диапазон ссылок содержит невидимые данные, пожалуйста, пересмотрите диапазон',
             listIntersects: 'Выбранный диапазон не может пересекаться с диапазоном правила.',
             primitive: 'Formulas are not permitted for custom ticked and unticked values.',
+
         },
         panel: {
             title: 'Управление проверкой данных',
@@ -53,6 +54,7 @@ const locale: typeof zhCN = {
             rejectInput: 'Отклонить ввод',
             messageInfo: 'Сообщение помощи',
             showInfo: 'Показать текст помощи для выбранной ячейки',
+            allowBlank: 'Игнорировать пустые значения',
         },
         operators: {
             between: 'между',

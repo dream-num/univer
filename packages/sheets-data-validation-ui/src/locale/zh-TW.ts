@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             rejectInput: '拒絕輸入',
             messageInfo: '文字提示',
             showInfo: '顯示所選單元格的提示文字',
+            allowBlank: '忽略空值',
         },
         operators: {
             between: '介於',

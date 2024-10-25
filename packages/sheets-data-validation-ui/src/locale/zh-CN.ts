@@ -51,6 +51,7 @@ const locale = {
             rejectInput: '拒绝输入',
             messageInfo: '文字提示',
             showInfo: '显示所选单元格的提示文字',
+            allowBlank: '忽略空值',
         },
         operators: {
             between: '介于',

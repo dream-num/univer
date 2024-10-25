@@ -18,7 +18,7 @@ import type { DataValidationOperator, DataValidationType, IDataValidationRuleBas
 import type { IUpdateSheetDataValidationRangeCommandParams } from '@univerjs/sheets-data-validation';
 import { debounce, ICommandService, isUnitRangesEqual, IUniverInstanceService, LocaleService, RedoCommand, shallowEqual, UndoCommand, UniverInstanceType, useDependency } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation';
-import { Button, FormLayout, Select } from '@univerjs/design';
+import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
@@ -321,6 +321,17 @@ export function DataValidationDetail() {
                     />
                 )
                 : null}
+            <FormLayout>
+                <Checkbox
+                    checked={(localRule.allowBlank ?? true)}
+                    onChange={() => handleUpdateRuleSetting({
+                        ...baseRule,
+                        allowBlank: !(localRule.allowBlank ?? true),
+                    })}
+                >
+                    {localeService.t('dataValidation.panel.allowBlank')}
+                </Checkbox>
+            </FormLayout>
             <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
             <div className={styles.dataValidationDetailButtons}>
                 <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>

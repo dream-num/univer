@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             rejectInput: 'Từ chối đầu vào',
             messageInfo: 'Thông báo',
             showInfo: 'Hiển thị thông báo cho ô đã chọn',
+            allowBlank: 'Bỏ qua giá trị rỗng',
         },
         operators: {
             between: 'Giữa',

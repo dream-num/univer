@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             messageInfo: 'Helper message',
             showInfo: 'Show help text for a selected cell',
             rangeError: 'Ranges are not legal',
+            allowBlank: 'Allow blank values',
         },
         operators: {
             between: 'between',

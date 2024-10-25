@@ -261,13 +261,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'シート番号を求めるシートまたは参照の名前を指定します。 値を省略すると、この関数を含むシートの番号が返されます。' },
         },
     },
     SHEETS: {
-        description: '参照内のシート数を返します。',
-        abstract: '参照内のシート数を返します。',
+        description: 'ワークブック内のシート数を返します',
+        abstract: 'ワークブック内のシート数を返します',
         links: [
             {
                 title: '指導',
@@ -275,8 +274,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     TYPE: {

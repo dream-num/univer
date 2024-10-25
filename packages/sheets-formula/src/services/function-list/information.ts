@@ -308,16 +308,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.SHEET.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.SHEET.functionParameter.number1.name',
-                detail: 'formula.functionList.SHEET.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SHEET.functionParameter.number2.name',
-                detail: 'formula.functionList.SHEET.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.SHEET.functionParameter.value.name',
+                detail: 'formula.functionList.SHEET.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -329,20 +322,6 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         description: 'formula.functionList.SHEETS.description',
         abstract: 'formula.functionList.SHEETS.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.SHEETS.functionParameter.number1.name',
-                detail: 'formula.functionList.SHEETS.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.SHEETS.functionParameter.number2.name',
-                detail: 'formula.functionList.SHEETS.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {

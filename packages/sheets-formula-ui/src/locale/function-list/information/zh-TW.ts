@@ -260,13 +260,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '要輸入工作表編號的工作表名稱或參照。 如果省略，SHEET 會傳回包含該函數的工作表編號。' },
         },
     },
     SHEETS: {
-        description: '傳回引用中的工作表數',
-        abstract: '傳回引用中的工作表數',
+        description: '傳回工作簿中的工作表數',
+        abstract: '傳回工作簿中的工作表數',
         links: [
             {
                 title: '教導',
@@ -274,8 +273,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     TYPE: {

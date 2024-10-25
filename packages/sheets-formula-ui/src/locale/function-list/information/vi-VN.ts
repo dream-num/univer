@@ -223,6 +223,31 @@ export default {
         functionParameter: {
         },
     },
+    SHEET: {
+        description: 'Trả về số trang của trang tham chiếu.',
+        abstract: 'Trả về số trang của trang tham chiếu.',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sheet-%E5%87%BD%E6%95%B0-44718b6f-8b87-47a1-a9d6-b701c06cff24',
+            },
+        ],
+        functionParameter: {
+            value: { name: 'giá trị', detail: 'là tên của một trang hoặc một tham chiếu mà bạn muốn tìm số trang của nó. Nếu đối số value được bỏ qua, hàm SHEET trả về số trang của trang có chứa hàm.' },
+        },
+    },
+    SHEETS: {
+        description: 'Trả về số trang tính trong một bảng tính',
+        abstract: 'Trả về số trang tính trong một bảng tính',
+        links: [
+            {
+                title: 'Hướng dẫn',
+                url: 'https://support.microsoft.com/vi-vn/office/sheets-%E5%87%BD%E6%95%B0-770515eb-e1e8-45ce-8066-b557e5e4b80b',
+            },
+        ],
+        functionParameter: {
+        },
+    },
     TYPE: {
         description: 'Trả về một số đại diện cho kiểu dữ liệu của giá trị',
         abstract: 'Trả về một số đại diện cho kiểu dữ liệu của giá trị',

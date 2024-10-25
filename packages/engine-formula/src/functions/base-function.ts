@@ -43,6 +43,8 @@ export class BaseFunction {
     private _column: number = -1;
     private _definedNames: Nullable<IDefinedNameMapItem>;
     private _locale: LocaleType;
+    private _sheetOrder: string[];
+    private _sheetNameMap: { [sheetId: string]: string };
 
     /**
      * Whether the function needs to expand the parameters
@@ -58,6 +60,11 @@ export class BaseFunction {
      * Whether the function needs handle locale
      */
     needsLocale: boolean = false;
+
+    /**
+     * Whether the function needs sheets info
+     */
+    needsSheetsInfo: boolean = false;
 
     /**
      * Minimum number of parameters
@@ -123,6 +130,24 @@ export class BaseFunction {
 
     setLocale(locale: LocaleType) {
         this._locale = locale;
+    }
+
+    getSheetsInfo() {
+        return {
+            sheetOrder: this._sheetOrder,
+            sheetNameMap: this._sheetNameMap,
+        };
+    }
+
+    setSheetsInfo({
+        sheetOrder,
+        sheetNameMap,
+    }: {
+        sheetOrder: string[];
+        sheetNameMap: { [sheetId: string]: string };
+    }) {
+        this._sheetOrder = sheetOrder;
+        this._sheetNameMap = sheetNameMap;
     }
 
     isAsync() {

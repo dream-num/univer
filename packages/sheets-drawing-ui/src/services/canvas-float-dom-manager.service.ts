@@ -186,6 +186,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
     transformChange$ = this._transformChange$.asObservable();
 
+    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
+    public add$ = this._add$.asObservable();
+
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
     remove$ = this._remove$.asObservable();
 
@@ -220,6 +223,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         return subUnitMap;
+    }
+
+    getFloatDomInfo(id: string) {
+        return this._domLayerInfoMap.get(id);
     }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
@@ -533,6 +540,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             unitId,
             drawings: [sheetDrawingParam],
         } as IInsertDrawingCommandParams);
+
+        this._add$.next({ unitId, subUnitId, id });
 
         return {
             id,

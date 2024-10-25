@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { CommandType, type IMutation, type IObjectArrayPrimitiveType, IRowData, IUniverInstanceService, type Nullable, Tools, type Worksheet } from '@univerjs/core';
+import type { IMutation, IObjectArrayPrimitiveType, IRowData, Nullable, Worksheet } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { getOldRowData } from '../../basics/row-column-value';
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface ISetRowDataMutationParams {
@@ -34,10 +36,10 @@ export const SetRowDataMutationFactory = (
 
     // Loop through the row data and set the old row data
     for (const rowIndex in rowData) {
-        let row = manager.getRow(Number(rowIndex));
-        row = Tools.deepClone(row);
+        const newRow = rowData[rowIndex];
+        const currentRow = manager.getRow(Number(rowIndex));
 
-        oldRowData[rowIndex] = setRowNull(row);
+        oldRowData[rowIndex] = getOldRowData(currentRow, newRow);
     }
 
     return {
@@ -76,40 +78,3 @@ export const SetRowDataMutation: IMutation<ISetRowDataMutationParams> = {
         return true;
     },
 };
-
-/**
- * Reset the row data to undefined when undoing the operation
- * @param row
- * @returns
- */
-function setRowNull(row: Nullable<Partial<IRowData>>) {
-    if (row === null || row === undefined) {
-        return null;
-    }
-
-    if (row.h === undefined) {
-        row.h = undefined;
-    }
-
-    if (row.ia === undefined) {
-        row.ia = undefined;
-    }
-
-    if (row.ah === undefined) {
-        row.ah = undefined;
-    }
-
-    if (row.hd === undefined) {
-        row.hd = undefined;
-    }
-
-    if (row.s === undefined) {
-        row.s = undefined;
-    }
-
-    if (row.custom === undefined) {
-        row.custom = undefined;
-    }
-
-    return row;
-}

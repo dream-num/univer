@@ -26,7 +26,7 @@ import { SetRangeValuesMutation } from '../../commands/mutations/set-range-value
 import { SetRowDataMutation } from '../../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../../commands/mutations/set-row-visible.mutation';
 import { SetWorksheetColWidthMutation } from '../../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutations';
+import { SetWorksheetDefaultStyleMutation } from '../../commands/mutations/set-worksheet-default-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,

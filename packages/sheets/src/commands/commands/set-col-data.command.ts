@@ -15,7 +15,7 @@
  */
 
 import type { IAccessor, ICommand } from '@univerjs/core';
-import type { ISetColCustomMutationParams } from '../mutations/set-col-custom.mutation';
+import type { ISetColDataMutationParams } from '../mutations/set-col-data.mutation';
 
 import {
     CommandType,
@@ -23,13 +23,13 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { SetColCustomMutation, SetColCustomMutationFactory } from '../mutations/set-col-custom.mutation';
+import { SetColDataMutation, SetColDataMutationFactory } from '../mutations/set-col-data.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
-export const SetColCustomCommand: ICommand = {
+export const SetColDataCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'sheet.command.set-col-custom',
-    handler: (accessor: IAccessor, params: ISetColCustomMutationParams) => {
+    id: 'sheet.command.set-col-data',
+    handler: (accessor: IAccessor, params: ISetColDataMutationParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -37,23 +37,24 @@ export const SetColCustomCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
+        const { columnData } = params;
         const { unitId, subUnitId, worksheet } = target;
 
-        const redoMutationParams: ISetColCustomMutationParams = {
+        const redoMutationParams: ISetColDataMutationParams = {
             subUnitId,
             unitId,
-            custom: params.custom,
+            columnData,
         };
 
-        const undoMutationParams = SetColCustomMutationFactory(redoMutationParams, worksheet);
+        const undoMutationParams = SetColDataMutationFactory(redoMutationParams, worksheet);
 
-        const result = commandService.syncExecuteCommand(SetColCustomMutation.id, redoMutationParams);
+        const result = commandService.syncExecuteCommand(SetColDataMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetColCustomMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: SetColCustomMutation.id, params: redoMutationParams }],
+                undoMutations: [{ id: SetColDataMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: SetColDataMutation.id, params: redoMutationParams }],
             });
 
             return true;

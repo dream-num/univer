@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IAccessor, IMutation, IStyleData } from '@univerjs/core';
+import type { IAccessor, IMutation, IStyleData, Nullable } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetDefaultStyleMutationParams {
     unitId: string;
     subUnitId: string;
-    defaultStyle: string | IStyleData;
+    defaultStyle: string | Nullable<IStyleData>;
 }
 
 export const SetWorksheetDefaultStyleMutation: IMutation<ISetWorksheetDefaultStyleMutationParams> = {
@@ -45,13 +45,13 @@ export const SetWorksheetDefaultStyleMutation: IMutation<ISetWorksheetDefaultSty
 export const SetWorksheetDefaultStyleMutationFactory = (accessor: IAccessor, params: ISetWorksheetDefaultStyleMutationParams) => {
     const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
     if (!target) {
-        throw new Error('[SetWorksheetNameMutationFactory]: worksheet is null error!');
+        throw new Error('[SetWorksheetDefaultStyleMutationFactory]: worksheet is null error!');
     }
 
     const { worksheet } = target;
     return {
         unitId: params.unitId,
-        name: worksheet.getDefaultCellStyle(),
         subUnitId: worksheet.getSheetId(),
+        defaultStyle: worksheet.getDefaultCellStyle(),
     };
 };

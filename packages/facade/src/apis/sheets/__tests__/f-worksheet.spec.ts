@@ -17,7 +17,7 @@
 import type { ICellData, Injector, IStyleData, Nullable, Workbook } from '@univerjs/core';
 import type { FUniver } from '../../facade';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColCustomCommand, SetColCustomMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowCustomCommand, SetRowCustomMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColDataCommand, SetColDataMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowDataMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { CancelFrozenCommand } from '@univerjs/sheets-ui';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -70,8 +70,10 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetWorksheetRowHeightMutation);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightCommand);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightMutation);
-        commandService.registerCommand(SetRowCustomCommand);
-        commandService.registerCommand(SetRowCustomMutation);
+        commandService.registerCommand(SetRowDataCommand);
+        commandService.registerCommand(SetRowDataMutation);
+        commandService.registerCommand(SetColDataCommand);
+        commandService.registerCommand(SetColDataMutation);
 
         // column
         commandService.registerCommand(InsertColCommand);
@@ -86,8 +88,6 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetColVisibleMutation);
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
-        commandService.registerCommand(SetColCustomCommand);
-        commandService.registerCommand(SetColCustomMutation);
 
         // merge cells
         commandService.registerCommand(AddWorksheetMergeCommand);

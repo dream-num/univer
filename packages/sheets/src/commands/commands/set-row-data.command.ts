@@ -37,12 +37,13 @@ export const SetRowDataCommand: ICommand = {
         const target = getSheetCommandTarget(univerInstanceService, params);
         if (!target) return false;
 
+        const { rowData } = params;
         const { unitId, subUnitId, worksheet } = target;
 
         const redoMutationParams: ISetRowDataMutationParams = {
             subUnitId,
             unitId,
-            rowData: params.rowData,
+            rowData,
         };
 
         const undoMutationParams = SetRowDataMutationFactory(redoMutationParams, worksheet);

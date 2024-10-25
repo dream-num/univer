@@ -200,10 +200,12 @@ export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams 
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
 export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
-export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutations';
+export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutation';
 export { type ISetWorksheetRowColumnStyleMutationParams, SetWorksheetRowColumnStyleMutation, SetWorksheetRowColumnStyleMutationFactory } from './commands/mutations/set-worksheet-row-column-style.mutation';
 export { type ISetRowDataMutationParams, SetRowDataMutation, SetRowDataMutationFactory } from './commands/mutations/set-row-data.mutation';
 export { SetRowDataCommand } from './commands/commands/set-row-data.command';
+export { type ISetColDataMutationParams, SetColDataMutation, SetColDataMutationFactory } from './commands/mutations/set-col-data.mutation';
+export { SetColDataCommand } from './commands/commands/set-col-data.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,
@@ -405,9 +407,5 @@ export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.oper
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
-export { SetRowCustomCommand } from './commands/commands/set-row-custom.command';
-export { type ISetRowCustomMutationParams, SetRowCustomMutation } from './commands/mutations/set-row-custom.mutation';
-export { SetColCustomCommand } from './commands/commands/set-col-custom.command';
-export { type ISetColCustomMutationParams, SetColCustomMutation } from './commands/mutations/set-col-custom.mutation';
 
 // #endregion

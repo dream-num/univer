@@ -204,6 +204,23 @@ export class ColumnManager {
     }
 
     /**
+     * Set column data of given column
+     * @param columnPos
+     * @param columnData
+     */
+    setColumn(columnPos: number, columnData: Partial<IColumnData>) {
+        this._columnData[columnPos] = columnData;
+    }
+
+    /**
+     * Remove column data of given column
+     * @param columnPos
+     */
+    removeColumn(columnPos: number) {
+        delete this._columnData[columnPos];
+    }
+
+    /**
      * get given column data or create a column data when it's null
      * @param columnPos column index
      * @returns {Partial<IColumnData>} columnData

@@ -91,12 +91,12 @@ export class TextLengthValidator extends BaseDataValidator<number> {
 
         const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result);
         const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result);
-        const isFormulaVaild = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
             formula1: this._parseNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
             formula2: this._parseNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
-            isFormulaVaild,
+            isFormulaValid,
         };
     }
 

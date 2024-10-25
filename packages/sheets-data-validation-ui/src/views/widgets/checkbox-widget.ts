@@ -85,12 +85,12 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const formulaResult1 = getFormulaResult(results?.[0]?.result);
         const formulaResult2 = getFormulaResult(results?.[1]?.result);
-        const isFormulaVaild = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
             formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
             formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
-            isFormulaVaild,
+            isFormulaValid,
         };
     }
 

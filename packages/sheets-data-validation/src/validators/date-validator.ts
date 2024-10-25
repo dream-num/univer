@@ -68,12 +68,12 @@ export class DateValidator extends BaseDataValidator<number> {
         const { formula1, formula2 } = rule;
         const formulaResult1 = getFormulaResult(results?.[0]?.result);
         const formulaResult2 = getFormulaResult(results?.[1]?.result);
-        const isFormulaVaild = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
             formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
             formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
-            isFormulaVaild,
+            isFormulaValid,
         };
     }
 

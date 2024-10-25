@@ -150,12 +150,12 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const isFormulaVaild = isLegalFormulaResult(String(formulaResult1));
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1));
 
         return {
             formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
             formula2: undefined,
-            isFormulaVaild,
+            isFormulaValid,
         };
     }
 

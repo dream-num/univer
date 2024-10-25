@@ -20,6 +20,7 @@ import { DataValidationOperator, DataValidationType, isFormulaString, Tools } fr
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
+import { isLegalFormulaResult } from '../utils/formula';
 import { getCellValueNumber } from './decimal-validator';
 
 export class WholeValidator extends BaseDataValidator<number> {
@@ -71,9 +72,14 @@ export class WholeValidator extends BaseDataValidator<number> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
+        const formula1Result = isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.v : formula1;
+        const formula2Result = isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.v : formula2;
+        const isFormulaValid = isLegalFormulaResult(`${formula1Result}`) && isLegalFormulaResult(`${formula2Result}`);
+
         const info = {
-            formula1: this._parseNumber(isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.v : formula1),
-            formula2: this._parseNumber(isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.v : formula2),
+            formula1: this._parseNumber(formula1Result),
+            formula2: this._parseNumber(formula2Result),
+            isFormulaValid,
         };
 
         return info;

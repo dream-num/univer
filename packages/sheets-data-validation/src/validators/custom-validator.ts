@@ -41,7 +41,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return {
             formula1: undefined,
             formula2: undefined,
-            isFormulaVaild: false,
+            isFormulaValid: false,
         };
     }
 

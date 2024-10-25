@@ -99,14 +99,14 @@ export class CheckboxValidator extends BaseDataValidator {
 
         const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
         const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
-        const isFormulaVaild = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2));
+        const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2));
 
         return {
             formula1: transformCheckboxValue(originFormula1),
             formula2: transformCheckboxValue(originFormula2),
             originFormula1,
             originFormula2,
-            isFormulaVaild,
+            isFormulaValid,
         };
     }
 

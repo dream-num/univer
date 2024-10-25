@@ -30,9 +30,10 @@ import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/s
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
+import { useBlur } from './hooks/useBlur';
 import { useEditorInput } from './hooks/useEditorInput';
-import { useFormulaToken } from './hooks/useFormulaToken';
 
+import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
 import { useResize } from './hooks/useResize';
@@ -216,6 +217,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useEditorInput(unitId, rangeString, editor);
 
     useVerify(onVerify, sequenceNodes);
+
+    useBlur(editorId, isFocusSet);
 
     useEffect(() => {
         if (editor) {

@@ -22,6 +22,7 @@ import { IEditorService } from '@univerjs/docs-ui';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useBlur } from '../range-selector/hooks/useBlur';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useResize } from '../range-selector/hooks/useResize';
 import { HelpFunction } from './help-function/HelpFunction';
@@ -106,7 +107,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useRefactorEffect(isFocus, unitId);
     useLeftAndRightArrow(editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
-
+    useBlur(editorId, isFocusSet);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(formulaText, editor);
 
@@ -186,14 +187,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const handleClick = () => {
         if (editor) {
             editor.focus();
+            isFocusSet(true);
             onFocus();
-
-            if (!isFocus) {
-                isFocusSet(false);
-                setTimeout(() => {
-                    isFocusSet(true);
-                }, 16);
-            }
         }
     };
     return (

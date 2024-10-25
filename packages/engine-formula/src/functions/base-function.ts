@@ -60,6 +60,11 @@ export class BaseFunction {
     needsLocale: boolean = false;
 
     /**
+     * Whether the function needs sheets info
+     */
+    needsSheetsInfo: boolean = false;
+
+    /**
      * Minimum number of parameters
      */
     minParams: number = -1;

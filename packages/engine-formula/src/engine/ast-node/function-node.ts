@@ -60,6 +60,10 @@ export class FunctionNode extends BaseAstNode {
         if (this._functionExecutor.needsLocale) {
             this._setLocale();
         }
+
+        if (this._functionExecutor.needsSheetsInfo) {
+            this._setSheetsInfo();
+        }
     }
 
     override get nodeType() {
@@ -274,6 +278,10 @@ export class FunctionNode extends BaseAstNode {
 
     private _setLocale() {
         this._functionExecutor.setLocale(this._currentConfigService.getLocale());
+    }
+
+    private _setSheetsInfo() {
+
     }
 }
 

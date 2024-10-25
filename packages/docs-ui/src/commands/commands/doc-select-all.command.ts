@@ -57,11 +57,11 @@ export const DocSelectAllCommand: ICommand<ISelectAllCommandParams> = {
             // Push the rect range.
             textRanges.push({
                 startOffset: startIndex + 3, // 3 is TABLE_START, ROW_START, CELL_START.
-                endOffset: endIndex - 4, // 4 is CELL_END, ROW_END, TABLE_END AND \n.
+                endOffset: endIndex - 5, // 4 is CELL_END, ROW_END, TABLE_END AND \n.
                 rangeType: DOC_RANGE_TYPE.RECT,
             });
 
-            offset = endIndex + 1;
+            offset = endIndex;
         }
 
         if (offset !== prevBody.dataStream.length - 2) {

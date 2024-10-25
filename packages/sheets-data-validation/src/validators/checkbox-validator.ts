@@ -19,7 +19,7 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { DataValidationType, isFormulaString, Tools, WrapStrategy } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { getFormulaResult } from '../utils/formula';
+import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -96,13 +96,17 @@ export class CheckboxValidator extends BaseDataValidator {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<ICheckboxFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+
         const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1;
         const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2;
+        const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2));
+
         return {
             formula1: transformCheckboxValue(originFormula1),
             formula2: transformCheckboxValue(originFormula2),
             originFormula1,
             originFormula2,
+            isFormulaValid,
         };
     }
 

@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             rejectInput: '拒絕輸入',
             messageInfo: '文字提示',
             showInfo: '顯示所選單元格的提示文字',
+            allowBlank: '忽略空值',
         },
         operators: {
             between: '介於',
@@ -83,6 +84,10 @@ const locale: typeof zhCN = {
             equal: '值必須等於 {FORMULA1}',
             notEqual: '值必須不等於 {FORMULA1}',
             notBetween: '值必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
+        },
+        any: {
+            title: '任意值',
+            error: '此儲存格的內容違反了驗證規則',
         },
         date: {
             title: '日期',
@@ -166,6 +171,7 @@ const locale: typeof zhCN = {
             title: '自訂公式',
             error: '此儲存格的內容違反了驗證規則',
             validFail: '請輸入合法的公式',
+            ruleName: '自訂公式 {FORMULA1}',
         },
         alert: {
             title: '提示',

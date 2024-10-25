@@ -22,7 +22,7 @@ import type { CheckboxValidator } from '@univerjs/sheets-data-validation';
 import { HorizontalAlign, ICommandService, Inject, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, transformCheckboxValue } from '@univerjs/sheets-data-validation';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, DataValidationFormulaService, getCellValueOrigin, getFormulaResult, isLegalFormulaResult, transformCheckboxValue } from '@univerjs/sheets-data-validation';
 
 const MARGIN_H = 6;
 
@@ -83,9 +83,14 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
+
         return {
             formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
-            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+            formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
+            isFormulaValid,
         };
     }
 

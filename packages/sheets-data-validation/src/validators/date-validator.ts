@@ -22,7 +22,7 @@ import dayjs from 'dayjs';
 import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { getFormulaResult } from '../utils/formula';
+import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -66,10 +66,14 @@ export class DateValidator extends BaseDataValidator<number> {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
+        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? formulaResult1 : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? formulaResult2 : formula2),
+            isFormulaValid,
         };
     }
 

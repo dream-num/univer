@@ -29,6 +29,7 @@ export type RangeMutation = {
     ruleId: string;
     oldRanges: IRange[];
     newRanges: IRange[];
+    rule: ISheetDataValidationRule;
 } | {
     type: 'delete';
     rule: ISheetDataValidationRule;
@@ -202,7 +203,8 @@ export class RuleMatrix {
                     type: 'update',
                     ruleId: rule.uid,
                     oldRanges,
-                    newRanges,
+                    newRanges: Rectangle.sort(newRanges),
+                    rule,
                 });
             }
 
@@ -231,7 +233,8 @@ export class RuleMatrix {
                     type: 'update',
                     ruleId: rule.uid,
                     oldRanges,
-                    newRanges,
+                    newRanges: Rectangle.sort(newRanges),
+                    rule,
                 });
             }
 
@@ -251,7 +254,7 @@ export class RuleMatrix {
                 type: 'add',
                 rule: {
                     ...rule,
-                    ranges: newRanges,
+                    ranges: Rectangle.sort(newRanges),
                 },
             });
         });

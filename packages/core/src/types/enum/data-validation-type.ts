@@ -34,4 +34,5 @@ export enum DataValidationType {
      */
     DECIMAL = 'decimal',
     CHECKBOX = 'checkbox',
+    ANY = 'any',
 }

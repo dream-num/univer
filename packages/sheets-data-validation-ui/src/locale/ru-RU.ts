@@ -32,6 +32,7 @@ const locale: typeof zhCN = {
             formulaError: 'Диапазон ссылок содержит невидимые данные, пожалуйста, пересмотрите диапазон',
             listIntersects: 'Выбранный диапазон не может пересекаться с диапазоном правила.',
             primitive: 'Formulas are not permitted for custom ticked and unticked values.',
+
         },
         panel: {
             title: 'Управление проверкой данных',
@@ -53,6 +54,7 @@ const locale: typeof zhCN = {
             rejectInput: 'Отклонить ввод',
             messageInfo: 'Сообщение помощи',
             showInfo: 'Показать текст помощи для выбранной ячейки',
+            allowBlank: 'Игнорировать пустые значения',
         },
         operators: {
             between: 'между',
@@ -83,6 +85,10 @@ const locale: typeof zhCN = {
             equal: 'Значение должно быть равно {FORMULA1}',
             notEqual: 'Значение должно быть не равно {FORMULA1}',
             notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
+        },
+        any: {
+            title: 'Любое значение',
+            error: 'Содержимое этой ячейки нарушает правило проверки',
         },
         date: {
             title: 'Дата',
@@ -164,6 +170,7 @@ const locale: typeof zhCN = {
             title: 'Пользовательская формула',
             error: 'Содержимое этой ячейки нарушает правило проверки',
             validFail: 'Пожалуйста, введите допустимую формулу',
+            ruleName: 'Пользовательская формула {FORMULA1}',
         },
         alert: {
             title: 'Ошибка',

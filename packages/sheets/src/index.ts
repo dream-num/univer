@@ -202,6 +202,8 @@ export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } fro
 export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
 export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutations';
 export { type ISetWorksheetRowColumnStyleMutationParams, SetWorksheetRowColumnStyleMutation, SetWorksheetRowColumnStyleMutationFactory } from './commands/mutations/set-worksheet-row-column-style.mutation';
+export { type ISetRowDataMutationParams, SetRowDataMutation, SetRowDataMutationFactory } from './commands/mutations/set-row-data.mutation';
+export { SetRowDataCommand } from './commands/commands/set-row-data.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,

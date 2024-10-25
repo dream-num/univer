@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { CustomData, ICellData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, ICellData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { copyRangeStyles, InsertColCommand, InsertRowCommand, type ISetRangeValuesMutationParams, ISetRowDataMutationParams, type IToggleGridlinesCommandParams, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColCustomCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, type ISetRangeValuesMutationParams, type IToggleGridlinesCommandParams, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColCustomCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowCustomCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
 import { type IDataValidationResCache, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
@@ -160,13 +160,17 @@ export class FWorksheet {
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const styles = [{ index, style }];
-        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+
+        const params: ISetRowDataMutationParams = {
             unitId,
             subUnitId,
-            isRow: true,
-            styles,
-        });
+            rowData: {
+                [index]: {
+                    s: style,
+                },
+            },
+        };
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
         return this;
     }
     // #endregion
@@ -694,11 +698,20 @@ export class FWorksheet {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
 
-        await this._commandService.executeCommand(SetRowCustomCommand.id, {
+        const rowData: IObjectArrayPrimitiveType<Nullable<IRowData>> = {};
+        for (const [rowIndex, customData] of Object.entries(custom)) {
+            rowData[Number(rowIndex)] = {
+                custom: customData,
+            };
+        }
+
+        const params: ISetRowDataMutationParams = {
             unitId,
             subUnitId,
-            custom,
-        });
+            rowData,
+        };
+
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
 
         return this;
     }

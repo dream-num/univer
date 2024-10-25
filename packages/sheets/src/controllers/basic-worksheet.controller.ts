@@ -52,18 +52,19 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
+import { SetColCustomCommand } from '../commands/commands/set-col-custom.command';
 import {
     SetColHiddenCommand,
     SetSelectedColsVisibleCommand,
     SetSpecificColsVisibleCommand,
 } from '../commands/commands/set-col-visible.command';
-import { SetColCustomCommand } from '../commands/commands/set-col-custom.command';
 import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
 import { SetRowCustomCommand } from '../commands/commands/set-row-custom.command';
+import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
 import {
     SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
@@ -111,13 +112,14 @@ import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remo
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
-import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetColCustomMutation } from '../commands/mutations/set-col-custom.mutation';
+import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
-import { SetRowCustomMutation } from '../commands/mutations/set-row-custom.mutation';
 
+import { SetRowCustomMutation } from '../commands/mutations/set-row-custom.mutation';
+import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
@@ -128,7 +130,6 @@ import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-na
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
-import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -178,7 +179,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             ReorderRangeMutation,
             EmptyMutation,
             SetWorksheetDefaultStyleMutation,
-            SetWorksheetRowColumnStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -238,6 +238,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRowVisibleMutation,
                 SetRowCustomCommand,
                 SetRowCustomMutation,
+                SetRowDataCommand,
+                SetRowDataMutation,
                 SetSelectedColsVisibleCommand,
                 SetSelectedRowsVisibleCommand,
                 SetSpecificColsVisibleCommand,

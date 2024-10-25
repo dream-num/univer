@@ -103,6 +103,23 @@ export class RowManager {
     }
 
     /**
+     * Set row data of given row
+     * @param rowPos
+     * @param rowData
+     */
+    setRow(rowPos: number, rowData: Partial<IRowData>) {
+        this._rowData[rowPos] = rowData;
+    }
+
+    /**
+     * Remove row data of given row
+     * @param rowPos
+     */
+    removeRow(rowPos: number) {
+        delete this._rowData[rowPos];
+    }
+
+    /**
      * Get given row data or create a row data when it's null
      * @param rowPos row index
      * @returns {Partial<IRowData>} rowData

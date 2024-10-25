@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import clsx from 'clsx';
 import type { PropsWithChildren } from 'react';
+import clsx from 'clsx';
 import React from 'react';
 
 import styles from './index.module.less';
@@ -37,16 +37,20 @@ export const FormLayout = (props: IFormLayoutProps) => {
         <div className={clsx(styles.formLayout, className)} style={style}>
             {label && <div className={styles.formLayoutLabel}>{label}</div>}
             {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
-            <div style={contentStyle} className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
-                {children}
-                {error
-                    ? (
-                        <div className={styles.formLayoutError}>
-                            {error}
-                        </div>
-                    )
-                    : null}
-            </div>
+            {children
+                ? (
+                    <div style={contentStyle} className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
+                        {children}
+                        {error
+                            ? (
+                                <div className={styles.formLayoutError}>
+                                    {error}
+                                </div>
+                            )
+                            : null}
+                    </div>
+                )
+                : null}
         </div>
     );
 };

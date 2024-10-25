@@ -85,6 +85,10 @@ const locale: typeof zhCN = {
             notEqual: '值必須不等於 {FORMULA1}',
             notBetween: '值必須在 {FORMULA1} 和 {FORMULA2} 範圍之外',
         },
+        any: {
+            title: '任意值',
+            error: '此儲存格的內容違反了驗證規則',
+        },
         date: {
             title: '日期',
             operators: {

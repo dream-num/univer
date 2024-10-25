@@ -85,6 +85,10 @@ const locale: typeof zhCN = {
             notEqual: 'مقدار باید برابر نیست با {FORMULA1}',
             notBetween: 'مقدار باید بین {FORMULA1} و {FORMULA2} نباشد',
         },
+        any: {
+            title: 'هر مقدار',
+            error: 'محتوای این سلول نقض قانون اعتبارسنجی است',
+        },
         date: {
             title: 'تاریخ',
             operators: {

@@ -83,6 +83,10 @@ const locale = {
             notEqual: '值必须不等于 {FORMULA1}',
             notBetween: '值必须在 {FORMULA1} 和 {FORMULA2} 范围之外',
         },
+        any: {
+            title: '任意值',
+            error: '此单元格的内容违反了验证规则',
+        },
         date: {
             title: '日期',
             operators: {

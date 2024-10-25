@@ -85,6 +85,10 @@ const locale: typeof zhCN = {
             notEqual: 'Value must be not equal to {FORMULA1}',
             notBetween: 'Value must be not between {FORMULA1} and {FORMULA2}',
         },
+        any: {
+            title: 'Any value',
+            error: 'The content of this cell violates the validation rule',
+        },
         date: {
             title: 'Date',
             operators: {

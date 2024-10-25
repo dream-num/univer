@@ -86,6 +86,10 @@ const locale: typeof zhCN = {
             notEqual: 'Значение должно быть не равно {FORMULA1}',
             notBetween: 'Значение должно быть не между {FORMULA1} и {FORMULA2}',
         },
+        any: {
+            title: 'Любое значение',
+            error: 'Содержимое этой ячейки нарушает правило проверки',
+        },
         date: {
             title: 'Дата',
             operators: {

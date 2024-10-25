@@ -85,6 +85,10 @@ const locale: typeof zhCN = {
             notEqual: 'Giá trị phải không bằng {FORMULA1}',
             notBetween: 'Giá trị phải không nằm giữa {FORMULA1} và {FORMULA2}',
         },
+        any: {
+            title: 'Bất kỳ giá trị',
+            error: 'Nội dung của ô này vi phạm quy tắc xác thực',
+        },
         date: {
             title: 'Ngày',
             operators: {

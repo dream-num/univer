@@ -87,7 +87,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
 
-    const { sequenceNodes } = useFormulaToken(formulaWithoutEqualSymbol);
+    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
 
     const handleSelectionChange = (refString: string, offset: number) => {
@@ -123,6 +123,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                     const result = `=${text}`;
                     formulaTextSet(result);
                     onChange(result);
+                    // 当无内容的时候,删除'=',会导致 doc 编辑器内的内容和 formulaText 不同步,导致失去焦点, 这里强制同步一次.
+                    if (!text) {
+                        sequenceNodesSet([]);
+                    }
                     setTimeout(() => {
                         editor.setSelectionRanges([{ startOffset: result.length, endOffset: result.length }]);
                     }, 16);

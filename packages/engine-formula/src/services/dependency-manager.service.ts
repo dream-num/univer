@@ -16,7 +16,7 @@
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree';
-import { createIdentifier, Disposable, ObjectMatrix, RTree } from '@univerjs/core';
+import { Disposable, ObjectMatrix, RTree } from '@univerjs/core';
 
 export interface IOtherFormulaDependencyParam {
     [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: Nullable<string> } }>;
@@ -30,63 +30,13 @@ export interface IFormulaDependencyParam {
     [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix< string> }>;
 }
 
-export interface IDependencyManagerService {
-    dispose(): void;
-
-    getAllTree(): FormulaDependencyTree[];
-
-    buildDependencyTree(shouldBeBuildTrees: FormulaDependencyTree[], dependencyTrees?: FormulaDependencyTree[]): FormulaDependencyTree[];
-
-    clearDependencyForTree(shouldBeClearTree: Nullable<FormulaDependencyTree>): void;
-
-    reset(): void;
-
-    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: FormulaDependencyTree): void;
-
-    removeOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string[]): void;
-
-    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string): Nullable<FormulaDependencyTree>;
-
-    addFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string, dependencyTree: FormulaDependencyTree): void;
-
-    removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]): void;
-
-    getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string): Nullable<FormulaDependencyTree>;
-
-    addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: FormulaDependencyTree): void;
-
-    removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
-
-    getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<FormulaDependencyTree>;
-
-    removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
-
-    clearFormulaDependency(unitId: string, sheetId?: string): void;
-
-    addDependencyRTreeCache(tree: FormulaDependencyTree): void;
-
-    searchDependency(search: IUnitRange[]): Set<string>;
-
-    getLastTreeId(): number;
-
-    clearDependencyAll(): void;
-
-    clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
-    clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
-
-    openKdTree(): void;
-    closeKdTree(): void;
-
-    getTreeById(treeId: string): Nullable<FormulaDependencyTree>;
-}
-
 /**
  * Passively marked as dirty, register the reference and execution actions of the feature plugin.
  * After execution, a dirty area and calculated data will be returned,
  * causing the formula to be marked dirty again,
  * thereby completing the calculation of the entire dependency tree.
  */
-export class DependencyManagerService extends Disposable implements IDependencyManagerService {
+export class DependencyManagerService extends Disposable {
     private _otherFormulaData: IOtherFormulaDependencyParam = {};
 
     private _featureFormulaData: IFeatureFormulaDependencyParam = {};
@@ -560,7 +510,3 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         this._allTreeMap.delete(treeId || '');
     }
 }
-
-export const IDependencyManagerService = createIdentifier<DependencyManagerService>(
-    'univer.formula.dependency-manager.service'
-);

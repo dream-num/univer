@@ -21,20 +21,18 @@ import type {
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../basics/common';
-
 import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
-import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
+import { Disposable, Inject, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
 import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
 import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
-
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
 import { objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import { IFormulaCurrentConfigService } from './current-data.service';
+import { FormulaCurrentConfigService } from './current-data.service';
 
 /**
  * IDLE: Idle phase of the formula engine.
@@ -87,100 +85,7 @@ export interface IExecutionInProgressParams {
     stage: FormulaExecuteStageType;
 }
 
-export interface IFormulaRuntimeService {
-    currentRow: number;
-
-    currentColumn: number;
-
-    currentSubUnitId: string;
-
-    currentUnitId: string;
-
-    dispose(): void;
-
-    reset(): void;
-
-    setCurrent(
-        row: number,
-        column: number,
-        rowCount: number,
-        columnCount: number,
-        sheetId: string,
-        unitId: string
-    ): void;
-
-    registerFunctionDefinitionPrivacyVar(lambdaId: string, lambdaVar: Map<string, Nullable<BaseAstNode>>): void;
-
-    getFunctionDefinitionPrivacyVar(lambdaId: string): Nullable<Map<string, Nullable<BaseAstNode>>>;
-
-    setRuntimeData(functionVariant: FunctionVariantType): void;
-
-    getUnitData(): IRuntimeUnitDataType;
-
-    getUnitArrayFormula(): IArrayFormulaRangeType;
-
-    stopExecution(): void;
-
-    setFormulaExecuteStage(type: FormulaExecuteStageType): void;
-
-    setFormulaCycleIndex(index: number): void;
-
-    isStopExecution(): boolean;
-
-    getFormulaExecuteStage(): FormulaExecuteStageType;
-
-    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType): void;
-
-    getRuntimeOtherData(): IRuntimeOtherUnitDataType;
-
-    getAllRuntimeData(): IAllRuntimeData;
-
-    markedAsSuccessfullyExecuted(): void;
-
-    markedAsNoFunctionsExecuted(): void;
-
-    markedAsStopFunctionsExecuted(): void;
-
-    markedAsInitialFunctionsExecuted(): void;
-
-    setTotalFormulasToCalculate(value: number): void;
-
-    getTotalFormulasToCalculate(): number;
-
-    setCompletedFormulasCount(value: number): void;
-
-    getCompletedFormulasCount(): number;
-
-    getRuntimeState(): IExecutionInProgressParams;
-
-    setTotalArrayFormulasToCalculate(value: number): void;
-
-    getTotalArrayFormulasToCalculate(): number;
-
-    setCompletedArrayFormulasCount(value: number): void;
-
-    getCompletedArrayFormulasCount(): number;
-
-    enableCycleDependency(): void;
-
-    disableCycleDependency(): void;
-
-    isCycleDependency(): boolean;
-
-    getRuntimeArrayFormulaCellData(): IRuntimeUnitDataType;
-
-    getRuntimeFeatureRange(): { [featureId: string]: IFeatureDirtyRangeType };
-
-    getRuntimeFeatureCellData(): { [featureId: string]: IRuntimeUnitDataType };
-
-    setRuntimeFeatureCellData(featureId: string, featureData: IRuntimeUnitDataType): void;
-
-    setRuntimeFeatureRange(featureId: string, featureRange: IFeatureDirtyRangeType): void;
-
-    clearReferenceAndNumberformatCache(): void;
-}
-
-export class FormulaRuntimeService extends Disposable implements IFormulaRuntimeService {
+export class FormulaRuntimeService extends Disposable {
     private _formulaExecuteStage: FormulaExecuteStageType = FormulaExecuteStageType.IDLE;
 
     private _stopState = false;
@@ -225,7 +130,9 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     private _isCycleDependency: boolean = false;
 
-    constructor(@IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService) {
+    constructor(
+        @Inject(FormulaCurrentConfigService) private readonly _currentConfigService: FormulaCurrentConfigService
+    ) {
         super();
     }
 
@@ -787,5 +694,3 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return isInDirtyRange(dirtyRanges, unitId, sheetId, row, column);
     }
 }
-
-export const IFormulaRuntimeService = createIdentifier<FormulaRuntimeService>('univer.formula.runtime.service');

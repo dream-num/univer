@@ -22,7 +22,7 @@ import type {
     ISetFeatureCalculationMutation } from '../commands/mutations/set-feature-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
-import { Disposable, ICommandService, ObjectMatrix } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, ObjectMatrix } from '@univerjs/core';
 import { SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
     RemoveFeatureCalculationMutation,
@@ -30,23 +30,17 @@ import {
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import { IDependencyManagerService } from '../services/dependency-manager.service';
-import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import { DependencyManagerService } from '../services/dependency-manager.service';
+import { FeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 
 export class SetDependencyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IFeatureCalculationManagerService
-        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService,
-        @IFeatureCalculationManagerService private readonly _featureCalculationManagerService: IFeatureCalculationManagerService) {
+        @Inject(DependencyManagerService) private readonly _dependencyManagerService: DependencyManagerService,
+        @Inject(FeatureCalculationManagerService) private readonly _featureCalculationManagerService: FeatureCalculationManagerService) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
         this._commandExecutedListener();
-
         this._featureCalculationManagerServiceListener();
     }
 
@@ -135,9 +129,7 @@ export class SetDependencyController extends Disposable {
         );
     }
 
-    private _handleSetDefinedName(
-        command: ICommandInfo
-    ): void {
+    private _handleSetDefinedName(command: ICommandInfo): void {
         const params = command.params as ISetDefinedNameMutationParam;
         if (params == null) {
             return;

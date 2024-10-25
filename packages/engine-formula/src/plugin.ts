@@ -16,7 +16,7 @@
 
 import type { Dependency } from '@univerjs/core';
 import type { IUniverEngineFormulaConfig } from './controller/config.schema';
-import { IConfigService, Inject, Injector, Plugin } from '@univerjs/core';
+import { IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies } from '@univerjs/core';
 import { CalculateController } from './controller/calculate.controller';
 import { defaultPluginConfig, PLUGIN_CONFIG_KEY } from './controller/config.schema';
 import { FormulaController } from './controller/formula.controller';
@@ -41,19 +41,15 @@ import { ValueNodeFactory } from './engine/ast-node/value-node';
 import { FormulaDependencyGenerator } from './engine/dependency/formula-dependency';
 import { Interpreter } from './engine/interpreter/interpreter';
 import { FormulaDataModel } from './models/formula-data.model';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+import { ActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { CalculateFormulaService } from './services/calculate-formula.service';
-import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from './services/current-data.service';
-import { DefinedNamesService, IDefinedNamesService } from './services/defined-names.service';
-import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
-import {
-    FeatureCalculationManagerService,
-    IFeatureCalculationManagerService,
-} from './services/feature-calculation-manager.service';
-import { FunctionService, IFunctionService } from './services/function.service';
-import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
-import { ISuperTableService, SuperTableService } from './services/super-table.service';
+import { FormulaCurrentConfigService } from './services/current-data.service';
+import { DefinedNamesService } from './services/defined-names.service';
+import { DependencyManagerService } from './services/dependency-manager.service';
+import { FeatureCalculationManagerService } from './services/feature-calculation-manager.service';
+import { FunctionService } from './services/function.service';
+import { OtherFormulaManagerService } from './services/other-formula-manager.service';
+import { FormulaRuntimeService } from './services/runtime.service';
 
 const PLUGIN_NAME = 'UNIVER_ENGINE_FORMULA_PLUGIN';
 
@@ -77,63 +73,54 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     override onReady(): void {
-        this._injector.get(FormulaController);
-        this._injector.get(SetDefinedNameController);
-        this._injector.get(SetSuperTableController);
-
-        if (!this._config?.notExecuteFormula) {
-            this._injector.get(SetOtherFormulaController);
-            this._injector.get(SetFeatureCalculationController);
-            this._injector.get(SetDependencyController);
-            this._injector.get(CalculateController);
-        }
+        touchDependencies(this._injector, [
+            [FormulaController],
+            [SetDefinedNameController],
+            [SetSuperTableController],
+            [SetOtherFormulaController],
+            [SetFeatureCalculationController],
+            [SetDependencyController],
+            [CalculateController],
+        ]);
     }
 
     override onRendered(): void {
-        if (!this._config?.notExecuteFormula) {
-            this._injector.get(CalculateFormulaService);
-            this._injector.get(FormulaDependencyGenerator);
-        }
+        touchDependencies(this._injector, [
+            [CalculateFormulaService],
+            [FormulaDependencyGenerator],
+        ]);
     }
 
     private _initialize() {
-        // worker and main thread
         const dependencies: Dependency[] = [
             // Services
-            [IFunctionService, { useClass: FunctionService }],
-            [IDefinedNamesService, { useClass: DefinedNamesService }],
-            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
-            [ISuperTableService, { useClass: SuperTableService }],
-
+            [FunctionService],
+            [DefinedNamesService],
+            [ActiveDirtyManagerService],
             // Models
             [FormulaDataModel],
-
             // Engine
             [LexerTreeBuilder],
-
-            //Controllers
             [FormulaController],
             [SetDefinedNameController],
             [SetSuperTableController],
         ];
 
         if (!this._config?.notExecuteFormula) {
-            // only worker
+            // Dependencies for computing.
             dependencies.push(
                 // Services
                 [CalculateFormulaService],
-                [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
-                [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
-                [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
-                [IDependencyManagerService, { useClass: DependencyManagerService }],
-                [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
-
+                [OtherFormulaManagerService],
+                [FormulaRuntimeService],
+                [FormulaCurrentConfigService],
+                [DependencyManagerService],
+                [FeatureCalculationManagerService],
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [SetDependencyController],
                 [SetFeatureCalculationController],
-
                 // Calculation engine
                 [FormulaDependencyGenerator],
                 [Interpreter],
@@ -153,6 +140,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             );
         }
 
-        dependencies.forEach((dependency) => this._injector.add(dependency));
+        registerDependencies(this._injector, dependencies);
     }
 }

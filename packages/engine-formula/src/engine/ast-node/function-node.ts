@@ -15,7 +15,6 @@
  */
 
 import type { BaseFunction } from '../../functions/base-function';
-
 import type { LexerNode } from '../analysis/lexer-node';
 import type {
     AsyncArrayObject,
@@ -28,10 +27,10 @@ import { Inject, Injector } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IDefinedNamesService } from '../../services/defined-names.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaCurrentConfigService } from '../../services/current-data.service';
+import { DefinedNamesService } from '../../services/defined-names.service';
+import { FunctionService } from '../../services/function.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { prefixHandler } from '../utils/prefixHandler';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
@@ -43,9 +42,9 @@ export class FunctionNode extends BaseAstNode {
     constructor(
         token: string,
         private _functionExecutor: BaseFunction,
-        private _currentConfigService: IFormulaCurrentConfigService,
-        private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService
+        private _currentConfigService: FormulaCurrentConfigService,
+        private _runtimeService: FormulaRuntimeService,
+        private _definedNamesService: DefinedNamesService
     ) {
         super(token);
 
@@ -300,10 +299,10 @@ export class ErrorFunctionNode extends BaseAstNode {
 
 export class FunctionNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
+        @Inject(FormulaCurrentConfigService) private readonly _currentConfigService: FormulaCurrentConfigService,
+        @Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();

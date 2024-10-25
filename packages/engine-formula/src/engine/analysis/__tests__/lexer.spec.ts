@@ -15,14 +15,14 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import { LocaleType } from '@univerjs/core';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
-import { IDefinedNamesService } from '../../../services/defined-names.service';
-import { Lexer } from '../lexer';
 import type { LexerNode } from '../lexer-node';
+import { LocaleType } from '@univerjs/core';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { FormulaCurrentConfigService } from '../../../services/current-data.service';
+import { DefinedNamesService } from '../../../services/defined-names.service';
+import { Lexer } from '../lexer';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -66,8 +66,8 @@ describe('lexer test', () => {
     let lexer: Lexer;
     let get: Injector['get'];
     let workbook: Workbook;
-    let definedNamesService: IDefinedNamesService;
-    let formulaCurrentConfigService: IFormulaCurrentConfigService;
+    let definedNamesService: DefinedNamesService;
+    let formulaCurrentConfigService: FormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
 
     beforeEach(() => {
@@ -76,8 +76,8 @@ describe('lexer test', () => {
         workbook = testBed.sheet;
         get = testBed.get;
 
-        definedNamesService = get(IDefinedNamesService);
-        formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+        definedNamesService = get(DefinedNamesService);
+        formulaCurrentConfigService = get(FormulaCurrentConfigService);
         lexerTreeBuilder = get(LexerTreeBuilder);
 
         formulaCurrentConfigService.setExecuteUnitId('test');

@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { Disposable, ICommandService, Inject, IUniverInstanceService, ThemeService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
+import { DefinedNamesService, deserializeRangeWithSheet, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import { getNormalSelectionStyle, getPrimaryForRange, ScrollToCellOperation, SetWorksheetActivateCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import { filter, merge } from 'rxjs';
 
@@ -27,7 +27,7 @@ export class SheetsDefinedNameController extends Disposable {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IUniverInstanceService private readonly _instanceSrv: IUniverInstanceService,
         @ICommandService private readonly _cmdSrv: ICommandService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService
     ) {
         super();
 

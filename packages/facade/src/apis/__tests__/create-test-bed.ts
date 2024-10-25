@@ -32,7 +32,7 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
-import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, IActiveDirtyManagerService, IFunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, FormulaDataModel, FunctionService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import {
@@ -155,7 +155,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 },
             ]);
 
-            injector.add([IFunctionService, { useClass: FunctionService }]);
+            injector.add([FunctionService, { useClass: FunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
             injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
             injector.add([IRenderManagerService, { useClass: RenderManagerServiceTestBed }]);
@@ -190,7 +190,7 @@ export function createFacadeTestBed(workbookData?: IWorkbookData, dependencies?:
                 [DataValidationFormulaService],
                 [DataValidationCustomFormulaService],
                 [RegisterOtherFormulaService],
-                [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+                [ActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
                 [SheetsDataValidationValidatorService],
                 [SheetDataValidationModel],
 

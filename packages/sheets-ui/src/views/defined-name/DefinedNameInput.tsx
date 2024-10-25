@@ -19,7 +19,7 @@ import type { Nullable, Workbook } from '@univerjs/core';
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/docs-ui';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { DefinedNamesService, type DefinedNamesServiceParam, FunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
@@ -29,11 +29,11 @@ import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
 import styles from './index.module.less';
 
-export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
+export interface IDefinedNameInputProps extends Omit<DefinedNamesServiceParam, 'id'> {
     inputId: string;
     type?: string;
     state: boolean;
-    confirm?: (param: IDefinedNamesServiceParam) => void;
+    confirm?: (param: DefinedNamesServiceParam) => void;
     cancel?: () => void;
     id?: string;
 }
@@ -60,8 +60,8 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
-    const definedNamesService = useDependency(IDefinedNamesService);
-    const functionService = useDependency(IFunctionService);
+    const definedNamesService = useDependency(DefinedNamesService);
+    const functionService = useDependency(FunctionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const componentManager = useDependency(ComponentManager);
 

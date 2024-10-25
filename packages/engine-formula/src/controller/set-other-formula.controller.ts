@@ -16,50 +16,39 @@
 
 import type { ICommandInfo } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
-
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import { IDependencyManagerService } from '../services/dependency-manager.service';
-import {
-    IOtherFormulaManagerService,
-} from '../services/other-formula-manager.service';
+import { OtherFormulaManagerService } from '../services/other-formula-manager.service';
 
 export class SetOtherFormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService,
-        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
+        @Inject(OtherFormulaManagerService) private readonly _otherFormulaManagerService: OtherFormulaManagerService
     ) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
         this._commandExecutedListener();
     }
 
     private _commandExecutedListener() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetOtherFormulaMutation.id) {
-                    const params = command.params as ISetOtherFormulaMutationParams;
-                    if (params == null) {
-                        return;
-                    }
-                    const config = { [params.unitId]: { [params.subUnitId]: params.formulaMap } };
-                    this._otherFormulaManagerService.batchRegister(config);
-                } else if (command.id === RemoveOtherFormulaMutation.id) {
-                    const params = command.params as IRemoveOtherFormulaMutationParams;
-                    if (params == null) {
-                        return;
-                    }
-                    const obj: Record<string, true> = {};
-                    params.formulaIdList.forEach((id) => obj[id] = true);
-                    const config = { [params.unitId]: { [params.subUnitId]: obj } };
-                    this._otherFormulaManagerService.batchRemove(config);
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetOtherFormulaMutation.id) {
+                const params = command.params as ISetOtherFormulaMutationParams;
+                if (params == null) {
+                    return;
                 }
-            })
-        );
+                const config = { [params.unitId]: { [params.subUnitId]: params.formulaMap } };
+                this._otherFormulaManagerService.batchRegister(config);
+            } else if (command.id === RemoveOtherFormulaMutation.id) {
+                const params = command.params as IRemoveOtherFormulaMutationParams;
+                if (params == null) {
+                    return;
+                }
+                const obj: Record<string, true> = {};
+                params.formulaIdList.forEach((id) => obj[id] = true);
+                const config = { [params.unitId]: { [params.subUnitId]: obj } };
+                this._otherFormulaManagerService.batchRemove(config);
+            }
+        }));
     }
 }

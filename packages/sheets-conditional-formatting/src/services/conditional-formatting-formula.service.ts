@@ -20,7 +20,7 @@ import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/m
 import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, RefAlias, toDisposable, Tools } from '@univerjs/core';
 
 import {
-    IActiveDirtyManagerService,
+    ActiveDirtyManagerService,
     RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation,
@@ -66,7 +66,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(Injector) private _injector: Injector,
-        @Inject(IActiveDirtyManagerService) private _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(ActiveDirtyManagerService) private _activeDirtyManagerService: ActiveDirtyManagerService,
         @Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
         @Inject(ConditionalFormattingRuleModel) private _conditionalFormattingRuleModel: ConditionalFormattingRuleModel
 

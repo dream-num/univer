@@ -37,7 +37,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
 } from '@univerjs/core';
-import { FormulaDataModel, IActiveDirtyManagerService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, FormulaDataModel, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import {
     InsertColMutation,
     InsertRowMutation,
@@ -55,20 +55,24 @@ import {
 
 export class ActiveDirtyController extends Disposable {
     constructor(
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(ActiveDirtyManagerService) private readonly _activeDirtyManagerService: ActiveDirtyManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
-        this._initialize();
+        this._init();
     }
 
-    private _initialize(): void {
-        this._initialConversion();
+    private _init() {
+        this._initSetRangeValues();
+        this._initialMove();
+        this._initialRowAndColumn();
+        this._initialSheet();
+        this._initialDefinedName();
     }
 
-    private _initialConversion() {
+    private _initSetRangeValues(): void {
         this._activeDirtyManagerService.register(SetRangeValuesMutation.id, {
             commandId: SetRangeValuesMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -86,14 +90,6 @@ export class ActiveDirtyController extends Disposable {
                 };
             },
         });
-
-        this._initialMove();
-
-        this._initialRowAndColumn();
-
-        this._initialSheet();
-
-        this._initialDefinedName();
     }
 
     private _initialMove() {

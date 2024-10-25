@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
-
 import type { IDirtyUnitOtherFormulaMap, IFormulaDataItem, IOtherFormulaData } from '../basics/common';
+import { Disposable } from '@univerjs/core';
 
 export interface IOtherFormulaManagerSearchParam {
     unitId: string;
@@ -29,31 +27,12 @@ export interface IOtherFormulaManagerInsertParam extends IOtherFormulaManagerSea
     item: IFormulaDataItem;
 }
 
-export interface IOtherFormulaManagerService {
-    dispose(): void;
-
-    remove(searchParam: IOtherFormulaManagerSearchParam): void;
-
-    get(searchParam: IOtherFormulaManagerSearchParam): Nullable<IFormulaDataItem>;
-
-    has(searchParam: IOtherFormulaManagerSearchParam): boolean;
-
-    register(insertParam: IOtherFormulaManagerInsertParam): void;
-
-    getOtherFormulaData(): IOtherFormulaData;
-
-    batchRegister(formulaData: IOtherFormulaData): void;
-
-    batchRemove(formulaData: IDirtyUnitOtherFormulaMap): void;
-}
+// NOTE@wzhudev: if this service really necessary?
 
 /**
- * Passively marked as dirty, register the reference and execution actions of the feature plugin.
- * After execution, a dirty area and calculated data will be returned,
- * causing the formula to be marked dirty again,
- * thereby completing the calculation of the entire dependency tree.
+ * A simple map to register formulas from upper layer features.
  */
-export class OtherFormulaManagerService extends Disposable implements IOtherFormulaManagerService {
+export class OtherFormulaManagerService extends Disposable {
     private _otherFormulaData: IOtherFormulaData = {};
 
     override dispose(): void {
@@ -68,11 +47,6 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
     get(searchParam: IOtherFormulaManagerSearchParam) {
         const { unitId, subUnitId, formulaId } = searchParam;
         return this._otherFormulaData[unitId]?.[subUnitId]?.[formulaId];
-    }
-
-    has(searchParam: IOtherFormulaManagerSearchParam) {
-        const { unitId, subUnitId, formulaId } = searchParam;
-        return this._otherFormulaData[unitId]?.[subUnitId]?.[formulaId] != null;
     }
 
     register(insertParam: IOtherFormulaManagerInsertParam) {
@@ -142,7 +116,3 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
         return this._otherFormulaData;
     }
 }
-
-export const IOtherFormulaManagerService = createIdentifier<OtherFormulaManagerService>(
-    'univer.formula.other-formula-manager.service'
-);

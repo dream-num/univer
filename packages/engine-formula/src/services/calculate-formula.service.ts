@@ -23,7 +23,6 @@ import type {
     IUnitExcludedCell,
 } from '../basics/common';
 import type { LexerNode } from '../engine/analysis/lexer-node';
-
 import type { IAllRuntimeData, IExecutionInProgressParams } from './runtime.service';
 import {
     Disposable,
@@ -41,8 +40,8 @@ import { ErrorNode } from '../engine/ast-node/base-ast-node';
 import { FormulaDependencyGenerator } from '../engine/dependency/formula-dependency';
 import { Interpreter } from '../engine/interpreter/interpreter';
 import { FORMULA_REF_TO_ARRAY_CACHE, type FunctionVariantType } from '../engine/reference-object/base-reference-object';
-import { IFormulaCurrentConfigService } from './current-data.service';
-import { FormulaExecuteStageType, IFormulaRuntimeService } from './runtime.service';
+import { FormulaCurrentConfigService } from './current-data.service';
+import { FormulaExecuteStageType, FormulaRuntimeService } from './runtime.service';
 
 export const DEFAULT_CYCLE_REFERENCE_COUNT = 1;
 
@@ -50,24 +49,24 @@ export const CYCLE_REFERENCE_COUNT = 'cycleReferenceCount';
 
 export const EVERY_N_FUNCTION_EXECUTION_PAUSE = 100;
 
+/**
+ * This service is for scheduling the calculation of formulas and reporting calculation progress.
+ */
 export class CalculateFormulaService extends Disposable {
     private readonly _executionStartListener$ = new Subject<boolean>();
-
     readonly executionStartListener$ = this._executionStartListener$.asObservable();
 
     private readonly _executionCompleteListener$ = new Subject<IAllRuntimeData>();
-
     readonly executionCompleteListener$ = this._executionCompleteListener$.asObservable();
 
     private readonly _executionInProgressListener$ = new Subject<IExecutionInProgressParams>();
-
     readonly executionInProgressListener$ = this._executionInProgressListener$.asObservable();
 
     constructor(
         @IConfigService private readonly _configService: IConfigService,
         @Inject(Lexer) private readonly _lexer: Lexer,
-        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(FormulaCurrentConfigService) private readonly _currentConfigService: FormulaCurrentConfigService,
+        @Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService,
         @Inject(FormulaDependencyGenerator) private readonly _formulaDependencyGenerator: FormulaDependencyGenerator,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder

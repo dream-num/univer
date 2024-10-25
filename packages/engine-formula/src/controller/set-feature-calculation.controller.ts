@@ -19,25 +19,21 @@ import type {
     IRemoveFeatureCalculationMutationParam,
     ISetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
-import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import { FeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 
 export class SetFeatureCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+        @Inject(FeatureCalculationManagerService)
+        private readonly _featureCalculationManagerService: FeatureCalculationManagerService
     ) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
         this._commandExecutedListener();
     }
 

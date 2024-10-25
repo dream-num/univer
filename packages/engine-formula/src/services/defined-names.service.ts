@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { Observable } from 'rxjs';
-import { createIdentifier, Disposable, IUniverInstanceService } from '@univerjs/core';
+import type { IUnitRange, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { handleRefStringInfo, serializeRange } from '../engine/utils/reference';
 
-export interface IDefinedNamesServiceParam {
+export interface DefinedNamesServiceParam {
     id: string;
     name: string;
     formulaOrRefString: string;
@@ -30,7 +29,7 @@ export interface IDefinedNamesServiceParam {
 
 }
 
-export interface IDefinedNamesServiceFocusParam extends IDefinedNamesServiceParam {
+export interface DefinedNamesServiceFocusParam extends DefinedNamesServiceParam {
     unitId: string;
 }
 
@@ -39,45 +38,15 @@ export interface IDefinedNameMap {
 }
 
 export interface IDefinedNameMapItem {
-    [id: string]: IDefinedNamesServiceParam;
+    [id: string]: DefinedNamesServiceParam;
 }
 
-export interface IDefinedNamesService {
-    registerDefinedName(unitId: string, param: IDefinedNamesServiceParam): void;
+// DEBT@wzhudev: this service expose too much API that seems redundant.
 
-    registerDefinedNames(unitId: string, params: IDefinedNameMapItem): void;
-
-    getDefinedNameMap(unitId: string): Nullable<IDefinedNameMapItem>;
-
-    getValueByName(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
-
-    getValueById(unitId: string, id: string): Nullable<IDefinedNamesServiceParam>;
-
-    removeDefinedName(unitId: string, name: string): void;
-
-    removeUnitDefinedName(unitId: string): void;
-
-    hasDefinedName(unitId: string): boolean;
-
-    setCurrentRange(range: IUnitRange): void;
-
-    getCurrentRange(): IUnitRange;
-
-    getCurrentRangeForString(): string;
-
-    currentRange$: Observable<IUnitRange>;
-
-    update$: Observable<unknown>;
-
-    focusRange$: Observable<IDefinedNamesServiceFocusParam>;
-
-    focusRange(unitId: string, id: string): void;
-
-    getWorksheetByRef(unitId: string, ref: string): Nullable<Worksheet>;
-
-}
-
-export class DefinedNamesService extends Disposable implements IDefinedNamesService {
+/**
+ * This service is for storing data for "Define Names" feature.
+ */
+export class DefinedNamesService extends Disposable {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: IDefinedNameMap = {};
 
@@ -96,7 +65,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     private readonly _currentRange$ = new Subject<IUnitRange>();
     readonly currentRange$ = this._currentRange$.asObservable();
 
-    private readonly _focusRange$ = new Subject<IDefinedNamesServiceFocusParam>();
+    private readonly _focusRange$ = new Subject<DefinedNamesServiceFocusParam>();
     readonly focusRange$ = this._focusRange$.asObservable();
 
     constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
@@ -140,7 +109,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._update();
     }
 
-    registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
+    registerDefinedName(unitId: string, param: DefinedNamesServiceParam) {
         const unitMap = this._definedNameMap[unitId];
 
         if (unitMap == null) {
@@ -191,5 +160,3 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         this._update$.next(null);
     }
 }
-
-export const IDefinedNamesService = createIdentifier<DefinedNamesService>('univer.formula.defined-names.service');

@@ -15,7 +15,7 @@
  */
 
 import type { Injector, Nullable } from '@univerjs/core';
-import type { IFunctionService } from '../../services/function.service';
+import type { FunctionService } from '../../services/function.service';
 import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { PrefixNode } from '../ast-node/prefix-node';
@@ -23,7 +23,7 @@ import { PrefixNode } from '../ast-node/prefix-node';
 const minusRegExp = new RegExp(prefixToken.MINUS, 'g');
 const atRegExp = new RegExp(prefixToken.AT, 'g');
 
-export function prefixHandler(tokenTrimParam: string, functionService: IFunctionService, injector: Injector) {
+export function prefixHandler(tokenTrimParam: string, functionService: FunctionService, injector: Injector) {
     let minusPrefixNode: Nullable<PrefixNode>;
     let atPrefixNode: Nullable<PrefixNode>;
     let tokenTrim = tokenTrimParam;

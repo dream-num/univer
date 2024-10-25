@@ -25,9 +25,9 @@ import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import { Interpreter } from '../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../engine/utils/ast-node-tool';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaCurrentConfigService } from '../../services/current-data.service';
+import { FunctionService } from '../../services/function.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { Day } from '../date/day';
 import { Edate } from '../date/edate';
 import { FUNCTION_NAMES_DATE } from '../date/function-names';
@@ -271,11 +271,11 @@ describe('Test nested functions', () => {
         astTreeBuilder = get(AstTreeBuilder);
         interpreter = get(Interpreter);
 
-        const functionService = get(IFunctionService);
+        const functionService = get(FunctionService);
 
-        const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+        const formulaCurrentConfigService = get(FormulaCurrentConfigService);
 
-        const formulaRuntimeService = get(IFormulaRuntimeService);
+        const formulaRuntimeService = get(FormulaRuntimeService);
 
         formulaCurrentConfigService.load({
             formulaData: {},

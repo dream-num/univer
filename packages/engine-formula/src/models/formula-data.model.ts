@@ -37,6 +37,9 @@ export interface IRangeChange {
     newCell: IRange | null;
 }
 
+/**
+ * This model is for caching formula data and array formula data.
+ */
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 

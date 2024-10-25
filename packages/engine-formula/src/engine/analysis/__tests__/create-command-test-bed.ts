@@ -32,17 +32,13 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 import { CalculateFormulaService } from '../../../services/calculate-formula.service';
-import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../../../services/current-data.service';
-import { DefinedNamesService, IDefinedNamesService } from '../../../services/defined-names.service';
-import { DependencyManagerService, IDependencyManagerService } from '../../../services/dependency-manager.service';
-import { FeatureCalculationManagerService, IFeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
-import { FunctionService, IFunctionService } from '../../../services/function.service';
-import {
-    IOtherFormulaManagerService,
-    OtherFormulaManagerService,
-} from '../../../services/other-formula-manager.service';
-import { FormulaRuntimeService, IFormulaRuntimeService } from '../../../services/runtime.service';
-import { ISuperTableService, SuperTableService } from '../../../services/super-table.service';
+import { FormulaCurrentConfigService } from '../../../services/current-data.service';
+import { DefinedNamesService } from '../../../services/defined-names.service';
+import { DependencyManagerService } from '../../../services/dependency-manager.service';
+import { FeatureCalculationManagerService } from '../../../services/feature-calculation-manager.service';
+import { FunctionService } from '../../../services/function.service';
+import { OtherFormulaManagerService } from '../../../services/other-formula-manager.service';
+import { FormulaRuntimeService } from '../../../services/runtime.service';
 import { AstRootNodeFactory } from '../../ast-node/ast-root-node';
 import { FunctionNodeFactory } from '../../ast-node/function-node';
 import { LambdaNodeFactory } from '../../ast-node/lambda-node';
@@ -295,14 +291,13 @@ function registerFormulaDependencies(injector: Injector) {
     injector.add([Lexer]);
     injector.add([LexerTreeBuilder]);
 
-    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
-    injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
-    injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
-    injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
+    injector.add([FormulaCurrentConfigService]);
+    injector.add([FormulaRuntimeService]);
+    injector.add([FunctionService]);
+    injector.add([OtherFormulaManagerService]);
+    injector.add([DefinedNamesService]);
+    injector.add([FeatureCalculationManagerService]);
+    injector.add([DependencyManagerService]);
 
     injector.add([FormulaDependencyGenerator]);
     injector.add([Interpreter]);

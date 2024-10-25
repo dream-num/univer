@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import { createIdentifier, Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
-import type { IUnitRange, LocaleType, Nullable, Workbook } from '@univerjs/core';
-
-import { convertUnitDataToRuntime } from '../basics/runtime';
+import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
 import type {
     IArrayFormulaRangeType,
     IDirtyUnitFeatureMap,
@@ -34,6 +31,8 @@ import type {
     IUnitSheetNameMap,
     IUnitStylesData,
 } from '../basics/common';
+import { Disposable, Inject, IUniverInstanceService, LocaleService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
+import { convertUnitDataToRuntime } from '../basics/runtime';
 
 export interface IFormulaDirtyData {
     forceCalculation: boolean;
@@ -45,62 +44,7 @@ export interface IFormulaDirtyData {
     clearDependencyTreeCache: IDirtyUnitSheetNameMap; // unitId -> sheetId
 }
 
-export interface IFormulaCurrentConfigService {
-    load(config: IFormulaDatasetConfig): void;
-
-    getUnitData(): IUnitData;
-
-    /**
-     * Get the unit styles data.
-     */
-    getUnitStylesData(): IUnitStylesData;
-
-    getFormulaData(): IFormulaData;
-
-    getSheetNameMap(): IUnitSheetNameMap;
-
-    isForceCalculate(): boolean;
-
-    getDirtyRanges(): IUnitRange[];
-
-    getDirtyNameMap(): IDirtyUnitSheetNameMap;
-
-    getDirtyDefinedNameMap(): IDirtyUnitSheetDefinedNameMap;
-
-    getDirtyUnitFeatureMap(): IDirtyUnitFeatureMap;
-
-    registerUnitData(unitData: IUnitData): void;
-
-    registerFormulaData(formulaData: IFormulaData): void;
-
-    registerSheetNameMap(sheetNameMap: IUnitSheetNameMap): void;
-
-    getExcludedRange(): Nullable<IUnitExcludedCell>;
-
-    loadDirtyRangesAndExcludedCell(dirtyRanges: IUnitRange[], excludedCell?: IUnitExcludedCell): void;
-
-    getArrayFormulaCellData(): IRuntimeUnitDataType;
-
-    getArrayFormulaRange(): IArrayFormulaRangeType;
-
-    getSheetName(unitId: string, sheetId: string): string;
-
-    getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
-
-    getExecuteUnitId(): Nullable<string>;
-    getExecuteSubUnitId(): Nullable<string>;
-
-    setExecuteUnitId(unitId: string): void;
-    setExecuteSubUnitId(subUnitId: string): void;
-
-    getDirtyData(): IFormulaDirtyData;
-
-    getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
-
-    getLocale(): LocaleType;
-}
-
-export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
+export class FormulaCurrentConfigService extends Disposable {
     private _unitData: IUnitData = {};
 
     private _unitStylesData: IUnitStylesData = {};
@@ -471,7 +415,3 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         };
     }
 }
-
-export const IFormulaCurrentConfigService = createIdentifier<FormulaCurrentConfigService>(
-    'univer.formula.current-data.service'
-);

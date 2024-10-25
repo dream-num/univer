@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
+import type { FunctionService, ISequenceNode, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { LocaleType, numfmt } from '@univerjs/core';
 import { matchToken, sequenceNodeType } from '@univerjs/engine-formula';
 
@@ -68,7 +68,7 @@ export function isCJKLocale(locale: LocaleType) {
  * @param lexerTreeBuilder
  * @returns
  */
-export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: IFunctionService) {
+export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder, currentLocale: LocaleType, functionService: FunctionService) {
     let normalStr = str;
 
     if (isCJKLocale(currentLocale)) {
@@ -98,7 +98,7 @@ export function normalizeString(str: string, lexerTreeBuilder: LexerTreeBuilder,
     return parsedValue == null ? str : normalStr;
 }
 
-function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: IFunctionService) {
+function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder: LexerTreeBuilder, functionService: FunctionService) {
     const nodes = lexerTreeBuilder.sequenceNodesBuilder(normalStr);
 
     if (!nodes) return str;
@@ -146,7 +146,7 @@ function normalizeFormulaString(str: string, normalStr: string, lexerTreeBuilder
     return _normalStr;
 }
 
-function hasFunctionName(name: string, functionService: IFunctionService, nodes: (string | ISequenceNode)[], index: number) {
+function hasFunctionName(name: string, functionService: FunctionService, nodes: (string | ISequenceNode)[], index: number) {
     const functionList = functionService.getDescriptions();
 
     if (nodes[index + 1] !== matchToken.OPEN_BRACKET) {

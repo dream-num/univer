@@ -25,10 +25,9 @@ import {
     regexTestSingleRow,
 } from '../../basics/regex';
 import { matchToken } from '../../basics/token';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { ISuperTableService } from '../../services/super-table.service';
+import { FormulaCurrentConfigService } from '../../services/current-data.service';
+import { FunctionService } from '../../services/function.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
@@ -57,8 +56,8 @@ export class ReferenceNode extends BaseAstNode {
     }
 
     override execute() {
-        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
-        const runtimeService = this._accessor.get(IFormulaRuntimeService);
+        const currentConfigService = this._accessor.get(FormulaCurrentConfigService);
+        const runtimeService = this._accessor.get(FormulaRuntimeService);
 
         this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
@@ -104,9 +103,7 @@ export class ReferenceNode extends BaseAstNode {
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @ISuperTableService private readonly _superTableService: ISuperTableService,
-        @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();

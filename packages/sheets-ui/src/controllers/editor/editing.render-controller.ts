@@ -48,7 +48,7 @@ import {
     RichTextEditingMutation,
 } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
-import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import { FunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
 import {
     convertTextRotation,
     DeviceInputEventType,
@@ -102,7 +102,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Inject(DocSelectionManagerService) private readonly _textSelectionManagerService: DocSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) protected readonly _localService: LocaleService,
@@ -727,7 +727,7 @@ export function getCellDataByInput(
     lexerTreeBuilder: LexerTreeBuilder,
     getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
-    functionService: IFunctionService
+    functionService: FunctionService
 ) {
     cellData = Tools.deepClone(cellData);
 

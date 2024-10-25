@@ -23,7 +23,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { FunctionType, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { DefinedNamesService, FunctionType, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { IDescriptionService } from '../services/description.service';
@@ -39,7 +39,7 @@ export class DefinedNameController extends Disposable {
 
     constructor(
         @IDescriptionService private readonly _descriptionService: IDescriptionService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
 

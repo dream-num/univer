@@ -28,7 +28,7 @@ import {
     DEFAULT_TOKEN_TYPE_ROOT,
     FORCED_RECALCULATION_FUNCTION_NAME,
 } from '../../basics/token-type';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { AstRootNode, AstRootNodeFactory } from '../ast-node/ast-root-node';
 import { ErrorNode } from '../ast-node/base-ast-node';
 import { ErrorFunctionNode, FunctionNodeFactory } from '../ast-node/function-node';
@@ -55,7 +55,7 @@ export class AstTreeBuilder extends Disposable {
     private _refOffsetY = 0;
 
     constructor(
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService,
         @Inject(AstRootNodeFactory) private readonly _astRootNodeFactory: AstRootNodeFactory,
         @Inject(FunctionNodeFactory) private readonly _functionNodeFactory: FunctionNodeFactory,
         @Inject(LambdaNodeFactory) private readonly _lambdaNodeFactory: LambdaNodeFactory,

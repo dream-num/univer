@@ -18,7 +18,7 @@ import type { IFunctionNames } from '../basics/function';
 import type { BaseFunction } from '../functions/base-function';
 import type { IUniverEngineFormulaConfig } from './config.schema';
 
-import { Disposable, ICommandService, IConfigService } from '@univerjs/core';
+import { Disposable, ICommandService, IConfigService, Inject } from '@univerjs/core';
 import { type Ctor, Optional } from '@univerjs/core';
 import { DataSyncPrimaryController } from '@univerjs/rpc';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
@@ -57,25 +57,27 @@ import { functionStatistical } from '../functions/statistical/function-map';
 import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
-import { IFunctionService } from '../services/function.service';
+import { FunctionService } from '../services/function.service';
 import { PLUGIN_CONFIG_KEY } from './config.schema';
 
+/**
+ * This controller register commands for running formula and built-in functions.
+ */
 export class FormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @IConfigService private readonly _configService: IConfigService,
         @Optional(DataSyncPrimaryController) private readonly _dataSyncPrimaryController?: DataSyncPrimaryController
     ) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
         this._registerCommands();
         this._registerFunctions();
     }
+
+    // DEBT@wzhudev: some mutations are mutations just be be synced into the web worker
+    // they **should not** be mutations in the first place.
 
     private _registerCommands(): void {
         [
@@ -125,14 +127,11 @@ export class FormulaController extends Disposable {
                 ...functionUniver,
                 ...functionWeb,
             ] as Array<[Ctor<BaseFunction>, IFunctionNames]>
-        )
-            .concat(config?.function ?? [])
-            .map((registerObject) => {
-                const Func = registerObject[0] as Ctor<BaseFunction>;
-                const name = registerObject[1] as IFunctionNames;
-
-                return new Func(name);
-            });
+        ).concat(config?.function ?? []).map((registerObject) => {
+            const Func = registerObject[0] as Ctor<BaseFunction>;
+            const name = registerObject[1] as IFunctionNames;
+            return new Func(name);
+        });
 
         this._functionService.registerExecutors(...functions);
     }

@@ -15,9 +15,9 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { IFormulaDataItem } from '../../basics/common';
+
+import { CommandType } from '@univerjs/core';
 
 export interface ISetOtherFormulaMutationParams {
     unitId: string;
@@ -35,6 +35,8 @@ export interface IRemoveOtherFormulaMutationParams {
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.
  * It requires setting local to true during execution.
+ *
+ * @deprecated anti-pattern
  */
 export const SetOtherFormulaMutation: IMutation<ISetOtherFormulaMutationParams> = {
     id: 'formula.mutation.set-other-formula',
@@ -42,6 +44,9 @@ export const SetOtherFormulaMutation: IMutation<ISetOtherFormulaMutationParams> 
     handler: () => true,
 };
 
+/**
+ * @deprecated anti-pattern
+ */
 export const RemoveOtherFormulaMutation: IMutation<IRemoveOtherFormulaMutationParams> = {
     id: 'formula.mutation.remove-other-formula',
     type: CommandType.MUTATION,

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
+import type { IUnitRange } from '@univerjs/core';
 
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
 import type { IFeatureDirtyRangeType, IRuntimeUnitDataType } from '../basics/common';
 import type { IRemoveFeatureCalculationMutationParam } from '../commands/mutations/set-feature-calculation.mutation';
-import type { IAllRuntimeData } from './runtime.service';
 import type { IFormulaDirtyData } from './current-data.service';
+import type { IAllRuntimeData } from './runtime.service';
+import { Disposable } from '@univerjs/core';
+import { Subject } from 'rxjs';
 
 export interface IFeatureCalculationManagerParam {
     unitId: string;
@@ -34,29 +33,13 @@ export interface IFeatureCalculationManagerParam {
     };
 }
 
-export interface IFeatureCalculationManagerService {
-    dispose(): void;
-
-    remove(unitId: string, subUnitId: string, featureIds: string[]): void;
-
-    get(unitId: string, subUnitId: string, featureId: string): Nullable<IFeatureCalculationManagerParam>;
-
-    has(unitId: string, subUnitId: string, featureId: string): boolean;
-
-    register(unitId: string, subUnitId: string, featureId: string, referenceExecutor: IFeatureCalculationManagerParam): void;
-
-    getReferenceExecutorMap(): Map<string, Map<string, Map<string, IFeatureCalculationManagerParam>>>;
-
-    onChanged$: Observable<IRemoveFeatureCalculationMutationParam>;
-}
-
 /**
  * Passively marked as dirty, register the reference and execution actions of the feature plugin.
  * After execution, a dirty area and calculated data will be returned,
  * causing the formula to be marked dirty again,
  * thereby completing the calculation of the entire dependency tree.
  */
-export class FeatureCalculationManagerService extends Disposable implements IFeatureCalculationManagerService {
+export class FeatureCalculationManagerService extends Disposable {
     private _referenceExecutorMap: Map<string, Map<string, Map<string, IFeatureCalculationManagerParam>>> = new Map(); // unitId -> subUnitId -> featureId -> IFeatureCalculationManagerParam
 
     private _onChanged$ = new Subject<IRemoveFeatureCalculationMutationParam>();
@@ -114,7 +97,3 @@ export class FeatureCalculationManagerService extends Disposable implements IFea
         return this._referenceExecutorMap;
     }
 }
-
-export const IFeatureCalculationManagerService = createIdentifier<FeatureCalculationManagerService>(
-    'univer.formula.feature-calculation-manager.service'
-);

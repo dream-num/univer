@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { Inject } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
-import { IFunctionService } from '../../services/function.service';
+import { FunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -82,7 +83,7 @@ export class UnionNode extends BaseAstNode {
 }
 
 export class UnionNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+    constructor(@Inject(FunctionService) private readonly _functionService: FunctionService) {
         super();
     }
 

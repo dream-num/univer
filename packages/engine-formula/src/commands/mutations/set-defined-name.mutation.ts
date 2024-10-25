@@ -16,7 +16,7 @@
 
 import type { IAccessor, IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import { IDefinedNamesService } from '../../services/defined-names.service';
+import { DefinedNamesService } from '../../services/defined-names.service';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;
@@ -42,7 +42,7 @@ export const SetDefinedNameMutationFactory = (
     params: ISetDefinedNameMutationParam
 ): ISetDefinedNameMutationParam => {
     const { unitId, id } = params;
-    const definedNamesService = accessor.get(IDefinedNamesService);
+    const definedNamesService = accessor.get(DefinedNamesService);
 
     const definedName = definedNamesService.getValueById(unitId, id);
 

@@ -27,7 +27,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, IActiveDirtyManagerService, IDefinedNamesService, IDependencyManagerService, IFeatureCalculationManagerService, IFormulaCurrentConfigService, IFormulaRuntimeService, IFunctionService, Interpreter, IOtherFormulaManagerService, ISuperTableService, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SuffixNodeFactory, SuperTableService, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
+import { ActiveDirtyManagerService, AstRootNodeFactory, AstTreeBuilder, CalculateController, CalculateFormulaService, DefinedNamesService, DependencyManagerService, FeatureCalculationManagerService, FormulaCurrentConfigService, FormulaDataModel, FormulaDependencyGenerator, FormulaRuntimeService, FunctionNodeFactory, FunctionService, Interpreter, LambdaNodeFactory, LambdaParameterNodeFactory, Lexer, LexerTreeBuilder, OperatorNodeFactory, OtherFormulaManagerService, PrefixNodeFactory, ReferenceNodeFactory, SuffixNodeFactory, UnionNodeFactory, ValueNodeFactory } from '@univerjs/engine-formula';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import { SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
@@ -149,22 +149,21 @@ function registerFormulaDependencies(injector: Injector) {
     ]);
 
     injector.add([FormulaDataModel]);
-    injector.add([IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }]);
+    injector.add([ActiveDirtyManagerService]);
 
     injector.add([CalculateFormulaService]);
     injector.add([Lexer]);
     injector.add([LexerTreeBuilder]);
 
-    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
-    injector.add([IDependencyManagerService, { useClass: DependencyManagerService }]);
-    injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
-    injector.add([IFunctionService, { useClass: FunctionService }]);
-    injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
-    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-    injector.add([ISuperTableService, { useClass: SuperTableService }]);
+    injector.add([FormulaCurrentConfigService]);
+    injector.add([DependencyManagerService]);
+    injector.add([FormulaRuntimeService]);
+    injector.add([FunctionService]);
+    injector.add([OtherFormulaManagerService]);
+    injector.add([DefinedNamesService]);
     injector.add([CalculateController]);
 
-    injector.add([IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }]);
+    injector.add([FeatureCalculationManagerService]);
     injector.add([FormulaDependencyGenerator]);
     injector.add([Interpreter]);
     injector.add([AstTreeBuilder]);

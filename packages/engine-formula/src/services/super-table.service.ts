@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { createIdentifier, Disposable } from '@univerjs/core';
-
 import type { ISuperTable, TableOptionType } from '../basics/common';
+
+import { Disposable } from '@univerjs/core';
 
 export interface ISuperTableOptionParam {
     tableOption: string;
     tableOptionType: TableOptionType;
 }
 
-export interface ISuperTableService {
-    getTableMap(unitId: string): Nullable<Map<string, ISuperTable>>;
-
-    getTableOptionMap(): Map<string, TableOptionType>;
-
-    registerTable(unitId: string, tableName: string, reference: ISuperTable): void;
-
-    registerTableOptionMap(tableOption: string, tableOptionType: TableOptionType): void;
-
-    remove(unitId: string, tableName: string): void;
-}
-
-export class SuperTableService extends Disposable implements ISuperTableService {
+export class SuperTableService extends Disposable {
     // 18.5.1.2 table (Table)
     private _tableMap: Map<string, Map<string, ISuperTable>> = new Map();
 
@@ -57,10 +44,6 @@ export class SuperTableService extends Disposable implements ISuperTableService 
         return this._tableMap.get(unitId);
     }
 
-    getTableOptionMap() {
-        return this._tableOptionMap;
-    }
-
     registerTable(unitId: string, tableName: string, reference: ISuperTable) {
         if (this._tableMap.get(unitId) == null) {
             this._tableMap.set(unitId, new Map());
@@ -73,4 +56,3 @@ export class SuperTableService extends Disposable implements ISuperTableService 
     }
 }
 
-export const ISuperTableService = createIdentifier<ISuperTableService>('univer.formula.super-table.service');

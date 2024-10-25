@@ -26,9 +26,9 @@ import type {
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { Disposable, ICommandService, throttle } from '@univerjs/core';
 import {
+    ActiveDirtyManagerService,
     FormulaExecutedStateType,
     FormulaExecuteStageType,
-    IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
     SetFormulaCalculationStopMutation,
@@ -51,7 +51,7 @@ export interface ICalculationProgress {
 }
 const NilProgress: ICalculationProgress = { done: 0, count: 0 };
 
-const lo = { onlyLocal: true };
+const onlyLocal = { onlyLocal: true };
 
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
@@ -83,7 +83,7 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @Inject(ActiveDirtyManagerService) private readonly _activeDirtyManagerService: ActiveDirtyManagerService
     ) {
         super();
 
@@ -129,7 +129,7 @@ export class TriggerCalculationController extends Disposable {
                     this._executingDirtyData = this._mergeDirty(this._executingDirtyData, dirtyData);
 
                     if (this._executionInProgressParams == null) {
-                        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, lo);
+                        this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { ...this._executingDirtyData }, onlyLocal);
                     } else {
                         this._restartCalculation = true;
                         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id);
@@ -396,7 +396,7 @@ export class TriggerCalculationController extends Disposable {
                             {
                                 ...this._executingDirtyData,
                             },
-                            lo
+                            onlyLocal
                         );
                     } else {
                         this._executionInProgressParams = null;
@@ -427,7 +427,7 @@ export class TriggerCalculationController extends Disposable {
                 commands: [],
                 forceCalculation: true,
             },
-            lo
+            onlyLocal
         );
     }
 

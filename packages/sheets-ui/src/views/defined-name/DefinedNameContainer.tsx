@@ -16,10 +16,10 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 
-import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { DefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Confirm, Tooltip } from '@univerjs/design';
-import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { DefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetShowCommand, SheetsSelectionsService } from '@univerjs/sheets';
 import clsx from 'clsx';
@@ -33,7 +33,7 @@ export const DefinedNameContainer = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
-    const definedNamesService = useDependency(IDefinedNamesService);
+    const definedNamesService = useDependency(DefinedNamesService);
     const selectionManagerService = useDependency(SheetsSelectionsService);
 
     if (workbook == null) {
@@ -51,7 +51,7 @@ export const DefinedNameContainer = () => {
     };
 
     const [editState, setEditState] = useState(false);
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
+    const [definedNames, setDefinedNames] = useState<DefinedNamesServiceParam[]>(getDefinedNameMap());
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
     const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
 
@@ -65,7 +65,7 @@ export const DefinedNameContainer = () => {
         };
     }, []);
 
-    const insertConfirm = (param: IDefinedNamesServiceParam) => {
+    const insertConfirm = (param: DefinedNamesServiceParam) => {
         const { name, formulaOrRefString, comment, localSheetId, hidden } = param;
 
         let id = param.id;
@@ -94,7 +94,7 @@ export const DefinedNameContainer = () => {
         setDeleteConformKey(null);
     }
 
-    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+    const focusDefinedName = async (definedName: DefinedNamesServiceParam) => {
         // The worksheet may be hidden, so we need to show it first
         const { formulaOrRefString, id } = definedName;
         const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);

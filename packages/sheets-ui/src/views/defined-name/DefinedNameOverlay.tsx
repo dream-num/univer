@@ -16,9 +16,9 @@
 
 import type { Workbook } from '@univerjs/core';
 
-import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import type { DefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { DefinedNamesService } from '@univerjs/engine-formula';
 import { SetWorksheetShowCommand } from '@univerjs/sheets';
 import { ISidebarService } from '@univerjs/ui';
 import React, { useEffect, useState } from 'react';
@@ -33,7 +33,7 @@ export interface IDefinedNameOverlayProps {
 export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const definedNamesService = useDependency(IDefinedNamesService);
+    const definedNamesService = useDependency(DefinedNamesService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const sidebarService = useDependency(ISidebarService);
 
@@ -48,7 +48,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
         return [];
     };
 
-    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
+    const [definedNames, setDefinedNames] = useState<DefinedNamesServiceParam[]>(getDefinedNameMap());
 
     useEffect(() => {
         const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
@@ -80,7 +80,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
         commandService.executeCommand(SidebarDefinedNameOperation.id, { value: 'open' });
     };
 
-    const focusDefinedName = async (definedName: IDefinedNamesServiceParam) => {
+    const focusDefinedName = async (definedName: DefinedNamesServiceParam) => {
         // The worksheet may be hidden, so we need to show it first
         const { formulaOrRefString, id } = definedName;
         const worksheet = definedNamesService.getWorksheetByRef(unitId, formulaOrRefString);

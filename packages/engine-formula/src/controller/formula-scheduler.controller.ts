@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
-export interface IOtherFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
-
 /**
- * @deprecated anti-pattern, and why is this not in the engine-formula package?
+ * This controller dispose necessary API to upper layer plugins to call the formula engine, without knowing if the
+ * formula engine is running in the same process or in a different process.
  */
-export const OtherFormulaMarkDirty: IMutation<IOtherFormulaMarkDirtyParams> = {
-    type: CommandType.MUTATION,
-    id: 'sheet.mutation.data-validation-formula-mark-dirty',
-    handler() {
-        return true;
-    },
-};
+export class FormulaSchedulerController {
+    constructor() {
+
+    }
+}

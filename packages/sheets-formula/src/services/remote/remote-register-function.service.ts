@@ -15,8 +15,8 @@
  */
 
 import type { BaseFunction } from '@univerjs/engine-formula';
-import { CustomFunction, IFunctionService } from '@univerjs/engine-formula';
 import { createIdentifier } from '@univerjs/core';
+import { CustomFunction, FunctionService } from '@univerjs/engine-formula';
 
 export interface IRemoteRegisterFunctionService {
     registerFunctions(serializedFuncs: Array<[string, string]>): Promise<void>;
@@ -31,7 +31,7 @@ export const IRemoteRegisterFunctionService = createIdentifier<IRemoteRegisterFu
  */
 export class RemoteRegisterFunctionService implements IRemoteRegisterFunctionService {
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService
+        @Inject(FunctionService) private readonly _functionService: FunctionService
     ) {}
 
     async registerFunctions(serializedFuncs: Array<[string, string]>): Promise<void> {

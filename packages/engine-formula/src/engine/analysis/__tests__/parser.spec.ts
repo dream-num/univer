@@ -29,9 +29,9 @@ import { Divided } from '../../../functions/meta/divided';
 import { FUNCTION_NAMES_META } from '../../../functions/meta/function-names';
 import { Minus } from '../../../functions/meta/minus';
 import { Plus } from '../../../functions/meta/plus';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
-import { IFunctionService } from '../../../services/function.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { FormulaCurrentConfigService } from '../../../services/current-data.service';
+import { FunctionService } from '../../../services/function.service';
+import { FormulaRuntimeService } from '../../../services/runtime.service';
 import { Interpreter } from '../../interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../utils/ast-node-tool';
 import { Lexer } from '../lexer';
@@ -53,11 +53,11 @@ describe('Test indirect', () => {
         astTreeBuilder = get(AstTreeBuilder);
         interpreter = get(Interpreter);
 
-        const functionService = get(IFunctionService);
+        const functionService = get(FunctionService);
 
-        const formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+        const formulaCurrentConfigService = get(FormulaCurrentConfigService);
 
-        const formulaRuntimeService = get(IFormulaRuntimeService);
+        const formulaRuntimeService = get(FormulaRuntimeService);
 
         formulaCurrentConfigService.load({
             formulaData: {},

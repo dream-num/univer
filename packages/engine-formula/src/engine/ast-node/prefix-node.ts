@@ -23,8 +23,8 @@ import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { prefixToken } from '../../basics/token';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
-import { IFunctionService } from '../../services/function.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FunctionService } from '../../services/function.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
@@ -80,7 +80,7 @@ export class PrefixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const runtimeService = this._accessor.get(IFormulaRuntimeService);
+        const runtimeService = this._accessor.get(FormulaRuntimeService);
 
         const currentRow = runtimeService.currentRow || 0;
         const currentColumn = runtimeService.currentColumn || 0;
@@ -114,7 +114,7 @@ export class PrefixNode extends BaseAstNode {
 
 export class PrefixNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();

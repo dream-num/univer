@@ -19,7 +19,7 @@ import type {
     IUniverSheetsFormulaBaseConfig,
     IUniverSheetsFormulaRemoteConfig,
 } from './controllers/config.schema';
-import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DependentOn, IConfigService, Inject, Injector, Plugin, registerDependencies, touchDependencies, UniverInstanceType } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
 import { fromModule, IRPCChannelService, toModule } from '@univerjs/rpc';
@@ -113,16 +113,18 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             }]);
         }
 
-        dependencies.forEach((dependency) => j.add(dependency));
+        registerDependencies(j, dependencies);
     }
 
     override onReady(): void {
-        this._injector.get(FormulaController);
-        this._injector.get(TriggerCalculationController);
-        this._injector.get(ActiveDirtyController);
-        this._injector.get(ArrayFormulaCellInterceptorController);
-        this._injector.get(UpdateFormulaController);
-        this._injector.get(UpdateDefinedNameController);
+        touchDependencies(this._injector, [
+            [FormulaController],
+            [TriggerCalculationController],
+            [ActiveDirtyController],
+            [ArrayFormulaCellInterceptorController],
+            [UpdateFormulaController],
+            [UpdateDefinedNameController],
+        ]);
     }
 
     override onRendered(): void {

@@ -15,19 +15,19 @@
  */
 
 import type { IAccessor } from '@univerjs/core';
-import { Inject, Injector } from '@univerjs/core';
-
-import { ErrorType } from '../../basics/error-type';
-import { suffixToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IFunctionService } from '../../services/function.service';
-import { Lexer } from '../analysis/lexer';
-import { LexerNode } from '../analysis/lexer-node';
+
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { CellReferenceObject } from '../reference-object/cell-reference-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { Inject, Injector } from '@univerjs/core';
+import { ErrorType } from '../../basics/error-type';
+import { suffixToken } from '../../basics/token';
+import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
+import { FormulaCurrentConfigService } from '../../services/current-data.service';
+import { FunctionService } from '../../services/function.service';
+import { Lexer } from '../analysis/lexer';
+import { LexerNode } from '../analysis/lexer-node';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -91,7 +91,7 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
+        const currentConfigService = this._accessor.get(FormulaCurrentConfigService);
 
         const lexer = this._accessor.get(Lexer);
 
@@ -116,7 +116,7 @@ export class SuffixNode extends BaseAstNode {
 
 export class SuffixNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();

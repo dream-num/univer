@@ -20,7 +20,7 @@ import { BuildTextUtils, ColorKit, CustomRangeType, DisposableCollection, DOCS_Z
 import { Button, FormLayout, Input, Select } from '@univerjs/design';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocBackScrollRenderController, DocSelectionRenderService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { DefinedNamesService, deserializeRangeWithSheet, serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
@@ -48,7 +48,7 @@ export const CellLinkEdit = () => {
     const [payload, setPayload] = useState('');
 
     const localeService = useDependency(LocaleService);
-    const definedNameService = useDependency(IDefinedNamesService);
+    const definedNameService = useDependency(DefinedNamesService);
     const editorBridgeService = useDependency(IEditorBridgeService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const popupService = useDependency(SheetsHyperLinkPopupService);

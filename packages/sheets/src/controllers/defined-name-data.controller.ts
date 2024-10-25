@@ -20,13 +20,13 @@ import {
     IResourceManagerService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { DefinedNamesService } from '@univerjs/engine-formula';
 
 const SHEET_DEFINED_NAME_PLUGIN = 'SHEET_DEFINED_NAME_PLUGIN';
 
 export class DefinedNameDataController extends Disposable {
     constructor(
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @IResourceManagerService private _resourceManagerService: IResourceManagerService
     ) {
         super();

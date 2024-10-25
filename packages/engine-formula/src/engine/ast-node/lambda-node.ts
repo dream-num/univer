@@ -24,7 +24,7 @@ import {
     DEFAULT_TOKEN_TYPE_LAMBDA_OMIT_PARAMETER,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
 } from '../../basics/token-type';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { Interpreter } from '../interpreter/interpreter';
 import { updateLambdaStatement } from '../utils/update-lambda-statement';
@@ -90,7 +90,7 @@ export class LambdaNode extends BaseAstNode {
 
 export class LambdaNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter
     ) {
         super();

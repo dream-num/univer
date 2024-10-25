@@ -17,7 +17,7 @@
 import { useDependency } from '@univerjs/core';
 
 import { Dropdown, Input } from '@univerjs/design';
-import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { DefinedNamesService } from '@univerjs/engine-formula';
 import { MoreDownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
@@ -26,7 +26,7 @@ import styles from './index.module.less';
 
 export function DefinedName({ disable }: { disable: boolean }) {
     const [rangeString, setRangeString] = React.useState('');
-    const definedNamesService = useDependency(IDefinedNamesService);
+    const definedNamesService = useDependency(DefinedNamesService);
 
     useEffect(() => {
         const subscription = definedNamesService.currentRange$.subscribe(() => {

@@ -18,9 +18,6 @@ import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type { IFeatureDirtyRangeType, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
 
 import type { ErrorType } from '../../basics/error-type';
-import type { IFormulaDirtyData } from '../../services/current-data.service';
-import type { IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
-import type { IAllRuntimeData } from '../../services/runtime.service';
 import type { LexerNode } from '../analysis/lexer-node';
 import type { AstRootNode, FunctionNode, PrefixNode, SuffixNode } from '../ast-node';
 import type { BaseAstNode } from '../ast-node/base-ast-node';
@@ -30,11 +27,11 @@ import { Disposable, Inject, moveRangeByOffset, ObjectMatrix } from '@univerjs/c
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IDependencyManagerService } from '../../services/dependency-manager.service';
-import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
-import { IOtherFormulaManagerService } from '../../services/other-formula-manager.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaCurrentConfigService, type IFormulaDirtyData } from '../../services/current-data.service';
+import { DependencyManagerService } from '../../services/dependency-manager.service';
+import { FeatureCalculationManagerService, type IFeatureCalculationManagerParam } from '../../services/feature-calculation-manager.service';
+import { OtherFormulaManagerService } from '../../services/other-formula-manager.service';
+import { FormulaRuntimeService, type IAllRuntimeData } from '../../services/runtime.service';
 import { Lexer } from '../analysis/lexer';
 import { AstTreeBuilder } from '../analysis/parser';
 import { ErrorNode } from '../ast-node/base-ast-node';
@@ -51,7 +48,7 @@ interface IFeatureFormulaParam {
     featureId: string;
 }
 
-function generateRandomDependencyTreeId(dependencyManagerService: IDependencyManagerService): string {
+function generateRandomDependencyTreeId(dependencyManagerService: DependencyManagerService): string {
     const idNum = dependencyManagerService.getLastTreeId() || 0;
     return idNum.toString();
 }
@@ -61,15 +58,14 @@ export class FormulaDependencyGenerator extends Disposable {
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
 
     constructor(
-        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
-        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService,
-        @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @Inject(FormulaCurrentConfigService) private readonly _currentConfigService: FormulaCurrentConfigService,
+        @Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService,
+        @Inject(OtherFormulaManagerService) private readonly _otherFormulaManagerService: OtherFormulaManagerService,
+        @Inject(FeatureCalculationManagerService) private readonly _featureCalculationManagerService: FeatureCalculationManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
         @Inject(Lexer) private readonly _lexer: Lexer,
-        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
+        @Inject(DependencyManagerService) private readonly _dependencyManagerService: DependencyManagerService
     ) {
         super();
     }

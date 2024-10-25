@@ -17,15 +17,15 @@
 import type { Injector } from '@univerjs/core';
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
+import { FormulaCurrentConfigService } from '../../../services/current-data.service';
+import { FormulaRuntimeService } from '../../../services/runtime.service';
 import { FormulaDependencyGenerator } from '../../dependency/formula-dependency';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
     let get: Injector['get'];
     let formulaDependencyGenerator: FormulaDependencyGenerator;
-    let formulaCurrentConfigService: IFormulaCurrentConfigService;
+    let formulaCurrentConfigService: FormulaCurrentConfigService;
     let testUnitId = 'test';
     let testSheetId = 'sheet1';
     let testSheetData = {};
@@ -36,9 +36,9 @@ describe('Test indirect', () => {
 
         formulaDependencyGenerator = get(FormulaDependencyGenerator);
 
-        formulaCurrentConfigService = get(IFormulaCurrentConfigService);
+        formulaCurrentConfigService = get(FormulaCurrentConfigService);
 
-        const formulaRuntimeService = get(IFormulaRuntimeService);
+        const formulaRuntimeService = get(FormulaRuntimeService);
 
         const sheetItem = testBed.sheetData[testBed.sheetId];
 

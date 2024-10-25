@@ -20,50 +20,45 @@ import type {
     ISetDefinedNameMutationSearchParam,
 } from '../commands/mutations/set-defined-name.mutation';
 
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
-import { IDefinedNamesService } from '../services/defined-names.service';
+import { DefinedNamesService } from '../services/defined-names.service';
 
+/**
+ * This controller is for syncing defined names between the host thread and the worker thread.
+ *
+ * @deprecated Should be under formula interface.
+ */
 export class SetDefinedNameController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService
     ) {
         super();
 
-        this._initialize();
-    }
-
-    private _initialize(): void {
-        this._commandExecutedListener();
-    }
-
-    private _commandExecutedListener() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetDefinedNameMutation.id) {
-                    const params = command.params as ISetDefinedNameMutationParam;
-                    if (params == null) {
-                        return;
-                    }
-                    const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params;
-                    this._definedNamesService.registerDefinedName(unitId, {
-                        id,
-                        name: name.trim(),
-                        formulaOrRefString: formulaOrRefString.trim(),
-                        comment: comment?.trim(),
-                        hidden,
-                        localSheetId,
-                    });
-                } else if (command.id === RemoveDefinedNameMutation.id) {
-                    const params = command.params as ISetDefinedNameMutationSearchParam;
-                    if (params == null) {
-                        return;
-                    }
-                    const { unitId, id } = params;
-                    this._definedNamesService.removeDefinedName(unitId, id);
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            if (command.id === SetDefinedNameMutation.id) {
+                const params = command.params as ISetDefinedNameMutationParam;
+                if (params == null) {
+                    return;
                 }
-            })
-        );
+                const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params;
+                this._definedNamesService.registerDefinedName(unitId, {
+                    id,
+                    name: name.trim(),
+                    formulaOrRefString: formulaOrRefString.trim(),
+                    comment: comment?.trim(),
+                    hidden,
+                    localSheetId,
+                });
+            } else if (command.id === RemoveDefinedNameMutation.id) {
+                const params = command.params as ISetDefinedNameMutationSearchParam;
+                if (params == null) {
+                    return;
+                }
+                const { unitId, id } = params;
+                this._definedNamesService.removeDefinedName(unitId, id);
+            }
+        }));
     }
 }

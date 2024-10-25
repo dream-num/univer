@@ -24,7 +24,7 @@ import { Lexer } from '../../../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { generateExecuteAstNodeData } from '../../../../engine/utils/ast-node-tool';
-import { IFunctionService } from '../../../../services/function.service';
+import { FunctionService } from '../../../../services/function.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
@@ -48,7 +48,7 @@ describe('Test map', () => {
         astTreeBuilder = get(AstTreeBuilder);
         interpreter = get(Interpreter);
 
-        const functionService = get(IFunctionService);
+        const functionService = get(FunctionService);
 
         functionService.registerExecutors(
             new Map(FUNCTION_NAMES_LOGICAL.MAP),

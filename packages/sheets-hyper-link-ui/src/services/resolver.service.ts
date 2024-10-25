@@ -21,7 +21,7 @@ import type { ISheetHyperLinkInfo } from '../types/interfaces/i-sheet-hyper-link
 import type { ISheetUrlParams } from '../types/interfaces/i-sheet-url-params';
 import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceService, LocaleService, RANGE_TYPE, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
-import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
+import { DefinedNamesService, deserializeRangeWithSheet, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
@@ -58,7 +58,7 @@ export class SheetsHyperLinkResolverService {
     constructor(
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @ICommandService private _commandService: ICommandService,
-        @IDefinedNamesService private _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private _definedNamesService: DefinedNamesService,
         @IMessageService private _messageService: IMessageService,
         @Inject(LocaleService) private _localeService: LocaleService,
         @IConfigService private _configService: IConfigService

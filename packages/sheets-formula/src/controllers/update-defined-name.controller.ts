@@ -15,7 +15,7 @@
  */
 
 import type { IMutationInfo, Nullable, Workbook } from '@univerjs/core';
-import type { IDefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
+import type { DefinedNamesServiceParam, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import type { IUnitRangeWithOffset } from './utils/ref-range-move';
 import {
     Disposable,
@@ -23,7 +23,7 @@ import {
     IUniverInstanceService,
     UniverInstanceType,
 } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, IDefinedNamesService, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { DefinedNamesService, deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRangeToRefString, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import { RemoveDefinedNameCommand, SetDefinedNameCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { FormulaReferenceMoveType, type IFormulaReferenceMoveParam, updateRefOffset } from './utils/ref-range-formula';
 import { getNewRangeByMoveParam } from './utils/ref-range-move';
@@ -31,7 +31,7 @@ import { getReferenceMoveParams } from './utils/ref-range-param';
 
 export class UpdateDefinedNameController extends Disposable {
     constructor(
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
@@ -206,7 +206,7 @@ export class UpdateDefinedNameController extends Disposable {
         };
     }
 
-    private _removeSheet(item: IDefinedNamesServiceParam, unitId: string, subUnitId: string) {
+    private _removeSheet(item: DefinedNamesServiceParam, unitId: string, subUnitId: string) {
         const { formulaOrRefString } = item;
         const sheetId = this._definedNamesService.getWorksheetByRef(unitId, formulaOrRefString)?.getSheetId();
 

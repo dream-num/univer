@@ -21,16 +21,16 @@ import type { ReferenceNode } from '../ast-node/reference-node';
 import type { FunctionVariantType } from '../reference-object/base-reference-object';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
 import type { PreCalculateNodeType } from '../utils/node-type';
-import { Disposable } from '@univerjs/core';
+import { Disposable, Inject } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME } from '../../basics/token-type';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
+import { FormulaRuntimeService } from '../../services/runtime.service';
 import { NodeType } from '../ast-node/node-type';
 import { ErrorValueObject } from '../value-object/base-value-object';
 
 export class Interpreter extends Disposable {
-    constructor(@IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService) {
+    constructor(@Inject(FormulaRuntimeService) private readonly _runtimeService: FormulaRuntimeService) {
         super();
     }
 

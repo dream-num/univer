@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import { Disposable, Inject } from '@univerjs/core';
-
-import { IDefinedNamesService } from '../../services/defined-names.service';
 import type { ISequenceArray } from '../utils/sequence';
-import { sequenceNodeType } from '../utils/sequence';
-import { operatorToken } from '../../basics/token';
-import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { Disposable, Inject } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
+import { operatorToken } from '../../basics/token';
+import { FormulaCurrentConfigService } from '../../services/current-data.service';
+import { DefinedNamesService } from '../../services/defined-names.service';
+import { sequenceNodeType } from '../utils/sequence';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {
     constructor(
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService
+        @Inject(FormulaCurrentConfigService) private readonly _formulaCurrentConfigService: FormulaCurrentConfigService
     ) {
         super();
     }

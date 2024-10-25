@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap } from '../basics/common';
-import { createIdentifier, Disposable } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 export interface IDirtyConversionManagerParams {
     commandId: string;
@@ -30,52 +30,23 @@ export interface IDirtyConversionManagerParams {
     };
 }
 
-export interface IActiveDirtyManagerService {
-    dispose(): void;
-
-    remove(commandId: string): void;
-
-    get(commandId: string): Nullable<IDirtyConversionManagerParams>;
-
-    has(featureId: string): boolean;
-
-    register(featureId: string, dirtyConversion: IDirtyConversionManagerParams): void;
-
-    getDirtyConversionMap(): Map<string, IDirtyConversionManagerParams>;
-}
-
 /**
- * Actively mark as dirty, calculate the dirty area based on the command,
- * and plugins can register the ref range they affect into the formula engine.
+ * This service expose a API for plugins to tell the formula engine what areas could be dirty when
+ * a mutation is triggered.
  */
-export class ActiveDirtyManagerService extends Disposable implements IActiveDirtyManagerService {
+export class ActiveDirtyManagerService extends Disposable {
     private _dirtyConversionMap: Map<string, IDirtyConversionManagerParams> = new Map();
 
     override dispose(): void {
+        super.dispose();
         this._dirtyConversionMap.clear();
-    }
-
-    remove(commandId: string) {
-        this._dirtyConversionMap.delete(commandId);
     }
 
     get(commandId: string) {
         return this._dirtyConversionMap.get(commandId);
     }
 
-    has(commandId: string) {
-        return this._dirtyConversionMap.has(commandId);
-    }
-
     register(commandId: string, dirtyConversion: IDirtyConversionManagerParams) {
         this._dirtyConversionMap.set(commandId, dirtyConversion);
     }
-
-    getDirtyConversionMap() {
-        return this._dirtyConversionMap;
-    }
 }
-
-export const IActiveDirtyManagerService = createIdentifier<ActiveDirtyManagerService>(
-    'univer.formula.active-dirty-manager.service'
-);

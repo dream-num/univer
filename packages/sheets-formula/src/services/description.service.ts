@@ -32,12 +32,12 @@ import {
     functionLookup,
     functionMath,
     functionMeta,
+    FunctionService,
     functionStatistical,
     functionText,
     FunctionType,
     functionUniver,
     functionWeb,
-    IFunctionService,
     isReferenceStrings,
 } from '@univerjs/engine-formula';
 import { PLUGIN_CONFIG_KEY_BASE } from '../controllers/config.schema';
@@ -121,7 +121,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     private _descriptions: IFunctionInfo[] = [];
 
     constructor(
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IConfigService private readonly _configService: IConfigService
     ) {

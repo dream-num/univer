@@ -40,11 +40,11 @@ import {
     UniverInstanceType,
 } from '@univerjs/core';
 
-import { deserializeRangeWithSheet,
+import { DefinedNamesService,
+    deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
-    IDefinedNamesService,
     initSheetFormulaData,
     LexerTreeBuilder,
     sequenceNodeType,
@@ -87,7 +87,7 @@ export class UpdateFormulaController extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(DefinedNamesService) private readonly _definedNamesService: DefinedNamesService,
         @Inject(Injector) readonly _injector: Injector
     ) {
         super();

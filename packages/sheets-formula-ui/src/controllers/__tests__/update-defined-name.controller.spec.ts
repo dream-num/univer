@@ -17,7 +17,7 @@
 import type { ICellData, Injector, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import type { IDeleteRangeMoveLeftCommandParams, IDeleteRangeMoveUpCommandParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, InsertRangeMoveDownCommandParams, InsertRangeMoveRightCommandParams, IRemoveRowColCommandParams, IRemoveSheetCommandParams, ISetWorksheetNameCommandParams } from '@univerjs/sheets';
 import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
-import { IDefinedNamesService, RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameController, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
+import { DefinedNamesService, RemoveDefinedNameMutation, SetArrayFormulaDataMutation, SetDefinedNameController, SetDefinedNameMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand, InsertColMutation, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRangeCommand, MoveRangeMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, RemoveSheetMutation, SetDefinedNameCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetSelectionsOperation, SetWorksheetNameCommand, SetWorksheetNameMutation, SheetsSelectionsService } from '@univerjs/sheets';
 
 import { UpdateDefinedNameController } from '@univerjs/sheets-formula';
@@ -132,7 +132,7 @@ describe('Test update defined name', () => {
                 .getValues();
 
         getDefinedNameRef = (name: string = 'DefinedName1') => {
-            const definedNameService = get(IDefinedNamesService);
+            const definedNameService = get(DefinedNamesService);
             const definedName = definedNameService.getValueByName('test', name);
             if (definedName) {
                 return definedName.formulaOrRefString;

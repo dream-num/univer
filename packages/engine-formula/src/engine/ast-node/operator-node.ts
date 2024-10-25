@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { ErrorType } from '../../basics/error-type';
 import type { compareToken } from '../../basics/token';
-import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import type { Compare } from '../../functions/meta/compare';
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { Inject } from '@univerjs/core';
+import { ErrorType } from '../../basics/error-type';
+import { OPERATOR_TOKEN_COMPARE_SET, OPERATOR_TOKEN_SET, operatorToken } from '../../basics/token';
+import { FUNCTION_NAMES_MATH } from '../../functions/math/function-names';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
-import { IFunctionService } from '../../services/function.service';
+import { FunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -84,7 +85,7 @@ export class OperatorNode extends BaseAstNode {
 }
 
 export class OperatorNodeFactory extends BaseAstNodeFactory {
-    constructor(@IFunctionService private readonly _functionService: IFunctionService) {
+    constructor(@Inject(FunctionService) private readonly _functionService: FunctionService) {
         super();
     }
 

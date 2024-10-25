@@ -15,11 +15,11 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
-import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
-import { bufferTime, filter, map, Subject } from 'rxjs';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
+import { Disposable, ICommandService, Tools } from '@univerjs/core';
+import { ActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
+import { bufferTime, filter, map, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common';
 
@@ -27,7 +27,6 @@ export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
 
     private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
-    public formulaChange$ = this._formulaChange$.asObservable();
 
     // FIXME: this design could be improved.
 
@@ -36,9 +35,10 @@ export class RegisterOtherFormulaService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService
+        @Inject(ActiveDirtyManagerService) private _activeDirtyManagerService: ActiveDirtyManagerService
     ) {
         super();
+
         this._initFormulaRegister();
         this._initFormulaCalculationResultChange();
     }
@@ -68,10 +68,6 @@ export class RegisterOtherFormulaService extends Disposable {
         return subUnitMap;
     }
 
-    private _createFormulaId(unitId: string, subUnitId: string) {
-        return `formula.${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
-    }
-
     private _initFormulaRegister() {
         this._activeDirtyManagerService.register(OtherFormulaMarkDirty.id,
             {
@@ -84,23 +80,27 @@ export class RegisterOtherFormulaService extends Disposable {
                 },
             });
 
-        this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
-            return list.reduce((result, cur) => {
-                const { unitId, subUnitId, formulaId, formulaText } = cur;
-                if (!result[unitId]) {
-                    result[unitId] = {};
-                }
-                if (!result[unitId][subUnitId]) {
-                    result[unitId][subUnitId] = {};
-                }
-                result[unitId][subUnitId][formulaId] = { f: formulaText };
-                return result;
-            }, {} as { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: { f: string } } } });
-        })).subscribe((result) => {
+        this._formulaChange$.pipe(
+            bufferTime(16),
+            filter((list) => !!list.length),
+            map((list) => {
+                return list.reduce((result, cur) => {
+                    const { unitId, subUnitId, formulaId, formulaText } = cur;
+                    if (!result[unitId]) {
+                        result[unitId] = {};
+                    }
+                    if (!result[unitId][subUnitId]) {
+                        result[unitId][subUnitId] = {};
+                    }
+                    result[unitId][subUnitId][formulaId] = { f: formulaText };
+                    return result;
+                }, {} as { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: { f: string } } } });
+            })).subscribe((result) => {
             for (const unitId in result) {
                 for (const subUnitId in result[unitId]) {
                     const value = result[unitId][subUnitId];
                     const config: ISetOtherFormulaMutationParams = { unitId, subUnitId, formulaMap: value };
+                    // FIXME@wzhudev: when we set other formula mutation, we should automatically set them as dirty
                     this._commandService.executeCommand(SetOtherFormulaMutation.id, config).then(() => {
                         this._commandService.executeCommand(OtherFormulaMarkDirty.id,
                             { [unitId]: { [subUnitId]: value } } as unknown as IOtherFormulaMarkDirtyParams);
@@ -115,6 +115,8 @@ export class RegisterOtherFormulaService extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetFormulaCalculationResultMutation.id) {
                 const params = commandInfo.params as ISetFormulaCalculationResultMutation;
+
+                // 这里的性能问题究竟如何呢？
 
                 const { unitOtherData } = params;
                 const results: Record<string, Record<string, IOtherFormulaResult[]>> = {};
@@ -142,13 +144,14 @@ export class RegisterOtherFormulaService extends Disposable {
                         }
                     }
                 }
+
                 this._formulaResult$.next(results);
             }
         }));
     }
 
     registerFormula(unitId: string, subUnitId: string, formulaText: string, extra?: Record<string, any>) {
-        const formulaId = this._createFormulaId(unitId, subUnitId);
+        const formulaId = createFormulaId(unitId, subUnitId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 
         cacheMap.set(formulaId, {
@@ -158,12 +161,15 @@ export class RegisterOtherFormulaService extends Disposable {
             callbacks: new Set(),
             extra,
         });
+
         this._formulaChange$.next({
             unitId,
             subUnitId,
             formulaText,
             formulaId,
         });
+
+        // TODO: 这里应该 return observable 以返回计算结果
         return formulaId;
     }
 
@@ -200,4 +206,8 @@ export class RegisterOtherFormulaService extends Disposable {
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         return cacheMap.get(formulaId);
     }
+}
+
+function createFormulaId(unitId: string, subUnitId: string) {
+    return `formula.${unitId}_${subUnitId}_${Tools.generateRandomId(8)}`;
 }

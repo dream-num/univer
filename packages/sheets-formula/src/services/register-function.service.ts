@@ -15,9 +15,9 @@
  */
 
 import type { IDisposable, ILocales } from '@univerjs/core';
-import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo, PrimitiveValueType } from '@univerjs/engine-formula';
-import { CustomFunction, FunctionType, IFunctionService } from '@univerjs/engine-formula';
+import { createIdentifier, Disposable, DisposableCollection, Inject, LocaleService, Optional, toDisposable } from '@univerjs/core';
+import { CustomFunction, FunctionService, FunctionType } from '@univerjs/engine-formula';
 
 import { IDescriptionService } from './description.service';
 import { IRemoteRegisterFunctionService } from './remote/remote-register-function.service';
@@ -91,7 +91,7 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
-        @IFunctionService private readonly _functionService: IFunctionService,
+        @Inject(FunctionService) private readonly _functionService: FunctionService,
         @Optional(IRemoteRegisterFunctionService)
         private readonly _remoteRegisterFunctionService?: IRemoteRegisterFunctionService
     ) {

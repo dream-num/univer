@@ -144,6 +144,7 @@ export class NumfmtEditorController extends Disposable {
             toDisposable(
                 this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT,
                     {
+                        // eslint-disable-next-line complexity
                         handler: (value, context, next) => {
                             // clear the effect
                             this._collectEffectMutation.clean();
@@ -164,19 +165,24 @@ export class NumfmtEditorController extends Disposable {
                                         null
                                     );
                             };
-
-                            // if the value is empty or the current numfmt is text format, return the value directly
-                            if (!value?.v || currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
+                            if (!value?.v && !value?.p) {
                                 return next(value);
                             }
 
-                            const content = String(value.v);
+                            if (value.p?.body?.dataStream) {
+                                const dataStreamWithoutEnd = value.p.body.dataStream.replace(/\r\n$/, '');
+                                const num = Number(dataStreamWithoutEnd);
+                                if (Number.isNaN(num)) {
+                                    return next(value);
+                                }
+                            }
+
+                            const content = value?.p?.body?.dataStream ? value.p.body.dataStream.replace(/\r\n$/, '') : String(value.v);
 
                             const numfmtInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
 
                             if (numfmtInfo) {
                                 if (numfmtInfo.z) {
-                                    const v = Number(numfmtInfo.v);
                                     this._collectEffectMutation.add(
                                         context.unitId,
                                         context.subUnitId,
@@ -186,8 +192,9 @@ export class NumfmtEditorController extends Disposable {
                                             pattern: numfmtInfo.z,
                                         }
                                     );
-                                    return { ...value, v, t: CellValueType.NUMBER };
                                 }
+                                const v = Number(numfmtInfo.v);
+                                return { ...value, v, p: null, t: CellValueType.NUMBER };
                             } else if (
                                 ['date', 'time', 'datetime', 'percent'].includes(currentNumfmtType) ||
                                 !isNumeric(content)

@@ -492,7 +492,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         );
     }
 
-    addFloatDomToPosition(layer: ICanvasFloatDom, propId?: string) {
+    addFloatDomToPosition(layer: ICanvasFloatDom, propId?: string, executeCommand = true) {
         const target = getSheetCommandTarget(this._univerInstanceService, {
             unitId: layer.unitId,
             subUnitId: layer.subUnitId,
@@ -528,17 +528,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             data,
             allowTransform,
         };
-
-        this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
-            unitId,
-            drawings: [sheetDrawingParam],
-        } as IInsertDrawingCommandParams);
-
+        if (executeCommand) {
+            this._commandService.executeCommand(InsertSheetDrawingCommand.id, {
+                unitId,
+                drawings: [sheetDrawingParam],
+            } as IInsertDrawingCommandParams);
+        }
         return {
             id,
             dispose: () => {
                 this._removeDom(id, true);
             },
+            sheetDrawingParam,
         };
     }
 

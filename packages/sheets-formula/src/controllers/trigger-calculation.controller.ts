@@ -24,7 +24,7 @@ import type {
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService, throttle } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, throttle } from '@univerjs/core';
 import {
     ActiveDirtyManagerService,
     FormulaExecutedStateType,

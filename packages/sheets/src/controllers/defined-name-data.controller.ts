@@ -17,6 +17,7 @@
 import type { IDefinedNameMapItem } from '@univerjs/engine-formula';
 import {
     Disposable,
+    Inject,
     IResourceManagerService,
     UniverInstanceType,
 } from '@univerjs/core';

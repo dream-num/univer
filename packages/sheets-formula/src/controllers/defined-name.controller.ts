@@ -19,6 +19,7 @@ import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engi
 import {
     Disposable,
     ICommandService,
+    Inject,
     IUniverInstanceService,
     toDisposable,
     UniverInstanceType,

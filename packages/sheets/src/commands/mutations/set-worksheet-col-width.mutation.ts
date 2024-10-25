@@ -16,7 +16,6 @@
 
 import type { IMutation, IObjectArrayPrimitiveType, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-
 import { getSheetCommandTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetColWidthMutationParams {

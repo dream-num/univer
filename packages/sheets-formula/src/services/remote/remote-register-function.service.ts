@@ -15,7 +15,7 @@
  */
 
 import type { BaseFunction } from '@univerjs/engine-formula';
-import { createIdentifier } from '@univerjs/core';
+import { createIdentifier, Inject } from '@univerjs/core';
 import { CustomFunction, FunctionService } from '@univerjs/engine-formula';
 
 export interface IRemoteRegisterFunctionService {

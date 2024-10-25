@@ -77,4 +77,3 @@ export const SetDefinedNameCommand: ICommand = {
         return false;
     },
 };
-

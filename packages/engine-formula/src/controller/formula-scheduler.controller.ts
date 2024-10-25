@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
+import type { ISetDefinedNameMutationParam } from '../commands/mutations/set-defined-name.mutation';
+
 /**
  * This controller dispose necessary API to upper layer plugins to call the formula engine, without knowing if the
  * formula engine is running in the same process or in a different process.
  */
 export class FormulaSchedulerController {
     constructor() {
+    }
+
+    setDefinedName(params: ISetDefinedNameMutationParam): void {
 
     }
 }

@@ -15,10 +15,9 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-
 import type { ISuperTable } from '../../basics/common';
 import type { ISuperTableOptionParam } from '../../services/super-table.service';
+import { CommandType } from '@univerjs/core';
 
 export interface ISetSuperTableMutationSearchParam {
     unitId: string;

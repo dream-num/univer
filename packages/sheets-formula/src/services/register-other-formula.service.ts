@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { Disposable, ICommandService, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, Inject, Tools } from '@univerjs/core';
 import { ActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { bufferTime, filter, map, Subject } from 'rxjs';
 import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';

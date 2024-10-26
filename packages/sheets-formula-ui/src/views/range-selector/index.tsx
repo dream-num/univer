@@ -25,14 +25,15 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { filter } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useBlur } from './hooks/useBlur';
-import { useEditorInput } from './hooks/useEditorInput';
 
+import { useEditorInput } from './hooks/useEditorInput';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
@@ -169,8 +170,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const handleOpenModal = () => {
         if (!isError) {
-            rangeDialogVisibleSet(true);
-            onRangeSelectorDialogVisibleChange(true);
+            editor?.focus();
+            // 从另一个 editor 直接打开的时候,调整下事件监听顺序,确保打开面板的逻辑在 editor 切换之后
+            setTimeout(() => {
+                rangeDialogVisibleSet(true);
+                onRangeSelectorDialogVisibleChange(true);
+            }, 30);
         }
     };
 
@@ -328,6 +333,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
             {rangeDialogVisible && (
                 <RangeSelectorDialog
+                    editorId={editorId}
                     handleConfirm={handleConfirm}
                     handleClose={handleClose}
                     unitId={unitId}
@@ -344,6 +350,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 }
 
 function RangeSelectorDialog(props: {
+    editorId: string;
     handleConfirm: (ranges: IUnitRangeName[]) => void;
     handleClose: () => void;
     visible: boolean;
@@ -353,12 +360,14 @@ function RangeSelectorDialog(props: {
     isOnlyOneRange: boolean;
     isSupportAcrossSheet: boolean;
 }) {
-    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
+    const { editorId, handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
 
     const localeService = useDependency(LocaleService);
+    const editorService = useDependency(IEditorService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const renderManagerService = useDependency(IRenderManagerService);
+
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
@@ -447,6 +456,17 @@ function RangeSelectorDialog(props: {
             refSelectionsRenderService?.setSkipLastEnabled(true);
         }
     }, [ranges]);
+
+    useEffect(() => {
+        const d = editorService.focusStyle$.pipe(filter((e) => !!e)).subscribe((e) => {
+            if (e !== editorId) {
+                handleClose();
+            }
+        });
+        return () => {
+            d.unsubscribe();
+        };
+    }, [editorService, editorId]);
 
     return (
         <Dialog

@@ -318,6 +318,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     if (isChart) {
                         imageConfig.fill = 'white';
                         imageConfig.rotateEnabled = false;
+                        imageConfig.stroke = 'blue';
+                        imageConfig.paintFirst = 'stroke';
+                        imageConfig.strokeWidth = 1;
+                        imageConfig.borderEnabled = false;
                     }
 
                     const rect = new Rect(rectShapeKey, imageConfig);
@@ -503,6 +507,21 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             })
         );
+    }
+
+    updateFloatDomProps(unitId: string, subUnitId: string, id: string, props: Record<string, any>) {
+        const info = this._domLayerInfoMap.get(id);
+        const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
+        if (info && renderObject) {
+            const { scene } = renderObject;
+            const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId: id });
+            const rectShape = scene.getObject(rectShapeKey);
+            if (rectShape && rectShape instanceof Rect) {
+                rectShape.setProps(props);
+            }
+
+        }
+
     }
 
     addFloatDomToPosition(layer: ICanvasFloatDom, propId?: string, executeCommand = true) {

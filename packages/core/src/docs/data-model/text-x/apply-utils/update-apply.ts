@@ -449,16 +449,25 @@ function updateCustomRanges(
         body.customRanges = [];
     }
     const { customRanges } = body;
+    const { customRanges: updateDataCustomRanges = [] } = updateBody;
+    const rangeMap: Record<string, ICustomRange> = Object.create(null);
 
-    const { customRanges: updateDataCustomRanges } = updateBody;
-
-    if (customRanges == null || updateDataCustomRanges == null) {
-        return;
+    for (const customRange of customRanges) {
+        const { rangeId } = customRange;
+        rangeMap[rangeId] = customRange;
     }
 
     let removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
         removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
+    } else {
+        for (const updateCustomRange of updateDataCustomRanges) {
+            const { rangeId } = updateCustomRange;
+            const oldCustomRange = rangeMap[rangeId];
+            if (oldCustomRange) {
+                Object.assign(oldCustomRange, updateCustomRange);
+            }
+        }
     }
 
     // retain
@@ -479,8 +488,25 @@ function updateCustomDecorations(
     }
 
     let removeCustomDecorations: ICustomDecoration[] = [];
+    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
+
+    for (const customDecoration of body.customDecorations) {
+        const { id } = customDecoration;
+        decorationMap[id] = customDecoration;
+    }
+
     if (coverType === UpdateDocsAttributeType.REPLACE) {
         removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
+    } else {
+        if (updateBody.customDecorations) {
+            for (const updateCustomDecoration of updateBody.customDecorations) {
+                const { id, ...extra } = updateCustomDecoration;
+                const oldCustomDecoration = decorationMap[id];
+                if (oldCustomDecoration) {
+                    Object.assign(oldCustomDecoration, extra);
+                }
+            }
+        }
     }
 
     insertCustomDecorations(body, updateBody, 0, currentIndex);

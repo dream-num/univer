@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { getBodySlice, IUniverInstanceService, JSONX, TextX, TextXActionType, Tools, UniverInstanceType, UpdateDocsAttributeType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import type { CustomDecorationType, DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
+import type { DocumentDataModel, IAccessor, IMutationInfo } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { CustomDecorationType, IUniverInstanceService, JSONX, TextX, TextXActionType, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 interface IAddCustomDecorationParam {
     unitId: string;
@@ -132,22 +132,10 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
         return false;
     }
 
-    const decorations = documentDataModel.getBody()?.customDecorations?.filter((d) => d.id === id);
-    if (!decorations?.length) {
+    const decoration = documentDataModel.getBody()?.customDecorations?.find((d) => d.id === id);
+    if (!decoration) {
         return false;
     }
-
-    const oldBodySlices = decorations.map((i) => {
-        const bodySlice = getBodySlice(body, i.startIndex, i.endIndex + 1);
-        // bodySlice.customDecorations = bodySlice.customDecorations?.filter((decoration) => decoration.id !== id);
-        return bodySlice;
-    });
-
-    const bodySlices = oldBodySlices.map((bodySlice) => {
-        const copy = Tools.deepClone(bodySlice);
-        copy.customDecorations = copy.customDecorations?.filter((decoration) => decoration.id !== id);
-        return copy;
-    });
 
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
@@ -160,28 +148,30 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
 
     const textX = new TextX();
     const jsonX = JSONX.getInstance();
+    const { startIndex, endIndex } = decoration;
+    const len = endIndex - startIndex + 1;
 
-    let cursor = 0;
-    decorations.forEach((decoration, i) => {
-        const bodySlice = bodySlices[i];
-        const oldBody = oldBodySlices[i];
-        if (decoration.startIndex !== cursor) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: decoration.startIndex - cursor,
-                segmentId,
-            });
-        }
-        cursor = (decoration.startIndex);
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: decoration.endIndex - decoration.startIndex + 1,
-            segmentId,
-            body: bodySlice,
-            oldBody,
-            coverType: UpdateDocsAttributeType.REPLACE,
-        });
-        cursor = cursor + (decoration.endIndex - decoration.startIndex + 1);
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len: startIndex,
+        segmentId,
+    });
+
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len,
+        segmentId,
+        body: {
+            dataStream: '',
+            customDecorations: [
+                {
+                    startIndex: 0,
+                    endIndex: len - 1,
+                    id,
+                    type: CustomDecorationType.DELTED,
+                },
+            ],
+        },
     });
 
     doMutation.params.actions = jsonX.editOp(textX.serialize());

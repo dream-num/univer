@@ -347,6 +347,9 @@ export function insertCustomRanges(
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
+            if (customRangeMap[customRange.rangeId]) {
+                continue;
+            }
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
             insertCustomRanges.push(customRange);
@@ -409,6 +412,14 @@ export function insertCustomDecorations(
         body.customDecorations = [];
     }
     const { customDecorations } = body;
+    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
+
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const { id } = customDecoration;
+        decorationMap[id] = customDecoration;
+    }
+
     if (textLength > 0) {
         for (let i = 0, len = customDecorations.length; i < len; i++) {
             const customDecoration = customDecorations[i];
@@ -426,6 +437,9 @@ export function insertCustomDecorations(
         const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
+            if (decorationMap[customDecoration.id]) {
+                continue;
+            }
             insertCustomDecorations.push(customDecoration);
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;

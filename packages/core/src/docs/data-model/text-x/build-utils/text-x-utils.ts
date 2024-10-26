@@ -16,10 +16,11 @@
 
 import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
-import type { CustomRangeType, IDocumentBody } from '../../../../types/interfaces';
+import type { IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { IDeleteAction, IRetainAction } from '../action-types';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
@@ -45,62 +46,29 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
 
     const len = endIndex - startIndex + 1;
 
-    if (startIndex > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: startIndex,
-            segmentId,
-        });
-    }
-
     textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
+        t: TextXActionType.RETAIN,
+        len: startIndex,
         segmentId,
-        line: 0,
-    });
-    if (textRange) {
-        if (textRange.index > startIndex) {
-            textRange.index--;
-        }
-    }
-
-    if (len - 2 > 0) {
-        textX.push({
-            t: TextXActionType.RETAIN,
-            len: len - 2,
-            segmentId,
-        });
-    }
-
-    textX.push({
-        t: TextXActionType.DELETE,
-        len: 1,
-        segmentId,
-        line: 0,
     });
 
-    if (textRange) {
-        if (textRange.index > endIndex) {
-            textRange.index--;
-        }
-    }
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len,
+        segmentId,
+        body: {
+            dataStream: '',
+            customRanges: [
+                {
+                    startIndex: 0,
+                    endIndex: len - 1,
+                    rangeId,
+                    rangeType: CustomRangeType.DELTED,
+                },
+            ],
+        },
+    });
 
-    if (insert) {
-        textX.push({
-            body: insert,
-            t: TextXActionType.INSERT,
-            len: insert.dataStream.length,
-            segmentId,
-            line: 1,
-        });
-
-        if (textRange) {
-            if (textRange.index > endIndex) {
-                textRange.index += insert.dataStream.length;
-            }
-        }
-    }
     return textX;
 }
 
@@ -134,13 +102,13 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
         const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
         const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
-        const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1].endIndex);
+        const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1]?.endIndex ?? -Infinity, endIndex);
 
         const customRange = {
             rangeId: index ? `${rangeId}-${index}` : rangeId,
             rangeType,
             startIndex: 0,
-            endIndex: 0,
+            endIndex: rangeEndIndex - rangeStartIndex,
             wholeEntity,
             properties: {
                 ...properties,

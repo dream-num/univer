@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { CellValueType } from '@univerjs/protocol';
 import type { Nullable } from '../shared';
 import type { IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
@@ -22,7 +21,7 @@ import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
 import { Rectangle } from '../shared';
 import { DEFAULT_STYLES } from '../types/const';
-import { BaselineOffset, BooleanNumber, HorizontalAlign, type TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
+import { BaselineOffset, BooleanNumber, type CellValueType, HorizontalAlign, type TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
 import { CustomRangeType, FontStyleType, type IDocumentData, type IPaddingData, type IStyleBase, type IStyleData, type ITextRotation, type ITextStyle } from '../types/interfaces';
 
 export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]): boolean => {
@@ -42,6 +41,16 @@ export const DEFAULT_PADDING_DATA = {
     l: 2,
     r: 2,
 };
+
+export const getDefaultBaselineOffset = (fontSize: number) => ({
+    sbr: 0.6,
+    sbo: fontSize,
+    spr: 0.6,
+    spo: fontSize,
+});
+
+export const DEFAULT_FONTFACE_PLANE =
+    '"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
 
 export const VERTICAL_ROTATE_ANGLE = 90;
 
@@ -214,7 +223,6 @@ export function getFontStyleString(
     if (textStyle.fs) {
         originFontSize = Math.ceil(textStyle.fs);
     }
-    let fontSize = originFontSize;
 
     let fontFamilyResult = defaultFont;
     if (textStyle.ff) {
@@ -239,11 +247,12 @@ export function getFontStyleString(
 
     const { va: baselineOffset } = textStyle;
 
+    let fontSize = originFontSize;
     if (
         baselineOffset === BaselineOffset.SUBSCRIPT ||
         baselineOffset === BaselineOffset.SUPERSCRIPT
     ) {
-        const baselineOffsetInfo = FontCache.getBaselineOffsetInfo(fontFamilyResult, fontSize);
+        const baselineOffsetInfo = getBaselineOffsetInfo(fontFamilyResult, fontSize);
         const { sbr, spr } = baselineOffsetInfo;
 
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
@@ -287,4 +296,8 @@ export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl
     }
 
     TextX.apply(body, textX.serialize());
+}
+
+export function getBaselineOffsetInfo(_fontFamily: string, fontSize: number) {
+    return getDefaultBaselineOffset(fontSize);
 }

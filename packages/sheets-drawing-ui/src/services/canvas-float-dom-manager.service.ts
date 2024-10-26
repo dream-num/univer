@@ -24,7 +24,7 @@ import type { IInsertDrawingCommandParams } from '../commands/commands/interface
 import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
-import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
 import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
@@ -186,6 +186,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
     transformChange$ = this._transformChange$.asObservable();
 
+    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
+    public add$ = this._add$.asObservable();
+
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
     remove$ = this._remove$.asObservable();
 
@@ -220,6 +223,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         }
 
         return subUnitMap;
+    }
+
+    getFloatDomInfo(id: string) {
+        return this._domLayerInfoMap.get(id);
     }
 
     private _getSceneAndTransformerByDrawingSearch(unitId: Nullable<string>) {
@@ -306,12 +313,18 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                         zIndex: this._drawingManagerService.getDrawingOrder(unitId, subUnitId).length - 1,
                     };
 
-                    if (drawingType === DrawingTypeEnum.DRAWING_CHART) {
+                    const isChart = drawingType === DrawingTypeEnum.DRAWING_CHART;
+
+                    if (isChart) {
                         imageConfig.fill = 'white';
                         imageConfig.rotateEnabled = false;
                     }
 
                     const rect = new Rect(rectShapeKey, imageConfig);
+
+                    if (isChart) {
+                        rect.setObjectType(ObjectType.CHART);
+                    }
 
                     scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
                     if (floatDomParam.allowTransform !== false) {
@@ -534,6 +547,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 drawings: [sheetDrawingParam],
             } as IInsertDrawingCommandParams);
         }
+
+        this._add$.next({ unitId, subUnitId, id });
+
         return {
             id,
             dispose: () => {

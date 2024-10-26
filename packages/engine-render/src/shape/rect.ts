@@ -65,6 +65,10 @@ export class Rect<T extends IRectProps = IRectProps> extends Shape<T> {
         return this._radius;
     }
 
+    setObjectType(type: ObjectType) {
+        this.objectType = type;
+    }
+
     static override drawWith(ctx: UniverRenderingContext, props: IRectProps) {
         let { radius, width, height } = props;
 

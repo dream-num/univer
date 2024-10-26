@@ -15,15 +15,15 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import type { BaseObject } from './base-object';
-
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 import { Subject, type Subscription } from 'rxjs';
+import { type BaseObject, ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
@@ -95,6 +95,10 @@ const MINI_WIDTH_LIMIT = 20;
 const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
+
+const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
+    ObjectType.CHART,
+]);
 
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
@@ -1637,7 +1641,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        if (!evt.ctrlKey) {
+        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(applyObject.objectType)) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

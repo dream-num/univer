@@ -617,6 +617,10 @@ export function hypergeometricCDF(x: number, n: number, M: number, N: number): n
 }
 
 export function hypergeometricPDF(x: number, n: number, M: number, N: number): number {
+    if (n - x > N - M) {
+        return 0;
+    }
+
     return calculateCombin(M, x) * calculateCombin(N - M, n - x) / calculateCombin(N, n);
 }
 

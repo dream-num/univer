@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../basics/error-type';
 import { negbinomialCDF, negbinomialPDF } from '../../../basics/statistical';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -21,7 +22,6 @@ import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class NegbinomDist extends BaseFunction {
     override minParams = 4;
@@ -103,7 +103,7 @@ export class NegbinomDist extends BaseFunction {
         const probabilitySValue = +_probabilitySObject.getValue();
         const cumulativeValue = +_cumulativeObject.getValue();
 
-        if (numberFValue < 0 || numberSValue < 1 || probabilitySValue < 0 || probabilitySValue > 1) {
+        if (numberFValue < 0 || numberSValue < 1 || probabilitySValue <= 0 || probabilitySValue >= 1) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

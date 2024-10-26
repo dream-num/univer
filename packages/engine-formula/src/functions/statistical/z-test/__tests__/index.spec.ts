@@ -44,6 +44,23 @@ describe('Test zTest function', () => {
             expect(getObjectValue(result)).toBe(0.09057419685136392);
         });
 
+        it('Value is number string', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['\'3', '\'6', '\'7', '\'8', '\'6', '\'5', '\'4', '\'2', '\'1', '\'9'],
+                ]),
+                rowCount: 1,
+                columnCount: 10,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const x = NumberValueObject.create(4);
+            const result = testFunction.calculate(array, x);
+            expect(getObjectValue(result)).toBe(ErrorType.NA);
+        });
+
         it('Array value test', () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

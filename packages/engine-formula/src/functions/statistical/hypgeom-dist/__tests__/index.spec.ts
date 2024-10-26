@@ -208,6 +208,51 @@ describe('Test hypgeomDist function', () => {
                 [0.46542827657378744, ErrorType.VALUE, 0.46542827657378744, 0.46542827657378744, 0.1021671826625387, 0.1021671826625387],
                 [0.1021671826625387, ErrorType.NUM, 0.8468524251805986, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
+
+            const sampleS2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [1],
+                    [4],
+                    [8],
+                    [20],
+                ]),
+                rowCount: 4,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const numberSample2 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [4],
+                    [8],
+                    [20],
+                ]),
+                rowCount: 3,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result2 = testFunction.calculate(sampleS2, numberSample2, populationS, numberPop, cumulative);
+            expect(getObjectValue(result2)).toStrictEqual([
+                [0.46542827657378744],
+                [0.8867587520838295],
+                [1],
+                [ErrorType.NA],
+            ]);
+        });
+
+        it('More test', () => {
+            const sampleS = NumberValueObject.create(20);
+            const numberSample = NumberValueObject.create(20);
+            const populationS = NumberValueObject.create(20);
+            const numberPop = NumberValueObject.create(20);
+            const cumulative = BooleanValueObject.create(true);
+            const result = testFunction.calculate(sampleS, numberSample, populationS, numberPop, cumulative);
+            expect(getObjectValue(result)).toBe(1);
         });
     });
 });

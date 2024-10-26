@@ -72,6 +72,14 @@ export class Harmean extends BaseFunction {
                     return variant;
                 }
 
+                if (variant.isString()) {
+                    const _variant = variant.convertToNumberObjectValue();
+
+                    if (_variant.isError()) {
+                        return _variant;
+                    }
+                }
+
                 if (variant.isNull() || variant.isBoolean()) {
                     continue;
                 }

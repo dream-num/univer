@@ -106,5 +106,13 @@ describe('Test lognormInv function', () => {
                 [ErrorType.NUM, ErrorType.NUM, ErrorType.NUM, ErrorType.VALUE, ErrorType.NUM, ErrorType.NAME],
             ]);
         });
+
+        it('More test', () => {
+            const probability = NumberValueObject.create(0.012548);
+            const mean = NumberValueObject.create(100000);
+            const standardDev = NumberValueObject.create(1.987);
+            const result = testFunction.calculate(probability, mean, standardDev);
+            expect(getObjectValue(result)).toBe(ErrorType.NUM);
+        });
     });
 });

@@ -62,6 +62,14 @@ describe('Test negbinomDist function', () => {
             const probabilityS2 = NumberValueObject.create(1.5);
             const result2 = testFunction.calculate(numberF, numberS, probabilityS2, cumulative);
             expect(getObjectValue(result2)).toBe(ErrorType.NUM);
+
+            const probabilityS3 = NumberValueObject.create(0);
+            const result3 = testFunction.calculate(numberF, numberS, probabilityS3, cumulative);
+            expect(getObjectValue(result3)).toBe(ErrorType.NUM);
+
+            const probabilityS4 = NumberValueObject.create(1);
+            const result4 = testFunction.calculate(numberF, numberS, probabilityS4, cumulative);
+            expect(getObjectValue(result4)).toBe(ErrorType.NUM);
         });
 
         it('Cumulative value test', () => {

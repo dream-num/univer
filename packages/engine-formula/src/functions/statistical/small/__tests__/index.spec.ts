@@ -45,6 +45,23 @@ describe('Test small function', () => {
             expect(getObjectValue(result)).toStrictEqual(3);
         });
 
+        it('Value is number string', () => {
+            const array = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    ['\'1', '\'2', '\'3', '\'4', '\'5', '\'6', '\'7', '\'8', '\'9', '\'10'],
+                ]),
+                rowCount: 1,
+                columnCount: 10,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const k = NumberValueObject.create(2.5);
+            const result = testFunction.calculate(array, k);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+        });
+
         it('Array value test', () => {
             const array = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Skew extends BaseFunction {
     override minParams = 1;
@@ -34,6 +34,18 @@ export class Skew extends BaseFunction {
 
         for (let i = 0; i < variants.length; i++) {
             const variant = variants[i];
+
+            if (variant.isError()) {
+                return variant;
+            }
+
+            if (variant.isString()) {
+                const _variant = variant.convertToNumberObjectValue();
+
+                if (_variant.isError()) {
+                    return _variant;
+                }
+            }
 
             const rowCount = variant.isArray() ? (variant as ArrayValueObject).getRowCount() : 1;
             const columnCount = variant.isArray() ? (variant as ArrayValueObject).getColumnCount() : 1;

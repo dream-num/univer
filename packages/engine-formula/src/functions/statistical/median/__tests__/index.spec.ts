@@ -54,12 +54,12 @@ describe('Test median function', () => {
             const number5 = ErrorValueObject.create(ErrorType.NAME);
             const number6 = NumberValueObject.create(-3);
             const result = testFunction.calculate(number, number2, number3, number4);
-            expect(getObjectValue(result)).toStrictEqual(3);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.VALUE);
 
-            const result2 = testFunction.calculate(number, number2, number3, number4, number5);
+            const result2 = testFunction.calculate(number, number2, number3, number5);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NAME);
 
-            const result3 = testFunction.calculate(number, number2, number3, number4, number6);
+            const result3 = testFunction.calculate(number, number2, number3, number6);
             expect(getObjectValue(result3)).toStrictEqual(0);
         });
 
@@ -94,6 +94,16 @@ describe('Test median function', () => {
             });
             const result = testFunction.calculate(number);
             expect(getObjectValue(result)).toStrictEqual(ErrorType.NAME);
+
+            const number2 = NumberValueObject.create(1);
+            const number3 = NumberValueObject.create(2);
+            const number4 = StringValueObject.create('3');
+            const result2 = testFunction.calculate(number2, number3, number4);
+            expect(getObjectValue(result2)).toStrictEqual(2);
+
+            const number5 = StringValueObject.create('test');
+            const result3 = testFunction.calculate(number2, number3, number5);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.VALUE);
         });
     });
 });

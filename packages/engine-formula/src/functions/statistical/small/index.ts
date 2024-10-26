@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { checkVariantsErrorIsStringToNumber } from '../../../engine/utils/check-variant-error';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Small extends BaseFunction {
     override minParams = 2;
@@ -82,7 +82,7 @@ export class Small extends BaseFunction {
                     return valueObject as ErrorValueObject;
                 }
 
-                if (valueObject.isNull() || valueObject.isBoolean()) {
+                if (valueObject.isNull() || valueObject.isBoolean() || valueObject.isString()) {
                     continue;
                 }
 

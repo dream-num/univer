@@ -96,6 +96,10 @@ const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
 
+const SINGLE_ACTIVE_OBJECT_TYPE_MAP= new Set<ObjectType>([
+    ObjectType.CHART,
+]);
+
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
  * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
@@ -1637,7 +1641,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        if (!evt.ctrlKey || applyObject.objectType === ObjectType.CHART) {
+        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(applyObject.objectType)) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

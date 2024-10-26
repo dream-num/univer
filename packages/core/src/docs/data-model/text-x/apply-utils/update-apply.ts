@@ -15,17 +15,19 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import type {
-    ICustomBlock,
-    ICustomDecoration,
-    ICustomRange,
-    ICustomTable,
-    IDocumentBody,
-    IParagraph,
-    ISectionBreak,
-    ITextRun,
-} from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    type ICustomBlock,
+    type ICustomDecoration,
+    type ICustomRange,
+    type ICustomTable,
+    type IDocumentBody,
+    type IParagraph,
+    type ISectionBreak,
+    type ITextRun,
+} from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
@@ -460,18 +462,29 @@ function updateCustomRanges(
     let removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
         removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
+        insertCustomRanges(body, updateBody, 0, currentIndex);
     } else {
         for (const updateCustomRange of updateDataCustomRanges) {
             const { rangeId } = updateCustomRange;
             const oldCustomRange = rangeMap[rangeId];
             if (oldCustomRange) {
+                if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
+                    removeCustomRanges.push(oldCustomRange);
+                    continue;
+                }
                 Object.assign(oldCustomRange, updateCustomRange);
+            }
+        }
+
+        for (const removeCustomRange of removeCustomRanges) {
+            const { rangeId } = removeCustomRange;
+            const index = customRanges.findIndex((r) => r.rangeId === rangeId);
+            if (index !== -1) {
+                customRanges.splice(index, 1);
             }
         }
     }
 
-    // retain
-    insertCustomRanges(body, updateBody, 0, currentIndex);
     return removeCustomRanges;
 }
 
@@ -497,18 +510,30 @@ function updateCustomDecorations(
 
     if (coverType === UpdateDocsAttributeType.REPLACE) {
         removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
+        insertCustomDecorations(body, updateBody, 0, currentIndex);
     } else {
         if (updateBody.customDecorations) {
             for (const updateCustomDecoration of updateBody.customDecorations) {
                 const { id, ...extra } = updateCustomDecoration;
                 const oldCustomDecoration = decorationMap[id];
                 if (oldCustomDecoration) {
+                    if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+                        removeCustomDecorations.push(oldCustomDecoration);
+                        continue;
+                    }
                     Object.assign(oldCustomDecoration, extra);
+                }
+            }
+
+            for (const removeCustomDecoration of removeCustomDecorations) {
+                const { id } = removeCustomDecoration;
+                const index = body.customDecorations.findIndex((d) => d.id === id);
+                if (index !== -1) {
+                    body.customDecorations.splice(index, 1);
                 }
             }
         }
     }
 
-    insertCustomDecorations(body, updateBody, 0, currentIndex);
     return removeCustomDecorations;
 }

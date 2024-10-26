@@ -19,6 +19,7 @@ import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
 import type { IDeleteAction, IRetainAction } from '../action-types';
+import type { TextXSelection } from '../text-x';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
@@ -34,15 +35,14 @@ export interface IDeleteCustomRangeParam {
 }
 
 export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCustomRangeParam) {
-    const { rangeId, segmentId, documentDataModel, insert, textRange } = params;
-
+    const { rangeId, segmentId, documentDataModel, insert } = params;
     const range = documentDataModel.getSelfOrHeaderFooterModel(segmentId).getBody()?.customRanges?.find((r) => r.rangeId === rangeId);
     if (!range) {
         return false;
     }
 
     const { startIndex, endIndex } = range;
-    const textX = new TextX();
+    const textX: TextXSelection = new TextX();
 
     const len = endIndex - startIndex + 1;
 
@@ -68,6 +68,22 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
             ],
         },
     });
+
+    if (insert) {
+        textX.push({
+            t: TextXActionType.INSERT,
+            body: insert,
+            len: insert.dataStream.length,
+            line: 0,
+            segmentId,
+        });
+    }
+
+    textX.selections = [{
+        startOffset: startIndex,
+        endOffset: endIndex + 1 + (insert?.dataStream.length ?? 0),
+        collapsed: true,
+    }];
 
     return textX;
 }
@@ -97,7 +113,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 
     const customRanges = body.customRanges ?? [];
     let cursor = 0;
-    const textX = new TextX();
+    const textX: TextX & { selections?: ITextRange[] } = new TextX();
 
     const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
         const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
@@ -134,6 +150,8 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
     const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
     newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
+
+    textX.selections = [actualRange];
     return textX;
 }
 

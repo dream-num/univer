@@ -89,6 +89,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
         properties,
         body,
     });
+
     if (!textX) {
         return false;
     }
@@ -98,7 +99,7 @@ export function addCustomRangeBySelectionFactory(accessor: IAccessor, param: IAd
         params: {
             unitId,
             actions: [],
-            textRanges: undefined,
+            textRanges: textX.selections,
         },
         textX,
     };
@@ -117,15 +118,12 @@ export interface IDeleteCustomRangeFactoryParams {
 export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCustomRangeFactoryParams) {
     const { unitId, segmentId, insert } = params;
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const docSelectionManagerService = accessor.get(DocSelectionManagerService);
-    const selection = docSelectionManagerService.getTextRanges({ unitId, subUnitId: unitId })?.[0];
 
     const documentDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId);
     if (!documentDataModel) {
         return false;
     }
 
-    const textRange = selection?.collapsed ? { index: selection.startOffset } : undefined;
     const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
         id: RichTextEditingMutation.id,
         params: {
@@ -142,7 +140,6 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
         rangeId: params.rangeId,
         insert,
         segmentId,
-        textRange,
     });
 
     if (!textX) {
@@ -151,6 +148,6 @@ export function deleteCustomRangeFactory(accessor: IAccessor, params: IDeleteCus
 
     const path = getRichTextEditPath(documentDataModel, segmentId);
     doMutation.params.actions = jsonX.editOp(textX.serialize(), path);
-    doMutation.params.textRanges = textRange ? [{ startOffset: textRange.index, endOffset: textRange.index, collapsed: true }] : undefined;
+    doMutation.params.textRanges = textX.selections;
     return doMutation;
 }

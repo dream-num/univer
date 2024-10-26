@@ -353,8 +353,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this.focusStyle(editorUnitId);
 
         this._focus$.next({
-            startOffset: valueCount - 2,
-            endOffset: valueCount - 2,
+            startOffset: valueCount,
+            endOffset: valueCount,
         });
     }
 

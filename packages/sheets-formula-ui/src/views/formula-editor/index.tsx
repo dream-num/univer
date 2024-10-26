@@ -109,6 +109,12 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         };
     }, [editor]);
 
+    const blur = useMemo(() => () => {
+        if (editor) {
+            editor.blur();
+        }
+    }, [editor]);
+
     const handleSelectionChange = (refString: string, offset: number) => {
         const result = `=${refString}`;
         formulaTextSet(result);
@@ -163,6 +169,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             setTimeout(() => {
                 focus();
             }, 300);
+        } else {
+            blur();
         }
     }, [_isFocus]);
 

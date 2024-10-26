@@ -25,6 +25,11 @@ type ChangeStateCacheType = 'history' | 'collaboration';
 
 const DEBOUNCE_DELAY = 300;
 
+interface IStateCache {
+    history: IDocStateChangeParams[];
+    collaboration: IDocStateChangeParams[];
+}
+
 // This class sends out state-changing events, what is the state, the data model,
 // and the cursor & selection, and this class mainly serves the History(undo/redo) module and
 // the collaboration module.
@@ -49,6 +54,18 @@ export class DocStateChangeManagerService extends RxDisposable {
 
         this._initialize();
         this._listenDocStateChange();
+    }
+
+    getStateCache(unitId: string) {
+        return {
+            history: this._historyStateCache.get(unitId) ?? [],
+            collaboration: this._changeStateCache.get(unitId) ?? [],
+        };
+    }
+
+    setStateCache(unitId: string, cache: IStateCache) {
+        this._historyStateCache.set(unitId, cache.history);
+        this._changeStateCache.set(unitId, cache.collaboration);
     }
 
     private _setChangeState(changeState: IDocStateChangeParams) {

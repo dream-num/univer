@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class Harmean extends BaseFunction {
     override minParams = 1;
@@ -91,7 +91,11 @@ export class Harmean extends BaseFunction {
             }
         }
 
-        if (len === 0 || isNonPositive) {
+        if (len === 0) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (isNonPositive) {
             return ErrorValueObject.create(ErrorType.NUM);
         }
 

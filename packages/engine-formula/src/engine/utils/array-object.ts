@@ -28,20 +28,21 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
         const row = [];
 
         for (let c = 0; c < columnCount; c++) {
-            const value = valueObject.isArray() ? (valueObject as ArrayValueObject).get(r, c) as BaseValueObject : valueObject;
-
             if (valueRowCount === 1 && valueColumnCount === 1) {
+                const value = valueObject.isArray() ? (valueObject as ArrayValueObject).get(0, 0) as BaseValueObject : valueObject;
                 row.push(value);
                 continue;
             }
 
             if (valueRowCount === 1 && c < valueColumnCount) {
-                row.push((valueObject as ArrayValueObject).get(0, c) as BaseValueObject);
+                const value = (valueObject as ArrayValueObject).get(0, c) as BaseValueObject;
+                row.push(value);
                 continue;
             }
 
             if (valueColumnCount === 1 && r < valueRowCount) {
-                row.push((valueObject as ArrayValueObject).get(r, 0) as BaseValueObject);
+                const value = (valueObject as ArrayValueObject).get(r, 0) as BaseValueObject;
+                row.push(value);
                 continue;
             }
 
@@ -50,6 +51,7 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
                 continue;
             }
 
+            const value = (valueObject as ArrayValueObject).get(r, c) as BaseValueObject;
             row.push(value);
         }
 

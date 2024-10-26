@@ -75,7 +75,7 @@ describe('Test harmean function', () => {
                 column: 0,
             });
             const result = testFunction.calculate(number);
-            expect(getObjectValue(result)).toStrictEqual(ErrorType.NUM);
+            expect(getObjectValue(result)).toStrictEqual(ErrorType.NA);
         });
 
         it('More test', () => {

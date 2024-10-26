@@ -15,15 +15,15 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import { ObjectType, type BaseObject } from './base-object';
-
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 import { Subject, type Subscription } from 'rxjs';
+import { type BaseObject, ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
@@ -96,7 +96,7 @@ const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
 
-const SINGLE_ACTIVE_OBJECT_TYPE_MAP= new Set<ObjectType>([
+const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
     ObjectType.CHART,
 ]);
 
@@ -1634,7 +1634,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
-    
+
         applyObject = this._findGroupObject(applyObject);
 
         if (this._selectedObjectMap.has(applyObject.oKey)) {

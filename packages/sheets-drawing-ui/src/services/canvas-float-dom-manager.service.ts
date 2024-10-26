@@ -322,10 +322,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
 
                     const rect = new Rect(rectShapeKey, imageConfig);
 
-                    if(isChart) {
+                    if (isChart) {
                         rect.setObjectType(ObjectType.CHART);
                     }
-                   
 
                     scene.addObject(rect, DRAWING_OBJECT_LAYER_INDEX);
                     if (floatDomParam.allowTransform !== false) {

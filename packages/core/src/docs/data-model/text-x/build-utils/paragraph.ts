@@ -123,6 +123,7 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
     }
 
     const currentParagraph = paragraphs.find((p) => p.startIndex === paragraphIndex);
+
     if (!currentParagraph?.bullet || currentParagraph.bullet.listType.indexOf(PresetListType.CHECK_LIST) === -1) {
         return false;
     }

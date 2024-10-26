@@ -229,7 +229,6 @@ function buildJS() {
         '@univerjs/docs-thread-comment-ui',
         '@univerjs/drawing',
         '@univerjs/drawing-ui',
-        '@univerjs/sheets-hyper-link',
         '@univerjs/sheets-hyper-link-ui',
         '@univerjs/sheets-drawing',
         '@univerjs/sheets-drawing-ui',

@@ -30,7 +30,6 @@ import { UniverSheetsConditionalFormattingPlugin } from '@univerjs/sheets-condit
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsDrawingPlugin } from '@univerjs/sheets-drawing';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import { UniverSheetsHyperLinkPlugin } from '@univerjs/sheets-hyper-link';
 import { UniverSheetsSortPlugin } from '@univerjs/sheets-sort';
 import { UniverThreadCommentPlugin } from '@univerjs/thread-comment';
 import { Observable, shareReplay } from 'rxjs';
@@ -68,7 +67,6 @@ function registerSheetPlugins(univer: Univer): void {
     univer.registerPlugin(UniverDataValidationPlugin);
     univer.registerPlugin(UniverSheetsDataValidationPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
-    univer.registerPlugin(UniverSheetsHyperLinkPlugin);
     univer.registerPlugin(UniverSheetsDrawingPlugin);
     univer.registerPlugin(UniverSheetsSortPlugin);
 }

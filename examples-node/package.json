@@ -23,7 +23,6 @@
         "@univerjs/sheets-drawing": "workspace:*",
         "@univerjs/sheets-filter": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-hyper-link": "workspace:*",
         "@univerjs/sheets-sort": "workspace:*",
         "@univerjs/thread-comment": "workspace:*",
         "rxjs": "^7.8.1"

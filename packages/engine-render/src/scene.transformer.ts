@@ -15,7 +15,7 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import type { BaseObject } from './base-object';
+import { ObjectType, type BaseObject } from './base-object';
 
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
 import type { ITransformerConfig } from './basics/transformer-config';
@@ -1630,14 +1630,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _updateActiveObjectList(applyObject: BaseObject, evt: IPointerEvent | IMouseEvent) {
         const { isCropper } = this._getConfig(applyObject);
-
+    
         applyObject = this._findGroupObject(applyObject);
 
         if (this._selectedObjectMap.has(applyObject.oKey)) {
             return;
         }
 
-        if (!evt.ctrlKey) {
+        if (!evt.ctrlKey || applyObject.objectType === ObjectType.CHART) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

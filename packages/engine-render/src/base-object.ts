@@ -52,6 +52,7 @@ export enum ObjectType {
     IMAGE,
     RECT,
     CIRCLE,
+    CHART,
 }
 
 export abstract class BaseObject extends Disposable {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValueType, IDocumentData, IPaddingData, IStyleData, ITextRotation, ITextStyle, Nullable, TextDirection } from '@univerjs/core';
+import type { CellValueType, IDocumentData, IPaddingData, IStyleBase, IStyleData, ITextRotation, ITextStyle, Nullable, TextDirection } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { convertTextRotation } from '../../basics/text-rotation';
 import { DEFAULT_PADDING_DATA } from './sheet-skeleton';
@@ -109,4 +109,21 @@ export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
         wrapStrategy,
         paddingData,
     } as ICellStyle;
+}
+
+export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
+    if (!format) {
+        return {};
+    }
+    const { ff, fs, it, bl, ul, st, ol, cl } = format;
+    const style: IStyleBase = {};
+    ff && (style.ff = ff);
+    fs && (style.fs = fs);
+    it && (style.it = it);
+    bl && (style.bl = bl);
+    ul && (style.ul = ul);
+    st && (style.st = st);
+    ol && (style.ol = ol);
+    cl && (style.cl = cl);
+    return style;
 }

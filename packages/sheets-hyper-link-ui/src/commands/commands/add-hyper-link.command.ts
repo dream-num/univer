@@ -21,7 +21,7 @@ import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
@@ -53,14 +53,14 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             return false;
         }
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-        const skeleton = skeletonManagerService.getCurrent()?.skeleton;
-        if (!worksheet || !skeleton) {
+        // const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+        // const skeleton = skeletonManagerService.getCurrent()?.skeleton;
+        if (!worksheet) {
             return false;
         }
         const { payload, display, row, column, id } = link;
         const cellData = worksheet.getCell(row, column);
-        const doc = skeleton.getBlankCellDocumentModel(cellData);
+        const doc = worksheet.getBlankCellDocumentModel(cellData);
         const snapshot = doc.documentModel!.getSnapshot();
         const body = Tools.deepClone(snapshot.body);
         if (!body) {

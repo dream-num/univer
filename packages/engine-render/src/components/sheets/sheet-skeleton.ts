@@ -90,7 +90,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
-import { createDocumentModelWithStyle, extractOtherStyle } from './util';
+import { createDocumentModelWithStyle, extractOtherStyle, getFontFormat } from './util';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -1118,7 +1118,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
 
         const style = this._styles.getStyleByCell(cell);
-        const textStyle = this._getFontFormat(style);
+        const textStyle = getFontFormat(style);
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
@@ -1137,7 +1137,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
         const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
 
-        fontString = getFontStyleString({}, this._localeService).fontCache;
+        fontString = getFontStyleString({}).fontCache;
 
         const documentModel = createDocumentModelWithStyle(content, textStyle);
 
@@ -1215,8 +1215,8 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
             );
         } else if (cell.v != null) {
-            const textStyle = this._getFontFormat(style);
-            fontString = getFontStyleString(textStyle, this._localeService).fontCache;
+            const textStyle = getFontFormat(style);
+            fontString = getFontStyleString(textStyle).fontCache;
 
             let cellText = extractPureTextFromCell(cell);
 

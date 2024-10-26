@@ -14,21 +14,70 @@
  * limitations under the License.
  */
 
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
-import type { IStyleData } from '../types/interfaces';
+import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
-import { BuildTextUtils } from '../docs';
+import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
-import { type BooleanNumber, CellValueType } from '../types/enum';
+import { DEFAULT_STYLES } from '../types/const';
+import { type BooleanNumber, CellValueType, type HorizontalAlign, type TextDirection, type VerticalAlign, type WrapStrategy } from '../types/enum';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
+import { addLinkToDocumentModel, convertTextRotation, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, getFontStyleString } from './util';
 import { SheetViewModel } from './view-model';
 
+export interface IDocumentLayoutObject {
+    documentModel: Nullable<DocumentDataModel>;
+    fontString: string;
+    textRotation: ITextRotation;
+    wrapStrategy: WrapStrategy;
+    verticalAlign: VerticalAlign;
+    horizontalAlign: HorizontalAlign;
+    paddingData: IPaddingData;
+    fill?: Nullable<string>;
+}
+export interface ICellOtherConfig {
+    textRotation?: ITextRotation;
+    textDirection?: Nullable<TextDirection>;
+    horizontalAlign?: HorizontalAlign;
+    verticalAlign?: VerticalAlign;
+    wrapStrategy?: WrapStrategy;
+    paddingData?: IPaddingData;
+    cellValueType?: CellValueType;
+}
+
+export interface ICellDocumentModelOption {
+    isDeepClone?: boolean;
+    displayRawFormula?: boolean;
+    ignoreTextRotation?: boolean;
+}
+
+const DEFAULT_CELL_DOCUMENT_MODEL_OPTION = {
+    isDeepClone: false,
+    displayRawFormula: false,
+    ignoreTextRotation: false,
+};
 /**
  * The model of a Worksheet.
  */
@@ -189,6 +238,7 @@ export class Worksheet {
      * Get worksheet printable cell range.
      * @returns
      */
+    // eslint-disable-next-line max-lines-per-function
     getCellMatrixPrintRange() {
         const matrix = this.getCellMatrix();
         const mergedCells = this.getMergeData();
@@ -201,6 +251,7 @@ export class Worksheet {
         let rowInitd = false;
         let columnInitd = false;
         matrix.forEach((rowIndex, row) => {
+            // eslint-disable-next-line complexity
             Object.keys(row).forEach((colIndexStr) => {
                 const colIndex = +colIndexStr;
                 const cellValue = matrix.getValue(rowIndex, colIndex);
@@ -921,6 +972,190 @@ export class Worksheet {
         };
 
         // #endregion
+    }
+
+    /**
+     * This method generates a document model based on the cell's properties and handles the associated styles and configurations.
+     * If the cell does not exist, it will return null.
+     * PS: This method has significant impact on performance.
+     * @param cell
+     * @param options
+     */
+    // eslint-disable-next-line complexity, max-lines-per-function
+    private _getCellDocumentModel(
+        cell: Nullable<ICellDataForSheetInterceptor>,
+        options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
+    ): Nullable<IDocumentLayoutObject> {
+        const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
+            ...DEFAULT_CELL_DOCUMENT_MODEL_OPTION,
+            ...options,
+        };
+
+        const style = this._styles.getStyleByCell(cell);
+
+        if (!cell) {
+            return;
+        }
+
+        let documentModel: Nullable<DocumentDataModel>;
+        let fontString = 'document';
+        const cellOtherConfig = extractOtherStyle(style);
+
+        const textRotation: ITextRotation = ignoreTextRotation
+            ? DEFAULT_STYLES.tr
+            : cellOtherConfig.textRotation || DEFAULT_STYLES.tr;
+        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || DEFAULT_STYLES.tb;
+        const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
+
+        if (cell.f && displayRawFormula) {
+            // The formula does not detect horizontal alignment and rotation.
+            documentModel = createDocumentModelWithStyle(cell.f.toString(), {}, { verticalAlign });
+            horizontalAlign = DEFAULT_STYLES.ht;
+        } else if (cell.p) {
+            const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
+            documentModel = this._updateConfigAndGetDocumentModel(
+                isDeepClone ? Tools.deepClone(cell.p) : cell.p,
+                horizontalAlign,
+                paddingData,
+                {
+                    horizontalAlign,
+                    verticalAlign,
+                    centerAngle,
+                    vertexAngle,
+                    wrapStrategy,
+                }
+            );
+        } else if (cell.v != null) {
+            const textStyle = getFontFormat(style);
+            fontString = getFontStyleString(textStyle).fontCache;
+
+            let cellText = extractPureTextFromCell(cell);
+
+            // Add a single quotation mark to the force string type. Don't add single quotation mark in extractPureTextFromCell, because copy and paste will be affected.
+            // edit mode when displayRawFormula is true
+            if (cell.t === CellValueType.FORCE_STRING && displayRawFormula) {
+                cellText = `'${cellText}`;
+            }
+
+            documentModel = createDocumentModelWithStyle(cellText, textStyle, {
+                ...cellOtherConfig,
+                textRotation,
+                cellValueType: cell.t!,
+            });
+        }
+
+        // This is a compatible code. cc @weird94
+        if (documentModel && cell.linkUrl && cell.linkId) {
+            addLinkToDocumentModel(documentModel, cell.linkUrl, cell.linkId);
+        }
+
+        /**
+         * the alignment mode is returned with respect to the offset of the sheet cell,
+         * because the document needs to render the layout for cells and
+         * support alignment across multiple cells (e.g., horizontal alignment of long text in overflow mode).
+         * The alignment mode of the document itself cannot meet this requirement,
+         * so an additional renderConfig needs to be added during the rendering of the document component.
+         * This means that there are two coexisting alignment modes.
+         * In certain cases, such as in an editor, conflicts may arise,
+         * requiring only one alignment mode to be retained.
+         * By removing the relevant configurations in renderConfig,
+         * the alignment mode of the sheet cell can be modified.
+         * The alternative alignment mode is applied to paragraphs within the document.
+         */
+        return {
+            documentModel,
+            fontString,
+            textRotation,
+            wrapStrategy,
+            verticalAlign,
+            horizontalAlign,
+            paddingData,
+            fill: style?.bg?.rgb,
+        };
+    }
+
+    private _updateConfigAndGetDocumentModel(
+        documentData: IDocumentData,
+        horizontalAlign: HorizontalAlign,
+        paddingData: IPaddingData,
+        renderConfig?: IDocumentRenderConfig
+    ): Nullable<DocumentDataModel> {
+        if (!renderConfig) {
+            return;
+        }
+
+        if (!documentData.body?.dataStream) {
+            return;
+        }
+
+        if (!documentData.documentStyle) {
+            documentData.documentStyle = {};
+        }
+
+        documentData.documentStyle.marginTop = paddingData.t ?? 0;
+        documentData.documentStyle.marginBottom = paddingData.b ?? 2;
+        documentData.documentStyle.marginLeft = paddingData.l ?? 2;
+        documentData.documentStyle.marginRight = paddingData.r ?? 2;
+
+        // Fix https://github.com/dream-num/univer/issues/1586
+        documentData.documentStyle.pageSize = {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        };
+
+        documentData.documentStyle.renderConfig = renderConfig;
+
+        const paragraphs = documentData.body.paragraphs || [];
+
+        for (const paragraph of paragraphs) {
+            if (!paragraph.paragraphStyle) {
+                paragraph.paragraphStyle = {};
+            }
+
+            paragraph.paragraphStyle.horizontalAlign = horizontalAlign;
+        }
+
+        return new DocumentDataModel(documentData);
+    }
+
+    getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
+        const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
+
+        const style = this._styles.getStyleByCell(cell);
+        const textStyle = getFontFormat(style);
+
+        if (documentModelObject != null) {
+            if (documentModelObject.documentModel == null) {
+                documentModelObject.documentModel = createDocumentModelWithStyle('', textStyle);
+            }
+            return documentModelObject;
+        }
+
+        const content = '';
+
+        let fontString = 'document';
+
+        const textRotation: ITextRotation = DEFAULT_STYLES.tr;
+        const horizontalAlign: HorizontalAlign = DEFAULT_STYLES.ht;
+        const verticalAlign: VerticalAlign = DEFAULT_STYLES.vt;
+        const wrapStrategy: WrapStrategy = DEFAULT_STYLES.tb;
+        const paddingData: IPaddingData = DEFAULT_PADDING_DATA;
+
+        fontString = getFontStyleString({}).fontCache;
+
+        const documentModel = createDocumentModelWithStyle(content, textStyle);
+
+        return {
+            documentModel,
+            fontString,
+            textRotation,
+            wrapStrategy,
+            verticalAlign,
+            horizontalAlign,
+            paddingData,
+        };
     }
 }
 

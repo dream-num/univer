@@ -201,11 +201,11 @@ export { InsertDefinedNameCommand } from './commands/commands/insert-defined-nam
 export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
 export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutation';
-export { type ISetWorksheetRowColumnStyleMutationParams, SetWorksheetRowColumnStyleMutation, SetWorksheetRowColumnStyleMutationFactory } from './commands/mutations/set-worksheet-row-column-style.mutation';
+export { SetWorksheetDefaultStyleCommand } from './commands/commands/set-worksheet-default-style.command';
 export { type ISetRowDataMutationParams, SetRowDataMutation, SetRowDataMutationFactory } from './commands/mutations/set-row-data.mutation';
-export { SetRowDataCommand } from './commands/commands/set-row-data.command';
+export { type ISetRowDataCommandParams, SetRowDataCommand } from './commands/commands/set-row-data.command';
 export { type ISetColDataMutationParams, SetColDataMutation, SetColDataMutationFactory } from './commands/mutations/set-col-data.mutation';
-export { SetColDataCommand } from './commands/commands/set-col-data.command';
+export { type ISetColDataCommandParams, SetColDataCommand } from './commands/commands/set-col-data.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,

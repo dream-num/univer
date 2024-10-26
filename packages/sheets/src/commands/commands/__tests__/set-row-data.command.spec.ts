@@ -15,9 +15,9 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { ISetRowDataMutationParams } from '../../mutations/set-row-data.mutation';
-import { BooleanNumber, DEFAULT_WORKSHEET_ROW_HEIGHT, ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+import type { ISetRowDataCommandParams } from '../set-row-data.command';
 
+import { BooleanNumber, DEFAULT_WORKSHEET_ROW_HEIGHT, ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { SetRowDataMutation } from '../../mutations/set-row-data.mutation';
 import { SetRowDataCommand } from '../set-row-data.command';
@@ -90,7 +90,7 @@ describe('test set row data commands', () => {
     it('should set properties on rows', async () => {
         expect(getRowData(1)).toEqual({ hd: BooleanNumber.FALSE });
 
-        const params: ISetRowDataMutationParams = {
+        const params: ISetRowDataCommandParams = {
             unitId: 'test',
             subUnitId: 'sheet1',
             rowData: {

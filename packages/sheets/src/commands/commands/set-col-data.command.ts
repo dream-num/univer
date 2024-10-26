@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IAccessor, ICommand } from '@univerjs/core';
+import type { IAccessor, IColumnData, ICommand, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
 import type { ISetColDataMutationParams } from '../mutations/set-col-data.mutation';
 
+import type { ISheetCommandSharedParams } from '../utils/interface';
 import {
     CommandType,
     ICommandService,
@@ -26,10 +27,16 @@ import {
 import { SetColDataMutation, SetColDataMutationFactory } from '../mutations/set-col-data.mutation';
 import { getSheetCommandTarget } from './utils/target-util';
 
+export type IColumnProperties = Omit<IColumnData, 'w' | 'hd'>;
+
+export interface ISetColDataCommandParams extends Partial<ISheetCommandSharedParams> {
+    columnData: IObjectArrayPrimitiveType<Nullable<IColumnProperties>>;
+}
+
 export const SetColDataCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-col-data',
-    handler: (accessor: IAccessor, params: ISetColDataMutationParams) => {
+    handler: (accessor: IAccessor, params: ISetColDataCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

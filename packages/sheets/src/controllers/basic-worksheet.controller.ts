@@ -176,7 +176,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
-            SetWorksheetDefaultStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -288,6 +287,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRangeProtectionMutation,
 
                 ToggleCellCheckboxCommand,
+                SetWorksheetDefaultStyleMutation,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

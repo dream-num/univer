@@ -21,6 +21,7 @@ import { MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/mov
 import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
 import { RemoveWorksheetMergeMutation } from '../../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../../commands/mutations/reorder-range.mutation';
+import { SetColDataMutation } from '../../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../../commands/mutations/set-col-visible.mutation';
 import { SetRangeValuesMutation } from '../../commands/mutations/set-range-values.mutation';
 import { SetRowDataMutation } from '../../commands/mutations/set-row-data.mutation';
@@ -65,4 +66,5 @@ export const COMMAND_LISTENER_VALUE_CHANGE = [
     ReorderRangeMutation.id,
     SetWorksheetDefaultStyleMutation.id,
     SetRowDataMutation.id,
+    SetColDataMutation.id,
 ];

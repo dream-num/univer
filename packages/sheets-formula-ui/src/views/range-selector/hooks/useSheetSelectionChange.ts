@@ -20,12 +20,12 @@ import type { Workbook } from '@univerjs/core';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import type { INode } from '../utils/filterReferenceNode';
 
-import { debounce, DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService, useDependency } from '@univerjs/core';
 import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
-import { distinctUntilChanged, map } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { distinctUntilChanged, map, merge } from 'rxjs';
+import { debounceTime, throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { filterReferenceNode, isComma } from '../utils/filterReferenceNode';
 import { rangePreProcess } from '../utils/rangePreProcess';
@@ -42,15 +42,6 @@ export const useSheetSelectionChange = (isNeed: boolean,
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const isScalingRef = useRef(false);
-
-    const debounceReset = useMemo(() => debounce(() => {
-        isScalingRef.current = false;
-    }, 300), []);
-
-    const setIsScaling = () => {
-        isScalingRef.current = true;
-        debounceReset();
-    };
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
@@ -138,6 +129,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
             };
             const d1 = refSelectionsRenderService.selectionMoveEnd$.subscribe((selections) => {
                 handleSelectionsChange(selections);
+                isScalingRef.current = false;
             });
 
             const d2 = refSelectionsRenderService.selectionMoving$.pipe(throttleTime(50)).subscribe((selections) => {
@@ -198,16 +190,15 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     disposableCollection.dispose();
                     const controls = refSelectionsRenderService.getSelectionControls();
                     controls.forEach((control, index) => {
-                        disposableCollection.add(control.selectionScaling$.subscribe((e) => {
-                            const rangeText = serializeRange(e);
+                        disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
+                            debounceTime(30),
+                            map((e) => {
+                                return serializeRange(e);
+                            }),
+                            distinctUntilChanged()
+                        ).subscribe((rangeText) => {
+                            isScalingRef.current = true;
                             handleSequenceNodeReplace(rangeText, index);
-                            setIsScaling();
-                        }));
-                        disposableCollection.add(control.selectionMoving$.pipe(map((e) => {
-                            return serializeRange(e);
-                        }), distinctUntilChanged()).subscribe((rangeText) => {
-                            handleSequenceNodeReplace(rangeText, index);
-                            setIsScaling();
                         }));
                     });
                 }, 30);

@@ -198,14 +198,14 @@ export const useSheetSelectionChange = (
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
                 controls.forEach((control, index) => {
-                    disposableCollection.add(control.selectionScaling$.subscribe((e) => {
+                    disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
+                        debounceTime(30),
+                        map((e) => {
+                            return serializeRange(e);
+                        }),
+                        distinctUntilChanged()
+                    ).subscribe((rangeText) => {
                         isScalingRef.current = true;
-                        const rangeText = serializeRange(e);
-                        handleSequenceNodeReplace(rangeText, index);
-                    }));
-                    disposableCollection.add(control.selectionMoving$.pipe(map((e) => {
-                        return serializeRange(e);
-                    }), distinctUntilChanged()).subscribe((rangeText) => {
                         handleSequenceNodeReplace(rangeText, index);
                     }));
                 });

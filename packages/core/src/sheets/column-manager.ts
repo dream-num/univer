@@ -227,15 +227,11 @@ export class ColumnManager {
      */
     getColumnOrCreate(columnPos: number): Partial<IColumnData> {
         const { _columnData } = this;
-        const config = this._config;
         const column = _columnData[columnPos];
         if (column) {
             return column;
         }
-        const create = {
-            w: config.defaultColumnWidth,
-            hd: BooleanNumber.FALSE,
-        };
+        const create = {};
         this._columnData[columnPos] = create;
         return create;
     }

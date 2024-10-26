@@ -130,8 +130,8 @@ export class RowManager {
         if (row) {
             return row;
         }
-        const config = this._config;
-        const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
+
+        const create = {};
         _rowData[rowPos] = create;
 
         return create;

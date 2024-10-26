@@ -15,12 +15,12 @@
  */
 
 import type { Injector, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { ISetRowDataCommandParams } from '../set-row-data.command';
-
+import type { ISetColDataCommandParams } from '../set-col-data.command';
 import { BooleanNumber, ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { SetRowDataMutation } from '../../mutations/set-row-data.mutation';
-import { SetRowDataCommand } from '../set-row-data.command';
+import { SetColDataMutation } from '../../mutations/set-col-data.mutation';
+import { SetColDataCommand } from '../set-col-data.command';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => {
@@ -45,16 +45,17 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => {
                     1: {
                         hd: BooleanNumber.FALSE,
                     },
-                },
-                rowData: {
-                    1: {
-                        hd: BooleanNumber.FALSE,
-                    },
                     5: {
                         custom: {
                             key: 'value',
                         },
                     },
+                },
+                rowData: {
+                    1: {
+                        hd: BooleanNumber.FALSE,
+                    },
+
                 },
             },
         },
@@ -65,14 +66,15 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => {
     };
 };
 
-describe('test set row data commands', () => {
+describe('test set column data commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
 
-    function getRowData(row: number) {
+    function getColumnData(column: number) {
         const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
-        return worksheet.getRowManager().getRow(row);
+        const columnManager = worksheet.getColumnManager();
+        return columnManager.getColumn(column);
     }
 
     beforeEach(() => {
@@ -81,19 +83,19 @@ describe('test set row data commands', () => {
         get = testBed.get;
 
         commandService = get(ICommandService);
-        commandService.registerCommand(SetRowDataCommand);
-        commandService.registerCommand(SetRowDataMutation);
+        commandService.registerCommand(SetColDataCommand);
+        commandService.registerCommand(SetColDataMutation);
     });
 
     afterEach(() => univer.dispose());
 
-    it('should set properties on rows', async () => {
-        expect(getRowData(1)).toEqual({ hd: BooleanNumber.FALSE });
+    it('should set custom properties on columns', async () => {
+        expect(getColumnData(1)).toEqual({ hd: BooleanNumber.FALSE });
 
-        const params: ISetRowDataCommandParams = {
+        const params: ISetColDataCommandParams = {
             unitId: 'test',
             subUnitId: 'sheet1',
-            rowData: {
+            columnData: {
                 1: {
                     custom: {
                         color: 'red',
@@ -108,48 +110,49 @@ describe('test set row data commands', () => {
                     custom: undefined,
                 },
             },
-        };
-        await commandService.executeCommand(SetRowDataCommand.id, params);
 
-        expect(getRowData(1)).toEqual({
+        };
+        await commandService.executeCommand(SetColDataCommand.id, params);
+
+        expect(getColumnData(1)).toEqual({
             hd: BooleanNumber.FALSE,
             custom: {
                 color: 'red',
             },
         });
-        expect(getRowData(2)).toEqual({
+        expect(getColumnData(2)).toEqual({
             custom: {
                 color: 'green',
             },
         });
-        expect(getRowData(5)).toEqual({
+        expect(getColumnData(5)).toEqual({
             custom: undefined,
         });
 
         await commandService.executeCommand(UndoCommand.id);
-        expect(getRowData(1)).toEqual({
+        expect(getColumnData(1)).toEqual({
             hd: BooleanNumber.FALSE,
         });
-        expect(getRowData(2)).toBeUndefined();
-        expect(getRowData(5)).toEqual({
+        expect(getColumnData(2)).toBeUndefined();
+        expect(getColumnData(5)).toEqual({
             custom: {
                 key: 'value',
             },
         });
 
         await commandService.executeCommand(RedoCommand.id);
-        expect(getRowData(1)).toEqual({
+        expect(getColumnData(1)).toEqual({
             hd: BooleanNumber.FALSE,
             custom: {
                 color: 'red',
             },
         });
-        expect(getRowData(2)).toEqual({
+        expect(getColumnData(2)).toEqual({
             custom: {
                 color: 'green',
             },
         });
-        expect(getRowData(5)).toEqual({
+        expect(getColumnData(5)).toEqual({
             custom: undefined,
         });
     });

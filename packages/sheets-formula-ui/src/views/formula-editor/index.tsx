@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { IDisposable } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { useBlur } from '../range-selector/hooks/useBlur';
+import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
+import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
+import { useRefocus } from '../range-selector/hooks/useRefocus';
 import { useResize } from '../range-selector/hooks/useResize';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useClickOutside } from './hooks/useClickOutside';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
 import { useDocHight, useSheetHighlight } from './hooks/useHighlight';
-import { useRefactorEffect } from './hooks/useRefactorEffect';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
@@ -92,22 +94,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
 
-    const focus = useMemo(() => {
-        return () => {
-            if (editor) {
-                const focusId = editorService.getFocusId();
-                if (focusId !== editor.getEditorId()) {
-                    editor.focus();
-                    const selections = editor.getSelectionRanges();
-                    if (!selections.length) {
-                        const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
-                        const offset = Math.max(body.length - 2, 0);
-                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                    }
-                }
-            }
-        };
-    }, [editor]);
+    const focus = useFocus(editor);
 
     const blur = useMemo(() => () => {
         if (editor) {
@@ -132,6 +119,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
     useBlur(editorId, isFocusSet);
+    useRefocus();
+
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(formulaText, editor);
 
@@ -164,19 +153,19 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     }, [editor]);
 
     useEffect(() => {
-        isFocusSet(_isFocus);
-        if (_isFocus) {
-            setTimeout(() => {
+        const time = setTimeout(() => {
+            if (_isFocus) {
+                isFocusSet(_isFocus);
                 focus();
-            }, 300);
-        } else {
-            blur();
-        }
+            }
+        }, 300);
+        return () => {
+            clearTimeout(time);
+        };
     }, [_isFocus]);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
-        const currentEditor = editorService.getFocusEditor();
         if (formulaEditorContainerRef.current) {
             dispose = editorService.register({
                 autofocus: true,
@@ -194,9 +183,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
         return () => {
             dispose?.dispose();
-            if (currentEditor) {
-                currentEditor.focus();
-            }
         };
     }, []);
 

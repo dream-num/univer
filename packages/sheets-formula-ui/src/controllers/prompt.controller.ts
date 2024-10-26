@@ -413,6 +413,10 @@ export class PromptController extends Disposable {
     }
 
     private _closeRangePrompt(editorId: Nullable<string>) {
+        const docId = editorId || this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
+        if (isRangeSelector(docId) || isEmbeddingFormulaEditor(docId)) {
+            return;
+        }
         this._insertSelections = [];
         this._refSelectionsService.clear();
 

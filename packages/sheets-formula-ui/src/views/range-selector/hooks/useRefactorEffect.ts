@@ -24,7 +24,7 @@ import { useEffect, useLayoutEffect } from 'react';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
-export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRange: boolean) => {
+export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
@@ -81,12 +81,4 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string, isOnlyOneRang
             refSelectionsRenderService?.setSkipLastEnabled(false);
         }
     }, [isNeed]);
-
-    useEffect(() => {
-        if (isOnlyOneRange) {
-            refSelectionsRenderService?.setRemainLastEnabled(false);
-        } else {
-            refSelectionsRenderService?.setRemainLastEnabled(true);
-        }
-    }, [isOnlyOneRange]);
 };

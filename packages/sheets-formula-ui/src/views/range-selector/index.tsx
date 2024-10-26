@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { IDisposable, IUnitRangeName } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { createInternalEditorID, debounce, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
@@ -26,18 +23,24 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
-
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { filter } from 'rxjs';
+
+import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useBlur } from './hooks/useBlur';
 
 import { useEditorInput } from './hooks/useEditorInput';
+import { useFocus } from './hooks/useFocus';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
+import { useOnlyOneRange } from './hooks/useOnlyOneRange';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
+import { useRefocus } from './hooks/useRefocus';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
@@ -180,25 +183,18 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
     };
 
-    const focus = useMemo(() => {
-        return () => {
-            if (editor) {
-                editor.focus();
-                const selections = editor.getSelectionRanges();
-                if (!selections.length) {
-                    const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
-                    const offset = Math.max(body.length - 2, 0);
-                    editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                }
-            }
-        };
-    }, [editor]);
+    const focus = useFocus(editor);
 
     useEffect(() => {
-        isFocusSet(_isFocus);
-        if (_isFocus) {
-            focus();
-        }
+        const time = setTimeout(() => {
+            isFocusSet(_isFocus);
+            if (_isFocus) {
+                focus();
+            }
+        }, 300);
+        return () => {
+            clearTimeout(time);
+        };
     }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
@@ -227,7 +223,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useSheetSelectionChange(!rangeDialogVisible && isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
 
-    useRefactorEffect(!rangeDialogVisible && isFocus, unitId, isOnlyOneRange);
+    useRefactorEffect(!rangeDialogVisible && isFocus, unitId);
+
+    useOnlyOneRange(unitId, isOnlyOneRange);
 
     useEditorInput(unitId, rangeString, editor);
 
@@ -236,6 +234,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useBlur(editorId, isFocusSet);
 
     useLeftAndRightArrow(!rangeDialogVisible && isFocus, editor);
+
+    useRefocus();
 
     useEffect(() => {
         if (editor) {
@@ -257,6 +257,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onBlur();
                 // Refresh the component
                 sequenceNodesSet((pre) => [...pre]);
+                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                editor?.focus();
             }
         });
         const d2 = commandService.onCommandExecuted((info) => {
@@ -287,7 +289,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
-        const currentEditor = editorService.getFocusEditor();
         if (containerRef.current) {
             dispose = editorService.register({
                 autofocus: true,
@@ -304,9 +305,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
         return () => {
             dispose?.dispose();
-            if (currentEditor) {
-                currentEditor.focus();
-            }
         };
     }, []);
 
@@ -451,7 +449,8 @@ function RangeSelectorDialog(props: {
 
     useSheetHighlight(visible, unitId, subUnitId, refSelections);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
-    useRefactorEffect(focusIndex >= 0, unitId, isOnlyOneRange);
+    useRefactorEffect(focusIndex >= 0, unitId);
+    useOnlyOneRange(unitId, isOnlyOneRange);
     // 如果只有一个空 range,那么默认自动添加 range
     useEffect(() => {
         if (ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {

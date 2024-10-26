@@ -25,7 +25,8 @@ import { DisposableCollection, IUniverInstanceService, useDependency } from '@un
 import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useRef } from 'react';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
@@ -148,7 +149,7 @@ export const useSheetSelectionChange = (
     }, [refSelectionsRenderService, editor, isSupportAcrossSheet, isNeed]);
 
     useEffect(() => {
-        if (isNeed && refSelectionsRenderService) {
+        if (isNeed && refSelectionsRenderService && editor) {
             const disposableCollection = new DisposableCollection();
             const handleSequenceNodeReplace = (token: string, index: number) => {
                 let currentIndex = 0;
@@ -163,9 +164,6 @@ export const useSheetSelectionChange = (
                         }
                         return node;
                     } else if (node.nodeType === sequenceNodeType.REFERENCE) {
-                        if (!isFinish) {
-                            offset += node.token.length;
-                        }
                         const unitRange = deserializeRangeWithSheet(token);
                         unitRange.unitId = unitRange.unitId === '' ? unitId : unitRange.unitId;
                         unitRange.sheetName = unitRange.sheetName === '' ? currentSheetName : unitRange.sheetName;
@@ -177,42 +175,46 @@ export const useSheetSelectionChange = (
                             } else {
                                 cloneNode.token = serializeRange(unitRange.range);
                             }
+                            offset += cloneNode.token.length;
                             currentIndex++;
+
                             return cloneNode;
+                        }
+                        if (!isFinish) {
+                            offset += node.token.length;
                         }
                         currentIndex++;
                         return node;
+                    }
+                    if (!isFinish) {
+                        offset += node.token.length;
                     }
                     return node;
                 });
                 const result = sequenceNodeToText(newSequenceNodes);
                 handleRangeChange(result, offset || -1);
             };
-            let time = 0 as any;
-            const dispose = refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {
+            const dispose = merge(editor.input$, refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(30)).subscribe(() => {
                 disposableCollection.dispose();
-                time = setTimeout(() => {
-                    const controls = refSelectionsRenderService.getSelectionControls();
-                    controls.forEach((control, index) => {
-                        disposableCollection.add(control.selectionScaling$.subscribe((e) => {
-                            isScalingRef.current = true;
-                            const rangeText = serializeRange(e);
-                            handleSequenceNodeReplace(rangeText, index);
-                        }));
-                        disposableCollection.add(control.selectionMoving$.pipe(map((e) => {
-                            return serializeRange(e);
-                        }), distinctUntilChanged()).subscribe((rangeText) => {
-                            handleSequenceNodeReplace(rangeText, index);
-                        }));
-                    });
-                }, 30);
+                const controls = refSelectionsRenderService.getSelectionControls();
+                controls.forEach((control, index) => {
+                    disposableCollection.add(control.selectionScaling$.subscribe((e) => {
+                        isScalingRef.current = true;
+                        const rangeText = serializeRange(e);
+                        handleSequenceNodeReplace(rangeText, index);
+                    }));
+                    disposableCollection.add(control.selectionMoving$.pipe(map((e) => {
+                        return serializeRange(e);
+                    }), distinctUntilChanged()).subscribe((rangeText) => {
+                        handleSequenceNodeReplace(rangeText, index);
+                    }));
+                });
             });
 
             return () => {
                 dispose.unsubscribe();
                 disposableCollection.dispose();
-                clearTimeout(time);
             };
         }
-    }, [isNeed, refSelectionsRenderService]);
+    }, [isNeed, refSelectionsRenderService, editor]);
 };

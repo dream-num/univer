@@ -1120,6 +1120,7 @@ export class Worksheet {
         return new DocumentDataModel(documentData);
     }
 
+    // Only used for cell edit, and no need to rotate text when edit cell content!
     getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
         const documentModelObject = this._getCellDocumentModel(cell, { ignoreTextRotation: true });
 
@@ -1156,6 +1157,15 @@ export class Worksheet {
             horizontalAlign,
             paddingData,
         };
+    }
+
+    // Only used for cell edit, and no need to rotate text when edit cell content!
+    getCellDocumentModelWithFormula(cell: ICellData): Nullable<IDocumentLayoutObject> {
+        return this._getCellDocumentModel(cell, {
+            isDeepClone: true,
+            displayRawFormula: true,
+            ignoreTextRotation: true,
+        });
     }
 }
 

@@ -21,7 +21,7 @@ import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+// import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface ICancelHyperLinkCommandParams {
     unitId: string;
@@ -56,16 +56,16 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
             return false;
         }
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-        const skeleton = skeletonManagerService.getCurrent()?.skeleton;
-        if (!worksheet || !skeleton) {
+        // const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+        // const skeleton = skeletonManagerService.getCurrent()?.skeleton;
+        if (!worksheet) {
             return false;
         }
         const cellData = worksheet.getCell(row, column);
         if (!cellData) {
             return false;
         }
-        const doc = skeleton.getCellDocumentModelWithFormula(cellData);
+        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
         if (!doc?.documentModel) {
             return false;
         }

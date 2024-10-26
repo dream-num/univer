@@ -20,7 +20,7 @@ import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellLinkContent, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export interface IUpdateHyperLinkCommandParams {
     unitId: string;
@@ -34,7 +34,7 @@ export interface IUpdateHyperLinkCommandParams {
 export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.update-hyper-link',
-    // eslint-disable-next-line max-lines-per-function, complexity
+    // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
         if (!params) {
             return false;
@@ -53,9 +53,9 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
             return false;
         }
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-        const skeleton = skeletonManagerService.getCurrent()?.skeleton;
-        if (!worksheet || !skeleton) {
+        // const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
+        // const skeleton = skeletonManagerService.getCurrent()?.skeleton;
+        if (!worksheet) {
             return false;
         }
         const { payload, display = '' } = link;
@@ -63,7 +63,7 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         if (!cellData) {
             return false;
         }
-        const doc = skeleton.getCellDocumentModelWithFormula(cellData);
+        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
         if (!doc?.documentModel) {
             return false;
         }

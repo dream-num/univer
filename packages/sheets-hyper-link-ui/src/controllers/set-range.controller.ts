@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export class SheetHyperLinkSetRangeController extends Disposable {
     constructor(
@@ -149,12 +149,18 @@ export class SheetHyperLinkSetRangeController extends Disposable {
 
                 if (typeof cell.v === 'string' && Tools.isLegalUrl(cell.v) && cell.v[cell.v.length - 1] !== ' ') {
                     const { unitId, subUnitId } = context;
-                    const renderer = this._renderManagerService.getRenderById(unitId);
-                    const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
-                    if (!skeleton) {
+
+                    const workbook = this._univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
+                    const worksheet = workbook?.getSheetBySheetId(subUnitId);
+                    if (!worksheet) {
                         return next(cell);
                     }
-                    const doc = skeleton.skeleton.getBlankCellDocumentModel(cell);
+                    // const renderer = this._renderManagerService.getRenderById(unitId);
+                    // const skeleton = renderer?.with(SheetSkeletonManagerService).getWorksheetSkeleton(subUnitId);
+                    // if (!skeleton) {
+                    //     return next(cell);
+                    // }
+                    const doc = worksheet.getBlankCellDocumentModel(cell);
                     if (!doc.documentModel) {
                         return next(cell);
                     }

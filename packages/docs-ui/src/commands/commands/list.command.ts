@@ -279,6 +279,7 @@ export interface IToggleCheckListCommandParams {
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
     id: 'doc.command.toggle-check-list',
+
     type: CommandType.COMMAND,
 
     handler: (accessor, params) => {

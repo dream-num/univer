@@ -183,19 +183,23 @@ export function RangeSelector(props: IRangeSelectorProps) {
     const focus = useMemo(() => {
         return () => {
             if (editor) {
-                const focusId = editorService.getFocusId();
-                if (focusId !== editor.getEditorId()) {
-                    editor.focus();
-                    const selections = editor.getSelectionRanges();
-                    if (!selections.length) {
-                        const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
-                        const offset = Math.max(body.length - 2, 0);
-                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                    }
+                editor.focus();
+                const selections = editor.getSelectionRanges();
+                if (!selections.length) {
+                    const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
+                    const offset = Math.max(body.length - 2, 0);
+                    editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
                 }
             }
         };
     }, [editor]);
+
+    useEffect(() => {
+        isFocusSet(_isFocus);
+        if (_isFocus) {
+            focus();
+        }
+    }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
 
@@ -268,15 +272,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d2.dispose();
         };
     }, [isSupportAcrossSheet]);
-
-    useEffect(() => {
-        isFocusSet(_isFocus);
-        if (_isFocus) {
-            setTimeout(() => {
-                focus();
-            }, 300);
-        }
-    }, [_isFocus, focus]);
 
     useEffect(() => {
         if (editor && rangeDialogVisible) {

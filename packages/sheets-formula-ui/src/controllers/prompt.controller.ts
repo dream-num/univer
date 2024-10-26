@@ -16,6 +16,23 @@
 
 // FIXME: why so many calling to close the editor here?
 
+import type {
+    DocumentDataModel,
+    ICommandInfo,
+    IDisposable,
+    IRange,
+    IRangeWithCoord,
+    ITextRun,
+    Nullable,
+    Workbook,
+} from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle,
+} from '@univerjs/sheets';
+import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 import {
     AbsoluteRefType,
     Direction,
@@ -68,6 +85,7 @@ import {
     SheetsSelectionsService,
 } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
+
 import {
     ExpandSelectionCommand,
     getEditorObject,
@@ -80,23 +98,6 @@ import {
 } from '@univerjs/sheets-ui';
 import { IContextMenuService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation, UNI_DISABLE_CHANGING_FOCUS_KEY } from '@univerjs/ui';
 import { distinctUntilChanged, distinctUntilKeyChanged, filter } from 'rxjs';
-import type {
-    DocumentDataModel,
-    ICommandInfo,
-    IDisposable,
-    IRange,
-    IRangeWithCoord,
-    ITextRun,
-    Nullable,
-    Workbook,
-} from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { IAbsoluteRefTypeForRange, ISequenceNode } from '@univerjs/engine-formula';
-
-import type {
-    ISelectionWithStyle,
-} from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
 import { HelpFunctionOperation } from '../commands/operations/help-function.operation';
 import { ReferenceAbsoluteOperation } from '../commands/operations/reference-absolute.operation';
@@ -105,7 +106,6 @@ import { META_KEY_CTRL_AND_SHIFT } from '../common/prompt';
 import { getFormulaRefSelectionStyle } from '../common/selection';
 import { IFormulaPromptService } from '../services/prompt.service';
 import { RefSelectionsRenderService } from '../services/render-services/ref-selections.render-service';
-import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
 
 interface IRefSelection {
     refIndex: number;
@@ -441,7 +441,10 @@ export class PromptController extends Disposable {
             // Theme color should be set when SelectionControl is created, it's too late to set theme color at selecitonEnd(pointerup).
             // The logic below has been moved to syncToEditor.
             // this._allSelectionRenderServices.forEach((r) => this._updateRefSelectionStyle(r, this._isSelectionMovingRefSelections));
-
+            const docID = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
+            if (isRangeSelector(docID) || isEmbeddingFormulaEditor(docID)) {
+                return;
+            }
             const selectionControls = this._allSelectionRenderServices.map((s) => s.getSelectionControls()).flat();
             selectionControls.forEach((c) => {
                 c.disableHelperSelection();

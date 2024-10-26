@@ -71,7 +71,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
         if (isNeed && refSelectionsRenderService) {
             let isFirst = true;
             const handleSelectionsChange = (selections: ISelectionWithCoordAndStyle[]) => {
-                if (isFirst) {
+                if (isFirst || isScalingRef.current) {
                     isFirst = false;
                     return;
                 }
@@ -195,6 +195,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
             let time = 0 as any;
             const dispose = refSelectionsRenderService.selectionMoveEnd$.subscribe(() => {
                 time = setTimeout(() => {
+                    disposableCollection.dispose();
                     const controls = refSelectionsRenderService.getSelectionControls();
                     controls.forEach((control, index) => {
                         disposableCollection.add(control.selectionScaling$.subscribe((e) => {

@@ -129,7 +129,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useSheetHighlight(isFocus, unitId, subUnitId, refSelections);
     useResize(editor);
     useRefactorEffect(isFocus, unitId);
-    useLeftAndRightArrow(editor);
+    useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
     useBlur(editorId, isFocusSet);
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(sequenceNodes, editor);

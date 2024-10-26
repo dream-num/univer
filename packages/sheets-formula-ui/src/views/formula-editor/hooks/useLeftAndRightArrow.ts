@@ -19,14 +19,13 @@ import { CommandType, DisposableCollection, ICommandService, useDependency } fro
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { useEffect } from 'react';
-import { PROMPT_SELECTION_KEYCODE_ARROW_LIST } from '../../../controllers/shortcuts/prompt.shortcut';
 
-export const useLeftAndRightArrow = (editor?: Editor) => {
+export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
     const commandService = useDependency(ICommandService);
     const shortcutService = useDependency(IShortcutService);
 
     useEffect(() => {
-        if (!editor) {
+        if (!editor || !isNeed) {
             return;
         }
         const editorId = editor.getEditorId();
@@ -64,7 +63,7 @@ export const useLeftAndRightArrow = (editor?: Editor) => {
             },
         }));
 
-        PROMPT_SELECTION_KEYCODE_ARROW_LIST.map((keyCode) => {
+        [KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].map((keyCode) => {
             return {
                 id: operationId,
                 binding: keyCode,
@@ -82,5 +81,5 @@ export const useLeftAndRightArrow = (editor?: Editor) => {
         return () => {
             d.dispose();
         };
-    }, [editor]);
+    }, [editor, isNeed]);
 };

@@ -176,6 +176,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
+        const currentEditor = editorService.getFocusEditor();
         if (formulaEditorContainerRef.current) {
             dispose = editorService.register({
                 autofocus: true,
@@ -193,6 +194,9 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
         return () => {
             dispose?.dispose();
+            if (currentEditor) {
+                currentEditor.focus();
+            }
         };
     }, []);
 

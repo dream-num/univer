@@ -289,6 +289,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
+        const currentEditor = editorService.getFocusEditor();
         if (containerRef.current) {
             dispose = editorService.register({
                 autofocus: true,
@@ -305,6 +306,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
         return () => {
             dispose?.dispose();
+            if (currentEditor) {
+                currentEditor.focus();
+            }
         };
     }, []);
 

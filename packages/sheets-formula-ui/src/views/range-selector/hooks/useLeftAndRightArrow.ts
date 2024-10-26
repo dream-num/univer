@@ -38,15 +38,14 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
                 if (range && range.collapsed) {
                     switch (keycode) {
                         case KeyCode.ARROW_LEFT: {
-                            const startOffset = range.startOffset;
-                            const endOffset = range.endOffset;
-                            editor.setSelectionRanges([{ startOffset: startOffset - 1, endOffset: endOffset - 1 }]);
+                            const offset = Math.max(range.startOffset - 1, 0);
+                            editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
                             break;
                         }
                         case KeyCode.ARROW_RIGHT: {
-                            const startOffset = range.startOffset;
-                            const endOffset = range.endOffset;
-                            editor.setSelectionRanges([{ startOffset: startOffset + 1, endOffset: endOffset + 1 }]);
+                            const content = (editor.getDocumentData().body?.dataStream || ',,').length - 2;
+                            const offset = Math.min(range.endOffset + 1, content);
+                            editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
                             break;
                         }
                     }
@@ -63,7 +62,7 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
             },
         }));
 
-        [KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].map((keyCode) => {
+        [KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP].map((keyCode) => {
             return {
                 id: operationId,
                 binding: keyCode,

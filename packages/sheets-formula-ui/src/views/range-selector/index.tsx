@@ -36,6 +36,7 @@ import { useBlur } from './hooks/useBlur';
 import { useEditorInput } from './hooks/useEditorInput';
 import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
+import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
@@ -229,6 +230,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     useVerify(onVerify, sequenceNodes);
 
     useBlur(editorId, isFocusSet);
+
+    useLeftAndRightArrow(!rangeDialogVisible && isFocus, editor);
 
     useEffect(() => {
         if (editor) {

@@ -179,7 +179,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             if (editor) {
                 const focusId = editorService.getFocusId();
                 if (focusId !== editor.getEditorId()) {
-                    editorService.focus(editor.getEditorId());
+                    editor.focus();
                     const selections = editor.getSelectionRanges();
                     if (!selections.length) {
                         const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
@@ -301,7 +301,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         return () => {
             dispose?.dispose();
         };
-    }, [containerRef.current]);
+    }, []);
 
     const handleClick = () => {
         onFocus();

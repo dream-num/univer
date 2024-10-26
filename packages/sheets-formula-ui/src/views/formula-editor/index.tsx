@@ -97,7 +97,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             if (editor) {
                 const focusId = editorService.getFocusId();
                 if (focusId !== editor.getEditorId()) {
-                    editorService.focus(editor?.getEditorId());
+                    editor.focus();
                     const selections = editor.getSelectionRanges();
                     if (!selections.length) {
                         const body = editor.getDocumentData().body?.dataStream ?? '\r\n';
@@ -194,7 +194,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         return () => {
             dispose?.dispose();
         };
-    }, [formulaEditorContainerRef.current]);
+    }, []);
 
     const handleFunctionSelect = (v: string) => {
         const res = handlerFormulaReplace(v);

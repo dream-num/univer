@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { Disposable, Inject, IPermissionService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { type ICellPermission, WorksheetViewPermission } from '@univerjs/sheets';
 
@@ -40,7 +40,7 @@ export class DataValidationFormulaController extends Disposable {
                 continue;
             }
             const { token } = node;
-            const sequenceGrid = deserializeRangeWithSheet(token);
+            const sequenceGrid = deserializeRangeWithSheetWithCache(token);
             const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             let targetSheet: Nullable<Worksheet> = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();

@@ -152,8 +152,7 @@ export { FeatureCalculationManagerService, IFeatureCalculationManagerService } f
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
 export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
-export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
-export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
-export { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
+export { FormulaExecutedStateType, FormulaExecuteStageType, FormulaRuntimeService, type IAllRuntimeData, type IExecutionInProgressParams, IFormulaRuntimeService } from './services/runtime.service';
 export { ISuperTableService } from './services/super-table.service';
 export { SuperTableService } from './services/super-table.service';
+export { deserializeRangeWithSheetWithCache } from './engine/utils/reference-cache';

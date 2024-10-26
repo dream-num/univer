@@ -21,7 +21,7 @@ import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { IEditorBridgeService, IFormulaEditorManagerService, useActiveWorkbook } from '@univerjs/sheets-ui';
-import { KeyCode, ProgressBar } from '@univerjs/ui';
+import { KeyCode } from '@univerjs/ui';
 import clsx from 'clsx';
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
@@ -230,7 +230,6 @@ export function FormulaBar() {
                     <CheckMarkSingle />
                 </span>
             </div>
-            <ProgressBar barColor={progressBarColor} />
         </div>
     );
 }

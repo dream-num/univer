@@ -15,8 +15,9 @@
  */
 
 import type { PropsWithChildren } from 'react';
+import { MoreUpSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import React from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 import styles from './index.module.less';
 
@@ -29,29 +30,59 @@ export interface IFormLayoutProps {
     className?: string;
     contentStyle?: React.CSSProperties;
     error?: string;
+    collapsable?: boolean;
+    defaultCollapsed?: boolean;
 }
 
+const FormLayoutContext = createContext(false);
+
 export const FormLayout = (props: IFormLayoutProps) => {
-    const { label, desc, children, style, className, error, contentStyle } = props;
+    const { label, desc, children, style, className, error, contentStyle, collapsable = false, defaultCollapsed = false } = props;
+    const [collapsed, setCollapsed] = useState(defaultCollapsed);
+    const isInner = useContext(FormLayoutContext);
+
     return (
-        <div className={clsx(styles.formLayout, className)} style={style}>
-            {label && <div className={styles.formLayoutLabel}>{label}</div>}
-            {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
-            {children
-                ? (
-                    <div style={contentStyle} className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
-                        {children}
-                        {error
+        <FormLayoutContext.Provider value={true}>
+            <div className={clsx(styles.formLayout, isInner ? styles.formLayoutInner : '', className)} style={style}>
+                {label && (
+                    <div style={{ cursor: collapsable ? 'pointer' : 'default' }} className={styles.formLayoutLabel} onClick={() => setCollapsed(!collapsed)}>
+                        {label}
+                        {collapsable
                             ? (
-                                <div className={styles.formLayoutError}>
-                                    {error}
-                                </div>
+                                <MoreUpSingle
+                                    style={{
+                                        marginLeft: 4,
+                                        transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                                        transition: 'transform 0.3s',
+                                    }}
+                                />
                             )
                             : null}
                     </div>
-                )
-                : null}
-        </div>
+                )}
+                {collapsed && collapsable
+                    ? null
+                    : (
+                        <>
+                            {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
+                            {children
+                                ? (
+                                    <div style={contentStyle} className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
+                                        {children}
+                                        {error
+                                            ? (
+                                                <div className={styles.formLayoutError}>
+                                                    {error}
+                                                </div>
+                                            )
+                                            : null}
+                                    </div>
+                                )
+                                : null}
+                        </>
+                    )}
+            </div>
+        </FormLayoutContext.Provider>
     );
 };
 

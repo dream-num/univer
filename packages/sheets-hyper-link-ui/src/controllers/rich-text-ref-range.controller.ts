@@ -19,7 +19,7 @@ import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@unive
 import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
-import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
+import { ERROR_RANGE } from '../types/const';
 
 export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
     private _refRangeMap: Map<string, Map<string, ObjectMatrix<IDisposable>>> = new Map();

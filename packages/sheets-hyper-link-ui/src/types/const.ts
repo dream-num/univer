@@ -15,3 +15,4 @@
  */
 
 export const SHEET_HYPER_LINK_UI_PLUGIN = 'SHEET_HYPER_LINK_UI_PLUGIN';
+export const ERROR_RANGE = 'err';

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-export { SheetsHyperLinkCopyPasteController } from './controllers/copy-paste.controller';
 export { InsertLinkShortcut } from './controllers/menu';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
 

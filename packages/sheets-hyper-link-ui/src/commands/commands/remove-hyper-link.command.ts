@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
 import { BuildTextUtils, CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
-import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 
 export interface ICancelHyperLinkCommandParams {
     unitId: string;
@@ -47,7 +45,6 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const hyperLinkModel = accessor.get(HyperLinkModel);
 
         const { unitId, subUnitId, row, column, id } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
@@ -112,28 +109,6 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
             id: SetRangeValuesMutation.id,
             params: undoParams,
         });
-
-        const link = hyperLinkModel.getHyperLinkByLocation(unitId, subUnitId, row, column);
-        if (link) {
-            redos.push({
-                id: RemoveHyperLinkMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    id,
-                },
-            });
-            undos.push({
-                id: AddHyperLinkMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    link: {
-                        ...link,
-                    },
-                } as IAddHyperLinkMutationParams,
-            });
-        }
 
         const res = sequenceExecute(redos, commandService).result;
 

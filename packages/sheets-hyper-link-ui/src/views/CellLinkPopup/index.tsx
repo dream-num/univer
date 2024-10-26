@@ -18,7 +18,6 @@ import type { IHyperLinkPopup } from '../../services/popup.service';
 import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IMessageService, IZenZoneService } from '@univerjs/ui';
 import cs from 'clsx';
@@ -28,6 +27,7 @@ import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { SheetHyperLinkType } from '../../types/enums/hyper-link-type';
 import styles from './index.module.less';
 
 const iconsMap = {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import type { ICellHyperLink } from '@univerjs/sheets-hyper-link';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import type React from 'react';
+import type { ICellHyperLink } from '../types/interfaces/i-hyper-link';
+import { Disposable } from '@univerjs/core';
+import { SheetHyperLinkType } from '../types/enums/hyper-link-type';
 
 export interface ICustomHyperLinkFormProps {
     linkId: string;

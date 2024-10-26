@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
+import type { SheetHyperLinkType } from '../enums/hyper-link-type';
 import type { ISheetUrlParams } from './i-sheet-url-params';
 
 export interface ISheetHyperLinkInfo {

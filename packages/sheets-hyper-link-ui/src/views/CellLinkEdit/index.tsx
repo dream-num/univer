@@ -25,7 +25,6 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { RangeSelector } from '@univerjs/sheets-formula-ui';
-import { SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService, IMarkSelectionService, ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -37,6 +36,7 @@ import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
 import { SheetsHyperLinkSidePanelService } from '../../services/side-panel.service';
 import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
+import { SheetHyperLinkType } from '../../types/enums/hyper-link-type';
 import styles from './index.module.less';
 
 export const CellLinkEdit = () => {

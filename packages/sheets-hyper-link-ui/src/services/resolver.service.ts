@@ -23,10 +23,11 @@ import { ICommandService, IConfigService, Inject, isValidRange, IUniverInstanceS
 import { MessageType } from '@univerjs/design';
 import { deserializeRangeWithSheet, IDefinedNamesService, serializeRange, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
-import { ERROR_RANGE, SheetHyperLinkType } from '@univerjs/sheets-hyper-link';
 import { ScrollToRangeOperation } from '@univerjs/sheets-ui';
 import { IMessageService } from '@univerjs/ui';
 import { PLUGIN_CONFIG_KEY } from '../controllers/config.schema';
+import { ERROR_RANGE } from '../types/const';
+import { SheetHyperLinkType } from '../types/enums/hyper-link-type';
 
 function getContainRange(range: IRange, worksheet: Worksheet) {
     const mergedCells = worksheet.getMergeData();

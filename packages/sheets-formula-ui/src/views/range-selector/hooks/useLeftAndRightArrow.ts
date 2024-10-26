@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Editor } from '@univerjs/docs-ui';
 import { CommandType, DisposableCollection, ICommandService, useDependency } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IShortcutService, KeyCode } from '@univerjs/ui';
 import { useEffect } from 'react';
+import type { Editor } from '@univerjs/docs-ui';
 
 export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
     const commandService = useDependency(ICommandService);
@@ -35,19 +35,17 @@ export const useLeftAndRightArrow = (isNeed: boolean, editor?: Editor) => {
             const selections = editor.getSelectionRanges();
             if (selections.length === 1) {
                 const range = selections[0];
-                if (range && range.collapsed) {
-                    switch (keycode) {
-                        case KeyCode.ARROW_LEFT: {
-                            const offset = Math.max(range.startOffset - 1, 0);
-                            editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                            break;
-                        }
-                        case KeyCode.ARROW_RIGHT: {
-                            const content = (editor.getDocumentData().body?.dataStream || ',,').length - 2;
-                            const offset = Math.min(range.endOffset + 1, content);
-                            editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
-                            break;
-                        }
+                switch (keycode) {
+                    case KeyCode.ARROW_LEFT: {
+                        const offset = Math.max(range.startOffset - 1, 0);
+                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+                        break;
+                    }
+                    case KeyCode.ARROW_RIGHT: {
+                        const content = (editor.getDocumentData().body?.dataStream || ',,').length - 2;
+                        const offset = Math.min(range.endOffset + 1, content);
+                        editor.setSelectionRanges([{ startOffset: offset, endOffset: offset }]);
+                        break;
                     }
                 }
             }

@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable, IDocumentData, IRange, Nullable, Workbook } from '@univerjs/core';
-import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, Tools, UniverInstanceType } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { CustomRangeType, Disposable, DisposableCollection, ICommandService, Inject, isValidRange, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { ERROR_RANGE } from '@univerjs/sheets-hyper-link';
 
 export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
@@ -81,62 +81,6 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
 
     private _registerRange(unitId: string, subUnitId: string, row: number, col: number, p: IDocumentData) {
         const map = this._enusreMap(unitId, subUnitId);
-        const data = Tools.deepClone(p);
-        const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
-            const dataCopy = Tools.deepClone(data);
-            dataCopy.body?.customRanges?.forEach((customRange) => {
-                if (customRange.rangeType === CustomRangeType.HYPERLINK) {
-                    const payload = customRange.properties?.url;
-                    const range = this._isLegalRangeUrl(unitId, payload);
-                    if (range) {
-                        const resultRange = handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo);
-                        const newPayload = `#gid=${subUnitId}&range=${resultRange ? serializeRange(resultRange) : ERROR_RANGE}`;
-                        customRange.properties!.url = newPayload;
-                    }
-                }
-            });
-            const position = handleDefaultRangeChangeWithEffectRefCommands({ startRow: row, endRow: row, startColumn: col, endColumn: col }, commandInfo);
-
-            if (!position) {
-                return {
-                    redos: [],
-                    undos: [],
-                };
-            }
-
-            return {
-                redos: [{
-                    id: SetRangeValuesMutation.id,
-                    params: {
-                        unitId,
-                        subUnitId,
-                        cellValue: {
-                            [position.startRow]: {
-                                [position.startColumn]: {
-                                    p: dataCopy,
-                                },
-                            },
-                        },
-                    },
-                }],
-                undos: [
-                    {
-                        id: SetRangeValuesMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            cellValue: {
-                                [row]: {
-                                    [col]: {
-                                        p: data,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                ],
-            };
-        };
 
         if (p.body?.customRanges?.some((customRange) => customRange.rangeType === CustomRangeType.HYPERLINK && this._isLegalRangeUrl(unitId, customRange.properties?.url))) {
             const disposableCollection = new DisposableCollection();
@@ -145,7 +89,9 @@ export class SheetsHyperLinkRichTextRefRangeController extends Disposable {
                     const payload = customRange.properties?.url;
                     const range = this._isLegalRangeUrl(unitId, payload);
                     if (range) {
-                        disposableCollection.add(this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId));
+                        disposableCollection.add(this._refRangeService.watchRange(unitId, subUnitId, range, (before, after) => {
+                            customRange.properties!.url = `#gid=${subUnitId}&range=${after ? serializeRange(after) : ERROR_RANGE}`;
+                        }));
                     }
                 }
             });

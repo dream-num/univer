@@ -103,15 +103,6 @@ export class RowManager {
     }
 
     /**
-     * Set row data of given row
-     * @param rowPos
-     * @param rowData
-     */
-    setRow(rowPos: number, rowData: Partial<IRowData>) {
-        this._rowData[rowPos] = rowData;
-    }
-
-    /**
      * Remove row data of given row
      * @param rowPos
      */

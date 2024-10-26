@@ -72,7 +72,7 @@ export const SetColDataMutation: IMutation<ISetColDataMutationParams> = {
             }
 
             const currentCol = manager.getColumnOrCreate(Number(colIndex));
-            manager.setColumn(Number(colIndex), Object.assign(currentCol, col));
+            Object.assign(currentCol, col);
         }
 
         return true;

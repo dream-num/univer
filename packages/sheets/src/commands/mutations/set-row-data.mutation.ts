@@ -72,7 +72,7 @@ export const SetRowDataMutation: IMutation<ISetRowDataMutationParams> = {
             }
 
             const currentRow = manager.getRowOrCreate(Number(rowIndex));
-            manager.setRow(Number(rowIndex), Object.assign(currentRow, row));
+            Object.assign(currentRow, row);
         }
 
         return true;

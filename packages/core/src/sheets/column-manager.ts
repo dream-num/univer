@@ -204,15 +204,6 @@ export class ColumnManager {
     }
 
     /**
-     * Set column data of given column
-     * @param columnPos
-     * @param columnData
-     */
-    setColumn(columnPos: number, columnData: Partial<IColumnData>) {
-        this._columnData[columnPos] = columnData;
-    }
-
-    /**
      * Remove column data of given column
      * @param columnPos
      */

@@ -81,7 +81,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
             selectionWithStyle.push({
                 range,
-                primary: undefined,
+                primary: null,
                 style: getFormulaRefSelectionStyle(themeService, themeColor, refIndex.toString()),
             });
         }
@@ -95,8 +95,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
             if (allControls.length === ranges.length) {
                 allControls.forEach((control, index) => {
                     const selection = ranges[index];
-                    const primaryCell = skeleton.getCellByIndex(selection.range.startRow, selection.range.startColumn);
-                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), primaryCell);
+                    control.updateRange(attachRangeWithCoord(skeleton, selection.range), null);
                     control.updateStyle(selection.style!);
                 });
             } else {

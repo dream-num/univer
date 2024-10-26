@@ -26,7 +26,6 @@ import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
-import { generateRandomId } from '@univerjs/core';
 
 export enum FDtreeStateType {
     DEFAULT,
@@ -44,13 +43,13 @@ export enum FDtreeStateType {
  * is used to determine the order of formula calculations.
  */
 export class FormulaDependencyTree {
-    treeId: string = '';
+    treeId: number = -1;
 
     nodeData: Nullable<IExecuteAstNodeData>;
 
-    children: Set<string> = new Set();
+    children: Set<number> = new Set();
 
-    parents: Set<string> = new Set();
+    parents: Set<number> = new Set();
 
     formula: string = '';
 
@@ -74,12 +73,8 @@ export class FormulaDependencyTree {
 
     isCache: boolean = false;
 
-    constructor(treeId?: string) {
-        if (treeId != null) {
-            this.treeId = treeId;
-        } else {
-            this.treeId = generateRandomId(8);
-        }
+    constructor(treeId: number) {
+        this.treeId = treeId;
     }
 
     toJson() {
@@ -227,7 +222,7 @@ export class FormulaDependencyTree {
         this.rangeList.push(...ranges);
     }
 
-    hasChildren(treeId: string) {
+    hasChildren(treeId: number) {
         return this.children.has(treeId);
     }
 

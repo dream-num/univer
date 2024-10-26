@@ -261,13 +261,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'Value is the name of a sheet or a reference for which you want the sheet number. If value is omitted, SHEET returns the number of the sheet that contains the function.' },
         },
     },
     SHEETS: {
-        description: 'Returns the number of sheets in a reference',
-        abstract: 'Returns the number of sheets in a reference',
+        description: 'Returns the number of sheets in a workbook',
+        abstract: 'Returns the number of sheets in a workbook',
         links: [
             {
                 title: 'Instruction',
@@ -275,8 +274,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     TYPE: {

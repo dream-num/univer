@@ -261,13 +261,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '值', detail: '需要其工作表编号的工作表或引用的名称。 如果省略值，SHEET 返回包含 函数的工作表编号。' },
         },
     },
     SHEETS: {
-        description: '返回引用中的工作表数',
-        abstract: '返回引用中的工作表数',
+        description: '返回工作簿中的工作表数',
+        abstract: '返回工作簿中的工作表数',
         links: [
             {
                 title: '教学',
@@ -275,8 +274,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     TYPE: {

@@ -50,7 +50,6 @@ import { INotificationService } from './services/notification/notification.servi
 import { IUIPartsService, UIPartsService } from './services/parts/parts.service';
 import { IPlatformService, PlatformService } from './services/platform/platform.service';
 import { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
-import { IProgressService, ProgressService } from './services/progress/progress.service';
 import { IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 import { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';
 import { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
@@ -112,7 +111,6 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [ILocalFileService, { useClass: DesktopLocalFileService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
-            [IProgressService, { useClass: ProgressService }],
             [CanvasFloatDomService],
             [IUIController, {
                 useFactory: (injector: Injector) => injector.createInstance(DesktopUIController, this._config),

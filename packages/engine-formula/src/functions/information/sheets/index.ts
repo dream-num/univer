@@ -14,31 +14,20 @@
  * limitations under the License.
  */
 
-export enum NodeType {
-    REFERENCE = 1,
-    VALUE = 2,
-    OPERATOR = 3,
-    FUNCTION = 4,
-    LAMBDA = 5,
-    LAMBDA_PARAMETER = 6,
-    ERROR = 7,
-    BASE = 8,
-    ROOT = 9,
-    UNION = 10,
-    PREFIX = 11,
-    SUFFIX = 12,
-    NULL = 13,
-}
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
 
-export const NODE_ORDER_MAP = new Map([
-    [NodeType.REFERENCE, 7],
-    [NodeType.VALUE, 9],
-    [NodeType.OPERATOR, 8],
-    [NodeType.FUNCTION, 6],
-    [NodeType.LAMBDA, 1],
-    [NodeType.LAMBDA_PARAMETER, 2],
-    [NodeType.ROOT, 10],
-    [NodeType.UNION, 3],
-    [NodeType.PREFIX, 4],
-    [NodeType.SUFFIX, 5],
-]);
+export class Sheets extends BaseFunction {
+    override minParams = 0;
+
+    override maxParams = 0;
+
+    override needsSheetsInfo = true;
+
+    override calculate(): BaseValueObject {
+        const { sheetOrder } = this.getSheetsInfo();
+
+        return NumberValueObject.create(sheetOrder.length);
+    }
+}

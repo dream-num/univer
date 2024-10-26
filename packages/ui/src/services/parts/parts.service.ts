@@ -15,10 +15,9 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
+import type { ComponentType } from '../../common/component-manager';
 import { createIdentifier, Disposable, toDisposable } from '@univerjs/core';
 import { type Observable, Subject } from 'rxjs';
-
-import type { ComponentType } from '../../common/component-manager';
 
 type ComponentRenderer = () => ComponentType;
 type ComponentPartKey = BuiltInUIPart | string;

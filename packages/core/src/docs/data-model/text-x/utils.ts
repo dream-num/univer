@@ -18,7 +18,6 @@ import type { ICustomBlock, ICustomDecoration, IDocumentBody, IParagraph, ISecti
 import type { IRetainAction } from './action-types';
 import { UpdateDocsAttributeType } from '../../../shared/command-enum';
 import { Tools } from '../../../shared/tools';
-import { DataStreamTreeTokenType } from '../types';
 import { coverTextRuns } from './apply-utils/update-apply';
 
 export enum SliceBodyType {
@@ -176,7 +175,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
         }
     });
 
-    const newData = `${DataStreamTreeTokenType.CUSTOM_RANGE_START.repeat(leftOffset)}${dataStream}${DataStreamTreeTokenType.CUSTOM_RANGE_END.repeat(rightOffset)}`;
+    const newData = `${dataStream}`;
 
     if (textRuns) {
         if (textRuns[0]) {

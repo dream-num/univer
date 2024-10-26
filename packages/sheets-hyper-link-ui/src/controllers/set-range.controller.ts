@@ -16,7 +16,7 @@
 
 import type { IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
@@ -165,10 +165,10 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             collapsed: false,
                         },
                         body: {
-                            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${cell.v}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                            dataStream: `${cell.v}`,
                             customRanges: [{
                                 startIndex: 0,
-                                endIndex: cell.v.length + 1,
+                                endIndex: cell.v.length - 1,
                                 rangeId: generateRandomId(),
                                 rangeType: CustomRangeType.HYPERLINK,
                                 properties: {

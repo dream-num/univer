@@ -64,7 +64,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             return false;
         }
 
-        const insertRange = BuildTextUtils.selection.getInsertSelection(previousActiveRange, body);
+        const insertRange = previousActiveRange;
         Object.assign(previousActiveRange, insertRange);
         const { startOffset } = previousActiveRange;
 
@@ -95,13 +95,13 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const { dos, retain } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0, body);
+            const { dos } = BuildTextUtils.selection.getDeleteActions(previousActiveRange, segmentId, 0);
 
             textX.push(...dos);
 
             doMutation.params!.textRanges = [{
-                startOffset: startOffset + len + retain,
-                endOffset: startOffset + len + retain,
+                startOffset: startOffset + len,
+                endOffset: startOffset + len,
                 collapsed: true,
             }];
         } else {

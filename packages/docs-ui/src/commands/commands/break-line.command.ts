@@ -86,7 +86,7 @@ export const BreakLineCommand: ICommand = {
 
         const unitId = docDataModel.getUnitId();
 
-        const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
+        const { startOffset, endOffset } = activeTextRange;
 
         const paragraphs = body.paragraphs ?? [];
         const prevParagraph = paragraphs.find((p) => p.startIndex >= startOffset);

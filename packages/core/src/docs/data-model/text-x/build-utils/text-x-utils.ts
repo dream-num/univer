@@ -20,11 +20,9 @@ import type { CustomRangeType, IDocumentBody } from '../../../../types/interface
 import type { DocumentDataModel } from '../../document-data-model';
 import type { IDeleteAction, IRetainAction } from '../action-types';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
-import { DataStreamTreeTokenType } from '../../types';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
-import { excludePointsFromRange, isIntersecting, shouldDeleteCustomRange } from './custom-range';
-import { getDeleteSelection, getSelectionForAddCustomRange } from './selection';
+import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
 
 export interface IDeleteCustomRangeParam {
     rangeId: string;
@@ -116,7 +114,6 @@ export interface IAddCustomRangeTextXParam {
     body: IDocumentBody;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     const { range, rangeId, rangeType, segmentId, wholeEntity, properties, body } = param;
     const actualRange = getSelectionForAddCustomRange(range, body);
@@ -134,104 +131,41 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     let cursor = 0;
     const textX = new TextX();
 
-    // eslint-disable-next-line max-lines-per-function
     const addCustomRange = (startIndex: number, endIndex: number, index: number) => {
-        const relativeCustomRanges = [];
-        for (let i = 0, len = customRanges.length; i < len; i++) {
-            const customRange = customRanges[i];
-            // intersect
-            if (customRange.rangeType === rangeType && Math.max(customRange.startIndex, startIndex) <= Math.min(customRange.endIndex, endIndex)) {
-                relativeCustomRanges.push({ ...customRange });
-            }
+        const relativeCustomRanges = getIntersectingCustomRanges(startIndex, endIndex, customRanges, rangeType);
+        const rangeStartIndex = Math.min((relativeCustomRanges[0]?.startIndex ?? Infinity), startIndex);
+        const rangeEndIndex = Math.max(relativeCustomRanges[relativeCustomRanges.length - 1].endIndex);
 
-            // optimize
-            if (customRange.startIndex > endIndex) {
-                break;
-            }
-        }
-        const deletes = relativeCustomRanges.map((i) => [i.startIndex, i.endIndex]).flat().sort((pre, aft) => pre - aft);
-
-        const range = deletes.length
-            ? {
-                startOffset: Math.min(deletes[0], startIndex),
-                endOffset: Math.max(deletes[deletes.length - 1] + 1, endIndex + 1),
-            }
-            : {
-                startOffset: startIndex,
-                endOffset: endIndex + 1,
-            };
-
-        if (range.startOffset !== cursor) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: range.startOffset - cursor,
-                segmentId,
-            });
-            cursor = range.startOffset;
-        }
-        textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
+        const customRange = {
+            rangeId: index ? `${rangeId}-${index}` : rangeId,
+            rangeType,
+            startIndex: 0,
+            endIndex: 0,
+            wholeEntity,
+            properties: {
+                ...properties,
             },
-            len: 1,
-            line: 0,
+        };
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: rangeStartIndex - cursor,
             segmentId,
         });
-
-        deletes.forEach((index) => {
-            if (index !== cursor) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: index - cursor,
-                    segmentId,
-                });
-                cursor = index;
-            }
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                line: 0,
-                segmentId,
-            });
-            cursor++;
-        });
-
-        if (cursor !== range.endOffset) {
-            textX.push({
-                t: TextXActionType.RETAIN,
-                len: range.endOffset - cursor,
-                segmentId,
-            });
-            cursor = range.endOffset;
-        }
-
         textX.push({
-            t: TextXActionType.INSERT,
-            body: {
-                dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_END,
-                customRanges: [
-                    {
-                        rangeId: index ? `${rangeId}-${index}` : rangeId,
-                        rangeType,
-                        startIndex: -(range.endOffset - range.startOffset - deletes.length + 1),
-                        endIndex: 0,
-                        wholeEntity,
-                        properties: {
-                            ...properties,
-                        },
-                    },
-                ],
-            },
-            len: 1,
-            line: 0,
+            t: TextXActionType.RETAIN,
+            len: rangeEndIndex - rangeStartIndex + 1,
             segmentId,
+            body: {
+                dataStream: '',
+                customRanges: [customRange],
+            },
+            coverType: UpdateDocsAttributeType.REPLACE,
         });
+        cursor = rangeEndIndex;
     };
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
     const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
     newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
-
     return textX;
 }
 
@@ -245,9 +179,9 @@ export function getRetainAndDeleteAndExcludeLineBreak(
     memoryCursor: number = 0,
     preserveLineBreak: boolean = true
 ): Array<IRetainAction | IDeleteAction> {
-    const { startOffset, endOffset } = getDeleteSelection(selection, body);
+    const { startOffset, endOffset } = selection;
     const dos: Array<IRetainAction | IDeleteAction> = [];
-    const { paragraphs = [], dataStream } = body;
+    const { paragraphs = [] } = body;
 
     const textStart = startOffset - memoryCursor;
     const textEnd = endOffset - memoryCursor;
@@ -256,25 +190,7 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
     );
 
-    const relativeCustomRanges = body.customRanges?.filter((customRange) => isIntersecting(customRange.startIndex, customRange.endIndex, startOffset, endOffset - 1));
-    const toDeleteRanges = new Set(relativeCustomRanges?.filter((customRange) => shouldDeleteCustomRange(startOffset, endOffset - startOffset, customRange, dataStream)));
     const retainPoints = new Set<number>();
-    relativeCustomRanges?.forEach((range) => {
-        if (toDeleteRanges.has(range)) {
-            return;
-        }
-
-        if (range.startIndex - memoryCursor >= textStart &&
-            range.startIndex - memoryCursor <= textEnd &&
-            range.endIndex - memoryCursor > textEnd) {
-            retainPoints.add(range.startIndex);
-        }
-        if (range.endIndex - memoryCursor >= textStart &&
-            range.endIndex - memoryCursor <= textEnd &&
-            range.startIndex < textStart) {
-            retainPoints.add(range.endIndex);
-        }
-    });
 
     if (textStart > 0) {
         dos.push({
@@ -322,36 +238,36 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         cursor = textEnd;
     }
 
-    if (!preserveLineBreak) {
-        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
-        if (nextParagraph) {
-            if (nextParagraph.startIndex > cursor) {
-                dos.push({
-                    t: TextXActionType.RETAIN,
-                    len: nextParagraph.startIndex - cursor,
-                    segmentId,
-                });
-                cursor = nextParagraph.startIndex;
-            }
+    // if (!preserveLineBreak) {
+    //     const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
+    //     if (nextParagraph) {
+    //         if (nextParagraph.startIndex > cursor) {
+    //             dos.push({
+    //                 t: TextXActionType.RETAIN,
+    //                 len: nextParagraph.startIndex - cursor,
+    //                 segmentId,
+    //             });
+    //             cursor = nextParagraph.startIndex;
+    //         }
 
-            dos.push({
-                t: TextXActionType.RETAIN,
-                len: 1,
-                segmentId,
-                body: {
-                    dataStream: '',
-                    paragraphs: [
-                        {
-                            ...nextParagraph,
-                            startIndex: 0,
-                            bullet: paragraphInRange?.bullet,
-                        },
-                    ],
-                },
-                coverType: UpdateDocsAttributeType.REPLACE,
-            });
-        }
-    }
+    //         dos.push({
+    //             t: TextXActionType.RETAIN,
+    //             len: 1,
+    //             segmentId,
+    //             body: {
+    //                 dataStream: '',
+    //                 paragraphs: [
+    //                     {
+    //                         ...nextParagraph,
+    //                         startIndex: 0,
+    //                         bullet: paragraphInRange?.bullet,
+    //                     },
+    //                 ],
+    //             },
+    //             coverType: UpdateDocsAttributeType.REPLACE,
+    //         });
+    //     }
+    // }
 
     return dos;
 }

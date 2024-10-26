@@ -121,7 +121,7 @@ export const CellLinkEdit = () => {
                     const doc = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
                     const currentSelection = textSelectionService.getActiveTextRange();
                     const body = doc?.getBody();
-                    const selection = currentSelection && body ? BuildTextUtils.selection.getInsertSelection(currentSelection, body) : null;
+                    const selection = currentSelection && body ? currentSelection : null;
                     const customRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
 
                     setShowLabel(false);

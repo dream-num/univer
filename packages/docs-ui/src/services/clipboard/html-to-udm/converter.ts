@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, skipParseTagNames, Tools } from '@univerjs/core';
 import type { IDocumentBody, IDocumentData, ITable, ITextStyle, Nullable } from '@univerjs/core';
+import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
+import { CustomRangeType, DataStreamTreeTokenType, generateRandomId, skipParseTagNames, Tools } from '@univerjs/core';
 import { genTableSource, getEmptyTableCell, getEmptyTableRow, getTableColumn } from '../../../commands/commands/table/table';
 import { extractNodeStyle } from './parse-node-style';
 import parseToDom from './parse-to-dom';
-import type { IAfterProcessRule, IPastePlugin, IStyleRule } from './paste-plugins/type';
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();
@@ -285,13 +285,7 @@ export class HtmlToUDMService {
 
     private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
         const body = doc.body!;
-        const element = node as HTMLElement;
-        const start = body.dataStream.length;
-        if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
-        }
-
-        return start;
+        return body.dataStream.length;
     }
 
     private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
@@ -299,7 +293,6 @@ export class HtmlToUDMService {
         const element = node as HTMLElement;
 
         if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
             body.customRanges = body.customRanges ?? [];
             body.customRanges.push({
                 startIndex: start,

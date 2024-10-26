@@ -27,7 +27,6 @@ import type {
 } from '../../../../types/interfaces';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -348,35 +347,8 @@ export function insertCustomRanges(
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
-            const oldCustomRange = customRangeMap[customRange.rangeId];
-
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
-            if (oldCustomRange) {
-                if (oldCustomRange.startIndex <= customRange.startIndex &&
-                    oldCustomRange.endIndex >= customRange.endIndex) {
-                    continue;
-                }
-
-                const isClosed =
-                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
-
-                if (isClosed) {
-                    insertCustomRanges.push(customRange);
-                    continue;
-                }
-
-                // old is start
-                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
-                    oldCustomRange.endIndex = customRange.endIndex;
-                    continue;
-                }
-                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
-                    oldCustomRange.startIndex = customRange.startIndex;
-                    continue;
-                }
-            }
             insertCustomRanges.push(customRange);
         }
 
@@ -731,7 +703,6 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const { customRanges } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength - 1;
     const removeCustomRanges: ICustomRange[] = [];
 
@@ -740,15 +711,11 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
-            // delete custom-range start means delete custom-range
-            if (startIndex <= st && endIndex >= st) {
-                removeCustomRanges.push({
-                    ...customRange,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
-                });
+            // delete decoration
+            if (st >= startIndex && ed <= endIndex) {
+                removeCustomRanges.push(customRange);
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
+            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];

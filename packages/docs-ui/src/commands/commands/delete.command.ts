@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
-    BuildTextUtils,
     CommandType,
     DataStreamTreeTokenType,
     generateRandomId,
@@ -30,18 +32,13 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
+
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
-import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
-
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
 import { DeleteCommand, UpdateCommand } from './core-editing.command';
-
-const getDeleteSelection = BuildTextUtils.selection.getDeleteSelection;
 
 export interface IDeleteCustomBlockParams {
     direction: DeleteDirection;
@@ -165,7 +162,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, originBody);
+        const actualRange = activeRange;
         const unitId = docDataModel.getUnitId();
         const { startOffset, collapsed } = actualRange;
 
@@ -344,7 +341,7 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, body);
+        const actualRange = activeRange;
         const { startOffset, collapsed } = actualRange;
         const curGlyph = skeleton.findNodeByCharIndex(startOffset, segmentId, segmentPage);
 
@@ -554,7 +551,7 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const actualRange = getDeleteSelection(activeRange, body, DeleteDirection.RIGHT);
+        const actualRange = activeRange;
         const { startOffset, endOffset, collapsed } = actualRange;
         // No need to delete when the cursor is at the last position of the last paragraph.
         if (startOffset === body.dataStream.length - 2 && collapsed) {

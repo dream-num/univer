@@ -101,7 +101,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         if (docDataModel == null || originBody == null) {
             return false;
         }
-        const selections = originSelections.map((range) => BuildTextUtils.selection.getInsertSelection(range, originBody));
+        const selections = originSelections.map((range) => range);
         const unitId = docDataModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -192,7 +192,7 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
                     segmentId,
                 });
             } else {
-                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor, originBody);
+                const { dos } = BuildTextUtils.selection.getDeleteActions(selection, segmentId, memoryCursor.cursor);
                 textX.push(...dos);
             }
 

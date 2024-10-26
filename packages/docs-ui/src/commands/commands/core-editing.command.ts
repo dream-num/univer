@@ -49,7 +49,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
 
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
@@ -68,10 +67,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
         if (originBody == null) {
             return false;
         }
-        const actualRange = extendLastRange
-            ? BuildTextUtils.selection.getDeleteSelection(range, originBody)
-            : BuildTextUtils.selection.getInsertSelection(range, originBody);
-        const { startOffset, collapsed } = actualRange;
+        const { startOffset, collapsed } = range;
         const cursorMove = cursorOffset ?? body.dataStream.length;
         const textRanges = [
             {
@@ -104,13 +100,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 });
             }
         } else {
-            const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
+            const { dos } = BuildTextUtils.selection.getDeleteActions(range, segmentId, 0);
 
             textX.push(...dos);
 
             doMutation.params.textRanges = [{
-                startOffset: startOffset + cursorMove + retain,
-                endOffset: startOffset + cursorMove + retain,
+                startOffset: startOffset + cursorMove,
+                endOffset: startOffset + cursorMove,
                 collapsed,
             }];
         }
@@ -161,28 +157,16 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         }
 
         const { startOffset } = range;
-        const dataStream = body.dataStream;
         const start = direction === DeleteDirection.LEFT ? startOffset - len : startOffset;
-        const end = start + len - 1;
-        const relativeCustomRanges = body.customRanges?.filter((customRange) => BuildTextUtils.customRange.isIntersecting(customRange.startIndex, customRange.endIndex, start, end));
-        const toDeleteRanges = relativeCustomRanges?.filter((customRange) => BuildTextUtils.customRange.shouldDeleteCustomRange(start, len, customRange, dataStream));
-        const deleteIndexes: number[] = [];
-        for (let i = 0; i < len; i++) {
-            deleteIndexes.push(start + i);
-        }
-        toDeleteRanges?.forEach((range) => {
-            deleteIndexes.push(range.startIndex, range.endIndex);
-        });
-        deleteIndexes.sort((pre, aft) => pre - aft);
-        const deleteStart = deleteIndexes[0];
+
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
             params: {
                 unitId,
                 actions: [],
                 textRanges: [{
-                    startOffset: deleteStart,
-                    endOffset: deleteStart,
+                    startOffset: start,
+                    endOffset: start,
                     collapsed: true,
                 }],
                 debounce: true,
@@ -192,24 +176,19 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
-        let cursor = 0;
-        for (let i = 0; i < deleteIndexes.length; i++) {
-            const deleteIndex = deleteIndexes[i];
-            if (deleteIndex - cursor > 0) {
-                textX.push({
-                    t: TextXActionType.RETAIN,
-                    len: deleteIndex - cursor,
-                    segmentId,
-                });
-            }
-            textX.push({
-                t: TextXActionType.DELETE,
-                len: 1,
-                segmentId,
-                line: 0,
-            });
-            cursor = deleteIndex + 1;
-        }
+        const cursor = 0;
+        textX.push({
+            t: TextXActionType.RETAIN,
+            len: start - cursor,
+            segmentId,
+        });
+
+        textX.push({
+            t: TextXActionType.DELETE,
+            len,
+            segmentId,
+            line: 0,
+        });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
         doMutation.params.actions = jsonX.editOp(textX.serialize(), path);

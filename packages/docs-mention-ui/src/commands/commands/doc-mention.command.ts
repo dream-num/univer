@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, ICommandService } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
-import { deleteCustomRangeFactory, replaceSelectionFactory } from '@univerjs/docs-ui';
 import type { ICommand, IDocumentBody } from '@univerjs/core';
 import type { IDocMention } from '../../types/interfaces/i-mention';
+import { CommandType, CustomRangeType, ICommandService } from '@univerjs/core';
+import { DocSelectionManagerService } from '@univerjs/docs';
+import { deleteCustomRangeFactory, replaceSelectionFactory } from '@univerjs/docs-ui';
 
 export interface IAddDocMentionCommandParams {
     mention: IDocMention;
@@ -41,7 +41,7 @@ export const AddDocMentionCommand: ICommand<IAddDocMentionCommandParams> = {
         if (!activeRange) {
             return false;
         }
-        const dataStream = `${DataStreamTreeTokenType.CUSTOM_RANGE_START} @${mention.label} ${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
+        const dataStream = ` @${mention.label} `;
         const body: IDocumentBody = {
             dataStream,
             customRanges: [{

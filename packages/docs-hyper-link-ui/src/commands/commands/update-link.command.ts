@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { DocumentDataModel, ICommand } from '@univerjs/core';
+import { CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
-import type { DocumentDataModel, ICommand } from '@univerjs/core';
 
 export interface IUpdateDocHyperLinkCommandParams {
     unitId: string;
@@ -54,7 +54,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
-                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${params.label}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                dataStream: `${params.label}`,
                 customRanges: [{
                     rangeId: newId,
                     rangeType: CustomRangeType.HYPERLINK,

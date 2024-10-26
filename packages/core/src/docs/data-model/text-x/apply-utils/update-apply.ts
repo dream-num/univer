@@ -31,8 +31,6 @@ import {
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
-    deleteCustomDecorations,
-    deleteCustomRanges,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
@@ -459,10 +457,31 @@ function updateCustomRanges(
         rangeMap[rangeId] = customRange;
     }
 
-    let removeCustomRanges: ICustomRange[] = [];
+    const removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
+        const removeIndex: number[] = [];
+        for (let index = 0; index < customRanges.length; index++) {
+            const customRange = customRanges[index];
+            const { startIndex, endIndex } = customRange;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                removeCustomRanges.push(customRange);
+                removeIndex.push(index);
+            }
+        }
+
+        for (let index = removeIndex.length - 1; index >= 0; index--) {
+            customRanges.splice(removeIndex[index], 1);
+        }
+
         insertCustomRanges(body, updateBody, 0, currentIndex);
+        updateBody.customRanges?.forEach((customRange) => {
+            const { startIndex, endIndex } = customRange;
+            customRanges.push({
+                ...customRange,
+                startIndex: startIndex + textLength,
+                endIndex: endIndex + textLength,
+            });
+        });
     } else {
         for (const updateCustomRange of updateDataCustomRanges) {
             const { rangeId } = updateCustomRange;
@@ -500,37 +519,57 @@ function updateCustomDecorations(
         body.customDecorations = [];
     }
 
-    let removeCustomDecorations: ICustomDecoration[] = [];
+    const removeCustomDecorations: ICustomDecoration[] = [];
     const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
-
-    for (const customDecoration of body.customDecorations) {
+    const { customDecorations } = body;
+    const { customDecorations: updateDataCustomDecorations = [] } = updateBody;
+    for (const customDecoration of customDecorations) {
         const { id } = customDecoration;
         decorationMap[id] = customDecoration;
     }
 
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
-        insertCustomDecorations(body, updateBody, 0, currentIndex);
-    } else {
-        if (updateBody.customDecorations) {
-            for (const updateCustomDecoration of updateBody.customDecorations) {
-                const { id, ...extra } = updateCustomDecoration;
-                const oldCustomDecoration = decorationMap[id];
-                if (oldCustomDecoration) {
-                    if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
-                        removeCustomDecorations.push(oldCustomDecoration);
-                        continue;
-                    }
-                    Object.assign(oldCustomDecoration, extra);
-                }
+        const removeIndex: number[] = [];
+        for (let index = 0; index < customDecorations.length; index++) {
+            const customDecoration = customDecorations[index];
+            const { startIndex, endIndex } = customDecoration;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                removeCustomDecorations.push(customDecoration);
+                removeIndex.push(index);
             }
+        }
 
-            for (const removeCustomDecoration of removeCustomDecorations) {
-                const { id } = removeCustomDecoration;
-                const index = body.customDecorations.findIndex((d) => d.id === id);
-                if (index !== -1) {
-                    body.customDecorations.splice(index, 1);
+        for (let index = removeIndex.length - 1; index >= 0; index--) {
+            customDecorations.splice(removeIndex[index], 1);
+        }
+
+        insertCustomDecorations(body, updateBody, 0, currentIndex);
+        updateBody.customDecorations?.forEach((customDecoration) => {
+            const { startIndex, endIndex } = customDecoration;
+            customDecorations.push({
+                ...customDecoration,
+                startIndex: startIndex + textLength,
+                endIndex: endIndex + textLength,
+            });
+        });
+    } else {
+        for (const updateCustomDecoration of updateDataCustomDecorations) {
+            const { id } = updateCustomDecoration;
+            const oldCustomDecoration = decorationMap[id];
+            if (oldCustomDecoration) {
+                if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+                    removeCustomDecorations.push(oldCustomDecoration);
+                    continue;
                 }
+                Object.assign(oldCustomDecoration, updateCustomDecoration);
+            }
+        }
+
+        for (const removeCustomDecoration of removeCustomDecorations) {
+            const { id } = removeCustomDecoration;
+            const index = customDecorations.findIndex((d) => d.id === id);
+            if (index !== -1) {
+                customDecorations.splice(index, 1);
             }
         }
     }

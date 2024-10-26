@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import { createInternalEditorID, debounce, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { createInternalEditorID, debounce, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
@@ -465,11 +465,15 @@ function RangeSelectorDialog(props: {
     }, [ranges]);
 
     useEffect(() => {
-        const d = editorService.focusStyle$.pipe(filter((e) => !!e)).subscribe((e) => {
-            if (e !== editorId) {
-                handleClose();
-            }
-        });
+        const d = editorService.focusStyle$
+            .pipe(
+                filter((e) => !!e && DOCS_NORMAL_EDITOR_UNIT_ID_KEY !== e)
+            )
+            .subscribe((e) => {
+                if (e !== editorId) {
+                    handleClose();
+                }
+            });
         return () => {
             d.unsubscribe();
         };

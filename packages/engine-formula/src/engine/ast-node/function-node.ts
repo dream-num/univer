@@ -337,7 +337,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._runtimeService);
 
         if (!Number.isNaN(Number(tokenTrim)) && !this._isParentUnionNode(param)) {
             return ErrorNode.create(ErrorType.VALUE);

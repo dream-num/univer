@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IRTreeItem, IUnitRange, Nullable } from '@univerjs/core';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IDirtyUnitSheetNameMap,
     IFeatureDirtyRangeType,
@@ -47,10 +47,6 @@ export class FormulaDependencyTree {
 
     nodeData: Nullable<IExecuteAstNodeData>;
 
-    children: Set<number> = new Set();
-
-    parents: Set<number> = new Set();
-
     formula: string = '';
 
     row: number = -1;
@@ -70,6 +66,7 @@ export class FormulaDependencyTree {
     formulaId: Nullable<string>;
 
     featureId: Nullable<string>;
+    featureDirtyRanges: IUnitRange[] = [];
 
     isCache: boolean = false;
 
@@ -103,13 +100,9 @@ export class FormulaDependencyTree {
         //     tree.dispose();
         // });
 
-        this.children.clear();
-
         this.rangeList = [];
 
-        this.parents.clear();
-
-        this.nodeData?.node.dispose();
+        // this.nodeData?.node.dispose();
 
         this.nodeData = null;
     }
@@ -209,10 +202,10 @@ export class FormulaDependencyTree {
         return false;
     }
 
-    pushChildren(tree: FormulaDependencyTree) {
-        this.children.add(tree.treeId);
-        tree._pushParent(this);
-    }
+    // pushChildren(tree: FormulaDependencyTree) {
+    //     this.children.add(tree.treeId);
+    //     tree._pushParent(this);
+    // }
 
     /**
      * Add the range corresponding to the current ast node.
@@ -222,12 +215,15 @@ export class FormulaDependencyTree {
         this.rangeList.push(...ranges);
     }
 
-    hasChildren(treeId: number) {
-        return this.children.has(treeId);
-    }
+    // hasChildren(treeId: number) {
+    //     return this.children.has(treeId);
+    // }
 
-    toRTreeItem(): IRTreeItem {
-        return {
+    toRTreeItem(): IUnitRange[] {
+        if (this.featureId != null) {
+            return this.featureDirtyRanges;
+        }
+        return [{
             unitId: this.unitId,
             sheetId: this.subUnitId,
             range: {
@@ -236,8 +232,7 @@ export class FormulaDependencyTree {
                 endRow: this.row,
                 endColumn: this.column,
             },
-            id: this.treeId,
-        };
+        }];
     }
 
     /**
@@ -267,7 +262,7 @@ export class FormulaDependencyTree {
         return false;
     }
 
-    private _pushParent(tree: FormulaDependencyTree) {
-        this.parents.add(tree.treeId);
-    }
+    // private _pushParent(tree: FormulaDependencyTree) {
+    //     this.parents.add(tree.treeId);
+    // }
 }

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import type { IAccessor } from '@univerjs/core';
-import { Inject, Injector } from '@univerjs/core';
+import type { BaseFunction } from '../../functions/base-function';
 
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import type { CellReferenceObject } from '../reference-object/cell-reference-object';
+import type { BaseValueObject } from '../value-object/base-value-object';
+import { Inject } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { suffixToken } from '../../basics/token';
-import type { BaseFunction } from '../../functions/base-function';
 import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { CellReferenceObject } from '../reference-object/cell-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -36,7 +35,8 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 
 export class SuffixNode extends BaseAstNode {
     constructor(
-        private _accessor: IAccessor,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _lexer: Lexer,
         private _operatorString: string,
         private _functionExecutor?: BaseFunction
     ) {
@@ -91,15 +91,15 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
+        // const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
 
-        const lexer = this._accessor.get(Lexer);
+        // const lexer = this._accessor.get(Lexer);
 
         const cellValue = value as CellReferenceObject;
         const range = cellValue.getRangePosition();
         const unitId = cellValue.getUnitId();
         const sheetId = cellValue.getSheetId();
-        const formulaData = currentConfigService.getFormulaData();
+        const formulaData = this._currentConfigService.getFormulaData();
 
         const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.f;
 
@@ -107,7 +107,7 @@ export class SuffixNode extends BaseAstNode {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const lexerNode = lexer.treeBuilder(formulaString);
+        const lexerNode = this._lexer.treeBuilder(formulaString);
 
         return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */
@@ -117,7 +117,8 @@ export class SuffixNode extends BaseAstNode {
 export class SuffixNodeFactory extends BaseAstNodeFactory {
     constructor(
         @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Lexer) private readonly _lexer: Lexer,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService
     ) {
         super();
     }
@@ -141,7 +142,7 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
         if (tokenTrim === suffixToken.PERCENTAGE) {
             functionName = FUNCTION_NAMES_META.DIVIDED;
         } else if (tokenTrim === suffixToken.POUND) {
-            return new SuffixNode(this._injector, tokenTrim);
+            return new SuffixNode(this._currentConfigService, this._lexer, tokenTrim);
         } else {
             return;
         }
@@ -151,6 +152,6 @@ export class SuffixNodeFactory extends BaseAstNodeFactory {
             console.error(`No function ${param}`);
             return ErrorNode.create(ErrorType.NAME);
         }
-        return new SuffixNode(this._injector, tokenTrim, functionExecutor);
+        return new SuffixNode(this._currentConfigService, this._lexer, tokenTrim, functionExecutor);
     }
 }

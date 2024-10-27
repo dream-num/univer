@@ -43,7 +43,7 @@ import { Interpreter } from '../interpreter/interpreter';
 import { generateExecuteAstNodeData, type IExecuteAstNodeData } from '../utils/ast-node-tool';
 import { FormulaDependencyTree } from './dependency-tree';
 
-const FORMULA_CACHE_LRU_COUNT = 100000;
+const FORMULA_CACHE_LRU_COUNT = 5000;
 
 interface IFeatureFormulaParam {
     unitId: string;
@@ -109,24 +109,19 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const treeList = await this._generateTreeList(formulaData, otherFormulaData, unitData);
 
-        const updateTreeList = this._getUpdateTreeListAndMakeDependency(treeList);
+        this._dependencyManagerService.openKdTree();
 
-        let finalTreeList = this._calculateRunList(updateTreeList);
+        const updateTreeList = this._getUpdateTreeListAndMakeDependency();
 
-        const hasFeatureCalculation = this._dependencyFeatureCalculation(finalTreeList);
-
-        if (hasFeatureCalculation) {
-            finalTreeList.forEach((tree) => {
-                tree.resetState();
-            });
-            finalTreeList = this._calculateRunList(finalTreeList);
-        }
+        const finalTreeList = this._calculateRunList(updateTreeList);
 
         const isCycleDependency = this._checkIsCycleDependency(finalTreeList);
 
         if (isCycleDependency) {
             this._runtimeService.enableCycleDependency();
         }
+
+        this._dependencyManagerService.closeKdTree();
 
         return Promise.resolve(finalTreeList);
     }
@@ -145,12 +140,14 @@ export class FormulaDependencyGenerator extends Disposable {
             visited.add(node.treeId);
             recursionStack.add(node.treeId);
 
+            const parents = this._dependencyManagerService.searchDependency(node.toRTreeItem());
+
             // Recur for all the children of this node
-            for (const childTreeId of node.children) {
-                if (!visited.has(childTreeId) && this._isCyclicUtil(childTreeId, visited, recursionStack)) {
+            for (const parentTreeId of parents) {
+                if (!visited.has(parentTreeId) && this._isCyclicUtil(parentTreeId, visited, recursionStack)) {
                     return true;
                 }
-                if (recursionStack.has(childTreeId)) {
+                if (recursionStack.has(parentTreeId)) {
                     return true;
                 }
             }
@@ -295,6 +292,11 @@ export class FormulaDependencyGenerator extends Disposable {
         FDtree.subUnitId = subUnitId;
 
         FDtree.getDirtyData = getDirtyData;
+
+        const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
+        const dirtyRanges = this._convertDirtyRangesToUnitRange(allDependency.dirtyRanges);
+
+        FDtree.featureDirtyRanges = dirtyRanges;
 
         FDtree.featureId = featureId;
 
@@ -641,35 +643,18 @@ export class FormulaDependencyGenerator extends Disposable {
      * Build a formula dependency tree based on the dependency relationships.
      * @param treeList
      */
-    private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
+    private _getUpdateTreeListAndMakeDependency() {
         const newTreeList: FormulaDependencyTree[] = [];
         const existTree = new Set<FormulaDependencyTree>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
 
-        this._dependencyManagerService.openKdTree();
-
-        const allTree: FormulaDependencyTree[] = this._dependencyManagerService.buildDependencyTree(treeList);
+        const allTree: FormulaDependencyTree[] = this._dependencyManagerService.getAllTree();
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
 
         for (let i = 0, len = allTree.length; i < len; i++) {
             const tree = allTree[i];
-
-            // if (dependencyAlgorithm) {
-            //     dependencyTreeCache.dependency(tree);
-            // } else {
-            //     for (let m = 0, mLen = treeList.length; m < mLen; m++) {
-            //         const treeMatch = treeList[m];
-            //         if (tree === treeMatch) {
-            //             continue;
-            //         }
-
-            //         if (tree.dependency(treeMatch)) {
-            //             tree.pushChildren(treeMatch);
-            //         }
-            //     }
-            // }
 
             /**
              * forceCalculate: Mandatory calculation, adding all formulas to dependencies
@@ -692,100 +677,7 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
-        this._dependencyManagerService.closeKdTree();
-
         return newTreeList;
-    }
-
-    private _dependencyFeatureCalculation(newTreeList: FormulaDependencyTree[]) {
-        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
-
-        if (featureMap.size === 0) {
-            return;
-        }
-
-        /**
-         * Clear the dependency relationships of all featureCalculation nodes in the tree.
-         * Because each execution requires rebuilding the reverse dependencies,
-         * the previous dependencies may become outdated due to data changes in applications such as pivot tables,
-         * which can result in an outdated dirty mark range.
-         */
-        this._clearFeatureCalculationNode(newTreeList);
-
-        let hasFeatureCalculation = false;
-
-        featureMap.forEach((subUnitMap, _) => {
-            subUnitMap.forEach((featureMap, _) => {
-                featureMap.forEach((params, featureId) => {
-                    const { unitId, subUnitId, getDirtyData } = params;
-                    const allDependency = getDirtyData(this._currentConfigService.getDirtyData() as IFormulaDirtyData, this._runtimeService.getAllRuntimeData() as IAllRuntimeData);
-                    const dirtyRanges = this._convertDirtyRangesToUnitRange(allDependency.dirtyRanges);
-                    const intersectTrees = this._intersectFeatureCalculation(dirtyRanges, newTreeList, { unitId, subUnitId, featureId });
-                    if (intersectTrees.length > 0) {
-                        let featureTree = this._getExistTreeList({ unitId, subUnitId, featureId }, newTreeList);
-                        if (featureTree == null) {
-                            featureTree = this._getFeatureFormulaTree(featureId, params);
-                            newTreeList.push(featureTree);
-                        }
-                        featureTree.parents = new Set<number>();
-                        intersectTrees.forEach((tree) => {
-                            if (tree.hasChildren(featureTree!.treeId)) {
-                                return;
-                            }
-                            tree.pushChildren(featureTree!);
-                        });
-
-                        hasFeatureCalculation = true;
-                    }
-                });
-            });
-        });
-
-        return hasFeatureCalculation;
-    }
-
-    private _clearFeatureCalculationNode(newTreeList: FormulaDependencyTree[]) {
-        const featureMap = this._featureCalculationManagerService.getReferenceExecutorMap();
-
-        newTreeList.forEach((tree) => {
-            const newChildren = new Set<number>();
-            for (const childTreeId of tree.children) {
-                const child = this._dependencyManagerService.getTreeById(childTreeId);
-                if (!child) {
-                    continue;
-                }
-                if (!child.featureId) {
-                    newChildren.add(childTreeId);
-                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(child.featureId)) {
-                    newChildren.add(childTreeId);
-                }
-            }
-            tree.children = newChildren;
-
-            const newParents = new Set<number>();
-            for (const parentTreeId of tree.parents) {
-                const parent = this._dependencyManagerService.getTreeById(parentTreeId);
-                if (!parent) {
-                    continue;
-                }
-                if (!parent.featureId) {
-                    newParents.add(parentTreeId);
-                } else if (!featureMap.get(tree.unitId)?.get(tree.subUnitId)?.has(parent.featureId)) {
-                    newParents.add(parentTreeId);
-                }
-            }
-            tree.parents = newParents;
-        });
-    }
-
-    private _getExistTreeList(param: IFeatureFormulaParam, treeList: FormulaDependencyTree[]) {
-        const { unitId, subUnitId, featureId } = param;
-        for (let i = 0, len = treeList.length; i < len; i++) {
-            const tree = treeList[i];
-            if (tree.unitId === unitId && tree.subUnitId === subUnitId && tree.featureId === featureId) {
-                return tree;
-            }
-        }
     }
 
     /**
@@ -809,22 +701,6 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
         return unitRange;
-    }
-
-    private _intersectFeatureCalculation(dirtyRanges: IUnitRange[], newTreeList: FormulaDependencyTree[], param: IFeatureFormulaParam) {
-        const dependencyTree = [];
-        const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges);
-        for (let i = 0, len = newTreeList.length; i < len; i++) {
-            const tree = newTreeList[i];
-            if (tree.unitId === param.unitId && tree.subUnitId === param.subUnitId && tree.featureId === param.featureId) {
-                continue;
-            }
-            const isAdded = treeIds.has(tree.treeId);
-            if (isAdded) {
-                dependencyTree.push(tree);
-            }
-        }
-        return dependencyTree;
     }
 
     private _includeTreeFeature(tree: FormulaDependencyTree) {
@@ -1004,7 +880,9 @@ export class FormulaDependencyGenerator extends Disposable {
             // It will clear the array.
             cacheStack.length = 0;
 
-            for (const parentTreeId of tree.parents) {
+            const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
+
+            for (const parentTreeId of searchResults) {
                 const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
                 if (!parentTree) {
                     throw new Error('ParentDependencyTree object is null');

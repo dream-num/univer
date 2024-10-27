@@ -59,14 +59,22 @@ export class LambdaValueObjectObject extends BaseValueObject {
     private _lambdaPrivacyValueMap = new Map<string, FunctionVariantType>();
 
     constructor(
-        private _lambdaNode: BaseAstNode,
+        private _lambdaNode: Nullable<BaseAstNode>,
 
-        private _interpreter: Interpreter,
+        private _interpreter: Nullable<Interpreter>,
 
         private _lambdaPrivacyVarKeys: string[]
     ) {
         super(0);
         this._lambdaPrivacyValueMap.clear();
+    }
+
+    override dispose(): void {
+        this._lambdaPrivacyValueMap.clear();
+        this._lambdaPrivacyValueMap = new Map();
+        this._lambdaNode = null;
+        this._interpreter = null;
+        this._lambdaPrivacyVarKeys = [];
     }
 
     override isLambda() {
@@ -75,7 +83,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
 
     execute(...variants: FunctionVariantType[]) {
         const paramCount = this._lambdaPrivacyVarKeys.length;
-        if (variants.length !== paramCount) {
+        if (variants.length !== paramCount || !this._interpreter || !this._lambdaNode) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
@@ -102,7 +110,10 @@ export class LambdaValueObjectObject extends BaseValueObject {
         return value;
     }
 
-    private _setLambdaNodeValue(node: BaseAstNode) {
+    private _setLambdaNodeValue(node: Nullable<BaseAstNode>) {
+        if (!node) {
+            return;
+        }
         const children = node.getChildren();
         const childrenCount = children.length;
         for (let i = 0; i < childrenCount; i++) {

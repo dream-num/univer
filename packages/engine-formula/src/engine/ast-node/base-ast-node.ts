@@ -58,6 +58,12 @@ export class BaseAstNode {
         });
         this._valueObject?.dispose();
 
+        this._valueObject = null;
+
+        this._children = [];
+
+        this._definedNames = [];
+
         this._parent = null;
     }
 

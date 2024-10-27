@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 
-import { Inject, Injector } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     regexTestSingeRange,
@@ -28,7 +27,6 @@ import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
-import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../reference-object/column-reference-object';
@@ -44,7 +42,8 @@ export class ReferenceNode extends BaseAstNode {
     private _refOffsetY = 0;
 
     constructor(
-        private _accessor: IAccessor,
+        private _currentConfigService: IFormulaCurrentConfigService,
+        private _runtimeService: IFormulaRuntimeService,
         private _operatorString: string,
         private _referenceObject: BaseReferenceObject,
         private _isPrepareMerge: boolean = false
@@ -57,8 +56,8 @@ export class ReferenceNode extends BaseAstNode {
     }
 
     override execute() {
-        const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
-        const runtimeService = this._accessor.get(IFormulaRuntimeService);
+        const currentConfigService = this._currentConfigService;
+        const runtimeService = this._runtimeService;
 
         this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
@@ -104,10 +103,9 @@ export class ReferenceNode extends BaseAstNode {
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @ISuperTableService private readonly _superTableService: ISuperTableService,
+        @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
-        @IFunctionService private readonly _functionService: IFunctionService,
-        @Inject(Injector) private readonly _injector: Injector
+        @IFunctionService private readonly _functionService: IFunctionService
     ) {
         super();
     }
@@ -140,7 +138,10 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         //     return true;
         // }
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, this._injector);
+        const currentConfigService = this._currentConfigService;
+        const runtimeService = this._formulaRuntimeService;
+
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, runtimeService);
 
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
             return;
@@ -148,12 +149,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         let node: Nullable<ReferenceNode>;
         if (regexTestSingeRange(tokenTrim)) {
-            node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
+            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
             if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
             } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
             }
         }
         // else {

@@ -64,8 +64,8 @@ const FloatDomSingle = memo((props: { layer: IFloatDom; id: string }) => {
 
             if (innerDomRef.current) {
                 const style = {
-                    width: `${size.width}px`,
-                    height: `${size.height}px`,
+                    width: `${size.width - 4}px`,
+                    height: `${size.height - 4}px`,
                     left: `${size.absolute.left ? 0 : 'auto'}`,
                     top: `${size.absolute.top ? 0 : 'auto'}`,
                     right: `${size.absolute.left ? 'auto' : 0}`,

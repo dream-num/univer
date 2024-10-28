@@ -75,6 +75,7 @@ import {
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from '../commands/commands/set-selection.command';
+import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ChangeZoomRatioCommand, SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import { AddWorksheetProtectionCommand, ChangeSheetProtectionFromSheetBarCommand, DeleteWorksheetProtectionCommand, DeleteWorksheetProtectionFormSheetBarCommand, SetWorksheetProtectionCommand } from '../commands/commands/worksheet-protection.command';
@@ -93,8 +94,8 @@ import { SheetPermissionOpenDialogOperation } from '../commands/operations/sheet
 import { SheetPermissionOpenPanelOperation } from '../commands/operations/sheet-permission-open-panel.operation';
 import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
-import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 
+import { BORDER_PANEL_COMPONENT } from '../components/border-panel/interface';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -280,6 +281,7 @@ export class SheetUIController extends Disposable {
             SetWorksheetProtectionCommand,
             DeleteWorksheetProtectionFormSheetBarCommand,
             SetProtectionCommand,
+            SetWorksheetColAutoWidthCommand,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

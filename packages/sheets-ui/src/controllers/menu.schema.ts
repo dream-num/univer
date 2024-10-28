@@ -39,7 +39,7 @@ import {
     SetSelectedRowsVisibleCommand, SetTabColorCommand,
     SetTextRotationCommand,
     SetTextWrapCommand,
-    SetVerticalTextAlignCommand, SetWorksheetColIsAutoWidthCommand, SetWorksheetHideCommand,
+    SetVerticalTextAlignCommand, SetWorksheetHideCommand,
     SetWorksheetRowIsAutoHeightCommand,
     ToggleGridlinesCommand,
 } from '@univerjs/sheets';
@@ -80,6 +80,7 @@ import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/co
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
 import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
     ChangeSheetProtectionFromSheetBarCommand,
@@ -487,7 +488,7 @@ export const menuSchema: MenuSchemaType = {
                 order: 3,
                 menuItemFactory: SetColWidthMenuItemFactory,
             },
-            [SetWorksheetColIsAutoWidthCommand.id]: {
+            [SetWorksheetColAutoWidthCommand.id]: {
                 order: 4,
                 menuItemFactory: ColAutoWidthMenuItemFactory,
             },

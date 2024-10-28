@@ -57,7 +57,6 @@ import {
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
     SetWorksheetActiveOperation,
-    SetWorksheetColIsAutoWidthCommand,
     SetWorksheetColWidthMutation,
     SetWorksheetRowIsAutoHeightCommand,
     SetWorksheetRowIsAutoHeightMutation,
@@ -111,6 +110,7 @@ import {
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
@@ -994,7 +994,7 @@ export function FitContentMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
 export function ColAutoWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: SetWorksheetColIsAutoWidthCommand.id,
+        id: SetWorksheetColAutoWidthCommand.id,
         type: MenuItemType.BUTTON,
         icon: 'AutoWidth',
         title: 'rightClick.fitContent',

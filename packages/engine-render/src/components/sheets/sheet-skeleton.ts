@@ -558,23 +558,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         return false;
     }
 
-    private _hasUnMergedCellInColumn(columnIndex: number, startRow: number, endRow: number): boolean {
-        const mergeData = this.worksheet.getMergeData();
-        if (!mergeData) {
-            return false;
-        }
-
-        for (let i = startRow; i <= endRow; i++) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(columnIndex, i);
-
-            if (!isMerged && !isMergedMainCell) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     //#region auto height
     /**
      * Calc all auto height by getDocsSkeletonPageSize in ranges
@@ -606,7 +589,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
 
                 const hasUnMergedCell = this._hasUnMergedCellInRow(rowIndex, startColumn, endColumn);
-                // const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
 
                 if (hasUnMergedCell) {
                     const autoHeight = this._calculateRowAutoHeight(rowIndex);
@@ -712,8 +694,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 // If the row has already been calculated, it does not need to be recalculated
                 if (calculatedCols.has(colIndex)) continue;
 
-                // const mergedRanges = this.worksheet.getMergedCellRange(startRow, startColumn, endRow, endColumn);
-
                 const autoWidth = this._calculateColWidth(colIndex);
                 calculatedCols.add(colIndex);
                 results.push({
@@ -768,6 +748,8 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
         }
 
+        // create a array, which contains all rows need to check
+        // array [start ... end] + additional arr
         const createRowSequence = (start: number, end: number, additionalArr: number[] | Set<number>) => {
             const range = Array.from(
                 { length: end - start + 1 },
@@ -1816,8 +1798,9 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!columnDataItem) {
                     continue;
                 }
-                const { w = defaultColumnWidth } = columnDataItem;
-                columnWidth = w;
+                if (columnDataItem.w != null) {
+                    columnWidth = columnDataItem.w;
+                }
 
                 if (columnDataItem.hd === BooleanNumber.TRUE) {
                     columnWidth = 0;

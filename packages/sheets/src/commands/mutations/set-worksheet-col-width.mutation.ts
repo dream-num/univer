@@ -56,30 +56,6 @@ export const SetWorksheetColWidthMutationFactory = (
     };
 };
 
-export const createAutoColWidthUndoMutationsByRedos = (
-    params: ISetWorksheetColWidthMutationParams,
-    worksheet: Worksheet
-): ISetWorksheetColWidthMutationParams => {
-    const { unitId, subUnitId, ranges } = params;
-    const colWidthObj: IObjectArrayPrimitiveType<Nullable<number>> = {};
-    const manager = worksheet.getColumnManager();
-
-    for (let i = 0; i < ranges.length; i++) {
-        const range = ranges[i];
-        for (let j = range.startColumn; j < range.endColumn + 1; j++) {
-            const col = manager.getColumnOrCreate(j);
-            colWidthObj[j] = col.w;
-        }
-    }
-
-    return {
-        unitId,
-        subUnitId,
-        ranges,
-        colWidth: colWidthObj,
-    };
-};
-
 /**
  * Set width of column manually
  */

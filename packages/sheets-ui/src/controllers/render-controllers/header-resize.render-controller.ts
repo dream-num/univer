@@ -22,9 +22,9 @@ import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderModule, Spreads
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
-    ISetWorksheetColIsAutoWidthCommandParams,
     ISetWorksheetRowIsAutoHeightCommandParams,
 } from '@univerjs/sheets';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import {
     createInterceptorKey,
     Disposable,
@@ -34,12 +34,13 @@ import {
     RANGE_TYPE,
 } from '@univerjs/core';
 import { CURSOR_TYPE, Rect, SHEET_VIEWPORT_KEY, Vector2 } from '@univerjs/engine-render';
+
 import {
     DeltaColumnWidthCommand,
-    DeltaRowHeightCommand, SetWorksheetColIsAutoWidthCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
+    DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService,
 } from '@univerjs/sheets';
-
 import { Subscription } from 'rxjs';
+import { SetWorksheetColAutoWidthCommand } from '../../commands/commands/set-worksheet-auto-col-width.command';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY } from '../../common/keys';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
@@ -522,7 +523,7 @@ export class HeaderResizeRenderController extends Disposable implements IRenderM
                         }
 
                         this._commandService.executeCommand<ISetWorksheetColIsAutoWidthCommandParams>(
-                            SetWorksheetColIsAutoWidthCommand.id, { ranges }
+                            SetWorksheetColAutoWidthCommand.id, { ranges }
                         );
                         this._columnResizeRect?.hide();
                         break;

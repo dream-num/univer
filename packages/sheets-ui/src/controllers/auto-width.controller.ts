@@ -14,47 +14,62 @@
  * limitations under the License.
  */
 
-import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, Nullable, Workbook } from '@univerjs/core';
+import type { IColAutoWidthInfo, IObjectArrayPrimitiveType, Nullable, Worksheet } from '@univerjs/core';
 import type { RenderManagerService } from '@univerjs/engine-render';
 import type {
-    ISetWorksheetColIsAutoWidthCommandParams,
     ISetWorksheetColWidthMutationParams,
 } from '@univerjs/sheets';
+import type { ISetWorksheetColIsAutoWidthCommandParams } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { Disposable, Inject, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import {
-    createAutoColWidthUndoMutationsByRedos,
-    SetWorksheetColIsAutoWidthCommand,
+    getSheetCommandTarget,
     SetWorksheetColWidthMutation,
-    SheetInterceptorService,
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 export const AFFECT_LAYOUT_STYLES = ['ff', 'fs', 'tr', 'tb'];
 
+export const createAutoColWidthUndoMutationsByRedos = (
+    params: ISetWorksheetColWidthMutationParams,
+    worksheet: Worksheet
+): ISetWorksheetColWidthMutationParams => {
+    const { unitId, subUnitId, ranges } = params;
+    const colWidthObj: IObjectArrayPrimitiveType<Nullable<number>> = {};
+    const manager = worksheet.getColumnManager();
+
+    for (let i = 0; i < ranges.length; i++) {
+        const range = ranges[i];
+        for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+            const col = manager.getColumnOrCreate(j);
+            colWidthObj[j] = col.w;
+        }
+    }
+
+    return {
+        unitId,
+        subUnitId,
+        ranges,
+        colWidth: colWidthObj,
+    };
+};
+
 export class AutoWidthController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
-        this._initialize();
     }
 
     getUndoRedoParamsOfColWidth(params: Required<ISetWorksheetColIsAutoWidthCommandParams>) {
         const defaultValue = { redos: [], undos: [] };
         const { _univerInstanceService: univerInstanceService } = this;
-        const unitId = params.unitId;
-        const subUnitId = params.subUnitId;
-        if (!unitId || !subUnitId) return defaultValue;
 
-        const workbook = univerInstanceService.getUnit<Workbook>(unitId);
-        if (!workbook) return defaultValue;
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return defaultValue;
 
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return defaultValue;
-
+        const { unitId, subUnitId, worksheet } = target;
         const sheetSkeletonService = this._renderManagerService.getRenderById(unitId)!.with<SheetSkeletonManagerService>(SheetSkeletonManagerService);
 
         if (!sheetSkeletonService.getCurrent()) return defaultValue;
@@ -87,23 +102,5 @@ export class AutoWidthController extends Disposable {
                 },
             ],
         };
-    }
-
-    private _initialize() {
-        const { _sheetInterceptorService: sheetInterceptorService } = this;
-
-        // intercept 'sheet.command.set-col-is-auto-width' command.
-        this.disposeWithMe(sheetInterceptorService.interceptCommand({
-            getMutations: (command: { id: string; params: Required<ISetWorksheetColIsAutoWidthCommandParams> }) => {
-                if (command.id !== SetWorksheetColIsAutoWidthCommand.id) {
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                }
-
-                return this.getUndoRedoParamsOfColWidth(command.params);
-            },
-        }));
     }
 }

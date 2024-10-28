@@ -143,7 +143,7 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
                 dataStream: '',
                 customRanges: [customRange],
             },
-            coverType: UpdateDocsAttributeType.REPLACE,
+            coverType: UpdateDocsAttributeType.COVER,
         });
         cursor = rangeEndIndex;
     };

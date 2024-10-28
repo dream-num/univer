@@ -36,7 +36,6 @@ import {
     deleteTables,
     deleteTextRuns,
     insertCustomBlocks,
-    insertCustomDecorations,
     insertParagraphs,
     insertSectionBreaks,
     insertTables,
@@ -545,13 +544,12 @@ function updateCustomDecorations(
             customDecorations.splice(removeIndex[index], 1);
         }
 
-        insertCustomDecorations(body, updateBody, 0, currentIndex);
         updateBody.customDecorations?.forEach((customDecoration) => {
             const { startIndex, endIndex } = customDecoration;
             customDecorations.push({
                 ...customDecoration,
-                startIndex: startIndex + textLength,
-                endIndex: endIndex + textLength,
+                startIndex: startIndex + currentIndex,
+                endIndex: endIndex + currentIndex,
             });
         });
     } else {
@@ -564,6 +562,8 @@ function updateCustomDecorations(
                     continue;
                 }
                 Object.assign(oldCustomDecoration, updateCustomDecoration);
+            } else {
+                customDecorations.push(updateCustomDecoration);
             }
         }
 

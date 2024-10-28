@@ -14,23 +14,63 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
 import type {
     IDirtyUnitSheetNameMap,
     IFeatureDirtyRangeType,
     IRuntimeUnitDataType,
     IUnitExcludedCell,
 } from '../../basics/common';
-
 import type { IFormulaDirtyData } from '../../services/current-data.service';
 import type { IAllRuntimeData } from '../../services/runtime.service';
 
+import type { AstRootNode } from '../ast-node/ast-root-node';
 import type { IExecuteAstNodeData } from '../utils/ast-node-tool';
+
+import { type IRange, type IUnitRange, moveRangeByOffset, type Nullable } from '@univerjs/core';
 
 export enum FDtreeStateType {
     DEFAULT,
     ADDED,
     SKIP,
+}
+
+export class FormulaDependencyTreeShareData {
+    formulaId: Nullable<string>;
+
+    subUnitId: string = '';
+
+    unitId: string = '';
+
+    node: Nullable<AstRootNode>;
+    rangeList: IUnitRange[] = [];
+
+    formula: string = '';
+
+    row: number = -1;
+
+    column: number = -1;
+
+    rowCount: number = Number.NEGATIVE_INFINITY;
+
+    columnCount: number = Number.NEGATIVE_INFINITY;
+
+    dispose(): void {
+        // this.children.forEach((tree) => {
+        //     tree.dispose();
+        // });
+
+        this.rangeList = [];
+
+        // this.nodeData?.node.dispose();
+
+        this.node = null;
+    }
+}
+
+export enum FormulaDependencyTreeType {
+    NORMAL_FORMULA,
+    OTHER_FORMULA,
+    FEATURE_FORMULA,
 }
 
 // export interface IUnitRangeWithToken {
@@ -45,44 +85,92 @@ export enum FDtreeStateType {
 export class FormulaDependencyTree {
     treeId: number = -1;
 
-    nodeData: Nullable<IExecuteAstNodeData>;
-
-    formula: string = '';
-
-    row: number = -1;
-
-    column: number = -1;
-
-    rowCount: number = Number.NEGATIVE_INFINITY;
-
-    columnCount: number = Number.NEGATIVE_INFINITY;
-
-    subUnitId: string = '';
-
-    unitId: string = '';
-
-    rangeList: IUnitRange[] = [];
-
-    formulaId: Nullable<string>;
-
     featureId: Nullable<string>;
     featureDirtyRanges: IUnitRange[] = [];
 
     isCache: boolean = false;
 
+    share: Nullable<FormulaDependencyTreeShareData>;
+
+    refOffsetX: number = 0;
+    refOffsetY: number = 0;
+
+    type: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
+
     constructor(treeId: number) {
         this.treeId = treeId;
     }
 
+    get row() {
+        if (this.share == null) {
+            return -1;
+        }
+        return this.share.row + this.refOffsetY;
+    }
+
+    get column() {
+        if (this.share == null) {
+            return -1;
+        }
+        return this.share.column + this.refOffsetX;
+    }
+
+    get unitId() {
+        return this.share?.unitId || '';
+    }
+
+    get subUnitId() {
+        return this.share?.subUnitId || '';
+    }
+
+    get rowCount() {
+        return this.share?.rowCount || Number.NEGATIVE_INFINITY;
+    }
+
+    get columnCount() {
+        return this.share?.columnCount || Number.NEGATIVE_INFINITY;
+    }
+
+    get formulaId() {
+        return this.share?.formulaId;
+    }
+
+    get formula() {
+        return this.share?.formula || '';
+    }
+
+    get rangeList() {
+        const rangeList = this.share?.rangeList || [];
+        const results = [];
+        for (let r = 0, len = rangeList.length; r < len; r++) {
+            const unitRange = rangeList[r];
+            const { unitId, sheetId, range } = unitRange;
+
+            const newRange = moveRangeByOffset(range, this.refOffsetX, this.refOffsetY);
+
+            results.push({
+                unitId,
+                sheetId,
+                range: newRange,
+            });
+        }
+
+        return results;
+    }
+
+    get nodeData(): IExecuteAstNodeData {
+        return {
+            node: this.share?.node,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
     toJson() {
         return {
-            formula: this.formula,
-            row: this.row,
-            column: this.column,
-            subUnitId: this.subUnitId,
-            unitId: this.unitId,
-            formulaId: this.formulaId,
-            featureId: this.featureId,
+            formula: this.share?.formula,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
         };
     }
 
@@ -96,15 +184,8 @@ export class FormulaDependencyTree {
     private _state = FDtreeStateType.DEFAULT;
 
     dispose(): void {
-        // this.children.forEach((tree) => {
-        //     tree.dispose();
-        // });
-
-        this.rangeList = [];
-
-        // this.nodeData?.node.dispose();
-
-        this.nodeData = null;
+        this.share = null;
+        this.featureDirtyRanges = [];
     }
 
     resetState() {
@@ -133,7 +214,14 @@ export class FormulaDependencyTree {
         const endRow = range.endRow;
         const endColumn = range.endColumn;
 
-        if (this.row < startRow || this.row > endRow || this.column < startColumn || this.column > endColumn) {
+        if (this.share == null) {
+            return false;
+        }
+
+        const currentRow = this.share.row + this.refOffsetY;
+        const currentColumn = this.share.column + this.refOffsetX;
+
+        if (currentRow < startRow || currentRow > endRow || currentColumn < startColumn || currentColumn > endColumn) {
             return false;
         }
 
@@ -141,12 +229,18 @@ export class FormulaDependencyTree {
     }
 
     dependencySheetName(dirtyUnitSheetNameMap?: IDirtyUnitSheetNameMap) {
-        if (this.rangeList.length === 0 || dirtyUnitSheetNameMap == null) {
+        if (this.share == null) {
             return false;
         }
 
-        for (let r = 0, len = this.rangeList.length; r < len; r++) {
-            const unitRange = this.rangeList[r];
+        const rangeList = this.share.rangeList;
+
+        if (rangeList.length === 0 || dirtyUnitSheetNameMap == null) {
+            return false;
+        }
+
+        for (let r = 0, len = rangeList.length; r < len; r++) {
+            const unitRange = rangeList[r];
             const { unitId, sheetId } = unitRange;
 
             /**
@@ -162,12 +256,18 @@ export class FormulaDependencyTree {
     }
 
     isExcludeRange(unitExcludedCell: Nullable<IUnitExcludedCell>) {
-        if (this.rangeList.length === 0) {
+        if (this.share == null) {
             return false;
         }
 
-        for (let r = 0, len = this.rangeList.length; r < len; r++) {
-            const unitRange = this.rangeList[r];
+        const rangeList = this.rangeList;
+
+        if (rangeList.length === 0) {
+            return false;
+        }
+
+        for (let r = 0, len = rangeList.length; r < len; r++) {
+            const unitRange = rangeList[r];
             const { unitId, sheetId, range } = unitRange;
 
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
@@ -212,7 +312,11 @@ export class FormulaDependencyTree {
      * @param range
      */
     pushRangeList(ranges: IUnitRange[]) {
-        this.rangeList.push(...ranges);
+        this.share?.rangeList.push(...ranges);
+    }
+
+    shouldBePushRangeList() {
+        return this.share?.rangeList.length === 0 && this.type !== FormulaDependencyTreeType.FEATURE_FORMULA;
     }
 
     // hasChildren(treeId: number) {
@@ -223,14 +327,22 @@ export class FormulaDependencyTree {
         if (this.featureId != null) {
             return this.featureDirtyRanges;
         }
+
+        if (this.share == null) {
+            return [];
+        }
+
+        const currentRow = this.row;
+        const currentColumn = this.column;
+
         return [{
             unitId: this.unitId,
             sheetId: this.subUnitId,
             range: {
-                startRow: this.row,
-                startColumn: this.column,
-                endRow: this.row,
-                endColumn: this.column,
+                startRow: currentRow,
+                startColumn: currentColumn,
+                endRow: currentRow,
+                endColumn: currentColumn,
             },
         }];
     }
@@ -239,28 +351,28 @@ export class FormulaDependencyTree {
      * Determine whether it is dependent on other trees.
      * @param dependenceTree
      */
-    dependency(dependenceTree: FormulaDependencyTree) {
-        if (this.rangeList.length === 0) {
-            return false;
-        }
+    // dependency(dependenceTree: FormulaDependencyTree) {
+    //     if (this.rangeList.length === 0) {
+    //         return false;
+    //     }
 
-        for (let r = 0, len = this.rangeList.length; r < len; r++) {
-            const unitRange = this.rangeList[r];
-            const unitId = unitRange.unitId;
-            const sheetId = unitRange.sheetId;
-            const range = unitRange.range;
+    //     for (let r = 0, len = this.rangeList.length; r < len; r++) {
+    //         const unitRange = this.rangeList[r];
+    //         const unitId = unitRange.unitId;
+    //         const sheetId = unitRange.sheetId;
+    //         const range = unitRange.range;
 
-            if (
-                dependenceTree.unitId === unitId &&
-                dependenceTree.subUnitId === sheetId &&
-                dependenceTree.inRangeData(range)
-            ) {
-                return true;
-            }
-        }
+    //         if (
+    //             dependenceTree.unitId === unitId &&
+    //             dependenceTree.subUnitId === sheetId &&
+    //             dependenceTree.inRangeData(range)
+    //         ) {
+    //             return true;
+    //         }
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     // private _pushParent(tree: FormulaDependencyTree) {
     //     this.parents.add(tree.treeId);

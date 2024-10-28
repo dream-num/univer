@@ -23,7 +23,6 @@ import { FormulaEditor, useSidebarClickWithoutInput } from '@univerjs/sheets-for
 import React, { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
-import { WrapperError } from '../../wrapper-error/WrapperError';
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
 
@@ -46,7 +45,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         }
         return '=';
     });
-    const [formulaError, formulaErrorSet] = useState('');
+    const [formulaError, formulaErrorSet] = useState<string | undefined>(undefined);
 
     const getResult = (config: {
         style: IHighlightCell['style'];
@@ -71,7 +70,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
             handler: (v, _c, next) => {
-                if (!formula || formula.length === 1 || !formula.startsWith('=')) {
+                if (formulaError || formula.length === 1 || !formula.startsWith('=')) {
                     formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
                     return false;
                 }
@@ -79,7 +78,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             },
         });
         return dispose as () => void;
-    }, [formula]);
+    }, [formulaError, formula]);
 
     const _onChange = (config: {
         formula: string;
@@ -92,27 +91,33 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });
+
     return (
         <div ref={divEleRef}>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
 
-                <WrapperError errorText={formulaError}>
-                    <FormulaEditor
-                        onChange={(formula) => {
-                            formulaSet(formula);
-                            _onChange({ style, formula });
-                            formulaErrorSet('');
-                        }}
-                        onFocus={() => { isFocusFormulaEditorSet(true); }}
-                        actions={formulaEditorActionsRef.current}
-                        isFocus={isFocusFormulaEditor}
-                        initValue={formula as any}
-                        unitId={workbook.getUnitId()}
-                        subUnitId={worksheet?.getSheetId()}
-                    >
-                    </FormulaEditor>
-                </WrapperError>
+                <FormulaEditor
+                    onChange={(formula) => {
+                        formulaSet(formula);
+                        _onChange({ style, formula });
+                    }}
+                    onVerify={(result, formula) => {
+                        if (!result || formula.length === 1) {
+                            formulaErrorSet(localeService.t('sheet.cf.errorMessage.formulaError'));
+                        } else {
+                            formulaErrorSet(undefined);
+                        }
+                    }}
+                    errorText={formulaError}
+                    onFocus={() => { isFocusFormulaEditorSet(true); }}
+                    actions={formulaEditorActionsRef.current}
+                    isFocus={isFocusFormulaEditor}
+                    initValue={formula as any}
+                    unitId={workbook.getUnitId()}
+                    subUnitId={worksheet?.getSheetId()}
+                >
+                </FormulaEditor>
 
             </div>
 

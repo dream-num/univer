@@ -35,6 +35,7 @@ import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
 import { useDocHight, useSheetHighlight } from './hooks/useHighlight';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
+import { useVerify } from './hooks/useVerify';
 import styles from './index.module.less';
 import { SearchFunction } from './search-function/SearchFunction';
 import { getFormulaText } from './utils/getFormulaText';
@@ -45,6 +46,7 @@ export interface IFormulaEditorProps {
     initValue: `=${string}`;
     onChange: (text: string) => void;
     errorText?: string | ReactNode;
+    onVerify?: (res: boolean, result: string) => void;
     isFocus?: boolean;
     onFocus?: () => void;
     onBlur?: () => void;
@@ -58,6 +60,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const { errorText, initValue, unitId, subUnitId, isFocus: _isFocus = true, isSupportAcrossSheet = false,
             onFocus = noop,
             onChange,
+            onVerify,
             actions,
     } = props;
 
@@ -90,11 +93,24 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const [isFocus, isFocusSet] = useState(_isFocus);
     const formulaEditorContainerRef = useRef(null);
     const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
+    const isError = useMemo(() => errorText !== undefined, [errorText]);
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
-
+    useVerify(onVerify, formulaWithoutEqualSymbol);
     const focus = useFocus(editor);
+
+    useEffect(() => {
+        const time = setTimeout(() => {
+            isFocusSet(_isFocus);
+            if (_isFocus) {
+                focus();
+            }
+        }, 300);
+        return () => {
+            clearTimeout(time);
+        };
+    }, [_isFocus, focus]);
 
     const blur = useMemo(() => () => {
         if (editor) {
@@ -152,18 +168,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     }, [editor]);
 
-    useEffect(() => {
-        const time = setTimeout(() => {
-            if (_isFocus) {
-                isFocusSet(_isFocus);
-                focus();
-            }
-        }, 300);
-        return () => {
-            clearTimeout(time);
-        };
-    }, [_isFocus]);
-
     useLayoutEffect(() => {
         let dispose: IDisposable;
         if (formulaEditorContainerRef.current) {
@@ -217,6 +221,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
             <div
                 className={clsx(styles.sheetEmbeddingFormulaEditorWrap, {
                     [styles.sheetEmbeddingFormulaEditorActive]: isFocus,
+                    [styles.sheetEmbeddingFormulaEditorError]: isError,
                 })}
                 ref={sheetEmbeddingRef}
             >

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { IEditorBridgeService, isRangeSelector } from '@univerjs/sheets-ui';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
-import type { Workbook } from '@univerjs/core';
 
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 
@@ -34,13 +34,14 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-
     useEffect(() => {
         if (isNeed) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             contextService.setContextValue(EDITOR_ACTIVATED, true);
-            editorBridgeService.enableForceKeepVisible();
+            if (!isRangeSelector(unitId)) {
+                editorBridgeService.enableForceKeepVisible();
+            }
 
             return () => {
                 d1?.dispose();

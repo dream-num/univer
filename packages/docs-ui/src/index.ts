@@ -77,8 +77,8 @@ export {
     type IUpdateCommandParams,
     UpdateCommand,
 } from './commands/commands/core-editing.command';
-export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/delete.command';
-export { getCursorWhenDelete } from './commands/commands/delete.command';
+export { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, type IDeleteCustomBlockParams, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
+export { getCursorWhenDelete } from './commands/commands/doc-delete.command';
 
 export { IMEInputCommand } from './commands/commands/ime-input.command';
 export {

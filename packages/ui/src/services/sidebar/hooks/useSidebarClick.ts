@@ -18,10 +18,9 @@ import { useDependency } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { useEffect } from 'react';
 /**
- * 点击面板其他区域的时候失去焦点.
- *
+ * Response panel to a click event.
  */
-export const useSidebarClickWithoutInput = (cb: (event: MouseEvent) => void) => {
+export const useSidebarClick = (cb: (event: MouseEvent) => void) => {
     const sidebarService = useDependency(ISidebarService);
     const container = sidebarService.getContainer();
 

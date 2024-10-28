@@ -97,7 +97,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
-    useVerify(onVerify, formulaWithoutEqualSymbol);
+    useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
     useEffect(() => {

@@ -19,19 +19,21 @@ import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { useEffect, useRef } from 'react';
 
-export const useVerify = (onVerify: IFormulaEditorProps['onVerify'], formulaText: string) => {
+export const useVerify = (isNeed: boolean, onVerify: IFormulaEditorProps['onVerify'], formulaText: string) => {
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const isInitRender = useRef(true);
 
     // No validation is performed during the initialization phase.
     useEffect(() => {
-        const time = setTimeout(() => {
-            isInitRender.current = false;
-        }, 500);
-        return () => {
-            clearTimeout(time);
-        };
-    });
+        if (isNeed) {
+            const time = setTimeout(() => {
+                isInitRender.current = false;
+            }, 500);
+            return () => {
+                clearTimeout(time);
+            };
+        }
+    }, [isNeed]);
 
     useEffect(() => {
         if (!isInitRender.current) {

@@ -229,7 +229,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useEditorInput(unitId, rangeString, editor);
 
-    useVerify(onVerify, sequenceNodes);
+    useVerify(!rangeDialogVisible && isFocus, onVerify, sequenceNodes);
 
     useBlur(editorId, isFocusSet);
 

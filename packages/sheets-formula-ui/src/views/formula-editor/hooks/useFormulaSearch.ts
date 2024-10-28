@@ -26,7 +26,7 @@ import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndex
 import { sequenceNodeToText } from '../../range-selector/utils/sequenceNodeToText';
 import { useStateRef } from '../hooks/useStateRef';
 
-export const useFormulaSearch = (nodes: INode[] = [], editor?: Editor) => {
+export const useFormulaSearch = (isNeed: boolean, nodes: INode[] = [], editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
 
     const [searchList, searchListSet] = useState<ISearchItem[]>([]);
@@ -41,7 +41,7 @@ export const useFormulaSearch = (nodes: INode[] = [], editor?: Editor) => {
     };
 
     useEffect(() => {
-        if (editor) {
+        if (editor && isNeed) {
             const d = editor.input$.pipe(debounceTime(300)).subscribe(() => {
                 const selections = editor.getSelectionRanges();
                 if (selections.length === 1) {
@@ -75,7 +75,13 @@ export const useFormulaSearch = (nodes: INode[] = [], editor?: Editor) => {
                 d.unsubscribe();
             };
         };
-    }, [editor]);
+    }, [editor, isNeed]);
+
+    useEffect(() => {
+        if (!isNeed) {
+            reset();
+        }
+    }, [isNeed]);
 
     const handlerFormulaReplace = (formulaName: string) => {
         const cloneNodes = [...stateRef.current.nodes];

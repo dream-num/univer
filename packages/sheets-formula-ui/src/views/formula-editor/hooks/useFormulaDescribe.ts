@@ -22,7 +22,7 @@ import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useEffect, useRef, useState } from 'react';
 import { debounceTime } from 'rxjs';
 
-export const useFormulaDescribe = (formulaText: string, editor?: Editor) => {
+export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
@@ -38,7 +38,7 @@ export const useFormulaDescribe = (formulaText: string, editor?: Editor) => {
     };
 
     useEffect(() => {
-        if (editor) {
+        if (editor && isNeed) {
             const d = editor.selectionChange$.pipe(debounceTime(50)).subscribe((e) => {
                 if (e.textRanges.length === 1) {
                     const [range] = e.textRanges;
@@ -60,7 +60,13 @@ export const useFormulaDescribe = (formulaText: string, editor?: Editor) => {
                 d.unsubscribe();
             };
         }
-    }, [editor]);
+    }, [editor, isNeed]);
+
+    useEffect(() => {
+        if (!isNeed) {
+            reset();
+        }
+    }, [isNeed]);
 
     return {
         functionInfo, paramIndex, reset,

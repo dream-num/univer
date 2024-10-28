@@ -112,12 +112,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         };
     }, [_isFocus, focus]);
 
-    const blur = useMemo(() => () => {
-        if (editor) {
-            editor.blur();
-        }
-    }, [editor]);
-
     const handleSelectionChange = (refString: string, offset: number) => {
         const result = `=${refString}`;
         formulaTextSet(result);
@@ -137,8 +131,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useBlur(editorId, isFocusSet);
     useRefocus();
 
-    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(sequenceNodes, editor);
-    const { functionInfo, paramIndex, reset } = useFormulaDescribe(formulaText, editor);
+    const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
+    const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
 
     useClickOutside(resetFormulaSearch, searchFunctionRef.current);
 
@@ -194,7 +188,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         const res = handlerFormulaReplace(v);
         if (res) {
             formulaTextSet(`=${res.text}`);
-            focus();
             const selections = editor?.getSelectionRanges();
             if (selections && selections.length === 1) {
                 const range = selections[0];
@@ -206,6 +199,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 }
             }
             resetFormulaSearch();
+            focus();
         }
     };
 
@@ -237,7 +231,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 editorId={editorId}
                 paramIndex={paramIndex}
                 functionInfo={functionInfo}
-                onClose={reset}
+                onClose={() => {
+                    reset();
+                    focus();
+                }}
             >
             </HelpFunction>
             <SearchFunction

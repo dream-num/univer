@@ -28,10 +28,8 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { LexerNode } from '../analysis/lexer-node';
-import { CellReferenceObject } from '../reference-object/cell-reference-object';
-import { ColumnReferenceObject } from '../reference-object/column-reference-object';
-import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { prefixHandler } from '../utils/prefixHandler';
+import { getReferenceObjectFromCache, ReferenceObjectType } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -149,12 +147,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         let node: Nullable<ReferenceNode>;
         if (regexTestSingeRange(tokenTrim)) {
-            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
+            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.CELL), isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
             if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.ROW), isPrepareMerge);
             } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.COLUMN), isPrepareMerge);
             }
         }
         // else {
@@ -194,3 +192,4 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         return param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON;
     }
 }
+

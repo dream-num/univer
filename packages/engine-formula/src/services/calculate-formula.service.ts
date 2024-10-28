@@ -127,6 +127,8 @@ export class CalculateFormulaService extends Disposable {
         this._executionCompleteListener$.next(this._runtimeService.getAllRuntimeData());
 
         CELL_INVERTED_INDEX_CACHE.clear();
+
+        this._runtimeService.reset();
     }
 
     private async _execute() {
@@ -330,8 +332,6 @@ export class CalculateFormulaService extends Disposable {
         } else if (!isArrayFormulaState) {
             this._runtimeService.markedAsNoFunctionsExecuted();
         }
-
-        this._runtimeService.clearReferenceAndNumberformatCache();
 
         return this._runtimeService.getAllRuntimeData();
     }

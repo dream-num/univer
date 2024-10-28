@@ -655,7 +655,7 @@ export class FormulaDependencyGenerator extends Disposable {
      */
     private _getUpdateTreeListAndMakeDependency() {
         const newTreeList: FormulaDependencyTree[] = [];
-        const existTree = new Set<FormulaDependencyTree>();
+        const existTree = new Set<number>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
 
         const allTree: FormulaDependencyTree[] = this._dependencyManagerService.getAllTree();
@@ -680,10 +680,10 @@ export class FormulaDependencyGenerator extends Disposable {
                         && !tree.isExcludeRange(this._currentConfigService.getExcludedRange()) //worst O(n^2), best O(n)  n^2=tree.rangeList.length*excludedRange.length, excludedRange.length is usually small
                     ) ||
                     this._includeTree(tree) //O(n) n=tree.rangeList.length
-                ) && !existTree.has(tree) //O(1)
+                ) && !existTree.has(tree.treeId) //O(1)
             ) {
                 newTreeList.push(tree);
-                existTree.add(tree);
+                existTree.add(tree.treeId);
             }
         }
 
@@ -864,14 +864,61 @@ export class FormulaDependencyGenerator extends Disposable {
         return false;
     }
 
-    /**
-     * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
-     * @param treeList
-     */
-    private _calculateRunList(treeList: FormulaDependencyTree[]) {
-        const stack = treeList;
-        const formulaRunList = [];
-        const cacheStack: FormulaDependencyTree[] = [];
+    // /**
+    //  * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
+    //  * @param treeList
+    //  */
+    // private _calculateRunList(treeList: FormulaDependencyTree[]) {
+    //     const stack = treeList;
+    //     const formulaRunList = [];
+    //     const cacheStack: Set<FormulaDependencyTree> = new Set();
+    //     while (stack.length > 0) {
+    //         const tree = stack.pop();
+
+    //         if (tree === undefined || tree.isSkip()) {
+    //             continue;
+    //         }
+
+    //         if (tree.isAdded()) {
+    //             formulaRunList.push(tree);
+    //             // If cacheStack is empty, that is, all parent nodes of the node have been processed, call setSkip() to mark the node as skipped. The premise of this is that the node should have been added to the formulaRunList, that is, the calculation is completed.
+    //             // Make sure setSkip is called after the node is added to formulaRunList to avoid skipping processing early.
+    //             tree.setSkip();
+    //             continue;
+    //         }
+
+    //         // It will clear the array.
+    //         cacheStack.clear();
+
+    //         const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
+
+    //         for (const parentTreeId of searchResults) {
+    //             const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
+    //             if (!parentTree) {
+    //                 throw new Error('ParentDependencyTree object is null');
+    //             }
+    //             if (parentTree.isAdded() || tree.isSkip()) {
+    //                 continue;
+    //             }
+    //             cacheStack.add(parentTree);
+    //         }
+
+    //         if (cacheStack.size === 0) {
+    //             formulaRunList.push(tree);
+    //             tree.setSkip();
+    //         } else {
+    //             tree.setAdded();
+    //             stack.push(tree, ...cacheStack);
+    //         }
+    //     }
+
+    //     return formulaRunList.reverse();
+    // }
+
+    private *_traverse(treeList: FormulaDependencyTree[]) {
+        const stack = treeList.slice();
+        const cacheStack: Set<FormulaDependencyTree> = new Set();
+
         while (stack.length > 0) {
             const tree = stack.pop();
 
@@ -880,15 +927,12 @@ export class FormulaDependencyGenerator extends Disposable {
             }
 
             if (tree.isAdded()) {
-                formulaRunList.push(tree);
-                // If cacheStack is empty, that is, all parent nodes of the node have been processed, call setSkip() to mark the node as skipped. The premise of this is that the node should have been added to the formulaRunList, that is, the calculation is completed.
-                // Make sure setSkip is called after the node is added to formulaRunList to avoid skipping processing early.
+                yield tree;
                 tree.setSkip();
                 continue;
             }
 
-            // It will clear the array.
-            cacheStack.length = 0;
+            cacheStack.clear();
 
             const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
 
@@ -900,18 +944,27 @@ export class FormulaDependencyGenerator extends Disposable {
                 if (parentTree.isAdded() || tree.isSkip()) {
                     continue;
                 }
-                cacheStack.push(parentTree);
+                cacheStack.add(parentTree);
             }
 
-            if (cacheStack.length === 0) {
-                formulaRunList.push(tree);
+            if (cacheStack.size === 0) {
+                yield tree;
                 tree.setSkip();
             } else {
                 tree.setAdded();
-                stack.push(tree, ...cacheStack);
+                stack.push(tree);
+                for (const cacheTree of cacheStack) {
+                    stack.push(cacheTree);
+                }
             }
         }
+    }
 
+    private _calculateRunList(treeList: FormulaDependencyTree[]) {
+        const formulaRunList = [];
+        for (const tree of this._traverse(treeList)) {
+            formulaRunList.push(tree);
+        }
         return formulaRunList.reverse();
     }
 }

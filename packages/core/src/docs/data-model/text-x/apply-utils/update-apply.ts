@@ -37,7 +37,6 @@ import {
     deleteTextRuns,
     insertCustomBlocks,
     insertCustomDecorations,
-    insertCustomRanges,
     insertParagraphs,
     insertSectionBreaks,
     insertTables,
@@ -473,18 +472,19 @@ function updateCustomRanges(
             customRanges.splice(removeIndex[index], 1);
         }
 
-        insertCustomRanges(body, updateBody, 0, currentIndex);
         updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;
             customRanges.push({
                 ...customRange,
-                startIndex: startIndex + textLength,
-                endIndex: endIndex + textLength,
+                startIndex: startIndex + currentIndex,
+                endIndex: endIndex + currentIndex,
             });
         });
     } else {
         for (const updateCustomRange of updateDataCustomRanges) {
             const { rangeId } = updateCustomRange;
+            updateCustomRange.startIndex = updateCustomRange.startIndex + currentIndex;
+            updateCustomRange.endIndex = updateCustomRange.endIndex + currentIndex;
             const oldCustomRange = rangeMap[rangeId];
             if (oldCustomRange) {
                 if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
@@ -492,6 +492,8 @@ function updateCustomRanges(
                     continue;
                 }
                 Object.assign(oldCustomRange, updateCustomRange);
+            } else {
+                customRanges.push(updateCustomRange);
             }
         }
 

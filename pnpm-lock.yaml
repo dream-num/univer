@@ -422,6 +422,82 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
+  examples-node:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../packages/data-validation
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../packages/docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../packages/drawing
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../packages/engine-formula
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../packages/rpc
+      '@univerjs/rpc-node':
+        specifier: workspace:*
+        version: link:../packages/rpc-node
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../packages/sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../packages/sheets-formula
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../packages/sheets-hyper-link
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../packages/thread-comment
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../common/shared
+      esbuild:
+        specifier: ^0.24.0
+        version: 0.24.0
+      esbuild-plugin-clean:
+        specifier: ^1.0.1
+        version: 1.0.1(esbuild@0.24.0)
+      esbuild-plugin-copy:
+        specifier: ^2.1.1
+        version: 2.1.1(esbuild@0.24.0)
+      minimist:
+        specifier: ^1.2.8
+        version: 1.2.8
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   mockdata:
     dependencies:
       '@univerjs/core':

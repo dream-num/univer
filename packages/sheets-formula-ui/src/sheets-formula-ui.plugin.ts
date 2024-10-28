@@ -20,7 +20,7 @@ import { DependentOn, IConfigService, Inject, Injector, Plugin, UniverInstanceTy
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
-import { EMBEDDING_FORMULA_EDITOR, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '@univerjs/sheets-ui';
 import { ComponentManager } from '@univerjs/ui';
 import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import {
@@ -96,7 +96,7 @@ export class UniverSheetsFormulaUIPlugin extends Plugin {
         const componentManager = this._injector.get(ComponentManager);
 
         componentManager.register(RANGE_SELECTOR_COMPONENT_KEY, RangeSelector);
-        componentManager.register(EMBEDDING_FORMULA_EDITOR, FormulaEditor);
+        componentManager.register(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, FormulaEditor);
     }
 
     override onSteady(): void {

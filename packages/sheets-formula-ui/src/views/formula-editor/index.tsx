@@ -30,7 +30,6 @@ import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useRefocus } from '../range-selector/hooks/useRefocus';
 import { useResize } from '../range-selector/hooks/useResize';
 import { HelpFunction } from './help-function/HelpFunction';
-import { useClickOutside } from './hooks/useClickOutside';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
 import { useFormulaSearch } from './hooks/useFormulaSearch';
 import { useDocHight, useSheetHighlight } from './hooks/useHighlight';
@@ -133,8 +132,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
     const { functionInfo, paramIndex, reset } = useFormulaDescribe(isFocus, formulaText, editor);
-
-    useClickOutside(resetFormulaSearch, searchFunctionRef.current);
 
     useEffect(() => {
         if (editor) {

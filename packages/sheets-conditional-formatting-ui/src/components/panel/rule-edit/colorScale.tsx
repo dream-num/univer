@@ -63,7 +63,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none'; value: numbe
 
     if (type === CFValueType.formula) {
         return (
-            <div style={{ width: '100%', marginLeft: 12 }}>
+            <div style={{ width: '100%', marginLeft: 4 }}>
                 <FormulaEditor
                     initValue={formulaInitValue as any}
                     unitId={unitId}

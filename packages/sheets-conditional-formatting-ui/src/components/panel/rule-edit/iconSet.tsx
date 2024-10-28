@@ -68,7 +68,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                     </>
                 )
                 : (
-                    <div style={{ width: '100%', marginLeft: 12 }}>
+                    <div style={{ width: '100%' }}>
                         <FormulaEditor
                             initValue={String(props.value) as any}
                             unitId={unitId}

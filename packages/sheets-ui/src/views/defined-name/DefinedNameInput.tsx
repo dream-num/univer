@@ -193,21 +193,19 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         const type = value as string;
         if (type === 'formula' && formulaOrRefStringValue.substring(0, 1) !== operatorToken.EQUALS) {
             setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
-            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
         } else if (formulaOrRefStringValue.substring(0, 1) === operatorToken.EQUALS) {
-            setFormulaOrRefStringValue('');
             setFormulaOrRefStringValue('');
         }
         setTypeValue(type);
     };
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
-    };
-
     const formulaEditorActionsRef = useRef<any>({});
     const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
 
     useSidebarClick((e: MouseEvent) => {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
@@ -215,7 +213,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     });
 
     return (
-        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }} onClick={handlePanelClick}>
+        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
             <div>
                 <Input placeholder={localeService.t('definedName.inputNamePlaceholder')} value={nameValue} allowClear onChange={setNameValue} affixWrapperStyle={widthStyle} />
             </div>
@@ -225,21 +223,22 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     <Radio value="formula">{localeService.t('definedName.ratioFormula')}</Radio>
                 </RadioGroup>
             </div>
-            {RangeSelector && typeValue === 'range' && (
-                <RangeSelector
-                    unitId={unitId}
-                    subUnitId={subUnitId}
-                    initValue={formulaOrRefStringValue}
-                    onChange={rangeSelectorChange}
-                    isFocus={isFocusRangeSelector}
-                    onFocus={() => isFocusRangeSelectorSet(true)}
-                    actions={rangeSelectorActionsRef.current}
-                    isSupportAcrossSheet
-                    onBlur={() => { isFocusRangeSelectorSet(false); }}
-                />
-            )}
-            {typeValue !== 'range' && FormulaEditor && (
-                <div className="univer-defined-name-input-formula-selector-text-wrap">
+            {typeValue === 'range'
+                ? (
+                    RangeSelector && (
+                        <RangeSelector
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            initValue={formulaOrRefStringValue}
+                            onChange={rangeSelectorChange}
+                            isFocus={isFocusRangeSelector}
+                            onFocus={() => isFocusRangeSelectorSet(true)}
+                            actions={rangeSelectorActionsRef.current}
+                            isSupportAcrossSheet
+                        />
+                    )
+                )
+                : (FormulaEditor && (
                     <FormulaEditor
                         initValue={formulaOrRefStringValue as any}
                         unitId={unitId}
@@ -255,9 +254,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                         onFocus={() => isFocusFormulaEditorSet(true)}
                         actions={formulaEditorActionsRef.current}
                     />
-                </div>
-            )}
-
+                ))}
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
             </div>

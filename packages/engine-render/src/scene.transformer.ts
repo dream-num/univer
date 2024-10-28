@@ -1535,11 +1535,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
      */
     public clearControlByIds(ids: string[]) {
         for (const id of ids) {
-            // const control = this._transformerControlMap.get(id);
-            // if(control) {
-            //     control.dispose();
-            //     this._transformerControlMap.delete(id);
-            // }
             this._selectedObjectMap.delete(id);
         }
         this.refreshControls();
@@ -1584,7 +1579,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
-
                 const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                     zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
                     radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
@@ -1607,7 +1601,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 } else {
                     anchor = this._createCopperResizeAnchor(type, applyObject, zIndex);
                 }
-
                 this._attachEventToAnchor(anchor, type, applyObject);
                 groupElements.push(anchor);
             }

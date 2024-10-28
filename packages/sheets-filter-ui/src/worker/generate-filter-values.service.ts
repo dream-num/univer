@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
-import { createIdentifier, Disposable, extractPureTextFromCell, ILogService, Inject, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import type { IFilterByValueItem } from '../services/sheets-filter-panel.service';
+import type { IRange, Styles, Workbook, Worksheet } from '@univerjs/core';
+import type { IFilterByValueItem, IFilterByValueWithTreeItem } from '../services/sheets-filter-panel.service';
+import { createIdentifier, Disposable, extractPureTextFromCell, ILogService, Inject, IUniverInstanceService, LocaleService, numfmt } from '@univerjs/core';
 
 export interface ISheetsGenerateFilterValuesService {
     getFilterValues(params: {
@@ -27,7 +27,7 @@ export interface ISheetsGenerateFilterValuesService {
         blankChecked: boolean;
         iterateRange: IRange;
         alreadyChecked: string[];
-    }): Promise<IFilterByValueItem[]>;
+    }): Promise<IFilterByValueWithTreeItem[]>;
 }
 export const SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME = 'sheets-filter.generate-filter-values.service';
 export const ISheetsGenerateFilterValuesService = createIdentifier<ISheetsGenerateFilterValuesService>(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME);
@@ -51,21 +51,14 @@ export class SheetsGenerateFilterValuesService extends Disposable {
         alreadyChecked: string[];
     }) {
         const { unitId, subUnitId, filteredOutRowsByOtherColumns, filters, blankChecked, iterateRange, alreadyChecked } = params;
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = this._univerInstanceService.getUnit<Workbook>(unitId)?.getSheetBySheetId(subUnitId);
 
-        if (!worksheet) return [];
+        if (!workbook || !worksheet) return [];
 
         this._logService.debug('[SheetsGenerateFilterValuesService]', 'getFilterValues for', { unitId, subUnitId });
 
-        return getFilterByValueItems(
-            filters,
-            blankChecked,
-            this._localeService,
-            iterateRange,
-            worksheet,
-            new Set(alreadyChecked.map(String)),
-            new Set(filteredOutRowsByOtherColumns)
-        );
+        return getFilterTreeByValueItems(filters, this._localeService, iterateRange, worksheet, new Set(filteredOutRowsByOtherColumns), new Set(alreadyChecked.map(String)), blankChecked, workbook.getStyles()); ;
     }
 }
 
@@ -136,4 +129,121 @@ export function getFilterByValueItems(
     }
 
     return items;
+}
+
+export function getFilterTreeByValueItems(
+    filters: boolean,
+    localeService: LocaleService,
+    iterateRange: IRange,
+    worksheet: Worksheet,
+    filteredOutRowsByOtherColumns: Set<number>,
+    alreadyChecked: Set<string>,
+    blankChecked: boolean,
+    styles: Styles
+): IFilterByValueWithTreeItem[] {
+    const items: Map<string, IFilterByValueWithTreeItem> = new Map();
+
+    const defaultPattern = 'yyyy-mm-dd';
+
+    let emptyCount = 0;
+    for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
+        const { row, rowSpan = 1 } = cell;
+
+        let rowIndex = 0;
+        while (rowIndex < rowSpan) {
+            const targetRow = row + rowIndex;
+
+            if (filteredOutRowsByOtherColumns.has(targetRow)) {
+                rowIndex++;
+                continue;
+            }
+
+            const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
+            if (!value) {
+                emptyCount += 1;
+                rowIndex += rowSpan;
+                continue;
+            }
+
+            const fmtStr = styles.get(cell.value?.s)?.n?.pattern;
+            const isDateValue = fmtStr && numfmt.isDate(fmtStr);
+            if (fmtStr && isDateValue) {
+                const originValue = numfmt.parseDate(value).v as number;
+                const valueParsedByDefaultPattern = numfmt.format(defaultPattern, originValue);
+                const [year, month, day] = valueParsedByDefaultPattern.split('-').map(Number);
+                let yearItem = items.get(`${year}`);
+                if (!yearItem) {
+                    yearItem = {
+                        title: `${year}`,
+                        key: `${year}`,
+                        children: [],
+                        count: 0,
+                        leaf: false,
+                        checked: false,
+                    };
+                    items.set(`${year}`, yearItem);
+                }
+                let monthItem = yearItem.children?.find((item) => item.key === `${year}-${month}`);
+                if (!monthItem) {
+                    monthItem = {
+                        title: `${month}`,
+                        key: `${year}-${month}`,
+                        children: [],
+                        count: 0,
+                        leaf: false,
+                        checked: false,
+                    };
+                    yearItem.children?.push(monthItem);
+                }
+                const dayItem = monthItem?.children?.find((item) => item.key === `${year}-${month}-${day}`);
+                if (!dayItem) {
+                    monthItem.children?.push({
+                        title: `${day}`,
+                        key: `${year}-${month}-${day}`,
+                        count: 1,
+                        originValues: new Set([value]),
+                        leaf: true,
+                        checked: alreadyChecked.size ? alreadyChecked.has(value) : !blankChecked,
+                    });
+                    monthItem.count++;
+                    yearItem.count++;
+                } else {
+                    dayItem.originValues!.add(value);
+                    dayItem.count++;
+                    monthItem.count++;
+                    yearItem.count++;
+                }
+            } else {
+                const key = value;
+                let item = items.get(key);
+                if (!item) {
+                    item = {
+                        title: value,
+                        leaf: true,
+                        checked: alreadyChecked.size ? alreadyChecked.has(value) : !blankChecked,
+                        key,
+                        count: 1,
+                    };
+                    items.set(key, item);
+                } else {
+                    item.count++;
+                }
+            }
+            rowIndex++;
+        }
+    }
+
+    const initialBlankChecked = filters ? blankChecked : true;
+    if (emptyCount > 0) {
+        const item: IFilterByValueWithTreeItem = {
+            title: localeService.t('sheets-filter.panel.empty'),
+            count: emptyCount,
+            leaf: true,
+            checked: initialBlankChecked,
+            key: 'empty',
+        };
+        items.set('empty', item);
+    }
+
+    return Array.from(items.values());
 }

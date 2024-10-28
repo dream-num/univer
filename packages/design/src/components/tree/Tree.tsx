@@ -16,15 +16,16 @@
 
 import { DropdownSingle } from '@univerjs/icons';
 import clsx from 'clsx';
+import VirtualList from 'rc-virtual-list';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Checkbox } from '../checkbox';
 
+import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
 import { createCacheWithFindNodePathFromTree, filterLeafNode, isIntermediated, mergeTreeSelected } from './util';
 
 export enum TreeSelectionMode {
     ONLY_LEAF_NODE,
-
     ALL,
 }
 
@@ -34,52 +35,60 @@ export interface ITreeNodeProps {
     children?: ITreeNodeProps[];
 }
 
-export interface ITreeProps {
-    data?: ITreeNodeProps[];
+export interface IAttachTreeProps {
+    level?: number;
+    count?: number;
+}
 
-    /**
-     * Set whether to expand all nodes by default
-     * @default false
-     */
+type TreeItemProps = ITreeNodeProps & IAttachTreeProps;
+
+export interface ITreeProps {
+    data?: TreeItemProps[];
+
     defaultExpandAll?: boolean;
 
-    /**
-     * Set the selection mode
-     * @default TreeSelectionMode.ALL
-     * @description
-     * - `TreeSelectionMode.ONLY_LEAF_NODE` only select leaf node
-     * - `TreeSelectionMode.ALL` select all node
-     */
     selectionMode?: TreeSelectionMode;
 
-    /**
-     * Used for setting the currently selected value,leaf node.
-     */
     valueGroup?: string[];
 
-    /**
-     * Set the handler to handle `click` event
-     */
     onChange?: (node: ITreeNodeProps, allSelectedNode: ITreeNodeProps[]) => void;
 
     onExpend?: (value: string) => void;
+
+    height?: number;
+
+    itemHeight?: number;
+
+    attachRender?: (node: TreeItemProps) => React.ReactNode;
+
+    treeNodeClassName?: string;
+
+    style?: React.CSSProperties;
 }
 
-type TreeItemProps = ITreeNodeProps & {
-    _selected?: boolean;
-    _expand?: boolean;
-    _intermediated?: boolean;
-};
+function flattenTree(items: TreeItemProps[], expandedKeys: Set<string>, level = 1): TreeItemProps[] {
+    const flatItems: TreeItemProps[] = [];
+
+    items.forEach((item) => {
+        flatItems.push({ ...item, level });
+
+        if (item.children && expandedKeys.has(item.key)) {
+            flatItems.push(...flattenTree(item.children, expandedKeys, level + 1));
+        }
+    });
+
+    return flatItems;
+}
 
 /**
  * Tree Component
  */
 export function Tree(props: ITreeProps) {
-    const { data = [], defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend } = props;
+    const { data = [], style, defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend, height = 200, itemHeight = 32, attachRender } = props;
     const [update, forceUpdate] = useState({});
     const expandKeySet = useMemo(() => {
         return new Set<string>();
-    }, [data]);
+    }, []);
 
     const findNode = useMemo(() => createCacheWithFindNodePathFromTree(data), [data]);
 
@@ -103,26 +112,7 @@ export function Tree(props: ITreeProps) {
         forceUpdate({});
     }, [defaultExpandAll, data]);
 
-    const computedData = useMemo(() => {
-        return data.map((item) => {
-            function walkData(item: ITreeNodeProps): TreeItemProps {
-                const { title, key, children } = item;
-                const isExpand = expandKeySet.has(key);
-                const isSelected = selectedNodeKeySet.has(key);
-                const intermediated = isIntermediated(selectedNodeKeySet, item);
-
-                return {
-                    title,
-                    key,
-                    children: children && children.map((item) => walkData(item)),
-                    _selected: isSelected,
-                    _expand: isExpand,
-                    _intermediated: intermediated,
-                };
-            }
-            return walkData(item);
-        });
-    }, [selectedNodeKeySet, expandKeySet, update]);
+    const flatData = useMemo(() => flattenTree(data, expandKeySet), [data, update, expandKeySet]);
 
     function handleChange(treeItem: TreeItemProps) {
         const path: string[] = findNode.findNodePathFromTreeWithCache(treeItem.key);
@@ -130,7 +120,7 @@ export function Tree(props: ITreeProps) {
         onChange?.(treeItem, filterLeafNode(data, result));
     }
 
-    function handleExpendItem(treeItem: ITreeNodeProps) {
+    function handleExpendItem(treeItem: TreeItemProps) {
         if (treeItem.children?.length) {
             if (expandKeySet.has(treeItem.key)) {
                 expandKeySet.delete(treeItem.key);
@@ -148,22 +138,27 @@ export function Tree(props: ITreeProps) {
         onExpend?.(treeItem.key);
     }
 
-    function walkTree(treeItem: TreeItemProps) {
-        const { title, key, children, _selected, _expand, _intermediated } = treeItem;
+    function renderTreeItem(treeItem: TreeItemProps) {
+        const { title, key, level = 0 } = treeItem;
+        const treeNodeClassName = props.treeNodeClassName;
+        const expended = expandKeySet.has(key);
+        const selected = selectedNodeKeySet.has(key);
+        const intermediated = isIntermediated(selectedNodeKeySet, treeItem);
         return (
-            <li
+            <div
                 key={key}
-                className={styles.treeListItem}
+                className={clsx(styles.treeListItem, treeNodeClassName)}
+                style={{ paddingLeft: `${level * 20}px` }}
             >
-                <a
+                <div
                     className={clsx(styles.treeListItemContent, {
-                        [styles.treeListItemContentSelected]: _selected,
+                        [styles.treeListItemContentSelected]: selected,
                     })}
                 >
-                    {children && children.length > 0 && (
+                    {treeItem.children && treeItem.children.length > 0 && (
                         <span
                             className={clsx(styles.treeIcon, {
-                                [styles.treeIconExpand]: _expand,
+                                [styles.treeIconExpand]: expended,
                             })}
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -174,36 +169,41 @@ export function Tree(props: ITreeProps) {
                         </span>
                     )}
                     <Checkbox
-                        checked={_selected && !_intermediated}
-                        indeterminate={_selected && _intermediated}
-                        onChange={() => {
-                            handleChange(treeItem);
-                        }}
+                        checked={selected && !intermediated}
+                        indeterminate={selected && intermediated}
+                        onChange={() => handleChange(treeItem)}
                     />
-                    <span onClick={(e) => {
-                        e.stopPropagation();
-                        handleExpendItem(treeItem);
-                    }}
-                    >
-                        {title}
-                    </span>
-                </a>
-                {children && (
-                    <ul
-                        className={clsx(styles.treeList, {
-                            [styles.treeListExpand]: _expand,
-                        })}
-                    >
-                        {children.map((item) => walkTree(item))}
-                    </ul>
-                )}
-            </li>
+                    <Tooltip showIfEllipsis placement="top" title={title}>
+                        <span
+                            className={styles.treeListItemTitle}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleExpendItem(treeItem);
+                            }}
+                        >
+                            {title}
+                        </span>
+                    </Tooltip>
+
+                    {attachRender && attachRender(treeItem)}
+                </div>
+            </div>
         );
     }
 
     return (
         <section className={styles.tree}>
-            <ul className={styles.treeList}>{computedData.map((item) => walkTree(item))}</ul>
+            <div className={styles.treeList} style={style}>
+                <VirtualList
+                    data={flatData}
+                    itemKey={(item) => item.key}
+                    height={height}
+                    itemHeight={itemHeight}
+                >
+                    {(item: TreeItemProps) => renderTreeItem(item)}
+                </VirtualList>
+            </div>
+
         </section>
     );
 }

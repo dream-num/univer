@@ -18,14 +18,15 @@ import type { IDisposable, IRange, Nullable } from '@univerjs/core';
 import type { FilterColumn, FilterModel, IFilterColumn, ISetSheetsFilterCriteriaCommandParams } from '@univerjs/sheets-filter';
 import type { Observable } from 'rxjs';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
-import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity } from '@univerjs/core';
+import { createIdentifier, Disposable, ICommandService, Inject, Injector, IUniverInstanceService, LocaleService, Quantity, Tools } from '@univerjs/core';
 import { RefRangeService } from '@univerjs/sheets';
 import { SetSheetsFilterCriteriaCommand } from '@univerjs/sheets-filter';
 
 import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { FilterConditionItems } from '../models/conditions';
 import { statisticFilterByValueItems } from '../models/utils';
-import { getFilterByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
+import { getFilterTreeByValueItems, ISheetsGenerateFilterValuesService } from '../worker/generate-filter-values.service';
+import { findObjectByKey, searchTree, updateLeafNodesCheckedStatus } from './util';
 
 export enum FilterBy {
     VALUES,
@@ -42,6 +43,16 @@ export interface IFilterByValueItem {
      * This property indicates that this is a special item which maps to empty strings or empty cells.
      */
     isEmpty: boolean;
+}
+
+export interface IFilterByValueWithTreeItem {
+    title: string;
+    key: string;
+    count: number;
+    checked: boolean;
+    leaf: boolean;
+    originValues?: Set<string>;
+    children?: IFilterByValueWithTreeItem[];
 }
 
 export interface ISheetsFilterPanelService {
@@ -412,7 +423,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
-        let items: IFilterByValueItem[];
+        let items: IFilterByValueWithTreeItem[];
         if (generateFilterValuesService) {
             items = await generateFilterValuesService.getFilterValues({
                 unitId,
@@ -425,31 +436,23 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
             });
         } else {
             // the first row is filter header and should be added to options
-            items = getFilterByValueItems(
-                !!filters,
-                blankChecked,
-                localeService,
-                iterateRange,
-                worksheet,
-                alreadyChecked,
-                filteredOutRowsByOtherColumns
-            );
+            items = getFilterTreeByValueItems(!!filters, localeService, iterateRange, worksheet, filteredOutRowsByOtherColumns, alreadyChecked, blankChecked, workbook.getStyles());
         }
 
         return injector.createInstance(ByValuesModel, filterModel, col, items);
     }
 
-    private readonly _rawFilterItems$: BehaviorSubject<IFilterByValueItem[]>;
-    readonly rawFilterItems$: Observable<IFilterByValueItem[]>;
-    get rawFilterItems(): IFilterByValueItem[] { return this._rawFilterItems$.getValue(); }
+    private readonly _rawFilterItems$: BehaviorSubject<IFilterByValueWithTreeItem[]>;
+    readonly rawFilterItems$: Observable<IFilterByValueWithTreeItem[]>;
+    get rawFilterItems(): IFilterByValueWithTreeItem[] { return this._rawFilterItems$.getValue(); }
 
-    readonly filterItems$: Observable<IFilterByValueItem[]>;
-    private _filterItems: IFilterByValueItem[] = [];
+    readonly filterItems$: Observable<IFilterByValueWithTreeItem[]>;
+    private _filterItems: IFilterByValueWithTreeItem[] = [];
     get filterItems() { return this._filterItems; }
 
     readonly canApply$: Observable<boolean>;
 
-    private readonly _manuallyUpdateFilterItems$: Subject<IFilterByValueItem[]>;
+    private readonly _manuallyUpdateFilterItems$: Subject<IFilterByValueWithTreeItem[]>;
 
     private readonly _searchString$: BehaviorSubject<string>;
     readonly searchString$: Observable<string>;
@@ -461,7 +464,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
          * Filter items would remain unchanged after we create them,
          * though data may change after.
          */
-        items: IFilterByValueItem[],
+        items: IFilterByValueWithTreeItem[],
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -469,10 +472,10 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         this._searchString$ = new BehaviorSubject<string>('');
         this.searchString$ = this._searchString$.asObservable();
 
-        this._rawFilterItems$ = new BehaviorSubject<IFilterByValueItem[]>(items);
+        this._rawFilterItems$ = new BehaviorSubject<IFilterByValueWithTreeItem[]>(items);
         this.rawFilterItems$ = this._rawFilterItems$.asObservable();
 
-        this._manuallyUpdateFilterItems$ = new Subject<IFilterByValueItem[]>();
+        this._manuallyUpdateFilterItems$ = new Subject<IFilterByValueWithTreeItem[]>();
 
         this.filterItems$ = merge(
             combineLatest([
@@ -487,10 +490,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
 
                     const lowerSearchString = searchString.toLowerCase();
                     const searchKeyWords = lowerSearchString.split(/\s+/).filter((s) => !!s);
-                    return items.filter((item) => {
-                        const loweredItemValue = item.value.toLowerCase();
-                        return searchKeyWords.some((keyword) => loweredItemValue.includes(keyword));
-                    });
+                    return searchTree(items, searchKeyWords);
                 })
             ),
             this._manuallyUpdateFilterItems$
@@ -517,29 +517,38 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         this._searchString$.next(str);
     }
 
+    onCheckAllToggled(checked: boolean) {
+        const items = Tools.deepClone(this._filterItems);
+        items.forEach((item) => updateLeafNodesCheckedStatus(item, checked));
+        this._manuallyUpdateFilterItems(items);
+    }
+
     /**
      * Toggle a filter item.
      */
-    onFilterCheckToggled(item: IFilterByValueItem, checked: boolean): void {
-        const items = this._filterItems.slice();
-        const changedItem = items.find((i) => i.index === item.index);
-        changedItem!.checked = checked;
+    onFilterCheckToggled(item: IFilterByValueWithTreeItem): void {
+        const items = Tools.deepClone(this._filterItems);
+        const changedItem = findObjectByKey(items, item.key);
+        if (!changedItem) {
+            return;
+        }
+        updateLeafNodesCheckedStatus(changedItem);
         this._manuallyUpdateFilterItems(items);
     }
 
-    onFilterOnly(item: IFilterByValueItem) {
-        const items = this._filterItems.slice();
-        items.forEach((i) => i.checked = i.index === item.index);
+    onFilterOnly(itemKeys: string[]) {
+        const items = Tools.deepClone(this._filterItems);
+        items.forEach((item) => updateLeafNodesCheckedStatus(item, false));
+        itemKeys.forEach((key) => {
+            const changedItem = findObjectByKey(items, key);
+            if (changedItem) {
+                updateLeafNodesCheckedStatus(changedItem, true);
+            }
+        });
         this._manuallyUpdateFilterItems(items);
     }
 
-    onCheckAllToggled(checked: boolean): void {
-        const items = this._filterItems.slice();
-        items.forEach((i) => i.checked = checked);
-        this._manuallyUpdateFilterItems(items);
-    }
-
-    private _manuallyUpdateFilterItems(items: IFilterByValueItem[]): void {
+    private _manuallyUpdateFilterItems(items: IFilterByValueWithTreeItem[]): void {
         this._manuallyUpdateFilterItems$.next(items);
     }
 
@@ -585,9 +594,11 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         } else {
             criteria.filters = {};
 
-            const nonEmptyItems = checkedItems.filter((item) => !item.isEmpty);
+            const nonEmptyItems = checkedItems.filter((item) => item.key !== 'empty');
             if (nonEmptyItems.length > 0) {
-                criteria.filters = { filters: nonEmptyItems.map((item) => item.value) };
+                criteria.filters = {
+                    filters: nonEmptyItems.flatMap((item) => item.originValues ? Array.from(item.originValues) : [item.title]),
+                };
             }
 
             const hasEmpty = nonEmptyItems.length !== checkedItems.length;

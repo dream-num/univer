@@ -19,12 +19,11 @@ import type { Documents, DocumentViewModel, IMouseEvent, IPageRenderConfig, IPat
 import type { Nullable } from 'vitest';
 import { BooleanNumber, Disposable, DocumentFlavor, ICommandService, Inject, IUniverInstanceService, LocaleService, toDisposable, Tools } from '@univerjs/core';
 
-import { DocSkeletonManagerService } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocumentEditArea, IRenderManagerService, PageLayoutType, Path, Rect, Vector2 } from '@univerjs/engine-render';
 import { ComponentManager } from '@univerjs/ui';
 import { neoGetDocObject } from '../basics/component-tools';
 import { CloseHeaderFooterCommand, CoreHeaderFooterCommand } from '../commands/commands/doc-header-footer.command';
-import { SwitchDocModeCommand } from '../commands/commands/switch-doc-mode.command';
 import { IEditorService } from '../services/editor/editor-manager.service';
 import { DocSelectionRenderService } from '../services/selection/doc-selection-render.service';
 import { COMPONENT_DOC_HEADER_FOOTER_PANEL } from '../views/header-footer/panel/component-name';
@@ -151,13 +150,32 @@ export class DocHeaderFooterController extends Disposable implements IRenderModu
 
     // Close header footer panel when switch mode.
     private _listenSwitchMode() {
+        // this.disposeWithMe(
+        //     this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
+        //         if (SwitchDocModeCommand.id === command.id) {
+        //             const viewModel = this._docSkeletonManagerService.getViewModel();
+        //             const editArea = viewModel.getEditArea();
+
+        //             if (editArea !== DocumentEditArea.BODY) {
+        //                 this._commandService.executeCommand(CloseHeaderFooterCommand.id, {
+        //                     unitId: this._context.unitId,
+        //                 });
+        //             }
+        //         }
+        //     })
+        // );
+
         this.disposeWithMe(
-            this._commandService.beforeCommandExecuted((command: ICommandInfo) => {
-                if (SwitchDocModeCommand.id === command.id) {
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (RichTextEditingMutation.id === command.id) {
+                    const docDataModel = this._context.unit;
+
                     const viewModel = this._docSkeletonManagerService.getViewModel();
                     const editArea = viewModel.getEditArea();
 
-                    if (editArea !== DocumentEditArea.BODY) {
+                    const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+
+                    if (editArea !== DocumentEditArea.BODY && documentFlavor === DocumentFlavor.MODERN) {
                         this._commandService.executeCommand(CloseHeaderFooterCommand.id, {
                             unitId: this._context.unitId,
                         });

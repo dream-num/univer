@@ -110,6 +110,9 @@ const locale: typeof enUS = {
             right: 'Ligne de cadre droite',
         },
         more: 'Plus',
+        hideGridlines: 'Masquer le quadrillage',
+        showGridlines: 'Afficher le quadrillage',
+        toggleGridlines: 'Activer/désactiver le quadrillage',
     },
     defaultFmt: {
         Automatic: {

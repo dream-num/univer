@@ -53,6 +53,7 @@ const locale: typeof enUS = {
             messageInfo: 'Message d\'aide',
             showInfo: 'Afficher le texte d\'aide pour une cellule sélectionnée',
             rangeError: 'Les plages ne sont pas légales',
+            allowBlank: 'Autoriser les valeurs vides',
         },
         operators: {
             between: 'entre',
@@ -83,6 +84,10 @@ const locale: typeof enUS = {
             equal: 'La valeur doit être égale à {FORMULA1}',
             notEqual: 'La valeur doit être différente de {FORMULA1}',
             notBetween: 'La valeur ne doit pas être entre {FORMULA1} et {FORMULA2}',
+        },
+        any: {
+            title: 'N\'importe quelle valeur',
+            error: 'Le contenu de cette cellule viole la règle de validation',
         },
         date: {
             title: 'Date',
@@ -164,6 +169,7 @@ const locale: typeof enUS = {
             title: 'Formule personnalisée',
             error: 'Le contenu de cette cellule viole sa règle de validation',
             validFail: 'Veuillez entrer une formule valide',
+            ruleName: 'La formule personnalisée est {FORMULA1}',
         },
         alert: {
             title: 'Erreur',

@@ -48,7 +48,7 @@ export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
                 value: LocaleType.EN_US,
             },
             {
-                label: 'French',
+                label: 'Français',
                 value: LocaleType.FR_FR,
             },
             {

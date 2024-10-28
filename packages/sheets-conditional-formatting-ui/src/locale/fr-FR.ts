@@ -169,6 +169,7 @@ const locale: typeof enUS = {
             },
             errorMessage: {
                 notBlank: 'La condition ne peut pas être vide',
+                rangeError: 'Plage invalide',
                 formulaError: 'Formule incorrecte',
             },
         },

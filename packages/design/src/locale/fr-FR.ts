@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import type { ILocale } from './interface';
 import dajsFrFR from 'dayjs/locale/fr';
 import PickerFrFR from 'rc-picker/lib/locale/fr_FR';
-import type { ILocale } from './interface';
 
 const locale: ILocale = {
     design: {
@@ -32,6 +32,9 @@ const locale: ILocale = {
             ...PickerFrFR,
         },
         CascaderList: {
+            empty: 'Aucun',
+        },
+        Select: {
             empty: 'Aucun',
         },
     },

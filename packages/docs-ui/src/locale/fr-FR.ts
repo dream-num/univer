@@ -46,6 +46,7 @@ const locale: typeof enUS = {
         order: 'Liste ordonnée',
         unorder: 'Liste non ordonnée',
         checklist: 'Liste de tâches',
+        documentFlavor: 'Modern Mode',
         alignLeft: 'Aligner à gauche',
         alignCenter: 'Aligner au centre',
         alignRight: 'Aligner à droite',

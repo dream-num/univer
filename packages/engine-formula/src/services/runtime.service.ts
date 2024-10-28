@@ -28,11 +28,12 @@ import type { ArrayValueObject } from '../engine/value-object/array-value-object
 import { createIdentifier, Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { isInDirtyRange } from '../basics/dirty';
 import { ErrorType } from '../basics/error-type';
-import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
-import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 
+import { getRuntimeFeatureCell } from '../engine/utils/get-runtime-feature-cell';
+
+import { clearNumberFormatTypeCache, clearStringToNumberPatternCache } from '../engine/utils/numfmt-kit';
 import { clearReferenceToRangeCache } from '../engine/utils/reference-cache';
-import { objectValueToCellValue } from '../engine/utils/value-object';
+import { clearReferenceObjectCache, objectValueToCellValue } from '../engine/utils/value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
@@ -365,12 +366,15 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._isCycleDependency = false;
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
+
+        this.clearReferenceAndNumberformatCache();
     }
 
     clearReferenceAndNumberformatCache() {
         clearNumberFormatTypeCache();
         clearStringToNumberPatternCache();
         clearReferenceToRangeCache();
+        clearReferenceObjectCache();
     }
 
     setCurrent(row: number, column: number, rowCount: number, columnCount: number, sheetId: string, unitId: string) {

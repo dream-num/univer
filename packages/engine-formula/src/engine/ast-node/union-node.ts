@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { ErrorType } from '../../basics/error-type';
 import { matchToken } from '../../basics/token';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
-import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
+import { getRangeReferenceObjectFromCache } from '../utils/value-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
@@ -66,18 +67,21 @@ export class UnionNode extends BaseAstNode {
 
         variant2 = variant2 as BaseReferenceObject;
 
-        if (variant1.isCell() && variant2.isCell()) {
-            return variant1.unionBy(variant2);
-        }
-        if (variant1.isRow() && variant2.isRow()) {
-            return variant1.unionBy(variant2);
-        }
-        if (variant1.isColumn() && variant2.isColumn()) {
-            return variant1.unionBy(variant2);
-        }
+        return getRangeReferenceObjectFromCache(variant1, variant2);
 
-        // =A1:A gets #NAME?
-        return ErrorValueObject.create(ErrorType.NAME);
+        // if (variant1.isCell() && variant2.isCell()) {
+
+        //     return variant1.unionBy(variant2);
+        // }
+        // if (variant1.isRow() && variant2.isRow()) {
+        //     return variant1.unionBy(variant2);
+        // }
+        // if (variant1.isColumn() && variant2.isColumn()) {
+        //     return variant1.unionBy(variant2);
+        // }
+
+        // // =A1:A gets #NAME?
+        // return ErrorValueObject.create(ErrorType.NAME);
     }
 }
 

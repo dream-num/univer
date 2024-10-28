@@ -314,7 +314,7 @@ export class CalculateFormulaService extends Disposable {
                 }
 
                 if (tree.formulaId != null) {
-                    this._runtimeService.setRuntimeOtherData(tree.formulaId, value);
+                    this._runtimeService.setRuntimeOtherData(tree.formulaId, tree.refOffsetX, tree.refOffsetY, value);
                 } else {
                     this._runtimeService.setRuntimeData(value);
                 }

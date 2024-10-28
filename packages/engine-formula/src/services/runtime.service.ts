@@ -130,7 +130,7 @@ export interface IFormulaRuntimeService {
 
     getFormulaExecuteStage(): FormulaExecuteStageType;
 
-    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType): void;
+    setRuntimeOtherData(formulaId: string, x: number, y: number, functionVariant: FunctionVariantType): void;
 
     getRuntimeOtherData(): IRuntimeOtherUnitDataType;
 
@@ -394,7 +394,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._functionDefinitionPrivacyVar.get(lambdaId);
     }
 
-    setRuntimeOtherData(formulaId: string, functionVariant: FunctionVariantType) {
+    setRuntimeOtherData(formulaId: string, x: number, y: number, functionVariant: FunctionVariantType) {
         const subUnitId = this._currentSubUnitId;
         const unitId = this._currentUnitId;
 
@@ -433,7 +433,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             cellDatas = [[objectValueToCellValue(functionVariant as BaseValueObject)!]];
         }
 
-        subComponentData![formulaId] = cellDatas;
+        subComponentData![formulaId] = {
+            cellData: cellDatas,
+            refOffsetX: x,
+            refOffsetY: y,
+        };
     }
 
     // eslint-disable-next-line max-lines-per-function

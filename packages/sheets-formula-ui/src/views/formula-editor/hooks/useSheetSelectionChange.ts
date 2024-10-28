@@ -26,7 +26,7 @@ import { deserializeRangeWithSheet, sequenceNodeType, serializeRange, serializeR
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useRef } from 'react';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { findIndexFromSequenceNodes } from '../../range-selector/utils/findIndexFromSequenceNodes';
 import { getOffsetFromSequenceNodes } from '../../range-selector/utils/getOffsetFromSequenceNodes';
@@ -194,12 +194,12 @@ export const useSheetSelectionChange = (
                 const result = sequenceNodeToText(newSequenceNodes);
                 handleRangeChange(result, offset || -1);
             };
-            const dispose = merge(editor.input$, refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(30)).subscribe(() => {
+            const reListen = () => {
                 disposableCollection.dispose();
                 const controls = refSelectionsRenderService.getSelectionControls();
                 controls.forEach((control, index) => {
                     disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
-                        debounceTime(30),
+                        throttleTime(30),
                         map((e) => {
                             return serializeRange(e);
                         }),
@@ -209,6 +209,9 @@ export const useSheetSelectionChange = (
                         handleSequenceNodeReplace(rangeText, index);
                     }));
                 });
+            };
+            const dispose = merge(editor.input$, refSelectionsRenderService.selectionMoveEnd$).pipe(debounceTime(50)).subscribe(() => {
+                reListen();
             });
 
             return () => {

@@ -25,7 +25,7 @@ import { deserializeRangeWithSheet, matchToken, sequenceNodeType, serializeRange
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { useEffect, useMemo, useRef } from 'react';
 import { distinctUntilChanged, map, merge } from 'rxjs';
-import { debounceTime, throttleTime } from 'rxjs/operators';
+import { throttleTime } from 'rxjs/operators';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
 import { filterReferenceNode, isComma } from '../utils/filterReferenceNode';
 import { rangePreProcess } from '../utils/rangePreProcess';
@@ -191,7 +191,7 @@ export const useSheetSelectionChange = (isNeed: boolean,
                     const controls = refSelectionsRenderService.getSelectionControls();
                     controls.forEach((control, index) => {
                         disposableCollection.add(merge(control.selectionMoving$, control.selectionScaling$).pipe(
-                            debounceTime(30),
+                            throttleTime(30),
                             map((e) => {
                                 return serializeRange(e);
                             }),

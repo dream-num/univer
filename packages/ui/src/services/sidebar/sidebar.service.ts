@@ -15,10 +15,10 @@
  */
 
 import type { IDisposable } from '@univerjs/core';
-import { createIdentifier } from '@univerjs/core';
 import type { Subject } from 'rxjs';
-
 import type { ISidebarMethodOptions } from '../../views/components/sidebar/interface';
+
+import { createIdentifier } from '@univerjs/core';
 
 export interface ISidebarService {
     readonly sidebarOptions$: Subject<ISidebarMethodOptions>;
@@ -30,6 +30,9 @@ export interface ISidebarService {
     get visible(): boolean;
 
     get options(): ISidebarMethodOptions;
+
+    getContainer(): HTMLElement | undefined;
+    setContainer(element?: HTMLElement): void;
 }
 
 export const ILeftSidebarService = createIdentifier<ISidebarService>('ui.left-sidebar.service');

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
+import type { FUniver, ICommand, IWorkbookData, Univer, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { ILocalFileService } from '@univerjs/ui';
-import type { ICommand, IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import type { FUniver } from '@univerjs/facade';
 
 declare global {
     // eslint-disable-next-line ts/naming-convention

@@ -246,9 +246,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../packages/engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../packages/facade
       '@univerjs/find-replace':
         specifier: workspace:*
         version: link:../packages/find-replace
@@ -552,9 +549,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../../packages/facade
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../../mockdata
@@ -3404,9 +3398,6 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../facade
       '@univerjs/protocol':
         specifier: 0.1.39-alpha.30
         version: 0.1.39-alpha.30(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)

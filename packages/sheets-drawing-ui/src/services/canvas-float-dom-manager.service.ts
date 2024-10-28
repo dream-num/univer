@@ -186,7 +186,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
     transformChange$ = this._transformChange$.asObservable();
 
-    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string; data?:Record<string, any>; }>();
+    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string; data?: Record<string, any> }>();
     public add$ = this._add$.asObservable();
 
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
@@ -211,11 +211,10 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     }
 
     private _bindScrollEvent() {
-        this._lifecycleService.lifecycle$.pipe(filter(s => s === LifecycleStages.Rendered), take(1)).subscribe(() => {
+        this._lifecycleService.lifecycle$.pipe(filter((s) => s === LifecycleStages.Rendered), take(1)).subscribe(() => {
             this._scrollUpdateListener();
-        })
+        });
     }
-
 
     private _ensureMap(unitId: string, subUnitId: string) {
         let unitMap = this._domLayerMap.get(unitId);
@@ -326,8 +325,8 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     if (isChart) {
                         imageConfig.fill = 'white';
                         imageConfig.rotateEnabled = false;
-                        if(data && (data as Record<string,any>).border){
-                            imageConfig.stroke =  (data as Record<string,any>).border;
+                        if (data && (data as Record<string, string>).border) {
+                            imageConfig.stroke = (data as Record<string, string>).border;
                         }
                         imageConfig.paintFirst = 'stroke';
                         imageConfig.strokeWidth = 1;
@@ -529,9 +528,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
             if (rectShape && rectShape instanceof Rect) {
                 rectShape.setProps(props);
             }
-
         }
-
     }
 
     addFloatDomToPosition(layer: ICanvasFloatDom, propId?: string, executeCommand = true) {

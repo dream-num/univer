@@ -47,7 +47,7 @@ Extensible. High-performance. Embedded to your application.
 ## 🌈 Highlights
 
 - 📈 Univer is designed to support **spreadsheets**, **documents** and **presentation**.
-- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js.
+- 🧙‍♀️ Univer is **isomorphic**. It can run both on browsers and Node.js (in the future, mobile devices as well), with the same API.
 - ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
 - 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
 - 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* that makes it a delight for developers to implement their unique requirements on the top of Univer.
@@ -109,7 +109,7 @@ Univer supports multiple languages, including:
 - `vi-VN`
 - `fa-IR`
 
-`zh-CN` and `en-US` are officially supported, while the others are contributed by the community.
+`zh-CN` and `en-US` are officially supported, while the others are contributed and maintained by the community.
 
 You can add the language you want by [Using Custom Locales](https://univer.ai/guides/sheet/getting-started/i18n#using-custom-locales). You can also help us add new language support by referring to the [contribution guide](./CONTRIBUTING.md).
 
@@ -134,6 +134,11 @@ You can find all the examples in the [Univer Examples](https://univer.ai/example
 <!-- ## 📦 Ecosystem
 
 Univer has a rich ecosystem that includes a wide range of tools and resources to help you get started with Univer: -->
+
+## 🔗 Links
+
+- [Official Site](https://univer.ai)
+- [Presets Repository](https://github.com/dream-num/univer-presets)
 
 ## 💬 Community
 

@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-/**
- * Copyright 2023-present DreamNum Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import type { IObjectMatrixPrimitiveType, Nullable } from '../shared';
 import type { IDocumentData, IDocumentRenderConfig, IPaddingData, IStyleData, ITextRotation } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, ISelectionCell, IWorksheetData } from './typedef';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
+import { convertTextRotation, getFontStyleString } from '../docs/data-model/utils';
 import { composeStyles, ObjectMatrix, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
 import { DEFAULT_STYLES } from '../types/const';
@@ -44,7 +29,7 @@ import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
 import { SpanModel } from './span-model';
-import { addLinkToDocumentModel, convertTextRotation, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat, getFontStyleString } from './util';
+import { addLinkToDocumentModel, createDocumentModelWithStyle, DEFAULT_PADDING_DATA, extractOtherStyle, getFontFormat } from './util';
 import { SheetViewModel } from './view-model';
 
 export interface IDocumentLayoutObject {

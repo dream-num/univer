@@ -19,10 +19,10 @@ import type { IRange, IUnitRange } from './typedef';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE } from '../common/const';
 import { BuildTextUtils, DocumentDataModel } from '../docs';
 import { TextX } from '../docs/data-model/text-x/text-x';
+import { convertTextRotation } from '../docs/data-model/utils';
 import { Rectangle } from '../shared';
-import { DEFAULT_STYLES } from '../types/const';
-import { BaselineOffset, BooleanNumber, type CellValueType, HorizontalAlign, type TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
-import { CustomRangeType, FontStyleType, type IDocumentData, type IPaddingData, type IStyleBase, type IStyleData, type ITextRotation, type ITextStyle } from '../types/interfaces';
+import { type CellValueType, HorizontalAlign, type TextDirection, VerticalAlign, WrapStrategy } from '../types/enum';
+import { CustomRangeType, type IDocumentData, type IPaddingData, type IStyleBase, type IStyleData, type ITextRotation, type ITextStyle } from '../types/interfaces';
 
 export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]): boolean => {
     return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
@@ -49,22 +49,17 @@ export const getDefaultBaselineOffset = (fontSize: number) => ({
     spo: fontSize,
 });
 
-export const DEFAULT_FONTFACE_PLANE =
-    '"Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+export interface ICellStyle {
+    textRotation?: ITextRotation;
+    textDirection?: Nullable<TextDirection>;
+    horizontalAlign?: HorizontalAlign;
+    verticalAlign?: VerticalAlign;
+    wrapStrategy?: WrapStrategy;
+    paddingData?: IPaddingData;
+    cellValueType?: CellValueType;
+}
 
 export const VERTICAL_ROTATE_ANGLE = 90;
-
-export function convertTextRotation(textRotation?: ITextRotation) {
-    const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation || { a: 0, v: BooleanNumber.FALSE };
-    let centerAngle = 0;
-    let vertexAngle = angle;
-    if (isVertical === BooleanNumber.TRUE) {
-        centerAngle = VERTICAL_ROTATE_ANGLE;
-        vertexAngle = VERTICAL_ROTATE_ANGLE;
-    }
-
-    return { centerAngle, vertexAngle };
-}
 
 export function createDocumentModelWithStyle(content: string, textStyle: ITextStyle, config: ICellStyle = {}) {
     const contentLength = content.length;
@@ -127,16 +122,6 @@ export function createDocumentModelWithStyle(content: string, textStyle: ITextSt
     return new DocumentDataModel(documentData);
 }
 
-export interface ICellStyle {
-    textRotation?: ITextRotation;
-    textDirection?: Nullable<TextDirection>;
-    horizontalAlign?: HorizontalAlign;
-    verticalAlign?: VerticalAlign;
-    wrapStrategy?: WrapStrategy;
-    paddingData?: IPaddingData;
-    cellValueType?: CellValueType;
-}
-
 export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
     if (!style) return {};
     const {
@@ -158,6 +143,11 @@ export function extractOtherStyle(style?: Nullable<IStyleData>): ICellStyle {
     } as ICellStyle;
 }
 
+/**
+ * Pick font style from cell style.
+ * @param format
+ * @returns {IStyleBase} style
+ */
 export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     if (!format) {
         return {};
@@ -173,102 +163,6 @@ export function getFontFormat(format?: Nullable<IStyleData>): IStyleBase {
     ol && (style.ol = ol);
     cl && (style.cl = cl);
     return style;
-}
-
-export interface IDocumentSkeletonFontStyle {
-    fontString: string;
-    fontSize: number;
-    originFontSize: number;
-    fontFamily: string;
-    fontCache: string;
-}
-
-// eslint-disable-next-line max-lines-per-function
-export function getFontStyleString(
-    textStyle?: IStyleBase
-): IDocumentSkeletonFontStyle {
-    const defaultFont = DEFAULT_STYLES.ff;
-
-    const defaultFontSize = DEFAULT_STYLES.fs;
-
-    if (!textStyle) {
-        const fontString = `${defaultFontSize}pt  ${defaultFont}`;
-
-        return {
-            fontCache: fontString,
-            fontString,
-            fontSize: defaultFontSize,
-            originFontSize: defaultFontSize,
-            fontFamily: defaultFont,
-        };
-    }
-
-    // font-style
-    let italic = FontStyleType.ITALIC;
-    if (textStyle.it === 0 || textStyle.it === undefined) {
-        italic = FontStyleType.NORMAL;
-    }
-
-    // font-variant
-    // font += `${FontStyleType.NORMAL} `;
-
-    // font-weight
-    let bold = FontStyleType.BOLD;
-    if (textStyle.bl === 0 || textStyle.bl === undefined) {
-        bold = FontStyleType.NORMAL;
-    }
-
-    // font-size/line-height
-    let originFontSize = defaultFontSize;
-    if (textStyle.fs) {
-        originFontSize = Math.ceil(textStyle.fs);
-    }
-
-    let fontFamilyResult = defaultFont;
-    if (textStyle.ff) {
-        let fontFamily = textStyle.ff;
-
-        fontFamily = fontFamily.replace(/"/g, '').replace(/'/g, '');
-
-        if (fontFamily.indexOf(' ') > -1) {
-            fontFamily = `"${fontFamily}"`;
-        }
-
-        // if (fontFamily != null && document.fonts && !document.fonts.check('12px ' + fontFamily)) {
-        //     menuButton.addFontToList(fontFamily);
-        // }
-
-        if (fontFamily == null) {
-            fontFamily = defaultFont;
-        }
-
-        fontFamilyResult = fontFamily;
-    }
-
-    const { va: baselineOffset } = textStyle;
-
-    let fontSize = originFontSize;
-    if (
-        baselineOffset === BaselineOffset.SUBSCRIPT ||
-        baselineOffset === BaselineOffset.SUPERSCRIPT
-    ) {
-        const baselineOffsetInfo = getBaselineOffsetInfo(fontFamilyResult, fontSize);
-        const { sbr, spr } = baselineOffsetInfo;
-
-        fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
-    }
-
-    const fontStringPure = `${italic} ${bold} ${fontSize}pt ${fontFamilyResult}`;
-
-    const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
-
-    return {
-        fontCache: fontStringPure,
-        fontString,
-        fontSize,
-        originFontSize,
-        fontFamily: fontFamilyResult,
-    };
 }
 
 export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
@@ -296,8 +190,4 @@ export function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl
     }
 
     TextX.apply(body, textX.serialize());
-}
-
-export function getBaselineOffsetInfo(_fontFamily: string, fontSize: number) {
-    return getDefaultBaselineOffset(fontSize);
 }

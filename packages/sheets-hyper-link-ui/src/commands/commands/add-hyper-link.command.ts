@@ -45,7 +45,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const hyperLinkModel = accessor.get(HyperLinkModel);
-        const editorBridgeService = accessor.get(IEditorBridgeService);
+        const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
         const { unitId, subUnitId, link } = params;
         const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         const currentRender = renderManagerService.getRenderById(unitId);
@@ -118,7 +118,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             t: CellValueType.STRING,
         };
 
-        const finalCellData = await editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, newCellData);
+        const finalCellData = editorBridgeService ? (await editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, newCellData)) : newCellData;
 
         const redoParams: ISetRangeValuesMutationParams = {
             unitId,

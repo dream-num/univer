@@ -20,6 +20,8 @@ export const SHEET_ZOOM_RANGE = [10, 400];
  * TODO@ggg: To avoid introducing the range-selector of the sheet-formula-ui package into sheet-ui, use a component key for now
  */
 export const RANGE_SELECTOR_COMPONENT_KEY = 'RANGE_SELECTOR_COMPONENT_KEY';
+export const EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY = 'RANGE_SELECTOR_COMPONENT_KEY';
+// end
 
 export enum SHEET_VIEW_KEY {
     MAIN = '__SpreadsheetRender__',

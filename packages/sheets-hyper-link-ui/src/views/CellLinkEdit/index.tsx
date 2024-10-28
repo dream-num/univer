@@ -396,7 +396,7 @@ export const CellLinkEdit = () => {
             return;
         }
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+        handleOutClick && handleOutClick(e as unknown as MouseEvent, () => isFocusRangeSelectorSet(false));
     };
 
     if (!editing) {

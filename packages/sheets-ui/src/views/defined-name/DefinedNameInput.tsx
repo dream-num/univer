@@ -225,6 +225,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     initValue={formulaOrRefStringValue}
                     onChange={rangeSelectorChange}
                     isFocus={isFocusRangeSelector}
+                    onFocus={() => isFocusRangeSelectorSet(true)}
                     actions={rangeSelectorActionsRef.current}
                     isSupportAcrossSheet
                     onBlur={() => { isFocusRangeSelectorSet(false); }}

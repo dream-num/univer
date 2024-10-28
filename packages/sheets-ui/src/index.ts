@@ -73,7 +73,7 @@ export { DragManagerService } from './services/drag-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverRenderController } from './controllers/hover-render.controller';
 export { DragRenderController } from './controllers/drag-render.controller';
-export { RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
+export { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY, SHEET_VIEW_KEY } from './common/keys';
 export { type ICanvasPopup, SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';

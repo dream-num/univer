@@ -22,7 +22,7 @@ import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
-import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { RangeSelector, useSidebarClickWithoutInput } from '@univerjs/sheets-formula-ui';
 import { ComponentManager, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
@@ -246,13 +246,13 @@ export function DataValidationDetail() {
         );
     };
 
-    const handlePanelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    useSidebarClickWithoutInput((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
-    };
+        handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
+    });
 
     return (
-        <div className={styles.dataValidationDetail} onClick={handlePanelClick}>
+        <div className={styles.dataValidationDetail}>
             <FormLayout
                 label={localeService.t('dataValidation.panel.range')}
                 error={(!localRule.ranges.length || isRangeError) ? localeService.t('dataValidation.panel.rangeError') : ''}
@@ -262,6 +262,7 @@ export function DataValidationDetail() {
                     subUnitId={subUnitId}
                     initValue={rangeStr}
                     onChange={handleUpdateRuleRanges}
+                    onFocus={() => isFocusRangeSelectorSet(true)}
                     isFocus={isFocusRangeSelector}
                     actions={rangeSelectorActionsRef.current}
                     onVerify={(isValid) => setIsRangeError(!isValid)}

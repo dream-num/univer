@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { IDisposable, IUnitRangeName } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { createInternalEditorID, debounce, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
@@ -23,13 +26,10 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { filter } from 'rxjs';
-
-import type { IDisposable, IUnitRangeName } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
 import { useBlur } from './hooks/useBlur';
 
@@ -64,7 +64,7 @@ export interface IRangeSelectorProps {
     onFocus?: () => void;
 
     actions?: {
-        handleOutClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => void;
+        handleOutClick?: (e: MouseEvent, cb: () => void) => void;
     };
 
     /**
@@ -118,10 +118,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     // init actions
     if (actions) {
-        actions.handleOutClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => {
+        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
             if (rangeSelectorWrapRef.current) {
                 const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
-                cb(isContain);
+                !isContain && cb();
             }
         };
     }
@@ -320,9 +320,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 [styles.sheetRangeSelectorActive]: isFocus && !isError,
                 [styles.sheetRangeSelectorError]: isError,
             })}
-
             >
-                <div className={styles.sheetRangeSelectorText} ref={containerRef} onClick={handleClick}>
+                <div className={styles.sheetRangeSelectorText} ref={containerRef} onMouseUp={handleClick}>
                 </div>
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />

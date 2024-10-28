@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@univerjs/core';
+import type { Editor } from '@univerjs/docs-ui';
+import type { ReactNode } from 'react';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { IDisposable } from '@univerjs/core';
-import type { Editor } from '@univerjs/docs-ui';
-import type { ReactNode } from 'react';
 import { useBlur } from '../range-selector/hooks/useBlur';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
@@ -50,7 +50,7 @@ export interface IFormulaEditorProps {
     onBlur?: () => void;
     isSupportAcrossSheet?: boolean;
     actions?: {
-        handleOutClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => void;
+        handleOutClick?: (e: MouseEvent, cb: () => void) => void;
     };
 }
 const noop = () => { };
@@ -73,10 +73,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     // init actions
     if (actions) {
-        actions.handleOutClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => {
+        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
             if (sheetEmbeddingRef.current) {
                 const isContain = sheetEmbeddingRef.current.contains(e.target as Node);
-                cb(isContain);
+                !isContain && cb();
             }
         };
     }
@@ -223,11 +223,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 <div
                     className={styles.sheetEmbeddingFormulaEditorText}
                     ref={formulaEditorContainerRef}
-                    onClick={() => {
-                        setTimeout(() => {
-                            handleClick();
-                        }, 30);
-                    }}
+                    onMouseUp={handleClick}
                 >
                 </div>
                 {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}

@@ -19,7 +19,7 @@ import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighligh
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
-import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { FormulaEditor, useSidebarClickWithoutInput } from '@univerjs/sheets-formula-ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
@@ -88,16 +88,10 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         onChange(getResult(config));
     };
 
-    useEffect(() => {
-        const handlePanelClick = (e: MouseEvent) => {
-            const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
-            handleOutClick && handleOutClick(e as any, isFocusFormulaEditorSet);
-        };
-        divEleRef.current?.parentElement?.addEventListener('click', handlePanelClick);
-        return () => {
-            divEleRef.current?.parentElement?.removeEventListener('click', handlePanelClick);
-        };
-    }, []);
+    useSidebarClickWithoutInput((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
     return (
         <div ref={divEleRef}>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>

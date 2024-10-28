@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
-import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import React, { useEffect, useMemo, useState } from 'react';
 import type { Workbook } from '@univerjs/core';
 import type { IColorScale, IConditionalFormattingRuleConfig } from '@univerjs/sheets-conditional-formatting';
+import type { IStyleEditorProps } from './type';
+
+import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { InputNumber, Select } from '@univerjs/design';
+import { CFRuleType, CFValueType, createDefaultValueByValueType } from '@univerjs/sheets-conditional-formatting';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ColorPicker } from '../../color-picker';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
-import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const TextInput = (props: { id: string; type: CFValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
+const TextInput = (props: { id: string; type: CFValueType | 'none'; value: number | string; onChange: (v: number | string) => void; className: string }) => {
     const { type, className, onChange, id, value } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
@@ -50,21 +52,31 @@ const TextInput = (props: { id: string; type: CFValueType | 'none';value: number
             min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
         };
     }, [type]);
+
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
+
     if (type === CFValueType.formula) {
         return (
-            <TextEditor
-                openForSheetSubUnitId={subUnitId}
-                openForSheetUnitId={unitId}
-                id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_colo_scale_${id}`)}
-                value={formulaInitValue}
-                style={{ maxWidth: '50%', marginLeft: 4 }}
-                canvasStyle={{ fontSize: 10 }}
-                onlyInputFormula={true}
-                onChange={(v = '') => {
-                    const formula = v || '';
-                    onChange(formula);
-                }}
-            />
+            <div style={{ width: '100%', marginLeft: 12 }}>
+                <FormulaEditor
+                    initValue={formulaInitValue as any}
+                    unitId={unitId}
+                    subUnitId={subUnitId}
+                    isFocus={isFocusFormulaEditor}
+                    onChange={(v = '') => {
+                        const formula = v || '';
+                        onChange(formula);
+                    }}
+                    onFocus={() => isFocusFormulaEditorSet(true)}
+                    actions={formulaEditorActionsRef.current}
+                />
+            </div>
         );
     } else {
         return <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
@@ -217,6 +229,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
+                    style={{ flexShrink: 0 }}
                     options={minOptions}
                     value={minType}
                     onChange={(v) => {
@@ -248,6 +261,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
+                    style={{ flexShrink: 0 }}
                     options={medianOptions}
                     value={medianType}
                     onChange={(v) => {
@@ -283,6 +297,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
+                    style={{ flexShrink: 0 }}
                     options={maxOptions}
                     value={maxType}
                     onChange={(v) => {

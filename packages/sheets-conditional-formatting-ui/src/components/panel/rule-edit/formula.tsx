@@ -19,7 +19,8 @@ import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighligh
 import type { IStyleEditorProps } from './type';
 import { IUniverInstanceService, LocaleService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { CFRuleType, CFSubRuleType } from '@univerjs/sheets-conditional-formatting';
-import { FormulaEditor, useSidebarClickWithoutInput } from '@univerjs/sheets-formula-ui';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useRef, useState } from 'react';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
@@ -87,7 +88,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         onChange(getResult(config));
     };
 
-    useSidebarClickWithoutInput((e: MouseEvent) => {
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
     });

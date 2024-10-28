@@ -22,8 +22,9 @@ import { Button, Checkbox, FormLayout, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { SheetsSelectionsService } from '@univerjs/sheets';
 import { RemoveSheetDataValidationCommand, UpdateSheetDataValidationOptionsCommand, UpdateSheetDataValidationRangeCommand, UpdateSheetDataValidationSettingCommand } from '@univerjs/sheets-data-validation';
-import { RangeSelector, useSidebarClickWithoutInput } from '@univerjs/sheets-formula-ui';
-import { ComponentManager, useEvent, useObservable } from '@univerjs/ui';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
+
+import { ComponentManager, useEvent, useObservable, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DataValidationPanelService } from '../../../services/data-validation-panel.service';
 import { DataValidationOptions } from '../options';
@@ -246,7 +247,7 @@ export function DataValidationDetail() {
         );
     };
 
-    useSidebarClickWithoutInput((e: MouseEvent) => {
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     });

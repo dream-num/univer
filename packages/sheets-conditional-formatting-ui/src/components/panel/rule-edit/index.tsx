@@ -26,7 +26,9 @@ import { Button, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, serializeRange } from '@univerjs/engine-formula';
 import { RemoveSheetMutation, setEndForRange, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
-import { RangeSelector, useSidebarClickWithoutInput } from '@univerjs/sheets-formula-ui';
+import { RangeSelector } from '@univerjs/sheets-formula-ui';
+import { useSidebarClick } from '@univerjs/ui';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 
@@ -237,7 +239,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         }
     };
 
-    useSidebarClickWithoutInput((e: MouseEvent) => {
+    useSidebarClick((e: MouseEvent) => {
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
         handleOutClick && handleOutClick(e, () => isFocusRangeSelectorSet(false));
     });

@@ -17,15 +17,16 @@
 import type { Workbook } from '@univerjs/core';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import type { IStyleEditorProps } from './type';
-import { createInternalEditorID, get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 
+import { get, IUniverInstanceService, LocaleService, set, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
-
 import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
-import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
-import { ILayoutService, useScrollYOverContainer } from '@univerjs/ui';
-import React, { forwardRef, useEffect, useMemo, useState } from 'react';
+
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap } from '@univerjs/sheets-conditional-formatting';
+import { FormulaEditor } from '@univerjs/sheets-formula-ui';
+import { ILayoutService, useScrollYOverContainer, useSidebarClick } from '@univerjs/ui';
+
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import stylesBase from '../index.module.less';
 import styles from './index.module.less';
@@ -35,7 +36,7 @@ const getIcon = (iconType: string, iconId: string | number) => {
     return arr[Number(iconId)] || '';
 };
 
-const TextInput = (props: { id: number; type: CFValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
+const TextInput = (props: { id: number; type: CFValueType; value: number | string; onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
     const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()?.getSheetId();
@@ -45,6 +46,14 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
         }
         return '';
     }, [props.error]);
+
+    const formulaEditorActionsRef = useRef<Parameters<typeof FormulaEditor>[0]['actions']>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
     return (
         <div className={styles.positionRelative}>
             {props.type !== CFValueType.formula
@@ -59,18 +68,20 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                     </>
                 )
                 : (
-                    <TextEditor
-                        id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_icon_set_${props.id}`)}
-                        value={String(props.value).startsWith('=') ? String(props.value) : '='}
-                        openForSheetSubUnitId={subUnitId}
-                        openForSheetUnitId={unitId}
-                        canvasStyle={{ fontSize: 10 }}
-                        onlyInputFormula={true}
-                        onChange={(v = '') => {
-                            const formula = v || '';
-                            props.onChange(formula);
-                        }}
-                    />
+                    <div style={{ width: '100%', marginLeft: 12 }}>
+                        <FormulaEditor
+                            initValue={String(props.value) as any}
+                            unitId={unitId}
+                            subUnitId={subUnitId}
+                            isFocus={isFocusFormulaEditor}
+                            onChange={(v = '') => {
+                                const formula = v || '';
+                                props.onChange(formula);
+                            }}
+                            onFocus={() => isFocusFormulaEditorSet(true)}
+                            actions={formulaEditorActionsRef.current}
+                        />
+                    </div>
                 )}
         </div>
     );
@@ -117,9 +128,9 @@ const IconGroupList = forwardRef<HTMLDivElement | null, IconGroupListProps>((pro
     );
 });
 
-const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void;iconType?: IIconType; iconId: string }) => {
+const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) => void; iconType?: IIconType; iconId: string }) => {
     const list = useMemo(() => {
-        const result: { iconType: IIconType;iconId: string; base64: string }[] = [];
+        const result: { iconType: IIconType; iconId: string; base64: string }[] = [];
         for (const key in iconMap) {
             const list = iconMap[key as IIconType];
             const iconType = key as IIconType;
@@ -262,7 +273,13 @@ const IconSetRuleEdit = (props: {
                                     </div>
                                 </div>
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
-                                    <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as CFNumberOperator, index); }} />
+                                    <Select
+                                        style={{ flexShrink: 0 }}
+                                        className={`${styles.width45} ${stylesBase.mL0}`}
+                                        options={valueTypeOptions}
+                                        value={item.value.type}
+                                        onChange={(v) => { handleValueTypeChange(v as CFNumberOperator, index); }}
+                                    />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
                                         <TextInput id={index} type={item.value.type} error={error} value={item.value.value || ''} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
@@ -304,10 +321,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             if (index === list.length - 1) {
                 // The last condition is actually the complement of the above conditions,
                 // packages/sheets-conditional-formatting/src/services/calculate-unit/icon-set.ts
-                return { operator: CFNumberOperator.lessThanOrEqual,
-                         value: { type: CFValueType.num, value: Number.MAX_SAFE_INTEGER },
-                         iconType: currentIconType,
-                         iconId: String(index) };
+                return {
+                    operator: CFNumberOperator.lessThanOrEqual,
+                    value: { type: CFValueType.num, value: Number.MAX_SAFE_INTEGER },
+                    iconType: currentIconType,
+                    iconId: String(index),
+                };
             }
             return createDefaultConfigItem(currentIconType, index, list);
         });
@@ -389,20 +408,24 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     };
 
     useEffect(() => {
-        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, { handler() {
-            const result: IIconSet = { type: CFRuleType.iconSet, isShowValue, config: configList } as IIconSet;
-            return result;
-        } });
+        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
+            handler() {
+                const result: IIconSet = { type: CFRuleType.iconSet, isShowValue, config: configList } as IIconSet;
+                return result;
+            },
+        });
         return () => {
             dispose();
         };
     }, [isShowValue, configList, interceptorManager]);
 
     useEffect(() => {
-        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, { handler() {
-            const keys = Object.keys(errorMap);
-            return keys.length === 0;
-        } });
+        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, {
+            handler() {
+                const keys = Object.keys(errorMap);
+                return keys.length === 0;
+            },
+        });
         return () => {
             dispose();
         };

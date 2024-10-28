@@ -16,15 +16,14 @@
 
 import type { Nullable, Workbook } from '@univerjs/core';
 
-import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
+import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools, UniverInstanceType, useDependency } from '@univerjs/core';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { TextEditor } from '@univerjs/docs-ui';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { hasCJKText } from '@univerjs/engine-render';
 import { ErrorSingle } from '@univerjs/icons';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, useSidebarClick } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
+import { EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY, RANGE_SELECTOR_COMPONENT_KEY } from '../../common/keys';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
 import styles from './index.module.less';
@@ -66,7 +65,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const componentManager = useDependency(ComponentManager);
 
     const RangeSelector = useMemo(() => componentManager.get(RANGE_SELECTOR_COMPONENT_KEY), []);
-
+    const FormulaEditor = useMemo(() => componentManager.get(EMBEDDING_FORMULA_EDITOR_COMPONENT_KEY), []);
     if (workbook == null) {
         return;
     }
@@ -207,6 +206,14 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
     };
 
+    const formulaEditorActionsRef = useRef<any>({});
+    const [isFocusFormulaEditor, isFocusFormulaEditorSet] = useState(false);
+
+    useSidebarClick((e: MouseEvent) => {
+        const handleOutClick = formulaEditorActionsRef.current?.handleOutClick;
+        handleOutClick && handleOutClick(e, () => isFocusFormulaEditorSet(false));
+    });
+
     return (
         <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }} onClick={handlePanelClick}>
             <div>
@@ -231,20 +238,22 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                     onBlur={() => { isFocusRangeSelectorSet(false); }}
                 />
             )}
-            {typeValue !== 'range' && (
+            {typeValue !== 'range' && FormulaEditor && (
                 <div className="univer-defined-name-input-formula-selector-text-wrap">
-                    <TextEditor
-                        key={`${inputId}-editor`}
-                        value={formulaOrRefStringValue}
-                        onValid={setValidFormulaOrRange}
-                        onChange={formulaEditorChange}
-                        id={createInternalEditorID(`${inputId}-editor`)}
-                        placeholder={localeService.t('definedName.inputFormulaPlaceholder')}
-                        openForSheetUnitId={unitId}
-                        onlyInputFormula={true}
-                        // style={{ width: '99%' }}
-                        className="univer-defined-name-input-text-editor-container"
-                        canvasStyle={{ fontSize: 10 }}
+                    <FormulaEditor
+                        initValue={formulaOrRefStringValue as any}
+                        unitId={unitId}
+                        subUnitId={subUnitId}
+                        isFocus={isFocusFormulaEditor}
+                        onChange={(v = '') => {
+                            const formula = v || '';
+                            formulaEditorChange(formula);
+                        }}
+                        onVerify={(res: boolean) => {
+                            setValidFormulaOrRange(res);
+                        }}
+                        onFocus={() => isFocusFormulaEditorSet(true)}
+                        actions={formulaEditorActionsRef.current}
                     />
                 </div>
             )}

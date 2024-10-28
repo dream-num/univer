@@ -20,17 +20,16 @@ import {
     Inject,
     toDisposable,
 } from '@univerjs/core';
-
+import { AFTER_CELL_EDIT, SheetInterceptorService } from '@univerjs/sheets';
 import { ConditionalFormattingService } from '@univerjs/sheets-conditional-formatting';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export class ConditionalFormattingEditorController extends Disposable {
     constructor(
-        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
-        @Inject(ConditionalFormattingService) private _conditionalFormattingService: ConditionalFormattingService
-
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(ConditionalFormattingService) private readonly _conditionalFormattingService: ConditionalFormattingService
     ) {
         super();
+
         this._initInterceptorEditorEnd();
     }
 
@@ -42,8 +41,8 @@ export class ConditionalFormattingEditorController extends Disposable {
     private _initInterceptorEditorEnd() {
         this.disposeWithMe(
             toDisposable(
-                this._editorBridgeService.interceptor.intercept(
-                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
+                this._sheetInterceptorService.writeCellInterceptor.intercept(
+                    AFTER_CELL_EDIT,
                     {
                         handler: (value, context, next) => {
                             const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);

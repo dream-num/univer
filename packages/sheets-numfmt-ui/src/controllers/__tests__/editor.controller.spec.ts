@@ -17,7 +17,7 @@
 import type { ICellDataForSheetInterceptor, Workbook, Worksheet } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { SetNumfmtMutation } from '@univerjs/sheets';
+import { SetNumfmtMutation, SheetInterceptorService } from '@univerjs/sheets';
 
 import { SheetsNumfmtCellContentController } from '@univerjs/sheets-numfmt';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -27,12 +27,14 @@ import { createTestBed } from './test.util';
 
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
+
 class MockEditorBridgeService {
     interceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
     });
 }
+
 describe('test editor', () => {
     let unitId: string = '';
     let subUnitId: string = '';
@@ -47,6 +49,7 @@ describe('test editor', () => {
             [SheetsNumfmtCellContentController],
             [IEditorBridgeService, { useClass: MockEditorBridgeService }],
         ]);
+
         unitId = testBed.unitId;
         subUnitId = testBed.subUnitId;
         commandService = testBed.get(ICommandService);
@@ -73,7 +76,7 @@ describe('test editor', () => {
             },
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
-        const editorBridgeService = testBed.get(IEditorBridgeService);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
         const cellData = worksheet.getCell(0, 0);
         const location = {
             workbook,
@@ -88,9 +91,7 @@ describe('test editor', () => {
         expect(cellData!.v).toEqual('$0');
         expect(cellData!.t).toEqual(2);
 
-        const result = editorBridgeService.interceptor.fetchThroughInterceptors(
-            editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
-        )(cellData, location);
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
         // The currency  format needs to be entered in the editor with real values, not with currency symbols
         expect(result!.v).toEqual(0);
         expect(result!.t).toEqual(2);
@@ -111,7 +112,7 @@ describe('test editor', () => {
             },
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
-        const editorBridgeService = testBed.get(IEditorBridgeService);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
         const cellData = worksheet.getCell(0, 0);
         const location = {
             workbook,
@@ -123,9 +124,7 @@ describe('test editor', () => {
             origin: cellData,
         };
 
-        const result = editorBridgeService.interceptor.fetchThroughInterceptors(
-            editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
-        )(cellData, location);
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(BEFORE_CELL_EDIT)(cellData, location);
         // The data format needs to be entered in the editor with data string, not with real values
         expect(result!.v).toEqual(cellData!.v);
     });
@@ -145,7 +144,7 @@ describe('test editor', () => {
             },
         };
         commandService.syncExecuteCommand(SetNumfmtMutation.id, params);
-        const editorBridgeService = testBed.get(IEditorBridgeService);
+        const sheetInterceptorService = testBed.get(SheetInterceptorService);
         const cellData = { v: '12:33:22', t: 2 };
         const location = {
             workbook,
@@ -157,9 +156,7 @@ describe('test editor', () => {
             origin: cellData,
         };
 
-        const result = editorBridgeService.interceptor.fetchThroughInterceptors(
-            editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
-        )(cellData, location);
+        const result = sheetInterceptorService.writeCellInterceptor.fetchThroughInterceptors(AFTER_CELL_EDIT)(cellData, location);
         // The date-time drop is a numeric value, not a literal string
         expect(result?.v).toBe(0.5231712962962963);
     });

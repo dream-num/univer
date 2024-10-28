@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-export interface ISheetUrlParams {
-    gid?: string;
-    range?: string;
-    rangeid?: string;
-    unitid?: string;
-}
+import './f-workbook';
+import './f-range';
+
+export { FWorkbookHyperLinkMixin } from './f-workbook';

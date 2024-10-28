@@ -18,10 +18,32 @@ import type { CustomRangeType, DocumentDataModel, IAccessor, IAddCustomRangeText
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { BuildTextUtils, IUniverInstanceService, JSONX, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
-import { getRichTextEditPath } from '../commands/util';
 
 interface IAddCustomRangeParam extends IAddCustomRangeTextXParam {
     unitId: string;
+}
+
+/**
+ * @deprecated This is a duplication from docs-ui to avoid making too much breaking changes.
+ */
+export function getRichTextEditPath(docDataModel: DocumentDataModel, segmentId = '') {
+    if (!segmentId) {
+        return ['body'];
+    }
+
+    const { headers, footers } = docDataModel.getSnapshot();
+
+    if (headers == null && footers == null) {
+        throw new Error('Document data model must have headers or footers when update by segment id');
+    }
+
+    if (headers?.[segmentId] != null) {
+        return ['headers', segmentId, 'body'];
+    } else if (footers?.[segmentId] != null) {
+        return ['footers', segmentId, 'body'];
+    } else {
+        throw new Error('Segment id not found in headers or footers');
+    }
 }
 
 export function addCustomRangeFactory(accessor: IAccessor, param: IAddCustomRangeParam, body: IDocumentBody) {

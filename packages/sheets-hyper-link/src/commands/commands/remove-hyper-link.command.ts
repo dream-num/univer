@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentBody, IMutationInfo, Nullable } from '@univerjs/core';
 import type { IAddHyperLinkMutationParams } from '@univerjs/sheets-hyper-link';
 import { BuildTextUtils, CellValueType, CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { deleteCustomRangeFactory } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import { deleteCustomRangeFactory } from '@univerjs/docs';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-// import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
 export interface ICancelHyperLinkCommandParams {
     unitId: string;
@@ -40,47 +38,31 @@ export const CancelHyperLinkCommand: ICommand<ICancelHyperLinkCommandParams> = {
 
     // eslint-disable-next-line max-lines-per-function
     handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
+        if (!params) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const renderManagerService = accessor.get(IRenderManagerService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const instanceSrv = accessor.get(IUniverInstanceService);
         const hyperLinkModel = accessor.get(HyperLinkModel);
 
-        const { unitId, subUnitId, row, column, id } = params;
-        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        const currentRender = renderManagerService.getRenderById(unitId);
-        if (!currentRender || !workbook) {
-            return false;
-        }
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        // const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-        // const skeleton = skeletonManagerService.getCurrent()?.skeleton;
-        if (!worksheet) {
-            return false;
-        }
-        const cellData = worksheet.getCell(row, column);
-        if (!cellData) {
-            return false;
-        }
-        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
-        if (!doc?.documentModel) {
-            return false;
-        }
-        const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());
+        const target = getSheetCommandTarget(instanceSrv, params);
+        if (!target) return false;
 
+        const { row, column, id } = params;
+        const { unitId, subUnitId, worksheet } = target;
+
+        const cellData = worksheet.getCell(row, column);
+        if (!cellData) return false;
+
+        const doc = worksheet.getCellDocumentModelWithFormula(cellData);
+        if (!doc?.documentModel) return false;
+
+        const snapshot = Tools.deepClone(doc.documentModel!.getSnapshot());
         const range = snapshot.body?.customRanges?.find((range) => range.rangeId === id);
-        if (!range) {
-            return false;
-        }
+        if (!range) return false;
 
         const textX = BuildTextUtils.customRange.delete(accessor, { documentDataModel: doc.documentModel, rangeId: id });
-
-        if (!textX) {
-            return false;
-        }
+        if (!textX) return false;
 
         const newBody = TextX.apply(snapshot.body!, textX.serialize());
         const redos: IMutationInfo[] = [];

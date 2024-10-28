@@ -42,6 +42,18 @@ import { IThreadCommentMentionDataService, type IThreadCommentMentionDataSource,
 import { UniverUIPlugin } from '@univerjs/ui';
 import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
+import '@univerjs/sheets/facade';
+import '@univerjs/ui/facade';
+import '@univerjs/docs-ui/facade';
+import '@univerjs/sheets-ui/facade';
+import '@univerjs/sheets-data-validation/facade';
+import '@univerjs/engine-formula/facade';
+import '@univerjs/sheets-filter/facade';
+import '@univerjs/sheets-formula/facade';
+import '@univerjs/sheets-numfmt/facade';
+import '@univerjs/sheets-hyper-link-ui/facade';
+import '@univerjs/sheets-thread-comment/facade';
+
 /* eslint-disable-next-line node/prefer-global/process */
 const IS_E2E: boolean = !!process.env.IS_E2E;
 

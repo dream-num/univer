@@ -55,7 +55,7 @@ import {
     IRenderManagerService,
 } from '@univerjs/engine-render';
 
-import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
@@ -108,7 +108,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
         @Inject(LocaleService) protected readonly _localService: LocaleService,
         @IEditorService private readonly _editorService: IEditorService,
         @Inject(SheetCellEditorResizeService) private readonly _sheetCellEditorResizeService: SheetCellEditorResizeService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService
     ) {
         super();
 
@@ -561,7 +562,7 @@ export class EditingRenderController extends Disposable implements IRenderModule
             return;
         }
 
-        const finalCell = await this._editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, cellData);
+        const finalCell = await this._sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, cellData);
 
         this._commandService.executeCommand(SetRangeValuesCommand.id, {
             subUnitId: sheetId,

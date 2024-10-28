@@ -18,7 +18,7 @@ import type { IMutationInfo, Workbook } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, Inject, IUniverInstanceService, ObjectMatrix, Range, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
+import { AFTER_CELL_EDIT, ClearSelectionAllCommand, ClearSelectionContentCommand, ClearSelectionFormatCommand, getSheetCommandTarget, SetRangeValuesCommand, SheetInterceptorService, SheetsSelectionsService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
@@ -141,7 +141,7 @@ export class SheetHyperLinkSetRangeController extends Disposable {
     }
 
     private _initAfterEditor() {
-        this.disposeWithMe(this._editorBridgeService.interceptor.intercept(this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT, {
+        this.disposeWithMe(this._sheetInterceptorService.writeCellInterceptor.intercept(AFTER_CELL_EDIT, {
             handler: (cell, context, next) => {
                 if (!cell || cell.p) {
                     return next(cell);

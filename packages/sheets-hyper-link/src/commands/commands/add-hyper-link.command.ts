@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IDocumentData, IMutationInfo, Workbook } from '@univerjs/core';
+import type { ICellData, ICommand, IDocumentData, IMutationInfo } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
-import { addCustomRangeBySelectionFactory } from '@univerjs/docs-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
+import { BuildTextUtils, CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools } from '@univerjs/core';
+import { addCustomRangeBySelectionFactory } from '@univerjs/docs';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SheetInterceptorService } from '@univerjs/sheets';
 import { AddHyperLinkMutation, HyperLinkModel, type ICellHyperLink, RemoveHyperLinkMutation } from '@univerjs/sheets-hyper-link';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
 export interface IAddHyperLinkCommandParams {
     unitId: string;
@@ -37,35 +35,26 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
 
     // eslint-disable-next-line max-lines-per-function
     async handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
+        if (!params) return false;
+
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const hyperLinkModel = accessor.get(HyperLinkModel);
-        const editorBridgeService = accessor.get(IEditorBridgeService);
-        const { unitId, subUnitId, link } = params;
-        const workbook = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        const currentRender = renderManagerService.getRenderById(unitId);
-        if (!currentRender || !workbook) {
-            return false;
-        }
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        // const skeletonManagerService = currentRender.with(SheetSkeletonManagerService);
-        // const skeleton = skeletonManagerService.getCurrent()?.skeleton;
-        if (!worksheet) {
-            return false;
-        }
+        const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId, workbook, worksheet } = target;
+        const { link } = params;
         const { payload, display, row, column, id } = link;
+
         const cellData = worksheet.getCell(row, column);
         const doc = worksheet.getBlankCellDocumentModel(cellData);
         const snapshot = doc.documentModel!.getSnapshot();
         const body = Tools.deepClone(snapshot.body);
-        if (!body) {
-            return false;
-        }
+        if (!body) return false;
 
         let textX: TextX | false;
         if (display) {
@@ -103,9 +92,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             });
         }
 
-        if (!textX) {
-            return false;
-        }
+        if (!textX) return false;
 
         const newBody = TextX.apply(body, textX.serialize());
         const rangeValue: IDocumentData = {
@@ -118,8 +105,7 @@ export const AddHyperLinkCommand: ICommand<IAddHyperLinkCommandParams> = {
             t: CellValueType.STRING,
         };
 
-        const finalCellData = await editorBridgeService.beforeSetRangeValue(workbook, worksheet, row, column, newCellData);
-
+        const finalCellData = await sheetInterceptorService.onWriteCell(workbook, worksheet, row, column, newCellData);
         const redoParams: ISetRangeValuesMutationParams = {
             unitId,
             subUnitId,

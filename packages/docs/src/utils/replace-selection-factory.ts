@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, IUniverInstanceService, JSONX } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { DocumentDataModel, IAccessor, IDocumentBody, IMutationInfo, ITextRangeParam, Nullable, TextX } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
-import { getRichTextEditPath } from '../commands/util';
+import { BuildTextUtils, IUniverInstanceService, JSONX } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
+import { getRichTextEditPath } from './custom-range-factory';
 
 export interface IReplaceSelectionFactoryParams {
     unitId: string;
     /**
-     * slelection to be replaced, if not provided, use the current selection.
+     * selection to be replaced, if not provided, use the current selection.
      */
     selection?: ITextRangeParam;
 

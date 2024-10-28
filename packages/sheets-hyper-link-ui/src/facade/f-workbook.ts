@@ -14,26 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import type { ISheetHyperLinkInfo } from '../types/interfaces';
 import { FWorkbook } from '@univerjs/sheets/facade';
+import { SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
+import { FWorkbookHyperLinkMixin } from '@univerjs/sheets-hyper-link/facade';
 import { SheetsHyperLinkResolverService } from '../services/resolver.service';
 
-interface IFWorkbookHyperlinkMixin {
-    /**
-     * create a hyperlink for the sheet
-     * @param sheetId the sheet id to link
-     * @param range the range to link, or define-name id
-     * @returns the hyperlink string
-     */
-    createSheetHyperlink(this: FWorkbook, sheetId: string, range?: string | IRange): string;
-    /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
-     */
-    // TODO@weird94: this should be moved to hyperlink plugin
-    parseSheetHyperlink(this: FWorkbook, hyperlink: string): ISheetHyperLinkInfo;
+interface IFWorkbookHyperlinkUIMixin {
     /**
      * navigate to the sheet hyperlink
      * @param hyperlink the hyperlink string
@@ -41,31 +27,18 @@ interface IFWorkbookHyperlinkMixin {
     navigateToSheetHyperlink(this: FWorkbook, hyperlink: string): void;
 }
 
-class FWorkbookHyperLinkMixin extends FWorkbook implements IFWorkbookHyperlinkMixin {
-    override createSheetHyperlink(sheetId: string, range?: string | IRange): string {
-        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        return resolverService.buildHyperLink(this.getId(), sheetId, range);
-    }
-
-    /**
-     * parse the hyperlink string to get the hyperlink info
-     * @param hyperlink the hyperlink string
-     * @returns the hyperlink info
-     */
-    override parseSheetHyperlink(hyperlink: string): ISheetHyperLinkInfo {
-        const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        return resolverService.parseHyperLink(hyperlink);
-    }
-
+class FWorkbookHyperLinkUIMixin extends FWorkbookHyperLinkMixin implements IFWorkbookHyperlinkUIMixin {
+    // TODO: this should be migrated back to hyperlink ui plugin
     override navigateToSheetHyperlink(hyperlink: string): void {
+        const parserService = this._injector.get(SheetsHyperLinkParserService);
         const resolverService = this._injector.get(SheetsHyperLinkResolverService);
-        const info = resolverService.parseHyperLink(hyperlink);
-        info.handler();
+        const info = parserService.parseHyperLink(hyperlink);
+        resolverService.navigate(info);
     }
 }
 
-FWorkbook.extend(FWorkbookHyperLinkMixin);
+FWorkbook.extend(FWorkbookHyperLinkUIMixin);
 declare module '@univerjs/sheets/facade' {
     // eslint-disable-next-line ts/naming-convention
-    interface FWorkbook extends IFWorkbookHyperlinkMixin {}
+    interface FWorkbook extends IFWorkbookHyperlinkUIMixin {}
 }

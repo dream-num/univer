@@ -23,7 +23,6 @@ import { AddHyperLinkCommand } from '../commands/commands/add-hyper-link.command
 import { CancelHyperLinkCommand } from '../commands/commands/remove-hyper-link.command';
 import { UpdateHyperLinkCommand } from '../commands/commands/update-hyper-link.command';
 
-// TODO@weird94: related methods should be moved from sheets-hyperlink-ui to sheets-hyperlink
 export interface ICellHyperLink {
     id: string;
     startIndex: number;

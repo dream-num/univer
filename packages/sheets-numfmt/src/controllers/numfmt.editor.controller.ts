@@ -32,6 +32,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
 import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
@@ -42,8 +43,8 @@ import {
     SheetInterceptorService,
     transformCellsToRange,
 } from '@univerjs/sheets';
-import { IEditorBridgeService } from '@univerjs/sheets-ui';
 
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { getPatternType } from '../utils/pattern';
 
 const createCollectEffectMutation = () => {
@@ -167,7 +168,9 @@ export class NumfmtEditorController extends Disposable {
                                         null
                                     );
                             };
-                            if (!value?.v) {
+
+                            // if the value is empty or the current numfmt is text format, return the value directly
+                            if (!value?.v || currentNumfmtValue?.pattern === DEFAULT_TEXT_FORMAT) {
                                 return next(value);
                             }
 

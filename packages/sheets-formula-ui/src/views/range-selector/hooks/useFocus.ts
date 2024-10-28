@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@univerjs/core';
-import { type Editor, IEditorService } from '@univerjs/docs-ui';
+import type { Editor } from '@univerjs/docs-ui';
 import { useMemo } from 'react';
 
 export const useFocus = (editor?: Editor) => {
-    const editorService = useDependency(IEditorService);
-
     const focus = useMemo(() => {
         return () => {
             if (editor) {
                 editor.focus();
                 const selections = [...editor.getSelectionRanges()];
-                // @TODO:editorService: 当完全移除editorService 的时候,这段代码可以删掉.
-                editorService.focus(editor.getEditorId());
                 if (selections.length) {
                     editor.setSelectionRanges(selections);
                 }

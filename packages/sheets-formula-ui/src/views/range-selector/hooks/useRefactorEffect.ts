@@ -18,7 +18,6 @@ import type { Workbook } from '@univerjs/core';
 import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
-import { IEditorBridgeService, isRangeSelector } from '@univerjs/sheets-ui';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 
@@ -28,7 +27,6 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
-    const editorBridgeService = useDependency(IEditorBridgeService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const contextMenuService = useDependency(IContextMenuService);
 
@@ -39,15 +37,11 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             contextService.setContextValue(EDITOR_ACTIVATED, true);
-            if (!isRangeSelector(unitId)) {
-                editorBridgeService.enableForceKeepVisible();
-            }
 
             return () => {
                 d1?.dispose();
                 contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
                 contextService.setContextValue(EDITOR_ACTIVATED, false);
-                editorBridgeService.disableForceKeepVisible();
             };
         }
     }, [isNeed]);

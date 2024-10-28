@@ -21,7 +21,7 @@ import type { ISetFrozenMutationParams } from '@univerjs/sheets';
 import type { IFloatDomData, ISheetDrawingPosition, ISheetFloatDom } from '@univerjs/sheets-drawing';
 import type { IFloatDomLayout } from '@univerjs/ui';
 import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
-import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DisposableCollection, fromEventSubject, generateRandomId, ICommandService, Inject, IUniverInstanceService, LifecycleService, LifecycleStages, UniverInstanceType } from '@univerjs/core';
 import { DrawingTypeEnum, getDrawingShapeKeyByDrawingSearch, IDrawingManagerService } from '@univerjs/drawing';
 
 import { DRAWING_OBJECT_LAYER_INDEX, IRenderManagerService, ObjectType, Rect, SHEET_VIEWPORT_KEY } from '@univerjs/engine-render';
@@ -29,7 +29,7 @@ import { getSheetCommandTarget, SetFrozenMutation } from '@univerjs/sheets';
 import { DrawingApplyType, ISheetDrawingService, SetDrawingApplyMutation } from '@univerjs/sheets-drawing';
 import { ISheetSelectionRenderService, SetZoomRatioOperation, SheetSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/sheets-ui';
 import { CanvasFloatDomService } from '@univerjs/ui';
-import { BehaviorSubject, filter, map, Subject, switchMap } from 'rxjs';
+import { BehaviorSubject, filter, map, Subject, switchMap, take } from 'rxjs';
 import { InsertSheetDrawingCommand } from '../commands/commands/insert-sheet-drawing.command';
 
 export interface ICanvasFloatDom {
@@ -186,7 +186,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
     private _transformChange$ = new Subject<{ id: string; value: ITransformState }>();
     transformChange$ = this._transformChange$.asObservable();
 
-    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
+    private _add$ = new Subject<{ unitId: string; subUnitId: string; id: string; data?:Record<string, any>; }>();
     public add$ = this._add$.asObservable();
 
     private _remove$ = new Subject<{ unitId: string; subUnitId: string; id: string }>();
@@ -200,14 +200,22 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
         @Inject(ICommandService) private _commandService: ICommandService,
         @IDrawingManagerService private _drawingManagerService: IDrawingManagerService,
         @Inject(CanvasFloatDomService) private readonly _canvasFloatDomService: CanvasFloatDomService,
-        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService
+        @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
+        @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService
     ) {
         super();
         this._drawingAddListener();
-        this._scrollUpdateListener();
         this._featureUpdateListener();
         this._deleteListener();
+        this._bindScrollEvent();
     }
+
+    private _bindScrollEvent() {
+        this._lifecycleService.lifecycle$.pipe(filter(s => s === LifecycleStages.Rendered), take(1)).subscribe(() => {
+            this._scrollUpdateListener();
+        })
+    }
+
 
     private _ensureMap(unitId: string, subUnitId: string) {
         let unitMap = this._domLayerMap.get(unitId);
@@ -318,7 +326,9 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     if (isChart) {
                         imageConfig.fill = 'white';
                         imageConfig.rotateEnabled = false;
-                        imageConfig.stroke = 'blue';
+                        if(data && (data as Record<string,any>).border){
+                            imageConfig.stroke =  (data as Record<string,any>).border;
+                        }
                         imageConfig.paintFirst = 'stroke';
                         imageConfig.strokeWidth = 1;
                         imageConfig.borderEnabled = false;

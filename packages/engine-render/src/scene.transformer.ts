@@ -1534,7 +1534,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
      * @param {string[]} ids the id of the object to be cleared
      */
     public clearControlByIds(ids: string[]) {
-        for(const id of ids) {
+        for (const id of ids) {
             // const control = this._transformerControlMap.get(id);
             // if(control) {
             //     control.dispose();

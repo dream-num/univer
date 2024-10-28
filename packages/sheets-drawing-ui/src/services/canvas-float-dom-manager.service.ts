@@ -394,7 +394,7 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                 });
             })
         );
-        
+
         // remove float-dom control when drawing removed
         this.disposeWithMe(
             this._drawingManagerService.remove$.subscribe((params) => {
@@ -402,18 +402,16 @@ export class SheetCanvasFloatDomManagerService extends Disposable {
                     const { unitId, subUnitId, drawingId } = param;
                     const rectShapeKey = getDrawingShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId });
 
-                    
                     const renderObject = this._getSceneAndTransformerByDrawingSearch(unitId);
                     if (renderObject == null) {
                         return;
                     }
                     const { transformer, scene } = renderObject;
                     const rectShape = scene.getObject(rectShapeKey);
-                    if(rectShape?.oKey){
+                    if (rectShape?.oKey) {
                         transformer.clearControlByIds([rectShape?.oKey]);
                     }
                 });
-
             })
         );
     }

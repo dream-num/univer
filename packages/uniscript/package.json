@@ -67,7 +67,8 @@
     "dependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.30",
+        "@univerjs/facade": "workspace:*",
+        "@univerjs/protocol": "0.1.39-alpha.36",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",

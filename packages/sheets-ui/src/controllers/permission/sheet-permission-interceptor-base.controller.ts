@@ -23,7 +23,7 @@ import type { ISheetPasteParams } from '../../commands/commands/clipboard.comman
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { CustomCommandExecutionError, Disposable, DisposableCollection, FOCUSING_EDITOR_STANDALONE, ICommandService, IContextService, Inject, IPermissionService, isICellData, IUniverInstanceService, LocaleService, ObjectMatrix, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import { IMEInputCommand, InsertCommand } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, deserializeRangeWithSheetWithCache, IDefinedNamesService, LexerTreeBuilder, operatorToken, sequenceNodeType } from '@univerjs/engine-formula';
 import { UnitAction } from '@univerjs/protocol';
 import { ClearSelectionContentCommand, DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, DeltaColumnWidthCommand, DeltaRowHeightCommand, getSheetCommandTarget, InsertRangeMoveDownCommand, InsertRangeMoveRightCommand, MoveColsCommand, MoveRangeCommand, MoveRowsCommand, RangeProtectionPermissionEditPoint, RangeProtectionPermissionViewPoint, RangeProtectionRuleModel, SetBackgroundColorCommand, SetColWidthCommand, SetRangeValuesCommand, SetRowHeightCommand, SetSelectedColsVisibleCommand, SetSelectedRowsVisibleCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetNameCommand, SetWorksheetNameMutation, SetWorksheetOrderCommand, SetWorksheetRowIsAutoHeightCommand, SetWorksheetShowCommand, SheetsSelectionsService, WorkbookCopyPermission, WorkbookEditablePermission, WorkbookHideSheetPermission, WorkbookManageCollaboratorPermission, WorkbookMoveSheetPermission, WorkbookRenameSheetPermission, WorksheetCopyPermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellStylePermission, WorksheetSetCellValuePermission, WorksheetSetColumnStylePermission, WorksheetSetRowStylePermission, WorksheetViewPermission } from '@univerjs/sheets';
 import { IDialogService } from '@univerjs/ui';
@@ -44,8 +44,6 @@ export const SHEET_PERMISSION_PASTE_PLUGIN = 'SHEET_PERMISSION_PASTE_PLUGIN';
 export class SheetPermissionInterceptorBaseController extends Disposable {
     disposableCollection = new DisposableCollection();
 
-    private _showPermissionDialog = true;
-
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -64,10 +62,6 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
         this._initialize();
     }
 
-    setShowPermissionDialog(value: boolean) {
-        this._showPermissionDialog = value;
-    }
-
     public haveNotPermissionHandle(errorMsg: string) {
         const dialogProps = {
             id: UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID,
@@ -81,7 +75,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
             onClose: () => this._dialogService.close(UNIVER_SHEET_PERMISSION_ALERT_DIALOG_ID),
             className: 'sheet-permission-user-dialog',
         };
-        if (this._showPermissionDialog) {
+        if (this._permissionService.getShowComponents()) {
             this._dialogService.open(dialogProps);
         }
         throw new CustomCommandExecutionError('have not permission');
@@ -672,7 +666,7 @@ export class SheetPermissionInterceptorBaseController extends Disposable {
                         continue;
                     }
                     const { token } = node;
-                    const sequenceGrid = deserializeRangeWithSheet(token);
+                    const sequenceGrid = deserializeRangeWithSheetWithCache(token);
                     const workbook = sequenceGrid.unitId ? this._univerInstanceService.getUnit<Workbook>(sequenceGrid.unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                     if (!workbook) return true;
                     let targetSheet: Nullable<Worksheet> = sequenceGrid.sheetName ? workbook.getSheetBySheetName(sequenceGrid.sheetName) : workbook.getActiveSheet();

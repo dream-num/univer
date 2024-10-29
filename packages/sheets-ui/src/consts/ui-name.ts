@@ -17,4 +17,5 @@
 export enum SheetsUIPart {
     FILTER_PANEL_EMBED_POINT = 'filter-panel-embed-point',
     SHEETS_FOOTER = 'sheets-footer',
+    FORMULA_AUX = 'formula-aux',
 }

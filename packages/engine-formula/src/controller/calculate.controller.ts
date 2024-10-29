@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+import type { ICommandInfo } from '@univerjs/core';
+import type { IFormulaData } from '../basics/common';
 
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
-import type { IAllRuntimeData } from '../services/runtime.service';
+import type { IFormulaDirtyData } from '../services/current-data.service';
 import { Disposable, ICommandService, Inject } from '@univerjs/core';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
@@ -33,7 +33,7 @@ import {
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
-import { FormulaExecutedStateType } from '../services/runtime.service';
+import { FormulaExecutedStateType, type IAllRuntimeData } from '../services/runtime.service';
 
 export class CalculateController extends Disposable {
     constructor(
@@ -49,8 +49,6 @@ export class CalculateController extends Disposable {
     private _initialize(): void {
         this._commandExecutedListener();
         this._initialExecuteFormulaListener();
-
-        this._initialExecuteFormulaProcessListener();
     }
 
     private _commandExecutedListener() {
@@ -66,13 +64,7 @@ export class CalculateController extends Disposable {
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
 
-                    if (params.forceCalculation === true) {
-                        this._calculate(true);
-                    } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache } = params;
-
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, clearDependencyTreeCache);
-                    }
+                    this._calculate(params);
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
 
@@ -90,14 +82,9 @@ export class CalculateController extends Disposable {
     }
 
     private async _calculate(
-        forceCalculate: boolean = false,
-        dirtyRanges: IUnitRange[] = [],
-        dirtyNameMap: IDirtyUnitSheetNameMap = {},
-        dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
-        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {},
-        clearDependencyTreeCache: IDirtyUnitSheetNameMap = {}
+        formulaDirtyData: Partial<IFormulaDirtyData>
     ) {
+        const { forceCalculation: forceCalculate = false, dirtyRanges = [], dirtyNameMap = {}, dirtyDefinedNameMap = {}, dirtyUnitFeatureMap = {}, dirtyUnitOtherFormulaMap = {}, clearDependencyTreeCache = {} } = formulaDirtyData;
         if (
             dirtyRanges.length === 0 &&
             Object.keys(dirtyNameMap).length === 0 &&
@@ -159,9 +146,7 @@ export class CalculateController extends Disposable {
                 }
             );
         });
-    }
 
-    private _initialExecuteFormulaProcessListener() {
         /**
          * Assignment operation after formula calculation.
          */

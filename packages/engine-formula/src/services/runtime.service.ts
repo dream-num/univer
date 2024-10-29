@@ -47,6 +47,7 @@ import { IFormulaCurrentConfigService } from './current-data.service';
  */
 export enum FormulaExecuteStageType {
     IDLE,
+    START,
     START_DEPENDENCY,
     START_CALCULATION,
     CURRENTLY_CALCULATING,
@@ -272,6 +273,14 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         return this._isCycleDependency;
     }
 
+    setFormulaCycleIndex(index: number) {
+        this._formulaCycleIndex = index;
+    }
+
+    getFormulaCycleIndex() {
+        return this._formulaCycleIndex;
+    }
+
     setTotalArrayFormulasToCalculate(value: number) {
         this._totalArrayFormulasToCalculate = value;
     }
@@ -302,14 +311,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     getCompletedFormulasCount() {
         return this._completedFormulasCount;
-    }
-
-    setFormulaCycleIndex(index: number) {
-        this._formulaCycleIndex = index;
-    }
-
-    getFormulaCycleIndex() {
-        return this._formulaCycleIndex;
     }
 
     markedAsSuccessfullyExecuted() {
@@ -361,9 +362,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this.markedAsInitialFunctionsExecuted();
 
         this._stopState = false;
-
         this._isCycleDependency = false;
-
         this._totalFormulasToCalculate = 0;
         this._completedFormulasCount = 0;
     }
@@ -462,11 +461,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const arrayFormulaRange = this._unitArrayFormulaRange[unitId]!;
 
-        let arrayData = new ObjectMatrix<IRange>();
-
-        if (arrayFormulaRange[sheetId]) {
-            arrayData = new ObjectMatrix(arrayFormulaRange[sheetId]);
+        if (arrayFormulaRange[sheetId] === null || arrayFormulaRange[sheetId] === undefined) {
+            arrayFormulaRange[sheetId] = {};
         }
+
+        const arrayData = new ObjectMatrix<IRange>(arrayFormulaRange[sheetId]);
 
         if (this._runtimeArrayFormulaCellData[unitId] === undefined) {
             this._runtimeArrayFormulaCellData[unitId] = {};
@@ -523,9 +522,8 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 endColumn: endColumn - startColumn + column,
             };
 
+            // Do not use getData to synchronize arrayData to arrayFormulaRange[sheetId] anymore, they are already linked, otherwise it will cause performance issues
             arrayData.setValue(row, column, arrayRange);
-
-            arrayFormulaRange[sheetId] = arrayData.getData();
 
             if (
                 this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange) ||

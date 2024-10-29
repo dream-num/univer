@@ -22,6 +22,7 @@ import { DocSkeletonManagerService } from '@univerjs/docs';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { AfterSpaceCommand } from '../../commands/commands/auto-format.command';
 import { InsertCommand } from '../../commands/commands/core-editing.command';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { DocSelectionRenderService } from '../../services/selection/doc-selection-render.service';
 
 export class DocInputController extends Disposable implements IRenderModule {
@@ -31,7 +32,8 @@ export class DocInputController extends Disposable implements IRenderModule {
         private readonly _context: IRenderContext<DocumentDataModel>,
         @Inject(DocSelectionRenderService) private readonly _docSelectionRenderService: DocSelectionRenderService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DocMenuStyleService) private readonly _docMenuStyleService: DocMenuStyleService
     ) {
         super();
 
@@ -72,7 +74,8 @@ export class DocInputController extends Disposable implements IRenderModule {
             const originBody = docDataModel.getSelfOrHeaderFooterModel(segmentId).getBody();
 
             // Insert content's style should follow the text style of the current position.
-            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset);
+            const cacheStyle = this._docMenuStyleService.getStyleCache();
+            const curTextRun = getTextRunAtPosition(originBody?.textRuns ?? [], activeRange.endOffset, cacheStyle);
 
             await this._commandService.executeCommand(InsertCommand.id, {
                 unitId,

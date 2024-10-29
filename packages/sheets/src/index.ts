@@ -107,6 +107,7 @@ export { defaultWorkbookPermissionPoints, getAllWorkbookPermissionPoint } from '
 export {
     WorkbookCommentPermission,
     WorkbookCopyPermission,
+    WorkbookCreateProtectPermission,
     WorkbookCreateSheetPermission,
     WorkbookDeleteSheetPermission,
     WorkbookDuplicatePermission,
@@ -123,8 +124,9 @@ export {
     WorkbookViewHistoryPermission,
     WorkbookViewPermission,
     WorksheetCopyPermission,
-    WorksheetDeleteColumnPermission,
 
+    WorksheetDeleteColumnPermission,
+    WorksheetDeleteProtectionPermission,
     WorksheetDeleteRowPermission,
     WorksheetEditExtraObjectPermission,
     WorksheetEditPermission,
@@ -162,6 +164,9 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
+export { RangeProtectionPermissionManageCollaPoint } from './services/permission/permission-point/range/manage-collaborator';
+export { RangeProtectionPermissionDeleteProtectionPoint } from './services/permission/permission-point/range/delete-protection';
+export { baseProtectionActions } from './services/permission/range-permission/util';
 
 export { generateNullCell, generateNullCellValue } from './basics/utils';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
@@ -195,8 +200,12 @@ export { DeleteRangeProtectionCommand, type IDeleteRangeProtectionCommandParams 
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
 export { InsertRangeMoveDownCommand, type InsertRangeMoveDownCommandParams } from './commands/commands/insert-range-move-down.command';
 export { InsertRangeMoveRightCommand, type InsertRangeMoveRightCommandParams } from './commands/commands/insert-range-move-right.command';
-export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutations';
-export { type ISetWorksheetRowColumnStyleMutationParams, SetWorksheetRowColumnStyleMutation, SetWorksheetRowColumnStyleMutationFactory } from './commands/mutations/set-worksheet-row-column-style.mutation';
+export { type ISetWorksheetDefaultStyleMutationParams, SetWorksheetDefaultStyleMutation, SetWorksheetDefaultStyleMutationFactory } from './commands/mutations/set-worksheet-default-style.mutation';
+export { SetWorksheetDefaultStyleCommand } from './commands/commands/set-worksheet-default-style.command';
+export { type ISetRowDataMutationParams, SetRowDataMutation, SetRowDataMutationFactory } from './commands/mutations/set-row-data.mutation';
+export { type ISetRowDataCommandParams, SetRowDataCommand } from './commands/commands/set-row-data.command';
+export { type ISetColDataMutationParams, SetColDataMutation, SetColDataMutationFactory } from './commands/mutations/set-col-data.mutation';
+export { type ISetColDataCommandParams, SetColDataCommand } from './commands/commands/set-col-data.command';
 export {
     type IInsertColCommandParams,
     type IInsertRowCommandParams,
@@ -309,8 +318,9 @@ export type { ISetWorksheetShowCommandParams } from './commands/commands/set-wor
 export { AddRangeProtectionMutation, FactoryAddRangeProtectionMutation, type IAddRangeProtectionMutationParams } from './commands/mutations/add-range-protection.mutation';
 export { AddMergeUndoMutationFactory, AddWorksheetMergeMutation } from './commands/mutations/add-worksheet-merge.mutation';
 export { AddWorksheetProtectionMutation, type IAddWorksheetProtectionParams } from './commands/mutations/add-worksheet-protection.mutation';
-export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteSelectionProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
+export { DeleteRangeProtectionMutation, FactoryDeleteRangeProtectionMutation, type IDeleteRangeProtectionMutationParams } from './commands/mutations/delete-range-protection.mutation';
 export { DeleteWorksheetProtectionMutation } from './commands/mutations/delete-worksheet-protection.mutation';
+export type { IDeleteWorksheetProtectionParams } from './commands/mutations/delete-worksheet-protection.mutation';
 export { EmptyMutation } from './commands/mutations/empty.mutation';
 export {
     InsertColMutation,
@@ -380,11 +390,13 @@ export { type ISetWorksheetOrderMutationParams, SetWorksheetOrderMutation } from
 export { SetWorksheetPermissionPointsMutation } from './commands/mutations/set-worksheet-permission-points.mutation';
 export type { ISetWorksheetPermissionPointsMutationParams } from './commands/mutations/set-worksheet-permission-points.mutation';
 export { SetWorksheetProtectionMutation } from './commands/mutations/set-worksheet-protection.mutation';
+export type { ISetWorksheetProtectionParams } from './commands/mutations/set-worksheet-protection.mutation';
 export { SetWorksheetRightToLeftMutation } from './commands/mutations/set-worksheet-right-to-left.mutation';
 export {
     type ISetWorksheetRowAutoHeightMutationParams,
     type ISetWorksheetRowHeightMutationParams,
     type ISetWorksheetRowIsAutoHeightMutationParams,
+
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowAutoHeightMutationFactory,
     SetWorksheetRowHeightMutation,
@@ -395,4 +407,5 @@ export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.oper
 export { type ISetSelectionsOperationParams, SetSelectionsOperation } from './commands/operations/selection.operation';
 export { type ISetWorksheetActiveOperationParams, SetWorksheetActiveOperation } from './commands/operations/set-worksheet-active.operation';
 export { type IToggleCellCheckboxCommandParams, ToggleCellCheckboxCommand } from './commands/commands/toggle-checkbox.command';
+
 // #endregion

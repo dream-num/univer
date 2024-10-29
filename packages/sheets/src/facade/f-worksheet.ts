@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import type { ISetColDataCommandParams } from '../commands/commands/set-col-data.command';
+import type { ISetRowDataCommandParams } from '../commands/commands/set-row-data.command';
 import type { IToggleGridlinesCommandParams } from '../commands/commands/toggle-gridlines.command';
 import type { ISetRangeValuesMutationParams } from '../commands/mutations/set-range-values.mutation';
 import type { FWorkbook } from './f-workbook';
@@ -23,16 +25,17 @@ import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { InsertColCommand, InsertRowCommand } from '../commands/commands/insert-row-col.command';
 import { MoveColsCommand, MoveRowsCommand } from '../commands/commands/move-rows-cols.command';
 import { RemoveColCommand, RemoveRowCommand } from '../commands/commands/remove-row-col.command';
+import { SetColDataCommand } from '../commands/commands/set-col-data.command';
 import { SetColHiddenCommand, SetSpecificColsVisibleCommand } from '../commands/commands/set-col-visible.command';
 import { CancelFrozenCommand, SetFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
 import { SetRowHiddenCommand, SetSpecificRowsVisibleCommand } from '../commands/commands/set-row-visible.command';
 import { SetColWidthCommand } from '../commands/commands/set-worksheet-col-width.command';
 import { SetRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '../commands/commands/set-worksheet-row-height.command';
 import { ToggleGridlinesCommand } from '../commands/commands/toggle-gridlines.command';
 import { copyRangeStyles } from '../commands/commands/utils/selection-utils';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
-import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
+import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutation';
 import { SheetsSelectionsService } from '../services/selections/selection-manager.service';
 import { FRange } from './f-range';
 import { FSelection } from './f-selection';
@@ -92,7 +95,8 @@ export class FWorksheet extends FBase {
     }
 
     // #region rows
-    //#region default style
+
+    // #region default style
 
     /**
      * Get the default style of the worksheet
@@ -147,13 +151,18 @@ export class FWorksheet extends FBase {
     async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const styles = [{ index, style }];
-        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+
+        const params: ISetColDataCommandParams = {
             unitId,
             subUnitId,
-            isRow: false,
-            styles,
-        });
+            columnData: {
+                [index]: {
+                    s: style,
+                },
+            },
+        };
+
+        await this._commandService.executeCommand(SetColDataCommand.id, params);
         return this;
     }
 
@@ -165,15 +174,21 @@ export class FWorksheet extends FBase {
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const styles = [{ index, style }];
-        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+
+        const params: ISetRowDataCommandParams = {
             unitId,
             subUnitId,
-            isRow: true,
-            styles,
-        });
+            rowData: {
+                [index]: {
+                    s: style,
+                },
+            },
+        };
+
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
         return this;
     }
+
     // #endregion
 
     /**
@@ -605,6 +620,33 @@ export class FWorksheet extends FBase {
 
     // #endregion
 
+    /**
+     * Set custom properties for given rows.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        const rowData: IObjectArrayPrimitiveType<Nullable<IRowData>> = {};
+        for (const [rowIndex, customData] of Object.entries(custom)) {
+            rowData[Number(rowIndex)] = {
+                custom: customData,
+            };
+        }
+
+        const params: ISetRowDataCommandParams = {
+            unitId,
+            subUnitId,
+            rowData,
+        };
+
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
+
+        return this;
+    }
+
     // #region Column
 
     /**
@@ -894,6 +936,33 @@ export class FWorksheet extends FBase {
     }
 
     // #endregion
+
+    /**
+     * Set custom properties for given columns.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        const columnData: IObjectArrayPrimitiveType<Nullable<IColumnData>> = {};
+        for (const [columnIndex, customData] of Object.entries(custom)) {
+            columnData[Number(columnIndex)] = {
+                custom: customData,
+            };
+        }
+
+        const params: ISetColDataCommandParams = {
+            unitId,
+            subUnitId,
+            columnData,
+        };
+
+        await this._commandService.executeCommand(SetColDataCommand.id, params);
+
+        return this;
+    }
 
     // #region merge cells
 

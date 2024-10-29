@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { Tools } from '../../../shared/tools';
+/* eslint-disable no-param-reassign */
+
 import type { TextXAction } from './action-types';
+import { Tools } from '../../../shared/tools';
 import { TextXActionType } from './action-types';
 import { getBodySlice } from './utils';
 
@@ -114,6 +116,7 @@ export class ActionIterator {
             const index = this._index;
             const next = this.next();
             const restActions = this._actions.slice(this._index);
+
             this._offset = offset;
             this._index = index;
 

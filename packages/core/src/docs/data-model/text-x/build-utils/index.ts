@@ -41,7 +41,7 @@ export class BuildTextUtils {
         getInsertSelection,
 
         getDeleteActions: getRetainAndDeleteFromReplace,
-        getDeleteExculdeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
+        getDeleteExcludeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
     };
 
     static range = {

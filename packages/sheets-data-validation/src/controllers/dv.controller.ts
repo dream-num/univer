@@ -21,6 +21,7 @@ import { ClearSelectionAllCommand, SheetInterceptorService, SheetsSelectionsServ
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 import { SheetDataValidationModel } from '../models/sheet-data-validation-model';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
+import { AnyValidator } from '../validators/any-validator';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { WholeValidator } from '../validators/whole-validator';
@@ -45,6 +46,7 @@ export class DataValidationController extends RxDisposable {
 
     private _registerValidators(): void {
         ([
+            AnyValidator,
             DecimalValidator,
             WholeValidator,
             TextLengthValidator,

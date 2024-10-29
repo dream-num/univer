@@ -51,15 +51,12 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         textX.push({
             t: TextXActionType.RETAIN,
             len: startIndex,
-            segmentId,
         });
     }
 
     textX.push({
         t: TextXActionType.DELETE,
         len: 1,
-        segmentId,
-        line: 0,
     });
     if (textRange) {
         if (textRange.index > startIndex) {
@@ -71,15 +68,12 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         textX.push({
             t: TextXActionType.RETAIN,
             len: len - 2,
-            segmentId,
         });
     }
 
     textX.push({
         t: TextXActionType.DELETE,
         len: 1,
-        segmentId,
-        line: 0,
     });
 
     if (textRange) {
@@ -93,8 +87,6 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
             body: insert,
             t: TextXActionType.INSERT,
             len: insert.dataStream.length,
-            segmentId,
-            line: 1,
         });
 
         if (textRange) {
@@ -165,7 +157,6 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: range.startOffset - cursor,
-                segmentId,
             });
             cursor = range.startOffset;
         }
@@ -175,8 +166,6 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
                 dataStream: DataStreamTreeTokenType.CUSTOM_RANGE_START,
             },
             len: 1,
-            line: 0,
-            segmentId,
         });
 
         deletes.forEach((index) => {
@@ -184,15 +173,12 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: index - cursor,
-                    segmentId,
                 });
                 cursor = index;
             }
             textX.push({
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId,
             });
             cursor++;
         });
@@ -201,7 +187,6 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: range.endOffset - cursor,
-                segmentId,
             });
             cursor = range.endOffset;
         }
@@ -224,8 +209,6 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
                 ],
             },
             len: 1,
-            line: 0,
-            segmentId,
         });
     };
     const relativeParagraphs = (body.paragraphs ?? []).filter((p) => p.startIndex < endOffset && p.startIndex > startOffset);
@@ -280,7 +263,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         dos.push({
             t: TextXActionType.RETAIN,
             len: textStart,
-            segmentId,
         });
     }
 
@@ -300,14 +282,11 @@ export function getRetainAndDeleteAndExcludeLineBreak(
             dos.push({
                 t: TextXActionType.DELETE,
                 len,
-                line: 0,
-                segmentId,
             });
         }
         dos.push({
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId,
         });
         cursor = pos + 1;
     });
@@ -316,8 +295,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         dos.push({
             t: TextXActionType.DELETE,
             len: textEnd - cursor,
-            line: 0,
-            segmentId,
         });
         cursor = textEnd;
     }
@@ -329,7 +306,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
                 dos.push({
                     t: TextXActionType.RETAIN,
                     len: nextParagraph.startIndex - cursor,
-                    segmentId,
                 });
                 cursor = nextParagraph.startIndex;
             }
@@ -337,7 +313,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
             dos.push({
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -387,8 +362,6 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
         t: TextXActionType.INSERT,
         body: insertBody,
         len: insertBody.dataStream.length,
-        line: 0,
-        segmentId,
     });
 
     return textX;

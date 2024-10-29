@@ -141,6 +141,8 @@ export interface IWorksheetData {
     rightToLeft: BooleanNumber;
 }
 
+export type CustomData = Nullable<Record<string, any>>;
+
 /**
  * Properties of row data
  */
@@ -169,6 +171,11 @@ export interface IRowData {
      * style id
      */
     s?: Nullable<IStyleData | string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
 }
 
 export interface IRowAutoHeightInfo {
@@ -194,6 +201,16 @@ export interface IColumnData {
      * style id
      */
     s?: Nullable<IStyleData | string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: CustomData;
+}
+
+export interface IColAutoWidthInfo {
+    col: number;
+    width?: number;
 }
 
 /**
@@ -235,7 +252,7 @@ export interface ICellData {
     /**
      * User stored custom fields
      */
-    custom?: Nullable<Record<string, any>>;
+    custom?: CustomData;
 }
 
 export interface ICellMarksStyle {
@@ -259,6 +276,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
     interceptorAutoHeight?: () => number | undefined;
+    interceptorAutoWidth?: () => number | undefined;
     /**
      * can cell be covered when sibling is overflow
      */

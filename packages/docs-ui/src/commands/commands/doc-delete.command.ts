@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import {
     BuildTextUtils,
     CommandType,
@@ -28,14 +31,12 @@ import {
     TextX,
     TextXActionType,
     Tools,
+    UniverInstanceType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
+
 import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getParagraphByGlyph, hasListGlyph, isFirstGlyph, isIndentByGlyph } from '@univerjs/engine-render';
-import type { IAccessor, ICommand, ICustomBlock, IDocumentBody, IMutationInfo, IParagraph, ITextRange, ITextRun, JSONXActions, Nullable } from '@univerjs/core';
-
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IRectRangeWithStyle, ITextRangeWithStyle } from '@univerjs/engine-render';
 import { DeleteDirection } from '../../types/delete-direction';
 import { getCommandSkeleton, getRichTextEditPath } from '../util';
 import { CutContentCommand } from './clipboard.inner.command';
@@ -98,15 +99,12 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(documentDataModel, segmentId);
@@ -141,6 +139,7 @@ interface IMergeTwoParagraphParams {
 }
 
 export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
+
     id: 'doc.command.merge-two-paragraph',
 
     type: CommandType.COMMAND,
@@ -159,24 +158,37 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
         const { segmentId, style } = activeRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const originBody = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (!docDataModel || !originBody) {
+        if (docDataModel == null || originBody == null) {
             return false;
         }
 
         const actualRange = getDeleteSelection(activeRange, originBody);
         const unitId = docDataModel.getUnitId();
-        const { startOffset, collapsed } = actualRange;
 
+        const { startOffset, collapsed } = actualRange;
         if (!collapsed) {
             return false;
         }
 
         const startIndex = direction === DeleteDirection.LEFT ? startOffset : startOffset + 1;
-        const endIndex = originBody.paragraphs!
-            .find((p) => p.startIndex >= startIndex)!.startIndex!;
-        const body = getParagraphBody(accessor, unitId, originBody, startIndex, endIndex);
+
+        let curParagraph;
+        let nextParagraph;
+
+        for (const paragraph of originBody.paragraphs!) {
+            if (paragraph.startIndex >= startIndex) {
+                nextParagraph = paragraph;
+                break;
+            }
+            curParagraph = paragraph;
+        }
+
+        if (curParagraph == null || nextParagraph == null) {
+            return false;
+        }
+
         const cursor = direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset;
 
         const textRanges = [
@@ -200,33 +212,38 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
 
+        if (curParagraph.startIndex > 0) {
+            textX.push({
+                t: TextXActionType.RETAIN,
+                len: curParagraph.startIndex,
+            });
+        }
+
         textX.push({
-            t: TextXActionType.RETAIN,
-            len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
-            segmentId,
+            t: TextXActionType.DELETE,
+            len: 1,
         });
 
-        if (body.dataStream.length) {
+        if (nextParagraph.startIndex > curParagraph.startIndex + 1) {
             textX.push({
-                t: TextXActionType.INSERT,
-                body,
-                len: body.dataStream.length,
-                line: 0,
-                segmentId,
+                t: TextXActionType.RETAIN,
+                len: nextParagraph.startIndex - curParagraph.startIndex - 1,
             });
         }
 
         textX.push({
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId,
-        });
-
-        textX.push({
-            t: TextXActionType.DELETE,
-            len: endIndex + 1 - startIndex,
-            line: 0,
-            segmentId,
+            coverType: UpdateDocsAttributeType.REPLACE,
+            body: {
+                dataStream: '',
+                paragraphs: [
+                    {
+                        ...Tools.deepClone(curParagraph),
+                        startIndex: 0,
+                    },
+                ],
+            },
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -292,6 +309,7 @@ export function getCursorWhenDelete(textRanges: Readonly<Nullable<ITextRangeWith
 // Handle BACKSPACE key.
 export const DeleteLeftCommand: ICommand = {
     id: 'doc.command.delete-left',
+
     type: CommandType.COMMAND,
     // eslint-disable-next-line max-lines-per-function, complexity
     handler: async (accessor) => {
@@ -302,7 +320,7 @@ export const DeleteLeftCommand: ICommand = {
         let result = true;
 
         const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!docDataModel) {
+        if (docDataModel == null) {
             return false;
         }
 

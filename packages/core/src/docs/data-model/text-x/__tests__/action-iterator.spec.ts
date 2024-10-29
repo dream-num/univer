@@ -37,11 +37,9 @@ describe('Test action iterator', () => {
                 }],
             },
             len: 5,
-            line: 0,
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         expect(iterator.hasNext()).toBe(true);
@@ -81,7 +79,6 @@ describe('Test action iterator', () => {
                 customDecorations: [],
             },
             len: 2,
-            line: 0,
         });
 
         expect(iterator.peekType()).toBe(TextXActionType.INSERT);
@@ -103,7 +100,6 @@ describe('Test action iterator', () => {
                 }],
             },
             len: 3,
-            line: 0,
         });
 
         expect(iterator.peekType()).toBe(TextXActionType.DELETE);
@@ -113,7 +109,6 @@ describe('Test action iterator', () => {
         expect(action).toEqual({
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         });
 
         expect(iterator.hasNext()).toBe(false);
@@ -141,7 +136,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         expect(iterator.rest()).toEqual([{
@@ -150,7 +144,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
 
         iterator.next(3);
@@ -161,7 +154,6 @@ describe('Test action iterator', () => {
         }, {
             t: TextXActionType.DELETE,
             len: 5,
-            line: 0,
         }]);
     });
 });

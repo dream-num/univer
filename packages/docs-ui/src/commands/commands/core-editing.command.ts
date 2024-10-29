@@ -46,9 +46,9 @@ export const EditorInsertTextCommandId = 'doc.command.insert-text';
  */
 export const InsertCommand: ICommand<IInsertCommandParams> = {
     id: EditorInsertTextCommandId,
+
     type: CommandType.COMMAND,
 
-    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor, params: IInsertCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const { range, segmentId, body, unitId, cursorOffset, extendLastRange } = params;
@@ -99,13 +99,13 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: startOffset,
-                    segmentId,
                 });
             }
         } else {
             const { dos, retain } = BuildTextUtils.selection.getDeleteActions(actualRange, segmentId, 0, originBody);
 
             textX.push(...dos);
+
             doMutation.params.textRanges = [{
                 startOffset: startOffset + cursorMove + retain,
                 endOffset: startOffset + cursorMove + retain,
@@ -117,8 +117,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             t: TextXActionType.INSERT,
             body,
             len: body.dataStream.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -197,14 +195,11 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: deleteIndex - cursor,
-                    segmentId,
                 });
             }
             textX.push({
                 t: TextXActionType.DELETE,
                 len: 1,
-                segmentId,
-                line: 0,
             });
             cursor = deleteIndex + 1;
         }
@@ -265,14 +260,12 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         textX.push({
             t: TextXActionType.RETAIN,
             len: startOffset,
-            segmentId,
         });
 
         textX.push({
             t: TextXActionType.RETAIN,
             body: updateBody,
             len: endOffset - startOffset,
-            segmentId,
             coverType,
         });
 

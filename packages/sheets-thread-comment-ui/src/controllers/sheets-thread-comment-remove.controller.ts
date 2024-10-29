@@ -47,9 +47,9 @@ export class ThreadCommentRemoveSheetsController extends Disposable {
                         if (!subUnitId) {
                             return { redos: [], undos: [] };
                         }
-                        const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
+                        const commentMap = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
-                        const comments = Array.from(Object.values(commentMap)).filter((comment) => !comment.parentId);
+                        const comments = Array.from(commentMap.values()).filter((comment) => !comment.parentId);
                         const ids = comments.map((comment) => comment.id);
                         const shouldSync = this._threadCommentDataSourceService.syncUpdateMutationToColla;
 

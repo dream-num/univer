@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
 import { IThreadCommentDataSourceService } from '../../services/tc-datasource.service';
 import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
-import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 
 export interface IAddCommentCommandParams {
     unitId: string;

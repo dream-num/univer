@@ -37,9 +37,9 @@ export class FFormula {
         this._commandService.executeCommand(SetFormulaCalculationStartMutation.id, { commands: [], forceCalculation: true }, { onlyLocal: true });
     }
 
-    /**
-     * Stop the calculation of the formula.
-     */
+     /**
+      * Stop the calculation of the formula.
+      */
     stopCalculation(): void {
         this._commandService.executeCommand(SetFormulaCalculationStopMutation.id, {});
     }

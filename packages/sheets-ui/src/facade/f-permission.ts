@@ -15,7 +15,6 @@
  */
 
 import { FPermission } from '@univerjs/sheets/facade';
-import { SheetPermissionInterceptorBaseController } from '../controllers/permission/sheet-permission-interceptor-base.controller';
 
 interface IFPermissionSheetsUIMixin {
     /**
@@ -28,8 +27,7 @@ interface IFPermissionSheetsUIMixin {
 
 class FPermissionSheetsUIMixin extends FPermission implements IFPermissionSheetsUIMixin {
     override setPermissionDialogVisible(visible: boolean): void {
-        const sheetPermissionInterceptorBaseController = this._injector.get(SheetPermissionInterceptorBaseController);
-        sheetPermissionInterceptorBaseController.setShowPermissionDialog(visible);
+        this._permissionService.setShowComponents(visible);
     }
 }
 

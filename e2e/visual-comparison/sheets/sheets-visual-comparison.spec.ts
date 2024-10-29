@@ -39,6 +39,7 @@ test('diff default sheet toolbar', async () => {
     const screenshot = await page.screenshot({
         mask: [
             page.locator('.univer-headerbar'),
+            page.locator('.univer-defined-name'),
         ],
         fullPage: true,
     });

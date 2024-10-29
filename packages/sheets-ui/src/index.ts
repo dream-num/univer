@@ -26,7 +26,6 @@ export { AutoFillController } from './controllers/auto-fill.controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { SheetUIController } from './controllers/sheet-ui.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
-export { type IUniverSheetsUIConfig } from './controllers/config.schema';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
     getCoordByCell,
@@ -82,6 +81,7 @@ export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { type IHoverCellPosition } from './services/hover-manager.service';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
+export { AutoWidthController } from './controllers/auto-width.controller';
 export { type IDragCellPosition } from './services/drag-manager.service';
 export { SheetMenuPosition } from './controllers/menu/menu';
 export { useHighlightRange } from './hooks/useHighlightRange';
@@ -98,6 +98,7 @@ export { SheetPrintInterceptorService } from './services/print-interceptor.servi
 export { UniverSheetsMobileUIPlugin } from './mobile-plugin';
 export { MobileSheetBar } from './views/mobile/sheet-bar/MobileSheetBar';
 export { SheetPermissionInitController } from './controllers/permission/sheet-permission-init.controller';
+export { type IUniverSheetsUIConfig } from './controllers/config.schema';
 
 export { FormatPainterStatus, IFormatPainterService } from './services/format-painter/format-painter.service';
 export type { IFormatPainterBeforeApplyHookParams, IFormatPainterHook } from './services/format-painter/format-painter.service';

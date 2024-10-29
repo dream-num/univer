@@ -14,38 +14,57 @@
  * limitations under the License.
  */
 
-import type { IAccessor, Workbook } from '@univerjs/core';
+import type { IAccessor, Nullable, Workbook } from '@univerjs/core';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import type { IMenuItem, IShortcutItem } from '@univerjs/ui';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { DocSelectionManagerService } from '@univerjs/docs';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_ZEN_EDITOR_UNIT_ID_KEY, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { DocSelectionRenderService } from '@univerjs/docs-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { getSheetCommandTarget, RangeProtectionPermissionEditPoint, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetInsertHyperlinkPermission, WorksheetSetCellValuePermission } from '@univerjs/sheets';
 import { getCurrentRangeDisable$, IEditorBridgeService, whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { getMenuHiddenObservable, KeyCode, MenuGroup, MenuItemType, MenuPosition, MetaKeys } from '@univerjs/ui';
-import { map, mergeMap, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, of, switchMap } from 'rxjs';
 import { InsertHyperLinkOperation, InsertHyperLinkToolbarOperation } from '../commands/operations/popup.operations';
 import { getShouldDisableCellLink, shouldDisableAddLink } from '../utils';
+
+const getEditingLinkDisable$ = (accessor: IAccessor, unitId = DOCS_ZEN_EDITOR_UNIT_ID_KEY) => {
+    const univerInstanceService = accessor.get(IUniverInstanceService);
+    const docSelctionService = accessor.get(IRenderManagerService).getRenderById(unitId)?.with(DocSelectionRenderService);
+    if (!docSelctionService) {
+        return of(true);
+    }
+
+    return docSelctionService.textSelectionInner$.pipe(map(() => {
+        const editorBridgeService = accessor.get(IEditorBridgeService);
+        const state = editorBridgeService.getEditCellState();
+        if (!state) {
+            return true;
+        }
+        const target = getSheetCommandTarget(univerInstanceService, { unitId: state.unitId, subUnitId: state.sheetId });
+        if (!target?.worksheet) {
+            return true;
+        }
+
+        if (getShouldDisableCellLink(target.worksheet, state.row, state.column)) {
+            return true;
+        }
+
+        return shouldDisableAddLink(accessor);
+    }));
+};
 
 const getLinkDisable$ = (accessor: IAccessor) => {
     const disableRange$ = getCurrentRangeDisable$(accessor, { workbookTypes: [WorkbookEditablePermission], worksheetTypes: [WorksheetEditPermission, WorksheetSetCellValuePermission, WorksheetInsertHyperlinkPermission], rangeTypes: [RangeProtectionPermissionEditPoint] }, true);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetSelectionService = accessor.get(SheetsSelectionsService);
+    const editorBridgeService = accessor.has(IEditorBridgeService) ? accessor.get(IEditorBridgeService) : null;
+
     const disableCell$ = univerInstanceService.focused$.pipe(
-        map((focused) => {
-            if (!focused) {
-                return null;
-            }
-            const unit = univerInstanceService.getUnit<Workbook>(focused, UniverInstanceType.UNIVER_SHEET);
-            return unit;
-        }),
-        mergeMap((unit) => {
-            if (!unit) {
-                return new Observable<null>((sub) => {
-                    sub.next(null);
-                });
-            }
-            return unit.activeSheet$;
-        }),
-        mergeMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
+        filter((focused) => Boolean(focused)),
+        map((focused) => univerInstanceService.getUnit<Workbook>(focused!, UniverInstanceType.UNIVER_SHEET)),
+        filter((unit) => Boolean(unit)),
+        switchMap((unit) => unit!.activeSheet$),
+        switchMap((sheet) => sheetSelectionService.selectionMoveEnd$.pipe(map((selections) => sheet && { selections, sheet }))),
         map((sheetWithSelection) => {
             if (!sheetWithSelection) {
                 return true;
@@ -56,43 +75,32 @@ const getLinkDisable$ = (accessor: IAccessor) => {
             }
             const row = selections[0].range.startRow;
             const col = selections[0].range.startColumn;
-            return getShouldDisableCellLink(sheet, row, col);
+
+            if (getShouldDisableCellLink(sheet, row, col)) {
+                return true;
+            }
+        }),
+        switchMap((disableCell) => {
+            if (disableCell) {
+                return of(true);
+            }
+
+            const isEditing$ = (editorBridgeService ? editorBridgeService.visible$ : of<Nullable<IEditorBridgeServiceVisibleParam>>(null))
+                .pipe(map((visible) => visible?.visible ? DOCS_NORMAL_EDITOR_UNIT_ID_KEY : undefined));
+
+            return isEditing$.pipe(
+                switchMap(
+                    (editing) => editing ?
+                        getEditingLinkDisable$(accessor, editing)
+                        : of(false)
+                )
+            );
         })
     );
 
-    return disableRange$.pipe(mergeMap((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell))));
-};
-
-const getZenLinkDisable$ = (accessor: IAccessor) => {
-    const univerInstanceService = accessor.get(IUniverInstanceService);
-    return univerInstanceService.focused$.pipe(
-        mergeMap((focused) => {
-            if (!focused || focused !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                return new Observable<null>((sub) => sub.next(null));
-            }
-            const textSelectionManagerService = accessor.get(DocSelectionManagerService);
-            return textSelectionManagerService.textSelection$;
-        }),
-        map((selection) => {
-            if (!selection || selection.unitId !== DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
-                return true;
-            }
-            const editorBridgeService = accessor.get(IEditorBridgeService);
-            const state = editorBridgeService.getEditCellState();
-            if (!state) {
-                return true;
-            }
-            const target = getSheetCommandTarget(univerInstanceService, { unitId: state.unitId, subUnitId: state.sheetId });
-            if (!target?.worksheet) {
-                return true;
-            }
-
-            if (getShouldDisableCellLink(target.worksheet, state.row, state.column)) {
-                return true;
-            }
-
-            return shouldDisableAddLink(accessor);
-        })
+    return disableRange$.pipe(
+        distinctUntilChanged(),
+        switchMap(((disableRange) => disableCell$.pipe(map((disableCell) => disableRange || disableCell))))
     );
 };
 
@@ -121,7 +129,7 @@ export const zenEditorInsertLinkMenuFactory = (accessor: IAccessor) => {
         ...linkMenu,
         id: genZenEditorMenuId(linkMenu.commandId),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
-        disabled$: getZenLinkDisable$(accessor),
+        disabled$: getEditingLinkDisable$(accessor),
     } as IMenuItem;
 };
 
@@ -148,7 +156,7 @@ export const zenEditorInsertLinkMenuToolbarFactory = (accessor: IAccessor) => {
         ...linkToolbarMenu,
         id: genZenEditorMenuId(linkToolbarMenu.commandId),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_DOC, DOCS_ZEN_EDITOR_UNIT_ID_KEY),
-        disabled$: getZenLinkDisable$(accessor),
+        disabled$: getEditingLinkDisable$(accessor),
     };
 };
 

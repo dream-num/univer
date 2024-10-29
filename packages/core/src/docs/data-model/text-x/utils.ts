@@ -196,6 +196,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
     paragraphs?.forEach((p) => {
         p.startIndex += leftOffset;
     });
+
     customRanges?.forEach((range) => {
         range.startIndex += leftOffset;
         range.endIndex += leftOffset;
@@ -355,9 +356,9 @@ export function isUselessRetainAction(action: IRetainAction): boolean {
         return true;
     }
 
-    const { textRuns = [], paragraphs = [] } = body;
+    const { textRuns = [], paragraphs = [], customRanges = [], customBlocks = [], customDecorations = [] } = body;
 
-    if (textRuns.length === 0 && paragraphs.length === 0) {
+    if (textRuns.length === 0 && paragraphs.length === 0 && customRanges.length === 0 && customBlocks.length === 0 && customDecorations.length === 0) {
         return true;
     }
 

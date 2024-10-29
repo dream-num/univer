@@ -259,8 +259,6 @@ function getMutationActions(segmentId: string, docDatModel: DocumentDataModel, p
         textX.push({
             t: TextXActionType.DELETE,
             len: deleteLen,
-            line: 0,
-            segmentId,
         });
     }
 
@@ -269,8 +267,6 @@ function getMutationActions(segmentId: string, docDatModel: DocumentDataModel, p
             t: TextXActionType.INSERT,
             body,
             len: body.dataStream.length,
-            line: 0,
-            segmentId,
         });
     }
 
@@ -338,13 +334,12 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...BuildTextUtils.selection.getDeleteExculdeLastLineBreakActions(selection, body, '', 0, false));
+        textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, body, '', 0, false));
         // insert
         textX.push({
             t: TextXActionType.INSERT,
             body: insertBody,
             len: insertBody.dataStream.length,
-            line: 0,
         });
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 

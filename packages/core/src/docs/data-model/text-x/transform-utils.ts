@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+/* eslint-disable no-param-reassign */
+
 import type { Nullable } from '../../../shared';
-import type { IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
+import type { ICustomRange, IDocumentBody, IParagraph, IParagraphStyle, ITextRun, ITextStyle } from '../../../types/interfaces';
 import type { IRetainAction } from './action-types';
 import { Tools, UpdateDocsAttributeType } from '../../../shared';
 import { normalizeTextRuns } from './apply-utils/common';
@@ -53,6 +55,7 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
         return false;
     }
 
+    // TODO: @JOCS, I think no need to iterate over the text runs and compare them! because the textRuns length is always 1.
     while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: targetStyle } = targetTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: originStyle, sId } = originTextRuns[removeIndex];
@@ -147,6 +150,25 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
     return normalizeTextRuns(newUpdateTextRuns);
 }
 
+function transformCustomRanges(
+    originCustomRanges: ICustomRange[],
+    targetCustomRanges: ICustomRange[],
+    transformType: TextXTransformType,
+    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+): ICustomRange[] {
+    if (originCustomRanges.length === 0) {
+        return Tools.deepClone(targetCustomRanges);
+    }
+
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        return transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+            ? Tools.deepClone(originCustomRanges)
+            : Tools.deepClone(targetCustomRanges);
+    } else {
+        throw new Error('CustomRanges is only supported in replace mode.');
+    }
+}
+
 // At present, only the two properties of paragraphStyle and bullet are handled,
 // paragraphStyle is treated separately, while bullet is treated as a whole because
 // the properties in bullet are related
@@ -189,17 +211,25 @@ function transformParagraph(
     }
 
     if (targetParagraph.bullet) {
-        if (originParagraph.bullet == null || transformType === TextXTransformType.COVER) {
+        if (originParagraph.bullet == null) {
             paragraph.bullet = {
                 ...targetParagraph.bullet,
             };
+        } else {
+            if (coverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+                    ? { ...originParagraph.bullet }
+                    : { ...targetParagraph.bullet };
+            } else {
+                throw new Error('Bullet is only supported in replace mode.');
+            }
         }
     }
 
     return paragraph;
 }
 
-// eslint-disable-next-line max-lines-per-function
+// eslint-disable-next-line max-lines-per-function, complexity
 export function transformBody(
     thisAction: IRetainAction,
     otherAction: IRetainAction,
@@ -207,8 +237,9 @@ export function transformBody(
 ): IDocumentBody {
     const { body: thisBody, coverType: thisCoverType } = thisAction;
     const { body: otherBody, coverType: otherCoverType } = otherAction;
+
     if (thisBody == null || thisBody.dataStream !== '' || otherBody == null || otherBody.dataStream !== '') {
-        throw new Error('Data stream is not supported in transform.');
+        throw new Error('Data stream is not supported in retain transform.');
     }
 
     if (thisCoverType !== otherCoverType) {
@@ -219,8 +250,8 @@ export function transformBody(
         dataStream: '',
     };
 
-    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [] } = thisBody;
-    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [] } = otherBody;
+    const { textRuns: thisTextRuns = [], paragraphs: thisParagraphs = [], customRanges: thisCustomRanges = [] } = thisBody;
+    const { textRuns: otherTextRuns = [], paragraphs: otherParagraphs = [], customRanges: otherCustomRanges = [] } = otherBody;
 
     let textRuns: ITextRun[] = [];
     if (priority) {
@@ -230,6 +261,17 @@ export function transformBody(
     }
     if (textRuns.length) {
         retBody.textRuns = textRuns;
+    }
+
+    let customRanges: ICustomRange[] = [];
+    if (priority) {
+        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED, thisCoverType);
+    } else {
+        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER, thisCoverType);
+    }
+
+    if (customRanges.length) {
+        retBody.customRanges = customRanges;
     }
 
     const paragraphs: IParagraph[] = [];

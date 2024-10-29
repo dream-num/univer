@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
-import type { FUniver } from '../../everything';
+import type { FUniver, ICellData, Injector, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetArrayFormulaDataMutation, SetFormulaCalculationNotificationMutation, SetFormulaCalculationResultMutation, SetFormulaCalculationStartMutation, SetFormulaCalculationStopMutation } from '@univerjs/engine-formula';
+
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createFormulaTestBed } from './create-formula-test-bed';
+
+import '../../everything';
 
 describe('Test FFormula', () => {
     let get: Injector['get'];

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { Avatar, Tooltip } from '@univerjs/design';
-import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
 import type { IRange, Workbook } from '@univerjs/core';
-import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
-import { DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorkbookManageCollaboratorPermission, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { ISidebarService, useObservable } from '@univerjs/ui';
-import { merge } from 'rxjs';
 import type { IPermissionPoint } from '@univerjs/protocol';
-import { UnitAction, UnitObject } from '@univerjs/protocol';
-import { DeleteSingle, WriteSingle } from '@univerjs/icons';
-
-import { serializeRange } from '@univerjs/engine-formula';
-
-import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
+import type { IRangeProtectionRule, IWorksheetProtectionRule } from '@univerjs/sheets';
 import type { IPermissionPanelRule } from '../../../services/permission/sheet-permission-panel.model';
-import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
+import { IAuthzIoService, ICommandService, IPermissionService, IUniverInstanceService, LocaleService, UniverInstanceType, useDependency, UserManagerService } from '@univerjs/core';
+import { Avatar, Tooltip } from '@univerjs/design';
+import { serializeRange } from '@univerjs/engine-formula';
+import { DeleteSingle, WriteSingle } from '@univerjs/icons';
+import { UnitAction, UnitObject } from '@univerjs/protocol';
+import { baseProtectionActions, DeleteRangeProtectionCommand, RangeProtectionRuleModel, SetWorksheetActiveOperation, WorksheetProtectionRuleModel } from '@univerjs/sheets';
+import { ISidebarService, useObservable } from '@univerjs/ui';
+import clsx from 'clsx';
+
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { merge } from 'rxjs';
+import { DeleteWorksheetProtectionCommand } from '../../../commands/commands/worksheet-protection.command';
 import { UNIVER_SHEET_PERMISSION_PANEL, UNIVER_SHEET_PERMISSION_PANEL_FOOTER } from '../../../consts/permission';
 import { useHighlightRange } from '../../../hooks/useHighlightRange';
+import { SheetPermissionPanelModel } from '../../../services/permission/sheet-permission-panel.model';
 import { panelListEmptyBase64 } from './constant';
 import styles from './index.module.less';
 
@@ -72,12 +72,12 @@ export const SheetPermissionPanelList = () => {
             const sheetId = sheet.getSheetId();
             const rules = rangeProtectionRuleModel.getSubunitRuleList(unitId, sheetId);
             rules.forEach((rule) => {
-                if (rule.permissionId && rule.name) {
+                if (rule.permissionId) {
                     allRangePermissionId.push(rule.permissionId);
                 }
             });
             const worksheetPermissionRule = worksheetProtectionModel.getRule(unitId, sheetId);
-            if (worksheetPermissionRule?.permissionId && worksheetPermissionRule.name) {
+            if (worksheetPermissionRule?.permissionId) {
                 allSheetPermissionId.push(worksheetPermissionRule.permissionId);
             }
         });
@@ -87,7 +87,7 @@ export const SheetPermissionPanelList = () => {
         const allPermissionRule = await authzIoService.list({
             objectIDs: allPermissionId,
             unitID: unitId,
-            actions: [UnitAction.View, UnitAction.Edit],
+            actions: baseProtectionActions,
         });
 
         const subUnitPermissionIds = rangeProtectionRuleModel.getSubunitRuleList(unitId, subUnitId).map((item) => item.permissionId);
@@ -119,13 +119,13 @@ export const SheetPermissionPanelList = () => {
 
     useEffect(() => {
         const subscribe = workbook.activeSheet$.subscribe(async () => {
-            const ruleList = await getRuleList(true);
+            const ruleList = await getRuleList(isCurrentSheet);
             setRuleList(ruleList);
         });
         return () => {
             subscribe.unsubscribe();
         };
-    }, []);
+    }, [isCurrentSheet]);
 
     useEffect(() => {
         const getRuleListByRefresh = async () => {
@@ -232,9 +232,11 @@ export const SheetPermissionPanelList = () => {
                             const viewAction = item.actions.find((action) => action.action === UnitAction.View);
                             const viewPermission = viewAction?.allowed;
 
-                            const manageCollaboratorAction = permissionService.getPermissionPoint(new WorkbookManageCollaboratorPermission(unitId).id)?.value ?? false;
+                            const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
+                            const deleteAction = item.actions.find(((action) => action.action === UnitAction.Delete));
 
-                            const hasManagerPermission = manageCollaboratorAction || currentUser.userID === item.creator?.userID;
+                            const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
+                            const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;
 
                             let ruleName = '';
 
@@ -282,14 +284,18 @@ export const SheetPermissionPanelList = () => {
                                             <div className={styles.sheetPermissionListItemHeaderName}>{ruleName}</div>
                                         </Tooltip>
 
-                                        {hasManagerPermission && (
+                                        {(hasManagerPermission || hasDeletePermission) && (
                                             <div className={styles.sheetPermissionListItemHeaderOperator}>
-                                                <Tooltip title={localeService.t('permission.panel.edit')}>
-                                                    <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleEdit(rule as IPermissionPanelRule)}><WriteSingle /></div>
-                                                </Tooltip>
-                                                <Tooltip title={localeService.t('permission.panel.delete')}>
-                                                    <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleDelete(rule)}><DeleteSingle /></div>
-                                                </Tooltip>
+                                                {hasManagerPermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.edit')}>
+                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleEdit(rule as IPermissionPanelRule)}><WriteSingle /></div>
+                                                    </Tooltip>
+                                                )}
+                                                {hasDeletePermission && (
+                                                    <Tooltip title={localeService.t('permission.panel.delete')}>
+                                                        <div className={styles.sheetPermissionListItemHeaderIcon} onClick={() => handleDelete(rule)}><DeleteSingle /></div>
+                                                    </Tooltip>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -297,7 +303,7 @@ export const SheetPermissionPanelList = () => {
                                     <div className={styles.sheetPermissionListItemContent}>
                                         <div className={styles.sheetPermissionListItemContentEdit}>
 
-                                            <Tooltip title={item.creator?.userID}>
+                                            <Tooltip title={item.creator?.name}>
                                                 <div>
                                                     <Avatar src={item.creator?.avatar} style={{ marginRight: 6 }} size={24} />
                                                 </div>

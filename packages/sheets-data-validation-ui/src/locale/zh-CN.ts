@@ -51,6 +51,7 @@ const locale = {
             rejectInput: '拒绝输入',
             messageInfo: '文字提示',
             showInfo: '显示所选单元格的提示文字',
+            allowBlank: '忽略空值',
         },
         operators: {
             between: '介于',
@@ -81,6 +82,10 @@ const locale = {
             equal: '值必须等于 {FORMULA1}',
             notEqual: '值必须不等于 {FORMULA1}',
             notBetween: '值必须在 {FORMULA1} 和 {FORMULA2} 范围之外',
+        },
+        any: {
+            title: '任意值',
+            error: '此单元格的内容违反了验证规则',
         },
         date: {
             title: '日期',
@@ -164,6 +169,7 @@ const locale = {
             title: '自定义公式',
             error: '此单元格的内容违反了验证规则',
             validFail: '请输入合法的公式',
+            ruleName: '自定义公式 {FORMULA1}',
         },
         alert: {
             title: '提示',

@@ -98,6 +98,11 @@ export interface IFormulaCurrentConfigService {
     getClearDependencyTreeCache(): IDirtyUnitSheetNameMap;
 
     getLocale(): LocaleType;
+
+    getSheetsInfo(): {
+        sheetOrder: string[];
+        sheetNameMap: { [sheetId: string]: string };
+    };
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -239,6 +244,16 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     getLocale() {
         return this._localeService.getCurrentLocale();
+    }
+
+    getSheetsInfo() {
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const { id, sheetOrder } = workbook.getSnapshot();
+
+        return {
+            sheetOrder,
+            sheetNameMap: this._sheetIdToNameMap[id] as { [sheetId: string]: string },
+        };
     }
 
     load(config: IFormulaDatasetConfig) {

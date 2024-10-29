@@ -110,19 +110,22 @@ export class DataValidationRefRangeController extends Disposable {
             const currentFormula = this._dataValidationCustomFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
             if (currentFormula) {
                 const disposable = this._formulaRefRangeService.registerFormula(
+                    unitId,
+                    subUnitId,
                     currentFormula.formula,
                     (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                 );
                 disposeSet.add(() => disposable.dispose());
             }
-        }
-
-        if (rule.type !== DataValidationType.CUSTOM) {
+        } else {
             const currentFormula = this._dataValidationFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
+
             if (currentFormula) {
                 const [formula1, formula2] = currentFormula;
                 if (formula1) {
                     const disposable = this._formulaRefRangeService.registerFormula(
+                        unitId,
+                        subUnitId,
                         formula1.text,
                         (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                     );
@@ -131,6 +134,8 @@ export class DataValidationRefRangeController extends Disposable {
 
                 if (formula2) {
                     const disposable = this._formulaRefRangeService.registerFormula(
+                        unitId,
+                        subUnitId,
                         formula2.text,
                         (newFormulaString) => handleFormulaChange('formula2', newFormulaString)
                     );

@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             messageInfo: 'Helper message',
             showInfo: 'Show help text for a selected cell',
             rangeError: 'Ranges are not legal',
+            allowBlank: 'Allow blank values',
         },
         operators: {
             between: 'between',
@@ -83,6 +84,10 @@ const locale: typeof zhCN = {
             equal: 'Value must be equal to {FORMULA1}',
             notEqual: 'Value must be not equal to {FORMULA1}',
             notBetween: 'Value must be not between {FORMULA1} and {FORMULA2}',
+        },
+        any: {
+            title: 'Any value',
+            error: 'The content of this cell violates the validation rule',
         },
         date: {
             title: 'Date',
@@ -164,6 +169,7 @@ const locale: typeof zhCN = {
             title: 'Custom formula',
             error: 'This cell\'s contents violate its validation rule',
             validFail: 'Please input a valid formula',
+            ruleName: 'Custom formula is {FORMULA1}',
         },
         alert: {
             title: 'Error',

@@ -21,6 +21,7 @@ import { RichTextEditingMutation } from '@univerjs/docs';
 import { IRenderManagerService, type ITextRangeWithStyle } from '@univerjs/engine-render';
 import { getTextRunAtPosition } from '../../basics/paragraph';
 import { DocIMEInputManagerService } from '../../services/doc-ime-input-manager.service';
+import { DocMenuStyleService } from '../../services/doc-menu-style.service';
 import { getRichTextEditPath } from '../util';
 
 export interface IIMEInputCommandParams {
@@ -42,6 +43,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const renderManagerService = accessor.get(IRenderManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const docMenuStyleService = accessor.get(DocMenuStyleService);
 
         const imeInputManagerService = renderManagerService.getRenderById(unitId)?.with(DocIMEInputManagerService);
         const docDataModel = univerInstanceService.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
@@ -86,7 +88,8 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             },
         };
 
-        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen);
+        const styleCache = docMenuStyleService.getStyleCache();
+        const curTextRun = getTextRunAtPosition(body.textRuns ?? [], startOffset + oldTextLen, styleCache);
 
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
@@ -105,7 +108,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
-                segmentId,
             });
         }
 
@@ -113,8 +115,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
             textX.push({
                 t: TextXActionType.DELETE,
                 len: oldTextLen,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -131,8 +131,6 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
                     : [],
             },
             len: newText.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

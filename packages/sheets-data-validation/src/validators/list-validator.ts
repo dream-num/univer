@@ -20,6 +20,7 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getFormulaResult, isLegalFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { deserializeListOptions } from './util';
 
@@ -37,7 +38,10 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
                         resultSet.add(numfmt.format(cell.s.n.pattern, value, { throws: false }));
                         return;
                     }
-                    resultSet.add(value.toString());
+
+                    if (isLegalFormulaResult(value.toString())) {
+                        resultSet.add(value.toString());
+                    }
                 }
             });
         }
@@ -145,10 +149,13 @@ export class ListValidator extends BaseDataValidator {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
         const { formula1 = '' } = rule;
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const isFormulaValid = isLegalFormulaResult(String(formulaResult1));
 
         return {
             formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
             formula2: undefined,
+            isFormulaValid,
         };
     }
 

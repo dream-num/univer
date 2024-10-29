@@ -232,18 +232,20 @@ export function ListDropDown(props: IDropdownComponentProps) {
                         unitId,
                     });
                 }
-
-                await commandService.executeCommand(SetCellEditVisibleOperation.id, {
-                    visible: false,
-                    eventType: DeviceInputEventType.Keyboard,
-                    unitId,
-                    keycode: KeyCode.ESC,
-                } as IEditorBridgeServiceVisibleParam);
-                commandService.executeCommand(SetRangeValuesCommand.id, params);
                 setLocalValue(str);
                 if (!multiple) {
                     hideFn();
                 }
+
+                if (editorBridgeService.isVisible().visible) {
+                    await commandService.executeCommand(SetCellEditVisibleOperation.id, {
+                        visible: false,
+                        eventType: DeviceInputEventType.Keyboard,
+                        unitId,
+                        keycode: KeyCode.ESC,
+                    } as IEditorBridgeServiceVisibleParam);
+                }
+                commandService.executeCommand(SetRangeValuesCommand.id, params);
             }}
             options={options}
             onEdit={handleEdit}

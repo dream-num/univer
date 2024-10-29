@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             messageInfo: 'پیام راهنما',
             showInfo: 'نمایش متن راهنما برای یک سلول انتخاب شده',
             rangeError: 'محدوده‌ها نامعتبر هستند',
+            allowBlank: 'رد سلول خالی',
         },
         operators: {
             between: 'بین',
@@ -83,6 +84,10 @@ const locale: typeof zhCN = {
             equal: 'مقدار باید برابر با {FORMULA1} باشد',
             notEqual: 'مقدار باید برابر نیست با {FORMULA1}',
             notBetween: 'مقدار باید بین {FORMULA1} و {FORMULA2} نباشد',
+        },
+        any: {
+            title: 'هر مقدار',
+            error: 'محتوای این سلول نقض قانون اعتبارسنجی است',
         },
         date: {
             title: 'تاریخ',
@@ -161,9 +166,10 @@ const locale: typeof zhCN = {
             unchecked: 'مقدار انتخاب نشده',
         },
         custom: {
-            title: 'فرمول سفارشی',
+            title: 'فرمول سفارشی ',
             error: 'محتوای این سلول با قانون اعتبارسنجی آن نقض می‌شود',
             validFail: 'لطفا یک فرمول معتبر وارد کنید',
+            ruleName: 'فرمول سفارشی {FORMULA1}',
         },
         alert: {
             title: 'خطا',

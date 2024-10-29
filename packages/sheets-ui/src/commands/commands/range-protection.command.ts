@@ -15,11 +15,11 @@
  */
 
 import type { ICommand, Workbook } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import type { IRangeProtectionRule } from '@univerjs/sheets';
-import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetProtectionMutation, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
-import { UnitObject } from '@univerjs/protocol';
 import type { IPermissionPanelRule } from '../../services/permission/sheet-permission-panel.model';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { UnitObject } from '@univerjs/protocol';
+import { AddRangeProtectionMutation, AddWorksheetProtectionMutation, DeleteRangeProtectionMutation, DeleteWorksheetProtectionMutation, RangeProtectionRuleModel, SetRangeProtectionMutation, SetWorksheetProtectionMutation, SheetsSelectionsService, WorksheetProtectionRuleModel } from '@univerjs/sheets';
 import { SheetPermissionPanelModel } from '../../services/permission/sheet-permission-panel.model';
 import { SheetPermissionOpenPanelOperation } from '../operations/sheet-permission-open-panel.operation';
 import { DeleteWorksheetProtectionCommand } from './worksheet-protection.command';
@@ -237,7 +237,7 @@ export const DeleteRangeProtectionFromContextMenuCommand: ICommand = {
         const subUnitId = worksheet.getSheetId();
         const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
 
-        if (worksheetRule?.permissionId && worksheetRule?.name) {
+        if (worksheetRule?.permissionId) {
             return commandService.executeCommand(DeleteWorksheetProtectionCommand.id, { unitId, subUnitId, rule: worksheetRule });
         } else {
             const selectRange = selectionManagerService.getCurrentLastSelection()?.range;
@@ -288,7 +288,7 @@ export const SetRangeProtectionFromContextMenuCommand: ICommand = {
         const subUnitId = worksheet.getSheetId();
         const worksheetRule = worksheetRuleModel.getRule(unitId, subUnitId);
         const sheetPermissionPanelModel = accessor.get(SheetPermissionPanelModel);
-        if (worksheetRule?.permissionId && worksheetRule?.name) {
+        if (worksheetRule?.permissionId) {
             const oldRule = {
                 ...worksheetRule,
                 unitId,

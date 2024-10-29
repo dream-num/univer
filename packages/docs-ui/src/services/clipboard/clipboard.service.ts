@@ -21,7 +21,7 @@ import { BuildTextUtils, createIdentifier, DataStreamTreeTokenType, Disposable, 
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import { CutContentCommand, InnerPasteCommand } from '../../commands/commands/clipboard.inner.command';
-import { getCursorWhenDelete } from '../../commands/commands/delete.command';
+import { getCursorWhenDelete } from '../../commands/commands/doc-delete.command';
 import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';

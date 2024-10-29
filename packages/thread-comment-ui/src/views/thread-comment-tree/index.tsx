@@ -23,7 +23,8 @@ import { DeleteSingle, MoreHorizontalSingle, ReplyToCommentSingle, ResolvedSingl
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, getDT, ResolveCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import { useObservable } from '@univerjs/ui';
 import cs from 'clsx';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { debounceTime } from 'rxjs';
 import { SetActiveCommentOperation } from '../../commands/operations/comment.operations';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import { transformDocument2TextNodes, transformTextNodes2Document } from '../thread-comment-editor/util';
@@ -203,7 +204,8 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     const threadCommentModel = useDependency(ThreadCommentModel);
     const [isHover, setIsHover] = useState(false);
     const [editingId, setEditingId] = useState('');
-    useObservable(threadCommentModel.commentMap$);
+    const updte$ = useMemo(() => threadCommentModel.commentUpdate$.pipe(debounceTime(16)), [threadCommentModel]);
+    useObservable(updte$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
     const userManagerService = useDependency(UserManagerService);

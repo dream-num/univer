@@ -56,6 +56,9 @@ export const SetWorksheetColWidthMutationFactory = (
     };
 };
 
+/**
+ * Set width of column manually
+ */
 export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutationParams> = {
     id: 'sheet.mutation.set-worksheet-col-width',
     type: CommandType.MUTATION,
@@ -68,10 +71,11 @@ export const SetWorksheetColWidthMutation: IMutation<ISetWorksheetColWidthMutati
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
         const manager = worksheet.getColumnManager();
         const ranges = params.ranges;
-
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             for (let j = range.startColumn; j < range.endColumn + 1; j++) {
+                const visible = worksheet.getColVisible(j);
+                if (!visible) continue;
                 const column = manager.getColumnOrCreate(j);
                 if (typeof params.colWidth === 'number') {
                     column.w = params.colWidth;

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { ICommand, IParagraph } from '@univerjs/core';
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, getBodySlice, ICommandService, IUniverInstanceService, normalizeBody, PresetListType, Tools, updateAttributeByInsert } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IParagraph } from '@univerjs/core';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, PresetListType, Tools, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { InsertCommand } from './core-editing.command';
+import { ToggleCheckListCommand } from './list.command';
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {
     const paragraphs: IParagraph[] = [];
@@ -51,6 +52,7 @@ export function generateParagraphs(dataStream: string, prevParagraph?: IParagrap
 
 export const BreakLineCommand: ICommand = {
     id: 'doc.command.break-line',
+
     type: CommandType.COMMAND,
 
     handler: async (accessor) => {
@@ -68,21 +70,23 @@ export const BreakLineCommand: ICommand = {
         if (rectRanges && rectRanges.length) {
             const { startOffset } = activeTextRange;
 
-            docSelectionManagerService.replaceTextRanges([{
+            docSelectionManagerService.replaceDocRanges([{
                 startOffset,
                 endOffset: startOffset,
             }]);
+
             return true;
         }
 
         const { segmentId } = activeTextRange;
-        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId).getBody();
-        if (!docDataModel || !body) {
+        const docDataModel = univerInstanceService.getCurrentUnitForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
+        const body = docDataModel?.getSelfOrHeaderFooterModel(segmentId ?? '').getBody();
+        if (docDataModel == null || body == null) {
             return false;
         }
 
         const unitId = docDataModel.getUnitId();
+
         const { startOffset, endOffset } = BuildTextUtils.selection.getInsertSelection(activeTextRange, body);
 
         const paragraphs = body.paragraphs ?? [];
@@ -90,36 +94,39 @@ export const BreakLineCommand: ICommand = {
         if (!prevParagraph) {
             return false;
         }
-        // line breaks to 2
-        const bodyAfter = normalizeBody(getBodySlice(body, endOffset, prevParagraph.startIndex + 1));
-        bodyAfter.customRanges = bodyAfter.customRanges?.map(BuildTextUtils.customRange.copyCustomRange);
+
+        const prevParagraphIndex = prevParagraph.startIndex;
+
+        const insertBody = {
+            dataStream: DataStreamTreeTokenType.PARAGRAPH,
+            paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
+        };
+
         const deleteRange = {
             startOffset,
-            endOffset: prevParagraph.startIndex + 1,
-            collapsed: false,
+            endOffset,
         };
-
-        if (bodyAfter.paragraphs?.[0].bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
-            bodyAfter.paragraphs[0].bullet.listType = PresetListType.CHECK_LIST;
-        };
-
-        updateAttributeByInsert(
-            bodyAfter,
-            {
-                dataStream: DataStreamTreeTokenType.PARAGRAPH,
-                paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
-            },
-            1,
-            0
-        );
 
         const result = await commandService.executeCommand(InsertCommand.id, {
             unitId,
-            body: bodyAfter,
+            body: insertBody,
             range: deleteRange,
             segmentId,
-            cursorOffset: 1,
         });
+
+        if (prevParagraph.bullet?.listType === PresetListType.CHECK_LIST_CHECKED) {
+            const params = {
+                index: prevParagraphIndex + 1 - (endOffset - startOffset),
+                segmentId,
+                textRanges: [{
+                    startOffset: startOffset + 1,
+                    endOffset: startOffset + 1,
+                }],
+            };
+            const toggleCheckListResult = await commandService.executeCommand(ToggleCheckListCommand.id, params);
+
+            return Boolean(toggleCheckListResult) && result;
+        }
 
         return result;
     },

@@ -18,13 +18,8 @@ import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValid
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { getFormulaCellData } from '../utils/formula';
-
-function isLegalFormulaResult(res: string) {
-    return !(ERROR_TYPE_SET as Set<string>).has(res);
-}
+import { getFormulaCellData, isLegalFormulaResult } from '../utils/formula';
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
@@ -46,6 +41,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return {
             formula1: undefined,
             formula2: undefined,
+            isFormulaValid: false,
         };
     }
 
@@ -54,6 +50,10 @@ export class CustomFormulaValidator extends BaseDataValidator {
         const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
         const cellData = getFormulaCellData(result?.result);
         const formulaResult = cellData?.v;
+
+        if (!isLegalFormulaResult(String(formulaResult))) {
+            return false;
+        }
 
         if (Tools.isDefine(formulaResult) && formulaResult !== '') {
             if (cellData!.t === CellValueType.BOOLEAN) {
@@ -80,5 +80,9 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
         return this.localeService.t('dataValidation.custom.error');
+    }
+
+    override generateRuleName(rule: IDataValidationRuleBase): string {
+        return (this.localeService.t('dataValidation.custom.ruleName')).replace('{FORMULA1}', rule.formula1 ?? '');
     }
 }

@@ -225,6 +225,37 @@ export class SheetsDataValidationRenderController extends RxDisposable {
                                 };
                                 return validator?.canvasRender?.calcCellAutoHeight?.(info);
                             },
+                            interceptorAutoWidth: () => {
+                                const skeleton = this._renderManagerService.getRenderById(unitId)
+                                    ?.with(SheetSkeletonManagerService)
+                                    .getWorksheetSkeleton(subUnitId)
+                                    ?.skeleton;
+                                if (!skeleton) {
+                                    return undefined;
+                                }
+                                const mergeCell = skeleton.worksheet.getMergedCell(row, col);
+
+                                const info: ICellRenderContext = {
+                                    data: {
+                                        ...cell,
+                                        dataValidation: {
+                                            ruleId,
+                                            validStatus,
+                                            rule,
+                                            validator,
+                                        },
+                                    },
+                                    style: skeleton.getsStyles().getStyleByCell(cell),
+                                    primaryWithCoord: skeleton.getCellByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
+                                    unitId,
+                                    subUnitId,
+                                    row,
+                                    col,
+                                    workbook,
+                                    worksheet,
+                                };
+                                return validator?.canvasRender?.calcCellAutoWidth?.(info);
+                            },
                             coverable: (cell?.coverable ?? true) && !(rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE),
                         });
                     },
@@ -390,4 +421,3 @@ export class SheetsDataValidationMobileRenderController extends RxDisposable {
             });
     }
 }
-

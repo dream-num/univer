@@ -53,6 +53,7 @@ const locale: typeof zhCN = {
             rejectInput: 'Từ chối đầu vào',
             messageInfo: 'Thông báo',
             showInfo: 'Hiển thị thông báo cho ô đã chọn',
+            allowBlank: 'Bỏ qua giá trị rỗng',
         },
         operators: {
             between: 'Giữa',
@@ -83,6 +84,10 @@ const locale: typeof zhCN = {
             equal: 'Giá trị phải bằng {FORMULA1}',
             notEqual: 'Giá trị phải không bằng {FORMULA1}',
             notBetween: 'Giá trị phải không nằm giữa {FORMULA1} và {FORMULA2}',
+        },
+        any: {
+            title: 'Bất kỳ giá trị',
+            error: 'Nội dung của ô này vi phạm quy tắc xác thực',
         },
         date: {
             title: 'Ngày',
@@ -164,6 +169,7 @@ const locale: typeof zhCN = {
             title: 'Công thức tùy chỉnh',
             error: 'Nội dung của ô này vi phạm quy tắc xác thực',
             validFail: 'Vui lòng nhập một công thức hợp lệ',
+            ruleName: 'Công thức tùy chỉnh {FORMULA1}',
         },
         alert: {
             title: 'Thông báo',

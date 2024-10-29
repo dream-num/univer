@@ -57,7 +57,7 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
 
         const segmentPage = docSelectionRenderService?.getSegmentPage();
 
-        const documentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
+        const oldDocumentFlavor = docDataModel.getSnapshot().documentStyle.documentFlavor;
 
         const docRanges = docSelectionManagerService.getDocRanges();
 
@@ -66,7 +66,7 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: docRanges,
+                textRanges: (oldDocumentFlavor === DocumentFlavor.TRADITIONAL && !!segmentId) ? [] : docRanges,
             },
         };
 
@@ -75,13 +75,13 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
         const rawActions: JSONXActions = [];
         let action;
 
-        if (documentFlavor === undefined) {
+        if (oldDocumentFlavor === undefined) {
             action = jsonX.insertOp(['documentStyle', 'documentFlavor'], DocumentFlavor.MODERN);
         } else {
-            if (documentFlavor === DocumentFlavor.MODERN) {
-                action = jsonX.replaceOp(['documentStyle', 'documentFlavor'], documentFlavor, DocumentFlavor.TRADITIONAL);
+            if (oldDocumentFlavor === DocumentFlavor.MODERN) {
+                action = jsonX.replaceOp(['documentStyle', 'documentFlavor'], oldDocumentFlavor, DocumentFlavor.TRADITIONAL);
             } else {
-                action = jsonX.replaceOp(['documentStyle', 'documentFlavor'], documentFlavor, DocumentFlavor.MODERN);
+                action = jsonX.replaceOp(['documentStyle', 'documentFlavor'], oldDocumentFlavor, DocumentFlavor.MODERN);
             }
         }
 
@@ -93,7 +93,7 @@ export const SwitchDocModeCommand: ICommand<ISwitchDocModeCommandParams> = {
 
         // Change all drawings' position to relative to paragraph if necessary.
         // And only need to change drawing in body.
-        if (documentFlavor !== DocumentFlavor.MODERN) {
+        if (oldDocumentFlavor !== DocumentFlavor.MODERN) {
             const snapshot = docDataModel.getSnapshot();
             const { drawings = {}, body } = snapshot;
             const customBlocks = body?.customBlocks ?? [];

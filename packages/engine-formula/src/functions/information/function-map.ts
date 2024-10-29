@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { FUNCTION_NAMES_INFORMATION } from './function-names';
 import { Cell } from './cell';
 import { ErrorType } from './error-type';
+import { FUNCTION_NAMES_INFORMATION } from './function-names';
 import { Isblank } from './isblank';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
@@ -31,6 +31,8 @@ import { Isref } from './isref';
 import { Istext } from './istext';
 import { N } from './n';
 import { Na } from './na';
+import { Sheet } from './sheet';
+import { Sheets } from './sheets';
 import { Type } from './type';
 
 export const functionInformation = [
@@ -50,5 +52,7 @@ export const functionInformation = [
     [Istext, FUNCTION_NAMES_INFORMATION.ISTEXT],
     [N, FUNCTION_NAMES_INFORMATION.N],
     [Na, FUNCTION_NAMES_INFORMATION.NA],
+    [Sheet, FUNCTION_NAMES_INFORMATION.SHEET],
+    [Sheets, FUNCTION_NAMES_INFORMATION.SHEETS],
     [Type, FUNCTION_NAMES_INFORMATION.TYPE],
 ];

@@ -340,8 +340,19 @@ describe('Test nested functions', () => {
         it('Nested functions IFERROR,XLOOKUP,MAX,SUMIFS,EDATE,TODAY,DAY,PLUS,Minus,CONCATENATE', () => {
             const result = calculate('=IFERROR(XLOOKUP(MAX(SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1)), SUMIFS(C2:C10, A2:A10, ">="&EDATE(TODAY(),-1)+1-DAY(TODAY()), A2:A10, "<"&TODAY()-DAY(TODAY())+1), B2:B10, "No Data"), "No Data")');
 
-            expect(result).toStrictEqual([[101], [102], [103], [104], [105], [101], [102], [103], [104]]);
+            expect(result).toStrictEqual([
+                [101],
+                [102],
+                [103],
+                [104],
+                [105],
+                [101],
+                [102],
+                [103],
+                [104],
+            ]);
         });
+
         it('Nested functions ADDRESS,XMATCH,MIN,SUMIFS,EDATE,TODAY,DAY', () => {
             const result = calculate('=ADDRESS(XMATCH(MIN(SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1)), SUMIFS(C2:C10, A2:A10, ">=" & EDATE(TODAY(), -1) + 1 - DAY(TODAY()), A2:A10, "<" & TODAY() - DAY(TODAY()) + 1), 0) + 1, 2)');
 

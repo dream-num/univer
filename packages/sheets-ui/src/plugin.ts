@@ -25,6 +25,7 @@ import { filter } from 'rxjs/operators';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
+import { AutoWidthController } from './controllers/auto-width.controller';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCheckboxController } from './controllers/checkbox.controller';
@@ -47,6 +48,7 @@ import { SheetPermissionInterceptorCanvasRenderController } from './controllers/
 import { SheetPermissionInterceptorClipboardController } from './controllers/permission/sheet-permission-interceptor-clipboard.controller';
 import { SheetPermissionInterceptorFormulaRenderController } from './controllers/permission/sheet-permission-interceptor-formula-render.controller';
 import { SheetPermissionRenderController, SheetPermissionRenderManagerController, WorksheetProtectionRenderController } from './controllers/permission/sheet-permission-render.controller';
+import { SheetPermissionViewModelController } from './controllers/permission/sheet-permission-view-model.controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 import { EditorBridgeRenderController } from './controllers/render-controllers/editor-bridge.render-controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
@@ -135,6 +137,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             // controllers
             [ActiveWorksheetController],
             [AutoHeightController],
+            [AutoWidthController],
             [FormulaEditorController],
             [SheetClipboardController],
             [SheetsRenderService],
@@ -152,10 +155,12 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetPermissionInterceptorClipboardController],
             [SheetPermissionInterceptorBaseController],
             [SheetPermissionInitController],
+            [SheetPermissionViewModelController],
             [SheetPermissionRenderManagerController],
         ] as Dependency[], this._config.override));
 
         touchDependencies(this._injector, [
+            [SheetPermissionViewModelController],
             [SheetPermissionPanelModel],
         ]);
     }
@@ -186,6 +191,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             [SheetsDefinedNameController],
             [StatusBarController],
             [AutoHeightController],
+            [AutoWidthController],
             [EditorDataSyncController],
             [SheetCheckboxController],
         ]);

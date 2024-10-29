@@ -38,7 +38,7 @@ import {
 import { getCanvasOffsetByEngine, IEditorService } from '@univerjs/docs-ui';
 import { convertTextRotation, DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { BEFORE_CELL_EDIT, IRefSelectionsService, SheetInterceptorService } from '@univerjs/sheets';
-import { BehaviorSubject, map, mergeMap } from 'rxjs';
+import { BehaviorSubject, map, switchMap } from 'rxjs';
 import { ISheetSelectionRenderService } from './selection/base-selection-render.service';
 import { attachPrimaryWithCoord } from './selection/util';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
@@ -131,7 +131,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     readonly currentEditCellLayout$ = this._currentEditCellLayout$.asObservable();
 
     readonly currentEditCell$ = this._currentEditCellState$.pipe(
-        mergeMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
+        switchMap((editCellState) => this._currentEditCellLayout$.pipe(map((layout) => (editCellState && layout ? { ...editCellState, ...layout } : null))))
     );
 
     private readonly _visible$ = new BehaviorSubject<IEditorBridgeServiceVisibleParam>(this._visible);

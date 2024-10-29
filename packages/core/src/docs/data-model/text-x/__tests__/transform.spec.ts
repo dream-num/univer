@@ -18,6 +18,7 @@ import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
 import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
+import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
 
@@ -27,7 +28,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                     customRanges: [],
@@ -39,7 +39,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'e',
                 },
@@ -49,13 +48,11 @@ describe('transform()', () => {
         const expectedActionsWithPriorityTrue: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'e',
                     customRanges: [],
@@ -68,7 +65,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'e',
                     customRanges: [],
@@ -86,7 +82,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -108,13 +103,11 @@ describe('transform()', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
         const expectedActionsWithPriorityTrue = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
@@ -134,14 +127,12 @@ describe('transform()', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
         const expectedActionsWithPriorityFalse: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
@@ -161,7 +152,6 @@ describe('transform()', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -174,7 +164,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -184,21 +173,16 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             },
         ];
         const expectedActionsWithPriorityTrue = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             },
         ];
 
@@ -210,7 +194,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
             },
         ];
         const actionsB: TextXAction[] = [
@@ -220,8 +203,6 @@ describe('transform()', () => {
                 body: {
                     dataStream: 'h',
                 },
-                line: 0,
-                segmentId: '',
             },
         ];
         const expectedActionsWithPriorityTrue: TextXAction[] = [
@@ -233,8 +214,6 @@ describe('transform()', () => {
                     customRanges: [],
                     customDecorations: [],
                 },
-                line: 0,
-                segmentId: '',
             },
         ];
 
@@ -246,14 +225,12 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
             },
         ];
         const actionsB: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             },
         ];
         const expectedActionsWithPriorityTrue: TextXAction[] = [];
@@ -266,14 +243,12 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
             },
         ];
         const actionsB: TextXAction[] = [
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
             },
         ];
         const expectedActionsWithPriorityTrue: TextXAction[] = [];
@@ -286,7 +261,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             },
         ];
         const actionsB: TextXAction[] = [
@@ -296,7 +270,6 @@ describe('transform()', () => {
                     dataStream: 'h',
                 },
                 len: 1,
-                line: 0,
             },
         ];
         const expectedActionsWithPriorityTrue: TextXAction[] = [
@@ -308,7 +281,6 @@ describe('transform()', () => {
                     customDecorations: [],
                 },
                 len: 1,
-                line: 0,
             },
         ];
 
@@ -320,7 +292,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -340,7 +311,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -360,7 +330,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -380,7 +349,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -400,7 +368,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -427,7 +394,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -447,7 +413,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -467,7 +432,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -487,7 +451,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -507,7 +470,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -529,7 +491,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -554,7 +515,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -574,8 +534,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             },
         ];
 
@@ -583,8 +541,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             },
         ];
 
@@ -596,7 +552,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -615,7 +570,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -635,7 +589,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -654,7 +607,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -679,7 +631,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -699,7 +650,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -716,11 +666,10 @@ describe('transform()', () => {
             },
         ];
 
-        const expectedActionsWithPriorityTrue: TextXAction[] = [
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -736,11 +685,10 @@ describe('transform()', () => {
             },
         ];
 
-        const expectedActionsWithPriorityFalse: TextXAction[] = [
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -757,19 +705,112 @@ describe('transform()', () => {
             },
         ];
 
-        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityFalse);
-        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityFalse);
+    });
+
+    it('retain + retain with custom range', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.example.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.baidu.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.baidu.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        const expectedActionsWithPriorityFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.REPLACE,
+                body: {
+                    dataStream: '',
+                    customRanges: [
+                        {
+                            startIndex: -1,
+                            endIndex: 0,
+                            rangeId: 'rangeId',
+                            rangeType: CustomRangeType.HYPERLINK,
+                            properties: {
+                                url: 'https://www.example.com',
+                            },
+                        },
+                    ],
+                },
+            },
+        ];
+
+        // console.log(JSON.stringify(TextX._transform(actionsA, actionsB, 'right'), null, 2));
+
+        expect(TextX._transform(actionsA, actionsB, 'right')).toEqual(expectedActionsWithPriorityTrue);
+        expect(TextX._transform(actionsA, actionsB, 'left')).toEqual(expectedActionsWithPriorityFalse);
     });
 
     it('insert after the retain attributes', () => {
         const actionA: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
             },
@@ -778,7 +819,6 @@ describe('transform()', () => {
         const actionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 textRuns: [
@@ -796,11 +836,9 @@ describe('transform()', () => {
         const transformedActionA: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
                 customRanges: [],
@@ -811,7 +849,6 @@ describe('transform()', () => {
         const transformedActionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 customRanges: [],
@@ -836,7 +873,6 @@ describe('transform()', () => {
         const actionA: TextXAction[] = [{
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
             },
@@ -845,7 +881,6 @@ describe('transform()', () => {
         const actionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 textRuns: [
@@ -863,7 +898,6 @@ describe('transform()', () => {
         const transformedActionA: TextXAction[] = [{
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
                 customRanges: [],
@@ -874,11 +908,9 @@ describe('transform()', () => {
         const transformedActionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 customRanges: [],
@@ -903,11 +935,9 @@ describe('transform()', () => {
         const actionA: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
             },
@@ -916,7 +946,6 @@ describe('transform()', () => {
         const actionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 2,
-            segmentId: '',
             body: {
                 dataStream: '',
                 textRuns: [
@@ -934,11 +963,9 @@ describe('transform()', () => {
         const transformedActionA: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.INSERT,
             len: 1,
-            line: 0,
             body: {
                 dataStream: 'e',
                 customRanges: [],
@@ -949,7 +976,6 @@ describe('transform()', () => {
         const transformedActionB: TextXAction[] = [{
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 customRanges: [],
@@ -967,11 +993,9 @@ describe('transform()', () => {
         }, {
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
         }, {
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId: '',
             body: {
                 dataStream: '',
                 customRanges: [],

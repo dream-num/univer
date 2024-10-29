@@ -15,7 +15,7 @@
  */
 
 import type { ITextRange } from '../../../../../sheets/typedef';
-import { describe, expect, it } from 'vitest'; // 替换为你的文件路径
+import { describe, expect, it } from 'vitest';
 import { CustomRangeType, type ICustomRange } from '../../../../../types/interfaces';
 import { DataStreamTreeTokenType } from '../../../types';
 import { excludePointsFromRange, getCustomRangesInterestsWithSelection, shouldDeleteCustomRange } from '../custom-range';

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import type { Injector, Workbook } from '@univerjs/core';
-import type { FUniver } from '../../everything';
+import type { FUniver, Injector, Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
-import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+import { AddWorksheetMergeCommand, AddWorksheetMergeMutation, CancelFrozenCommand, InsertColCommand, InsertColMutation, InsertRowCommand, InsertRowMutation, MoveColsCommand, MoveColsMutation, MoveRowsCommand, MoveRowsMutation, RemoveColCommand, RemoveColMutation, RemoveRowCommand, RemoveRowMutation, RemoveWorksheetMergeCommand, RemoveWorksheetMergeMutation, SetColDataCommand, SetColDataMutation, SetColHiddenCommand, SetColHiddenMutation, SetColVisibleMutation, SetColWidthCommand, SetFrozenCommand, SetFrozenMutation, SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowDataMutation, SetRowHeightCommand, SetRowHiddenCommand, SetRowHiddenMutation, SetRowVisibleMutation, SetSelectionsOperation, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation, SetWorksheetRowIsAutoHeightCommand, SetWorksheetRowIsAutoHeightMutation, SheetsSelectionsService } from '@univerjs/sheets';
+
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createWorksheetTestBed } from './create-worksheet-test-bed';
+
+import '../../everything';
 
 describe('Test FWorksheet', () => {
     let get: Injector['get'];
@@ -57,6 +59,10 @@ describe('Test FWorksheet', () => {
         commandService.registerCommand(SetWorksheetRowHeightMutation);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightCommand);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightMutation);
+        commandService.registerCommand(SetRowDataCommand);
+        commandService.registerCommand(SetRowDataMutation);
+        commandService.registerCommand(SetColDataCommand);
+        commandService.registerCommand(SetColDataMutation);
 
         // column
         commandService.registerCommand(InsertColCommand);
@@ -311,6 +317,21 @@ describe('Test FWorksheet', () => {
         expect(currentRowHeight).toBe(200);
     });
 
+    it('Worksheet setRowCustom', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
+
+        const sheet = await activeSheet?.setRowCustom({
+            0: {
+                color: 'red',
+            },
+        });
+        expect(sheet).toBeDefined();
+
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentRowCustom = currentWorksheet?.getRowManager().getRow(0)?.custom;
+        expect(currentRowCustom).toEqual({ color: 'red' });
+    });
+
     // #endregion
 
     // #region Column
@@ -455,6 +476,23 @@ describe('Test FWorksheet', () => {
         expect(currentColWidth2).toBe(100);
     });
 
+    it('Worksheet setColumnCustom', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getSheetByName('sheet1');
+
+        const sheet = await activeSheet?.setColumnCustom({
+            0: {
+                color: 'red',
+            },
+        });
+        expect(sheet).toBeDefined();
+
+        const currentWorksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const currentColCustom = currentWorksheet?.getColumnManager().getColumn(0)?.custom;
+        expect(currentColCustom).toEqual({ color: 'red' });
+    });
+
+    // #endregion
+
     it('Worksheet freeze', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
@@ -506,6 +544,4 @@ describe('Test FWorksheet', () => {
         expect(activeSheet?.getFrozenRows()).toBe(21);
         expect(activeSheet?.getFrozenColumns()).toBe(9);
     });
-
-    // #endregion
 });

@@ -64,7 +64,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/protocol": "0.1.39-alpha.30",
+        "@univerjs/protocol": "0.1.39-alpha.36",
         "@univerjs/sheets": "workspace:*"
     },
     "devDependencies": {

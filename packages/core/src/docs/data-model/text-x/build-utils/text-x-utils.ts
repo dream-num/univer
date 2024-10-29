@@ -97,7 +97,7 @@ export interface IAddCustomRangeTextXParam {
 }
 
 export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
-    const { range, rangeId, rangeType, segmentId, wholeEntity, properties, body } = param;
+    const { range, rangeId, rangeType, wholeEntity, properties, body } = param;
     const actualRange = getSelectionForAddCustomRange(range, body);
     if (!actualRange) {
         return false;
@@ -147,7 +147,11 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
     const newRanges = excludePointsFromRange([startOffset, endOffset - 1], relativeParagraphs.map((p) => p.startIndex));
     newRanges.forEach(([start, end], i) => addCustomRange(start, end, i));
 
-    textX.selections = [actualRange];
+    textX.selections = [{
+        startOffset: actualRange.endOffset,
+        endOffset: actualRange.endOffset,
+        collapsed: true,
+    }];
     return textX;
 }
 

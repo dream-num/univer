@@ -34,4 +34,5 @@ export { EditSheetDrawingOperation } from './commands/operations/edit-sheet-draw
 export { type IInsertImageCommandParams, InsertFloatImageCommand } from './commands/commands/insert-image.command';
 export { SidebarSheetDrawingOperation } from './commands/operations/open-drawing-panel.operation';
 
+export type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from './commands/commands/interfaces';
 // #endregion

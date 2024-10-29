@@ -103,7 +103,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
-                segmentId,
             });
         }
 
@@ -115,8 +114,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
                     paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
                 },
                 len: 1,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -144,8 +141,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
                 ],
             },
             len: tableDataStream.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

@@ -430,7 +430,7 @@ export const CellLinkEdit = () => {
                     </FormLayout>
                 )
                 : null}
-            <FormLayout label={localeService.t('hyperLink.form.type')} contentStyle={{ marginBottom: 0 }}>
+            <FormLayout label={localeService.t('hyperLink.form.type')}>
                 <Select
                     options={linkTypeOptions}
                     value={type}

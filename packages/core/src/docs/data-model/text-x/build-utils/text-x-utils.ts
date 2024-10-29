@@ -51,13 +51,11 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
     textX.push({
         t: TextXActionType.RETAIN,
         len: startIndex,
-        segmentId,
     });
 
     textX.push({
         t: TextXActionType.RETAIN,
         len,
-        segmentId,
         body: {
             dataStream: '',
             customRanges: [
@@ -76,8 +74,6 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
             t: TextXActionType.INSERT,
             body: insert,
             len: insert.dataStream.length,
-            line: 0,
-            segmentId,
         });
     }
 
@@ -135,12 +131,10 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
         textX.push({
             t: TextXActionType.RETAIN,
             len: rangeStartIndex - cursor,
-            segmentId,
         });
         textX.push({
             t: TextXActionType.RETAIN,
             len: rangeEndIndex - rangeStartIndex + 1,
-            segmentId,
             body: {
                 dataStream: '',
                 customRanges: [customRange],
@@ -184,7 +178,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         dos.push({
             t: TextXActionType.RETAIN,
             len: textStart,
-            segmentId,
         });
     }
 
@@ -204,14 +197,11 @@ export function getRetainAndDeleteAndExcludeLineBreak(
             dos.push({
                 t: TextXActionType.DELETE,
                 len,
-                line: 0,
-                segmentId,
             });
         }
         dos.push({
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId,
         });
         cursor = pos + 1;
     });
@@ -220,8 +210,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         dos.push({
             t: TextXActionType.DELETE,
             len: textEnd - cursor,
-            line: 0,
-            segmentId,
         });
         cursor = textEnd;
     }
@@ -233,7 +221,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
                 dos.push({
                     t: TextXActionType.RETAIN,
                     len: nextParagraph.startIndex - cursor,
-                    segmentId,
                 });
                 cursor = nextParagraph.startIndex;
             }
@@ -241,7 +228,6 @@ export function getRetainAndDeleteAndExcludeLineBreak(
             dos.push({
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -283,32 +269,36 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     const oldBody = getBodySlice(body, selection.startOffset, selection.endOffset);
     const diffs = textDiff(oldBody.dataStream, insertBody.dataStream);
     let cursor = 0;
-    const actions: TextXAction[] = diffs.map(([type, text]) => {
+    const actions = diffs.map(([type, text]) => {
         switch (type) {
             case 0: {
-                const action = {
+                const action: TextXAction = {
                     t: TextXActionType.RETAIN,
                     body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    len: text.length,
                 };
                 cursor += text.length;
                 return action;
             }
             case 1: {
-                const action = {
+                const action: TextXAction = {
                     t: TextXActionType.INSERT,
                     body: getBodySlice(insertBody, cursor, cursor + text.length),
+                    len: text.length,
                 };
                 cursor += text.length;
                 return action;
             }
-            default:
-                return {
+            default: {
+                const action: TextXAction = {
                     t: TextXActionType.DELETE,
                     len: text.length,
                 };
+                return action;
+            }
         }
     });
-    // const diffs = textDiff
+
     const textX = new TextX();
     textX.push(...actions);
 

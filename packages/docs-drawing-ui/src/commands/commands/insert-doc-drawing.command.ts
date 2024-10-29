@@ -74,7 +74,6 @@ export const InsertDocDrawingCommand: ICommand = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: startOffset,
-                    segmentId,
                 });
             }
         } else {
@@ -123,8 +122,6 @@ export const InsertDocDrawingCommand: ICommand = {
                 })),
             },
             len: drawings.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(documentDataModel, segmentId);

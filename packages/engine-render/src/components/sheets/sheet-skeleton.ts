@@ -19,6 +19,7 @@ import type {
     IBorderStyleData,
     ICellData,
     ICellDataForSheetInterceptor,
+    IColAutoWidthInfo,
     IColumnData,
     IColumnRange,
     IDocumentData,
@@ -46,7 +47,7 @@ import type {
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
 
 import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
-import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
+import { type BorderCache, type IFontCacheItem, type IStylesCache, SHEET_VIEWPORT_KEY } from './interfaces';
 /* eslint-disable max-lines-per-function */
 /* eslint-disable no-param-reassign */
 import {
@@ -77,7 +78,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
+import { BORDER_TYPE as BORDER_LTRB, COLOR_BLACK_RGB, MAXIMUM_COL_WIDTH, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import {
@@ -92,6 +93,7 @@ import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
+import { EXPAND_SIZE_FOR_RENDER_OVERFLOW } from './constants';
 
 function addLinkToDocumentModel(documentModel: DocumentDataModel, linkUrl: string, linkId: string): void {
     const body = documentModel.getBody()!;
@@ -252,7 +254,8 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _columnHeaderHeight = 0;
 
     /**
-     * Range of visible area(range in viewBounds)
+     * Range viewBounds. only update by viewBounds.
+     * It would change multiple times in one frame if there is multiple viewport (after freeze row&col)
      */
     private _visibleRange: IRowColumnRange = {
         startRow: -1,
@@ -260,6 +263,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         startColumn: -1,
         endColumn: -1,
     };
+
+    private _visibleRangeMap: Map<SHEET_VIEWPORT_KEY, IRowColumnRange> = new Map();
 
     // private _dataMergeCache: IRange[] = [];
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
@@ -340,8 +345,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._visibleRange;
     }
 
-    get visibleArea(): IRowColumnRange {
-        return this._visibleRange;
+    visibleRangeByViewportKey(viewportKey: SHEET_VIEWPORT_KEY): Nullable<IRowColumnRange> {
+        return this._visibleRangeMap.get(viewportKey);
     }
 
     // get dataMergeCache(): IRange[] {
@@ -461,7 +466,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param bounds
      * @returns boolean
      */
-    calculateSegment(bounds?: IViewportInfo): boolean {
+    updateVisibleRange(bounds?: IViewportInfo): boolean {
         if (!this._worksheetData) {
             return false;
         }
@@ -473,24 +478,57 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (bounds != null) {
-            this._visibleRange = this.getRowColumnSegment(bounds);
+            const range = this.getRowColumnSegment(bounds);
+            this._visibleRange = range;
+            this._visibleRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, range);
         }
 
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
-        if (!this.calculateSegment(bounds)) {
+    /**
+     * Set border background and font to this._stylesCache by visible range, which derives from bounds)
+     * @param bounds viewBounds
+     */
+    setStylesCache(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
+        if (!this.updateVisibleRange(bounds)) {
             return;
         }
 
-        // const { mergeData } = this._worksheetData;
+        const rowColumnSegment = this._visibleRange;
+        const columnWidthAccumulation = this.columnWidthAccumulation;
+        const { startRow: visibleStartRow, endRow: visibleEndRow, startColumn: visibleStartColumn, endColumn: visibleEndColumn } = rowColumnSegment;
 
-        // // this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
-        // const rowColumnSegment = this._rowColumnSegment;
-        // const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
+        if (visibleEndColumn === -1 || visibleEndRow === -1) return;
 
-        this._calculateStylesCache();
+        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
+        for (const mergeRange of mergeRanges) {
+            this._setStylesCacheForOneCell(mergeRange.startRow, mergeRange.startColumn, {
+                mergeRange,
+            });
+        }
+
+        // expandStartCol & expandEndCol is slightly expand curr col range. This is for calculating text for overflow situations.
+        const expandStartCol = Math.max(0, visibleStartColumn - EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+        const expandEndCol = Math.min(columnWidthAccumulation.length - 1, visibleEndColumn + EXPAND_SIZE_FOR_RENDER_OVERFLOW);
+        for (let r = visibleStartRow; r <= visibleEndRow; r++) {
+            if (this.worksheet.getRowVisible(r) === false) continue;
+
+            for (let c = visibleStartColumn; c <= visibleEndColumn; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: true, border: true } });
+            }
+
+            // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
+            for (let c = expandStartCol; c < visibleEndColumn; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+            }
+            if (visibleEndColumn === 0) continue;
+
+            // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
+            for (let c = visibleEndColumn + 1; c < expandEndCol; c++) {
+                this._setStylesCacheForOneCell(r, c, { cacheItem: { bg: false, border: false } });
+            }
+        }
 
         return this;
     }
@@ -498,11 +536,34 @@ export class SpreadsheetSkeleton extends Skeleton {
     calculate(bounds?: IViewportInfo): Nullable<SpreadsheetSkeleton> {
         this._resetCache();
 
-        this.calculateWithoutClearingCache(bounds);
+        this.setStylesCache(bounds);
 
         return this;
     }
 
+    private _hasUnMergedCellInRow(rowIndex: number, startColumn: number, endColumn: number): boolean {
+        const mergeData = this.worksheet.getMergeData();
+        if (!mergeData) {
+            return false;
+        }
+
+        for (let i = startColumn; i <= endColumn; i++) {
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowIndex, i);
+
+            if (!isMerged && !isMergedMainCell) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //#region auto height
+    /**
+     * Calc all auto height by getDocsSkeletonPageSize in ranges
+     * @param ranges
+     * @returns {IRowAutoHeightInfo[]} result
+     */
     calculateAutoHeightInRange(ranges: Nullable<IRange[]>): IRowAutoHeightInfo[] {
         if (!Tools.isArray(ranges)) {
             return [];
@@ -543,32 +604,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
-    private _hasUnMergedCellInRow(rowIndex: number, startColumn: number, endColumn: number): boolean {
-        const mergeData = this.worksheet.getMergeData();
-        if (!mergeData) {
-            return false;
-        }
-
-        for (let i = startColumn; i <= endColumn; i++) {
-            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(rowIndex, i);
-
-            if (!isMerged && !isMergedMainCell) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    // TODO: auto height
     private _calculateRowAutoHeight(rowNum: number): number {
+        const worksheet = this.worksheet;
         const { columnCount, columnData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
         let height = defaultRowHeight;
-
-        const worksheet = this.worksheet;
-        if (!worksheet) {
-            return height;
-        }
 
         for (let i = 0; i < columnCount; i++) {
             // When calculating the automatic height of a row, if a cell is in a merged cell,
@@ -636,6 +675,195 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         return Math.min(height, MAXIMUM_ROW_HEIGHT);
     }
+    //#endregion
+
+    //#region calculate auto width
+    calculateAutoWidthInRange(ranges: Nullable<IRange[]>): IColAutoWidthInfo[] {
+        if (!Tools.isArray(ranges)) {
+            return [];
+        }
+
+        const results: IColAutoWidthInfo[] = [];
+        const calculatedCols = new Set<number>();
+
+        for (const range of ranges) {
+            const { startColumn, endColumn } = range;
+
+            for (let colIndex = startColumn; colIndex <= endColumn; colIndex++) {
+                if (!this.worksheet.getColVisible(colIndex)) continue;
+                // If the row has already been calculated, it does not need to be recalculated
+                if (calculatedCols.has(colIndex)) continue;
+
+                const autoWidth = this._calculateColWidth(colIndex);
+                calculatedCols.add(colIndex);
+                results.push({
+                    col: colIndex,
+                    width: autoWidth,
+                });
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * Iterate rows in visible area(and rows around it) and return column width of the specified column(by column index)
+     *
+     * @param colIndex
+     * @returns {number} width
+     */
+    private _calculateColWidth(colIndex: number): number {
+        const MEASURE_EXTENT = 10000;
+        const MEASURE_EXTENT_FOR_PARAGRAPH = MEASURE_EXTENT / 10;
+        const worksheet = this.worksheet;
+
+        // row has default height, but col does not, col can be very narrow near zero
+        let colWidth = 0;
+
+        // for cell with only v, auto size for content width in visible range and ± 10000 rows around.
+        // for cell with p, auto width for content in visible range and ± 1000 rows, 1/10 of situation above.
+        // first row and last row should be considered.
+        // skip hidden row
+        // also handle multiple viewport situation (freeze row & freeze row&col)
+        // if there are no content in this column, return current column width.
+        const visibleRangeViewMain = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN);
+        if (!visibleRangeViewMain) return colWidth;
+
+        const { startRow: startRowOfViewMain, endRow: endRowOfViewMain } = visibleRangeViewMain;
+        const rowCount = this.worksheet.getRowCount();
+        const checkStart = Math.max(0, startRowOfViewMain - MEASURE_EXTENT); // 0
+        const checkEnd = Math.min(rowCount, endRowOfViewMain + MEASURE_EXTENT); // rowCount
+
+        // check width of first row and last row,
+        const otherRowIndex: Set<number> = new Set();
+        otherRowIndex.add(0);
+        otherRowIndex.add(rowCount - 1);
+
+        // add rows in viewMainTop(viewMainTopLeft are included)
+        const visibleRangeViewMainTop = this.visibleRangeByViewportKey(SHEET_VIEWPORT_KEY.VIEW_MAIN_TOP);
+        if (visibleRangeViewMainTop) {
+            const { startRow: startRowOfViewMainTop, endRow: endRowOfViewMainTop } = visibleRangeViewMainTop;
+            for (let i = startRowOfViewMainTop; i <= endRowOfViewMainTop; i++) {
+                otherRowIndex.add(i);
+            }
+        }
+
+        // create a array, which contains all rows need to check
+        // array [start ... end] + additional arr
+        const createRowSequence = (start: number, end: number, additionalArr: number[] | Set<number>) => {
+            const range = Array.from(
+                { length: end - start + 1 },
+                (_, i) => i + start
+            );
+            return [...range, ...additionalArr];
+        };
+
+        const rowIdxArr = createRowSequence(checkStart, checkEnd, otherRowIndex);
+
+        const preColIndex = Math.max(0, colIndex - 1);
+        const currColWidth = this._columnWidthAccumulation[colIndex] - this._columnWidthAccumulation[preColIndex];
+        for (let i = 0; i < rowIdxArr.length; i++) {
+            const row = rowIdxArr[i];
+
+            const { isMerged, isMergedMainCell } = this._getCellMergeInfo(colIndex, row);
+            if (isMerged && !isMergedMainCell) continue;
+
+            if (!this.worksheet.getRowVisible(row)) continue;
+
+            const cell = worksheet.getCell(row, colIndex);
+            if (!cell) continue;
+
+            // for cell with paragraph, only check ±1000 rows around visible area, continue the loop if out of range
+            if (cell.p) {
+                if (row + MEASURE_EXTENT_FOR_PARAGRAPH <= startRowOfViewMain || row - MEASURE_EXTENT_FOR_PARAGRAPH >= endRowOfViewMain) {
+                    continue;
+                }
+            }
+
+            let measuredWidth = this._getMeasuredWidthByCell(cell, currColWidth);
+
+            if (cell.fontRenderExtension) {
+                measuredWidth += ((cell.fontRenderExtension?.leftOffset || 0) + (cell.fontRenderExtension?.rightOffset || 0));
+            }
+
+            colWidth = Math.max(colWidth, measuredWidth);
+
+            // early return, if maxColWidth is larger than MAXIMUM_COL_WIDTH
+            if (colWidth >= MAXIMUM_COL_WIDTH) {
+                return MAXIMUM_COL_WIDTH;
+            }
+        }
+
+        // if there are no content in this column( measure result is 0), return current column width.
+        if (colWidth === 0) {
+            return currColWidth;
+        }
+        return colWidth;
+    }
+
+    /**
+     * For _calculateColMaxWidth
+     * @param cell
+     * @returns {number} width
+     */
+    _getMeasuredWidthByCell(cell: ICellDataForSheetInterceptor, currColWidth: number) {
+        let measuredWidth = 0;
+
+        // isSkip means the text in this cell would not rendering.
+        if (cell.fontRenderExtension?.isSkip && cell?.interceptorAutoWidth) {
+            const cellWidth = cell.interceptorAutoWidth?.();
+            if (cellWidth) {
+                return cellWidth;
+            }
+        }
+
+        const modelObject = this._getCellDocumentModel(cell);
+        if (modelObject == null) {
+            return measuredWidth;
+        }
+
+        const { documentModel, textRotation } = modelObject;
+        if (documentModel == null) {
+            return measuredWidth;
+        }
+
+        const documentViewModel = new DocumentViewModel(documentModel);
+        const { vertexAngle: angle } = convertTextRotation(textRotation);
+        const cellStyle = this._styles.getStyleByCell(cell);
+
+        if (cellStyle?.tb === WrapStrategy.WRAP) {
+            documentModel.updateDocumentDataPageSize(currColWidth, Infinity);
+        } else {
+            documentModel.updateDocumentDataPageSize(Infinity, Infinity);
+        }
+
+        const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
+
+        documentSkeleton.calculate();
+        // key
+        measuredWidth = (getDocsSkeletonPageSize(documentSkeleton, angle) ?? { width: 0 }).width;
+        // When calculating the auto Height, need take the margin information into account,
+        // because there is margin information when rendering
+        if (documentSkeleton) {
+            const skeletonData = documentSkeleton.getSkeletonData()!;
+            const {
+                marginTop: t,
+                marginBottom: b,
+                marginLeft: l,
+                marginRight: r,
+            } = skeletonData.pages[skeletonData.pages.length - 1];
+
+            const absAngleInRad = Math.abs(degToRad(angle));
+
+            measuredWidth +=
+                t * Math.sin(absAngleInRad) +
+                r * Math.cos(absAngleInRad) +
+                b * Math.sin(absAngleInRad) +
+                l * Math.cos(absAngleInRad);
+        }
+        return measuredWidth;
+    };
+    //#endregion
 
     /**
      * Calculate data for row col & cell position, then update position value to this._rowHeaderWidth & this._rowHeightAccumulation & this._columnHeaderHeight & this._columnWidthAccumulation.
@@ -1545,6 +1773,12 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
     }
 
+    /**
+     * Calc columnWidthAccumulation by columnData
+     * @param colCount
+     * @param columnData
+     * @param defaultColumnWidth
+     */
     private _generateColumnMatrixCache(
         colCount: number,
         columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>,
@@ -1564,7 +1798,6 @@ export class SpreadsheetSkeleton extends Skeleton {
                 if (!columnDataItem) {
                     continue;
                 }
-
                 if (columnDataItem.w != null) {
                     columnWidth = columnDataItem.w;
                 }
@@ -1575,7 +1808,6 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             columnTotalWidth += columnWidth;
-
             columnWidthAccumulation.push(columnTotalWidth); // 列的临时长度分布
         }
 
@@ -1693,41 +1925,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         return this.worksheet.getSpanModel().getMergedCellRangeForSkeleton(range.startRow, range.startColumn, range.endRow, range.endColumn);
-    }
-
-    private _calculateStylesCache(): void {
-        const rowColumnSegment = this._visibleRange;
-        const columnWidthAccumulation = this.columnWidthAccumulation;
-        const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-
-        if (endColumn === -1 || endRow === -1) return;
-
-        const mergeRanges = this.getCurrentRowColumnSegmentMergeData(this._visibleRange);
-        for (const mergeRange of mergeRanges) {
-            this._setStylesCache(mergeRange.startRow, mergeRange.startColumn, {
-                mergeRange,
-            });
-        }
-
-        // const mergeRange = mergeRanges.length ? mergeRanges[0] : undefined;
-        for (let r = startRow; r <= endRow; r++) {
-            if (this.worksheet.getRowVisible(r) === false) continue;
-
-            for (let c = startColumn; c <= endColumn; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: true, border: true } });
-            }
-
-            // Calculate the text length for overflow situations, focusing on the leftmost column within the visible range.
-            for (let c = 0; c < startColumn; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
-            }
-            if (endColumn === 0) continue;
-
-            // Calculate the text length for overflow situations, focusing on the rightmost column within the visible range.
-            for (let c = endColumn + 1; c < columnWidthAccumulation.length; c++) {
-                this._setStylesCache(r, c, { cacheItem: { bg: false, border: false } });
-            }
-        }
     }
 
     resetCache(): void {
@@ -1856,12 +2053,12 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Set border background and font to this._stylesCache
+     * Set border background and font to this._stylesCache cell by cell.
      * @param row {number}
      * @param col {number}
      * @param options {{ mergeRange: IRange; cacheItem: ICacheItem } | undefined}
      */
-    private _setStylesCache(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
+    private _setStylesCacheForOneCell(row: number, col: number, options: { mergeRange?: IRange; cacheItem?: ICacheItem }): void {
         if (row === -1 || col === -1) {
             return;
         }

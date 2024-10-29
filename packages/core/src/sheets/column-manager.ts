@@ -195,7 +195,6 @@ export class ColumnManager {
     /**
      * get given column data
      * @param columnPos column index
-     * @returns
      */
     getColumn(columnPos: number): Nullable<Partial<IColumnData>> {
         const column = this._columnData[columnPos];

@@ -96,7 +96,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: startOffset,
-                    segmentId,
                 });
             }
         } else {
@@ -115,8 +114,6 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
             t: TextXActionType.INSERT,
             body,
             len: body.dataStream.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -180,14 +177,11 @@ export const DeleteCommand: ICommand<IDeleteCommandParams> = {
         textX.push({
             t: TextXActionType.RETAIN,
             len: start - cursor,
-            segmentId,
         });
 
         textX.push({
             t: TextXActionType.DELETE,
             len,
-            segmentId,
-            line: 0,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);
@@ -246,14 +240,12 @@ export const UpdateCommand: ICommand<IUpdateCommandParams> = {
         textX.push({
             t: TextXActionType.RETAIN,
             len: startOffset,
-            segmentId,
         });
 
         textX.push({
             t: TextXActionType.RETAIN,
             body: updateBody,
             len: endOffset - startOffset,
-            segmentId,
             coverType,
         });
 

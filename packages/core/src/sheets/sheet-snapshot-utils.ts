@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber } from '../types/enum/text-style';
 import type { IWorksheetData } from './typedef';
+import { BooleanNumber } from '../types/enum/text-style';
 
 // TODO@wzhudev: default value should not be exposed, but the keys.
 

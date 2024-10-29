@@ -172,7 +172,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
-            SetWorksheetColWidthMutation,
             SetWorksheetDefaultStyleMutation,
             SetWorksheetRowColumnStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
@@ -250,10 +249,14 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetWorksheetNameCommand,
                 SetWorksheetOrderCommand,
                 SetWorksheetOrderMutation,
+
                 SetWorksheetRowAutoHeightMutation,
                 SetWorksheetRowHeightMutation,
                 SetWorksheetRowIsAutoHeightCommand,
                 SetWorksheetRowIsAutoHeightMutation,
+                SetWorksheetColWidthMutation,
+                // SetWorksheetColIsAutoWidthCommand,
+
                 SetSelectionsOperation,
                 ScrollToCellOperation,
                 InsertDefinedNameCommand,

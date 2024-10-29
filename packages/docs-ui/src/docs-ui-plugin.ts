@@ -35,7 +35,7 @@ import { BreakLineCommand } from './commands/commands/break-line.command';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand } from './commands/commands/clipboard.command';
 import { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
 import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands/core-editing.command';
-import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
+import { DeleteCustomBlockCommand, DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/doc-delete.command';
 import { CloseHeaderFooterCommand } from './commands/commands/doc-header-footer.command';
 import { DocParagraphSettingCommand } from './commands/commands/doc-paragraph-setting.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';

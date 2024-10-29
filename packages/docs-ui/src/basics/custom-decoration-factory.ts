@@ -51,7 +51,6 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: start - cursor,
-                segmentId,
             });
         }
 
@@ -67,7 +66,6 @@ export function addCustomDecorationFactory(param: IAddCustomDecorationParam) {
                 }],
             },
             len: end - start,
-            segmentId,
         });
 
         cursor = end;
@@ -154,13 +152,11 @@ export function deleteCustomDecorationFactory(accessor: IAccessor, params: IDele
     textX.push({
         t: TextXActionType.RETAIN,
         len: startIndex,
-        segmentId,
     });
 
     textX.push({
         t: TextXActionType.RETAIN,
         len,
-        segmentId,
         body: {
             dataStream: '',
             customDecorations: [

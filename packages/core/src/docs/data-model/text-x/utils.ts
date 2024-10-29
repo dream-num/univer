@@ -195,6 +195,7 @@ export function normalizeBody(body: IDocumentBody): IDocumentBody {
     paragraphs?.forEach((p) => {
         p.startIndex += leftOffset;
     });
+
     customRanges?.forEach((range) => {
         range.startIndex += leftOffset;
         range.endIndex += leftOffset;

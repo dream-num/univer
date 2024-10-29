@@ -15,15 +15,15 @@
  */
 
 import type { IAbsoluteTransform, IKeyValue, Nullable } from '@univerjs/core';
-import type { BaseObject } from './base-object';
-
 import type { IMouseEvent, IPointerEvent } from './basics/i-events';
+
 import type { ITransformerConfig } from './basics/transformer-config';
 import type { IPoint } from './basics/vector2';
 import type { Scene } from './scene';
 import type { IRectProps } from './shape/rect';
 import { Disposable, MOVE_BUFFER_VALUE, requestImmediateMacroTask, toDisposable } from '@univerjs/core';
 import { Subject, type Subscription } from 'rxjs';
+import { type BaseObject, ObjectType } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
 import { offsetRotationAxis } from './basics/offset-rotation-axis';
 
@@ -95,6 +95,10 @@ const MINI_WIDTH_LIMIT = 20;
 const MINI_HEIGHT_LIMIT = 20;
 
 const DEFAULT_CONTROL_PLUS_INDEX = 5000;
+
+const SINGLE_ACTIVE_OBJECT_TYPE_MAP = new Set<ObjectType>([
+    ObjectType.CHART,
+]);
 
 /**
  * Transformer constructor.  Transformer is a special type of group that allow you transform
@@ -1525,6 +1529,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._clearControl$.next(changeSelf);
     }
 
+    /**
+     * @description Clear the control of the object with the specified id
+     * @param {string[]} ids the id of the object to be cleared
+     */
+    public clearControlByIds(ids: string[]) {
+        for (const id of ids) {
+            this._selectedObjectMap.delete(id);
+        }
+        this.refreshControls();
+    }
+
     private _clearControlMap() {
         this._transformerControlMap.forEach((control) => {
             control.dispose();
@@ -1564,7 +1579,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width, applyObject);
 
                 const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
-
                 const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                     zIndex: zIndex - 1, left, top, height: rotateSize, width: rotateSize,
                     radius: rotateCornerRadius, strokeWidth: borderStrokeWidth * 2, stroke: borderStroke,
@@ -1587,7 +1601,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 } else {
                     anchor = this._createCopperResizeAnchor(type, applyObject, zIndex);
                 }
-
                 this._attachEventToAnchor(anchor, type, applyObject);
                 groupElements.push(anchor);
             }
@@ -1637,7 +1650,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             return;
         }
 
-        if (!evt.ctrlKey) {
+        if (!evt.ctrlKey || SINGLE_ACTIVE_OBJECT_TYPE_MAP.has(applyObject.objectType)) {
             this._selectedObjectMap.clear();
             this._clearControlMap();
         }

@@ -80,6 +80,11 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         return (style?.fs ?? 10) * 1.6;
     }
 
+    calcCellAutoWidth(info: ICellRenderContext): number | undefined {
+        const { style } = info;
+        return (style?.fs ?? 10) * 1.6;
+    }
+
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);

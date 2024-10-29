@@ -279,6 +279,7 @@ export interface IToggleCheckListCommandParams {
 
 export const ToggleCheckListCommand: ICommand<IToggleCheckListCommandParams> = {
     id: 'doc.command.toggle-check-list',
+
     type: CommandType.COMMAND,
 
     handler: (accessor, params) => {
@@ -428,7 +429,6 @@ export const QuickListCommand: ICommand<IQuickListCommandParams> = {
         textX.push({
             t: TextXActionType.DELETE,
             len: paragraphEnd - paragraphStart,
-            line: 1,
         });
 
         textX.push({

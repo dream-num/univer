@@ -249,6 +249,7 @@ interface ICloseHeaderFooterParams {
 
 export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
     id: 'doc.command.close-header-footer',
+
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: ICloseHeaderFooterParams) => {
@@ -275,7 +276,7 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
         }
 
         // TODO: @JOCS, these codes bellow should be automatically executed?
-        docSelectionManagerService.replaceTextRanges([]); // Clear text selection.
+        docSelectionManagerService.replaceDocRanges([]); // Clear text selection.
         transformer.clearSelectedObjects();
         docSelectionRenderService.setSegment('');
         docSelectionRenderService.setSegmentPage(-1);
@@ -283,6 +284,8 @@ export const CloseHeaderFooterCommand: ICommand<ICloseHeaderFooterParams> = {
         skeleton.calculate();
         renderObject.mainComponent?.makeDirty(true);
 
-        return commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
+        commandService.executeCommand(SidebarDocHeaderFooterPanelOperation.id, { value: 'close' });
+
+        return true;
     },
 };

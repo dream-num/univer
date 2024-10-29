@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
@@ -22,8 +24,6 @@ import { floor } from '../../../engine/utils/math-kit';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 
 export class PercentrankInc extends BaseFunction {
     override minParams = 2;
@@ -93,6 +93,14 @@ export class PercentrankInc extends BaseFunction {
 
         if (xValue < array[0] || xValue > array[n - 1]) {
             return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (n === 1) {
+            if (xValue === array[0]) {
+                return NumberValueObject.create(1);
+            } else {
+                return ErrorValueObject.create(ErrorType.NA);
+            }
         }
 
         let result = 0;

@@ -75,6 +75,24 @@ describe('Test percentrankInc function', () => {
             });
             const result2 = testFunction.calculate(array2, x);
             expect(getObjectValue(result2)).toStrictEqual(ErrorType.NUM);
+
+            const array3 = ArrayValueObject.create({
+                calculateValueList: transformToValueObject([
+                    [-1],
+                ]),
+                rowCount: 1,
+                columnCount: 1,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+            const result3 = testFunction.calculate(array3, x);
+            expect(getObjectValue(result3)).toStrictEqual(ErrorType.NA);
+
+            const x2 = NumberValueObject.create(-1);
+            const result4 = testFunction.calculate(array3, x2);
+            expect(getObjectValue(result4)).toStrictEqual(1);
         });
 
         it('X value test', () => {

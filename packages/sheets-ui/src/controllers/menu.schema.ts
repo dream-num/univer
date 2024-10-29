@@ -80,6 +80,7 @@ import { RemoveColConfirmCommand, RemoveRowConfirmCommand } from '../commands/co
 import { RemoveSheetConfirmCommand } from '../commands/commands/remove-sheet-confirm.command';
 import { SetOnceFormatPainterCommand } from '../commands/commands/set-format-painter.command';
 import { CancelFrozenCommand, SetColumnFrozenCommand, SetRowFrozenCommand, SetSelectionFrozenCommand } from '../commands/commands/set-frozen.command';
+import { SetWorksheetColAutoWidthCommand } from '../commands/commands/set-worksheet-auto-col-width.command';
 import { ShowMenuListCommand } from '../commands/commands/unhide.command';
 import {
     ChangeSheetProtectionFromSheetBarCommand,
@@ -107,6 +108,7 @@ import {
     BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     CancelFrozenMenuItemFactory,
+    ColAutoWidthMenuItemFactory,
     CopyMenuItemFactory,
     // CutMenuItemFactory,
     FitContentMenuItemFactory,
@@ -486,8 +488,12 @@ export const menuSchema: MenuSchemaType = {
                 order: 3,
                 menuItemFactory: SetColWidthMenuItemFactory,
             },
-            [SHEET_FROZEN_HEADER_MENU_ID]: {
+            [SetWorksheetColAutoWidthCommand.id]: {
                 order: 4,
+                menuItemFactory: ColAutoWidthMenuItemFactory,
+            },
+            [SHEET_FROZEN_HEADER_MENU_ID]: {
+                order: 5,
                 menuItemFactory: SheetFrozenHeaderMenuItemFactory,
                 [SetSelectionFrozenCommand.id]: {
                     order: 0,
@@ -499,7 +505,7 @@ export const menuSchema: MenuSchemaType = {
                 },
             },
             [SHEET_PERMISSION_CONTEXT_MENU_ID]: {
-                order: 5,
+                order: 6,
                 menuItemFactory: sheetPermissionContextMenuFactory,
                 [AddRangeProtectionFromContextMenuCommand.id]: {
                     order: 0,

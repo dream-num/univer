@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting, shouldDeleteCustomRange } from './custom-range';
+import { copyCustomRange, getCustomRangesInterestsWithSelection, isIntersecting } from './custom-range';
 import { changeParagraphBulletNestLevel, setParagraphBullet, switchParagraphBullet, toggleChecklistParagraph } from './paragraph';
 import { fromPlainText, getPlainText, isEmptyDocument } from './parse';
-import { getDeleteSelection, getInsertSelection, getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
+import { getRetainAndDeleteFromReplace, isSegmentIntersects, makeSelection, normalizeSelection } from './selection';
 import { addCustomRangeTextX, deleteCustomRangeTextX, getRetainAndDeleteAndExcludeLineBreak, replaceSelectionTextX } from './text-x-utils';
 
 export class BuildTextUtils {
     static customRange = {
         add: addCustomRangeTextX,
         delete: deleteCustomRangeTextX,
-
         copyCustomRange,
         getCustomRangesInterestsWithSelection,
-        shouldDeleteCustomRange,
-
         isIntersecting,
     };
 
@@ -37,9 +34,6 @@ export class BuildTextUtils {
 
         makeSelection,
         normalizeSelection,
-        getDeleteSelection,
-        getInsertSelection,
-
         getDeleteActions: getRetainAndDeleteFromReplace,
         getDeleteExcludeLastLineBreakActions: getRetainAndDeleteAndExcludeLineBreak,
     };

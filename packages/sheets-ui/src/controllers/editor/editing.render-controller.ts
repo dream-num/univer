@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, UnitModel, Workbook } from '@univerjs/core';
+import type { DocumentDataModel, ICellData, ICommandInfo, IDisposable, IDocumentBody, IDocumentData, IStyleData, Nullable, Styles, UnitModel, Workbook } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { IRenderContext, IRenderModule } from '@univerjs/engine-render';
 import type { WorkbookSelections } from '@univerjs/sheets';
@@ -49,12 +49,13 @@ import {
 } from '@univerjs/docs';
 import { VIEWPORT_KEY as DOC_VIEWPORT_KEY, DocSelectionRenderService, IEditorService, MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs-ui';
 import { IFunctionService, LexerTreeBuilder, matchToken } from '@univerjs/engine-formula';
+import { DEFAULT_TEXT_FORMAT } from '@univerjs/engine-numfmt';
+
 import {
     convertTextRotation,
     DeviceInputEventType,
     IRenderManagerService,
 } from '@univerjs/engine-render';
-
 import { COMMAND_LISTENER_SKELETON_CHANGE, SetRangeValuesCommand, SetSelectionsOperation, SetWorksheetActivateCommand, SetWorksheetActiveOperation, SheetsSelectionsService } from '@univerjs/sheets';
 import { KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { distinctUntilChanged, filter } from 'rxjs';
@@ -473,6 +474,9 @@ export class EditingRenderController extends Disposable implements IRenderModule
 
         // Reselect the current selections, when exist cell editor by press ESC.I
         if (keycode === KeyCode.ESC) {
+            if (this._editorBridgeService.isForceKeepVisible()) {
+                this._editorBridgeService.disableForceKeepVisible();
+            }
             const selections = this._workbookSelections.getCurrentSelections();
             if (selections) {
                 this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
@@ -554,7 +558,8 @@ export class EditingRenderController extends Disposable implements IRenderModule
             this._lexerTreeBuilder,
             (model) => model.getSnapshot(),
             this._localService,
-            this._functionService
+            this._functionService,
+            workbook.getStyles()
         );
 
         if (!cellData) {
@@ -721,13 +726,15 @@ export class EditingRenderController extends Disposable implements IRenderModule
     }
 }
 
+// eslint-disable-next-line
 export function getCellDataByInput(
     cellData: ICellData,
     documentDataModel: Nullable<DocumentDataModel>,
     lexerTreeBuilder: LexerTreeBuilder,
     getSnapshot: (data: DocumentDataModel) => IDocumentData,
     localeService: LocaleService,
-    functionService: IFunctionService
+    functionService: IFunctionService,
+    styles: Styles
 ) {
     cellData = Tools.deepClone(cellData);
 
@@ -751,7 +758,15 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
-    if (isFormulaString(newDataStream)) {
+    // Text format ('@@@') has the highest priority
+    if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
+        // If the style is text format ('@@@'), the data should be set as a string.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.STRING;
+    } else if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {
             return null;
         }

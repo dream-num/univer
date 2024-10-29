@@ -15,19 +15,18 @@
  */
 
 import type { IDocumentData, Nullable, Workbook } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, ThemeService, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DocumentFlavor, HorizontalAlign, IPermissionService, IUniverInstanceService, Rectangle, UniverInstanceType, useDependency, useObservable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { TextEditor } from '@univerjs/docs-ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
 import { RangeProtectionPermissionEditPoint, RangeProtectionRuleModel, SheetsSelectionsService, WorkbookEditablePermission, WorksheetEditPermission, WorksheetProtectionRuleModel, WorksheetSetCellValuePermission } from '@univerjs/sheets';
-import { KeyCode, ProgressBar } from '@univerjs/ui';
+import { ComponentContainer, KeyCode, useComponentsOfPart } from '@univerjs/ui';
 import clsx from 'clsx';
-
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { EMPTY, merge, switchMap } from 'rxjs';
 import { useActiveWorkbook } from '../../components/hook';
+import { SheetsUIPart } from '../../consts/ui-name';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
-
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { DefinedName } from '../defined-name/DefinedName';
 import styles from './index.module.less';
@@ -43,16 +42,17 @@ export function FormulaBar() {
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
     const editorBridgeService = useDependency(IEditorBridgeService);
-    const themeService = useDependency(ThemeService);
-    const progressBarColor = themeService.getCurrentTheme().primaryColor;
-    const [disable, setDisable] = useState<boolean>(false);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const selectionManager = useDependency(SheetsSelectionsService);
     const worksheetProtectionRuleModel = useDependency(WorksheetProtectionRuleModel);
     const rangeProtectionRuleModel = useDependency(RangeProtectionRuleModel);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const selectionManager = useDependency(SheetsSelectionsService);
     const permissionService = useDependency(IPermissionService);
+
+    const [disable, setDisable] = useState<boolean>(false);
     const currentWorkbook = useActiveWorkbook();
     const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), undefined, undefined, [])!;
+
+    const formulaAuxUIParts = useComponentsOfPart(SheetsUIPart.FORMULA_AUX);
 
     function getPermissionIds(unitId: string, subUnitId: string): string[] {
         return [
@@ -257,7 +257,7 @@ export function FormulaBar() {
                 </div>
             </div>
 
-            <ProgressBar barColor={progressBarColor} />
+            <ComponentContainer key="formula-aux" components={formulaAuxUIParts}></ComponentContainer>
         </div>
     );
 }

@@ -85,7 +85,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -107,7 +106,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -136,13 +134,11 @@ describe('apply method', () => {
         const actionsA: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                     textRuns: [
@@ -173,7 +169,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -201,13 +196,11 @@ describe('apply method', () => {
         const actionsA: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                     textRuns: [
@@ -238,7 +231,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -267,11 +259,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -288,11 +278,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -330,11 +318,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -352,11 +338,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -395,11 +379,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -422,11 +404,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -459,13 +439,6 @@ describe('apply method', () => {
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
 
-        // console.log(JSON.stringify(resultA, null, 2));
-        // console.log(JSON.stringify(resultB, null, 2));
-
-        // console.log('composedAction1', JSON.stringify(composedAction1, null, 2));
-
-        // console.log(JSON.stringify(resultC, null, 2));
-
         expect(resultA).toEqual(resultB);
         expect(resultC).toEqual(resultD);
         expect(resultA).toEqual(resultC);
@@ -477,11 +450,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [{
@@ -497,7 +468,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [{
@@ -509,6 +479,122 @@ describe('apply method', () => {
                             },
                         },
                     }],
+                },
+            },
+        ];
+
+        const doc1 = getDefaultDocWithLength2();
+        const doc2 = getDefaultDocWithLength2();
+        const doc3 = getDefaultDocWithLength2();
+        const doc4 = getDefaultDocWithLength2();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should get the same result when one is break line and the other is edit after the break point', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+            }, {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: '\r',
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            horizontalAlign: HorizontalAlign.LEFT,
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 2,
+            }, {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: 'X',
+                    textRuns: [{
+                        st: 0,
+                        ed: 1,
+                        ts: {
+                            bl: BooleanNumber.TRUE,
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const doc1 = getDefaultDocWithLength2();
+        const doc2 = getDefaultDocWithLength2();
+        const doc3 = getDefaultDocWithLength2();
+        const doc4 = getDefaultDocWithLength2();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        // console.log(JSON.stringify(resultA, null, 2));
+        // console.log(JSON.stringify(resultB, null, 2));
+
+        // console.log('composedAction1', JSON.stringify(composedAction1, null, 2));
+        // console.log('composedAction2', JSON.stringify(composedAction2, null, 2));
+
+        // console.log(JSON.stringify(resultC, null, 2));
+
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
+
+    it('should get the same result when one is delete actions and the other is insert actions', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.DELETE,
+                len: 2,
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 2,
+            }, {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: '1',
+                },
+            },
+            {
+                t: TextXActionType.INSERT,
+                len: 1,
+                body: {
+                    dataStream: '1',
                 },
             },
         ];

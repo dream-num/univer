@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-import { CustomRangeType, DataStreamTreeTokenType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
-import { handleStringToStyle, textTrim } from '@univerjs/ui';
 import type { ICustomRange, IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } from '@univerjs/core';
-
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { extractNodeStyle } from './parse-node-style';
-import parseToDom, { generateParagraphs } from './utils';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
+
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
@@ -29,6 +25,10 @@ import type {
     IUniverSheetCopyDataModel,
 } from '../type';
 import type { IAfterProcessRule, IPastePlugin } from './paste-plugins/type';
+import { CustomRangeType, DEFAULT_WORKSHEET_ROW_HEIGHT, generateRandomId, ObjectMatrix, skipParseTagNames } from '@univerjs/core';
+import { handleStringToStyle, textTrim } from '@univerjs/ui';
+import { extractNodeStyle } from './parse-node-style';
+import parseToDom, { generateParagraphs } from './utils';
 
 export interface IStyleRule {
     filter: string | string[] | ((node: HTMLElement) => boolean);
@@ -514,7 +514,6 @@ export class HtmlToUSMService {
         return documentModel?.getSnapshot();
     }
 
-    // eslint-disable-next-line max-lines-per-function
     private process(
         parent: Nullable<ChildNode>,
         nodes: NodeListOf<ChildNode>,
@@ -542,24 +541,6 @@ export class HtmlToUSMService {
                     dataStream: '',
                     textRuns: [],
                 };
-
-                // if ((parent as Element).tagName.toUpperCase() === 'A') {
-                //     const id = Tools.generateRandomId();
-                //     text = `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${text}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`;
-                //     doc.customRanges = [
-                //         ...(doc.customRanges ?? []),
-                //         {
-                //             startIndex: doc.dataStream.length,
-                //             endIndex: doc.dataStream.length + text.length - 1,
-                //             rangeId: id,
-                //             rangeType: CustomRangeType.HYPERLINK,
-                //         },
-                //     ];
-                //     doc.payloads = {
-                //         ...doc.payloads,
-                //         [id]: (parent as HTMLAnchorElement).href,
-                //     };
-                // }
 
                 doc.dataStream += text;
                 newDoc.dataStream += text;
@@ -609,13 +590,7 @@ export class HtmlToUSMService {
 
     private _processBeforeLink(node: HTMLElement, doc: Partial<IDocumentData>) {
         const body = doc.body!;
-        const element = node as HTMLElement;
-        const start = body.dataStream.length;
-        if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_START;
-        }
-
-        return start;
+        return body.dataStream.length;
     }
 
     private _processAfterLink(node: HTMLElement, doc: Partial<IDocumentData>, start: number) {
@@ -623,7 +598,6 @@ export class HtmlToUSMService {
         const element = node as HTMLElement;
 
         if (element.tagName.toUpperCase() === 'A') {
-            body.dataStream += DataStreamTreeTokenType.CUSTOM_RANGE_END;
             body.customRanges = body.customRanges ?? [];
             body.customRanges.push({
                 startIndex: start,

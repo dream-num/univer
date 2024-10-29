@@ -100,7 +100,6 @@ export { INotificationService } from './services/notification/notification.servi
 export { BuiltInUIPart, IUIPartsService, UIPartsService } from './services/parts/parts.service';
 export { IPlatformService, PlatformService } from './services/platform/platform.service';
 export { CanvasPopupService, ICanvasPopupService, type IPopup } from './services/popup/canvas-popup.service';
-export { type IProgressCount, IProgressService, type IProgressStep, ProgressService } from './services/progress/progress.service';
 export { KeyCode, MetaKeys } from './services/shortcut/keycode';
 export { type IShortcutItem, IShortcutService, ShortcutService } from './services/shortcut/shortcut.service';
 export { ShortcutPanelService } from './services/shortcut/shortcut-panel.service';

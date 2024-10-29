@@ -30,6 +30,7 @@ const BASE_OBJECT_ARRAY_Set = new Set(BASE_OBJECT_ARRAY);
 export interface IShapeProps extends IObjectFullState, ISize, IOffset, IScale {
     rotateEnabled?: boolean;
     resizeEnabled?: boolean;
+    borderEnabled?: boolean;
     hoverCursor?: Nullable<string>;
     moveCursor?: string | null;
     fillRule?: string;
@@ -402,13 +403,18 @@ export abstract class Shape<T extends IShapeProps> extends BaseObject {
 
         const hasRotateEnabled = props?.rotateEnabled !== undefined;
         const hasResizeEnabled = props?.resizeEnabled !== undefined;
-        if (hasRotateEnabled || hasResizeEnabled) {
+        const hasBorderEnabled = props?.borderEnabled !== undefined;
+
+        if (hasRotateEnabled || hasResizeEnabled || hasBorderEnabled) {
             const transformerConfig = this.transformerConfig || {};
             if (hasRotateEnabled) {
                 transformerConfig.rotateEnabled = props?.rotateEnabled;
             }
             if (hasResizeEnabled) {
                 transformerConfig.resizeEnabled = props?.resizeEnabled;
+            }
+            if (hasBorderEnabled) {
+                transformerConfig.borderEnabled = props?.borderEnabled;
             }
             this.transformerConfig = { ...transformerConfig };
         }

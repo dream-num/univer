@@ -15,29 +15,27 @@
  */
 
 import type { Nullable } from '../../../../shared';
-import type {
-    ICustomBlock,
-    ICustomDecoration,
-    ICustomRange,
-    ICustomTable,
-    IDocumentBody,
-    IParagraph,
-    ISectionBreak,
-    ITextRun,
-} from '../../../../types/interfaces';
 import { Tools, UpdateDocsAttributeType } from '../../../../shared';
+import {
+    CustomDecorationType,
+    CustomRangeType,
+    type ICustomBlock,
+    type ICustomDecoration,
+    type ICustomRange,
+    type ICustomTable,
+    type IDocumentBody,
+    type IParagraph,
+    type ISectionBreak,
+    type ITextRun,
+} from '../../../../types/interfaces';
 import { PresetListType } from '../../preset-list-type';
 import {
     deleteCustomBlocks,
-    deleteCustomDecorations,
-    deleteCustomRanges,
     deleteParagraphs,
     deleteSectionBreaks,
     deleteTables,
     deleteTextRuns,
     insertCustomBlocks,
-    insertCustomDecorations,
-    insertCustomRanges,
     insertParagraphs,
     insertSectionBreaks,
     insertTables,
@@ -449,20 +447,64 @@ function updateCustomRanges(
         body.customRanges = [];
     }
     const { customRanges } = body;
+    const { customRanges: updateDataCustomRanges = [] } = updateBody;
+    const rangeMap: Record<string, ICustomRange> = Object.create(null);
 
-    const { customRanges: updateDataCustomRanges } = updateBody;
-
-    if (customRanges == null || updateDataCustomRanges == null) {
-        return;
+    for (const customRange of customRanges) {
+        const { rangeId } = customRange;
+        rangeMap[rangeId] = customRange;
     }
 
-    let removeCustomRanges: ICustomRange[] = [];
+    const removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        removeCustomRanges = deleteCustomRanges(body, textLength, currentIndex);
+        const removeIndex: number[] = [];
+        for (let index = 0; index < customRanges.length; index++) {
+            const customRange = customRanges[index];
+            const { startIndex, endIndex } = customRange;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                removeCustomRanges.push(customRange);
+                removeIndex.push(index);
+            }
+        }
+
+        for (let index = removeIndex.length - 1; index >= 0; index--) {
+            customRanges.splice(removeIndex[index], 1);
+        }
+
+        updateBody.customRanges?.forEach((customRange) => {
+            const { startIndex, endIndex } = customRange;
+            customRanges.push({
+                ...customRange,
+                startIndex: startIndex + currentIndex,
+                endIndex: endIndex + currentIndex,
+            });
+        });
+    } else {
+        for (const updateCustomRange of updateDataCustomRanges) {
+            const { rangeId } = updateCustomRange;
+            updateCustomRange.startIndex = updateCustomRange.startIndex + currentIndex;
+            updateCustomRange.endIndex = updateCustomRange.endIndex + currentIndex;
+            const oldCustomRange = rangeMap[rangeId];
+            if (oldCustomRange) {
+                if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
+                    removeCustomRanges.push(oldCustomRange);
+                    continue;
+                }
+                Object.assign(oldCustomRange, updateCustomRange);
+            } else {
+                customRanges.push(updateCustomRange);
+            }
+        }
+
+        for (const removeCustomRange of removeCustomRanges) {
+            const { rangeId } = removeCustomRange;
+            const index = customRanges.findIndex((r) => r.rangeId === rangeId);
+            if (index !== -1) {
+                customRanges.splice(index, 1);
+            }
+        }
     }
 
-    // retain
-    insertCustomRanges(body, updateBody, 0, currentIndex);
     return removeCustomRanges;
 }
 
@@ -478,11 +520,61 @@ function updateCustomDecorations(
         body.customDecorations = [];
     }
 
-    let removeCustomDecorations: ICustomDecoration[] = [];
-    if (coverType === UpdateDocsAttributeType.REPLACE) {
-        removeCustomDecorations = deleteCustomDecorations(body, textLength, currentIndex, false);
+    const removeCustomDecorations: ICustomDecoration[] = [];
+    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
+    const { customDecorations } = body;
+    const { customDecorations: updateDataCustomDecorations = [] } = updateBody;
+    for (const customDecoration of customDecorations) {
+        const { id } = customDecoration;
+        decorationMap[id] = customDecoration;
     }
 
-    insertCustomDecorations(body, updateBody, 0, currentIndex);
+    if (coverType === UpdateDocsAttributeType.REPLACE) {
+        const removeIndex: number[] = [];
+        for (let index = 0; index < customDecorations.length; index++) {
+            const customDecoration = customDecorations[index];
+            const { startIndex, endIndex } = customDecoration;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                removeCustomDecorations.push(customDecoration);
+                removeIndex.push(index);
+            }
+        }
+
+        for (let index = removeIndex.length - 1; index >= 0; index--) {
+            customDecorations.splice(removeIndex[index], 1);
+        }
+
+        updateBody.customDecorations?.forEach((customDecoration) => {
+            const { startIndex, endIndex } = customDecoration;
+            customDecorations.push({
+                ...customDecoration,
+                startIndex: startIndex + currentIndex,
+                endIndex: endIndex + currentIndex,
+            });
+        });
+    } else {
+        for (const updateCustomDecoration of updateDataCustomDecorations) {
+            const { id } = updateCustomDecoration;
+            const oldCustomDecoration = decorationMap[id];
+            if (oldCustomDecoration) {
+                if (updateCustomDecoration.type === CustomDecorationType.DELTED) {
+                    removeCustomDecorations.push(oldCustomDecoration);
+                    continue;
+                }
+                Object.assign(oldCustomDecoration, updateCustomDecoration);
+            } else {
+                customDecorations.push(updateCustomDecoration);
+            }
+        }
+
+        for (const removeCustomDecoration of removeCustomDecorations) {
+            const { id } = removeCustomDecoration;
+            const index = customDecorations.findIndex((d) => d.id === id);
+            if (index !== -1) {
+                customDecorations.splice(index, 1);
+            }
+        }
+    }
+
     return removeCustomDecorations;
 }

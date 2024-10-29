@@ -17,7 +17,7 @@
 import type { IDisposable, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { Disposable, DisposableCollection, Inject, IUniverInstanceService, moveRangeByOffset, UniverInstanceType } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheetWithCache, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
@@ -50,7 +50,7 @@ export class FormulaRefRangeService extends Disposable {
 
         const transformSequenceNodes = sequenceNodes?.map((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                const gridRangeName = deserializeRangeWithSheet(node.token);
+                const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
                 const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
                 const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);
@@ -143,7 +143,7 @@ export class FormulaRefRangeService extends Disposable {
 
         sequenceNodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                const gridRangeName = deserializeRangeWithSheet(node.token);
+                const gridRangeName = deserializeRangeWithSheetWithCache(node.token);
                 const { range, unitId: rangeUnitId, sheetName: rangeSheetName } = gridRangeName;
                 const workbook = this._univerInstanceService.getUnit<Workbook>(rangeUnitId || unitId);
                 const worksheet = rangeSheetName ? workbook?.getSheetBySheetName(rangeSheetName) : workbook?.getSheetBySheetId(subUnitId);

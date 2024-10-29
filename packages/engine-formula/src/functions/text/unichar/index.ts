@@ -32,8 +32,6 @@ const filterCodeArray = Object.values(DataStreamTreeTokenType).filter((value) =>
         DataStreamTreeTokenType.TABLE_CELL_END,
         DataStreamTreeTokenType.TABLE_ROW_END,
         DataStreamTreeTokenType.TABLE_END,
-        DataStreamTreeTokenType.CUSTOM_RANGE_START,
-        DataStreamTreeTokenType.CUSTOM_RANGE_END,
         DataStreamTreeTokenType.CUSTOM_BLOCK,
     ].includes(value as DataStreamTreeTokenType);
 });

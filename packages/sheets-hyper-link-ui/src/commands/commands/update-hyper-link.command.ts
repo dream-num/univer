@@ -16,7 +16,7 @@
 
 import type { DocumentDataModel, ICellData, ICommand, IMutationInfo, Workbook } from '@univerjs/core';
 import type { ICellLinkContent } from '../../types/interfaces/i-hyper-link';
-import { CellValueType, CommandType, CustomRangeType, DataStreamTreeTokenType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync, TextX, Tools, UniverInstanceType } from '@univerjs/core';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
@@ -83,12 +83,12 @@ export const UpdateHyperLinkCommand: ICommand<IUpdateHyperLinkCommandParams> = {
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
-                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                dataStream: `${display}`,
                 customRanges: [{
                     rangeId: newId,
                     rangeType: CustomRangeType.HYPERLINK,
                     startIndex: 0,
-                    endIndex: display.length + 1,
+                    endIndex: display.length - 1,
                     properties: {
                         url: payload,
                     },
@@ -186,12 +186,12 @@ export const UpdateRichHyperLinkCommand: ICommand<IUpdateRichHyperLinkCommandPar
         const replaceSelection = replaceSelectionFactory(accessor, {
             unitId,
             body: {
-                dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${display}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                dataStream: `${display}`,
                 customRanges: [{
                     rangeId: newId,
                     rangeType: CustomRangeType.HYPERLINK,
                     startIndex: 0,
-                    endIndex: display.length + 1,
+                    endIndex: display.length - 1,
                     properties: {
                         url: payload.payload,
                     },

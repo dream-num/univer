@@ -15,20 +15,20 @@
  */
 
 import type { IKeyValue, ITransformState, Nullable } from '@univerjs/core';
-import { Disposable, EventSubject } from '@univerjs/core';
-
-import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import type { IDragEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
+
 import type { IObjectFullState, ITransformChangeState } from './basics/interfaces';
+import type { ITransformerConfig } from './basics/transformer-config';
+import type { IViewportInfo, Vector2 } from './basics/vector2';
+import type { UniverRenderingContext } from './context';
+import type { Engine } from './engine';
+import type { Layer } from './layer';
+import type { Scene } from './scene';
+import { Disposable, EventSubject } from '@univerjs/core';
+import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { generateRandomKey, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
-import type { IViewportInfo, Vector2 } from './basics/vector2';
-import type { UniverRenderingContext } from './context';
-import type { Layer } from './layer';
-import type { ITransformerConfig } from './basics/transformer-config';
-import type { Scene } from './scene';
-import type { Engine } from './engine';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -52,6 +52,7 @@ export enum ObjectType {
     IMAGE,
     RECT,
     CIRCLE,
+    CHART,
 }
 
 export abstract class BaseObject extends Disposable {

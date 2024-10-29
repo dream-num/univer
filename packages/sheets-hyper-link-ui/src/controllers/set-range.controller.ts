@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CustomRangeType, DataStreamTreeTokenType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, TextX, Tools } from '@univerjs/core';
+import { BuildTextUtils, CustomRangeType, Disposable, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, TextX, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 
@@ -53,10 +53,10 @@ export class SheetHyperLinkSetRangeController extends Disposable {
                             collapsed: false,
                         },
                         body: {
-                            dataStream: `${DataStreamTreeTokenType.CUSTOM_RANGE_START}${cell.v}${DataStreamTreeTokenType.CUSTOM_RANGE_END}`,
+                            dataStream: `${cell.v}`,
                             customRanges: [{
                                 startIndex: 0,
-                                endIndex: cell.v.length + 1,
+                                endIndex: cell.v.length - 1,
                                 rangeId: generateRandomId(),
                                 rangeType: CustomRangeType.HYPERLINK,
                                 properties: {

@@ -14,10 +14,21 @@
  * limitations under the License.
  */
 
-import { Inject, Injector, Plugin, registerDependencies } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+import { Inject, Injector, mergeOverrideWithDependencies, Plugin, registerDependencies } from '@univerjs/core';
 import { HTTPService } from './services/http/http.service';
 import { IHTTPImplementation } from './services/http/implementations/implementation';
 import { XHRHTTPImplementation } from './services/http/implementations/xhr';
+
+export interface IUniverNetworkPluginConfig {
+    /**
+     * Build in dependencies that can be overridden:
+     *
+     * - {@link HTTPService}
+     * - {@link IHTTPImplementation}
+     */
+    override?: DependencyOverride;
+}
 
 /**
  * This plugin add network services to the Univer instance.
@@ -26,15 +37,16 @@ export class UniverNetworkPlugin extends Plugin {
     static override pluginName = 'UNIVER_NETWORK_PLUGIN';
 
     constructor(
+        private readonly _config: Partial<IUniverNetworkPluginConfig> | undefined = undefined,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super();
     }
 
     override onStarting(): void {
-        registerDependencies(this._injector, [
+        registerDependencies(this._injector, mergeOverrideWithDependencies([
             [HTTPService],
             [IHTTPImplementation, { useClass: XHRHTTPImplementation }],
-        ]);
+        ], this._config?.override));
     }
 }

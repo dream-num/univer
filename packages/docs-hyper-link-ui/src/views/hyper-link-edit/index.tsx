@@ -72,7 +72,7 @@ export const DocHyperLinkEdit = () => {
         }
 
         const body = doc?.getSelfOrHeaderFooterModel(activeRange.segmentId)?.getBody();
-        const selection = body ? BuildTextUtils.selection.getInsertSelection(activeRange, body) : null;
+        const selection = body ? activeRange : null;
         const matchedRange = selection && BuildTextUtils.customRange.getCustomRangesInterestsWithSelection(selection, body?.customRanges ?? [])?.[0];
         if (doc && matchedRange) {
             setLink(matchedRange?.properties?.url ?? '');

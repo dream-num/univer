@@ -939,6 +939,9 @@ importers:
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
+      fast-diff:
+        specifier: 1.3.0
+        version: 1.3.0
       kdbush:
         specifier: ^4.0.2
         version: 4.0.2
@@ -2759,6 +2762,9 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
+      '@univerjs/engine-numfmt':
+        specifier: workspace:*
+        version: link:../engine-numfmt
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

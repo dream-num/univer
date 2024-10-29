@@ -348,7 +348,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len,
-                    segmentId,
                 });
             }
 
@@ -356,7 +355,6 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 t: TextXActionType.RETAIN,
                 body,
                 len: endOffset - startOffset,
-                segmentId,
             });
 
             memoryCursor.reset();

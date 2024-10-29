@@ -27,7 +27,6 @@ import type {
 } from '../../../../types/interfaces';
 import { horizontalLineSegmentsSubtraction, sortRulesFactory, Tools } from '../../../../shared';
 import { isSameStyleTextRun } from '../../../../shared/compare';
-import { DataStreamTreeTokenType } from '../../types';
 
 export function normalizeTextRuns(textRuns: ITextRun[]) {
     const results: ITextRun[] = [];
@@ -338,45 +337,29 @@ export function insertCustomRanges(
         }
     }
 
-    const currentRange = customRanges.find((range) => range.startIndex > currentIndex && range.endIndex < currentIndex);
-
-    if (currentRange) {
-        return;
-    }
-
     const insertCustomRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
             const oldCustomRange = customRangeMap[customRange.rangeId];
-
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
+            // merge into old custom range
             if (oldCustomRange) {
-                if (oldCustomRange.startIndex <= customRange.startIndex &&
-                    oldCustomRange.endIndex >= customRange.endIndex) {
-                    continue;
-                }
-
-                const isClosed =
-                    body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START &&
-                    body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END;
-
-                if (isClosed) {
-                    insertCustomRanges.push(customRange);
-                    continue;
-                }
-
-                // old is start
-                if (body.dataStream[oldCustomRange.startIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_START) {
+                if (oldCustomRange.endIndex === customRange.startIndex - 1) {
                     oldCustomRange.endIndex = customRange.endIndex;
-                    continue;
                 }
-                if (body.dataStream[oldCustomRange.endIndex] === DataStreamTreeTokenType.CUSTOM_RANGE_END) {
+
+                if (oldCustomRange.startIndex === customRange.endIndex + 1) {
                     oldCustomRange.startIndex = customRange.startIndex;
-                    continue;
                 }
+                oldCustomRange.properties = {
+                    ...oldCustomRange.properties,
+                    ...customRange.properties,
+                };
+                continue;
             }
+            // new custom range
             insertCustomRanges.push(customRange);
         }
 
@@ -437,6 +420,14 @@ export function insertCustomDecorations(
         body.customDecorations = [];
     }
     const { customDecorations } = body;
+    const decorationMap: Record<string, ICustomDecoration> = Object.create(null);
+
+    for (let i = 0, len = customDecorations.length; i < len; i++) {
+        const customDecoration = customDecorations[i];
+        const { id } = customDecoration;
+        decorationMap[id] = customDecoration;
+    }
+
     if (textLength > 0) {
         for (let i = 0, len = customDecorations.length; i < len; i++) {
             const customDecoration = customDecorations[i];
@@ -454,9 +445,19 @@ export function insertCustomDecorations(
         const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
-            insertCustomDecorations.push(customDecoration);
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;
+            if (decorationMap[customDecoration.id]) {
+                const oldCustomDecoration = decorationMap[customDecoration.id];
+                if (oldCustomDecoration.endIndex === customDecoration.startIndex - 1) {
+                    oldCustomDecoration.endIndex = customDecoration.endIndex;
+                }
+
+                if (oldCustomDecoration.startIndex === customDecoration.endIndex + 1) {
+                    oldCustomDecoration.startIndex = customDecoration.startIndex;
+                }
+            }
+            insertCustomDecorations.push(customDecoration);
         }
 
         customDecorations.push(...insertCustomDecorations);
@@ -731,7 +732,6 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
     const { customRanges } = body;
 
     const startIndex = currentIndex;
-
     const endIndex = currentIndex + textLength - 1;
     const removeCustomRanges: ICustomRange[] = [];
 
@@ -740,15 +740,11 @@ export function deleteCustomRanges(body: IDocumentBody, textLength: number, curr
         for (let i = 0, len = customRanges.length; i < len; i++) {
             const customRange = customRanges[i];
             const { startIndex: st, endIndex: ed } = customRange;
-            // delete custom-range start means delete custom-range
-            if (startIndex <= st && endIndex >= st) {
-                removeCustomRanges.push({
-                    ...customRange,
-                    startIndex: st - currentIndex,
-                    endIndex: ed - currentIndex,
-                });
+            // delete decoration
+            if (st >= startIndex && ed <= endIndex) {
+                removeCustomRanges.push(customRange);
                 continue;
-            } else if (st <= startIndex && ed >= endIndex) {
+            } else if (Math.max(startIndex, st) <= Math.min(endIndex, ed)) {
                 const segments = horizontalLineSegmentsSubtraction(st, ed, startIndex, endIndex);
                 customRange.startIndex = segments[0];
                 customRange.endIndex = segments[1];

@@ -139,8 +139,8 @@ export class DataValidationCustomFormulaService extends Disposable {
         };
     };
 
-    private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string) {
-        return this._registerOtherFormulaService.registerFormula(unitId, subUnitId, formulaString, { ruleId });
+    private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string, ranges: IRange[]) {
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formulaString, ranges, { ruleId });
     };
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {
@@ -182,25 +182,33 @@ export class DataValidationCustomFormulaService extends Disposable {
         const originCol = ranges[0].startColumn;
 
         let originFormulaId: string | undefined;
-        ranges.forEach((range) => {
-            Range.foreach(range, (row, column) => {
-                const relativeFormula = transformFormula(
-                    this._lexerTreeBuilder,
-                    formula,
-                    originRow,
-                    originCol,
-                    row,
-                    column
-                );
-                const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
-                formulaMap.setValue(row, column, {
-                    formulaId,
-                        // formulaText: relativeFormula,
-                    ruleId,
-                });
-                formulaCellMap.set(formulaId, { row, column });
-            });
+        // ranges.forEach((range) => {
+        //     Range.foreach(range, (row, column) => {
+        //         const relativeFormula = transformFormula(
+        //             this._lexerTreeBuilder,
+        //             formula,
+        //             originRow,
+        //             originCol,
+        //             row,
+        //             column
+        //         );
+        //         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
+        //         formulaMap.setValue(row, column, {
+        //             formulaId,
+        //                 // formulaText: relativeFormula,
+        //             ruleId,
+        //         });
+        //         formulaCellMap.set(formulaId, { row, column });
+        //     });
+        // });
+
+        const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula, ranges);
+        formulaMap.setValue(originRow, originCol, {
+            formulaId,
+                // formulaText: relativeFormula,
+            ruleId,
         });
+        formulaCellMap.set(formulaId, { row: originRow, column: originCol });
 
         ruleFormulaMap.set(ruleId, {
             formula,

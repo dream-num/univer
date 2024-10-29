@@ -353,6 +353,10 @@ export function insertCustomRanges(
                 if (oldCustomRange.startIndex === customRange.endIndex + 1) {
                     oldCustomRange.startIndex = customRange.startIndex;
                 }
+                oldCustomRange.properties = {
+                    ...oldCustomRange.properties,
+                    ...customRange.properties,
+                };
                 continue;
             }
             // new custom range

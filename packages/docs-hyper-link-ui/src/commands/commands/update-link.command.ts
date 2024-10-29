@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, ICommand } from '@univerjs/core';
-import { CommandType, CustomRangeType, generateRandomId, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { CommandType, CustomRangeType, getBodySlice, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { replaceSelectionFactory } from '@univerjs/docs-ui';
 
@@ -34,7 +34,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
         if (!params) {
             return false;
         }
-        const { unitId, payload, segmentId } = params;
+        const { unitId, payload, segmentId, linkId } = params;
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const docSelectionManagerService = accessor.get(DocSelectionManagerService);
@@ -44,7 +44,6 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             return false;
         }
 
-        const newId = generateRandomId();
         const oldBody = getBodySlice(doc.getSelfOrHeaderFooterModel(segmentId).getBody()!, currentSelection.startOffset!, currentSelection.endOffset!);
         const textRun = oldBody.textRuns?.[0];
         if (textRun) {
@@ -56,7 +55,7 @@ export const UpdateDocHyperLinkCommand: ICommand<IUpdateDocHyperLinkCommandParam
             body: {
                 dataStream: `${params.label}`,
                 customRanges: [{
-                    rangeId: newId,
+                    rangeId: linkId,
                     rangeType: CustomRangeType.HYPERLINK,
                     startIndex: 0,
                     endIndex: params.label.length + 1,

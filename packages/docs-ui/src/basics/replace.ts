@@ -59,8 +59,8 @@ export function replaceSelectionFactory(accessor: IAccessor, params: IReplaceSel
         return false;
     }
     const textRanges = params.textRanges ?? [{
-        startOffset: selection.startOffset + insertBody.dataStream.length,
-        endOffset: selection.startOffset + insertBody.dataStream.length,
+        startOffset: selection.startOffset + insertBody.dataStream.length + 1,
+        endOffset: selection.startOffset + insertBody.dataStream.length + 1,
         collapsed: true,
         segmentId,
     }];

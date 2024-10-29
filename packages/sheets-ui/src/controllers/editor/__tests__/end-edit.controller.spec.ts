@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, Injector, Univer, Workbook } from '@univerjs/core';
+import type { IFunctionService } from '@univerjs/engine-formula';
 import { CellValueType, IConfigService, IContextService, IResourceLoaderService, LocaleService, LocaleType, Tools } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
@@ -127,8 +128,16 @@ describe('Test EndEditController', () => {
             if (!documentLayoutObject) {
                 throw new Error('documentLayoutObject is undefined');
             }
-            // @ts-ignore
-            return getCellDataByInput(cell, documentLayoutObject.documentModel, lexerTreeBuilder, (model) => model.getSnapshot(), localeService, get(IMockFunctionService));
+
+            return getCellDataByInput(
+                cell,
+                documentLayoutObject.documentModel,
+                lexerTreeBuilder,
+                (model) => model.getSnapshot(),
+                localeService,
+                get(IMockFunctionService) as IFunctionService,
+                workbook.getStyles()
+            );
         };
 
         normalizeStringByLexer = (str: string) => {
@@ -153,6 +162,70 @@ describe('Test EndEditController', () => {
 
             const cellData = getCellDataByInputCell(cell, inputCell);
             const target = { v: '2', t: CellValueType.NUMBER, f: null, si: null, p: null };
+
+            expect(cellData).toEqual({
+                ...target,
+            });
+        });
+        it('Text cell input 001', () => {
+            const cell: ICellData = {
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                t: null,
+            };
+
+            const inputCell = {
+                v: '001',
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            const target = {
+                v: '001',
+                t: CellValueType.STRING,
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                f: null,
+                si: null,
+                p: null,
+            };
+
+            expect(cellData).toEqual({
+                ...target,
+            });
+        });
+        it('Text cell input 2024-10-28', () => {
+            const cell: ICellData = {
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                t: null,
+            };
+
+            const inputCell = {
+                v: '2024-10-28',
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            const target = {
+                v: '2024-10-28',
+                t: CellValueType.STRING,
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                f: null,
+                si: null,
+                p: null,
+            };
 
             expect(cellData).toEqual({
                 ...target,

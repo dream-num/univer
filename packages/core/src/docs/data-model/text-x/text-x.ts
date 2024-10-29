@@ -71,6 +71,8 @@ export class TextX {
                     } else if (thisAction.body && otherAction.body) {
                         textX.push({
                             ...thisAction,
+                            t: TextXActionType.RETAIN,
+                            coverType: otherAction.coverType,
                             body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
                         });
                     } else {
@@ -159,9 +161,12 @@ export class TextX {
                 if (thisAction.body == null || otherAction.body == null) {
                     textX.push(otherAction);
                 } else {
+                    const { coverType, body } = transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left');
                     textX.push({
                         ...otherAction,
-                        body: transformBody(thisAction as IRetainAction, otherAction as IRetainAction, priority === 'left'),
+                        t: TextXActionType.RETAIN,
+                        coverType,
+                        body,
                     });
                 }
             }

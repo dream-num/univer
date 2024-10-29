@@ -20,7 +20,8 @@ import { useDependency } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { useEffect, useRef, useState } from 'react';
-import { debounceTime } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs';
+import { useStateRef } from './useStateRef';
 
 export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?: Editor) => {
     const descriptionService = useDependency(IDescriptionService);
@@ -28,6 +29,8 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
 
     const [functionInfo, functionInfoSet] = useState<IFunctionInfo | undefined>();
     const [paramIndex, paramIndexSet] = useState<number>(-1);
+    const [isShow, isShowSet] = useState(true);
+    const isShowRef = useStateRef(isShow);
 
     const formulaTextRef = useRef(formulaText);
     formulaTextRef.current = formulaText;
@@ -35,6 +38,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
     const reset = () => {
         functionInfoSet(undefined);
         paramIndexSet(-1);
+        isShowSet(false);
     };
 
     useEffect(() => {
@@ -42,7 +46,7 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
             const d = editor.selectionChange$.pipe(debounceTime(50)).subscribe((e) => {
                 if (e.textRanges.length === 1) {
                     const [range] = e.textRanges;
-                    if (range.collapsed) {
+                    if (range.collapsed && isShowRef.current) {
                         // 为什么减1,因为nodes是不包含初始 ‘=’ 字符的,但是 selection 会包含 '='
                         const res = lexerTreeBuilder.getFunctionAndParameter(formulaTextRef.current, range.startOffset - 1);
                         if (res) {
@@ -54,10 +58,19 @@ export const useFormulaDescribe = (isNeed: boolean, formulaText: string, editor?
                         }
                     }
                 }
-                reset();
+                functionInfoSet(undefined);
+                paramIndexSet(-1);
+            });
+            const d2 = editor.selectionChange$.pipe(
+                filter((e) => e.textRanges.length === 1),
+                map((e) => e.textRanges[0].startOffset),
+                distinctUntilChanged()
+            ).subscribe(() => {
+                isShowSet(true);
             });
             return () => {
                 d.unsubscribe();
+                d2.unsubscribe();
             };
         }
     }, [editor, isNeed]);

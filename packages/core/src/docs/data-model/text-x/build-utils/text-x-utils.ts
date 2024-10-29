@@ -157,7 +157,6 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 export function getRetainAndDeleteAndExcludeLineBreak(
     selection: ITextRange,
     body: IDocumentBody,
-    segmentId: string = '',
     memoryCursor: number = 0,
     preserveLineBreak: boolean = true
 ): Array<IRetainAction | IDeleteAction> {

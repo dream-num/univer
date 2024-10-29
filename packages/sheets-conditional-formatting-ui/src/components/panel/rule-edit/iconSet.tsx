@@ -194,6 +194,9 @@ const IconSetRuleEdit = (props: {
 
     const handleValueTypeChange = (v: string, index: number) => {
         onChange([String(index), 'value', 'type'], v);
+        const item = configList[index];
+        const defaultValue = createDefaultValue(CFSubRuleType.number, item.operator) as number;
+        handleValueValueChange(defaultValue, index);
     };
     const render = useMemo(() => {
         return configList.map((item, index) => {

@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/rpc-node",
-    "version": "0.0.1",
-    "private": true,
+    "version": "0.5.0",
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",

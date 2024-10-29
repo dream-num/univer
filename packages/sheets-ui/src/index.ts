@@ -81,6 +81,7 @@ export type { IDiscreteRange } from './controllers/utils/range-tools';
 export { rangeToDiscreteRange, virtualizeDiscreteRanges } from './controllers/utils/range-tools';
 export { type IHoverCellPosition } from './services/hover-manager.service';
 export { AFFECT_LAYOUT_STYLES, AutoHeightController } from './controllers/auto-height.controller';
+export { AutoWidthController } from './controllers/auto-width.controller';
 export { type IDragCellPosition } from './services/drag-manager.service';
 export { SheetMenuPosition } from './controllers/menu/menu';
 export { useHighlightRange } from './hooks/useHighlightRange';

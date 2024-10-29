@@ -154,8 +154,12 @@ export class Font extends SheetExtension {
         const { ctx, viewRanges, diffRanges, spreadsheetSkeleton, cellInfo } = renderFontCtx;
 
         //#region merged cell
-        let { startY, endY, startX, endX } = cellInfo;
+        const { startY, endY, startX, endX } = cellInfo;
         const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        renderFontCtx.startX = startX;
+        renderFontCtx.startY = startY;
+        renderFontCtx.endX = endX;
+        renderFontCtx.endY = endY;
 
         // merged, but not primary cell, then skip. DO NOT RENDER AGAIN, or that would cause font blurry.
         if (isMerged && !isMergedMainCell) {
@@ -164,11 +168,12 @@ export class Font extends SheetExtension {
 
         // merged and primary cell
         if (isMergedMainCell) {
-            startY = mergeInfo.startY;
-            endY = mergeInfo.endY;
-            startX = mergeInfo.startX;
-            endX = mergeInfo.endX;
+            renderFontCtx.startX = mergeInfo.startX;
+            renderFontCtx.startY = mergeInfo.startY;
+            renderFontCtx.endX = mergeInfo.endX;
+            renderFontCtx.endY = mergeInfo.endY;
         }
+
         //#endregion
 
         const fontsConfig = fontMatrix.getValue(row, col);
@@ -205,14 +210,10 @@ export class Font extends SheetExtension {
         //#region text overflow
         renderFontCtx.overflowRectangle = overflowRange;
         renderFontCtx.cellData = cellData;
-        renderFontCtx.startX = startX;
-        renderFontCtx.startY = startY;
-        renderFontCtx.endX = endX;
-        renderFontCtx.endY = endY;
         this._setFontRenderBounds(renderFontCtx, row, col, fontMatrix);
         //#endregion
 
-        ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
+        ctx.translate(renderFontCtx.startX + FIX_ONE_PIXEL_BLUR_OFFSET, renderFontCtx.startY + FIX_ONE_PIXEL_BLUR_OFFSET);
         this._renderDocuments(ctx, fontsConfig, renderFontCtx.startX, renderFontCtx.startY, renderFontCtx.endX, renderFontCtx.endY, row, col, spreadsheetSkeleton.overflowCache);
 
         ctx.closePath();
@@ -309,7 +310,7 @@ export class Font extends SheetExtension {
             }
         } else {
             ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
-            // for normal cell, forbid text overflow cellarea
+            // for normal cell, forbid text overflow cell area
             ctx.clip();
         }
         renderFontContext.startX = startX;

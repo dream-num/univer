@@ -61,8 +61,9 @@ export interface IDropdownLine {
 }
 
 export function layoutDropdowns(items: string[], fontStyle: IDocumentSkeletonFontStyle, cellWidth: number, cellHeight: number) {
-    const contentWidth = cellWidth - ICON_PLACE - CELL_PADDING_H;
-    const contentHeight = cellHeight - CELL_PADDING_V * 2;
+    const cellPaddingH = ICON_PLACE + CELL_PADDING_H * 2;
+    const widthAvailableForContent = cellWidth - cellPaddingH;
+    const heightAvailableForContent = cellHeight - CELL_PADDING_V * 2;
     const textLayout = items.map((item) => ({
         layout: getDropdownItemSize(item, fontStyle),
         text: item,
@@ -75,7 +76,7 @@ export function layoutDropdowns(items: string[], fontStyle: IDocumentSkeletonFon
         const { layout } = item;
         const { width, height } = layout;
 
-        if (!currentLine || ((currentLine.width + width + MARGIN_H) > contentWidth)) {
+        if (!currentLine || ((currentLine.width + width + MARGIN_H) > widthAvailableForContent)) {
             currentLine = {
                 width,
                 height,
@@ -94,7 +95,9 @@ export function layoutDropdowns(items: string[], fontStyle: IDocumentSkeletonFon
         }
     });
     let totalHeight = 0;
+    let maxLineWidth = 0;
     lines.forEach((line, index) => {
+        maxLineWidth = Math.max(maxLineWidth, line.width);
         if (index === lines.length - 1) {
             totalHeight += line.height;
         } else {
@@ -105,8 +108,9 @@ export function layoutDropdowns(items: string[], fontStyle: IDocumentSkeletonFon
     return {
         lines,
         totalHeight,
-        contentWidth,
-        contentHeight,
+        contentWidth: widthAvailableForContent,
+        contentHeight: heightAvailableForContent,
         cellAutoHeight: totalHeight + CELL_PADDING_V * 2,
+        calcAutoWidth: maxLineWidth + cellPaddingH,
     };
 }

@@ -25,11 +25,19 @@ import { getCellValueOrigin } from '@univerjs/sheets-data-validation';
 import { ShowDataValidationDropdown } from '../../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../const';
 
+/**
+ * padding in Capsule
+ */
 const PADDING_H = 4;
 const ICON_SIZE = 4;
 const ICON_PLACE = 14;
+
+/**
+ * margin for Capsule, that means distance between capsule and cell border
+ */
 const MARGIN_H = 6;
 const MARGIN_V = 4;
+const RADIUS_BG = 8;
 const DROP_DOWN_ICON_COLOR = '#565656';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
@@ -319,7 +327,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 width: rectWidth,
                 height: rectHeight,
                 fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
-                radius: 8,
+                radius: RADIUS_BG,
             });
             ctx.save();
             ctx.translateWithPrecision(PADDING_H, 0);
@@ -408,6 +416,56 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             return fontHeight + (MARGIN_V * 2);
         }
+    }
+
+    calcCellAutoWidth(info: ICellRenderContext): number | undefined {
+        const { primaryWithCoord, style, data } = info;
+        const cellRange = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+
+        const fontRenderExtension = data.fontRenderExtension;
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
+
+        const rule = data.dataValidation?.rule;
+        if (!rule) return;
+        if (rule.renderMode === DataValidationRenderMode.TEXT) return;
+
+        const cellBounding = {
+            startX: cellRange.startX + leftOffset,
+            endX: cellRange.endX - rightOffset,
+            startY: cellRange.startY + topOffset,
+            endY: cellRange.endY - downOffset,
+        };
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const value = getCellValueOrigin(data);
+        const valueStr = `${value ?? ''}`;
+
+        let { tb, pd } = style || {};
+        const { l = DEFAULT_STYLES.pd.l, r = DEFAULT_STYLES.pd.r } = (pd ?? {});
+        tb = tb ?? WrapStrategy.WRAP;
+
+        let paddingAll = MARGIN_H * 2 + ICON_PLACE;
+        switch (rule.renderMode) {
+            case DataValidationRenderMode.ARROW:
+                paddingAll = ICON_PLACE + MARGIN_H * 2 + r + l;
+                break;
+            case DataValidationRenderMode.CUSTOM:
+                // + 1 is must, or last character will be cut
+                paddingAll = ICON_PLACE + MARGIN_H * 2 + PADDING_H * 2 + r + l + RADIUS_BG / 2 + 1;
+                break;
+                // default is CUSTOM
+            default:
+                paddingAll = ICON_PLACE + MARGIN_H * 2 + PADDING_H * 2 + r + l + RADIUS_BG / 2 + 1;
+        }
+        const widthForTextLayout = cellWidth - paddingAll;
+        const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
+        if (tb === WrapStrategy.WRAP) {
+            docModel.updateDocumentDataPageSize(Math.max(widthForTextLayout, 1));
+        }
+
+        documentSkeleton.calculate();
+        documentSkeleton.getActualSize();
+        const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+        return textLayout.width + paddingAll;
     }
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {

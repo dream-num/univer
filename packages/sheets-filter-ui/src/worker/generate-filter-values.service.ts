@@ -176,7 +176,12 @@ export function getFilterTreeByValueItems(
             const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
             const isDateValue = fmtStr && numfmt.isDate(fmtStr);
             if (fmtStr && isDateValue) {
-                const originValue = numfmt.parseDate(value).v as number;
+                // const originValue = numfmt.parseDate(value).v as number;
+                const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v as number;
+                if (!originValue) {
+                    rowIndex++;
+                    continue;
+                }
                 const valueParsedByDefaultPattern = numfmt.format(DefaultPattern, originValue);
                 const [year, month, day] = valueParsedByDefaultPattern.split('-').map(Number);
                 let yearItem = items.get(`${year}`);

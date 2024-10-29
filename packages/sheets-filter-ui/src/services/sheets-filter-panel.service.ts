@@ -587,9 +587,13 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const statistics = statisticFilterByValueItems(this._filterItems);
         const { checked, checkedItems } = statistics;
         const rawFilterItems = this.rawFilterItems;
+        let rawFilterCount = 0;
+        for (const item of rawFilterItems) {
+            rawFilterCount += item.count;
+        }
 
         const noChecked = checked === 0;
-        const allChecked = statistics.checked === rawFilterItems.length;
+        const allChecked = statistics.checked === rawFilterCount;
 
         const criteria: IFilterColumn = { colId: this.col };
         if (noChecked) {

@@ -271,6 +271,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     let cursor = 0;
     const actions = diffs.map(([type, text]) => {
         switch (type) {
+            // retain
             case 0: {
                 const action: TextXAction = {
                     t: TextXActionType.RETAIN,
@@ -280,6 +281,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
                 cursor += text.length;
                 return action;
             }
+            // insert
             case 1: {
                 const action: TextXAction = {
                     t: TextXActionType.INSERT,
@@ -289,6 +291,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
                 cursor += text.length;
                 return action;
             }
+            // delete
             default: {
                 const action: TextXAction = {
                     t: TextXActionType.DELETE,
@@ -300,7 +303,10 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     });
 
     const textX = new TextX();
+    textX.push({
+        t: TextXActionType.RETAIN,
+        len: selection.startOffset,
+    });
     textX.push(...actions);
-
     return textX;
 };

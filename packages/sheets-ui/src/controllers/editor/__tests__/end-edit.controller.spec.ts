@@ -231,6 +231,38 @@ describe('Test EndEditController', () => {
                 ...target,
             });
         });
+        it('Text cell input formula', () => {
+            const cell: ICellData = {
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                t: null,
+            };
+
+            const inputCell = {
+                v: '=SUM(1)',
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            const target = {
+                v: '=SUM(1)',
+                t: CellValueType.STRING,
+                s: {
+                    n: {
+                        pattern: '@@@',
+                    },
+                },
+                f: null,
+                si: null,
+                p: null,
+            };
+
+            expect(cellData).toEqual({
+                ...target,
+            });
+        });
         it('Rich text cell', () => {
             const cell = {
                 v: 1,

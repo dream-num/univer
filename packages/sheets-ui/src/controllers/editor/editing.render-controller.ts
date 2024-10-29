@@ -758,7 +758,15 @@ export function getCellDataByInput(
     const currentLocale = localeService.getCurrentLocale();
     newDataStream = normalizeString(newDataStream, lexerTreeBuilder, currentLocale, functionService);
 
-    if (isFormulaString(newDataStream)) {
+    // Text format ('@@@') has the highest priority
+    if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
+        // If the style is text format ('@@@'), the data should be set as a string.
+        cellData.v = newDataStream;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.STRING;
+    } else if (isFormulaString(newDataStream)) {
         if (cellData.f === newDataStream) {
             return null;
         }
@@ -791,13 +799,6 @@ export function getCellDataByInput(
             cellData.f = null;
             cellData.si = null;
         }
-    } else if (cellData.s && styles?.get(cellData.s)?.n?.pattern === DEFAULT_TEXT_FORMAT) {
-        // If the style is text format ('@@@'), the data should be set as a string.
-        cellData.v = newDataStream;
-        cellData.f = null;
-        cellData.si = null;
-        cellData.p = null;
-        cellData.t = CellValueType.STRING;
     } else if (numfmt.parseDate(newDataStream) || numfmt.parseNumber(newDataStream) || numfmt.parseTime(newDataStream)) {
         // If it can be converted to a number and is not forced to be a string, then the style should keep prev style.
         cellData.v = newDataStream;

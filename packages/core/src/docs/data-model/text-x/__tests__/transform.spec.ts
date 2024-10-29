@@ -16,7 +16,6 @@
 
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
-import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber } from '../../../../types/enum';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
@@ -631,7 +630,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -650,7 +648,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -670,7 +667,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -689,7 +685,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -714,7 +709,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     customRanges: [
@@ -736,7 +730,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     customRanges: [
@@ -758,7 +751,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     customRanges: [
@@ -780,7 +772,6 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     customRanges: [

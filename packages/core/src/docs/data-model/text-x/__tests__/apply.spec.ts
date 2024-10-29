@@ -17,7 +17,6 @@
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { TextXAction } from '../action-types';
 import { describe, expect, it } from 'vitest';
-import { UpdateDocsAttributeType } from '../../../../shared';
 import { BooleanNumber, HorizontalAlign } from '../../../../types/enum';
 import { PresetListType } from '../../preset-list-type';
 import { TextXActionType } from '../action-types';
@@ -321,7 +320,6 @@ describe('apply method', () => {
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -341,7 +339,6 @@ describe('apply method', () => {
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -382,7 +379,6 @@ describe('apply method', () => {
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -407,7 +403,6 @@ describe('apply method', () => {
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
                     paragraphs: [{

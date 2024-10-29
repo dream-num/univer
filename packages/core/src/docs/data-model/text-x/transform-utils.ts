@@ -55,7 +55,6 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
         return false;
     }
 
-    // TODO: @JOCS, I think no need to iterate over the text runs and compare them! because the textRuns length is always 1.
     while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: targetStyle } = targetTextRuns[updateIndex];
         const { st: removeSt, ed: removeEd, ts: originStyle, sId } = originTextRuns[removeIndex];
@@ -153,10 +152,9 @@ function transformTextRuns(originTextRuns: ITextRun[], targetTextRuns: ITextRun[
 function transformCustomRanges(
     originCustomRanges: ICustomRange[],
     targetCustomRanges: ICustomRange[],
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+    transformType: TextXTransformType
 ): ICustomRange[] {
-    if (originCustomRanges.length === 0) {
+    if (originCustomRanges.length === 0 || targetCustomRanges.length === 0) {
         return Tools.deepClone(targetCustomRanges);
     }
 
@@ -175,35 +173,29 @@ function transformCustomRanges(
 function transformParagraph(
     originParagraph: IParagraph,
     targetParagraph: IParagraph,
-    transformType: TextXTransformType,
-    coverType: UpdateDocsAttributeType = UpdateDocsAttributeType.COVER
+    transformType: TextXTransformType
 ): IParagraph {
     const paragraph: IParagraph = {
         startIndex: targetParagraph.startIndex,
     };
 
+    // transform paragraph, paragraphStyle fields does the cover operation, and bullet is the entire cover operation.
     if (targetParagraph.paragraphStyle) {
         if (originParagraph.paragraphStyle == null) {
             paragraph.paragraphStyle = {
                 ...targetParagraph.paragraphStyle,
             };
         } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.paragraphStyle = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.paragraphStyle }
-                    : { ...targetParagraph.paragraphStyle };
-            } else {
-                paragraph.paragraphStyle = {
-                    ...targetParagraph.paragraphStyle,
-                };
+            paragraph.paragraphStyle = {
+                ...targetParagraph.paragraphStyle,
+            };
 
-                if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
-                    const keys = Object.keys(originParagraph.paragraphStyle);
+            if (transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED) {
+                const keys = Object.keys(originParagraph.paragraphStyle);
 
-                    for (const key of keys) {
-                        if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
-                            delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
-                        }
+                for (const key of keys) {
+                    if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
+                        delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
                     }
                 }
             }
@@ -216,13 +208,9 @@ function transformParagraph(
                 ...targetParagraph.bullet,
             };
         } else {
-            if (coverType === UpdateDocsAttributeType.REPLACE) {
-                paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
-                    ? { ...originParagraph.bullet }
-                    : { ...targetParagraph.bullet };
-            } else {
-                throw new Error('Bullet is only supported in replace mode.');
-            }
+            paragraph.bullet = transformType === TextXTransformType.COVER_ONLY_NOT_EXISTED
+                ? { ...originParagraph.bullet }
+                : { ...targetParagraph.bullet };
         }
     }
 
@@ -235,15 +223,11 @@ export function transformBody(
     otherAction: IRetainAction,
     priority: boolean = false
 ): IDocumentBody {
-    const { body: thisBody, coverType: thisCoverType } = thisAction;
-    const { body: otherBody, coverType: otherCoverType } = otherAction;
+    const { body: thisBody } = thisAction;
+    const { body: otherBody } = otherAction;
 
     if (thisBody == null || thisBody.dataStream !== '' || otherBody == null || otherBody.dataStream !== '') {
         throw new Error('Data stream is not supported in retain transform.');
-    }
-
-    if (thisCoverType !== otherCoverType) {
-        throw new Error('Cover type is not consistent.');
     }
 
     const retBody: IDocumentBody = {
@@ -265,9 +249,9 @@ export function transformBody(
 
     let customRanges: ICustomRange[] = [];
     if (priority) {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED, thisCoverType);
+        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER_ONLY_NOT_EXISTED);
     } else {
-        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER, thisCoverType);
+        customRanges = transformCustomRanges(thisCustomRanges, otherCustomRanges, TextXTransformType.COVER);
     }
 
     if (customRanges.length) {
@@ -295,11 +279,10 @@ export function transformBody(
                 paragraph = transformParagraph(
                     thisParagraph,
                     otherParagraph,
-                    TextXTransformType.COVER_ONLY_NOT_EXISTED,
-                    thisCoverType
+                    TextXTransformType.COVER_ONLY_NOT_EXISTED
                 );
             } else {
-                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER, thisCoverType);
+                paragraph = transformParagraph(thisParagraph, otherParagraph, TextXTransformType.COVER);
             }
 
             paragraphs.push(paragraph);

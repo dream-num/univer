@@ -262,9 +262,15 @@ function transformParagraph(
         if (originParagraph.bullet === undefined) {
             paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
         } else {
-            paragraph.bullet = transformType === TextXTransformType.COVER && targetParagraph.bullet
-                ? Tools.deepClone(targetParagraph.bullet)
-                : Tools.deepClone(originParagraph.bullet);
+            if (originCoverType === UpdateDocsAttributeType.REPLACE || targetCoverType === UpdateDocsAttributeType.REPLACE) {
+                paragraph.bullet = transformType === TextXTransformType.COVER && targetParagraph.bullet
+                    ? Tools.deepClone(targetParagraph.bullet)
+                    : Tools.deepClone(originParagraph.bullet);
+            } else {
+                if (transformType === TextXTransformType.COVER) {
+                    paragraph.bullet = Tools.deepClone(targetParagraph.bullet);
+                }
+            }
         }
     }
 

@@ -305,4 +305,117 @@ describe('transform paragraph in body', () => {
         expect(resultE).toEqual(resultG);
         expect(composedAction3).toEqual(composedAction4);
     });
+
+    it('should pass test when COVER + COVER', () => {
+        const actionsA: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            lineSpacing: 2,
+                        },
+                        bullet: {
+                            listType: PresetListType.BULLET_LIST,
+                            listId: 'testBullet',
+                            nestingLevel: 0,
+                            textStyle: {
+                                fs: 15,
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const actionsB: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            lineSpacing: 1,
+                            spaceBelow: {
+                                v: 20,
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const expectedTransformedActionTrue: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            lineSpacing: 1,
+                            spaceBelow: {
+                                v: 20,
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        const expectedTransformedActionFalse: TextXAction[] = [
+            {
+                t: TextXActionType.RETAIN,
+                len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
+                body: {
+                    dataStream: '',
+                    paragraphs: [{
+                        startIndex: 0,
+                        paragraphStyle: {
+                            spaceBelow: {
+                                v: 20,
+                            },
+                        },
+                    }],
+                },
+            },
+        ];
+
+        expect(TextX.transform(actionsB, actionsA, 'left')).toEqual(expectedTransformedActionTrue);
+        expect(TextX.transform(actionsB, actionsA, 'right')).toEqual(expectedTransformedActionFalse);
+
+        const doc1 = getDefaultDocWithParagraph();
+        const doc2 = getDefaultDocWithParagraph();
+        const doc3 = getDefaultDocWithParagraph();
+        const doc4 = getDefaultDocWithParagraph();
+
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        // console.log(JSON.stringify(actionsA, null, 2));
+        // console.log(JSON.stringify(TextX.transform(actionsB, actionsA, 'left'), null, 2));
+        // console.log(JSON.stringify(composedAction1, null, 2));
+        // console.log(JSON.stringify(composedAction2, null, 2));
+
+        const resultC = TextX.apply(doc3, composedAction1);
+        const resultD = TextX.apply(doc4, composedAction2);
+
+        expect(resultA).toEqual(resultB);
+        expect(resultC).toEqual(resultD);
+        expect(resultA).toEqual(resultC);
+        expect(composedAction1).toEqual(composedAction2);
+    });
 });

@@ -18,7 +18,6 @@ import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRPCWorkerThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsFilterUIWorkerPlugin } from '@univerjs/sheets-filter-ui';
 import { UniverRemoteSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { enUS, faIR, ruRU, viVN, zhCN, zhTW } from '../locales';
 
@@ -40,7 +39,6 @@ univer.registerPlugin(UniverSheetsPlugin, { onlyRegisterFormulaRelatedMutations:
 univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverRPCWorkerThreadPlugin);
 univer.registerPlugin(UniverRemoteSheetsFormulaPlugin);
-univer.registerPlugin(UniverSheetsFilterUIWorkerPlugin);
 
 declare let self: WorkerGlobalScope & typeof globalThis & { univer: Univer };
 self.univer = univer;

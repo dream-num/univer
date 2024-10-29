@@ -445,12 +445,19 @@ export function insertCustomDecorations(
         const insertCustomDecorations: ICustomDecoration[] = [];
         for (let i = 0, len = insertBody.customDecorations.length; i < len; i++) {
             const customDecoration = insertBody.customDecorations[i];
-            if (decorationMap[customDecoration.id]) {
-                continue;
-            }
-            insertCustomDecorations.push(customDecoration);
             customDecoration.startIndex += currentIndex;
             customDecoration.endIndex += currentIndex;
+            if (decorationMap[customDecoration.id]) {
+                const oldCustomDecoration = decorationMap[customDecoration.id];
+                if (oldCustomDecoration.endIndex === customDecoration.startIndex - 1) {
+                    oldCustomDecoration.endIndex = customDecoration.endIndex;
+                }
+
+                if (oldCustomDecoration.startIndex === customDecoration.endIndex + 1) {
+                    oldCustomDecoration.startIndex = customDecoration.startIndex;
+                }
+            }
+            insertCustomDecorations.push(customDecoration);
         }
 
         customDecorations.push(...insertCustomDecorations);

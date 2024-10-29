@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
-import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
+import { EDITOR_ACTIVATED, IContextService, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
+import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 
@@ -25,9 +24,7 @@ import { RefSelectionsRenderService } from '../../../services/render-services/re
 
 export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const renderManagerService = useDependency(IRenderManagerService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
     const contextService = useDependency(IContextService);
-    const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const contextMenuService = useDependency(IContextMenuService);
     const refSelectionsService = useDependency(IRefSelectionsService);
 
@@ -47,19 +44,10 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
         }
     }, [isNeed]);
 
-    // reset selection
     useLayoutEffect(() => {
         if (isNeed) {
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-            const sheet = workbook?.getActiveSheet();
-            const selections = [...sheetsSelectionsService.getCurrentSelections()];
             return () => {
                 refSelectionsService.clear();
-                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
-                const currentSheet = workbook?.getActiveSheet();
-                if (currentSheet && currentSheet === sheet) {
-                    sheetsSelectionsService.setSelections(selections);
-                }
             };
         }
     }, [isNeed]);

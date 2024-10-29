@@ -40,6 +40,7 @@ import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
 import { useOnlyOneRange } from './hooks/useOnlyOneRange';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
 import { useRefocus } from './hooks/useRefocus';
+import { useResetSelection } from './hooks/useResetSelection';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
@@ -131,6 +132,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
+    const resetSelection = useResetSelection(!rangeDialogVisible && isFocus);
+
     const handleInputDebounce = useMemo(() => debounce((text: string) => {
         const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
         if (nodes) {
@@ -198,6 +201,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 clearTimeout(time);
             };
         } else {
+            resetSelection();
             isFocusSet(_isFocus);
         }
     }, [_isFocus, focus]);

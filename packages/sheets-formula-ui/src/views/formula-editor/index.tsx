@@ -28,6 +28,7 @@ import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
 import { useRefactorEffect } from '../range-selector/hooks/useRefactorEffect';
 import { useRefocus } from '../range-selector/hooks/useRefocus';
+import { useResetSelection } from '../range-selector/hooks/useResetSelection';
 import { useResize } from '../range-selector/hooks/useResize';
 import { HelpFunction } from './help-function/HelpFunction';
 import { useFormulaDescribe } from './hooks/useFormulaDescribe';
@@ -99,6 +100,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
+    const resetSelection = useResetSelection(isFocus);
+
     useLayoutEffect(() => {
         // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
         if (_isFocus) {
@@ -112,6 +115,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 clearTimeout(time);
             };
         } else {
+            resetSelection();
             isFocusSet(_isFocus);
         }
     }, [_isFocus, focus]);

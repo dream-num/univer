@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import type { ITextRun, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import type { ISequenceNode } from '@univerjs/engine-formula';
 import type { ISelectionStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import { ColorKit, IUniverInstanceService, ThemeService, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
-import { deserializeRangeWithSheet, sequenceNodeType } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IRefSelectionsService, setEndForRange } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import { attachRangeWithCoord, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RefSelectionsRenderService } from '../../../services/render-services/ref-selections.render-service';
+import { buildTextRuns, useColor } from '../../range-selector/hooks/useHighlight';
 
 interface IRefSelection {
     refIndex: number;
@@ -129,9 +130,10 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
             return;
         }
         const cloneBody = { dataStream: '', ...data.body };
+
         if (sequenceNodes == null || sequenceNodes.length === 0) {
             cloneBody.textRuns = [];
-            cloneBody.dataStream = '=\r\n';
+            cloneBody.dataStream = data.body?.dataStream || '\r\n';
             rangesSet([]);
         } else {
             const { textRuns, refSelections } = buildTextRuns(descriptionService, colorMap, sequenceNodes);
@@ -159,97 +161,6 @@ export function useDocHight(editorId: string, sequenceNodes: (string | ISequence
     return ranges;
 }
 
-export function useColor() {
-    const themeService = useDependency(ThemeService);
-    const style = themeService.getCurrentTheme();
-    const result = useMemo(() => {
-        const formulaRefColors = [
-            style.loopColor1,
-            style.loopColor2,
-            style.loopColor3,
-            style.loopColor4,
-            style.loopColor5,
-            style.loopColor6,
-            style.loopColor7,
-            style.loopColor8,
-            style.loopColor9,
-            style.loopColor10,
-            style.loopColor11,
-            style.loopColor12,
-        ];
-        const numberColor = style.hyacinth700;
-        const stringColor = style.verdancy800;
-        return { formulaRefColors, numberColor, stringColor };
-    }, [style]);
-    return result;
-}
-
-export function buildTextRuns(descriptionService: IDescriptionService, colorMap: {
-    formulaRefColors: string[];
-    numberColor: string;
-    stringColor: string;
-}, sequenceNodes: Array<ISequenceNode | string>) {
-    const { formulaRefColors, numberColor, stringColor } = colorMap;
-    const textRuns: ITextRun[] = [];
-    const refSelections: IRefSelection[] = [];
-    const themeColorMap = new Map<string, string>();
-    let refColorIndex = 0;
-
-    for (let i = 0, len = sequenceNodes.length; i < len; i++) {
-        const node = sequenceNodes[i];
-        if (typeof node === 'string') {
-            const theLastItem = textRuns[textRuns.length - 1];
-            const start = theLastItem ? (theLastItem.ed) : 0;
-            const end = start + node.length;
-            textRuns.push({
-                st: start,
-                ed: end,
-            });
-            continue;
-        }
-        if (descriptionService.hasDefinedNameDescription(node.token.trim())) {
-            continue;
-        }
-        const { startIndex, endIndex, nodeType, token } = node;
-        let themeColor = '';
-        if (nodeType === sequenceNodeType.REFERENCE) {
-            if (themeColorMap.has(token)) {
-                themeColor = themeColorMap.get(token)!;
-            } else {
-                const colorIndex = refColorIndex % formulaRefColors.length;
-                themeColor = formulaRefColors[colorIndex];
-                themeColorMap.set(token, themeColor);
-                refColorIndex++;
-            }
-
-            refSelections.push({
-                refIndex: i,
-                themeColor,
-                token,
-            });
-        } else if (nodeType === sequenceNodeType.NUMBER) {
-            themeColor = numberColor;
-        } else if (nodeType === sequenceNodeType.STRING) {
-            themeColor = stringColor;
-        } else if (nodeType === sequenceNodeType.ARRAY) {
-            themeColor = stringColor;
-        }
-
-        if (themeColor && themeColor.length > 0) {
-            textRuns.push({
-                st: startIndex,
-                ed: endIndex + 1,
-                ts: {
-                    cl: {
-                        rgb: themeColor,
-                    },
-                },
-            });
-        }
-    }
-
-    return { textRuns, refSelections };
-};
 function getFormulaRefSelectionStyle(themeService: ThemeService, refColor: string, id: string): ISelectionStyle {
     const style = themeService.getCurrentTheme();
     const fill = new ColorKit(refColor).setAlpha(0.05).toRgbString();

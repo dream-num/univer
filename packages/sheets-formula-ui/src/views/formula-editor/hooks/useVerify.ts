@@ -16,7 +16,7 @@
 
 import type { IFormulaEditorProps } from '../index';
 import { useDependency } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 import { useEffect, useRef } from 'react';
 
 export const useVerify = (isNeed: boolean, onVerify: IFormulaEditorProps['onVerify'], formulaText: string) => {
@@ -39,7 +39,7 @@ export const useVerify = (isNeed: boolean, onVerify: IFormulaEditorProps['onVeri
         if (!isInitRender.current) {
             if (onVerify) {
                 const result = lexerTreeBuilder.checkIfAddBracket(formulaText);
-                onVerify(result === 0, `=${formulaText}`);
+                onVerify(result === 0 && formulaText.startsWith(operatorToken.EQUALS), `${formulaText}`);
             }
         }
     }, [formulaText, onVerify]);

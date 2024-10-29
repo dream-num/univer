@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import { operatorToken } from '@univerjs/engine-formula';
+
 export const getFormulaText = (formula: string) => {
-    if (formula.startsWith('=')) {
+    if (formula.startsWith(operatorToken.EQUALS)) {
         return formula.slice(1);
     }
-    return formula;
+    return '';
 };

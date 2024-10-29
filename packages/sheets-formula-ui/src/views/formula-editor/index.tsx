@@ -19,6 +19,7 @@ import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
 import { createInternalEditorID, generateRandomId, useDependency } from '@univerjs/core';
 import { IEditorService } from '@univerjs/docs-ui';
+import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -67,10 +68,10 @@ export function FormulaEditor(props: IFormulaEditorProps) {
 
     const sheetEmbeddingRef = useRef<HTMLDivElement>(null);
     const [formulaText, formulaTextSet] = useState(() => {
-        if (initValue.startsWith('=')) {
+        if (initValue.startsWith(operatorToken.EQUALS)) {
             return initValue;
         }
-        return `=${initValue}`;
+        return '';
     });
 
     // init actions
@@ -94,7 +95,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     const editorId = useMemo(() => createInternalEditorID(`${EMBEDDING_FORMULA_EDITOR}-${generateRandomId(4)}`), []);
     const isError = useMemo(() => errorText !== undefined, [errorText]);
 
-    const { sequenceNodes, sequenceNodesSet } = useFormulaToken(formulaWithoutEqualSymbol);
+    const { sequenceNodes } = useFormulaToken(formulaWithoutEqualSymbol);
     const refSelections = useDocHight(editorId, sequenceNodes);
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
@@ -137,21 +138,8 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         if (editor) {
             const d = editor.input$.subscribe((e) => {
                 const text = (e.data.body?.dataStream ?? '').replaceAll(/\n|\r/g, '');
-                if (text.startsWith('=')) {
-                    formulaTextSet(text);
-                    onChange(text);
-                } else {
-                    const result = `=${text}`;
-                    formulaTextSet(result);
-                    onChange(result);
-                    // 当无内容的时候,删除'=',会导致 doc 编辑器内的内容和 formulaText 不同步,导致失去焦点, 这里强制同步一次.
-                    if (!text) {
-                        sequenceNodesSet([]);
-                    }
-                    setTimeout(() => {
-                        editor.setSelectionRanges([{ startOffset: result.length, endOffset: result.length }]);
-                    }, 16);
-                }
+                formulaTextSet(text);
+                onChange(text);
             });
             return () => {
                 d.unsubscribe();

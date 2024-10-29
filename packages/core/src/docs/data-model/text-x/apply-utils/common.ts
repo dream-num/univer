@@ -337,21 +337,25 @@ export function insertCustomRanges(
         }
     }
 
-    const currentRange = customRanges.find((range) => range.startIndex > currentIndex && range.endIndex < currentIndex);
-
-    if (currentRange) {
-        return;
-    }
-
     const insertCustomRanges: ICustomRange[] = [];
     if (insertBody.customRanges) {
         for (let i = 0, len = insertBody.customRanges.length; i < len; i++) {
             const customRange = insertBody.customRanges[i];
-            if (customRangeMap[customRange.rangeId]) {
-                continue;
-            }
+            const oldCustomRange = customRangeMap[customRange.rangeId];
             customRange.startIndex += currentIndex;
             customRange.endIndex += currentIndex;
+            // merge into old custom range
+            if (oldCustomRange) {
+                if (oldCustomRange.endIndex === customRange.startIndex - 1) {
+                    oldCustomRange.endIndex = customRange.endIndex;
+                }
+
+                if (oldCustomRange.startIndex === customRange.endIndex + 1) {
+                    oldCustomRange.startIndex = customRange.startIndex;
+                }
+                continue;
+            }
+            // new custom range
             insertCustomRanges.push(customRange);
         }
 

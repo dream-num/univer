@@ -18,12 +18,14 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { ITextRange, ITextRangeParam } from '../../../../sheets/typedef';
 import type { IDocumentBody } from '../../../../types/interfaces';
 import type { DocumentDataModel } from '../../document-data-model';
-import type { IDeleteAction, IRetainAction } from '../action-types';
+import type { IDeleteAction, IRetainAction, TextXAction } from '../action-types';
 import type { TextXSelection } from '../text-x';
 import { type Nullable, UpdateDocsAttributeType } from '../../../../shared';
+import { textDiff } from '../../../../shared/text-diff';
 import { CustomRangeType } from '../../../../types/interfaces';
 import { TextXActionType } from '../action-types';
 import { TextX } from '../text-x';
+import { getBodySlice } from '../utils';
 import { excludePointsFromRange, getIntersectingCustomRanges, getSelectionForAddCustomRange } from './custom-range';
 
 export interface IDeleteCustomRangeParam {
@@ -224,36 +226,36 @@ export function getRetainAndDeleteAndExcludeLineBreak(
         cursor = textEnd;
     }
 
-    // if (!preserveLineBreak) {
-    //     const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
-    //     if (nextParagraph) {
-    //         if (nextParagraph.startIndex > cursor) {
-    //             dos.push({
-    //                 t: TextXActionType.RETAIN,
-    //                 len: nextParagraph.startIndex - cursor,
-    //                 segmentId,
-    //             });
-    //             cursor = nextParagraph.startIndex;
-    //         }
+    if (!preserveLineBreak) {
+        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
+        if (nextParagraph) {
+            if (nextParagraph.startIndex > cursor) {
+                dos.push({
+                    t: TextXActionType.RETAIN,
+                    len: nextParagraph.startIndex - cursor,
+                    segmentId,
+                });
+                cursor = nextParagraph.startIndex;
+            }
 
-    //         dos.push({
-    //             t: TextXActionType.RETAIN,
-    //             len: 1,
-    //             segmentId,
-    //             body: {
-    //                 dataStream: '',
-    //                 paragraphs: [
-    //                     {
-    //                         ...nextParagraph,
-    //                         startIndex: 0,
-    //                         bullet: paragraphInRange?.bullet,
-    //                     },
-    //                 ],
-    //             },
-    //             coverType: UpdateDocsAttributeType.REPLACE,
-    //         });
-    //     }
-    // }
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: 1,
+                segmentId,
+                body: {
+                    dataStream: '',
+                    paragraphs: [
+                        {
+                            ...nextParagraph,
+                            startIndex: 0,
+                            bullet: paragraphInRange?.bullet,
+                        },
+                    ],
+                },
+                coverType: UpdateDocsAttributeType.REPLACE,
+            });
+        }
+    }
 
     return dos;
 }
@@ -278,20 +280,37 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
 
-    const textX = new TextX();
-    const deleteActions = getRetainAndDeleteAndExcludeLineBreak(selection, body, segmentId);
-    // delete
-    if (deleteActions.length) {
-        textX.push(...deleteActions);
-    }
-    // insert
-    textX.push({
-        t: TextXActionType.INSERT,
-        body: insertBody,
-        len: insertBody.dataStream.length,
-        line: 0,
-        segmentId,
+    const oldBody = getBodySlice(body, selection.startOffset, selection.endOffset);
+    const diffs = textDiff(oldBody.dataStream, insertBody.dataStream);
+    let cursor = 0;
+    const actions: TextXAction[] = diffs.map(([type, text]) => {
+        switch (type) {
+            case 0: {
+                const action = {
+                    t: TextXActionType.RETAIN,
+                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                };
+                cursor += text.length;
+                return action;
+            }
+            case 1: {
+                const action = {
+                    t: TextXActionType.INSERT,
+                    body: getBodySlice(insertBody, cursor, cursor + text.length),
+                };
+                cursor += text.length;
+                return action;
+            }
+            default:
+                return {
+                    t: TextXActionType.DELETE,
+                    len: text.length,
+                };
+        }
     });
+    // const diffs = textDiff
+    const textX = new TextX();
+    textX.push(...actions);
 
     return textX;
 };

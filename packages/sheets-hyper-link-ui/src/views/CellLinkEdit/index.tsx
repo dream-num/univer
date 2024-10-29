@@ -471,6 +471,7 @@ export const CellLinkEdit = () => {
                         initValue={payload}
                         onChange={handleRangeChange}
                         isFocus={isFocusRangeSelector}
+                        onFocus={() => isFocusRangeSelectorSet(true)}
                         onBlur={() => { isFocusRangeSelectorSet(false); }}
                         actions={rangeSelectorActionsRef.current}
                         onRangeSelectorDialogVisibleChange={async (visible) => {

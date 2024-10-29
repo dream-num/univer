@@ -73,6 +73,7 @@ async function generateLocale() {
         '@univerjs/ui',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const languages = [{
@@ -149,6 +150,7 @@ function buildCSS() {
         '@univerjs/find-replace',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const output = libs.map((lib) => {
@@ -243,6 +245,7 @@ function buildJS() {
         '@univerjs/facade',
         '@univerjs/uniscript',
         '@univerjs/sheets-crosshair-highlight',
+        '@univerjs/watermark',
     ];
 
     const output = libs.map((lib) => {

@@ -136,7 +136,7 @@ export class TextX {
                 (priority === 'left' || otherIter.peekType() !== TextXActionType.INSERT)
             ) {
                 const thisAction = thisIter.next();
-                textX.retain(thisAction.len, thisAction.segmentId ?? '');
+                textX.retain(thisAction.len);
             } else if (otherIter.peekType() === TextXActionType.INSERT) {
                 textX.push(otherIter.next());
             } else {
@@ -210,9 +210,7 @@ export class TextX {
                 invertedActions.push({
                     t: TextXActionType.DELETE,
                     len: action.len,
-                    line: 0, // hardcode
                     body: action.body,
-                    segmentId: action.segmentId,
                 });
             } else if (action.t === TextXActionType.DELETE) {
                 if (action.body == null) {
@@ -223,8 +221,6 @@ export class TextX {
                     t: TextXActionType.INSERT,
                     body: action.body,
                     len: action.len,
-                    line: 0, // hardcode
-                    segmentId: action.segmentId,
                 });
             } else {
                 if (action.body != null) {
@@ -238,7 +234,6 @@ export class TextX {
                         oldBody: action.body,
                         len: action.len,
                         coverType: UpdateDocsAttributeType.REPLACE,
-                        segmentId: action.segmentId,
                     });
                 } else {
                     invertedActions.push(action);
@@ -283,24 +278,21 @@ export class TextX {
 
     private _actions: TextXAction[] = [];
 
-    insert(len: number, body: IDocumentBody, segmentId = ''): this {
+    insert(len: number, body: IDocumentBody): this {
         const insertAction: IInsertAction = {
             t: TextXActionType.INSERT,
             body,
             len,
-            line: 0, // hardcode
-            segmentId,
         };
 
         this.push(insertAction);
         return this;
     }
 
-    retain(len: number, segmentId = '', body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
+    retain(len: number, body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
         const retainAction: IRetainAction = {
             t: TextXActionType.RETAIN,
             len,
-            segmentId,
         };
 
         if (body != null) {
@@ -316,12 +308,10 @@ export class TextX {
         return this;
     }
 
-    delete(len: number, segmentId = ''): this {
+    delete(len: number): this {
         const deleteAction: IDeleteAction = {
             t: TextXActionType.DELETE,
             len,
-            line: 0, // hardcode
-            segmentId,
         };
 
         this.push(deleteAction);

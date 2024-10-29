@@ -99,15 +99,12 @@ export const DeleteCustomBlockCommand: ICommand<IDeleteCustomBlockParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: direction === DeleteDirection.LEFT ? startOffset - 1 : startOffset,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(documentDataModel, segmentId);
@@ -219,29 +216,24 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: curParagraph.startIndex,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
-            segmentId,
         });
 
         if (nextParagraph.startIndex > curParagraph.startIndex + 1) {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: nextParagraph.startIndex - curParagraph.startIndex - 1,
-                segmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId,
             coverType: UpdateDocsAttributeType.REPLACE,
             body: {
                 dataStream: '',

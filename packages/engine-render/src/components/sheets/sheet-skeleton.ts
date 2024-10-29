@@ -244,6 +244,11 @@ export interface ICacheItem {
     border: boolean;
 }
 
+export interface IGetRowColByPosOptions {
+    closeFirst?: boolean;
+    visibleOnly?: boolean;
+}
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
     private _columnWidthAccumulation: number[] = [];
@@ -478,7 +483,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (bounds != null) {
-            const range = this.getRowColumnSegment(bounds);
+            const range = this.getRangeByBounding(bounds);
             this._visibleRange = range;
             this._visibleRangeMap.set(bounds.viewportKey as SHEET_VIEWPORT_KEY, range);
         }
@@ -913,9 +918,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(rowHeader.width, widthByComputation);
     }
 
-    getRowColumnSegment(bounds?: IViewportInfo): IRange {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
-        // return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    getRangeByBounding(bounds?: IViewportInfo): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
     }
 
     /**
@@ -926,8 +930,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this._worksheetData;
     }
 
-    getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle): IRange {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
+    getRangeByViewBound(bound?: IBoundRectNoAngle): IRange {
+        return this._getRangeByViewBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bound);
     }
 
     getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number): IRange {
@@ -1100,29 +1104,6 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * Get cell by pos(offsetX, offsetY).
-     * @param offsetX HTML coordinate system, mouse position x.
-     * @param offsetY HTML coordinate system, mouse position y.
-     * @param scaleX render scene scale x-axis, scene.getAncestorScale
-     * @param scaleY render scene scale y-axis, scene.getAncestorScale
-     * @param scrollXY render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
-     * @param scrollXY.x
-     * @param scrollXY.y
-     * @returns Selection data with coordinates
-     */
-    calculateCellIndexByPosition(
-        offsetX: number,
-        offsetY: number,
-        scaleX: number,
-        scaleY: number,
-        scrollXY: { x: number; y: number }
-    ): Nullable<ISelectionCellWithMergeInfo> {
-        const { row, column } = this.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-
-        return this.getCellByIndex(row, column);
-    }
-
-    /**
      *
      * @param offsetX HTML coordinate system, mouse position x.
      * @param offsetY HTML coordinate system, mouse position y.
@@ -1139,10 +1120,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         scaleX: number,
         scaleY: number,
         scrollXY: { x: number; y: number },
-        closeFirst?: boolean
+        options?: IGetRowColByPosOptions
     ): { row: number; column: number } {
-        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, closeFirst);
-        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, closeFirst);
+        const row = this.getRowPositionByOffsetY(offsetY, scaleY, scrollXY, options);
+        const column = this.getColumnPositionByOffsetX(offsetX, scaleX, scrollXY, options);
 
         return {
             row,
@@ -1151,27 +1132,17 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     *
-     * @param offsetX scaled offset x
+     * Get column index by offsetX
+     * @param offsetX no scaled offset x
      * @param scaleX scale x
      * @param scrollXY
-     * @returns
      */
-
-    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, closeFirst?: boolean): number {
+    getColumnPositionByOffsetX(offsetX: number, scaleX: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
         offsetX = this.getTransformOffsetX(offsetX, scaleX, scrollXY);
-
         const { columnWidthAccumulation } = this;
-
         let column = searchArray(columnWidthAccumulation, offsetX);
 
-        if (column === Number.POSITIVE_INFINITY) {
-            column = columnWidthAccumulation.length - 1;
-        } else if (column === -1) {
-            column = 0;
-        }
-
-        if (closeFirst) {
+        if (options?.closeFirst) {
             // check if upper column was closer than current
             if (Math.abs(columnWidthAccumulation[column] - offsetX) < Math.abs(offsetX - (columnWidthAccumulation[column - 1] ?? 0))) {
                 column = column + 1;
@@ -1182,28 +1153,21 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     *
+     * Get row index by offsetY
      * @param offsetY scaled offset y
      * @param scaleY scale y
      * @param scrollXY
      * @param scrollXY.x
      * @param scrollXY.y
      */
-    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, closeFirst?: boolean): number {
+    getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }, options?: IGetRowColByPosOptions): number {
         const { rowHeightAccumulation } = this;
-
         offsetY = this.getTransformOffsetY(offsetY, scaleY, scrollXY);
 
-        let row = searchArray(rowHeightAccumulation, offsetY);
+        let row = searchArray(rowHeightAccumulation, offsetY, options?.visibleOnly);
 
-        if (row === Number.POSITIVE_INFINITY) {
-            row = rowHeightAccumulation.length - 1;
-        } else if (row === -1) {
-            row = 0;
-        }
-
-        if (closeFirst) {
-            // check if upper row was closer than current
+        if (options?.closeFirst) {
+            // check if next row was closer than current
             if (Math.abs(rowHeightAccumulation[row] - offsetY) < Math.abs(offsetY - (rowHeightAccumulation[row - 1] ?? 0))) {
                 row = row + 1;
             }
@@ -1513,19 +1477,17 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getDecomposedOffset(offsetX: number, offsetY: number): { row: number; column: number; columnOffset: number; rowOffset: number } {
-        let column = searchArray(this._columnWidthAccumulation, offsetX);
+        const column = searchArray(this._columnWidthAccumulation, offsetX);
         let columnOffset = 0;
-        if (column === -1 || column === 0) {
-            column = 0;
+        if (column === 0) {
             columnOffset = offsetX;
         } else {
             columnOffset = offsetX - this._columnWidthAccumulation[column - 1];
         }
 
-        let row = searchArray(this._rowHeightAccumulation, offsetY);
+        const row = searchArray(this._rowHeightAccumulation, offsetY);
         let rowOffset = 0;
-        if (row === -1 || row === 0) {
-            row = 0;
+        if (row === 0) {
             rowOffset = offsetY;
         } else {
             rowOffset = offsetY - this._rowHeightAccumulation[row - 1];
@@ -1659,75 +1621,40 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     *
+     * Get the range of the bounding area of the canvas.
      * @param rowHeightAccumulation Row layout information
      * @param columnWidthAccumulation Column layout information
      * @param viewBound The range of the visible area of the canvas
      * @returns The range cell index of the canvas visible area
      */
-    protected _getBounding(
+    protected _getRangeByViewBounding(
         rowHeightAccumulation: number[],
         columnWidthAccumulation: number[],
         viewBound?: IBoundRectNoAngle
     ): IRange {
-        const rhaLength = rowHeightAccumulation.length;
-        const cwaLength = columnWidthAccumulation.length;
+        const lenOfRowData = rowHeightAccumulation.length;
+        const lenOfColData = columnWidthAccumulation.length;
 
         if (!viewBound) {
             return {
                 startRow: 0,
-                endRow: rhaLength - 1,
+                endRow: lenOfRowData - 1,
                 startColumn: 0,
-                endColumn: cwaLength - 1,
+                endColumn: lenOfColData - 1,
             };
         }
 
-        let dataset_row_st = -1;
-        let dataset_row_ed = -1;
-        let dataset_col_st = -1;
-        let dataset_col_ed = -1;
-
-        const row_st = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
-        const row_ed = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
-
-        if (row_st === -1 && row_ed === 0) {
-            dataset_row_st = 0;
-            dataset_row_ed = 0;
-        } else {
-            dataset_row_st = Math.max(0, row_st);
-
-            if (row_ed === Number.POSITIVE_INFINITY) {
-                dataset_row_ed = rhaLength - 1;
-            } else if (row_ed >= rhaLength) {
-                dataset_row_ed = rhaLength - 1;
-            } else {
-                dataset_row_ed = Math.max(0, row_ed);
-            }
-        }
-
-        const col_st = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
-        const col_ed = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
-
-        if (col_st === -1 && col_ed === 0) {
-            dataset_col_st = 0;
-            dataset_col_ed = 0;
-        } else {
-            dataset_col_st = Math.max(0, col_st);
-
-            if (col_ed === Number.POSITIVE_INFINITY) {
-                dataset_col_ed = cwaLength - 1;
-            } else if (col_ed >= cwaLength) {
-                dataset_col_ed = cwaLength - 1;
-            } else {
-                dataset_col_ed = Math.max(0, col_ed);
-            }
-        }
+        // viewBound contains header, so need to subtract the header height and margin
+        const startRow = searchArray(rowHeightAccumulation, Math.round(viewBound.top) - this.columnHeaderHeightAndMarginTop);
+        const endRow = searchArray(rowHeightAccumulation, Math.round(viewBound.bottom) - this.columnHeaderHeightAndMarginTop);
+        const startColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.left) - this.rowHeaderWidthAndMarginLeft);
+        const endColumn = searchArray(columnWidthAccumulation, Math.round(viewBound.right) - this.rowHeaderWidthAndMarginLeft);
 
         return {
-            startRow: dataset_row_st,
-            endRow: dataset_row_ed,
-            startColumn: dataset_col_st,
-            endColumn: dataset_col_ed,
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
         } as IRange;
     }
 

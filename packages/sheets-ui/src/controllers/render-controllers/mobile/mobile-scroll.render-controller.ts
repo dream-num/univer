@@ -498,7 +498,7 @@ export class MobileSheetsScrollRenderController extends Disposable implements IR
         }
 
         const bounds = viewport.getBounding();
-        return skeleton.getRowColumnSegment(bounds);
+        return skeleton.getRangeByBounding(bounds);
     }
 
     // eslint-disable-next-line max-lines-per-function, complexity

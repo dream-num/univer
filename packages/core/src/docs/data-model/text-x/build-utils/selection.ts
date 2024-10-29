@@ -272,7 +272,6 @@ export function getRetainAndDeleteFromReplace(
         dos.push({
             t: TextXActionType.RETAIN,
             len: textStart,
-            segmentId,
         });
     }
 
@@ -284,14 +283,11 @@ export function getRetainAndDeleteFromReplace(
             dos.push({
                 t: TextXActionType.DELETE,
                 len,
-                line: 0,
-                segmentId,
             });
         }
         dos.push({
             t: TextXActionType.RETAIN,
             len: 1,
-            segmentId,
         });
         cursor = pos + 1;
     });
@@ -300,8 +296,6 @@ export function getRetainAndDeleteFromReplace(
         dos.push({
             t: TextXActionType.DELETE,
             len: textEnd - cursor,
-            line: 0,
-            segmentId,
         });
         cursor = textEnd + 1;
     }

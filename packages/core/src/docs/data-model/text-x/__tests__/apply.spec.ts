@@ -85,7 +85,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                 },
@@ -107,7 +106,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -136,13 +134,11 @@ describe('apply method', () => {
         const actionsA: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                     textRuns: [
@@ -173,7 +169,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -201,13 +196,11 @@ describe('apply method', () => {
         const actionsA: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
-                segmentId: '',
                 len: 1,
             },
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                line: 0,
                 body: {
                     dataStream: 'h',
                     textRuns: [
@@ -238,7 +231,6 @@ describe('apply method', () => {
                         },
                     ],
                 },
-                segmentId: '',
             },
         ];
 
@@ -267,11 +259,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -288,11 +278,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -330,11 +318,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -352,11 +338,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -395,11 +379,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -422,11 +404,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 coverType: UpdateDocsAttributeType.REPLACE,
                 body: {
                     dataStream: '',
@@ -470,11 +450,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [{
@@ -490,7 +468,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-                segmentId: '',
                 body: {
                     dataStream: '',
                     textRuns: [{
@@ -531,12 +508,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                segmentId: '',
             }, {
                 t: TextXActionType.INSERT,
                 len: 1,
-                segmentId: '',
-                line: 0,
                 body: {
                     dataStream: '\r',
                     paragraphs: [{
@@ -553,12 +527,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-                segmentId: '',
             }, {
                 t: TextXActionType.INSERT,
                 len: 1,
-                segmentId: '',
-                line: 0,
                 body: {
                     dataStream: 'X',
                     textRuns: [{
@@ -605,8 +576,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.DELETE,
                 len: 2,
-                segmentId: '',
-                line: 0,
             },
         ];
 
@@ -614,12 +583,9 @@ describe('apply method', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 2,
-                segmentId: '',
             }, {
                 t: TextXActionType.INSERT,
                 len: 1,
-                segmentId: '',
-                line: 0,
                 body: {
                     dataStream: '1',
                 },
@@ -627,8 +593,6 @@ describe('apply method', () => {
             {
                 t: TextXActionType.INSERT,
                 len: 1,
-                segmentId: '',
-                line: 0,
                 body: {
                     dataStream: '1',
                 },

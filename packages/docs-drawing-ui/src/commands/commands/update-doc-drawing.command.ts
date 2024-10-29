@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import type { IDocDrawing } from '@univerjs/docs-drawing';
 import {
     BooleanNumber,
     CommandType,
@@ -30,9 +33,6 @@ import {
 import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { DocSelectionRenderService, getRichTextEditPath } from '@univerjs/docs-ui';
 import { DocumentEditArea, IRenderManagerService } from '@univerjs/engine-render';
-import type { DocumentDataModel, IAccessor, ICommand, IDocDrawingBase, IDocDrawingPosition, IMutationInfo, IObjectPositionH, IObjectPositionV, ISize, JSONXActions, WrapTextType } from '@univerjs/core';
-import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import type { IDocDrawing } from '@univerjs/docs-drawing';
 import { DocRefreshDrawingsService } from '../../services/doc-refresh-drawings.service';
 
 export enum TextWrappingStyle {
@@ -88,7 +88,6 @@ function getDeleteAndInsertCustomBlockActions(
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: offset,
-                    segmentId: oldSegmentId,
                 });
             }
 
@@ -102,21 +101,16 @@ function getDeleteAndInsertCustomBlockActions(
                     }],
                 },
                 len: 1,
-                line: 0,
-                segmentId: oldSegmentId,
             });
 
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: oldOffset - offset,
-                segmentId: oldSegmentId,
             });
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             });
         } else {
             // Delete first.
@@ -124,22 +118,18 @@ function getDeleteAndInsertCustomBlockActions(
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: oldOffset,
-                    segmentId: oldSegmentId,
                 });
             }
 
             textX.push({
                 t: TextXActionType.DELETE,
                 len: 1,
-                line: 0,
-                segmentId: '',
             });
 
             if (offset - oldOffset - 1 > 0) {
                 textX.push({
                     t: TextXActionType.RETAIN,
                     len: offset - oldOffset - 1,
-                    segmentId: oldSegmentId,
                 });
             }
 
@@ -153,8 +143,6 @@ function getDeleteAndInsertCustomBlockActions(
                     }],
                 },
                 len: 1,
-                line: 0,
-                segmentId: oldSegmentId,
             });
         }
 
@@ -168,15 +156,12 @@ function getDeleteAndInsertCustomBlockActions(
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: oldOffset,
-                segmentId: oldSegmentId,
             });
         }
 
         textX.push({
             t: TextXActionType.DELETE,
             len: 1,
-            line: 0,
-            segmentId: '',
         });
 
         let path = getRichTextEditPath(documentDataModel, oldSegmentId);
@@ -189,7 +174,6 @@ function getDeleteAndInsertCustomBlockActions(
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: offset,
-                segmentId,
             });
         }
 
@@ -203,8 +187,6 @@ function getDeleteAndInsertCustomBlockActions(
                 }],
             },
             len: 1,
-            line: 0,
-            segmentId,
         });
 
         path = getRichTextEditPath(documentDataModel, segmentId);

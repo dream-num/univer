@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
-import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import type { ICommand, IMutationInfo, JSONXActions } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
+import { BuildTextUtils, CommandType, DataStreamTreeTokenType, ICommandService, IUniverInstanceService, JSONX, TextX, TextXActionType } from '@univerjs/core';
+import { DocSelectionManagerService, RichTextEditingMutation } from '@univerjs/docs';
 import { getCommandSkeleton, getRichTextEditPath } from '../../util';
 import { generateParagraphs } from '../break-line.command';
 import { genEmptyTable, genTableSource } from './table';
@@ -103,7 +103,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: startOffset,
-                segmentId,
             });
         }
 
@@ -115,8 +114,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
                     paragraphs: generateParagraphs(DataStreamTreeTokenType.PARAGRAPH, prevParagraph),
                 },
                 len: 1,
-                line: 0,
-                segmentId,
             });
         }
 
@@ -144,8 +141,6 @@ export const CreateDocTableCommand: ICommand<ICreateDocTableCommandParams> = {
                 ],
             },
             len: tableDataStream.length,
-            line: 0,
-            segmentId,
         });
 
         const path = getRichTextEditPath(docDataModel, segmentId);

@@ -69,7 +69,6 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
         textX.push({
             t: TextXActionType.RETAIN,
             len: startIndex - memoryCursor.cursor,
-            segmentId,
         });
 
         textX.push({
@@ -99,7 +98,6 @@ export const switchParagraphBullet = (params: ISwitchParagraphBulletParams) => {
                         },
                 ],
             },
-            segmentId,
             coverType: UpdateDocsAttributeType.REPLACE,
         });
 
@@ -141,7 +139,6 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
     textX.push({
         t: TextXActionType.RETAIN,
         len: startIndex - memoryCursor.cursor,
-        segmentId,
     });
 
     textX.push({
@@ -162,7 +159,6 @@ export const toggleChecklistParagraph = (params: IToggleChecklistParagraphParams
             ],
         },
         coverType: UpdateDocsAttributeType.REPLACE,
-        segmentId,
     });
 
     memoryCursor.moveCursorTo(startIndex + 1);
@@ -200,7 +196,6 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
         textX.push({
             t: TextXActionType.RETAIN,
             len: startIndex - memoryCursor.cursor,
-            segmentId,
         });
 
         textX.push({
@@ -225,7 +220,6 @@ export const setParagraphBullet = (params: ISetParagraphBulletParams) => {
                     },
                 ],
             },
-            segmentId,
             coverType: UpdateDocsAttributeType.REPLACE,
         });
 
@@ -269,7 +263,6 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
         textX.push({
             t: TextXActionType.RETAIN,
             len: startIndex - memoryCursor.cursor,
-            segmentId,
         });
 
         if (bullet) {
@@ -297,7 +290,6 @@ export const changeParagraphBulletNestLevel = (params: IChangeParagraphBulletNes
                         },
                     ],
                 },
-                segmentId,
                 coverType: UpdateDocsAttributeType.REPLACE,
             });
         } else {

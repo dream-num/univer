@@ -23,7 +23,6 @@ import { operatorToken } from '@univerjs/engine-formula';
 import { EMBEDDING_FORMULA_EDITOR } from '@univerjs/sheets-ui';
 import clsx from 'clsx';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useBlur } from '../range-selector/hooks/useBlur';
 import { useFocus } from '../range-selector/hooks/useFocus';
 import { useFormulaToken } from '../range-selector/hooks/useFormulaToken';
 import { useLeftAndRightArrow } from '../range-selector/hooks/useLeftAndRightArrow';
@@ -100,16 +99,21 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useVerify(isFocus, onVerify, formulaText);
     const focus = useFocus(editor);
 
-    useEffect(() => {
-        const time = setTimeout(() => {
+    useLayoutEffect(() => {
+        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
+        if (_isFocus) {
+            const time = setTimeout(() => {
+                isFocusSet(_isFocus);
+                if (_isFocus) {
+                    focus();
+                }
+            }, 30);
+            return () => {
+                clearTimeout(time);
+            };
+        } else {
             isFocusSet(_isFocus);
-            if (_isFocus) {
-                focus();
-            }
-        }, 300);
-        return () => {
-            clearTimeout(time);
-        };
+        }
     }, [_isFocus, focus]);
 
     const handleSelectionChange = (refString: string, offset: number) => {
@@ -128,7 +132,6 @@ export function FormulaEditor(props: IFormulaEditorProps) {
     useRefactorEffect(isFocus, unitId);
     useLeftAndRightArrow(isFocus, editor);
     useSheetSelectionChange(isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, editor, handleSelectionChange);
-    useBlur(editorId, isFocusSet);
     useRefocus();
 
     const { searchList, searchText, handlerFormulaReplace, reset: resetFormulaSearch } = useFormulaSearch(isFocus, sequenceNodes, editor);
@@ -188,12 +191,17 @@ export function FormulaEditor(props: IFormulaEditorProps) {
         }
     };
 
-    const handleClick = () => {
-        if (editor) {
+    const handleMouseUp = () => {
+        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
+        // 即使失焦是 mousedown 事件,
+        // 聚焦是 mouseup 事件,
+        // 但是 react 的 useEffect 无法保证顺序,无法确保失焦在聚焦之前.
+
+        setTimeout(() => {
             isFocusSet(true);
             onFocus();
             focus();
-        }
+        }, 30);
     };
     return (
         <div className={styles.sheetEmbeddingFormulaEditor}>
@@ -207,7 +215,7 @@ export function FormulaEditor(props: IFormulaEditorProps) {
                 <div
                     className={styles.sheetEmbeddingFormulaEditorText}
                     ref={formulaEditorContainerRef}
-                    onMouseUp={handleClick}
+                    onMouseUp={handleMouseUp}
                 >
                 </div>
                 {errorText !== undefined ? <div className={styles.sheetEmbeddingFormulaEditorErrorWrap}>{errorText}</div> : null}

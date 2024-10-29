@@ -17,7 +17,7 @@
 import type { Workbook } from '@univerjs/core';
 import { EDITOR_ACTIVATED, IContextService, IUniverInstanceService, UniverInstanceType, useDependency } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DISABLE_NORMAL_SELECTIONS, SheetsSelectionsService } from '@univerjs/sheets';
+import { DISABLE_NORMAL_SELECTIONS, IRefSelectionsService, SheetsSelectionsService } from '@univerjs/sheets';
 import { IContextMenuService } from '@univerjs/ui';
 import { useEffect, useLayoutEffect } from 'react';
 
@@ -29,19 +29,20 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
     const contextService = useDependency(IContextService);
     const sheetsSelectionsService = useDependency(SheetsSelectionsService);
     const contextMenuService = useDependency(IContextMenuService);
+    const refSelectionsService = useDependency(IRefSelectionsService);
 
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (isNeed) {
             const d1 = refSelectionsRenderService?.enableSelectionChanging();
             contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, true);
             contextService.setContextValue(EDITOR_ACTIVATED, true);
 
             return () => {
-                d1?.dispose();
-                contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
                 contextService.setContextValue(EDITOR_ACTIVATED, false);
+                contextService.setContextValue(DISABLE_NORMAL_SELECTIONS, false);
+                d1?.dispose();
             };
         }
     }, [isNeed]);
@@ -53,6 +54,7 @@ export const useRefactorEffect = (isNeed: boolean, unitId: string) => {
             const sheet = workbook?.getActiveSheet();
             const selections = [...sheetsSelectionsService.getCurrentSelections()];
             return () => {
+                refSelectionsService.clear();
                 const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 const currentSheet = workbook?.getActiveSheet();
                 if (currentSheet && currentSheet === sheet) {

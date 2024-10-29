@@ -91,7 +91,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
 
     useEffect(() => {
         const skeleton = sheetSkeletonManagerService?.getCurrentSkeleton();
-        if (skeleton) {
+        if (skeleton && isNeed) {
             const allControls = refSelectionsRenderService?.getSelectionControls() || [];
             if (allControls.length === ranges.length) {
                 allControls.forEach((control, index) => {
@@ -103,11 +103,7 @@ export function useSheetHighlight(isNeed: boolean, unitId: string, subUnitId: st
                 refSelectionsService.setSelections(ranges);
             }
         }
-    }, [ranges, sheetSkeletonManagerService]);
-
-    useEffect(() => () => {
-        refSelectionsService.setSelections([]);
-    }, []);
+    }, [ranges, isNeed]);
 }
 
 export function useDocHight(editorId: string, sequenceNodes: (string | ISequenceNode)[]) {

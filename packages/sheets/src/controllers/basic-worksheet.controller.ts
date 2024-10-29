@@ -52,6 +52,7 @@ import {
     SetBorderPositionCommand,
     SetBorderStyleCommand,
 } from '../commands/commands/set-border-command';
+import { SetColDataCommand } from '../commands/commands/set-col-data.command';
 import {
     SetColHiddenCommand,
     SetSelectedColsVisibleCommand,
@@ -62,6 +63,7 @@ import { SetFrozenCommand } from '../commands/commands/set-frozen.command';
 import { SetFrozenCancelCommand } from '../commands/commands/set-frozen-cancel.command';
 import { SetRangeProtectionCommand } from '../commands/commands/set-range-protection.command';
 import { SetRangeValuesCommand } from '../commands/commands/set-range-values.command';
+import { SetRowDataCommand } from '../commands/commands/set-row-data.command';
 import {
     SetRowHiddenCommand,
     SetSelectedRowsVisibleCommand,
@@ -109,21 +111,23 @@ import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remo
 import { RemoveSheetMutation } from '../commands/mutations/remove-sheet.mutation';
 import { RemoveWorksheetMergeMutation } from '../commands/mutations/remove-worksheet-merge.mutation';
 import { ReorderRangeMutation } from '../commands/mutations/reorder-range.mutation';
+import { SetColDataMutation } from '../commands/mutations/set-col-data.mutation';
 import { SetColHiddenMutation, SetColVisibleMutation } from '../commands/mutations/set-col-visible.mutation';
 import { SetFrozenMutation } from '../commands/mutations/set-frozen.mutation';
+
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { SetRowDataMutation } from '../commands/mutations/set-row-data.mutation';
 import { SetRowHiddenMutation, SetRowVisibleMutation } from '../commands/mutations/set-row-visible.mutation';
 import { SetTabColorMutation } from '../commands/mutations/set-tab-color.mutation';
 import { SetWorkbookNameMutation } from '../commands/mutations/set-workbook-name.mutation';
 import { SetWorksheetColWidthMutation } from '../commands/mutations/set-worksheet-col-width.mutation';
-import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutations';
+import { SetWorksheetDefaultStyleMutation } from '../commands/mutations/set-worksheet-default-style.mutation';
 import { SetWorksheetHideMutation } from '../commands/mutations/set-worksheet-hide.mutation';
 import { SetWorksheetNameMutation } from '../commands/mutations/set-worksheet-name.mutation';
 import { SetWorksheetOrderMutation } from '../commands/mutations/set-worksheet-order.mutation';
 import { SetWorksheetPermissionPointsMutation } from '../commands/mutations/set-worksheet-permission-points.mutation';
 import { SetWorksheetProtectionMutation } from '../commands/mutations/set-worksheet-protection.mutation';
-import { SetWorksheetRowColumnStyleMutation } from '../commands/mutations/set-worksheet-row-column-style.mutation';
 import {
     SetWorksheetRowAutoHeightMutation,
     SetWorksheetRowHeightMutation,
@@ -172,8 +176,6 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetNumfmtMutation,
             ReorderRangeMutation,
             EmptyMutation,
-            SetWorksheetDefaultStyleMutation,
-            SetWorksheetRowColumnStyleMutation,
         ] as IMutation<object>[]).forEach((mutation) => {
             this._commandService.registerCommand(mutation);
             this._dataSyncPrimaryController?.registerSyncingMutations(mutation);
@@ -220,6 +222,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetColHiddenMutation,
                 SetColVisibleMutation,
                 SetColWidthCommand,
+                SetColDataCommand,
+                SetColDataMutation,
                 SetFrozenCancelCommand,
                 SetFrozenCommand,
                 SetFrozenMutation,
@@ -229,6 +233,8 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRowHiddenCommand,
                 SetRowHiddenMutation,
                 SetRowVisibleMutation,
+                SetRowDataCommand,
+                SetRowDataMutation,
                 SetSelectedColsVisibleCommand,
                 SetSelectedRowsVisibleCommand,
                 SetSpecificColsVisibleCommand,
@@ -281,6 +287,7 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
                 SetRangeProtectionMutation,
 
                 ToggleCellCheckboxCommand,
+                SetWorksheetDefaultStyleMutation,
             ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
         }
 

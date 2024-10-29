@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import type { ICellData, IDisposable, IFreeze, IRange, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
-import type { ISetRangeValuesMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
-import type { IDataValidationResCache } from '@univerjs/sheets-data-validation';
+import type { CustomData, ICellData, IColumnData, IDisposable, IFreeze, IObjectArrayPrimitiveType, IRange, IRowData, IStyleData, Nullable, Workbook, Worksheet } from '@univerjs/core';
+
+import type { ISetColDataCommandParams, ISetRangeValuesMutationParams, ISetRowDataCommandParams, ISetWorksheetDefaultStyleMutationParams, IToggleGridlinesCommandParams } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
 import type { FWorkbook, IFICanvasFloatDom } from './f-workbook';
 import { BooleanNumber, Direction, ICommandService, Inject, Injector, ObjectMatrix, RANGE_TYPE } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet } from '@univerjs/engine-formula';
-import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleMutation, SetWorksheetRowColumnStyleMutation, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
-import { SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
+import { copyRangeStyles, InsertColCommand, InsertRowCommand, MoveColsCommand, MoveRowsCommand, RemoveColCommand, RemoveRowCommand, SetColDataCommand, SetColHiddenCommand, SetColWidthCommand, SetFrozenCommand, SetRangeValuesMutation, SetRowDataCommand, SetRowHeightCommand, SetRowHiddenCommand, SetSpecificColsVisibleCommand, SetSpecificRowsVisibleCommand, SetWorksheetDefaultStyleCommand, SetWorksheetRowIsAutoHeightCommand, SheetsSelectionsService, ToggleGridlinesCommand } from '@univerjs/sheets';
+import { type IDataValidationResCache, SheetsDataValidationValidatorService } from '@univerjs/sheets-data-validation';
 import { SheetCanvasFloatDomManagerService } from '@univerjs/sheets-drawing-ui';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { SheetsThreadCommentModel } from '@univerjs/sheets-thread-comment';
@@ -124,15 +124,17 @@ export class FWorksheet {
      * @param style default style
      * @returns this worksheet
      */
-    async setDefaultStyle(style: string): Promise<FWorksheet> {
+    async setDefaultStyle(style: Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        await this._commandService.executeCommand(SetWorksheetDefaultStyleMutation.id, {
+
+        const params: ISetWorksheetDefaultStyleMutationParams = {
             unitId,
             subUnitId,
             defaultStyle: style,
-        });
-        this._worksheet.setDefaultCellStyle(style);
+        };
+
+        await this._commandService.executeCommand(SetWorksheetDefaultStyleCommand.id, params);
         return this;
     }
 
@@ -144,13 +146,18 @@ export class FWorksheet {
     async setColumnDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const styles = [{ index, style }];
-        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+
+        const params: ISetColDataCommandParams = {
             unitId,
             subUnitId,
-            isRow: false,
-            styles,
-        });
+            columnData: {
+                [index]: {
+                    s: style,
+                },
+            },
+        };
+
+        await this._commandService.executeCommand(SetColDataCommand.id, params);
         return this;
     }
 
@@ -162,13 +169,18 @@ export class FWorksheet {
     async setRowDefaultStyle(index: number, style: string | Nullable<IStyleData>): Promise<FWorksheet> {
         const unitId = this._workbook.getUnitId();
         const subUnitId = this._worksheet.getSheetId();
-        const styles = [{ index, style }];
-        await this._commandService.executeCommand(SetWorksheetRowColumnStyleMutation.id, {
+
+        const params: ISetRowDataCommandParams = {
             unitId,
             subUnitId,
-            isRow: true,
-            styles,
-        });
+            rowData: {
+                [index]: {
+                    s: style,
+                },
+            },
+        };
+
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
         return this;
     }
     // #endregion
@@ -687,6 +699,33 @@ export class FWorksheet {
         return this;
     }
 
+    /**
+     * Set custom properties for given rows.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setRowCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        const rowData: IObjectArrayPrimitiveType<Nullable<IRowData>> = {};
+        for (const [rowIndex, customData] of Object.entries(custom)) {
+            rowData[Number(rowIndex)] = {
+                custom: customData,
+            };
+        }
+
+        const params: ISetRowDataCommandParams = {
+            unitId,
+            subUnitId,
+            rowData,
+        };
+
+        await this._commandService.executeCommand(SetRowDataCommand.id, params);
+
+        return this;
+    }
+
     // #endregion
 
     // #region Column
@@ -973,6 +1012,33 @@ export class FWorksheet {
             ranges,
             value: width,
         });
+
+        return this;
+    }
+
+    /**
+     * Set custom properties for given columns.
+     * @param custom The custom properties to set.
+     * @returns This sheet, for chaining.
+     */
+    async setColumnCustom(custom: IObjectArrayPrimitiveType<CustomData>): Promise<FWorksheet> {
+        const unitId = this._workbook.getUnitId();
+        const subUnitId = this._worksheet.getSheetId();
+
+        const columnData: IObjectArrayPrimitiveType<Nullable<IColumnData>> = {};
+        for (const [columnIndex, customData] of Object.entries(custom)) {
+            columnData[Number(columnIndex)] = {
+                custom: customData,
+            };
+        }
+
+        const params: ISetColDataCommandParams = {
+            unitId,
+            subUnitId,
+            columnData,
+        };
+
+        await this._commandService.executeCommand(SetColDataCommand.id, params);
 
         return this;
     }

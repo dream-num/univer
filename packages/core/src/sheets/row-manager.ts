@@ -103,6 +103,14 @@ export class RowManager {
     }
 
     /**
+     * Remove row data of given row
+     * @param rowPos
+     */
+    removeRow(rowPos: number) {
+        delete this._rowData[rowPos];
+    }
+
+    /**
      * Get given row data or create a row data when it's null
      * @param rowPos row index
      * @returns {Partial<IRowData>} rowData
@@ -113,8 +121,8 @@ export class RowManager {
         if (row) {
             return row;
         }
-        const config = this._config;
-        const create = { hd: BooleanNumber.FALSE, h: config.defaultRowHeight };
+
+        const create = {};
         _rowData[rowPos] = create;
 
         return create;

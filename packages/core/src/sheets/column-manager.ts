@@ -204,21 +204,25 @@ export class ColumnManager {
     }
 
     /**
+     * Remove column data of given column
+     * @param columnPos
+     */
+    removeColumn(columnPos: number) {
+        delete this._columnData[columnPos];
+    }
+
+    /**
      * get given column data or create a column data when it's null
      * @param columnPos column index
      * @returns {Partial<IColumnData>} columnData
      */
     getColumnOrCreate(columnPos: number): Partial<IColumnData> {
         const { _columnData } = this;
-        const config = this._config;
         const column = _columnData[columnPos];
         if (column) {
             return column;
         }
-        const create = {
-            w: config.defaultColumnWidth,
-            hd: BooleanNumber.FALSE,
-        };
+        const create = {};
         this._columnData[columnPos] = create;
         return create;
     }

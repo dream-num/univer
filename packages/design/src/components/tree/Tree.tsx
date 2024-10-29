@@ -22,7 +22,7 @@ import { Checkbox } from '../checkbox';
 
 import { Tooltip } from '../tooltip';
 import styles from './index.module.less';
-import { createCacheWithFindNodePathFromTree, filterLeafNode, isIntermediated, mergeTreeSelected } from './util';
+import { createCacheWithFindNodePathFromTree, isIntermediated } from './util';
 
 export enum TreeSelectionMode {
     ONLY_LEAF_NODE,
@@ -51,7 +51,7 @@ export interface ITreeProps {
 
     valueGroup?: string[];
 
-    onChange?: (node: ITreeNodeProps, allSelectedNode: ITreeNodeProps[]) => void;
+    onChange?: (node: ITreeNodeProps) => void;
 
     onExpend?: (value: string) => void;
 
@@ -64,6 +64,8 @@ export interface ITreeProps {
     treeNodeClassName?: string;
 
     style?: React.CSSProperties;
+
+    defaultCache?: Map<string, string[]>;
 }
 
 function flattenTree(items: TreeItemProps[], expandedKeys: Set<string>, level = 1): TreeItemProps[] {
@@ -84,13 +86,13 @@ function flattenTree(items: TreeItemProps[], expandedKeys: Set<string>, level = 
  * Tree Component
  */
 export function Tree(props: ITreeProps) {
-    const { data = [], style, defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend, height = 200, itemHeight = 32, attachRender } = props;
+    const { data = [], defaultCache, style, defaultExpandAll = false, selectionMode = TreeSelectionMode.ALL, valueGroup = [], onChange, onExpend, height = 200, itemHeight = 32, attachRender } = props;
     const [update, forceUpdate] = useState({});
     const expandKeySet = useMemo(() => {
         return new Set<string>();
     }, []);
 
-    const findNode = useMemo(() => createCacheWithFindNodePathFromTree(data), [data]);
+    const findNode = useMemo(() => createCacheWithFindNodePathFromTree(data, defaultCache), [data, defaultCache]);
 
     const selectedNodeKeySet = useMemo(() => {
         const set = new Set<string>();
@@ -116,8 +118,6 @@ export function Tree(props: ITreeProps) {
 
     function handleChange(treeItem: TreeItemProps) {
         const path: string[] = findNode.findNodePathFromTreeWithCache(treeItem.key);
-        const result = mergeTreeSelected(data, [...selectedNodeKeySet], path);
-        onChange?.(treeItem, filterLeafNode(data, result));
     }
 
     function handleExpendItem(treeItem: TreeItemProps) {
@@ -171,7 +171,9 @@ export function Tree(props: ITreeProps) {
                     <Checkbox
                         checked={selected && !intermediated}
                         indeterminate={selected && intermediated}
-                        onChange={() => handleChange(treeItem)}
+                        onChange={() => {
+                            onChange?.(treeItem);
+                        }}
                     />
                     <Tooltip showIfEllipsis placement="top" title={title}>
                         <span

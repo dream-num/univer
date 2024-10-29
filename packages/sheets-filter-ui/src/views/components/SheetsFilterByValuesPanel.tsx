@@ -38,6 +38,8 @@ export function FilterByValue(props: { model: ByValuesModel }) {
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
     const indeterminate = stat.checked > 0 && stat.unchecked > 0;
 
+    const treeMap = model.treeMapCache;
+
     const onCheckAllToggled = useCallback(() => {
         model.onCheckAllToggled(!allChecked);
     }, [model, allChecked]);
@@ -86,6 +88,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                         onChange={(node) => {
                             model.onFilterCheckToggled(node as IFilterByValueWithTreeItem);
                         }}
+                        defaultCache={treeMap}
                         itemHeight={28}
                         treeNodeClassName={styles.sheetsFilterTreeNode}
                         attachRender={(item) => (

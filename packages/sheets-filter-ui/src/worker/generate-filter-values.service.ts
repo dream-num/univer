@@ -27,7 +27,10 @@ export interface ISheetsGenerateFilterValuesService {
         blankChecked: boolean;
         iterateRange: IRange;
         alreadyChecked: string[];
-    }): Promise<IFilterByValueWithTreeItem[]>;
+    }): Promise<{
+        filterTreeItems: IFilterByValueWithTreeItem[];
+        filterTreeMapCache: Map<string, string[]>;
+    }>;
 }
 export const SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME = 'sheets-filter.generate-filter-values.service';
 export const ISheetsGenerateFilterValuesService = createIdentifier<ISheetsGenerateFilterValuesService>(SHEETS_GENERATE_FILTER_VALUES_SERVICE_NAME);
@@ -140,10 +143,15 @@ export function getFilterTreeByValueItems(
     alreadyChecked: Set<string>,
     blankChecked: boolean,
     styles: Styles
-): IFilterByValueWithTreeItem[] {
+): {
+        filterTreeItems: IFilterByValueWithTreeItem[];
+        filterTreeMapCache: Map<string, string[]>;
+    } {
     const items: Map<string, IFilterByValueWithTreeItem> = new Map();
+    const treeMap: Map<string, string[]> = new Map();
 
-    const defaultPattern = 'yyyy-mm-dd';
+    const DefaultPattern = 'yyyy-mm-dd';
+    const EmptyKey = 'empty';
 
     let emptyCount = 0;
     for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
@@ -165,11 +173,11 @@ export function getFilterTreeByValueItems(
                 continue;
             }
 
-            const fmtStr = styles.get(cell.value?.s)?.n?.pattern;
+            const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
             const isDateValue = fmtStr && numfmt.isDate(fmtStr);
             if (fmtStr && isDateValue) {
                 const originValue = numfmt.parseDate(value).v as number;
-                const valueParsedByDefaultPattern = numfmt.format(defaultPattern, originValue);
+                const valueParsedByDefaultPattern = numfmt.format(DefaultPattern, originValue);
                 const [year, month, day] = valueParsedByDefaultPattern.split('-').map(Number);
                 let yearItem = items.get(`${year}`);
                 if (!yearItem) {
@@ -182,11 +190,12 @@ export function getFilterTreeByValueItems(
                         checked: false,
                     };
                     items.set(`${year}`, yearItem);
+                    treeMap.set(`${year}`, [`${year}`]);
                 }
                 let monthItem = yearItem.children?.find((item) => item.key === `${year}-${month}`);
                 if (!monthItem) {
                     monthItem = {
-                        title: `${month}`,
+                        title: localeService.t(`sheets-filter.date.${month}`),
                         key: `${year}-${month}`,
                         children: [],
                         count: 0,
@@ -194,6 +203,7 @@ export function getFilterTreeByValueItems(
                         checked: false,
                     };
                     yearItem.children?.push(monthItem);
+                    treeMap.set(`${year}-${month}`, [`${year}`, `${year}-${month}`]);
                 }
                 const dayItem = monthItem?.children?.find((item) => item.key === `${year}-${month}-${day}`);
                 if (!dayItem) {
@@ -207,6 +217,7 @@ export function getFilterTreeByValueItems(
                     });
                     monthItem.count++;
                     yearItem.count++;
+                    treeMap.set(`${year}-${month}-${day}`, [`${year}`, `${year}-${month}`, `${year}-${month}-${day}`]);
                 } else {
                     dayItem.originValues!.add(value);
                     dayItem.count++;
@@ -225,6 +236,7 @@ export function getFilterTreeByValueItems(
                         count: 1,
                     };
                     items.set(key, item);
+                    treeMap.set(key, [key]);
                 } else {
                     item.count++;
                 }
@@ -240,10 +252,18 @@ export function getFilterTreeByValueItems(
             count: emptyCount,
             leaf: true,
             checked: initialBlankChecked,
-            key: 'empty',
+            key: EmptyKey,
         };
         items.set('empty', item);
+        treeMap.set('empty', [EmptyKey]);
     }
 
-    return Array.from(items.values());
+    return {
+        filterTreeItems: Array.from(items.values()).sort((a, b) => {
+            if (a.children && !b.children) return -1;
+            if (!a.children && b.children) return 1;
+            return b.title.localeCompare(a.title);
+        }),
+        filterTreeMapCache: treeMap,
+    };
 }

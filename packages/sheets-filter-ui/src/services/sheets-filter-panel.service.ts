@@ -424,8 +424,9 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
         const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
 
         let items: IFilterByValueWithTreeItem[];
+        let cache: Map<string, string[]> | undefined;
         if (generateFilterValuesService) {
-            items = await generateFilterValuesService.getFilterValues({
+            const res = await generateFilterValuesService.getFilterValues({
                 unitId,
                 subUnitId,
                 filteredOutRowsByOtherColumns: Array.from(filteredOutRowsByOtherColumns),
@@ -434,12 +435,16 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
                 iterateRange,
                 alreadyChecked: Array.from(alreadyChecked),
             });
+            items = res.filterTreeItems;
+            cache = res.filterTreeMapCache;
         } else {
             // the first row is filter header and should be added to options
-            items = getFilterTreeByValueItems(!!filters, localeService, iterateRange, worksheet, filteredOutRowsByOtherColumns, alreadyChecked, blankChecked, workbook.getStyles());
+            const res = getFilterTreeByValueItems(!!filters, localeService, iterateRange, worksheet, filteredOutRowsByOtherColumns, alreadyChecked, blankChecked, workbook.getStyles());
+            items = res.filterTreeItems;
+            cache = res.filterTreeMapCache;
         }
 
-        return injector.createInstance(ByValuesModel, filterModel, col, items);
+        return injector.createInstance(ByValuesModel, filterModel, col, items, cache);
     }
 
     private readonly _rawFilterItems$: BehaviorSubject<IFilterByValueWithTreeItem[]>;
@@ -449,6 +454,9 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
     readonly filterItems$: Observable<IFilterByValueWithTreeItem[]>;
     private _filterItems: IFilterByValueWithTreeItem[] = [];
     get filterItems() { return this._filterItems; }
+
+    private _treeMapCache: Map<string, string[]>;
+    get treeMapCache() { return this._treeMapCache; }
 
     readonly canApply$: Observable<boolean>;
 
@@ -465,10 +473,12 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
          * though data may change after.
          */
         items: IFilterByValueWithTreeItem[],
+        cache: Nullable<Map<string, string[]>>,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
+        this._treeMapCache = cache;
         this._searchString$ = new BehaviorSubject<string>('');
         this.searchString$ = this._searchString$.asObservable();
 

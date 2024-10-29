@@ -151,7 +151,7 @@ describe('transform paragraph in body', () => {
         expect(composedAction1).toEqual(composedAction2);
     });
 
-    it('should pass test when REPLACE + COVER, and REPLACE has high priority', () => {
+    it('should pass test when REPLACE + COVER', () => {
         const actionsA: TextXAction[] = [
             {
                 t: TextXActionType.RETAIN,
@@ -269,18 +269,40 @@ describe('transform paragraph in body', () => {
         const doc3 = getDefaultDocWithParagraph();
         const doc4 = getDefaultDocWithParagraph();
 
-        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'left'));
-        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+        const resultA = TextX.apply(TextX.apply(doc1, actionsA), TextX.transform(actionsB, actionsA, 'right'));
+        const resultB = TextX.apply(TextX.apply(doc2, actionsB), TextX.transform(actionsA, actionsB, 'left'));
 
-        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
-        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+        const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'right'));
+        const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'left'));
 
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);
+
+        // console.log(JSON.stringify(resultA, null, 2));
+        // console.log(JSON.stringify(resultB, null, 2));
 
         expect(resultA).toEqual(resultB);
         expect(resultC).toEqual(resultD);
         expect(resultA).toEqual(resultC);
         expect(composedAction1).toEqual(composedAction2);
+
+        const doc5 = getDefaultDocWithParagraph();
+        const doc6 = getDefaultDocWithParagraph();
+        const doc7 = getDefaultDocWithParagraph();
+        const doc8 = getDefaultDocWithParagraph();
+
+        const resultE = TextX.apply(TextX.apply(doc5, actionsA), TextX.transform(actionsB, actionsA, 'left'));
+        const resultF = TextX.apply(TextX.apply(doc6, actionsB), TextX.transform(actionsA, actionsB, 'right'));
+
+        const composedAction3 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
+        const composedAction4 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
+
+        const resultG = TextX.apply(doc7, composedAction3);
+        const resultH = TextX.apply(doc8, composedAction4);
+
+        expect(resultE).toEqual(resultF);
+        expect(resultG).toEqual(resultH);
+        expect(resultE).toEqual(resultG);
+        expect(composedAction3).toEqual(composedAction4);
     });
 });

@@ -176,7 +176,7 @@ function transformCustomRanges(
 // paragraphStyle is treated separately, while bullet is treated as a whole because
 // the properties in bullet are related
 
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity, max-lines-per-function
 function transformParagraph(
     originParagraph: IParagraph,
     targetParagraph: IParagraph,
@@ -206,8 +206,16 @@ function transformParagraph(
                         const keys = Object.keys(originParagraph.paragraphStyle);
 
                         for (const key of keys) {
-                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle]) {
-                                delete paragraph.paragraphStyle[key as keyof IParagraphStyle];
+                            if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
                             }
                         }
                     }
@@ -219,6 +227,14 @@ function transformParagraph(
 
                         for (const key of keys) {
                             if (originParagraph.paragraphStyle[key as keyof IParagraphStyle] !== undefined) {
+                                paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
+                            }
+                        }
+                    } else {
+                        const keys = Object.keys(originParagraph.paragraphStyle);
+
+                        for (const key of keys) {
+                            if (paragraph.paragraphStyle[key as keyof IParagraphStyle] === undefined) {
                                 paragraph.paragraphStyle[key as keyof IParagraphStyle] = originParagraph.paragraphStyle[key as keyof IParagraphStyle] as any;
                             }
                         }

@@ -536,18 +536,12 @@ function updateCustomDecorations(
     }
 
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        const removeIndex: number[] = [];
         for (let index = 0; index < customDecorations.length; index++) {
             const customDecoration = customDecorations[index];
             const { startIndex, endIndex } = customDecoration;
             if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
                 removeCustomDecorations.push(customDecoration);
-                removeIndex.push(index);
             }
-        }
-
-        for (let index = removeIndex.length - 1; index >= 0; index--) {
-            customDecorations.splice(removeIndex[index], 1);
         }
 
         updateDataCustomDecorations?.forEach((customDecoration) => {
@@ -576,13 +570,13 @@ function updateCustomDecorations(
                 });
             }
         }
+    }
 
-        for (const removeCustomDecoration of removeCustomDecorations) {
-            const { id } = removeCustomDecoration;
-            const index = customDecorations.findIndex((d) => d.id === id);
-            if (index !== -1) {
-                customDecorations.splice(index, 1);
-            }
+    for (const removeCustomDecoration of removeCustomDecorations) {
+        const { id } = removeCustomDecoration;
+        const index = customDecorations.findIndex((d) => d.id === id);
+        if (index !== -1) {
+            customDecorations.splice(index, 1);
         }
     }
 

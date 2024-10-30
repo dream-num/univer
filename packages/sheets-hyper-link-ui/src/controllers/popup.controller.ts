@@ -35,11 +35,11 @@ import {
     WorksheetInsertHyperlinkPermission,
     WorksheetViewPermission,
 } from '@univerjs/sheets';
+import { HyperLinkEditSourceType } from '@univerjs/sheets-hyper-link';
 import { HoverManagerService, HoverRenderController, IEditorBridgeService, SheetPermissionInterceptorBaseController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { debounceTime, map, Observable, switchMap } from 'rxjs';
 import { SheetsHyperLinkPopupService } from '../services/popup.service';
-import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 
 export class SheetsHyperLinkPopupController extends Disposable {
     constructor(

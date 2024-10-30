@@ -21,10 +21,10 @@ import type { ICanvasPopup } from '@univerjs/sheets-ui';
 import { BuildTextUtils, CustomRangeType, Disposable, DOCS_ZEN_EDITOR_UNIT_ID_KEY, Inject, Injector, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService, IEditorService, IRangeSelectorService } from '@univerjs/docs-ui';
+import { HyperLinkEditSourceType } from '@univerjs/sheets-hyper-link';
 import { getCustomRangePosition, getEditingCustomRangePosition, IEditorBridgeService, SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { HyperLinkEditSourceType } from '../types/enums/edit-source';
 import { CellLinkEdit } from '../views/CellLinkEdit';
 import { CellLinkPopup } from '../views/CellLinkPopup';
 

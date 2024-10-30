@@ -16,9 +16,7 @@
 
 export { InsertLinkShortcut } from './controllers/menu';
 export { UniverSheetsHyperLinkUIPlugin } from './plugin';
-
 export { SheetsHyperLinkPopupService } from './services/popup.service';
-
 export { SheetsHyperLinkResolverService } from './services/resolver.service';
 export { type ICustomHyperLinkView, SheetsHyperLinkSidePanelService } from './services/side-panel.service';
 

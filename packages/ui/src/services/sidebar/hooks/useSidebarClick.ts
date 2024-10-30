@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
+import { useDependency } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import { useEffect } from 'react';
+/**
+ * Response panel to a click event.
+ */
+export const useSidebarClick = (cb: (event: MouseEvent) => void) => {
+    const sidebarService = useDependency(ISidebarService);
+    const container = sidebarService.getContainer();
 
-export const isRangeSelector = (unitId: string) => {
-    return unitId.includes(RANGE_SELECTOR_SYMBOLS);
+    useEffect(() => {
+        if (container) {
+            container.addEventListener('mousedown', cb);
+            return () => {
+                container.removeEventListener('mousedown', cb);
+            };
+        }
+    }, [cb, container]);
 };
-

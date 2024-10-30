@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
+import { operatorToken } from '@univerjs/engine-formula';
 
-export const isRangeSelector = (unitId: string) => {
-    return unitId.includes(RANGE_SELECTOR_SYMBOLS);
+export const getFormulaText = (formula: string) => {
+    if (formula.startsWith(operatorToken.EQUALS)) {
+        return formula.slice(1);
+    }
+    return '';
 };
-

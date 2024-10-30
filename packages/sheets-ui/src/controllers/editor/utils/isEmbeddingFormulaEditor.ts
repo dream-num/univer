@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
+export const EMBEDDING_FORMULA_EDITOR = 'embedding_formula_editor';
 
-export const isRangeSelector = (unitId: string) => {
-    return unitId.includes(RANGE_SELECTOR_SYMBOLS);
+export const isEmbeddingFormulaEditor = (unitId: string) => {
+    return unitId.includes(EMBEDDING_FORMULA_EDITOR);
 };
 

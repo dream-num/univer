@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
+// import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, useDependency } from '@univerjs/core';
+import { useEffect } from 'react';
 
-export const isRangeSelector = (unitId: string) => {
-    return unitId.includes(RANGE_SELECTOR_SYMBOLS);
+export const useRefocus = () => {
+    // const univerInstanceService = useDependency(IUniverInstanceService);
+
+    useEffect(() => {
+        return () => {
+            // univerInstanceService.focusUnit(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+        };
+    }, []);
 };
-

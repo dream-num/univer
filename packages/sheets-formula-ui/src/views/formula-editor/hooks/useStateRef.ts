@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-export const RANGE_SELECTOR_SYMBOLS = 'range_selector';
+import { useRef } from 'react';
 
-export const isRangeSelector = (unitId: string) => {
-    return unitId.includes(RANGE_SELECTOR_SYMBOLS);
+export const useStateRef = <T = any>(value: T) => {
+    const cache = useRef<T>();
+    cache.current = value;
+    return cache as { current: T };
 };
-

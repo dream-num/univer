@@ -1,0 +1,55 @@
+@width: 250px;
+@max-height: 400px;
+
+.formula-search-function {
+    overflow-y: auto;
+
+    box-sizing: border-box;
+    width: @width;
+    max-height: @max-height;
+    margin: 0;
+    padding: var(--padding-sm);
+
+    line-height: 20px;
+    list-style: none;
+
+    background-color: rgb(var(--bg-color-secondary));
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-lg);
+    outline: none;
+    box-shadow: var(--box-shadow-base);
+
+    overflow: hidden;
+    overflow-y: auto;
+
+    &-item {
+        cursor: pointer;
+
+        box-sizing: border-box;
+        padding: var(--padding-xs) var(--padding-sm);
+
+        color: rgb(var(--text-color));
+
+        border-radius: var(--border-radius-base);
+
+        transition: background 0.2s;
+
+        &-name {
+            font-size: var(--font-size-xxs);
+
+            &-light {
+                color: rgb(var(--error-color));
+            }
+        }
+
+        &-desc {
+            display: block;
+            font-size: var(--font-size-xxs);
+            color: rgb(var(--grey-500));
+        }
+
+        &-active {
+            background-color: rgb(var(--bg-color-hover));
+        }
+    }
+}

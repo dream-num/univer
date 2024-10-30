@@ -17,7 +17,7 @@
 import type { IDisposable, IUnitRangeName } from '@univerjs/core';
 import type { Editor } from '@univerjs/docs-ui';
 import type { ReactNode } from 'react';
-import { createInternalEditorID, debounce, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
+import { createInternalEditorID, debounce, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, generateRandomId, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { DocBackScrollRenderController, IEditorService } from '@univerjs/docs-ui';
 import { deserializeRangeWithSheet, LexerTreeBuilder, matchToken, sequenceNodeType } from '@univerjs/engine-formula';
@@ -25,16 +25,22 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '@univerjs/sheets-formula';
-
 import { RANGE_SELECTOR_SYMBOLS, SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
+
 import cl from 'clsx';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { filter } from 'rxjs';
 import { RefSelectionsRenderService } from '../../services/render-services/ref-selections.render-service';
-import { useEditorInput } from './hooks/useEditorInput';
-import { useFormulaToken } from './hooks/useFormulaToken';
 
+import { useEditorInput } from './hooks/useEditorInput';
+import { useFocus } from './hooks/useFocus';
+import { useFormulaToken } from './hooks/useFormulaToken';
 import { buildTextRuns, useColor, useDocHight, useSheetHighlight } from './hooks/useHighlight';
+import { useLeftAndRightArrow } from './hooks/useLeftAndRightArrow';
+import { useOnlyOneRange } from './hooks/useOnlyOneRange';
 import { useRefactorEffect } from './hooks/useRefactorEffect';
+import { useRefocus } from './hooks/useRefocus';
+import { useResetSelection } from './hooks/useResetSelection';
 import { useResize } from './hooks/useResize';
 import { useSheetSelectionChange } from './hooks/useSheetSelectionChange';
 import { useVerify } from './hooks/useVerify';
@@ -54,14 +60,11 @@ export interface IRangeSelectorProps {
     placeholder?: string;
     isFocus?: boolean;
     onBlur?: () => void;
-    /**
-     * 暂无效果
-     * @memberof IRangeSelectorProps
-     */
+
     onFocus?: () => void;
 
     actions?: {
-        handleOutClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => void;
+        handleOutClick?: (e: MouseEvent, cb: () => void) => void;
     };
 
     /**
@@ -88,6 +91,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             onVerify = noopFunction,
             onRangeSelectorDialogVisibleChange = noopFunction,
             onBlur = noopFunction,
+            onFocus = noopFunction,
             isFocus: _isFocus = true,
             isOnlyOneRange = false,
             isSupportAcrossSheet = false } = props;
@@ -114,10 +118,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     // init actions
     if (actions) {
-        actions.handleOutClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cb: (v: boolean) => void) => {
-            if (rangeSelectorWrapRef.current) {
+        actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
+            if (rangeSelectorWrapRef.current && !rangeDialogVisible) {
                 const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
-                cb(isContain);
+                !isContain && cb();
             }
         };
     }
@@ -127,6 +131,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, [rangeString]);
 
     const isError = useMemo(() => errorText !== undefined, [errorText]);
+
+    const resetSelection = useResetSelection(!rangeDialogVisible && isFocus);
 
     const handleInputDebounce = useMemo(() => debounce((text: string) => {
         const nodes = lexerTreeBuilder.sequenceNodesBuilder(text);
@@ -161,6 +167,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
         onChange(text);
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);
+        setTimeout(() => {
+            editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
+        }, 30);
     };
 
     const handleClose = () => {
@@ -170,22 +179,35 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const handleOpenModal = () => {
         if (!isError) {
-            rangeDialogVisibleSet(true);
-            onRangeSelectorDialogVisibleChange(true);
+            focus();
+            // 从另一个 editor 直接打开的时候,调整下事件监听顺序,确保打开面板的逻辑在 editor 切换之后
+            setTimeout(() => {
+                rangeDialogVisibleSet(true);
+                onRangeSelectorDialogVisibleChange(true);
+            }, 30);
         }
     };
 
-    const focus = useMemo(() => {
-        let time: NodeJS.Timeout = 0 as any;
-        return () => {
-            clearTimeout(time);
-            if (editor) {
-                time = setTimeout(() => {
-                    editor.focus();
-                }, 30);
-            }
-        };
-    }, [editor]);
+    const focus = useFocus(editor);
+
+    useLayoutEffect(() => {
+        // 如果是失去焦点的话，需要立刻执行
+        // 在进行多个 input 切换的时候,失焦必须立刻执行.
+        if (_isFocus) {
+            const time = setTimeout(() => {
+                isFocusSet(_isFocus);
+                if (_isFocus) {
+                    focus();
+                }
+            }, 30);
+            return () => {
+                clearTimeout(time);
+            };
+        } else {
+            resetSelection();
+            isFocusSet(_isFocus);
+        }
+    }, [_isFocus, focus]);
 
     const { checkScrollBar } = useResize(editor);
 
@@ -213,11 +235,17 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     useSheetSelectionChange(!rangeDialogVisible && isFocus, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
 
-    useRefactorEffect(!rangeDialogVisible && isFocus, unitId, isOnlyOneRange);
+    useRefactorEffect(!rangeDialogVisible && isFocus, unitId);
+
+    useOnlyOneRange(unitId, isOnlyOneRange);
 
     useEditorInput(unitId, rangeString, editor);
 
-    useVerify(onVerify, sequenceNodes);
+    useVerify(!rangeDialogVisible && isFocus, onVerify, sequenceNodes);
+
+    useLeftAndRightArrow(!rangeDialogVisible && isFocus, editor);
+
+    useRefocus();
 
     useEffect(() => {
         if (editor) {
@@ -239,6 +267,8 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onBlur();
                 // Refresh the component
                 sequenceNodesSet((pre) => [...pre]);
+                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                editor?.focus();
             }
         });
         const d2 = commandService.onCommandExecuted((info) => {
@@ -254,22 +284,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d2.dispose();
         };
     }, [isSupportAcrossSheet]);
-
-    useEffect(() => {
-        isFocusSet(_isFocus);
-    }, [_isFocus]);
-
-    useEffect(() => {
-        if (editor && rangeDialogVisible) {
-            editor.blur();
-            const d = editor.focus$.subscribe(() => {
-                editor.blur();
-            });
-            return () => {
-                d.unsubscribe();
-            };
-        }
-    }, [editor, rangeDialogVisible]);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;
@@ -290,7 +304,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
         return () => {
             dispose?.dispose();
         };
-    }, [containerRef.current]);
+    }, []);
+
+    const handleClick = () => {
+        // 在进行多个 input 切换的时候,失焦必须快于获得焦点.
+        // 即使失焦是 mousedown 事件,
+        // 聚焦是 mouseup 事件,
+        // 但是 react 的 useEffect 无法保证顺序,无法确保失焦在聚焦之前.
+        setTimeout(() => {
+            onFocus();
+            focus();
+            isFocusSet(true);
+        }, 30);
+    };
 
     return (
         <div className={styles.sheetRangeSelector} ref={rangeSelectorWrapRef}>
@@ -299,7 +325,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 [styles.sheetRangeSelectorError]: isError,
             })}
             >
-                <div className={styles.sheetRangeSelectorText} ref={containerRef}>
+                <div className={styles.sheetRangeSelectorText} ref={containerRef} onMouseUp={handleClick}>
                 </div>
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <SelectRangeSingle className={styles.sheetRangeSelectorIcon} onClick={handleOpenModal} />
@@ -310,6 +336,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
             {rangeDialogVisible && (
                 <RangeSelectorDialog
+                    editorId={editorId}
                     handleConfirm={handleConfirm}
                     handleClose={handleClose}
                     unitId={unitId}
@@ -326,6 +353,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 }
 
 function RangeSelectorDialog(props: {
+    editorId: string;
     handleConfirm: (ranges: IUnitRangeName[]) => void;
     handleClose: () => void;
     visible: boolean;
@@ -335,12 +363,14 @@ function RangeSelectorDialog(props: {
     isOnlyOneRange: boolean;
     isSupportAcrossSheet: boolean;
 }) {
-    const { handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
+    const { editorId, handleConfirm, handleClose: _handleClose, visible, initValue, unitId, subUnitId, isOnlyOneRange, isSupportAcrossSheet } = props;
 
     const localeService = useDependency(LocaleService);
+    const editorService = useDependency(IEditorService);
     const descriptionService = useDependency(IDescriptionService);
     const lexerTreeBuilder = useDependency(LexerTreeBuilder);
     const renderManagerService = useDependency(IRenderManagerService);
+
     const render = renderManagerService.getRenderById(unitId);
     const refSelectionsRenderService = render?.with(RefSelectionsRenderService);
 
@@ -422,13 +452,29 @@ function RangeSelectorDialog(props: {
 
     useSheetHighlight(visible, unitId, subUnitId, refSelections);
     useSheetSelectionChange(focusIndex >= 0, unitId, subUnitId, sequenceNodes, isSupportAcrossSheet, isOnlyOneRange, handleSheetSelectionChange);
-    useRefactorEffect(focusIndex >= 0, unitId, isOnlyOneRange);
+    useRefactorEffect(focusIndex >= 0, unitId);
+    useOnlyOneRange(unitId, isOnlyOneRange);
     // 如果只有一个空 range,那么默认自动添加 range
     useEffect(() => {
         if (ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {
             refSelectionsRenderService?.setSkipLastEnabled(true);
         }
     }, [ranges]);
+
+    useEffect(() => {
+        const d = editorService.focusStyle$
+            .pipe(
+                filter((e) => !!e && DOCS_NORMAL_EDITOR_UNIT_ID_KEY !== e)
+            )
+            .subscribe((e) => {
+                if (e !== editorId) {
+                    handleClose();
+                }
+            });
+        return () => {
+            d.unsubscribe();
+        };
+    }, [editorService, editorId]);
 
     return (
         <Dialog

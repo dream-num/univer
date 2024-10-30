@@ -368,6 +368,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -470,6 +471,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -491,6 +493,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     textRuns: [
@@ -589,6 +592,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [
@@ -607,6 +611,7 @@ describe('transform()', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [

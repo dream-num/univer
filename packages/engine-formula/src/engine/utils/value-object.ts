@@ -310,6 +310,8 @@ export function getRangeReferenceObjectFromCache(variant1: BaseReferenceObject, 
     const key = `${variant1.getToken()}:${variant2.getToken()}`;
     const o = referenceObjectFromCache.get(key);
     if (o) {
+        const { x, y } = variant1.getRefOffset();
+        o.setRefOffset(x, y);
         return o;
     }
     let referenceObject: FunctionVariantType = ErrorValueObject.create(ErrorType.NAME);

@@ -15,7 +15,6 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 
 import { ErrorType } from '../../basics/error-type';
 import {
@@ -42,11 +41,11 @@ export class ReferenceNode extends BaseAstNode {
     constructor(
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _operatorString: string,
-        private _referenceObject: BaseReferenceObject,
+        operatorString: string,
+        private _referenceObjectType: ReferenceObjectType,
         private _isPrepareMerge: boolean = false
     ) {
-        super(_operatorString);
+        super(operatorString);
     }
 
     override get nodeType() {
@@ -57,32 +56,34 @@ export class ReferenceNode extends BaseAstNode {
         const currentConfigService = this._currentConfigService;
         const runtimeService = this._runtimeService;
 
-        this._referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
+        const referenceObject = getReferenceObjectFromCache(this.getToken(), this._referenceObjectType);
 
-        this._referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
+        referenceObject.setDefaultUnitId(runtimeService.currentUnitId);
 
-        this._referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
+        referenceObject.setDefaultSheetId(runtimeService.currentSubUnitId);
 
-        this._referenceObject.setUnitData(currentConfigService.getUnitData());
+        referenceObject.setForcedSheetId(currentConfigService.getSheetNameMap());
 
-        this._referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
+        referenceObject.setUnitData(currentConfigService.getUnitData());
 
-        this._referenceObject.setRuntimeData(runtimeService.getUnitData());
+        referenceObject.setArrayFormulaCellData(currentConfigService.getArrayFormulaCellData());
 
-        this._referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
+        referenceObject.setRuntimeData(runtimeService.getUnitData());
 
-        this._referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
+        referenceObject.setUnitStylesData(currentConfigService.getUnitStylesData());
 
-        this._referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());
+        referenceObject.setRuntimeArrayFormulaCellData(runtimeService.getRuntimeArrayFormulaCellData());
+
+        referenceObject.setRuntimeFeatureCellData(runtimeService.getRuntimeFeatureCellData());
 
         const { x, y } = this.getRefOffset();
 
-        this._referenceObject.setRefOffset(x, y);
+        referenceObject.setRefOffset(x, y);
 
-        if (!this._isPrepareMerge && this._referenceObject.isExceedRange()) {
+        if (!this._isPrepareMerge && referenceObject.isExceedRange()) {
             this.setValue(ErrorValueObject.create(ErrorType.NAME));
         } else {
-            this.setValue(this._referenceObject);
+            this.setValue(referenceObject);
         }
     }
 
@@ -147,12 +148,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
         let node: Nullable<ReferenceNode>;
         if (regexTestSingeRange(tokenTrim)) {
-            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.CELL), isPrepareMerge);
+            node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.CELL, isPrepareMerge);
         } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
             if (regexTestSingleRow(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.ROW), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.ROW, isPrepareMerge);
             } else if (regexTestSingleColumn(tokenTrim)) {
-                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, getReferenceObjectFromCache(tokenTrim, ReferenceObjectType.COLUMN), isPrepareMerge);
+                node = new ReferenceNode(currentConfigService, runtimeService, tokenTrim, ReferenceObjectType.COLUMN, isPrepareMerge);
             }
         }
         // else {

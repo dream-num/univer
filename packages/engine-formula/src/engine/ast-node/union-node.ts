@@ -28,8 +28,8 @@ import { NODE_ORDER_MAP, NodeType } from './node-type';
 // const UNION_EXECUTOR_NAME = 'UNION';
 
 export class UnionNode extends BaseAstNode {
-    constructor(private _operatorString: string) {
-        super(_operatorString);
+    constructor(operatorString: string) {
+        super(operatorString);
     }
 
     override get nodeType() {
@@ -38,20 +38,24 @@ export class UnionNode extends BaseAstNode {
 
     override execute() {
         const children = this.getChildren();
-        const leftNode = children[0].getValue();
-        const rightNode = children[1].getValue();
+        const leftChild = children[0];
+        const rightChild = children[1];
+        const leftNode = leftChild.getValue();
+        const rightNode = rightChild.getValue();
 
         if (leftNode == null || rightNode == null) {
             throw new Error('leftNode and rightNode');
         }
 
         let result: FunctionVariantType;
-        if (this._operatorString === matchToken.COLON) {
+        if (this.getToken() === matchToken.COLON) {
             result = this._unionFunction(leftNode, rightNode) as FunctionVariantType;
         } else {
             result = ErrorValueObject.create(ErrorType.NAME);
         }
         this.setValue(result);
+
+        this.clearChildrenValue();
     }
 
     private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {

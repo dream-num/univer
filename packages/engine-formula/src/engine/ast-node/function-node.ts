@@ -47,7 +47,7 @@ export class FunctionNode extends BaseAstNode {
         private _runtimeService: IFormulaRuntimeService,
         private _definedNamesService: IDefinedNamesService
     ) {
-        super(token);
+        super('');
 
         if (this._functionExecutor.isAsync()) {
             this.setAsync();
@@ -78,7 +78,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
             if (object == null) {
                 continue;
             }
@@ -100,6 +101,8 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(result);
 
         this.setValue(result);
+
+        this.clearChildrenValue();
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -111,7 +114,8 @@ export class FunctionNode extends BaseAstNode {
         this._compatibility();
 
         for (let i = 0; i < childrenCount; i++) {
-            const object = children[i].getValue();
+            const child = children[i];
+            const object = child.getValue();
 
             if (object == null) {
                 continue;
@@ -131,6 +135,8 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(resultVariant);
 
         this.setValue(resultVariant as FunctionVariantType);
+
+        this.clearChildrenValue();
     }
 
      /**
@@ -298,11 +304,13 @@ export class ErrorFunctionNode extends BaseAstNode {
 
     override async executeAsync() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+        this.clearChildrenValue();
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
     override execute() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
+        this.clearChildrenValue();
     }
 }
 

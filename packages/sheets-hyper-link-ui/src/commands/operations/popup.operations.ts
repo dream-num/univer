@@ -16,9 +16,9 @@
 
 import { CommandType, DOCS_ZEN_EDITOR_UNIT_ID_KEY, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { getSheetCommandTarget, type ISheetCommandSharedParams, SheetsSelectionsService } from '@univerjs/sheets';
+import { HyperLinkEditSourceType } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
-import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
 import { getShouldDisableCurrentCellLink } from '../../utils';
 
 export interface IOpenHyperLinkEditPanelOperationParams extends ISheetCommandSharedParams {

@@ -2587,6 +2587,9 @@ importers:
       '@univerjs/sheets-formula-ui':
         specifier: workspace:*
         version: link:../sheets-formula-ui
+      '@univerjs/sheets-hyper-link':
+        specifier: workspace:*
+        version: link:../sheets-hyper-link
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

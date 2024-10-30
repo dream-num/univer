@@ -25,7 +25,7 @@ import type {
     ISetFormulaCalculationStartMutation,
 } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { Disposable, ICommandService } from '@univerjs/core';
+import { Disposable, ICommandService, ILogService } from '@univerjs/core';
 import {
     FormulaExecutedStateType,
     FormulaExecuteStageType,
@@ -117,7 +117,8 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @ILogService private readonly _logService: ILogService
     ) {
         super();
 
@@ -410,7 +411,7 @@ export class TriggerCalculationController extends Disposable {
                         this._executionInProgressParams = null;
                     }
 
-                    console.warn(`Execution result: ${result}`);
+                    this._logService.debug('[TriggerCalculationController]', result);
                 }
             })
         );

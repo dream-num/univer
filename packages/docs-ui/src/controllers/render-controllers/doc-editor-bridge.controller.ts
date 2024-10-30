@@ -194,6 +194,11 @@ export class DocEditorBridgeController extends Disposable implements IRenderModu
                     return;
                 }
 
+                // TODO:@ggg: Docs-ui should not rely on sheet-ui stuff, and the code needs to be removed after the editor is refactored.
+                if (unitId.includes('range_selector') || unitId.includes('embedding_formula_editor')) {
+                    return;
+                }
+
                 this._editorService.blur();
             })
         );

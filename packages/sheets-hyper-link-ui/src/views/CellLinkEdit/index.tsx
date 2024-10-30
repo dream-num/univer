@@ -74,7 +74,7 @@ export const CellLinkEdit = () => {
 
     const [showError, setShowError] = useState(false);
 
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
 
     const setByPayload = useRef(false);
 
@@ -83,7 +83,7 @@ export const CellLinkEdit = () => {
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
 
     useEffect(() => {
-        isFocusRangeSelectorSet(false);
+        isFocusRangeSelectorSet(true);
     }, [subUnitId]);
 
     useEffect(() => {

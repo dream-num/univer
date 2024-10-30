@@ -176,7 +176,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const handleOpenModal = () => {
         if (!isError) {
-            editor?.focus();
+            focus();
             // 从另一个 editor 直接打开的时候,调整下事件监听顺序,确保打开面板的逻辑在 editor 切换之后
             setTimeout(() => {
                 rangeDialogVisibleSet(true);
@@ -281,18 +281,6 @@ export function RangeSelector(props: IRangeSelectorProps) {
             d2.dispose();
         };
     }, [isSupportAcrossSheet]);
-
-    useEffect(() => {
-        if (editor && rangeDialogVisible) {
-            editor.blur();
-            const d = editor.focus$.subscribe(() => {
-                editor.blur();
-            });
-            return () => {
-                d.unsubscribe();
-            };
-        }
-    }, [editor, rangeDialogVisible]);
 
     useLayoutEffect(() => {
         let dispose: IDisposable;

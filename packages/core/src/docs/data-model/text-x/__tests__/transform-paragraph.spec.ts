@@ -209,7 +209,7 @@ describe('transform paragraph in body', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -237,7 +237,7 @@ describe('transform paragraph in body', () => {
             {
                 t: TextXActionType.RETAIN,
                 len: 1,
-                coverType: UpdateDocsAttributeType.REPLACE,
+                coverType: UpdateDocsAttributeType.COVER,
                 body: {
                     dataStream: '',
                     paragraphs: [{
@@ -346,6 +346,9 @@ describe('transform paragraph in body', () => {
                             spaceBelow: {
                                 v: 20,
                             },
+                            spaceAbove: {
+                                v: 30,
+                            },
                         },
                     }],
                 },
@@ -366,6 +369,9 @@ describe('transform paragraph in body', () => {
                             spaceBelow: {
                                 v: 20,
                             },
+                            spaceAbove: {
+                                v: 30,
+                            },
                         },
                     }],
                 },
@@ -384,6 +390,9 @@ describe('transform paragraph in body', () => {
                         paragraphStyle: {
                             spaceBelow: {
                                 v: 20,
+                            },
+                            spaceAbove: {
+                                v: 30,
                             },
                         },
                     }],
@@ -404,11 +413,6 @@ describe('transform paragraph in body', () => {
 
         const composedAction1 = TextX.compose(actionsA, TextX.transform(actionsB, actionsA, 'left'));
         const composedAction2 = TextX.compose(actionsB, TextX.transform(actionsA, actionsB, 'right'));
-
-        // console.log(JSON.stringify(actionsA, null, 2));
-        // console.log(JSON.stringify(TextX.transform(actionsB, actionsA, 'left'), null, 2));
-        // console.log(JSON.stringify(composedAction1, null, 2));
-        // console.log(JSON.stringify(composedAction2, null, 2));
 
         const resultC = TextX.apply(doc3, composedAction1);
         const resultD = TextX.apply(doc4, composedAction2);

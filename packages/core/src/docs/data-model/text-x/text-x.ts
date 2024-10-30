@@ -40,6 +40,7 @@ export class TextX {
         return textXApply(doc, actions);
     }
 
+    // eslint-disable-next-line complexity
     static compose(thisActions: TextXAction[], otherActions: TextXAction[]): TextXAction[] {
         const thisIter = new ActionIterator(thisActions);
         const otherIter = new ActionIterator(otherActions);
@@ -69,10 +70,14 @@ export class TextX {
                     if (thisAction.body == null && otherAction.body == null) {
                         textX.push(thisAction.len !== Number.POSITIVE_INFINITY ? thisAction : otherAction); // or otherAction
                     } else if (thisAction.body && otherAction.body) {
+                        const coverType = thisAction.coverType === UpdateDocsAttributeType.REPLACE || otherAction.coverType === UpdateDocsAttributeType.REPLACE
+                            ? UpdateDocsAttributeType.REPLACE
+                            : UpdateDocsAttributeType.COVER;
+
                         textX.push({
                             ...thisAction,
                             t: TextXActionType.RETAIN,
-                            coverType: otherAction.coverType,
+                            coverType,
                             body: composeBody(thisAction.body, otherAction.body, otherAction.coverType),
                         });
                     } else {

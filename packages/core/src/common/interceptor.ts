@@ -120,14 +120,14 @@ export class InterceptorManager<P extends Record<string, IInterceptor<any, any>>
 }
 
 export function createAsyncInterceptorKey<T, C>(key: string): IAsyncInterceptor<T, C> {
-    const symbol = `sheet_interceptor_${key}`;
-    return symbol as unknown as IAsyncInterceptor<T, C>; // FIXME: priority and handler is completely missing?
+    const symbol = `sheet_async_interceptor_${key}`;
+    return symbol as unknown as IAsyncInterceptor<T, C>;
 };
 
 export type AsyncInterceptorHandler<M = unknown, C = unknown> = (
     value: Nullable<M>,
     context: C,
-    next?: (value: Nullable<M>) => Promise<Nullable<M>>
+    next: (value: Nullable<M>) => Promise<Nullable<M>>
 ) => Promise<Nullable<M>>;
 
 export interface IAsyncInterceptor<M, C> {

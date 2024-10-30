@@ -180,7 +180,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
 
     const onRangeSelectorChange = (rangeString: string) => {
-        const result = rangeString.split(',').map(deserializeRangeWithSheet).map((item) => item.range);
+        const result = rangeString.split(',').filter((e) => !!e).map(deserializeRangeWithSheet).map((item) => item.range);
         rangeResult.current = result;
     };
 

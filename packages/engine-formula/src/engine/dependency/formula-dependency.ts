@@ -60,6 +60,7 @@ function generateRandomDependencyTreeId(dependencyManagerService: IDependencyMan
 export class FormulaDependencyGenerator extends Disposable {
     private _formulaASTCache = new FormulaAstLRU<AstRootNode>(FORMULA_CACHE_LRU_COUNT);
     private _updateRangeFlattenCache = new Map<string, Map<string, IRange[]>>();
+    private _dependencyTreeCache = new Map<number, IFormulaDependencyTree>();
 
     constructor(
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
@@ -122,6 +123,8 @@ export class FormulaDependencyGenerator extends Disposable {
             this._runtimeService.enableCycleDependency();
         }
 
+        this._dependencyTreeCache.clear();
+
         this._dependencyManagerService.closeKdTree();
 
         return Promise.resolve(finalTreeList);
@@ -139,7 +142,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
             if (color === WHITE) {
                 colorMap.set(currentTreeId, GRAY);
-                const node = this._dependencyManagerService.getTreeById(currentTreeId);
+                const node = this._dependencyTreeCache.get(currentTreeId);
                 if (node == null) {
                     colorMap.set(currentTreeId, BLACK);
                     stack.pop();
@@ -230,10 +233,10 @@ export class FormulaDependencyGenerator extends Disposable {
 
         for (let i = 0, len = treeList.length; i < len; i++) {
             const tree = treeList[i];
-
-            if (!tree.isCache) {
-                this._dependencyManagerService.addDependencyRTreeCache(tree);
+            if (tree.isCache) {
+                continue;
             }
+            this._dependencyManagerService.addDependencyRTreeCache(tree);
         }
 
         return treeList;
@@ -264,21 +267,17 @@ export class FormulaDependencyGenerator extends Disposable {
         featureMap.forEach((subUnitMap, _) => {
             subUnitMap.forEach((featureMap, _) => {
                 featureMap.forEach((params, featureId) => {
-                    const treeCache = this._dependencyManagerService.getFeatureFormulaDependency(params.unitId, params.subUnitId, featureId);
-                    if (treeCache) {
-                        treeCache.isCache = true;
-                        return;
-                    }
-                    treeList.push(this._getFeatureFormulaTree(featureId, params));
+                    const treeId = this._dependencyManagerService.getFeatureFormulaDependency(params.unitId, params.subUnitId, featureId);
+                    treeList.push(this._getFeatureFormulaTree(featureId, treeId, params));
                 });
             });
         });
     }
 
-    private _getFeatureFormulaTree(featureId: string, params: IFeatureCalculationManagerParam) {
+    private _getFeatureFormulaTree(featureId: string, treeId: Nullable<number>, params: IFeatureCalculationManagerParam) {
         const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
-
-        const FDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
+        const treeIdNum = treeId || generateRandomDependencyTreeId(this._dependencyManagerService);
+        const FDtree = new FormulaDependencyTree(treeIdNum);
 
         // FDtree.unitId = unitId;
         // FDtree.subUnitId = subUnitId;
@@ -301,6 +300,13 @@ export class FormulaDependencyGenerator extends Disposable {
 
         this._dependencyManagerService.addFeatureFormulaDependency(unitId, subUnitId, featureId, FDtree);
 
+        this._dependencyTreeCache.set(FDtree.treeId, FDtree);
+
+        const treeCache = this._dependencyManagerService.getFeatureFormulaDependency(params.unitId, params.subUnitId, featureId);
+        if (treeCache) {
+            FDtree.isCache = true;
+        }
+
         return FDtree;
     }
 
@@ -313,38 +319,27 @@ export class FormulaDependencyGenerator extends Disposable {
             if (subComponentData == null) {
                 continue;
             }
-
             const subComponentKeys = Object.keys(subComponentData);
             for (const subUnitId of subComponentKeys) {
                 const subFormulaData = subComponentData[subUnitId];
-
                 if (subFormulaData == null) {
                     continue;
                 }
-
                 const subFormulaDataKeys = Object.keys(subFormulaData);
                 for (const subFormulaDataId of subFormulaDataKeys) {
                     const hasOtherFormula = this._dependencyManagerService.hasOtherFormulaDataMainData(subFormulaDataId);
                     const formulaDataItem = subFormulaData[subFormulaDataId];
                     const { f: formulaString, ranges } = formulaDataItem;
-
+                    let isCache = false;
                     if (hasOtherFormula) {
-                        const treeSet = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
-                        if (treeSet) {
-                            for (const treeId of treeSet) {
-                                const tree = this._dependencyManagerService.getTreeById(treeId);
-                                if (tree) {
-                                    tree.isCache = true;
-                                }
-                            }
-                            continue;
-                        }
+                        isCache = true;
                     }
-
                     const node = this._generateAstNode(unitId, formulaString);
                     const { firstRow, firstColumn } = this._getFirstCellOfRange(ranges);
 
-                    const firstFDtree = new FormulaDependencyTree(generateRandomDependencyTreeId(this._dependencyManagerService));
+                    const treeMatrix = this._dependencyManagerService.getOtherFormulaDependency(unitId, subUnitId, subFormulaDataId);
+                    const firstTreeId = treeMatrix?.getValue(0, 0) || generateRandomDependencyTreeId(this._dependencyManagerService);
+                    const firstFDtree = new FormulaDependencyTree(firstTreeId);
 
                     for (let i = 0; i < ranges.length; i++) {
                         const range = ranges[i];
@@ -361,18 +356,23 @@ export class FormulaDependencyGenerator extends Disposable {
                                     firstFDtree.subUnitId = subUnitId;
                                     firstFDtree.formulaId = subFormulaDataId;
                                     firstFDtree.type = FormulaDependencyTreeType.OTHER_FORMULA;
+                                    firstFDtree.isCache = isCache;
                                     treeList.push(firstFDtree);
+                                    this._dependencyTreeCache.set(firstFDtree.treeId, firstFDtree);
                                     this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, firstFDtree);
                                     continue;
                                 }
 
                                 const virtual = new FormulaDependencyTreeVirtual();
-                                virtual.treeId = generateRandomDependencyTreeId(this._dependencyManagerService);
+                                virtual.treeId = treeMatrix?.getValue(x, y) || generateRandomDependencyTreeId(this._dependencyManagerService);
+
                                 virtual.refTree = firstFDtree;
                                 virtual.refOffsetX = x;
                                 virtual.refOffsetY = y;
+                                virtual.isCache = isCache;
                                 this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, virtual);
                                 treeList.push(virtual);
+                                this._dependencyTreeCache.set(virtual.treeId, virtual);
                             }
                         }
                     }
@@ -416,17 +416,20 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
 
-                    const treeCache = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column) as FormulaDependencyTree;
-                    if (treeCache) {
-                        sIdCache.set(si, treeCache);
-                        treeCache.isCache = true;
-                        return true;
+                    const FDtree = this._createFDtree(unitId, sheetId, row, column, unitData, formulaDataItem);
+
+                    const treeId = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
+                    if (treeId != null) {
+                        FDtree.treeId = treeId;
+                    } else {
+                        this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
                     }
 
-                    const FDtree = this._createFDtree(unitId, sheetId, row, column, unitData, formulaDataItem);
                     sIdCache.set(si, FDtree);
                     this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
                     treeList.push(FDtree);
+
+                    this._dependencyTreeCache.set(FDtree.treeId, FDtree);
                 });
 
                 matrixData.forValue((row, column, formulaDataItem) => {
@@ -441,12 +444,6 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
 
-                    const treeCache = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
-                    if (treeCache) {
-                        treeCache.isCache = true;
-                        return true;
-                    }
-
                     let FDtree: IFormulaDependencyTree;
 
                     if (si && sIdCache.has(si)) {
@@ -457,9 +454,16 @@ export class FormulaDependencyGenerator extends Disposable {
                         FDtree = this._createFDtree(unitId, sheetId, row, column, unitData, formulaDataItem);
                     }
 
-                    this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
+                    const treeId = this._dependencyManagerService.getFormulaDependency(unitId, sheetId, row, column);
+                    if (treeId != null) {
+                        FDtree.treeId = treeId;
+                    } else {
+                        this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
+                    }
 
                     treeList.push(FDtree);
+
+                    this._dependencyTreeCache.set(FDtree.treeId, FDtree);
                 });
 
                 sIdCache.clear();
@@ -730,13 +734,13 @@ export class FormulaDependencyGenerator extends Disposable {
         const existTree = new Set<number>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
 
-        const allTree: IFormulaDependencyTree[] = this._dependencyManagerService.getAllTree();
+        // const allTree: IFormulaDependencyTree[] = Array.from(this._dependencyTreeCache.values());
 
         const dirtyRanges = this._currentConfigService.getDirtyRanges();
         const treeIds = this._dependencyManagerService.searchDependency(dirtyRanges); // RTree Average case is O(logN + k)
 
-        for (let i = 0, len = allTree.length; i < len; i++) {
-            const tree = allTree[i];
+        for (const [treeId, tree] of this._dependencyTreeCache) {
+            // const tree = allTree[i];
 
             /**
              * forceCalculate: Mandatory calculation, adding all formulas to dependencies
@@ -748,15 +752,23 @@ export class FormulaDependencyGenerator extends Disposable {
                     forceCalculate ||
                     tree.dependencySheetName(this._currentConfigService.getDirtyNameMap()) || //O(n) n=tree.rangeList.length
                     (
-                        treeIds.has(tree.treeId)// O(1)
+                        treeIds.has(treeId)// O(1)
                         && !tree.isExcludeRange(this._currentConfigService.getExcludedRange()) //worst O(n^2), best O(n)  n^2=tree.rangeList.length*excludedRange.length, excludedRange.length is usually small
                     ) ||
                     this._includeTree(tree) //O(n) n=tree.rangeList.length
-                ) && !existTree.has(tree.treeId) //O(1)
+                ) && !existTree.has(treeId) //O(1)
             ) {
                 newTreeList.push(tree);
-                existTree.add(tree.treeId);
+                existTree.add(treeId);
             }
+        }
+
+        for (const [treeId, tree] of this._dependencyTreeCache) {
+            if (tree.isVirtual) {
+                continue;
+            }
+
+            (tree as FormulaDependencyTree).rangeList.length = 0;
         }
 
         return newTreeList;
@@ -1009,7 +1021,7 @@ export class FormulaDependencyGenerator extends Disposable {
             const searchResults = this._dependencyManagerService.searchDependency(tree.toRTreeItem());
 
             for (const parentTreeId of searchResults) {
-                const parentTree = this._dependencyManagerService.getTreeById(parentTreeId);
+                const parentTree = this._dependencyTreeCache.get(parentTreeId);
                 if (!parentTree) {
                     throw new Error('ParentDependencyTree object is null');
                 }
@@ -1037,6 +1049,7 @@ export class FormulaDependencyGenerator extends Disposable {
         for (const tree of this._traverse(treeList)) {
             formulaRunList.push(tree);
         }
+
         return formulaRunList.reverse();
     }
 }

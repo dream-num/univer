@@ -69,45 +69,78 @@ class FormulaDependencyTreeCalculator {
     }
 }
 
+type GetDirtyDataType = Nullable<
+    (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+        runtimeCellData: IRuntimeUnitDataType;
+        dirtyRanges: IFeatureDirtyRangeType;
+    }
+>;
 export type IFormulaDependencyTree = FormulaDependencyTree | FormulaDependencyTreeVirtual;
 
 export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculator {
     treeId: number;
-    refTree: FormulaDependencyTree;
+    refTree: Nullable<FormulaDependencyTree>;
     refOffsetX: number = 0;
     refOffsetY: number = 0;
     isCache: boolean = false;
+
+    node: Nullable<AstRootNode>;
 
     get isVirtual() {
         return true;
     }
 
     get row() {
+        if (this.refTree == null) {
+            return -1;
+        }
         return this.refTree.row + this.refOffsetY;
     }
 
     get column() {
+        if (this.refTree == null) {
+            return -1;
+        }
         return this.refTree.column + this.refOffsetX;
     }
 
     get rowCount() {
+        if (this.refTree == null) {
+            return 0;
+        }
         return this.refTree.rowCount;
     }
 
     get columnCount() {
+        if (this.refTree == null) {
+            return 0;
+        }
         return this.refTree.columnCount;
     }
 
     get unitId() {
+        if (this.refTree == null) {
+            return '';
+        }
         return this.refTree.unitId;
     }
 
     get subUnitId() {
+        if (this.refTree == null) {
+            return '';
+        }
         return this.refTree.subUnitId;
+    }
+
+    dispose() {
+        this.refTree = null;
     }
 
     get rangeList() {
         const unitRangeList = [];
+        if (this.refTree == null) {
+            return [];
+        }
         for (let i = 0; i < this.refTree.rangeList.length; i++) {
             const range = this.refTree.rangeList[i];
             unitRangeList.push({
@@ -120,6 +153,13 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     }
 
     get nodeData() {
+        if (this.refTree == null) {
+            return {
+                node: null,
+                refOffsetX: -1,
+                refOffsetY: -1,
+            };
+        }
         return {
             node: this.refTree.node,
             refOffsetX: this.refOffsetX,
@@ -160,6 +200,9 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     }
 
     dependencySheetName(dirtyUnitSheetNameMap?: IDirtyUnitSheetNameMap) {
+        if (this.refTree == null) {
+            return false;
+        }
         return this.refTree.dependencySheetName(dirtyUnitSheetNameMap);
     }
 
@@ -206,15 +249,13 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
         return false;
     }
 
-    getDirtyData: Nullable<
-        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
-            runtimeCellData: IRuntimeUnitDataType;
-            dirtyRanges: IFeatureDirtyRangeType;
-        }
-    >;
+    getDirtyData: GetDirtyDataType;
 
     featureId: Nullable<string>;
     get formulaId() {
+        if (this.refTree == null) {
+            return '';
+        }
         return this.refTree.formulaId;
     }
 }
@@ -226,10 +267,10 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
 export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
     treeId: number = -1;
 
+    isCache: boolean = false;
+
     featureId: Nullable<string>;
     featureDirtyRanges: IUnitRange[] = [];
-
-    isCache: boolean = false;
 
     refOffsetX: number = 0;
     refOffsetY: number = 0;
@@ -280,12 +321,7 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         };
     }
 
-    getDirtyData: Nullable<
-        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
-            runtimeCellData: IRuntimeUnitDataType;
-            dirtyRanges: IFeatureDirtyRangeType;
-        }
-    >;
+    getDirtyData: GetDirtyDataType;
 
     dispose(): void {
         this.featureDirtyRanges = [];
@@ -295,6 +331,8 @@ export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
         // this.nodeData?.node.dispose();
 
         this.node = null;
+
+        this.getDirtyData = null;
     }
 
     inRangeData(range: IRange) {

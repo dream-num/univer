@@ -34,39 +34,6 @@ export enum FDtreeStateType {
     SKIP,
 }
 
-export class FormulaDependencyTreeShareData {
-    formulaId: Nullable<string>;
-
-    subUnitId: string = '';
-
-    unitId: string = '';
-
-    node: Nullable<AstRootNode>;
-    rangeList: IUnitRange[] = [];
-
-    formula: string = '';
-
-    row: number = -1;
-
-    column: number = -1;
-
-    rowCount: number = Number.NEGATIVE_INFINITY;
-
-    columnCount: number = Number.NEGATIVE_INFINITY;
-
-    dispose(): void {
-        // this.children.forEach((tree) => {
-        //     tree.dispose();
-        // });
-
-        this.rangeList = [];
-
-        // this.nodeData?.node.dispose();
-
-        this.node = null;
-    }
-}
-
 export enum FormulaDependencyTreeType {
     NORMAL_FORMULA,
     OTHER_FORMULA,
@@ -78,115 +45,8 @@ export enum FormulaDependencyTreeType {
 //     token: string;
 // }
 
-/**
- * A dependency tree, capable of calculating mutual dependencies,
- * is used to determine the order of formula calculations.
- */
-export class FormulaDependencyTree {
-    treeId: number = -1;
-
-    featureId: Nullable<string>;
-    featureDirtyRanges: IUnitRange[] = [];
-
-    isCache: boolean = false;
-
-    share: Nullable<FormulaDependencyTreeShareData>;
-
-    refOffsetX: number = 0;
-    refOffsetY: number = 0;
-
-    type: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
-
-    constructor(treeId: number) {
-        this.treeId = treeId;
-    }
-
-    get row() {
-        if (this.share == null) {
-            return -1;
-        }
-        return this.share.row + this.refOffsetY;
-    }
-
-    get column() {
-        if (this.share == null) {
-            return -1;
-        }
-        return this.share.column + this.refOffsetX;
-    }
-
-    get unitId() {
-        return this.share?.unitId || '';
-    }
-
-    get subUnitId() {
-        return this.share?.subUnitId || '';
-    }
-
-    get rowCount() {
-        return this.share?.rowCount || Number.NEGATIVE_INFINITY;
-    }
-
-    get columnCount() {
-        return this.share?.columnCount || Number.NEGATIVE_INFINITY;
-    }
-
-    get formulaId() {
-        return this.share?.formulaId;
-    }
-
-    get formula() {
-        return this.share?.formula || '';
-    }
-
-    get rangeList() {
-        const rangeList = this.share?.rangeList || [];
-        const results = [];
-        for (let r = 0, len = rangeList.length; r < len; r++) {
-            const unitRange = rangeList[r];
-            const { unitId, sheetId, range } = unitRange;
-
-            const newRange = moveRangeByOffset(range, this.refOffsetX, this.refOffsetY);
-
-            results.push({
-                unitId,
-                sheetId,
-                range: newRange,
-            });
-        }
-
-        return results;
-    }
-
-    get nodeData(): IExecuteAstNodeData {
-        return {
-            node: this.share?.node,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
-        };
-    }
-
-    toJson() {
-        return {
-            formula: this.share?.formula,
-            refOffsetX: this.refOffsetX,
-            refOffsetY: this.refOffsetY,
-        };
-    }
-
-    getDirtyData: Nullable<
-        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
-            runtimeCellData: IRuntimeUnitDataType;
-            dirtyRanges: IFeatureDirtyRangeType;
-        }
-    >;
-
+class FormulaDependencyTreeCalculator {
     private _state = FDtreeStateType.DEFAULT;
-
-    dispose(): void {
-        this.share = null;
-        this.featureDirtyRanges = [];
-    }
 
     resetState() {
         this._state = FDtreeStateType.DEFAULT;
@@ -207,6 +67,81 @@ export class FormulaDependencyTree {
     isSkip() {
         return this._state === FDtreeStateType.SKIP;
     }
+}
+
+export type IFormulaDependencyTree = FormulaDependencyTree | FormulaDependencyTreeVirtual;
+
+export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculator {
+    treeId: number;
+    refTree: FormulaDependencyTree;
+    refOffsetX: number = 0;
+    refOffsetY: number = 0;
+    isCache: boolean = false;
+
+    get isVirtual() {
+        return true;
+    }
+
+    get row() {
+        return this.refTree.row + this.refOffsetY;
+    }
+
+    get column() {
+        return this.refTree.column + this.refOffsetX;
+    }
+
+    get rowCount() {
+        return this.refTree.rowCount;
+    }
+
+    get columnCount() {
+        return this.refTree.columnCount;
+    }
+
+    get unitId() {
+        return this.refTree.unitId;
+    }
+
+    get subUnitId() {
+        return this.refTree.subUnitId;
+    }
+
+    get rangeList() {
+        const unitRangeList = [];
+        for (let i = 0; i < this.refTree.rangeList.length; i++) {
+            const range = this.refTree.rangeList[i];
+            unitRangeList.push({
+                unitId: range.unitId,
+                sheetId: range.sheetId,
+                range: moveRangeByOffset(range.range, this.refOffsetX, this.refOffsetY),
+            });
+        }
+        return unitRangeList;
+    }
+
+    get nodeData() {
+        return {
+            node: this.refTree.node,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
+    toRTreeItem(): IUnitRange[] {
+        const currentRow = this.row;
+        const currentColumn = this.column;
+
+        return [{
+            unitId: this.unitId,
+            sheetId: this.subUnitId,
+            range: {
+                startRow: currentRow,
+                startColumn: currentColumn,
+                endRow: currentRow,
+                endColumn: currentColumn,
+            },
+        }];
+    }
 
     inRangeData(range: IRange) {
         const startRow = range.startRow;
@@ -214,12 +149,8 @@ export class FormulaDependencyTree {
         const endRow = range.endRow;
         const endColumn = range.endColumn;
 
-        if (this.share == null) {
-            return false;
-        }
-
-        const currentRow = this.share.row + this.refOffsetY;
-        const currentColumn = this.share.column + this.refOffsetX;
+        const currentRow = this.row;
+        const currentColumn = this.column;
 
         if (currentRow < startRow || currentRow > endRow || currentColumn < startColumn || currentColumn > endColumn) {
             return false;
@@ -229,11 +160,159 @@ export class FormulaDependencyTree {
     }
 
     dependencySheetName(dirtyUnitSheetNameMap?: IDirtyUnitSheetNameMap) {
-        if (this.share == null) {
+        return this.refTree.dependencySheetName(dirtyUnitSheetNameMap);
+    }
+
+    isExcludeRange(unitExcludedCell: Nullable<IUnitExcludedCell>) {
+        const rangeList = this.rangeList;
+
+        if (rangeList.length === 0) {
             return false;
         }
 
-        const rangeList = this.share.rangeList;
+        for (let r = 0, len = rangeList.length; r < len; r++) {
+            const unitRange = rangeList[r];
+            const { unitId, sheetId, range } = unitRange;
+
+            const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
+            let { startRow: rangeStartRow, endRow: rangeEndRow, startColumn: rangeStartColumn, endColumn: rangeEndColumn } = range;
+
+            if (Number.isNaN(rangeStartRow)) {
+                rangeStartRow = 0;
+            }
+            if (Number.isNaN(rangeStartColumn)) {
+                rangeStartColumn = 0;
+            }
+            if (Number.isNaN(rangeEndRow)) {
+                rangeEndRow = Number.POSITIVE_INFINITY;
+            }
+            if (Number.isNaN(rangeEndColumn)) {
+                rangeEndColumn = Number.POSITIVE_INFINITY;
+            }
+
+            let isInclude = false;
+
+            excludedCell?.forValue((row, column) => {
+                if (row >= rangeStartRow && row <= rangeEndRow && column >= rangeStartColumn && column <= rangeEndColumn) {
+                    isInclude = true;
+                    return false;
+                }
+            });
+
+            if (isInclude) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getDirtyData: Nullable<
+        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+            runtimeCellData: IRuntimeUnitDataType;
+            dirtyRanges: IFeatureDirtyRangeType;
+        }
+    >;
+
+    featureId: Nullable<string>;
+    formulaId: Nullable<string>;
+}
+
+/**
+ * A dependency tree, capable of calculating mutual dependencies,
+ * is used to determine the order of formula calculations.
+ */
+export class FormulaDependencyTree extends FormulaDependencyTreeCalculator {
+    treeId: number = -1;
+
+    featureId: Nullable<string>;
+    featureDirtyRanges: IUnitRange[] = [];
+
+    isCache: boolean = false;
+
+    refOffsetX: number = 0;
+    refOffsetY: number = 0;
+
+    type: FormulaDependencyTreeType = FormulaDependencyTreeType.NORMAL_FORMULA;
+
+    formulaId: Nullable<string>;
+
+    subUnitId: string = '';
+
+    unitId: string = '';
+
+    node: Nullable<AstRootNode>;
+    rangeList: IUnitRange[] = [];
+
+    formula: string = '';
+
+    row: number = -1;
+
+    column: number = -1;
+
+    rowCount: number = Number.NEGATIVE_INFINITY;
+
+    columnCount: number = Number.NEGATIVE_INFINITY;
+
+    constructor(treeId: number) {
+        super();
+        this.treeId = treeId;
+    }
+
+    get isVirtual() {
+        return false;
+    }
+
+    get nodeData(): IExecuteAstNodeData {
+        return {
+            node: this.node,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
+    toJson() {
+        return {
+            formula: this.formula,
+            refOffsetX: this.refOffsetX,
+            refOffsetY: this.refOffsetY,
+        };
+    }
+
+    getDirtyData: Nullable<
+        (dirtyData: IFormulaDirtyData, runtimeData: IAllRuntimeData) => {
+            runtimeCellData: IRuntimeUnitDataType;
+            dirtyRanges: IFeatureDirtyRangeType;
+        }
+    >;
+
+    dispose(): void {
+        this.featureDirtyRanges = [];
+
+        this.rangeList = [];
+
+        // this.nodeData?.node.dispose();
+
+        this.node = null;
+    }
+
+    inRangeData(range: IRange) {
+        const startRow = range.startRow;
+        const startColumn = range.startColumn;
+        const endRow = range.endRow;
+        const endColumn = range.endColumn;
+
+        const currentRow = this.row;
+        const currentColumn = this.column;
+
+        if (currentRow < startRow || currentRow > endRow || currentColumn < startColumn || currentColumn > endColumn) {
+            return false;
+        }
+
+        return true;
+    }
+
+    dependencySheetName(dirtyUnitSheetNameMap?: IDirtyUnitSheetNameMap) {
+        const rangeList = this.rangeList;
 
         if (rangeList.length === 0 || dirtyUnitSheetNameMap == null) {
             return false;
@@ -256,10 +335,6 @@ export class FormulaDependencyTree {
     }
 
     isExcludeRange(unitExcludedCell: Nullable<IUnitExcludedCell>) {
-        if (this.share == null) {
-            return false;
-        }
-
         const rangeList = this.rangeList;
 
         if (rangeList.length === 0) {
@@ -312,11 +387,11 @@ export class FormulaDependencyTree {
      * @param range
      */
     pushRangeList(ranges: IUnitRange[]) {
-        this.share?.rangeList.push(...ranges);
+        this.rangeList.push(...ranges);
     }
 
     shouldBePushRangeList() {
-        return this.share?.rangeList.length === 0 && this.type !== FormulaDependencyTreeType.FEATURE_FORMULA;
+        return this.rangeList.length === 0 && this.type !== FormulaDependencyTreeType.FEATURE_FORMULA;
     }
 
     // hasChildren(treeId: number) {
@@ -326,10 +401,6 @@ export class FormulaDependencyTree {
     toRTreeItem(): IUnitRange[] {
         if (this.featureId != null) {
             return this.featureDirtyRanges;
-        }
-
-        if (this.share == null) {
-            return [];
         }
 
         const currentRow = this.row;

@@ -50,7 +50,7 @@ export class LambdaParameterNode extends BaseAstNode {
         private _lambdaParameter: string,
         private _currentLambdaPrivacyVar: LambdaPrivacyVarType
     ) {
-        super(token);
+        super('');
     }
 
     getLambdaParameter() {

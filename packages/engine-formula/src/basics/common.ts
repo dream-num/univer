@@ -90,7 +90,7 @@ export interface IRuntimeOtherUnitCellItem {
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IRuntimeOtherUnitCellItem }> }>; //todo: Dushusir Item change to IRuntimeOtherUnitCellItem
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IRuntimeOtherUnitCellItem }> }>;
 }
 
 export interface IUnitSheetNameMap {

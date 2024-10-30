@@ -32,6 +32,7 @@ export class AstRootNode extends BaseAstNode {
 
         if (children.length > 1) {
             this.setValue(ErrorValueObject.create(ErrorType.VALUE));
+            this.clearChildrenValue();
             return;
         }
 
@@ -49,6 +50,8 @@ export class AstRootNode extends BaseAstNode {
         } else {
             this.setValue(node.getValue());
         }
+
+        this.clearChildrenValue();
 
         // return Promise.resolve(AstNodePromiseType.SUCCESS);
     }

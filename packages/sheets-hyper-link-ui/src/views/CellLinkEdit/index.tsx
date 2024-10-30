@@ -74,17 +74,13 @@ export const CellLinkEdit = () => {
 
     const [showError, setShowError] = useState(false);
 
-    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(true);
+    const [isFocusRangeSelector, isFocusRangeSelectorSet] = useState(false);
 
     const setByPayload = useRef(false);
 
     const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
-
-    useEffect(() => {
-        isFocusRangeSelectorSet(true);
-    }, [subUnitId]);
 
     useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
@@ -222,10 +218,8 @@ export const CellLinkEdit = () => {
     }, [editing, markSelectionService, themeService, univerInstanceService]);
 
     useEffect(() => {
-        if (type === SheetHyperLinkType.RANGE && !showLabel && !isFocusRangeSelector) {
-            isFocusRangeSelectorSet(true);
-        }
-    }, [type, isFocusRangeSelector, showLabel, editorBridgeService]);
+        isFocusRangeSelectorSet(type === SheetHyperLinkType.RANGE);
+    }, [type]);
 
     useEffect(() => {
         const render = editing?.type === HyperLinkEditSourceType.ZEN_EDITOR ?
@@ -472,7 +466,6 @@ export const CellLinkEdit = () => {
                         onChange={handleRangeChange}
                         isFocus={isFocusRangeSelector}
                         onFocus={() => isFocusRangeSelectorSet(true)}
-                        onBlur={() => { isFocusRangeSelectorSet(false); }}
                         actions={rangeSelectorActionsRef.current}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             if (visible) {

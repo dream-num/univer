@@ -437,6 +437,7 @@ function updateTables(
 
 // retain
 
+// eslint-disable-next-line max-lines-per-function
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -497,7 +498,17 @@ function updateCustomRanges(
                     delete rangeMap[rangeId];
                     continue;
                 }
-                Object.assign(oldCustomRange, updateCustomRange);
+
+                if (oldCustomRange.endIndex + 1 === updateCustomRange.endIndex) {
+                    oldCustomRange.startIndex = updateCustomRange.startIndex;
+                } else if (oldCustomRange.startIndex === updateCustomRange.endIndex + 1) {
+                    oldCustomRange.endIndex = updateCustomRange.startIndex;
+                }
+
+                oldCustomRange.properties = {
+                    ...oldCustomRange.properties,
+                    ...updateCustomRange.properties,
+                };
             } else {
                 rangeMap[rangeId] = updateCustomRange;
             }

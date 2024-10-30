@@ -16,7 +16,7 @@
 
 /* eslint-disable max-lines-per-function */
 
-import type { IStyleBase } from '@univerjs/core';
+import type { CellValue, IObjectMatrixPrimitiveType, IStyleBase, Nullable } from '@univerjs/core';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import type { ICalculateUnit, IContext } from './type';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
@@ -429,7 +429,11 @@ function handleFormula(rule: IConditionFormattingRule, context: IContext): Objec
 
             let result = false;
             if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
-                result = formulaItem.result === true;
+                const itemResult = formulaItem.result as IObjectMatrixPrimitiveType<Nullable<CellValue>>;
+
+                if (Tools.isObject(itemResult)) {
+                    result = itemResult[row]?.[col] === true;
+                }
             } else {
                 // If the formula triggers the calculation, wait for the result,
                 // and use the previous style cache until the result comes out

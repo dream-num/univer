@@ -85,12 +85,12 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return !Number.isNaN(formula);
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<any>> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<any>> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
-        const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result);
-        const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result);
+        const formulaResult1 = getFormulaResult(formulaInfo?.[0]?.result?.[row][column]);
+        const formulaResult2 = getFormulaResult(formulaInfo?.[1]?.result?.[row][column]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {

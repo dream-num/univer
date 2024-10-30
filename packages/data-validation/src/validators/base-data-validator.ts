@@ -108,7 +108,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${errorMsg}`;
     }
 
-    getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }): Nullable<IStyleData> {}
+    getExtraStyle(rule: IDataValidationRuleBase, value: Nullable<CellValue>, ctx: { style: IStyleData }, row: number, column: number): Nullable<IStyleData> {}
 
     getRuleFinalError(rule: IDataValidationRule) {
         if (rule.showErrorMessage && rule.error) {
@@ -126,7 +126,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return false;
     }
 
-    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult>;
+    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult>;
 
     abstract validatorFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): IFormulaValidResult;
 
@@ -178,14 +178,14 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     };
 
     async validator(cellInfo: IValidatorCellInfo, rule: IDataValidationRule): Promise<boolean> {
-        const { value: cellValue, unitId, subUnitId } = cellInfo;
+        const { value: cellValue, unitId, subUnitId, row, column } = cellInfo;
         const isEmpty = this.isEmptyCellValue(cellValue);
         const { allowBlank = true, operator } = rule;
         if (isEmpty) {
             return allowBlank;
         }
 
-        const formulaInfo = await this.parseFormula(rule, unitId, subUnitId);
+        const formulaInfo = await this.parseFormula(rule, unitId, subUnitId, row, column);
 
         if (!formulaInfo.isFormulaValid) {
             return false;

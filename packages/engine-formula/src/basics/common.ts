@@ -83,14 +83,8 @@ export interface IRuntimeUnitDataPrimitiveType {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>> }>;
 }
 
-export interface IRuntimeOtherUnitCellItem {
-    cellData: Nullable<ICellData>[][];
-    refOffsetX: number;
-    refOffsetY: number;
-}
-
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IRuntimeOtherUnitCellItem }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>[][]> }> }>;
 }
 
 export interface IUnitSheetNameMap {

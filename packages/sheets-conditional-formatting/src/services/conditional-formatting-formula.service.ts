@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { CellValue, ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
-import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, RefAlias, toDisposable, Tools } from '@univerjs/core';
+import { BooleanNumber, CellValueType, Disposable, ICommandService, Inject, Injector, ObjectMatrix, RefAlias, toDisposable, Tools } from '@univerjs/core';
 
 import {
     IActiveDirtyManagerService,
@@ -33,7 +33,7 @@ import { ConditionalFormattingService } from './conditional-formatting.service';
 
 // eslint-disable-next-line ts/consistent-type-definitions
 type IFormulaItem = {
-    formulaText: string;cfId: string;result?: boolean | number | string;status: FormulaResultStatus;count: number;formulaId: string;
+    formulaText: string;cfId: string;result?: boolean | number | string | IObjectMatrixPrimitiveType<Nullable<CellValue>>;status: FormulaResultStatus;count: number;formulaId: string;
 };
 export enum FormulaResultStatus {
     NOT_REGISTER = 1,
@@ -139,9 +139,15 @@ export class ConditionalFormattingFormulaService extends Disposable {
                         const cfIdSet = new Set<string>();
                         for (const formulaId in params.unitOtherData[unitId]![subUnitId]) {
                             const item = map.getValue(formulaId, ['formulaId']);
+
+                            const resultMatrix = new ObjectMatrix(params.unitOtherData[unitId][subUnitId][formulaId]);
+                            const resultObject = new ObjectMatrix<Nullable<CellValue>>();
+                            resultMatrix.forValue((row, col, value) => {
+                                resultObject.setValue(row, col, getResultFromFormula(value));
+                            });
+
                             if (item) {
-                                const value = getResultFromFormula(params.unitOtherData[unitId]![subUnitId]![formulaId]);
-                                item.result = value!;
+                                item.result = resultObject.clone();
                                 item.status = FormulaResultStatus.SUCCESS;
                                 cfIdSet.add(item.cfId);
                             }

@@ -120,10 +120,10 @@ export class ListValidator extends BaseDataValidator {
         };
     }
 
-    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, { style: defaultStyle }: { style: IStyleData }): Nullable<IStyleData> {
+    override getExtraStyle(rule: IDataValidationRule, value: Nullable<CellValue>, { style: defaultStyle }: { style: IStyleData }, row: number, column: number): Nullable<IStyleData> {
         const tb = (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP;
         if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
-            const colorMap = this.getListWithColorMap(rule);
+            const colorMap = this.getListWithColorMap(rule, row, column);
             const valueStr = `${value ?? ''}`;
             const color = colorMap[valueStr];
             if (color) {
@@ -146,14 +146,14 @@ export class ListValidator extends BaseDataValidator {
         return deserializeListOptions(cellString);
     }
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<string[] | undefined>> {
         const { formula1 = '' } = rule;
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[row][column]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1));
 
         return {
-            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
+            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[row][column]) : deserializeListOptions(formula1),
             formula2: undefined,
             isFormulaValid,
         };
@@ -174,7 +174,7 @@ export class ListValidator extends BaseDataValidator {
         return this.localeService.t('dataValidation.list.error');
     }
 
-    getList(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+    getList(rule: IDataValidationRule, row: number, column: number, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -186,10 +186,10 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[row][column]) : deserializeListOptions(formula1);
     }
 
-    async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+    async getListAsync(rule: IDataValidationRule, row: number, column: number, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
@@ -201,18 +201,18 @@ export class ListValidator extends BaseDataValidator {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result?.[row][column]) : deserializeListOptions(formula1);
     }
 
-    getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
-        const list = this.getList(rule, currentUnitId, currentSubUnitId);
+    getListWithColor(rule: IDataValidationRule, row: number, column: number, currentUnitId?: string, currentSubUnitId?: string) {
+        const list = this.getList(rule, row, column, currentUnitId, currentSubUnitId);
         const colorList = (rule.formula2 || '').split(',');
 
         return list.map((label, i) => ({ label, color: colorList[i] }));
     }
 
-    getListWithColorMap(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
-        const list = this.getListWithColor(rule, currentUnitId, currentSubUnitId);
+    getListWithColorMap(rule: IDataValidationRule, row: number, column: number, currentUnitId?: string, currentSubUnitId?: string) {
+        const list = this.getListWithColor(rule, row, column, currentUnitId, currentSubUnitId);
         const map: Record<string, string> = {};
 
         list.forEach((item) => {

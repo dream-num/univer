@@ -80,15 +80,15 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         return (style?.fs ?? 10) * 1.6;
     }
 
-    private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
+    private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[row][column]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[row][column]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
-            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1,
             formula2: isFormulaString(formula2) ? formulaResult2 : formula2,
             isFormulaValid,
         };
@@ -105,11 +105,11 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         }
 
         const colors = this._themeService.getCurrentTheme();
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId: unitId!, subUnitId, row, column: col })) {
             return;
         }
 
-        const result = validator.parseFormulaSync(rule, unitId, subUnitId);
+        const result = validator.parseFormulaSync(rule, unitId, subUnitId, row, col);
         const { formula1 } = result;
         const layout = this._calc(cellBounding, style);
         const { a: scaleX, d: scaleY } = ctx.getTransform();
@@ -180,11 +180,11 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
-        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId })) {
+        if (!validator.skipDefaultFontRender?.(rule, value, { unitId, subUnitId, row, column: col })) {
             return;
         }
 
-        const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId);
+        const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId, row, col);
         const params: ISetRangeValuesCommandParams = {
             range: {
                 startColumn: primaryWithCoord.actualColumn,

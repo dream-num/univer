@@ -182,7 +182,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     }
 
     const multiple = rule.type === DataValidationType.LIST_MULTIPLE;
-    const list = validator.getListWithColor(rule, unitId, subUnitId);
+    const list = validator.getListWithColor(rule, row, col, unitId, subUnitId);
     const cellStr = localValue || getDataValidationCellValue(worksheet.getCellRaw(row, col));
     const value = deserializeListOptions(cellStr);
 

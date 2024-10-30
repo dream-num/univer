@@ -72,8 +72,8 @@ export class WholeValidator extends BaseDataValidator<number> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
-        const formula1Result = isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.[row][column]?.v : formula1;
-        const formula2Result = isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.[row][column]?.v : formula2;
+        const formula1Result = isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.[0][0]?.v : formula1;
+        const formula2Result = isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.[0][0]?.v : formula2;
         const isFormulaValid = isLegalFormulaResult(`${formula1Result}`) && isLegalFormulaResult(`${formula2Result}`);
 
         const info = {

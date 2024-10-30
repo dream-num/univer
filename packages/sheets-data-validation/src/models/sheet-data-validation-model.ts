@@ -162,13 +162,21 @@ export class SheetDataValidationModel extends Disposable {
             ruleMatrix.updateRange(ruleId, payload.payload);
             this._dataValidationCacheService.updateRuleRanges(unitId, subUnitId, ruleId, payload.payload, oldRule.ranges);
             if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.updateRuleRanges(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload);
+                this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
+                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
+                    ...oldRule,
+                    ranges: payload.payload,
+                });
             }
         } else if (payload.type === UpdateRuleType.SETTING) {
             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, oldRule.ranges);
             this._dataValidationFormulaService.updateRuleFormulaText(unitId, subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2, oldRule.ranges);
             if (oldRule.type === DataValidationType.CUSTOM) {
-                this._dataValidationCustomFormulaService.updateRuleFormula(unitId, subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
+                this._dataValidationCustomFormulaService.deleteByRuleId(unitId, subUnitId, ruleId);
+                this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
+                    ...oldRule,
+                    ...payload.payload,
+                });
             } else if (payload.payload.type === DataValidationType.CUSTOM) {
                 this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, {
                     ...oldRule,

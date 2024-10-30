@@ -80,6 +80,11 @@ export class DataValidationFormulaService extends Disposable {
         return subUnitMap;
     }
 
+    private _registerSingleFormula(unitId: string, subUnitId: string, formula: string, ruleId: string) {
+        const ranges = [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }];
+        return this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula, ranges, { ruleId });
+    }
+
     addRule(unitId: string, subUnitId: string, ruleId: string, formula1: string | undefined, formula2: string | undefined, ranges: IRange[]) {
         const isFormula1Legal = isFormulaString(formula1);
         const isFormula2Legal = isFormulaString(formula2);
@@ -89,12 +94,11 @@ export class DataValidationFormulaService extends Disposable {
         const formulaRuleMap = this._ensureRuleFormulaMap(unitId, subUnitId);
         const item: [IFormulaInfo | undefined, IFormulaInfo | undefined] = [undefined, undefined];
         if (isFormula1Legal) {
-            const id = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula1!, ranges, { ruleId });
-
+            const id = this._registerSingleFormula(unitId, subUnitId, formula1!, ruleId);
             item[0] = { id, text: formula1! };
         }
         if (isFormula2Legal) {
-            const id = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula2!, ranges, { ruleId });
+            const id = this._registerSingleFormula(unitId, subUnitId, formula2!, ruleId);
             item[1] = { id, text: formula2! };
         }
         formulaRuleMap.set(ruleId, item);
@@ -123,7 +127,7 @@ export class DataValidationFormulaService extends Disposable {
         if (oldFormula1?.text !== formula1) {
             oldFormula1 && this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, [oldFormula1.id]);
             if (isFormulaString(formula1)) {
-                const formulaId = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula1!, ranges, { ruleId });
+                const formulaId = this._registerSingleFormula(unitId, subUnitId, formula1!, ruleId);
                 item[0] = {
                     text: formula1!,
                     id: formulaId,
@@ -136,7 +140,7 @@ export class DataValidationFormulaService extends Disposable {
         if (oldFormula2?.text !== formula2) {
             oldFormula2 && this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, [oldFormula2.id]);
             if (isFormulaString(formula2)) {
-                const formulaId = this._registerOtherFormulaService.registerFormulaWithRange(unitId, subUnitId, formula2!, ranges, { ruleId });
+                const formulaId = this._registerSingleFormula(unitId, subUnitId, formula2!, ruleId);
                 item[1] = {
                     text: formula2!,
                     id: formulaId,

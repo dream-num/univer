@@ -66,8 +66,8 @@ export class DateValidator extends BaseDataValidator<number> {
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>> {
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
-        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[row][column]);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[row][column]);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[0][0]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[0][0]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
@@ -82,8 +82,8 @@ export class DateValidator extends BaseDataValidator<number> {
         const { formula1, formula2 } = rule;
 
         return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[row][column]) : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2),
         };
     }
 

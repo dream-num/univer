@@ -98,8 +98,8 @@ export class CheckboxValidator extends BaseDataValidator {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
 
-        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1;
-        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[row][column]) : formula2;
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2;
         const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2));
 
         return {
@@ -120,8 +120,8 @@ export class CheckboxValidator extends BaseDataValidator {
     parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): ICheckboxFormulaResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1;
-        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[row][column]) : formula2;
+        const originFormula1 = isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[0][0]) : formula1;
+        const originFormula2 = isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[0][0]) : formula2;
         const isFormulaValid = isLegalFormulaResult(String(originFormula1)) && isLegalFormulaResult(String(originFormula2)); // TODO@Dushusir Handling return type errors, not sure if this is correct
 
         return {

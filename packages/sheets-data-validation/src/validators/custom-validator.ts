@@ -19,7 +19,7 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { CellValueType, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
-import { getFormulaCellData, isLegalFormulaResult } from '../utils/formula';
+import { isLegalFormulaResult } from '../utils/formula';
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
@@ -41,14 +41,13 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return {
             formula1: undefined,
             formula2: undefined,
-            isFormulaValid: false,
+            isFormulaValid: true,
         };
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): Promise<boolean> {
         const { column, row, unitId, subUnitId } = cellInfo;
-        const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
-        const cellData = getFormulaCellData(result?.result?.[row][column]);
+        const cellData = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, _rule.uid, row, column);
         const formulaResult = cellData?.v;
 
         if (!isLegalFormulaResult(String(formulaResult))) {

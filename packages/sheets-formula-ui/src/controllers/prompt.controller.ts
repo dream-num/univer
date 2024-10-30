@@ -33,13 +33,13 @@ import type {
 } from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
-import {
-    AbsoluteRefType,
+import { AbsoluteRefType,
     Direction,
     Disposable,
     DisposableCollection,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DOCS_ZEN_EDITOR_UNIT_ID_KEY,
     FOCUSING_EDITOR_INPUT_FORMULA,
     FORMULA_EDITOR_ACTIVATED,
     ICommandService,
@@ -414,7 +414,7 @@ export class PromptController extends Disposable {
 
     private _closeRangePrompt(editorId: Nullable<string>) {
         const docId = editorId || this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() || '';
-        if (isRangeSelector(docId) || isEmbeddingFormulaEditor(docId)) {
+        if (isRangeSelector(docId) || isEmbeddingFormulaEditor(docId) || docId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
             return;
         }
         this._insertSelections = [];

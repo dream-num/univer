@@ -66,7 +66,7 @@ export const DocHyperLinkEdit = () => {
             const matchedRange = body?.customRanges?.find((i) => editing?.linkId === i.rangeId);
             if (doc && matchedRange) {
                 setLink(matchedRange.properties?.url ?? '');
-                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex).dataStream));
+                setLabel(BuildTextUtils.transform.getPlainText(getBodySlice(body!, matchedRange.startIndex, matchedRange.endIndex + 1).dataStream));
             }
             return;
         }

@@ -77,9 +77,10 @@ export function deleteCustomRangeTextX(accessor: IAccessor, params: IDeleteCusto
         });
     }
 
+    const end = endIndex + 1 + (insert?.dataStream.length ?? 0);
     textX.selections = [{
-        startOffset: startIndex,
-        endOffset: endIndex + 1 + (insert?.dataStream.length ?? 0),
+        startOffset: end,
+        endOffset: end,
         collapsed: true,
     }];
 
@@ -269,7 +270,7 @@ export const replaceSelectionTextX = (params: IReplaceSelectionTextXParams) => {
     const body = doc.getSelfOrHeaderFooterModel(segmentId)?.getBody();
     if (!body) return false;
 
-    const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset - 1);
+    const oldBody = selection.collapsed ? null : getBodySlice(body, selection.startOffset, selection.endOffset);
     const diffs = textDiff(oldBody ? oldBody.dataStream : '', insertBody.dataStream);
     let cursor = 0;
     const actions = diffs.map(([type, text]) => {

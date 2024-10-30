@@ -131,7 +131,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async legacyPaste(html?: string, text?: string): Promise<boolean> {
         const partDocData = this._genDocDataFromHtmlAndText(html, text);
-
         // Paste in sheet editing mode without paste style, so we give textRuns empty array;
         if (this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() === DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
             if (text) {
@@ -392,7 +391,6 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
             results.push(docBody);
         }
-
         return {
             bodyList: results,
             needCache,

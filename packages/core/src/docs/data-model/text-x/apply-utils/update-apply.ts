@@ -436,6 +436,7 @@ function updateTables(
 }
 
 // retain
+
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -457,54 +458,59 @@ function updateCustomRanges(
 
     const removeCustomRanges: ICustomRange[] = [];
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        const removeIndex: number[] = [];
         for (let index = 0; index < customRanges.length; index++) {
             const customRange = customRanges[index];
             const { startIndex, endIndex } = customRange;
             if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                delete rangeMap[customRange.rangeId];
                 removeCustomRanges.push(customRange);
-                removeIndex.push(index);
             }
-        }
-
-        for (let index = removeIndex.length - 1; index >= 0; index--) {
-            customRanges.splice(removeIndex[index], 1);
         }
 
         updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;
-            customRanges.push({
+            rangeMap[customRange.rangeId] = {
                 ...customRange,
                 startIndex: startIndex + currentIndex,
                 endIndex: endIndex + currentIndex,
-            });
+            };
         });
     } else {
+        const relativeCustomRanges = new Set<string>();
+        for (let index = 0; index < customRanges.length; index++) {
+            const customRange = customRanges[index];
+            const { startIndex, endIndex } = customRange;
+            if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
+                relativeCustomRanges.add(customRange.rangeId);
+            }
+        }
+
         for (const updateCustomRange of updateDataCustomRanges) {
             const { rangeId } = updateCustomRange;
             updateCustomRange.startIndex = updateCustomRange.startIndex + currentIndex;
             updateCustomRange.endIndex = updateCustomRange.endIndex + currentIndex;
             const oldCustomRange = rangeMap[rangeId];
+            relativeCustomRanges.delete(rangeId);
             if (oldCustomRange) {
                 if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
                     removeCustomRanges.push(oldCustomRange);
+                    delete rangeMap[rangeId];
                     continue;
                 }
                 Object.assign(oldCustomRange, updateCustomRange);
             } else {
-                customRanges.push(updateCustomRange);
+                rangeMap[rangeId] = updateCustomRange;
             }
         }
 
-        for (const removeCustomRange of removeCustomRanges) {
-            const { rangeId } = removeCustomRange;
-            const index = customRanges.findIndex((r) => r.rangeId === rangeId);
-            if (index !== -1) {
-                customRanges.splice(index, 1);
-            }
-        }
+        relativeCustomRanges.forEach((rangeId) => {
+            removeCustomRanges.push(rangeMap[rangeId]);
+            delete rangeMap[rangeId];
+        });
     }
 
+    body.customRanges = Object.values(rangeMap);
+    body.customRanges.sort((a, b) => a.startIndex - b.startIndex);
     return removeCustomRanges;
 }
 
@@ -530,21 +536,15 @@ function updateCustomDecorations(
     }
 
     if (coverType === UpdateDocsAttributeType.REPLACE) {
-        const removeIndex: number[] = [];
         for (let index = 0; index < customDecorations.length; index++) {
             const customDecoration = customDecorations[index];
             const { startIndex, endIndex } = customDecoration;
             if (startIndex >= currentIndex && endIndex <= currentIndex + textLength - 1) {
                 removeCustomDecorations.push(customDecoration);
-                removeIndex.push(index);
             }
         }
 
-        for (let index = removeIndex.length - 1; index >= 0; index--) {
-            customDecorations.splice(removeIndex[index], 1);
-        }
-
-        updateBody.customDecorations?.forEach((customDecoration) => {
+        updateDataCustomDecorations?.forEach((customDecoration) => {
             const { startIndex, endIndex } = customDecoration;
             customDecorations.push({
                 ...customDecoration,
@@ -563,16 +563,20 @@ function updateCustomDecorations(
                 }
                 Object.assign(oldCustomDecoration, updateCustomDecoration);
             } else {
-                customDecorations.push(updateCustomDecoration);
+                customDecorations.push({
+                    ...updateCustomDecoration,
+                    startIndex: updateCustomDecoration.startIndex + currentIndex,
+                    endIndex: updateCustomDecoration.endIndex + currentIndex,
+                });
             }
         }
+    }
 
-        for (const removeCustomDecoration of removeCustomDecorations) {
-            const { id } = removeCustomDecoration;
-            const index = customDecorations.findIndex((d) => d.id === id);
-            if (index !== -1) {
-                customDecorations.splice(index, 1);
-            }
+    for (const removeCustomDecoration of removeCustomDecorations) {
+        const { id } = removeCustomDecoration;
+        const index = customDecorations.findIndex((d) => d.id === id);
+        if (index !== -1) {
+            customDecorations.splice(index, 1);
         }
     }
 

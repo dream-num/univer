@@ -37,7 +37,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
         };
     }
 
-    override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string): Promise<IFormulaResult> {
+    override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string, row: number, column: number): Promise<IFormulaResult> {
         return {
             formula1: undefined,
             formula2: undefined,
@@ -48,7 +48,7 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): Promise<boolean> {
         const { column, row, unitId, subUnitId } = cellInfo;
         const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
-        const cellData = getFormulaCellData(result?.result);
+        const cellData = getFormulaCellData(result?.result?.[row][column]);
         const formulaResult = cellData?.v;
 
         if (!isLegalFormulaResult(String(formulaResult))) {

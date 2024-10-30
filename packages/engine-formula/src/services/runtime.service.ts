@@ -408,7 +408,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const unitData = this._runtimeOtherData[unitId]!;
 
-        if (unitData[subUnitId] === undefined) {
+        if (unitData[subUnitId] === undefined || unitData[subUnitId] === null) {
             unitData[subUnitId] = {};
         }
 
@@ -437,11 +437,16 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             cellDatas = [[objectValueToCellValue(functionVariant as BaseValueObject)!]];
         }
 
-        subComponentData![formulaId] = {
-            cellData: cellDatas,
-            refOffsetX: x,
-            refOffsetY: y,
-        };
+        if (subComponentData[formulaId] === undefined || subComponentData[formulaId] === null) {
+            subComponentData[formulaId] = {};
+        }
+
+        if (subComponentData[formulaId][y] === undefined || subComponentData[formulaId][y] === null) {
+            subComponentData[formulaId][y] = {};
+        }
+
+        // x represents the column offset, y represents the row offset
+        subComponentData[formulaId][y][x] = cellDatas;
     }
 
     // eslint-disable-next-line max-lines-per-function

@@ -63,11 +63,11 @@ export class DateValidator extends BaseDataValidator<number> {
     scopes: string | string[] = ['sheet'];
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<number | undefined>> {
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number): Promise<IFormulaResult<number | undefined>> {
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
-        const formulaResult1 = getFormulaResult(results?.[0]?.result);
-        const formulaResult2 = getFormulaResult(results?.[1]?.result);
+        const formulaResult1 = getFormulaResult(results?.[0]?.result?.[row][column]);
+        const formulaResult2 = getFormulaResult(results?.[1]?.result?.[row][column]);
         const isFormulaValid = isLegalFormulaResult(String(formulaResult1)) && isLegalFormulaResult(String(formulaResult2));
 
         return {
@@ -77,13 +77,13 @@ export class DateValidator extends BaseDataValidator<number> {
         };
     }
 
-    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
+    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string, row: number, column: number) {
         const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
         return {
-            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
-            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+            formula1: transformDate2SerialNumber(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result?.[row][column]) : formula1),
+            formula2: transformDate2SerialNumber(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result?.[row][column]) : formula2),
         };
     }
 

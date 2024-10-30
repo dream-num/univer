@@ -185,7 +185,7 @@ export function getDataValidationDiffMutations(
                 const rule = sheetDataValidationModel.getRuleById(unitId, subUnitId, diff.ruleId);
                 if (rule && rule.type === DataValidationType.CHECKBOX) {
                     const validator = sheetDataValidationModel.getValidator(DataValidationType.CHECKBOX) as CheckboxValidator;
-                    const formula = validator.parseFormulaSync(rule, unitId, subUnitId);
+                    const formula = validator.parseFormulaSync(rule, unitId, subUnitId, diff.newRanges[0].startRow, diff.newRanges[0].startColumn);
                     setRangesDefaultValue(diff.newRanges, formula.formula2!);
                 }
                 break;
@@ -211,7 +211,7 @@ export function getDataValidationDiffMutations(
                 });
                 if (diff.rule.type === DataValidationType.CHECKBOX) {
                     const validator = sheetDataValidationModel.getValidator(DataValidationType.CHECKBOX) as CheckboxValidator;
-                    const formula = validator.parseFormulaSync(diff.rule, unitId, subUnitId);
+                    const formula = validator.parseFormulaSync(diff.rule, unitId, subUnitId, diff.rule.ranges[0].startRow, diff.rule.ranges[0].startColumn);
                     setRangesDefaultValue(diff.rule.ranges, formula.originFormula2!);
                 }
                 break;

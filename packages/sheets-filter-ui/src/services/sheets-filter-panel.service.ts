@@ -473,7 +473,7 @@ export class ByValuesModel extends Disposable implements IFilterByModel {
          * though data may change after.
          */
         items: IFilterByValueWithTreeItem[],
-        cache: Nullable<Map<string, string[]>>,
+        cache: Map<string, string[]>,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();

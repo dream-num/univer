@@ -49,7 +49,20 @@ export function searchTree(items: IFilterByValueWithTreeItem[], searchKeywords: 
     const result: IFilterByValueWithTreeItem[] = [];
 
     items.forEach((item) => {
-        const matches = searchKeywords.some((keyword) => item.title.toLowerCase().includes(keyword.toLowerCase()));
+        const originMatches = item.originValues
+            ? searchKeywords.some((keyword) =>
+                Array.from(item.originValues!).some((value) =>
+                    value.toLowerCase().includes(keyword.toLowerCase())
+                )
+            )
+            : false;
+
+        const titleMatches = !originMatches
+            && searchKeywords.some((keyword) =>
+                item.title.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+        const matches = originMatches || titleMatches;
 
         if (matches) {
             result.push({ ...item });

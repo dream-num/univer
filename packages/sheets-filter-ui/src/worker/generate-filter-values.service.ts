@@ -151,6 +151,7 @@ export function getFilterTreeByValueItems(
     const treeMap: Map<string, string[]> = new Map();
 
     const DefaultPattern = 'yyyy-mm-dd';
+    const canSplitPatternSet = new Set(['yyyy-MM-dd', 'yyyy/MM/dd', 'yyyy"年"MM"月"dd"日"', 'MM-dd', 'M"月"d"日"', 'MM-dd A/P hh:mm']);
     const EmptyKey = 'empty';
 
     let emptyCount = 0;
@@ -175,7 +176,7 @@ export function getFilterTreeByValueItems(
 
             const fmtStr = (cell.value?.v && !cell.value.p) ? styles.get(cell.value?.s)?.n?.pattern : '';
             const isDateValue = fmtStr && numfmt.isDate(fmtStr);
-            if (fmtStr && isDateValue) {
+            if (fmtStr && isDateValue && canSplitPatternSet.has(fmtStr)) {
                 // const originValue = numfmt.parseDate(value).v as number;
                 const originValue = worksheet.getCellRaw(cell.row, cell.col)?.v as number;
                 if (!originValue) {
@@ -264,11 +265,32 @@ export function getFilterTreeByValueItems(
     }
 
     return {
-        filterTreeItems: Array.from(items.values()).sort((a, b) => {
-            if (a.children && !b.children) return -1;
-            if (!a.children && b.children) return 1;
-            return b.title.localeCompare(a.title);
-        }),
+        filterTreeItems: generateFilterTreeBySort(Array.from(items.values())),
         filterTreeMapCache: treeMap,
     };
+}
+
+function generateFilterTreeBySort(tree: IFilterByValueWithTreeItem[]) {
+    return Array.from(tree).sort((a, b) => {
+        if (a.children && !b.children) return -1;
+        if (!a.children && b.children) return 1;
+        return b.title.localeCompare(a.title);
+    }).map((yearItem) => {
+        if (yearItem.children) {
+            yearItem.children.sort((a, b) => {
+                const monthA = Number.parseInt(a.key.split('-')[1], 10);
+                const monthB = Number.parseInt(b.key.split('-')[1], 10);
+                return monthA - monthB;
+            }).forEach((monthItem) => {
+                if (monthItem.children) {
+                    monthItem.children.sort((a, b) => {
+                        const dayA = Number.parseInt(a.key.split('-')[2], 10);
+                        const dayB = Number.parseInt(b.key.split('-')[2], 10);
+                        return dayA - dayB;
+                    });
+                }
+            });
+        }
+        return yearItem;
+    });
 }

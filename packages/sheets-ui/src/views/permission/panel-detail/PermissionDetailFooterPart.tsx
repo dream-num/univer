@@ -59,7 +59,7 @@ export const PermissionDetailFooterPart = (props: IPermissionDetailFooterPartPro
         return null;
     }
     const unitId = workbook.getUnitId();
-    const subUnitId = worksheet.getSheetId();
+    const subUnitId = worksheet.getUnitId();
 
     return (
         <div className={styles.sheetPermissionPanelFooter}>

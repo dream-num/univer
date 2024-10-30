@@ -83,10 +83,6 @@ export const CellLinkEdit = () => {
     const subUnitId = workbook?.getActiveSheet().getSheetId() || '';
 
     useEffect(() => {
-        isFocusRangeSelectorSet(false);
-    }, [subUnitId]);
-
-    useEffect(() => {
         if (editing?.row !== undefined && editing.col !== undefined) {
             const { label, customRange, row, col } = editing;
             let link;
@@ -222,10 +218,8 @@ export const CellLinkEdit = () => {
     }, [editing, markSelectionService, themeService, univerInstanceService]);
 
     useEffect(() => {
-        if (type === SheetHyperLinkType.RANGE && !showLabel && !isFocusRangeSelector) {
-            isFocusRangeSelectorSet(true);
-        }
-    }, [type, isFocusRangeSelector, showLabel, editorBridgeService]);
+        isFocusRangeSelectorSet(type === SheetHyperLinkType.RANGE);
+    }, [type]);
 
     useEffect(() => {
         const render = editing?.type === HyperLinkEditSourceType.ZEN_EDITOR ?
@@ -396,7 +390,7 @@ export const CellLinkEdit = () => {
             return;
         }
         const handleOutClick = rangeSelectorActionsRef.current?.handleOutClick;
-        handleOutClick && handleOutClick(e, isFocusRangeSelectorSet);
+        handleOutClick && handleOutClick(e as unknown as MouseEvent, () => isFocusRangeSelectorSet(false));
     };
 
     if (!editing) {
@@ -471,7 +465,7 @@ export const CellLinkEdit = () => {
                         initValue={payload}
                         onChange={handleRangeChange}
                         isFocus={isFocusRangeSelector}
-                        onBlur={() => { isFocusRangeSelectorSet(false); }}
+                        onFocus={() => isFocusRangeSelectorSet(true)}
                         actions={rangeSelectorActionsRef.current}
                         onRangeSelectorDialogVisibleChange={async (visible) => {
                             if (visible) {

@@ -24,22 +24,19 @@
         ".": "./src/index.ts",
         "./*": "./src/*"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
+    "main": "./src/index.ts",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
-                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
-                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*"
@@ -86,7 +83,8 @@
         "@univerjs/thread-comment": "workspace:*",
         "@univerjs/thread-comment-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@univerjs/watermark": "workspace:*"
+        "@univerjs/watermark": "workspace:*",
+        "@vitejs/plugin-react": "4.3.3"
     },
     "devDependencies": {
         "@univerjs-infra/shared": "workspace:*",
@@ -95,18 +93,16 @@
         "jsdom": "^24.1.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "vite": "^5.4.10",
+        "vitest": "^2.1.4"
     },
     "univerSpace": {
         ".": {
             "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*"

@@ -99,19 +99,19 @@ function updateTextRuns(
 // eslint-disable-next-line max-lines-per-function, complexity
 export function coverTextRuns(
     updateDataTextRuns: ITextRun[],
-    removeTextRuns: ITextRun[],
+    originTextRuns: ITextRun[],
     coverType: UpdateDocsAttributeType
 ) {
-    if (removeTextRuns.length === 0) {
+    if (originTextRuns.length === 0) {
         return updateDataTextRuns;
     }
 
     updateDataTextRuns = Tools.deepClone(updateDataTextRuns);
-    removeTextRuns = Tools.deepClone(removeTextRuns);
+    originTextRuns = Tools.deepClone(originTextRuns);
 
     const newUpdateTextRuns: ITextRun[] = [];
     const updateLength = updateDataTextRuns.length;
-    const removeLength = removeTextRuns.length;
+    const removeLength = originTextRuns.length;
     let updateIndex = 0;
     let removeIndex = 0;
     let pending: Nullable<ITextRun> = null;
@@ -129,13 +129,13 @@ export function coverTextRuns(
 
     while (updateIndex < updateLength && removeIndex < removeLength) {
         const { st: updateSt, ed: updateEd, ts: updateStyle } = updateDataTextRuns[updateIndex];
-        const { st: removeSt, ed: removeEd, ts: removeStyle, sId } = removeTextRuns[removeIndex];
+        const { st: removeSt, ed: removeEd, ts: originStyle, sId } = originTextRuns[removeIndex];
         let newTs;
 
         if (coverType === UpdateDocsAttributeType.COVER) {
-            newTs = { ...removeStyle, ...updateStyle };
+            newTs = { ...originStyle, ...updateStyle };
         } else {
-            newTs = { ...updateStyle, ...removeStyle };
+            newTs = { ...updateStyle };
         }
 
         if (updateEd < removeSt) {
@@ -146,7 +146,7 @@ export function coverTextRuns(
             updateIndex++;
         } else if (removeEd < updateSt) {
             if (!pushPendingAndReturnStatus()) {
-                newUpdateTextRuns.push(removeTextRuns[removeIndex]);
+                newUpdateTextRuns.push(originTextRuns[removeIndex]);
             }
 
             removeIndex++;
@@ -154,7 +154,7 @@ export function coverTextRuns(
             const newTextRun = {
                 st: Math.min(updateSt, removeSt),
                 ed: Math.max(updateSt, removeSt),
-                ts: updateSt < removeSt ? { ...updateStyle } : { ...removeStyle },
+                ts: updateSt < removeSt ? { ...updateStyle } : { ...originStyle },
                 sId: updateSt < removeSt ? undefined : sId,
             };
 
@@ -171,8 +171,8 @@ export function coverTextRuns(
 
             if (updateEd < removeEd) {
                 updateIndex++;
-                removeTextRuns[removeIndex].st = updateEd;
-                if (removeTextRuns[removeIndex].st === removeTextRuns[removeIndex].ed) {
+                originTextRuns[removeIndex].st = updateEd;
+                if (originTextRuns[removeIndex].st === originTextRuns[removeIndex].ed) {
                     removeIndex++;
                 }
             } else {
@@ -186,7 +186,7 @@ export function coverTextRuns(
             const pendingTextRun = {
                 st: Math.min(updateEd, removeEd),
                 ed: Math.max(updateEd, removeEd),
-                ts: updateEd < removeEd ? { ...removeStyle } : { ...updateStyle },
+                ts: updateEd < removeEd ? { ...originStyle } : { ...updateStyle },
                 sId: updateEd < removeEd ? sId : undefined,
             };
 
@@ -199,7 +199,7 @@ export function coverTextRuns(
     // If the last textRun is also disjoint, then the last textRun needs to be pushed in `newUpdateTextRun`
     const tempTopTextRun = newUpdateTextRuns[newUpdateTextRuns.length - 1];
     const updateLastTextRun = updateDataTextRuns[updateLength - 1];
-    const removeLastTextRun = removeTextRuns[removeLength - 1];
+    const removeLastTextRun = originTextRuns[removeLength - 1];
 
     if (tempTopTextRun && (tempTopTextRun.ed !== Math.max(updateLastTextRun.ed, removeLastTextRun.ed))) {
         if (updateLastTextRun.ed > removeLastTextRun.ed) {

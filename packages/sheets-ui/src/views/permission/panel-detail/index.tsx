@@ -355,6 +355,7 @@ export const SheetPermissionPanelDetail = ({ fromSheetBar }: { fromSheetBar: boo
                             subUnitId={subUnitId}
                             initValue={rangeStr}
                             onChange={handleRangeChange}
+                            onFocus={() => isFocusRangeSelectorSet(true)}
                             // onVerify={handleVerify}
                             isFocus={isFocusRangeSelector}
                             actions={rangeSelectorActionsRef.current}

@@ -54,8 +54,6 @@ export class UnionNode extends BaseAstNode {
             result = ErrorValueObject.create(ErrorType.NAME);
         }
         this.setValue(result);
-
-        this.clearChildrenValue();
     }
 
     private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {

@@ -150,7 +150,7 @@ describe('Test dependency', () => {
             });
 
             const treeList = await formulaDependencyGenerator.generate();
-            const treeJson = treeList.map((tree) => tree instanceof FormulaDependencyTree ? tree.formula : tree.refTree.formula);
+            const treeJson = treeList.map((tree) => tree instanceof FormulaDependencyTree ? tree.formula : tree.refTree?.formula);
 
             expect(treeJson).toEqual(
                 [

@@ -102,7 +102,6 @@ export class FunctionNode extends BaseAstNode {
 
         this.setValue(result);
 
-        this.clearChildrenValue();
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
@@ -135,8 +134,6 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(resultVariant);
 
         this.setValue(resultVariant as FunctionVariantType);
-
-        this.clearChildrenValue();
     }
 
      /**
@@ -304,13 +301,12 @@ export class ErrorFunctionNode extends BaseAstNode {
 
     override async executeAsync() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
-        this.clearChildrenValue();
+
         return Promise.resolve(AstNodePromiseType.SUCCESS);
     }
 
     override execute() {
         this.setValue(ErrorValueObject.create(ErrorType.NAME) as FunctionVariantType);
-        this.clearChildrenValue();
     }
 }
 

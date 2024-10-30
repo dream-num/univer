@@ -84,8 +84,6 @@ export class OperatorNode extends BaseAstNode {
                 object2 as BaseValueObject
             ) as FunctionVariantType
         );
-
-        this.clearChildrenValue();
     }
 }
 

@@ -160,39 +160,38 @@ export function addCustomRangeTextX(param: IAddCustomRangeTextXParam) {
 // paragraph information needs to be preserved when performing the CUT operation
 
 export function deleteSelectionTextX(
-    selection: ITextRange,
+    selections: ITextRange[],
     body: IDocumentBody,
     memoryCursor: number = 0,
     insertBody: Nullable<IDocumentBody> = null,
     keepBullet: boolean = true
 ): Array<TextXAction> {
-    const { startOffset, endOffset } = selection;
+    selections.sort((a, b) => a.startOffset - b.startOffset);
     const dos: Array<TextXAction> = [];
     const { paragraphs = [] } = body;
 
-    const textStart = startOffset - memoryCursor;
-    const textEnd = endOffset - memoryCursor;
-
     const paragraphInRange = paragraphs?.find(
-        (p) => p.startIndex - memoryCursor >= textStart && p.startIndex - memoryCursor < textEnd
+        (p) => p.startIndex >= selections[0].startOffset && p.startIndex < selections[0].endOffset
     );
+    let cursor = memoryCursor;
+    selections.forEach((selection) => {
+        const { startOffset, endOffset } = selection;
+        if (startOffset - memoryCursor > cursor) {
+            dos.push({
+                t: TextXActionType.RETAIN,
+                len: startOffset - memoryCursor,
+            });
+            cursor = startOffset;
+        }
 
-    if (textStart > 0) {
-        dos.push({
-            t: TextXActionType.RETAIN,
-            len: textStart,
-        });
-    }
-
-    let cursor = textStart;
-
-    if (cursor < textEnd) {
-        dos.push({
-            t: TextXActionType.DELETE,
-            len: textEnd - cursor,
-        });
-        cursor = textEnd;
-    }
+        if (cursor < endOffset) {
+            dos.push({
+                t: TextXActionType.DELETE,
+                len: endOffset - memoryCursor - cursor,
+            });
+            cursor = endOffset;
+        }
+    });
 
     if (insertBody) {
         dos.push({
@@ -203,7 +202,7 @@ export function deleteSelectionTextX(
     }
 
     if (paragraphInRange && keepBullet) {
-        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= textEnd);
+        const nextParagraph = paragraphs.find((p) => p.startIndex - memoryCursor >= (selections[selections.length - 1].endOffset - 1));
         if (nextParagraph) {
             if (nextParagraph.startIndex > cursor) {
                 dos.push({

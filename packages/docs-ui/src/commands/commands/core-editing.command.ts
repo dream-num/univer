@@ -105,7 +105,7 @@ export const InsertCommand: ICommand<IInsertCommandParams> = {
                 len: body.dataStream.length,
             });
         } else {
-            const dos = BuildTextUtils.selection.getDeleteActions(range, originBody, 0, body);
+            const dos = BuildTextUtils.selection.getDeleteActions([range], originBody, 0, body);
             textX.push(...dos);
         }
 

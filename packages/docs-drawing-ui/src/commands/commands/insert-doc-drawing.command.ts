@@ -77,7 +77,7 @@ export const InsertDocDrawingCommand: ICommand = {
                 });
             }
         } else {
-            const dos = BuildTextUtils.selection.getDeleteActions(activeTextRange, body, 0, null, false);
+            const dos = BuildTextUtils.selection.getDeleteActions([activeTextRange], body, 0, null, false);
             textX.push(...dos);
 
             const removedCustomBlockIds = getCustomBlockIdsInSelections(body, [activeTextRange]);

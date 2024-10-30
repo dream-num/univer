@@ -334,7 +334,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...BuildTextUtils.selection.getDeleteActions(selection, body, 0, insertBody));
+        textX.push(...BuildTextUtils.selection.getDeleteActions([selection], body, 0, insertBody));
         doMutation.params.actions = jsonX.editOp(textX.serialize());
 
         return true;

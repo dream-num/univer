@@ -95,7 +95,7 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
         const jsonX = JSONX.getInstance();
 
         if (!previousActiveRange.collapsed && isCompositionStart) {
-            const dos = BuildTextUtils.selection.getDeleteActions(previousActiveRange, body, 0, null, false);
+            const dos = BuildTextUtils.selection.getDeleteActions([previousActiveRange], body, 0, null, false);
             textX.push(...dos);
             doMutation.params!.textRanges = [{
                 startOffset: startOffset + len,

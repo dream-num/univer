@@ -233,7 +233,7 @@ export const SheetPermissionPanelList = () => {
                             const viewPermission = viewAction?.allowed;
 
                             const manageCollaboratorAction = item.actions.find((action) => action.action === UnitAction.ManageCollaborator);
-                            const deleteAction = item.actions.find(((action) => action.action === UnitAction.Delete));
+                            const deleteAction = item.actions.find((action) => action.action === UnitAction.Delete);
 
                             const hasManagerPermission = manageCollaboratorAction?.allowed || currentUser.userID === item.creator?.userID;
                             const hasDeletePermission = deleteAction?.allowed || currentUser.userID === item.creator?.userID;

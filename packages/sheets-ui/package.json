@@ -23,29 +23,28 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts",
-        "./facade": "./src/facade/index.ts"
+        "./facade": "./src/facade/index.ts",
+        "./locale/*": "./src/locale/*.ts"
     },
-    "main": "./lib/cjs/index.js",
-    "module": "./lib/es/index.js",
-    "types": "./lib/types/index.d.ts",
+    "main": "./src/index.ts",
     "publishConfig": {
         "access": "public",
-        "main": "./lib/cjs/index.js",
+        "main": "./lib/es/index.js",
         "module": "./lib/es/index.js",
         "exports": {
             ".": {
                 "import": "./lib/es/index.js",
-                "require": "./lib/cjs/index.js",
                 "types": "./lib/types/index.d.ts"
             },
             "./*": {
                 "import": "./lib/es/*",
-                "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
             },
             "./lib/*": "./lib/*",
-            "./locale/*": "./lib/locale/*.json"
+            "./locale/*": {
+                "import": "./lib/locale/*.js",
+                "types": "./lib/types/locale/*.d.ts"
+            }
         }
     },
     "directories": {
@@ -73,7 +72,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons": "^0.1.84",
+        "@univerjs/icons": "^0.2.2",
         "@univerjs/protocol": "0.1.39-alpha.38",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/telemetry": "workspace:*",
@@ -81,27 +80,28 @@
         "clsx": "^2.1.1"
     },
     "devDependencies": {
-        "@types/react": "^18.3.11",
+        "@types/react": "^18.3.12",
         "@univerjs-infra/shared": "workspace:*",
         "less": "^4.2.0",
         "react": "18.3.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.6.3",
-        "vite": "^5.4.8",
-        "vitest": "^2.1.2"
+        "vite": "^5.4.10",
+        "vitest": "^2.1.4"
     },
     "univerSpace": {
         ".": {
             "import": "./lib/es/index.js",
-            "require": "./lib/cjs/index.js",
             "types": "./lib/types/index.d.ts"
         },
         "./*": {
             "import": "./lib/es/*",
-            "require": "./lib/cjs/*",
             "types": "./lib/types/index.d.ts"
         },
         "./lib/*": "./lib/*",
-        "./locale/*": "./lib/locale/*.json"
+        "./locale/*": {
+            "import": "./lib/locale/*.js",
+            "types": "./lib/types/locale/*.d.ts"
+        }
     }
 }

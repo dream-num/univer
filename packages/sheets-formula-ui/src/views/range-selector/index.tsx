@@ -167,6 +167,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
         onChange(text);
         rangeDialogVisibleSet(false);
         onRangeSelectorDialogVisibleChange(false);
+        setTimeout(() => {
+            editor?.setSelectionRanges([{ startOffset: text.length, endOffset: text.length }]);
+        }, 30);
     };
 
     const handleClose = () => {

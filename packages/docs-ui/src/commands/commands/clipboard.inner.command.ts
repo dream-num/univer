@@ -240,7 +240,8 @@ function getCutActionsFromTextRanges(
     const memoryCursor = new MemoryCursor();
     memoryCursor.reset();
 
-    for (const selection of selections) {
+    for (let i = 0; i < selections.length; i++) {
+        const selection = selections[i];
         const { startOffset, endOffset, collapsed } = selection;
 
         if (startOffset == null || endOffset == null) {
@@ -255,7 +256,7 @@ function getCutActionsFromTextRanges(
                 len,
             });
         } else {
-            textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, memoryCursor.cursor, false));
+            textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, originBody, memoryCursor.cursor));
         }
 
         memoryCursor.reset();

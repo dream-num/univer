@@ -31,7 +31,6 @@ export class BuildTextUtils {
 
     static selection = {
         replace: replaceSelectionTextX,
-
         makeSelection,
         normalizeSelection,
         getDeleteActions: getRetainAndDeleteFromReplace,

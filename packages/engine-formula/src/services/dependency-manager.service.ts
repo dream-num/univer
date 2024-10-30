@@ -25,37 +25,28 @@ export interface IDependencyManagerService {
 
     reset(): void;
 
-    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: FormulaDependencyTree): void;
+    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: IFormulaDependencyTree): void;
     addOtherFormulaDependencyMainData(formulaId: string): void;
-
     removeOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string[]): void;
-
     hasOtherFormulaDataMainData(formulaId: string): boolean;
+    clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
+    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string): Nullable<Set<number>>;
 
     addFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string, dependencyTree: FormulaDependencyTree): void;
-
     removeFeatureFormulaDependency(unitId: string, sheetId: string, featureIds: string[]): void;
-
     getFeatureFormulaDependency(unitId: string, sheetId: string, featureId: string): Nullable<FormulaDependencyTree>;
+    clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
 
     addFormulaDependency(unitId: string, sheetId: string, row: number, column: number, dependencyTree: IFormulaDependencyTree): void;
-
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
-
     getFormulaDependency(unitId: string, sheetId: string, row: number, column: number): Nullable<IFormulaDependencyTree>;
-
+    clearFormulaDependency(unitId: string, sheetId?: string): void;
     removeFormulaDependencyByDefinedName(unitId: string, definedName: string): void;
 
-    clearFormulaDependency(unitId: string, sheetId?: string): void;
-
     addDependencyRTreeCache(tree: IFormulaDependencyTree): void;
-
     searchDependency(search: IUnitRange[]): Set<number>;
 
     getLastTreeId(): number;
-
-    clearOtherFormulaDependency(unitId: string, sheetId?: string): void;
-    clearFeatureFormulaDependency(unitId: string, sheetId?: string): void;
 
     openKdTree(): void;
     closeKdTree(): void;
@@ -179,7 +170,7 @@ export class DependencyManagerService extends Disposable implements IDependencyM
         this._otherFormulaDataMainData.clear();
     }
 
-    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: FormulaDependencyTree) {
+    addOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string, dependencyTree: IFormulaDependencyTree) {
         if (!this._otherFormulaData.has(unitId)) {
             this._otherFormulaData.set(unitId, new Map<string, Map<string, Set<number>>>());
         }
@@ -233,6 +224,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
                 this._otherFormulaData.delete(unitId);
             }
         }
+    }
+
+    getOtherFormulaDependency(unitId: string, sheetId: string, formulaId: string) {
+        return this._otherFormulaData.get(unitId)?.get(sheetId)?.get(formulaId);
     }
 
     addOtherFormulaDependencyMainData(formulaId: string) {

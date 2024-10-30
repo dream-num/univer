@@ -214,7 +214,9 @@ export class FormulaDependencyTreeVirtual extends FormulaDependencyTreeCalculato
     >;
 
     featureId: Nullable<string>;
-    formulaId: Nullable<string>;
+    get formulaId() {
+        return this.refTree.formulaId;
+    }
 }
 
 /**

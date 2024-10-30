@@ -19,10 +19,8 @@ export * from './basics';
 export type { IDocObjectParam } from './basics/component-tools';
 export { getDocObject, getDocObjectById, neoGetDocObject } from './basics/component-tools';
 export { addCustomDecorationBySelectionFactory, addCustomDecorationFactory, deleteCustomDecorationFactory } from './basics/custom-decoration-factory';
-export { addCustomRangeBySelectionFactory, addCustomRangeFactory, deleteCustomRangeFactory } from './basics/custom-range-factory';
 export * from './basics/docs-view-key';
 export { hasParagraphInTable } from './basics/paragraph';
-export { replaceSelectionFactory } from './basics/replace';
 export { docDrawingPositionToTransform, transformToDocDrawingPosition } from './basics/transform-position';
 
 export { getCommandSkeleton, getRichTextEditPath } from './commands/util';

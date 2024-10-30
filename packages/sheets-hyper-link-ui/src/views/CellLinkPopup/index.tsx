@@ -15,19 +15,17 @@
  */
 
 import type { IHyperLinkPopup } from '../../services/popup.service';
-import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency, useObservable } from '@univerjs/core';
+import { DOCS_ZEN_EDITOR_UNIT_ID_KEY, ICommandService, LocaleService, useDependency } from '@univerjs/core';
 import { MessageType, Tooltip } from '@univerjs/design';
 import { AllBorderSingle, CopySingle, LinkSingle, UnlinkSingle, WriteSingle, Xlsx } from '@univerjs/icons';
+import { CancelHyperLinkCommand, CancelRichHyperLinkCommand, HyperLinkEditSourceType, SheetHyperLinkType, SheetsHyperLinkParserService } from '@univerjs/sheets-hyper-link';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IMessageService, IZenZoneService } from '@univerjs/ui';
 import cs from 'clsx';
 import React, { useEffect, useState } from 'react';
-import { CancelHyperLinkCommand, CancelRichHyperLinkCommand } from '../../commands/commands/remove-hyper-link.command';
 import { OpenHyperLinkEditPanelOperation } from '../../commands/operations/popup.operations';
 import { SheetsHyperLinkPopupService } from '../../services/popup.service';
 import { SheetsHyperLinkResolverService } from '../../services/resolver.service';
-import { HyperLinkEditSourceType } from '../../types/enums/edit-source';
-import { SheetHyperLinkType } from '../../types/enums/hyper-link-type';
 import styles from './index.module.less';
 
 const iconsMap = {
@@ -46,8 +44,8 @@ export const CellLinkPopup = () => {
     const [currentPopup, setCurrentPopup] = useState<IHyperLinkPopup | null>(null);
     const resolverService = useDependency(SheetsHyperLinkResolverService);
     const editorBridgeService = useDependency(IEditorBridgeService);
+    const parserHyperLinkService = useDependency(SheetsHyperLinkParserService);
     const zenZoneService = useDependency(IZenZoneService);
-    const visible = useObservable(zenZoneService.visible$);
 
     useEffect(() => {
         setCurrentPopup(popupService.currentPopup);
@@ -67,7 +65,7 @@ export const CellLinkPopup = () => {
     if (!customRange?.properties?.url) {
         return null;
     }
-    const linkObj = resolverService.parseHyperLink(customRange.properties.url ?? '');
+    const linkObj = parserHyperLinkService.parseHyperLink(customRange.properties.url ?? '');
     const isError = linkObj.type === SheetHyperLinkType.INVALID;
 
     return (
@@ -78,7 +76,8 @@ export const CellLinkPopup = () => {
                     if (zenZoneService.visible) {
                         return;
                     }
-                    linkObj.handler();
+
+                    resolverService.navigate(linkObj);
                 }}
             >
                 <div className={styles.cellLinkType}>

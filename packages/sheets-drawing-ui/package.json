@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-drawing-ui",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -21,7 +21,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*",
-        "./locale/*": "./src/locale/*.ts"
+        "./locale/*": "./src/locale/*.ts",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",

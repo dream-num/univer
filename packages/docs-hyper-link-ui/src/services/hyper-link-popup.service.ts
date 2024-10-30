@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import { Disposable, Inject, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DocSelectionManagerService } from '@univerjs/docs';
 import { DocCanvasPopManagerService } from '@univerjs/docs-ui';
 import { BehaviorSubject } from 'rxjs';
-import type { DocumentDataModel, IDisposable, ITextRangeParam, Nullable } from '@univerjs/core';
 import { DocHyperLinkEdit } from '../views/hyper-link-edit';
 import { DocLinkPopup } from '../views/hyper-link-popup';
-
-/**
- * A link will have a placeholder, and when it is a link at the beginning, the placeholder does not have a width or height, causing an evaluation error
- */
-const SKIT_PLACEHOLDER = 0;
 
 export interface ILinkInfo {
     unitId: string;
@@ -77,13 +72,13 @@ export class DocHyperLinkPopupService extends Disposable {
             if (range) {
                 activeRange = {
                     collapsed: false,
-                    startOffset: range.startIndex + SKIT_PLACEHOLDER,
+                    startOffset: range.startIndex,
                     endOffset: range.endIndex + 1,
                     segmentId,
                     segmentPage,
                 };
 
-                this._textSelectionManagerService.replaceTextRanges([{
+                this._textSelectionManagerService.replaceDocRanges([{
                     startOffset: range.startIndex,
                     endOffset: range.endIndex + 1,
                 }]);
@@ -137,7 +132,7 @@ export class DocHyperLinkPopupService extends Disposable {
         this._infoPopup = this._docCanvasPopupManagerService.attachPopupToRange(
             {
                 collapsed: false,
-                startOffset: range.startIndex + SKIT_PLACEHOLDER,
+                startOffset: range.startIndex,
                 endOffset: range.endIndex + 1,
                 segmentId: info.segmentId,
                 segmentPage: info.segmentPage,

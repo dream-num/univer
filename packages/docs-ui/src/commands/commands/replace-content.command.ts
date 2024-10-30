@@ -334,7 +334,7 @@ export const ReplaceSelectionCommand: ICommand<IReplaceSelectionCommandParams> =
         const textX = new TextX();
         const jsonX = JSONX.getInstance();
         // delete
-        textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, body, '', 0, false));
+        textX.push(...BuildTextUtils.selection.getDeleteExcludeLastLineBreakActions(selection, body, 0, false));
         // insert
         textX.push({
             t: TextXActionType.INSERT,

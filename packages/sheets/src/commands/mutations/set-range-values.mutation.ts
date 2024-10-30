@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import type {
     IAccessor,
     ICellData,
@@ -26,6 +25,7 @@ import type {
     Nullable,
     Workbook,
 } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import { handleStyle, transformStyle } from '../../basics/cell-style';
 import { getCellType } from '../../basics/cell-type';
 import { getCellValue, setNull } from '../../basics/cell-value';
@@ -87,9 +87,6 @@ export const SetRangeValuesUndoMutationFactory = (
         const newStyle = styles.getStyleByCell(newVal);
 
         cell.s = transformStyle(oldStyle, newStyle);
-
-        // Do not use the transformCustom method, custom will overwrite the original value
-        // cell.custom = transformCustom(cell.custom, newVal?.custom);
 
         undoData.setValue(row, col, setNull(cell));
     });
@@ -164,7 +161,6 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 if (newVal.custom !== undefined) {
                     // Custom will overwrite the original value
                     oldVal.custom = newVal.custom;
-                    // handleCustom(oldVal, newVal);
                 }
 
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));

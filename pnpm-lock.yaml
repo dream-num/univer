@@ -119,6 +119,9 @@ importers:
       vite-plugin-dts:
         specifier: ^4.2.3
         version: 4.2.3(@types/node@22.7.5)(rollup@4.21.2)(typescript@5.6.3)(vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6))
+      vite-plugin-external:
+        specifier: ^4.3.1
+        version: 4.3.1
       vitest:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
@@ -243,9 +246,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../packages/engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../packages/facade
       '@univerjs/find-replace':
         specifier: workspace:*
         version: link:../packages/find-replace
@@ -303,6 +303,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../packages/sheets-numfmt
+      '@univerjs/sheets-numfmt-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
@@ -312,9 +315,9 @@ importers:
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../packages/sheets-thread-comment
-      '@univerjs/sheets-thread-comment-base':
+      '@univerjs/sheets-thread-comment-ui':
         specifier: workspace:*
-        version: link:../packages/sheets-thread-comment-base
+        version: link:../packages/sheets-thread-comment-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../packages/sheets-ui
@@ -416,6 +419,79 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
+  examples-node:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@univerjs/data-validation':
+        specifier: workspace:*
+        version: link:../packages/data-validation
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../packages/docs
+      '@univerjs/docs-drawing':
+        specifier: workspace:*
+        version: link:../packages/docs-drawing
+      '@univerjs/drawing':
+        specifier: workspace:*
+        version: link:../packages/drawing
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../packages/engine-formula
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../packages/rpc
+      '@univerjs/rpc-node':
+        specifier: workspace:*
+        version: link:../packages/rpc-node
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../packages/sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-data-validation':
+        specifier: workspace:*
+        version: link:../packages/sheets-data-validation
+      '@univerjs/sheets-drawing':
+        specifier: workspace:*
+        version: link:../packages/sheets-drawing
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../packages/sheets-filter
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../packages/sheets-formula
+      '@univerjs/sheets-sort':
+        specifier: workspace:*
+        version: link:../packages/sheets-sort
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../packages/thread-comment
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../common/shared
+      esbuild:
+        specifier: ^0.24.0
+        version: 0.24.0
+      esbuild-plugin-clean:
+        specifier: ^1.0.1
+        version: 1.0.1(esbuild@0.24.0)
+      esbuild-plugin-copy:
+        specifier: ^2.1.1
+        version: 2.1.1(esbuild@0.24.0)
+      minimist:
+        specifier: ^1.2.8
+        version: 1.2.8
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   mockdata:
     dependencies:
       '@univerjs/core':
@@ -457,9 +533,9 @@ importers:
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../packages/sheets-sort
-      '@univerjs/sheets-thread-comment-base':
+      '@univerjs/sheets-thread-comment':
         specifier: workspace:*
-        version: link:../packages/sheets-thread-comment-base
+        version: link:../packages/sheets-thread-comment
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../packages/thread-comment
@@ -494,9 +570,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../../packages/sheets
-      '@univerjs/sheets-filter-ui':
+      '@univerjs/sheets-filter':
         specifier: workspace:*
-        version: link:../../packages/sheets-filter-ui
+        version: link:../../packages/sheets-filter
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../../packages/sheets-ui
@@ -540,9 +616,6 @@ importers:
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../../packages/engine-render
-      '@univerjs/facade':
-        specifier: workspace:*
-        version: link:../../packages/facade
       '@univerjs/mockdata':
         specifier: workspace:*
         version: link:../../mockdata
@@ -572,31 +645,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-      vite:
-        specifier: ^5.4.8
-        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-      vitest:
-        specifier: ^2.1.2
-        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
-
-  packages-experimental/rpc-node:
-    dependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@univerjs/rpc':
-        specifier: workspace:*
-        version: link:../../packages/rpc
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@univerjs-infra/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -934,8 +982,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@wendellhu/redi':
         specifier: 0.16.1
         version: 0.16.1
@@ -998,8 +1046,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1677,6 +1725,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-numfmt-ui':
+        specifier: workspace:*
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment
@@ -1808,6 +1859,31 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
+  packages/rpc-node:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/rpc':
+        specifier: workspace:*
+        version: link:../rpc
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
   packages/sheets:
     dependencies:
       '@univerjs/core':
@@ -1820,8 +1896,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-numfmt
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -1854,8 +1930,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -1903,8 +1979,8 @@ importers:
         specifier: ^0.1.84
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2022,8 +2098,8 @@ importers:
         specifier: ^0.1.84
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2083,8 +2159,8 @@ importers:
         specifier: ^0.1.84
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2313,8 +2389,8 @@ importers:
         specifier: workspace:*
         version: link:../find-replace
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2407,9 +2483,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
-      '@univerjs/sheets-numfmt':
+      '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../sheets-numfmt
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2443,6 +2519,40 @@ importers:
         version: 5.6.3
       vite:
         specifier: ^5.4.4
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/sheets-hyper-link:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/protocol':
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
         version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
       vitest:
         specifier: ^2.1.2
@@ -2511,6 +2621,37 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/engine-numfmt':
+        specifier: workspace:*
+        version: link:../engine-numfmt
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+    devDependencies:
+      '@univerjs-infra/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+      vite:
+        specifier: ^5.4.8
+        version: 5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+      vitest:
+        specifier: ^2.1.2
+        version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
+
+  packages/sheets-numfmt-ui:
+    dependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
@@ -2524,11 +2665,14 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons':
-        specifier: ^0.1.84
+        specifier: ^0.1.79
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-numfmt':
+        specifier: workspace:*
+        version: link:../sheets-numfmt
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -2652,39 +2796,15 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^0.1.84
-        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-thread-comment-base':
-        specifier: workspace:*
-        version: link:../sheets-thread-comment-base
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
-      '@univerjs/thread-comment-ui':
-        specifier: workspace:*
-        version: link:../thread-comment-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2705,7 +2825,7 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2(@types/node@22.7.5)(happy-dom@15.0.0)(jsdom@24.1.1)(less@4.2.0)(sass@1.77.5)(terser@5.31.6)
 
-  packages/sheets-thread-comment-base:
+  packages/sheets-thread-comment-ui:
     dependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -2713,18 +2833,39 @@ importers:
       '@univerjs/design':
         specifier: workspace:*
         version: link:../design
+      '@univerjs/docs-ui':
+        specifier: workspace:*
+        version: link:../docs-ui
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons':
+        specifier: ^0.1.79
+        version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../sheets-thread-comment
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -2772,8 +2913,8 @@ importers:
         specifier: ^0.1.84
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -2990,8 +3131,11 @@ importers:
         specifier: workspace:*
         version: link:../core
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
     devDependencies:
       '@univerjs-infra/shared':
         specifier: workspace:*
@@ -3030,8 +3174,8 @@ importers:
         specifier: ^0.1.84
         version: 0.1.84(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/thread-comment':
         specifier: workspace:*
         version: link:../thread-comment
@@ -3198,8 +3342,8 @@ importers:
         specifier: workspace:*
         version: link:../network
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/rpc':
         specifier: workspace:*
         version: link:../rpc
@@ -3245,9 +3389,9 @@ importers:
       '@univerjs/sheets-hyper-link-ui':
         specifier: workspace:*
         version: link:../sheets-hyper-link-ui
-      '@univerjs/sheets-numfmt':
+      '@univerjs/sheets-numfmt-ui':
         specifier: workspace:*
-        version: link:../sheets-numfmt
+        version: link:../sheets-numfmt-ui
       '@univerjs/sheets-sort':
         specifier: workspace:*
         version: link:../sheets-sort
@@ -3257,9 +3401,9 @@ importers:
       '@univerjs/sheets-thread-comment':
         specifier: workspace:*
         version: link:../sheets-thread-comment
-      '@univerjs/sheets-thread-comment-base':
+      '@univerjs/sheets-thread-comment-ui':
         specifier: workspace:*
-        version: link:../sheets-thread-comment-base
+        version: link:../sheets-thread-comment-ui
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -3287,6 +3431,9 @@ importers:
       '@univerjs/uniscript':
         specifier: workspace:*
         version: link:../uniscript
+      '@univerjs/watermark':
+        specifier: workspace:*
+        version: link:../watermark
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3322,8 +3469,8 @@ importers:
         specifier: workspace:*
         version: link:../facade
       '@univerjs/protocol':
-        specifier: 0.1.39-alpha.36
-        version: 0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
+        specifier: 0.1.39-alpha.38
+        version: 0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -4997,6 +5144,9 @@ packages:
   '@types/express@4.17.21':
     resolution: {integrity: sha512-ejlPM315qwLpaQlQDTjPdsUFSc6ZsP4AN6AlWnogPjQ7CVi7PYF3YVz+CY3jE2pwYf7E/7HlDAN0rV2GxTG0HQ==}
 
+  '@types/fs-extra@11.0.4':
+    resolution: {integrity: sha512-yTbItCNreRooED33qjunPthRcSjERP1r4MqCZc7wv0u2sUkzTFp45tgUfS5+r7FrZPdmCCNflLhVSP/o+SemsQ==}
+
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
@@ -5008,6 +5158,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/jsonfile@6.1.4':
+    resolution: {integrity: sha512-D5qGUYwjvnNNextdU59/+fI+spnwtTFmyQP0h+PfIOSkNfpU6AOICUOkm4i0OnSk+NyjdPJrxCDro0sJsWlRpQ==}
 
   '@types/less@3.0.6':
     resolution: {integrity: sha512-PecSzorDGdabF57OBeQO/xFbAkYWo88g4Xvnsx7LRwqLC17I7OoKtA3bQB9uXkY6UkMWCOsA8HSVpaoitscdXw==}
@@ -5032,6 +5185,9 @@ packages:
 
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
+
+  '@types/node@14.18.63':
+    resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
 
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
@@ -5199,8 +5355,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.39-alpha.36':
-    resolution: {integrity: sha512-mmNm+hhI30ArFDaE+rrodEpEDajw6ikTJuSZMwhJBWQRzUlGMhyq8BnlOVnEiDjf244xfjuHWnh9ItIJEKiQAw==}
+  '@univerjs/protocol@0.1.39-alpha.38':
+    resolution: {integrity: sha512-+Ug7UGAryCWkySw+par8BVUNl7gTGaG6ZLs1CXhnnVeW4T4AvA8uW8X7VLmraaRPuAZdXZgOgW4c0aE9RUvf3Q==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': 1.9.14
@@ -10206,6 +10362,10 @@ packages:
       vite:
         optional: true
 
+  vite-plugin-external@4.3.1:
+    resolution: {integrity: sha512-aoukfac66QevFAbRF2ZD81WPSqeqhgEfbfhPYQP9RPWO1en+Lw4HyhWRdvSjYn56gcKUJCtHdFG2jEpYgleLng==}
+    engines: {node: '>=14.18.0', vite: '>=3.1.0'}
+
   vite@5.4.8:
     resolution: {integrity: sha512-FqrItQ4DT1NC4zCUqMB4c4AZORMKIa0m8/URVCZ77OZ/QSNeJ54bU1vrFADbDsuwfIPcgknRkmqakQcgnL4GiQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -12204,6 +12364,11 @@ snapshots:
       '@types/qs': 6.9.15
       '@types/serve-static': 1.15.7
 
+  '@types/fs-extra@11.0.4':
+    dependencies:
+      '@types/jsonfile': 6.1.4
+      '@types/node': 22.7.5
+
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.3
@@ -12213,6 +12378,10 @@ snapshots:
   '@types/http-errors@2.0.4': {}
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/jsonfile@6.1.4':
+    dependencies:
+      '@types/node': 22.7.5
 
   '@types/less@3.0.6': {}
 
@@ -12233,6 +12402,8 @@ snapshots:
   '@types/minimatch@3.0.5': {}
 
   '@types/ms@0.7.34': {}
+
+  '@types/node@14.18.63': {}
 
   '@types/node@22.7.5':
     dependencies:
@@ -12426,7 +12597,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@univerjs/protocol@0.1.39-alpha.36(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.39-alpha.38(@grpc/grpc-js@1.10.9)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.9
       rxjs: 7.8.1
@@ -18256,6 +18427,12 @@ snapshots:
       - '@types/node'
       - rollup
       - supports-color
+
+  vite-plugin-external@4.3.1:
+    dependencies:
+      '@types/fs-extra': 11.0.4
+      '@types/node': 14.18.63
+      fs-extra: 11.2.0
 
   vite@5.4.8(@types/node@22.7.5)(less@4.2.0)(sass@1.77.5)(terser@5.31.6):
     dependencies:

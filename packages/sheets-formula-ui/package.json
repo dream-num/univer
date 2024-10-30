@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula-ui",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -77,7 +77,7 @@
         "@univerjs/icons": "^0.1.84",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-numfmt-ui": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.1"

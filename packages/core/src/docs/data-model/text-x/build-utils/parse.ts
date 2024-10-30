@@ -28,8 +28,6 @@ const tags = [
     DataStreamTreeTokenType.TABLE_CELL_END, // 表格开始
     DataStreamTreeTokenType.TABLE_ROW_END, // 表格开始
     DataStreamTreeTokenType.TABLE_END, // 表格结束
-    // DataStreamTreeTokenType.CUSTOM_RANGE_START, // 自定义范围开始
-    // DataStreamTreeTokenType.CUSTOM_RANGE_END, // 自定义范围结束
     // DataStreamTreeTokenType.COLUMN_BREAK, // 换列
     // DataStreamTreeTokenType.PAGE_BREAK, // 换页
     // DataStreamTreeTokenType.DOCS_END, // 文档结尾

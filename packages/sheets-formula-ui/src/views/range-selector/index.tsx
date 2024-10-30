@@ -119,7 +119,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     // init actions
     if (actions) {
         actions.handleOutClick = (e: MouseEvent, cb: () => void) => {
-            if (rangeSelectorWrapRef.current) {
+            if (rangeSelectorWrapRef.current && !rangeDialogVisible) {
                 const isContain = rangeSelectorWrapRef.current.contains(e.target as Node);
                 !isContain && cb();
             }

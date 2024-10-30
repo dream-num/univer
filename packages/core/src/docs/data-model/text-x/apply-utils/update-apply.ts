@@ -436,7 +436,7 @@ function updateTables(
 }
 
 // retain
-// eslint-disable-next-line max-lines-per-function
+
 function updateCustomRanges(
     body: IDocumentBody,
     updateBody: IDocumentBody,
@@ -469,11 +469,11 @@ function updateCustomRanges(
 
         updateBody.customRanges?.forEach((customRange) => {
             const { startIndex, endIndex } = customRange;
-            customRanges.push({
+            rangeMap[customRange.rangeId] = {
                 ...customRange,
                 startIndex: startIndex + currentIndex,
                 endIndex: endIndex + currentIndex,
-            });
+            };
         });
     } else {
         const relativeCustomRanges = new Set<string>();
@@ -494,11 +494,12 @@ function updateCustomRanges(
             if (oldCustomRange) {
                 if (updateCustomRange.rangeType === CustomRangeType.DELTED) {
                     removeCustomRanges.push(oldCustomRange);
+                    delete rangeMap[rangeId];
                     continue;
                 }
                 Object.assign(oldCustomRange, updateCustomRange);
             } else {
-                customRanges.push(updateCustomRange);
+                rangeMap[rangeId] = updateCustomRange;
             }
         }
 
@@ -506,16 +507,9 @@ function updateCustomRanges(
             removeCustomRanges.push(rangeMap[rangeId]);
             delete rangeMap[rangeId];
         });
-
-        for (const removeCustomRange of removeCustomRanges) {
-            const { rangeId } = removeCustomRange;
-            const index = customRanges.findIndex((r) => r.rangeId === rangeId);
-            if (index !== -1) {
-                customRanges.splice(index, 1);
-            }
-        }
     }
 
+    body.customRanges = Object.values(rangeMap);
     body.customRanges.sort((a, b) => a.startIndex - b.startIndex);
     return removeCustomRanges;
 }

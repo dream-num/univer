@@ -39,5 +39,15 @@ export {
     SetSheetsFilterCriteriaMutation,
     SetSheetsFilterRangeMutation,
 } from './commands/mutations/sheets-filter.mutation';
+export {
+    ClearSheetsFilterCriteriaCommand,
+    type ISetSheetFilterRangeCommandParams,
+    type ISetSheetsFilterCriteriaCommandParams,
+    ReCalcSheetsFilterCommand,
+    RemoveSheetFilterCommand,
+    SetSheetFilterRangeCommand,
+    SetSheetsFilterCriteriaCommand,
+    SmartToggleSheetsFilterCommand,
+} from './commands/commands/sheets-filter.command';
 
 // #endregion

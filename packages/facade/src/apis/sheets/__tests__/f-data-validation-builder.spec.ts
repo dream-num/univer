@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { Injector } from '@univerjs/core';
+import type { FUniver } from '../../everything';
 import { DataValidationOperator, DataValidationType, ICommandService } from '@univerjs/core';
 import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
-import { FDataValidationBuilder } from '../f-data-validation-builder';
+import { FDataValidationBuilder } from '@univerjs/sheets-data-validation/facade/f-data-validation-builder.js';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { createFacadeTestBed } from '../../__tests__/create-test-bed';
-import type { FUniver } from '../../facade';
 
 describe('Test FDataValidationBuilder', () => {
     let get: Injector['get'];

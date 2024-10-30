@@ -40,6 +40,9 @@ export { composeInterceptors, createInterceptorKey, InterceptorEffectEnum, Inter
 export type { Serializable } from './common/json';
 export { MemoryCursor } from './common/memory-cursor';
 export { mixinClass } from './common/mixin';
+export { FBase } from './facade/f-base';
+export { FUniver } from './facade/f-univer';
+export { FHooks } from './facade/f-hooks';
 export { isNumeric, isSafeNumeric } from './common/number';
 export { Registry, RegistryAsMap } from './common/registry';
 export { requestImmediateMacroTask } from './common/request-immediate-macro-task';
@@ -141,7 +144,7 @@ export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
 export { getIntersectRange } from './shared/range';
 export { nameCharacterCheck } from './shared/name';
-export { bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
+export { afterTime, bufferDebounceTime, fromCallback, takeAfter } from './shared/rxjs';
 export { awaitTime } from './shared/timer';
 export { Range } from './sheets/range';
 export {

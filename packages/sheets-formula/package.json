@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -21,7 +21,8 @@
     ],
     "exports": {
         ".": "./src/index.ts",
-        "./*": "./src/*"
+        "./*": "./src/*",
+        "./facade": "./src/facade/index.ts"
     },
     "main": "./lib/cjs/index.js",
     "module": "./lib/es/index.js",

@@ -38,7 +38,6 @@ import {
 } from '@univerjs/docs';
 import { CoverContentCommand, VIEWPORT_KEY as DOC_VIEWPORT_KEY } from '@univerjs/docs-ui';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-
 import { takeUntil } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';

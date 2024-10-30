@@ -18,11 +18,14 @@ export { HyperLinkModel } from './models/hyper-link.model';
 export { SheetHyperLinkType } from './types/enums/hyper-link-type';
 export { UniverSheetsHyperLinkPlugin } from './plugin';
 export type { ICellHyperLink, ICellLinkContent } from './types/interfaces/i-hyper-link';
-
+export { type ISheetHyperLinkInfo, type ISheetUrlParams, SheetsHyperLinkParserService } from './services/parser.service';
 export { ERROR_RANGE } from './types/const';
 
 // #region - all commands
 
+export { AddHyperLinkCommand, AddRichHyperLinkCommand, type IAddHyperLinkCommandParams, type IAddRichHyperLinkCommandParams } from './commands/commands/add-hyper-link.command';
+export { CancelHyperLinkCommand, CancelRichHyperLinkCommand, type ICancelHyperLinkCommandParams, type ICancelRichHyperLinkCommandParams } from './commands/commands/remove-hyper-link.command';
+export { type IUpdateHyperLinkCommandParams, type IUpdateRichHyperLinkCommandParams, UpdateHyperLinkCommand, UpdateRichHyperLinkCommand } from './commands/commands/update-hyper-link.command';
 export { AddHyperLinkMutation, type IAddHyperLinkMutationParams } from './commands/mutations/add-hyper-link.mutation';
 export { type IRemoveHyperLinkMutationParams, RemoveHyperLinkMutation } from './commands/mutations/remove-hyper-link.mutation';
 export {
@@ -33,4 +36,3 @@ export {
 } from './commands/mutations/update-hyper-link.mutation';
 
 // #endregion
-
